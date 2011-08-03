@@ -1,0 +1,41 @@
+<script language="cache" runat="server">
+ n Passw,Code,Data,KontrId,RequestObj,FirstLine,ItemObj,i
+ //Code - Код сервисного ценра
+ //Passw - пароль сервисного центра
+ //Data - файл заявки Request[...].req
+ //Первая строка файла: Номер_$C(9)_(0:Платно;1:По гарантии)_$C(9)_Комментарий
+ //Последующие строки:	ID@Goods.Goods_$C(9)_Количество_$C(9)_Гарантийный талон_$C(9)_серийный номер_$C(9)_Продавец_$C(9)_Описание поломки_$C(9)_Дата продажи
+ s Passw=%request.Get("Pwd")
+ if Passw="" w "Невозможно зарегистрировать заявку."_$C(13,10)_"Не указан пароль." q 1
+ s Code=%request.Get("Code")
+ s Data=%request.Get("Data")
+ if ##class(Common.Common).GetPasswordFromCode(Code, .KontrId)'=Passw d  q 1
+ . w "Невозможно зарегистрировать заявку."_$C(13,10)
+ . w "В базе данных не существует клиент с кодом "_Code_" и паролем "_Passw_$C(13,10)
+ . w "Уточните ваши персональные данные и внесите их в параметры программы."
+ s RequestObj=##class(Operation.Instructions).%New()
+ d RequestObj.KontrSetObjectId(KontrId)
+ s RequestObj.InstDate=+$H
+ d RequestObj.OperSetObjectId(10)
+ s FirstLine=$P(Data,$C(13,10),1)
+ s RequestObj.Comment=$P(FirstLine,$C(9),3)
+ s RequestObj.Name=$P(FirstLine,$C(9),1)
+ d RequestObj.RashOplatTypeSetObjectId($P(FirstLine,$C(9),2)+1)
+ f i=2:1:$L(Data,$C(13,10)) d
+ . s CurrentFileString=$P(Data,$C(13,10),i)
+ . s ItemObj=##class(Operation.InstructionsItems).%New()
+ . d ItemObj.DocTypeSetObjectId("Operation.Instructions")
+ . d ItemObj.GoodsSetObjectId($P(CurrentFileString,$C(9),1))
+ . s ItemObj.Quantity=$P(CurrentFileString,$C(9),2)
+ . s ItemObj.garant=$P(CurrentFileString,$C(9),3)
+ . s ItemObj.sn=$P(CurrentFileString,$C(9),4)
+ . s ItemObj.seller=$P(CurrentFileString,$C(9),5)
+ . s ItemObj.opispolomki=$P(CurrentFileString,$C(9),6)
+ . d RequestObj.Items.Insert(ItemObj)
+ s ok=RequestObj.%Save()
+ if ok w "Заявка успешно зарегистрирована"_$C(9)_RequestObj.%Id()_$C(9)_RequestObj.StateLogicalToDisplay(RequestObj.State)
+ e  d
+ . JOB saveobjerror^saveerror(ok,$ZNAME_" Code="_Code)
+ . w "Невозможно зарегистрировать заявку."_$C(13,10)_"Внутренняя ошибка сервера."_$C(13,10)_"Ошибка зарегистрирована, мы сообщим Вам как только решим проблему."_$C(13,10)_"Спасибо за понимание."
+ q 1
+</script>

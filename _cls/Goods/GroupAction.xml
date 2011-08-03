@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Goods.GroupAction">
+<Description>
+Действия с группами</Description>
+<IncludeCode>xmlmacros</IncludeCode>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject</Super>
+<TimeCreated>60322,72305.584415</TimeCreated>
+
+<Method name="createGroup">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Catalogue="",Name="",Code="",Sub=""</FormalSpec>
+<Implementation><![CDATA[
+	s $ZT="GroupActionError"
+	q:Catalogue="" "Не указан каталог"
+	q:Name="" "Не указано имя новой группы"
+	i $ISOBJECT($G(%session)) s Depot=$G(%session.Data("depot"),1)
+	e  s Depot=1
+	q:Depot="" "Отсутствует код текущего склада"
+ 	i Sub=1 s ok=..GetLastSubItem(Catalogue,.Code)
+ 	e  s ok=..GetLastItem(Catalogue,.Code)
+	s new=##class(Goods.Group).%New()
+	d new.DepotSetObjectId(Depot)
+	d new.CatalogueSetObjectId(Catalogue)
+	s new.Code=Code
+	s new.Name=Name
+	s ok=new.%Save()
+	i '+ok $$$WriteObjError(ok) q "Извините, внутренняя ошибка при создании новой группы"
+	q new.%Id()
+GroupActionError
+ s ^Errors($H,"$ZE")=$ZE
+ q "Goods.GoodsAction "_$ZE
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+/*
+ClassMethod createSubGroup(Catalogue, Name, Parent)
+{
+ s $ZT="createSubGroupErr"
+ s Depot=%session.Data("depot")
+ q:Depot="" "Отсутствует код текущего склада"
+ &sql(select top 1 Code into :Code from Goods.Group where Depot=:Depot and Catalogue=:Catalogue and Parent=:Parent order by code DESC)
+ q:SQLCODE<0 "Goods.GroupAction.createSubGroup SQLCODE="_SQLCODE
+ i SQLCODE=100 s Code=Parent_"*0"
+ s $P(Code,"*",$L(Code,"*"))=+$P(Code,"*",$L(Code,"*"))+1
+ s new=##class(Goods.Group).%New()
+ d new.DepotSetObjectId(Depot)
+ d new.CatalogueSetObjectId(Catalogue)
+ s new.Code=Code
+ s new.Name=Name
+ s ok=new.%Save()
+ q ok
+createSubGroupErr
+ s ^Errors($H,"$ZE")=$ZE
+ q "Goods.GoodsAction "_$ZE
+}
+*/
+]]></Content>
+</UDLText>
+
+<Method name="DelGroup">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Catalogue="",Code,GroupId</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="DelGroupErr"
+ s Depot=%session.Data("depot")
+ q:Depot="" "Отсутствует код текущего склада"
+ 
+ &sql(select id into :id from Goods.Group where Depot=:Depot and Catalogue=:Catalogue and Parent=:Code)
+ q:SQLCODE<0 "Goods.GroupAction.DelGroup() 1 SQLCODE="_SQLCODE
+ q:'SQLCODE "Невозможно удалить группу содержащую подгруппы"
+ 
+ &sql(select count(id) into :count from Goods.GoodsGroup where Groups=:GroupId)
+ q:SQLCODE<0 "Goods.GroupAction.DelGroup() 2 SQLCODE="_SQLCODE
+ q:count>0 "Невозможно удалить группу содержащую товары"
+
+ &sql(select count(id) into :count from Goods.Params where Catalogue=:Catalogue and Groups=:Code)
+ q:SQLCODE<0 "Goods.GroupAction.DelGroup() 3 SQLCODE="_SQLCODE
+ q:count>0 "Невозможно удалить группу к которой привязаны свойства"
+
+ &sql(delete from Goods.Group where id=:GroupId)
+ q:SQLCODE<0 "Goods.GroupAction.DelGroup() 4 SQLCODE="_SQLCODE
+ q 1
+DelGroupErr
+ s ^Errors($H,"$ZE")=$ZE
+ q "Goods.GoodsAction "_$ZE
+]]></Implementation>
+</Method>
+
+<Method name="GetLastItem">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Catalogue="",Code="*"</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="GetLastItemErr"
+ //s Depot=$G(%session.Data("depot"),1)
+ s Depot=1
+ s Parent=$Piece(Code,"*",1,$Length(Code,"*")-1)
+ 
+ &sql(
+ declare huu cursor for
+ select Code into :lCode 
+ from Goods.Group 
+ where NULLIF(Parent,:Parent) is Null 
+ 	and Catalogue=:Catalogue 
+ 	and Depot=:Depot 
+ order by Code desc)
+ &sql(open huu)
+ f  &sql(fetch huu) q:SQLCODE  d
+ . s t=$P(lCode,"*",$L(lCode,"*"))
+ . i t>+$G(res) s res=t
+ &sql(close huu)
+ i $G(res)="" s Code="*"
+ s:Code="" Code="*"
+ s $P(Code,"*",$L(Code,"*"))=+$G(res)+1
+ q 1
+GetLastItemErr
+ $$$WriteError($ZE)
+ q "Goods.GroupAction "_$ZE
+]]></Implementation>
+</Method>
+
+<Method name="GetLastSubItem">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Catalogue="",Code=""</FormalSpec>
+<Implementation><![CDATA[
+  s $ZT="GetLastSubItemErr"
+ //s Depot=$G(%session.Data("depot"),1)
+ s Depot=1
+ &sql(
+ declare huu2 cursor for
+ select Code into :lCode 
+ from Goods.Group 
+ where Parent=:Code and Depot=:Depot and Catalogue=:Catalogue 
+ order by Code desc)
+ &sql(open huu2)
+ f  &sql(fetch huu2) q:SQLCODE  d
+ . s t=$P(lCode,"*",$L(lCode,"*"))
+ . i t>+$G(res) s res=t
+ &sql(close huu2)
+ s Code=Code_"*"_(+$G(res)+1)
+ q 1
+GetLastSubItemErr
+ $$$WriteError($ZE)
+ q "Goods.GroupAction "_$ZE
+old
+ //s $ZT="GetLastSItemErr"
+ s Depot=%session.Data("depot")
+ &sql(select top 1 Code into :LasSubCode from Goods.Group where Parent=:Code and Catalogue=:Catalogue and Depot=:Depot order by Code desc)
+ q:SQLCODE<0 err="Goods.GoodsAction.GetLastItem() SQLCODE="_SQLCODE
+ s:(SQLCODE=100)&(%ROWCOUNT=0) LasSubCode=Code_"*0"
+ s $P(LasSubCode,"*",$L(LasSubCode,"*"))=+$P(LasSubCode,"*",$L(LasSubCode,"*"))+1
+ s Code=LasSubCode
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="RenameGroup">
+<Description><![CDATA[
+Переименовывает товарную группу
+<br><var>GroupID</var> - ID группы
+<br><var>NewName</var> - Наименование группы]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>GroupID,NewName</FormalSpec>
+<Implementation><![CDATA[
+ s err="Извините, ошибка при переименовании группы"
+ &sql(update Goods.Group set Name=:NewName where ID=:GroupID)
+ i (SQLCODE<0)!(SQLCODE=100) $$$WriteError("RenameGroup SQLCODE="_SQLCODE) q err
+ q 1
+]]></Implementation>
+</Method>
+</Class>
+</Export>

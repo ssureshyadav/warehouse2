@@ -1,0 +1,145 @@
+<script language="cache" runat="server">
+ s user=%session.Data("user")
+ s ok=##class(Common.Rights).getrights(user,6)
+</script>
+
+<html XMLNS:SKLAD2>
+<IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc" >
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<style>
+input{border:solid 1 grey;width:350px}
+textarea{border:solid 1 grey;width:350px;}
+</style>
+<script language="Jscript" src="common.js"></script>
+<script language="jscript">
+function loadUsers(){
+window.location.href='selectUsers.csp';
+}
+
+function recalccells(){
+ok=#server(Store.Action.recalcstore())#
+if(ok==1){alert("Объемы ячеек успешно пересчитаны")}
+else{alert("Извините, при пересчете ячеек произошла внутренняя ошибка")}
+}
+
+function load(){
+measures.DownLoadPairs("","","DocumentClass");
+//AutoTemplate.startDownload('Data.csp?class=Common.Dictionary14&fields=Property3212,Name', LoadTemplatesItems);
+}
+
+function LoadTemplatesItems(text){
+addOptions(text,"AutoTemplate");
+}
+
+function chcurrency(){
+document.all.peresch.value=measures.item("meas");
+}
+
+function loadglobal(){
+window.location.href='Globalreuse.csp';
+	}
+
+//открыть окно для редактирования текста
+function ShowBigTextWindow(obj){
+var newItem=window.showModalDialog("widetext.csp",obj.innerText,"center:yes;status:no;dialogHeight:300px;dialogWidth:400px;resizable:yes;");
+if(newItem!=null){obj.innerText=newItem;}
+}
+
+// Выбрать контрагента
+function ChooseKontragentFunc(){
+var ChooseKontragent=document.all.ChooseKontragent;
+var UsersSelection=ChooseKontragent.options(ChooseKontragent.selectedIndex).value;
+if(UsersSelection=="choose"){
+	var newKontragent=window.showModalDialog("Dictionary.csp","Common.Kontragent","center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");
+	if(newKontragent==null){
+		ChooseKontragent.selectedIndex=0;
+		return false;}
+	if(ChooseKontragent.options.length==2){ChooseKontragent.options.length=3}
+	ChooseKontragent.options(2).value=newKontragent.split("~")[0];
+	ChooseKontragent.options(2).text=newKontragent.split("~")[1];
+	ChooseKontragent.selectedIndex=2;
+}
+}
+
+</script>
+</head>
+<body onkeypress="Replace126(this)" onload="load();">
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<td width=10%><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
+<TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=2><strong>Настройки</strong></TD>
+<td width=10% align=right>&nbsp;</td>
+</TABLE>
+<br>
+<form name="Tunes" method="post">
+<csp:IF CONDITION=ok=1>
+<fieldset><legend>Настройка пользователей:</legend>
+<sklad:Button name="user" id="users" onclick="loadUsers()" value="Пользователи" alt="Настройка пользователей">
+<sklad:Button onclick="location.href='LogJournal.csp'" value="Журнал доступа">
+<sklad:Button onclick="location.href='SendMailJournal.csp'" value="Журнал автоматических уведомлений">
+</fieldset>
+</CSP:IF>
+<fieldset><legend>Управление</legend>
+<sklad:Button onclick="recalccells()" value="Пересчитать объемы ячеек">
+<sklad:Button onclick="location.href='ShowDoubleGoods.csp'" value="Товары дубликаты">
+<sklad:Button onclick="location.href='Synchronization.csp'" value="Синхронизация">
+<sklad:Button onclick="location.href='CreateAnalogs.csp'" value="Управление аналогами">
+<sklad:Button onclick="location.href='Reports.csp'" value="Принятые отчёты">
+<sklad:Button onclick="location.href='ArchiveBase.csp'" value="Просмотр архивных баз">
+<sklad:Button onclick="location.href='NegativeQnt.csp'" value="Отрицательные остатки">
+<sklad:Button onclick="location.href='Operations2.csp'" value="Операции">
+</fieldset>
+<br>
+
+<script language="cache" runat="server">
+ s Tunes=$NA(^Tunes)
+ s i="" f  s i=$O(%request.Data(i)) q:i=""  d
+ . s where=+$G(@Tunes@(0,i))
+ . s @Tunes@(where,i,"Value")=%request.Data(i,1)
+ . s ^mtempArt("zzz",i)=%request.Get(i)
+ s Tunes=$NA(^Tunes)
+ s boo="" f  s boo=$O(@Tunes@(boo)) q:boo=""  d
+ . q:'+boo
+ . w "<fieldset width=100%><legend>"_$G(@Tunes@(boo))_"</legend><table>"
+ . s i="" f  s i=$O(@Tunes@(boo,i)) q:i=""  d
+ . . s CurrentValue=$G(@Tunes@(boo,i,"Value"))
+ . . w "<tr><td>"_@Tunes@(boo,i,"Caption")_"</td>"
+ . . w "<td>&nbsp;&nbsp;&nbsp;</td>"
+ . . w "<td>"
+ . . s str="<input type=""text"" value="""_CurrentValue_""" name="""_i_""" >"
+ . . d:(i="DefaultPoluh")
+ . . . s str="<select name=""DefaultPoluh"" id=""ChooseKontragent"" onchange=""ChooseKontragentFunc()"">"
+ . . . s str=str_"<option value=""0""> </option>"
+ . . . s str=str_"<option value=""choose"">Выбрать контрагента...</option>"
+ . . . i CurrentValue d
+ . . . . &sql(select Name into :Name from Common.Kontragent where ID=:CurrentValue)
+ . . . . s str=str_"<option value="""_CurrentValue_""" SELECTED>"_Name_"</option>"
+ . . . s str=str_"</select>"
+ . . d:(i="DefaultPlatejType")
+ . . . s str="<select name=""DefaultPlatejType"">"
+ . . . s str=str_##class(Docs.Action2).GetClassValuesOptions($G(CurrentValue),"Common.Dictionary13")
+ . . . s str=str_"</select>"
+ . . d:$D(^Tunes("COMBOBOX",i))
+ . . . s yes=$S(CurrentValue="1":"SELECTED",1:"")
+ . . . s no=$S(CurrentValue="0":"SELECTED",1:"")
+ . . . s str="<select name="""_i_"""><option value=""1"" "_yes_">Да<option value=""0"" "_no_">Нет</select>"
+ . . d:(i="garant")
+ . . . s perepis=$S(CurrentValue="perepis":"SELECTED",1:"")
+ . . . s skip=$S(CurrentValue="skip":"SELECTED",1:"")
+ . . . s str="<select name="""_i_"""><option value=""perepis"" "_perepis_">Переписать последний ремонт<option value=""skip"" "_skip_">Не записывать</select>"
+ . . d:(i="NotifyText")
+ . . . s str="<textarea name="""_i_""" ondblclick='ShowBigTextWindow(this)'>"_CurrentValue_"</textarea>"
+ . . //d:(i="AutoTemplate")
+ . . //. s str="<select id=""AutoTemplate"" name=""AutoTemplate"" style=""behavior:url('#default#download');""></select>"
+ . . w str,!
+ . . i i="peresch" w "<SKLAD2:table id=""measures"" width=260 ClassName=""Docs.waste"" onPropChange=""chcurrency()""/>"
+ . . w "</td></tr>"
+ . w "</table></fieldset><Br>"
+</script>
+<br>
+<center><sklad:Button onclick="Tunes.submit()" value="Сохранить изменения"></center>
+</form>
+<a href="MainRequest.htm" target=_blank>Основные требования к системе</a>
+</body>
+</html>

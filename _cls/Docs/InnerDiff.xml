@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.InnerDiff">
+<Super>Docs.Super</Super>
+<TimeCreated>60398,65473.066023</TimeCreated>
+
+<Property name="storeman">
+<Description>
+Грузчик</Description>
+<Type>Common.Dictionary5</Type>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>InnerDiffDefaultData</DefaultData>
+<Data name="InnerDiffDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"InnerDiff"</Subscript>
+<Value name="1">
+<Value>storeman</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

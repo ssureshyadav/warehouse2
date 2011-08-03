@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Operation.OperTemplate">
+<Description>
+Шаблоны операций</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60320,35535.287873</TimeCreated>
+
+<Property name="Resource">
+<Description>
+Ресурсы</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Ресурсы"/>
+</Property>
+
+<Property name="Place">
+<Description>
+Место</Description>
+<Type>Store.Address</Type>
+<Parameter name="CAPTION" value="Место"/>
+</Property>
+
+<Index name="PlaceIndex">
+<Properties>Place</Properties>
+</Index>
+
+<Property name="Name">
+<Description>
+Имя</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Имя"/>
+</Property>
+
+<Property name="Comment">
+<Description>
+Справочная информация</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Справочная информация"/>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+// Средняя продолжительность
+
+]]></Content>
+</UDLText>
+
+<UDLText name="T">
+<Content><![CDATA[
+//Property Duration As %String(CAPTION = "Средняя продолжительность");
+
+]]></Content>
+</UDLText>
+
+<UDLText name="T">
+<Content><![CDATA[
+//Index DurationIndex On Duration;
+
+]]></Content>
+</UDLText>
+
+<UDLText name="T">
+<Content><![CDATA[
+// Шаги
+
+]]></Content>
+</UDLText>
+
+<UDLText name="T">
+<Content><![CDATA[
+//Relationship Steps As Operation.StepTemplate [ Cardinality = many, Inverse = Operation ];
+
+]]></Content>
+</UDLText>
+
+<Property name="OperType">
+<Description>
+Тип операции</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=",Приём,Отгрузка,Внутренняя"/>
+<Parameter name="VALUELIST" value=",Приём,Отгрузка,Внутренняя"/>
+</Property>
+
+<Property name="cspfile">
+<Description>
+CSP файл</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="cl">
+<Description>
+Класс</Description>
+<Type>%String</Type>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Operation.OperTemplateD</DataLocation>
+<DefaultData>OperTemplateDefaultData</DefaultData>
+<IdLocation>^Operation.OperTemplateD</IdLocation>
+<IndexLocation>^Operation.OperTemplateI</IndexLocation>
+<StreamLocation>^Operation.OperTemplateS</StreamLocation>
+<Data name="OperTemplateDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Step</Value>
+</Value>
+<Value name="3">
+<Value>Place</Value>
+</Value>
+<Value name="4">
+<Value>Resource</Value>
+</Value>
+<Value name="5">
+<Value>Comment</Value>
+</Value>
+<Value name="6">
+<Value>Name</Value>
+</Value>
+<Value name="7">
+<Value>Duration</Value>
+</Value>
+<Value name="8">
+<Value>Steps</Value>
+</Value>
+<Value name="9">
+<Value>Depot</Value>
+</Value>
+<Value name="10">
+<Value>OperType</Value>
+</Value>
+<Value name="11">
+<Value>cl</Value>
+</Value>
+<Value name="12">
+<Value>cspfile</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

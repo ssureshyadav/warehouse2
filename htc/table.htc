@@ -1,0 +1,1082 @@
+<public:component tagname='table'>
+<PUBLIC:DEFAULTS viewLinkContent />
+<public:ATTACH EVENT="ondocumentready" HANDLER="init"/>
+<PUBLIC:PROPERTY NAME="width" VALUE="" />
+<PUBLIC:PROPERTY NAME="height" VALUE="" />
+<PUBLIC:PROPERTY NAME="rows" VALUE="0" get="getrows" />
+<PUBLIC:PROPERTY NAME="cols" VALUE="0" get ="getcols" />
+<PUBLIC:PROPERTY NAME="FullRowSelect" VALUE="1" />
+<PUBLIC:PROPERTY NAME="names" VALUE="" get="Getnames"/>
+<PUBLIC:PROPERTY NAME="CurrentRowTag" VALUE="undefined" />
+<PUBLIC:PROPERTY NAME="CurrentRowName" VALUE="" />
+<PUBLIC:PROPERTY NAME="ItemID" VALUE="" />
+<PUBLIC:PROPERTY NAME="CurrentRowElement" VALUE="" get="getRowElement" />
+<PUBLIC:PROPERTY NAME="DisplaySecondCol" VALUE=""/>
+<PUBLIC:PROPERTY NAME="ClassName" VALUE=""/>
+<PUBLIC:PROPERTY NAME="Silent" VALUE="" put="setsilent"/>
+<PUBLIC:PROPERTY NAME="CountTotal" VALUE="false"/>
+<PUBLIC:PROPERTY NAME="runValidateAddress" VALUE="false"/>
+<PUBLIC:PROPERTY NAME="QuantityField" VALUE="Quantity"/>
+<PUBLIC:PROPERTY NAME="ChangedProp" VALUE=""/>
+<PUBLIC:PROPERTY NAME="Total" VALUE=0 get="getTotal" />
+<PUBLIC:PROPERTY NAME="displaybar" VALUE=0 put="setdisplaybar" />
+<PUBLIC:PROPERTY NAME="cellChange" VALUE="" />
+
+<public:method name = "DownLoadPairs" />
+<public:method name = "ColumnData" />
+<public:method name = "ColumnTypes" />
+<public:method name = "Insrow" />
+<public:method name = "Delrow" />
+<public:method name = "ClearRows" />
+<public:method name = "LoadHeadersXML" />
+<public:method name = "AddRow" />
+<public:method name = "GetDataProps" />
+<public:method name = "GetData" />
+<public:method name = "setCellValue" />
+<public:method name = "setCellValueXY" />
+<public:method name = "GetCellValue" />
+<public:method name = "loadfrommethod" />
+<public:method name = "GetFromCard" />
+<public:method name = "GetXmlContent" />
+<public:method name = "ClearRows" />
+<public:method name = "item" />
+<public:method name = "DelItems" />
+<public:method name = "setsilent" />
+<public:method name = "delrows" />
+<public:method name = "itogo" />
+<public:event name="zonTableClick" id="zonTableClick" />
+<public:event name="onAddColumns" id="onAddColumns" />
+<public:event name="onLoadComplete" id="onLoadComplete" />
+<public:event name="onPropChange" id="onPropChange" />
+<public:event name="Totalchange" id="Totalchange" />
+<public:event name="OnCellChange" id="OnCellChange" />
+
+<HTML XMLNS:IE>
+<style>
+TD{border-left : 1 solid grey;border-top : 1 solid grey;}
+TABLE{border-right : 1 solid grey;border-bottom : 1 solid grey;}
+</style>
+<script language="JScript">
+var StringSplitter = "#@#";
+var InnerSplitter = "~";
+var OldTrColor;
+var CurrentRow="";
+var CurrentID;
+var Name = new Array();  //Name[номер столбца]=имя поля
+var Name2 = new Array();  //Name2[имя поля]=номер столбца
+var Type = new Array();
+var IsReadOnly = new Array(); //IsReadOnly[номер столбца] = 1 или 0
+var Description = new Array();
+var Valuelist = new Array();
+var Displaylist = new Array();
+var onerow = new Array();
+var SilentField = new Array();
+var GoodsSize = new Array();
+var GoodsWeight = new Array();
+var valuealong = new Array();
+var dispalong = new Array();
+var RowArray = new Array();
+var SelectedRows = new Array();
+var CurrentPropertyName="";
+// как хранятся данные, заполняется в DownLoadPairs и DrawHeaders
+var datadirection="";
+var kukl=new Array();  //значение коэффициента
+function init(){
+TableBorder.style.width=width;
+TableBorder.style.height=height;
+TableID.style.width=width;
+TableID.style.pixelWidth=TableID.style.pixelWidth-17;
+for (row = 1; row <= rows; row++){
+ trObject=InsertRow();
+ for (col = 1; col <= rows; col++){
+   tdObject=trObject.insertCell();
+   innerObject=CreateDiv(" ","string"+row);
+   tdObject.appendChild(innerObject);
+ }
+}
+setsilent(Silent);
+}
+
+function setsilent(val){
+var val=ReturnSpace(val)
+silentarray=val.split(",")
+if(val=="")silentarray=""
+	for (i = 0; i < silentarray.length; i++){
+		SilentField[silentarray[i]]=1
+	}
+}
+
+
+function DelItems(){
+Delrow();
+}
+
+//Загрузить таблицу для отображения пар | Параметр | Значение |
+function DownLoadPairs(Classnam,ID,skip,jiua,show){
+datadirection="cols";
+skip=ReturnSpace(skip)
+show=ReturnSpace(show)
+Classnam=ReturnSpace(Classnam)
+jiua=ReturnSpace(jiua)
+if(Classnam=="")Classnam=ClassName
+var urlstring="ListData.csp?Class="+Classnam+"&zse="+jiua+"&ID="+ID+"&skip="+skip+"&show="+show;
+TableID.startDownload(urlstring,DownLoadPairs2);
+//alert(urlstring)
+//window.open(urlstring)
+	}
+
+
+function DownLoadPairs2(textString){
+//Наименование свойства~Его description~DISPLAYLIST;VALUELIST~значение~Тип свойства (Date, String)~единицы измерения (могут быть а могут и нет)
+//alert(textString)
+var strings = textString.split(StringSplitter);
+	for (i = 0; i < strings.length-1; i++){
+		string = strings[i].split(InnerSplitter);
+		trString=InsertRow(string[0]);
+		//ElementID=string[0];
+		//trString.attachEvent("onclick",TRonclick);
+		var y=TableID.rows.length-1;
+		ElementID="id|"+1+"|"+y;
+		td=trString.insertCell();
+		td.innerText=string[1];
+		td.width="35%";
+		td=trString.insertCell();
+		if(DisplaySecondCol=="none")td.style.display="none";
+		td.width="65%";
+		PropertyType=string[4].split("@")[1];
+		IsReadOnly=ReturnBoolean(string[4].split("@")[2]);
+		Name[i]=string[0];
+		CurrentPropertyName=string[0];
+		Name2[string[0]]=i;
+		Type[i]=PropertyType;
+		CellValue=ReturnSpace(string[3]);
+		//делаем комбобоксы, если есть для них значения иначе пишем текст в ячейку
+		made=false;
+		if((ReturnSpace(string[2])!="")&(PropertyType=="%String")){
+		made=true;
+		txt=string[2];
+	  	parameters=txt.split(";");
+		//формируем объект для вставки в ячейку
+		if(parameters[0].split("=")[0]=="DISPLAYLIST"){
+			displayz=parameters[0].split("=")[1];
+  	  		valuez=parameters[1].split("=")[1];
+          	//changez="SelectClick(this.id)";
+          	changez="";
+			innerObject=CreateSelect(displayz,valuez,ElementID,changez,CellValue,"",IsReadOnly);
+			td.appendChild(innerObject);
+		   }
+	  	}
+		if(PropertyType=="%Date"){
+			made=true;
+			innerObject=CreateDateDiv(CellValue,ElementID,IsReadOnly);}
+		//Если тип свойства начинается не с % значит это свойство - объектная ссылка
+		if(PropertyType.substr(0,1)!="%"){
+			made=true;
+			innerObject=CreateDictDiv(CellValue,string[4],"id|"+1+"|"+y,IsReadOnly);}        
+        if(!made){innerObject=CreateDiv(CellValue,ElementID,IsReadOnly);}
+		//в предыдущем IF сформировали объект, SELECT либо DIV, вставим его в ячейку
+		td.appendChild(innerObject);
+		var strlength=string.length;
+		var dfg=(strlength-5)/2;
+		var arrdisp=string.slice(5,(5+dfg)).join(InnerSplitter)
+		var arrval=string.slice(5+dfg,strlength).join(InnerSplitter)
+		if(arrdisp!=""){
+			//alert(arrdisp+"\n"+arrval+"\n"+strings[i])
+			var innerObject=CreateSelect(arrdisp,arrval,"id2|"+1+"|"+y,"recalc(this)","",InnerSplitter,IsReadOnly);
+			td.appendChild(innerObject);
+			}
+	}
+// TableID.rows.length - "количество строк у таблицы"
+onLoadComplete.fire();
+}
+
+function TRonmouseover(tr){
+var currow=returnRow(tr)
+if(currow=="")return
+OldTrColor=currow.style.backgroundColor;
+//rrr.innerText="on OldTrColor = "+OldTrColor;
+//if(SelectedRows[CurrentRow]!=1){
+currow.style.backgroundColor="#eeffff";
+//}
+}
+
+function TRonclick(tr){
+curRow=returnRow(tr);
+if(curRow=="")return
+CurrentRow=curRow.rowIndex;
+CurrentRowTag=curRow.tag;
+ItemID=curRow.tag;
+CurrentRowName=curRow.cells(0).innerText;
+CurrentID=tr.srcElement.id;
+//if(window.event.ctrlKey){
+//	if(SelectedRows[CurrentRow]==1){
+//		curRow.style.backgroundColor='transparent';
+//		OldTrColor='white';
+//		SelectedRows[CurrentRow]=0;
+//		}
+//	else{
+//		curRow.style.backgroundColor="#defefe";
+//		SelectedRows[CurrentRow]=1;
+//		}
+//	}
+PaintTable();
+curRow.style.backgroundColor="#defefe";
+//else{
+//	PaintTable();
+//	curRow.style.backgroundColor="#defefe";
+//	SelectedRows[CurrentRow]=1;
+//	}
+zonTableClick.fire();
+}
+
+function TRonmouseout(tr){
+var currow=returnRow(tr)
+if(currow=="")return
+if(currow.rowIndex==CurrentRow)return false
+currow.style.backgroundColor=OldTrColor;
+}
+
+function ReturnSpace(Txt){
+if(Txt==null)return "";
+return Txt;
+}
+
+function CreateSelect(displayz,valuez,ElemId,ElemOnchange,CurrentValue,delimeter,IsReadOnly){
+if(ReturnSpace(delimeter)=="")var delimeter=",";
+if(ElemOnchange){ElemOnchange="onchange='"+ElemOnchange+"'"}
+var aElement=document.createElement("<select id='"+ElemId+"' "+ElemOnchange+"></select>");
+var disArr=displayz.split(delimeter);
+var valArr=valuez.split(delimeter);
+aElement.options.length=valArr.length-1;
+aElement.disabled=IsReadOnly;
+for (z = 0; z < disArr.length-1; z++){
+  aElement.options(z).text=disArr[z+1];
+  aElement.options(z).value=valArr[z+1];
+  //alert(ElemId+"\n"+valArr[z+1]+"\n"+CurrentValue)
+  if(valArr[z+1]==CurrentValue){aElement.options(z).selected=true;}
+  }
+aElement.Tag="@%String"
+return aElement;
+}
+
+// Проверка на изменение ячейки.
+function getDivChange(objectHandler) {
+	if (objectHandler.valueBefore == undefined) objectHandler.valueBefore = objectHandler.innerText;
+	if (objectHandler.valueBefore != objectHandler.innerText) {
+		var x = objectHandler.id.split("|")[1];
+		var y = objectHandler.id.split("|")[2];
+		
+		cellChange = new Object();
+		cellChange.colname = Name[x];
+		cellChange.colid = x;
+		cellChange.rowid = y;
+		cellChange.value = objectHandler.innerText; 
+		cellChange.valueBefore = objectHandler.valueBefore;
+		cellChange.handler = objectHandler; 
+
+		OnCellChange.fire();
+		objectHandler.valueBefore = objectHandler.innerText;
+		
+		return true;
+	}   else return false;
+}
+
+
+function CreateDiv(CellValue,cellID,IsReadOnly){
+var contenttext="";
+if((SilentField[CurrentPropertyName]!=1)&(!IsReadOnly)){
+var contenttext="CONTENTEDITABLE='true' ondblclick='ShowBigTextWindow(this)'";
+}
+//alert(CurrentPropertyName)
+ElementStr="<div id="+cellID+" "+contenttext+" onkeyup='getDivChange(this)' onfocus='if (this.valueBefore == undefined) this.valueBefore = this.innerText; cellaction(this);' ></div>";
+aElement=document.createElement(ElementStr);
+if(IsReadOnly){aElement.style.color="darkgray";}
+
+aElement.innerText=CellValue;
+aElement.Tag="@%String";
+return aElement;
+}
+
+function cellaction(obj){
+var numb=obj.id.split("|")[1];
+var str=obj.id.split("|")[2];
+if(Name[numb]=="quantplan"){
+	getStrArray(str);
+	var quant=getstorecell(RowArray["Goods"],RowArray["addr"]);
+	obj.innerText=quant;
+	}
+if((ClassName=="Docs.InnerItems")&&(Name[numb]=="Quantity")){
+	getStrArray(str);
+	var quant=getstorecell(RowArray["Goods"],RowArray["addr2"]);
+	obj.innerText=quant;
+	}
+if(CountTotal){
+setArr(numb,str,"");
+if(Name[numb]=="Total"){
+	if((Name2["Quantity"]!="undefined")&(Name2["Price"]!="undefined")){
+		var quantid="id|"+Name2[QuantityField]+"|"+str;
+		var quantplanid="id|"+Name2["quantplan"]+"|"+str;
+		var priceid="id|"+Name2["Price"]+"|"+str;
+		if(ReturnSpace(getArr(+Name2["Price"],+str))!=""){  //Если есть неокруглённое значение поля Цена, то возьмём его
+			var pr=getArr(+Name2["Price"],+str)
+		}
+		else{
+			var pr=document.getElementById(priceid).innerText;
+		}
+		var qu=document.getElementById(quantid).innerText;
+		var idpriceselect="id2|"+Name2["Price"]+"|"+str;
+		if(document.getElementById(idpriceselect)!=null){
+			var Factor=document.getElementById(idpriceselect).value.split("|")[1];
+			}
+			else{
+			var Factor=1;}
+		if((!isNaN(qu))&(!isNaN(pr))){
+			var res=qu*pr;
+			if(ClassName=="Docs.InventItems"){
+				//Для инвентаризации сумму строки считаем иначе
+				var qupl=document.getElementById(quantplanid).innerText;
+				var res=(qu*pr)-(qupl*pr)
+				}
+			if(ClassName=="Docs.DiffItems"){
+				//Для документа расхождения сумму строки считаем иначе
+				var Kolfact="id|"+Name2["Kolfact"]+"|"+str;
+				var qupl=document.getElementById(Kolfact).innerText;
+				var res=(qu*pr)-(qupl*pr)
+				}
+			setArr2(numb,str,(res/Factor));
+			setArr(numb,str,res)
+			obj.innerText=res.toFixed(2);
+			Totalchange.fire();
+			}
+		}
+	}
+}
+}
+function CreateDictDiv(CellValue,cellTag,cellID,IsReadOnly){
+var rightclick="";
+if(SilentField[CurrentPropertyName]!=1){
+	var rightclick="oncontextmenu='ClearDictDiv(this)'";
+	}
+ElementStr="<div style='cursor:hand' id="+cellID+" "+rightclick+"></div>";
+aElement=document.createElement(ElementStr);
+aElement.innerHTML=CellValue;
+aElement.Tag=cellTag;
+aElement.style.width="100%";
+if((SilentField[CurrentPropertyName]!=1)&(!IsReadOnly)){
+	aElement.attachEvent("onclick",DictClick);
+	}
+else{aElement.style.color="darkgray";}
+
+return aElement;
+}
+
+//очистить ячейку 
+function ClearDictDiv(obj){
+obj.innerText="";
+var objclass=obj.Tag.split("@")[1]
+obj.Tag="@"+objclass;
+}
+
+function DictClick(tr,depot){
+if(tr.srcElement.tagName!="DIV"){var ParamVariable=tr.srcElement.parentElement.parentElement.Tag.split("@");}
+else{var ParamVariable=tr.srcElement.Tag.split("@");}
+param=ParamVariable
+depot=ReturnSpace(depot)
+CellClassName=param[1];
+var curid=param[0];
+var choice=false;
+curRow=returnRow(tr);
+CurrentRow=curRow.rowIndex;
+var goodscol=Name2["Goods"];
+var goods=GetCellValue(goodscol,CurrentRow);
+if(CellClassName=="Store.Address"){
+	newItem=window.showModalDialog("storemodal2.csp?goods="+goods+"&depot="+depot,CellClassName,"center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;");
+	if(newItem!=null){if(newItem.split("~")[0]=="changedepot"){DictClick(tr,newItem.split("~")[1])}}
+var choice=true;
+}
+if(CellClassName=="Goods.Goods")
+{
+	if(curid!="")
+	{
+		if(!window.confirm("Выбрать из аналогов?"))
+		{
+			newItem=window.showModalDialog("selectgoods2.csp","","center:yes;status:no;dialogHeight:700px;dialogWidth:800px;resizable:yes;");
+		}
+		else
+		{
+			newItem=window.showModalDialog("Dictionary.csp?where=Name="+curid,"Common.Dictionary4","center:yes;status:no;dialogHeight:400px;dialogWidth:600px;resizable:yes;");
+		}
+	}
+	else
+	{
+		newItem=window.showModalDialog("selectgoods2.csp","","center:yes;status:no;dialogHeight:700px;dialogWidth:800px;resizable:yes;");
+	}
+	var choice=true;
+}
+if(choice==false){newItem=window.showModalDialog("Dictionary.csp",CellClassName,"center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");}
+if(newItem==null){return false;}
+newArr=newItem.split(InnerSplitter);
+var ValidOk=true;
+var numb=tr.srcElement.id.split("|")[1];
+if((Name2["Price"]!=null)&(CellClassName=="Goods.Goods"))
+{
+	var hhu="id|"+Name2["Price"]+"|"+CurrentRow
+	document.getElementById(hhu).innerText=getPrice(newArr[0])
+}
+if((Name[numb]=="addr")&&(runValidateAddress=="true"))
+{
+	var curgoodssize=GoodsSize[CurrentRow];
+	var quantcol=Name2[QuantityField];
+	var addrcol=Name2["addr"];
+	var addr=newArr[0];
+	var quant=GetCellValue(quantcol,CurrentRow);
+	getStrArray(CurrentRow);
+	RowArray["addr"]=newArr[0];
+	var ret=ValidateAddress(RowArray);
+	//alert("ret="+ret+"\ngoods="+RowArray["Goods"]+"\naddr="+RowArray["addr"]+"\nQuantity="+RowArray["Quantity"])
+	if(ret!=true)
+	{
+		//Проверка не прошла
+		var ValidOk=false;
+		//alert(ret);
+	}
+}
+if(ClassName=="Docs.UtilizItems")
+{
+	getStrArray(CurrentRow);
+	var ValidOk=curse(Name[numb],RowArray);
+}
+if(ValidOk){
+	//alert("выбрано " + newArr[9]);
+	tr.srcElement.innerText=newArr[9];
+	tr.srcElement.Tag=newArr[0]+"@"+param[1];
+	}
+ChangedProp=Name[CurrentRow];
+onPropChange.fire();
+}
+
+function getStrArray(crow){
+for(var i=0;i<Name.length;i++){
+	var val=GetCellValue(+i,+crow);
+	var curfld=Name[i];
+	//alert(i+"\n"+curfld+"\n"+val)
+	RowArray[curfld]=val;
+	}
+}
+
+function CreateDateDiv(CellValue,cellID,IsReadOnly){
+ElementStr="<div style='cursor:hand' id="+cellID+" ></div>";
+aElement=document.createElement(ElementStr);
+aElement.innerText=CellValue;
+aElement.Tag="@%Date";
+aElement.style.width="100%";
+if(!IsReadOnly)aElement.attachEvent("onclick",DateClick);
+else{aElement.style.color="darkgray";}
+return aElement;
+}
+
+function DateClick(tr){
+newDate=window.showModalDialog("calendar1.htm","","center:yes;status:no;dialogHeight:350px;dialogWidth:310px;resizable:yes;");
+if(ReturnSpace(newDate)!=""){tr.srcElement.innerText=newDate;}
+}
+
+function Getnames(){
+res=""
+for (z = 0; z <= TableID.rows.length-1; z++){
+res=res+TableID.rows.item(z).tag+InnerSplitter;
+}
+return res;
+}
+
+function ColumnData(column){
+res="";
+	for (z = 0; z <= TableID.rows.length-1; z++){
+	Objvalue="@%String"
+	tagNamez=TableID.rows.item(z).cells(column).firstChild.tagName;
+	if(tagNamez=="DIV"){
+		Objvalue=TableID.rows.item(z).cells(column).firstChild.innerText;
+		}
+	if(tagNamez=="SELECT"){Objvalue=TableID.rows.item(z).cells(column).firstChild.value;}
+	res=res+Objvalue+"~"
+		}
+res=res.substr(0,res.length-1);
+return res;
+}
+
+function ColumnTypes(column){
+res="";
+	for (z = 0; z <= TableID.rows.length-1; z++){
+	Objvalue=TableID.rows.item(z).cells(column).firstChild.Tag;
+	res=res+Objvalue+"~"
+		}
+res=res.substr(0,res.length-1);
+return res;
+}
+
+function InsertRow(tag){
+number=TableID.rows.length;
+if(ReturnSpace(tag)==""){tag="string"+number}
+trObject=TableID.insertRow();
+trObject.tag=tag;
+if((number/2)==Math.ceil(number/2)){trObject.style.backgroundColor="#efefef";}
+trObject.attachEvent("onmouseover",TRonmouseover);
+trObject.attachEvent("onmouseout",TRonmouseout);
+trObject.attachEvent("onclick",TRonclick);
+return trObject;
+}
+
+function Insrow(){
+number=TableID.rows.length;
+tag="string"+number;
+trObject=TableID.insertRow();
+trObject.tag=tag;
+if((number/2)==Math.ceil(number/2)){trObject.style.backgroundColor="#efefef";}
+trObject.attachEvent("onmouseover",TRonmouseover);
+trObject.attachEvent("onmouseout",TRonmouseout);
+trObject.attachEvent("onclick",TRonclick);
+   tdObject=trObject.insertCell();
+   innerObject=CreateDiv(" ","string"+number);
+   tdObject.appendChild(innerObject);
+return 1;
+}
+
+function Delrow(what){
+if((ReturnSpace(what)=="skipfirst")&&(CurrentRow==0))return;
+TableID.deleteRow(CurrentRow);
+PaintTable();
+}
+
+function PaintTable(){
+for(number=0 ; number<TableID.rows.length ; number++){
+if((number/2)==Math.ceil(number/2)){TableID.rows.item(number).style.backgroundColor="#efefef";}
+else{TableID.rows.item(number).style.backgroundColor='transparent';}
+}
+}
+
+function returnRow(SomeObj){
+if(SomeObj.srcElement.parentElement.parentElement.tagName=="TR"){return SomeObj.srcElement.parentElement.parentElement}
+if(SomeObj.srcElement.parentElement.tagName=="TR"){return SomeObj.srcElement.parentElement}
+if(SomeObj.srcElement.tagName=="TR"){return SomeObj.srcElement}
+return "";
+}
+
+function getRowElement(){
+if(CurrentRow=="undefined")return "";
+return TableID.rows(CurrentRow).cells(1).firstChild
+}
+
+function lookError(){
+if (xmlDoc.parseError.errorCode != 0) {
+   var myError = xmlDoc.parseError;
+   alert("Ошибка анализа XML\n" + myError.reason);
+   window.showModalDialog(xmlDoc.parseError.url,"","center:yes;status:no;dialogHeight:700px;dialogWidth:600px;resizable:yes;");
+   return false
+} else {
+   return true
+}
+}
+
+function ClearRows(){
+i=TableID.rows.length;
+   while (i >0)
+   {
+   TableID.deleteRow(0)
+	i=TableID.rows.length;
+   }
+}
+
+function LoadHeadersXML(skip){
+xmlDoc = new ActiveXObject("Msxml2.DOMDocument.3.0");
+xmlDoc.async = false;
+xmlDoc.validateOnParse = false;
+xmlDoc.load("ListData.csp?Class="+ClassName+"&skip="+skip+"&xml=1");
+ok=lookError();
+if(!ok)return false
+DrawHeaders(xmlDoc);
+}
+
+function DrawHeaders(xmlobj,hideevent){
+datadirection="rows";
+//window.open(xmlobj.url);alert(22);
+var oNodeList = xmlobj.selectNodes("//AllHeaders/*");
+if(oNodeList.length==0)return
+var trObject=TableID.insertRow();
+trObject.style.font="12pt Arial";
+trObject.style.color="#112255";
+for (var i=0; i<oNodeList.length; i++) {
+ var Item = oNodeList.item(i);
+ var tdObject=trObject.insertCell();
+ Description[i]=Item.selectSingleNode("text").text;
+ var txt=Item.selectSingleNode("key").text;
+ Name[i]=txt;
+ Name2[txt]=i;
+ Type[i]=Item.selectSingleNode("type").text;
+ IsReadOnly[i]=ReturnBoolean(Item.selectSingleNode("readonly").text);	//сохраняем в массив readonly текущего свойства
+ if(Item.selectSingleNode("Valuelist")!=null)Valuelist[i]=Item.selectSingleNode("Valuelist").text;
+ if(Item.selectSingleNode("Displaylist")!=null)Displaylist[i]=Item.selectSingleNode("Displaylist").text;
+ if(Item.selectSingleNode("valuealong")!=null)valuealong[i]=Item.selectSingleNode("valuealong").text;
+ if(Item.selectSingleNode("dispalong")!=null)dispalong[i]=Item.selectSingleNode("dispalong").text;
+ tdObject.innerText=Description[i];
+ }
+if(!hideevent)onAddColumns.fire();
+cols=i
+PaintTable()
+}
+
+function AddRow(FieldCaption,FieldValue,itogo){
+var trObject=InsertRow();
+var rowslength=TableID.rows.length-1;
+ for (var i=0; i<Name.length; i++) {
+	var tdObject=trObject.insertCell();
+	if (itogo != undefined) trObject.style.fontWeight = "bold";
+	var PropertyType=ReturnSpace(Type[i]);
+	var Valuelist1=ReturnSpace(Valuelist[i]);
+	var Displaylist1=ReturnSpace(Displaylist[i]);
+	var IsReadOnly=false;
+	var CellValue=ReturnSpace(FieldCaption[Name[i]]);
+	var ElementID="id|"+i+"|"+rowslength
+	var made=false;
+	if((Valuelist1!="")&(PropertyType=="%String")){
+		var made=true;
+	        var changez="";
+		var innerObject=CreateSelect(Displaylist1,Valuelist1,ElementID,changez,CellValue,"",IsReadOnly);
+		tdObject.appendChild(innerObject);
+	  	}
+	if(PropertyType=="%Date"){
+		var made=true;
+		var innerObject=CreateDateDiv(CellValue,ElementID,IsReadOnly);}
+	//Если тип свойства начинается не с % значит это свойство - объектная ссылка
+	if(PropertyType.substr(0,1)!="%"){
+		var made=true;
+		var ThisObjectId=ReturnSpace(FieldValue[Name[i]]);
+		var innerObject=CreateDictDiv(CellValue,ThisObjectId+"@"+PropertyType,"id|"+(i)+"|"+rowslength,IsReadOnly);}
+	if(!made){var innerObject=CreateDiv(CellValue,ElementID,IsReadOnly);}
+	tdObject.appendChild(innerObject);
+	//alert(i+"\n"+valuealong[i])
+	if (itogo == undefined) if(valuealong[i]){
+  		var innerobj=CreateSelect(dispalong[i],valuealong[i],"id2|"+(i)+"|"+rowslength,"recalc(this)",1,"~",IsReadOnly);
+  		tdObject.appendChild(innerobj);
+  		}
+ }
+}
+
+// Считает итого по столбцам. ColNames - строка с именами столбцов разделенных запятой ","
+function itogo(ColNames, ItogoCol) {
+    if (datadirection == "rows") {
+        lc = ColNames.split(",")
+        dp = GetDataProps("Name").split("~");
+
+        theCols = new Array();
+        newRow = new Array();
+        hVal = new Array();
+        
+        for (i=0;i<dp.length;i++)
+        for (j=0;j<lc.length;j++) if (dp[i] == lc[j]) theCols.push(i);
+    
+        for (i=0;i<theCols.length;i++)
+        for (j=1;j<TableID.rows.length;j++) {
+            if (newRow[dp[theCols[i]]] == undefined) newRow[dp[theCols[i]]] = 0
+            newRow[dp[theCols[i]]] += parseFloat(GetCellValue(theCols[i], j));
+        }
+        newRow[ItogoCol] = "Итого"
+        AddRow(newRow, hVal, 1);
+    }    
+}
+
+function GetData(datalines){
+rowscol=TableID.rows.length;
+colscol=TableID.rows.item(0).cells.length;
+if(rowscol<=1)return ""
+if(colscol<=1)return ""
+var res=""
+if(datalines=="rows")res=GetDataRows()
+if(datalines=="cols")res=GetDataCols()
+return res;
+}
+
+function GetDataRows(){
+res=""
+rowscol=TableID.rows.length;
+colscol=TableID.rows.item(0).cells.length;
+ for(i=1;i<rowscol;i++){
+	for(z=0;z<colscol;z++){
+		res=res+GetCellValue(z,i)+InnerSplitter;
+	}
+	res=res.substr(0,res.length-1);
+	res=res+StringSplitter;
+ }
+res=res.substr(0,res.length-3);
+return res;
+}
+
+function GetDataCols(){
+res=""
+rowscol=TableID.rows.length;
+colscol=TableID.rows.item(0).cells.length;
+ for(z=1;z<colscol;z++){
+ 	for(i=0;i<rowscol;i++){
+		res=res+GetCellValue(z,i)+InnerSplitter;
+		//alert("GetDataCols\nx="+z+"\ny="+i+"\nvalue="+GetCellValue(z,i))
+	}
+	res=res.substr(0,res.length-1);
+	res=res+StringSplitter;
+ }
+res=res.substr(0,res.length-3);
+return res;
+}
+
+function GetCellValue(x,y,returnvisible){
+if(TableID.rows.item(y).cells(x)==null)return ""
+if(TableID.rows.item(y).cells(x).firstChild==null)return ""
+var tagNamez=TableID.rows.item(y).cells(x).firstChild.tagName;
+var elementtag=TableID.rows.item(y).cells(x).firstChild.Tag;
+//alert("GetCellValue\nx="+x+"\ny="+y+"\nelementtag"+elementtag+"\ntagNamez"+tagNamez)
+var Objvalue="";
+if(tagNamez=="DIV"){
+	if(elementtag.split("@")[1].substr(0,1)=="%"){
+		var Objvalue=TableID.rows.item(y).cells(x).firstChild.innerText;
+		}
+	else{
+		var Objvalue=elementtag.split("@")[0]
+		//alert("getcell\nx="+x+"\ny="+y+"\n"+elementtag.split("@")[0]+"\n"+TableID.rows.item(y).cells(x).firstChild.Tag)
+		if(returnvisible){
+			var idvalue=Objvalue;
+			var Objvalue=TableID.rows.item(y).cells(x).firstChild.innerText;
+			}
+		}
+	}
+if(tagNamez=="SELECT"){
+	var Objvalue=TableID.rows.item(y).cells(x).firstChild.value;
+	}
+return Objvalue;
+}
+
+function GetDataProps(what){
+if(what=="Type") return "@"+Type.join(InnerSplitter+"@")
+if(what=="Name") return Name.join(InnerSplitter)
+return "";
+}
+
+function setCellValue(StringId,value1,hiddenvalue){
+if(datadirection=="cols")
+  for (z = 0; z <= TableID.rows.length-1; z++){
+    if(TableID.rows.item(z).tag==StringId){
+	childelement=TableID.rows.item(z).cells(1).firstChild;
+	childelement.innerText=value1;
+	oldtag=childelement.Tag.split("@")
+	childelement.Tag=hiddenvalue+"@"+oldtag[1];
+	}
+  }
+ if(datadirection=="rows"){
+	var ColumnNumber=Name2[StringId];
+	setCellValueXY(ColumnNumber, CurrentRow, value1, hiddenvalue)
+ }
+}
+
+// установить значение в конкретную ячейку таблицы
+function setCellValueXY(x, y, value, hidden){
+	var childelement;
+	
+	childelement = TableID.rows.item(y).cells(x).firstChild;
+	childelement.innerText = value;
+	oldtag = childelement.Tag.split("@")
+	childelement.Tag = hidden+"@"+oldtag[1];
+}
+
+function getrows(){
+return TableID.rows.length;
+}
+
+function getcols(){
+if (TableID.rows.length==0) return 0
+return TableID.rows.item(0).cells.length;
+}
+
+function loadfrommethod(classmethod,param1,param2,param3){
+xmlDoc = new ActiveXObject("Msxml2.DOMDocument.3.0");
+xmlDoc.async = false;
+xmlDoc.validateOnParse = false;
+xmlDoc.load("classmethod.csp?classmethod="+classmethod+"&param1="+param1+"&param2="+param2+"&param3="+param3);
+ok=lookError();
+if(!ok)return false
+parseresult(xmlDoc);
+}
+
+
+function GetFromCard(CardId,CardClass,fields,zamena){
+xmlDoc = new ActiveXObject("Msxml2.DOMDocument.3.0");
+xmlDoc.async = false;
+xmlDoc.validateOnParse = false;
+xmlDoc.load("CardData.csp?XML=1&ClassName="+CardClass+"&fields="+fields+"&CardID="+CardId+"&zamena="+zamena);
+ok=lookError();
+if(!ok)return false
+parseresult(xmlDoc);
+}
+
+//получаем xml объект, анализируем, раскладываем по полочкам, всё просто
+function parseresult(xmlobj){
+//window.open(xmlobj.url)
+DrawHeaders(xmlobj,true);
+oNodeList = xmlobj.selectNodes("//AllObjects/*");
+for (var i=0; i<oNodeList.length; i++) {
+ //начался цикл по узлам которые внутри корневого узла AllObjects (обычно это OneObject)
+ OneObject = oNodeList.item(i);  //текущий узел
+ //если есть комментарий к текущей строке выводим его
+ var comm=OneObject.selectSingleNode("comment")
+ if(comm!=null)alert(comm.text);
+  trobj=InsertRow(OneObject.getAttribute("id"));  //tag строки будет первый аттрибут текущего элемента
+  var rowsquant=TableID.rows.length-1;
+  for (var z=0; z<cols; z++) {
+    //начался цикл по колонкам таблицы
+    //извлекём из xml узел с именем текущего поля Name заполняется при LoadHeaders
+	CurrentPropertyName=Name[z];
+    text=returnSingleSubNode(OneObject,CurrentPropertyName,"text")
+    Id=getAttrib(OneObject.selectSingleNode(CurrentPropertyName),"id")
+    valuelist=getAttrib(OneObject.selectSingleNode(CurrentPropertyName),"valuelist")
+    displaylist=getAttrib(OneObject.selectSingleNode(CurrentPropertyName),"displaylist")
+	var ReadOnly = IsReadOnly[z];
+        if(CurrentPropertyName=="Goods"){
+    	var VarGoodsSize=returnSingleSubNode(OneObject,"GoodsSize","text");
+    	var VarGoodsWeight=returnSingleSubNode(OneObject,"GoodsWeight","text");
+    	GoodsSize[i]=VarGoodsSize;
+    	GoodsWeight[i]=VarGoodsSize;
+    	}
+    //alert(z+"\n"+ReturnSpace(Valuelist[z]))
+  	var innerobj=createobj(Type[z],text,"id|"+(z)+"|"+rowsquant,Id,Displaylist[z],Valuelist[z],ReadOnly)
+  	td=trobj.insertCell();
+  	td.appendChild(innerobj);
+  	if(valuealong[z]){
+  		var innerobj=CreateSelect(dispalong[z],valuealong[z],"id2|"+z+"|"+rowsquant,"recalc(this)",1,"~");
+  		td.appendChild(innerobj);
+  		} 	
+ } 
+ }
+if(xmlobj.selectSingleNode("root/comment")!=null){
+	var xmlcomment=xmlobj.selectSingleNode("root/comment").text;
+	if(xmlcomment!="")alert("Комментарий\n"+xmlcomment)}
+onLoadComplete.fire();
+}
+
+// пересчитать в соответствии со вновь выбранной единицей измерения
+function recalc(kukla){
+var x=kukla.id.split("|")[1];
+var y=kukla.id.split("|")[2];
+//alert(kukla.id)
+//alert("x="+x+"\n"+"y="+y+"\n"+unfixedvalue[+x,+y])
+if(ReturnSpace(getArr(+x,+y))!=""){
+	var val=getArr(+x,+y)
+	}
+else{
+	var val=GetCellValue(+x,+y);
+	}
+if(ReturnSpace(kukl[x,y])=="")kukl[x,y]=1
+var kukval=kukla.value.split("|")[1]
+if(val!=""){
+	var res=(val*kukval)/kukl[x,y];
+	setArr(+x,+y,res); //сохраним неокруглённое значение данной ячейки для потомков
+	TableID.rows.item(+y).cells(+x).firstChild.innerText=res.toFixed(2);}
+kukl[x,y]=kukval;
+}
+
+// объект строки, Cache тип вставляемой ячейки, значение, ID элемента внутри ячейки
+function createobj(PropertyType,CellValue,ElementID,ObjectId,displaylist,valuelist,IsReadOnly){
+		//делаем комбобоксы, если есть для них значения иначе пишем текст в ячейку
+		made=false;
+		//формируем объект для вставки в ячейку
+		if((ReturnSpace(displaylist)!="")&&(ReturnSpace(valuelist)!="")){
+			made=true;
+			innerObject=CreateSelect(displaylist,valuelist,ElementID,"",CellValue,"",IsReadOnly);
+			td.appendChild(innerObject);
+		   }
+		if(PropertyType=="%Date"){
+			made=true;
+			innerObject=CreateDateDiv(CellValue,ElementID,IsReadOnly);
+			}
+		
+		//Если тип свойства начинается не с % значит это свойство - объектная ссылка
+		if(PropertyType.substr(0,1)!="%"){
+			made=true;
+			innerObject=CreateDictDiv(CellValue,ObjectId+"@"+PropertyType,ElementID,IsReadOnly);
+			}
+        if(!made){innerObject=CreateDiv(CellValue,ElementID,IsReadOnly);}
+		return innerObject;
+}
+
+function returnSingleSubNode(obj,node,subnode){
+if(obj.selectSingleNode(node)==null) return "";
+if(obj.selectSingleNode(node).selectSingleNode(subnode)==null) return "";
+return obj.selectSingleNode(node).selectSingleNode(subnode).text;
+}
+
+function getAttrib(xmlnode,attr){
+if(xmlnode==null)return ""
+if(xmlnode.getAttribute(attr)==null)return ""
+return xmlnode.getAttribute(attr);
+}
+
+function GetXmlContent(){
+if (datadirection=="rows"){return GetXmlContentByRows()}
+else{return GetXmlContentByCols()}
+}
+
+function GetXmlContentByRows(){
+var xmlDoc = new ActiveXObject("Msxml2.DOMDocument.3.0");
+var RootElement = xmlDoc.createElement("RootElement");
+xmlDoc.documentElement=RootElement;
+var AllObjects = xmlDoc.createElement("AllObjects");
+if(TableID.rows.length==1)return
+for (var y = 1; y <= TableID.rows.length-1; y++){
+	var OneObject = xmlDoc.createElement("OneObject");
+	cellslength=TableID.rows.item(y).cells.length;
+   	   //аттрибут id элемента OneObject - id строки
+   	   newAtt = xmlDoc.createAttribute("id");
+   	   namedNodeMap = OneObject.attributes;
+   	   newAtt.text=TableID.rows.item(y).tag;
+   	   namedNodeMap.setNamedItem(newAtt);
+	for(var x=0; x<=cellslength-1; x++){
+		//var txt=TableID.rows.item(y).cells.item(x).innerText
+		var FieldElement = xmlDoc.createElement(Name[x]);
+		var Fieldtext = xmlDoc.createElement("text");
+		var txt=GetCellValueKolbased(x,y);
+		Fieldtext.text=txt
+		FieldElement.appendChild(Fieldtext);
+		var Fieldtype = xmlDoc.createElement("type");
+		Fieldtype.text=Type[x];
+		FieldElement.appendChild(Fieldtype);
+		OneObject.appendChild(FieldElement);
+	}
+	AllObjects.appendChild(OneObject);
+}
+RootElement.appendChild(AllObjects);
+//alert(xmlDoc.xml)
+return xmlDoc
+}
+
+function GetXmlContentByCols(){
+var xmlDoc = new ActiveXObject("Msxml2.DOMDocument.3.0");
+var RootElement = xmlDoc.createElement("RootElement");
+xmlDoc.documentElement=RootElement;
+var AllObjects = xmlDoc.createElement("AllObjects");
+var OneObject = xmlDoc.createElement("OneObject");
+for (var y = 0; y <= TableID.rows.length-1; y++){
+	var FieldElement = xmlDoc.createElement(Name[y]);
+	var Fieldtext = xmlDoc.createElement("text");
+		var txt=GetCellValueKolbased(1,y);
+	Fieldtext.text=txt;
+	FieldElement.appendChild(Fieldtext);
+	var Fieldtype = xmlDoc.createElement("type");
+	Fieldtype.text=Type[y]
+	FieldElement.appendChild(Fieldtype);
+	OneObject.appendChild(FieldElement);
+}
+AllObjects.appendChild(OneObject);
+RootElement.appendChild(AllObjects);
+//alert(xmlDoc.xml)
+return xmlDoc;
+}
+
+function GetCellValueKolbased(x,y){
+var txt=GetCellValue(x,y);
+if(txt=="")return txt;
+if(document.getElementById("id2|"+x+"|"+y)!=null){
+	var Factor=document.getElementById("id2|"+x+"|"+y).value.split("|")[1];
+	if(ReturnSpace(getArr(x,y))!=""){txt=getArr(x,y)/Factor;}
+	else{txt=txt/Factor}
+	}
+if(ReturnSpace(getArr2(x,y))!="")txt=getArr2(x,y);		
+var txt=txt.toString()
+return txt;
+}
+
+//Вернёт значение указанного поля в текущей строке
+function item(nam){
+var number=Name2[nam];
+if(datadirection=="cols")return GetCellValue(1,number)
+if(datadirection=="rows")return GetCellValue(number,CurrentRow)
+}
+	
+//удалит строки, если в параметре "all" удалит все, иначе кроме первой
+function delrows(what){
+if(what=="all"){var startrow=0;var end=1;
+Name = new Array(0);
+Name2 = new Array(0);
+Type = new Array(0);
+Description = new Array(0);
+Valuelist = new Array(0);
+Displaylist = new Array(0);
+valuealong = new Array(0);
+dispalong = new Array(0);
+
+Name = new Array();
+Name2 = new Array();
+Type = new Array();
+Description = new Array();
+Valuelist = new Array();
+Displaylist = new Array();
+valuealong = new Array();
+dispalong = new Array();
+}
+else{var startrow=1;var end=0;}
+if(TableID.rows.length==startrow)return
+var lioo=TableID.rows.length;
+for (var y = startrow; y<= lioo-1; y++){
+TableID.deleteRow(startrow);
+	}
+}
+
+function getTotal(){
+var ret=0;
+var totalnumb=Name2["Total"];
+if(ReturnSpace(totalnumb)!=""){
+	for(var i=1;i<TableID.rows.length;i++){
+	var tot=parseFloat(GetCellValue(totalnumb,i));
+	//alert("cellvalue="+GetCellValue(totalnumb,i)+"\ntot="+tot)
+	//var tot=tot.valueOf();
+	ret=ret+tot;
+	}
+  }
+return ret;
+}
+
+function setdisplaybar(val){
+if(val){bar.style.display="block"}
+else{bar.style.display="none"}
+}
+
+//открыть окно для редактирования текста
+function ShowBigTextWindow(obj){
+var newItem=window.showModalDialog("widetext.csp",obj.innerText,"center:yes;status:no;dialogHeight:300px;dialogWidth:400px;resizable:yes;");
+if(newItem!=null){obj.innerText=newItem;}
+}
+</script>
+<script language="VBScript">
+Dim arr(100,2000)
+Dim realarr(100,2000)
+
+Function getArr(x,y)
+getArr=arr(x,y)
+End Function
+
+Sub setArr(x,y,val)
+arr(x,y)=val
+End Sub
+
+Function getArr2(x,y)
+getArr2=realarr(x,y)
+End Function
+
+Sub setArr2(x,y,val)
+realarr(x,y)=val
+End Sub
+</script>
+<body>
+<span id="bar" style="display:none">
+<img src="images/del.gif" onmouseover="this.src='images/Ondel.gif'" onmouseout="this.src='images/del.gif'" onclick="Delrow('skipfirst')" style="cursor:hand">
+</span>
+<div id="TableBorder" style="overflow:auto;">
+<table id="TableID" border=0 style="behavior:url('#default#download');" cellpadding=0 cellspacing=0 >
+</table>
+</div>
+</body>
+</html>
+</public:component>

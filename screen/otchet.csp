@@ -1,0 +1,445 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+if %request.Get("word")="on"
+{
+ set %response.ContentType = "application/msword"
+ do %response.SetHeader("Content-Disposition","attachment;word.doc")
+ set %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+}
+ q 1
+</script>
+<script language="cache" runat="server">
+ s id=%request.Get("id")
+ s obj=##class(Docs.Otchet).%OpenId(id)
+ d:$ISOBJECT(obj)
+ . s mn(1)="января",mn(2)="февраля",mn(3)="марта",mn(4)="апреля",mn(5)="мая",mn(6)="июня",mn(7)="июля",mn(8)="августа",mn(9)="сентября",mn(10)="октября",mn(11)="ноября",mn(12)="декабря"
+ . s:$ISOBJECT(obj.User1) usr=obj.User1.Name
+ . d:$ISOBJECT(obj.Kontr)
+ . . s Name=obj.Kontr.Name
+ . . s Address=obj.Kontr.Address
+ . . s Tel=obj.Kontr.Phones
+ . . s email=obj.Kontr.EMail
+ . . s chief=obj.Kontr.chief
+ . s Numb=obj.Name
+ . s day=$P($ZD(obj.Dat,4),"/",1)
+ . s month=$G(mn(+$P($ZD(obj.Dat,4),"/",2)))
+ . s year=$P($ZD(obj.Dat,4),"/",3)
+ . s Date=day_" "_month_" "_year
+</script>
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1251">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 11">
+<meta name=Originator content="Microsoft Word 11">
+<link rel=File-List href="otchet.files/filelist.xml">
+<title>Технический отчет </title>
+<!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+<o:Author>NB-FUJ</o:Author>
+<o:LastAuthor>NB-FUJ</o:LastAuthor>
+<o:Revision>2</o:Revision>
+<o:TotalTime>22</o:TotalTime>
+<o:Created>2006-07-03T11:05:00Z</o:Created>
+<o:LastSaved>2006-07-03T11:05:00Z</o:LastSaved>
+<o:Pages>1</o:Pages>
+<o:Words>80</o:Words>
+<o:Characters>459</o:Characters>
+<o:Company>IBT</o:Company>
+<o:Lines>3</o:Lines>
+<o:Paragraphs>1</o:Paragraphs>
+<o:CharactersWithSpaces>538</o:CharactersWithSpaces>
+<o:Version>11.5606</o:Version>
+ </o:DocumentProperties>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:WordDocument>
+<w:SpellingState>Clean</w:SpellingState>
+<w:GrammarState>Clean</w:GrammarState>
+<w:PunctuationKerning/>
+<w:ValidateAgainstSchemas/>
+<w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+<w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+<w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+<w:Compatibility>
+ <w:BreakWrappedTables/>
+ <w:SnapToGridInCell/>
+ <w:WrapTextWithPunct/>
+ <w:UseAsianBreakRules/>
+ <w:DontGrowAutofit/>
+</w:Compatibility>
+<w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+ </w:WordDocument>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:LatentStyles DefLockedState="false" LatentStyleCount="156">
+ </w:LatentStyles>
+</xml><![endif]-->
+<style>
+<!--
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+span.SpellE
+	{mso-style-name:"";
+	mso-spl-e:yes;}
+.ss{border-left:solid windowtext 1.0pt;border-top:solid windowtext 1.0pt;}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
+@page Section1
+	{size:841.9pt 595.3pt;
+	mso-page-orientation:landscape;
+	margin:2.0cm 2.0cm 2.0cm 2.0cm;
+	mso-header-margin:35.45pt;
+	mso-footer-margin:35.45pt;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Обычная таблица";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;
+	mso-para-margin:0cm;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";
+	mso-ansi-language:#0400;
+	mso-fareast-language:#0400;
+	mso-bidi-language:#0400;}
+table.MsoTableGrid
+	{mso-style-name:"Сетка таблицы";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	border:solid windowtext 1.0pt;
+	mso-border-alt:solid windowtext .5pt;
+	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;
+	mso-border-insideh:.5pt solid windowtext;
+	mso-border-insidev:.5pt solid windowtext;
+	mso-para-margin:0cm;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";
+	mso-ansi-language:#0400;
+	mso-fareast-language:#0400;
+	mso-bidi-language:#0400;}
+</style>
+<![endif]-->
+</head>
+
+<body lang=RU style='tab-interval:35.4pt'>
+
+<div class=Section1>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span
+style='font-family:Arial'>Технический отчет <span style='mso-tab-count:1'>        </span></span></b><b
+style='mso-bidi-font-weight:normal'><span lang=EN-US style='font-family:Arial;
+mso-ansi-language:EN-US'>№#($G(Numb))# от #($G(Date))#<o:p></o:p></span></b></p>
+
+<p class=MsoNormal><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
+
+<table class=MsoTableGrid border=0 cellspacing=0 cellpadding=0
+ style='border-collapse:collapse;mso-yfti-tbllook:480;mso-padding-alt:0cm 5.4pt 0cm 5.4pt'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
+<td width=283 valign=top style='width:212.4pt;padding:0cm 5.4pt 0cm 5.4pt'>
+<p class=MsoNormal><span style='font-family:Arial'>Наименование сервисного
+центра<o:p></o:p></span></p>
+</td>
+<td width=703 valign=top style='width:526.9pt;padding:0cm 5.4pt 0cm 5.4pt'>
+<p class=MsoNormal><span lang=EN-US style='font-family:Arial;mso-ansi-language:
+EN-US'>#($G(Name))#<o:p></o:p></span></p>
+</td>
+ </tr>
+ <tr style='mso-yfti-irow:1'>
+<td width=283 valign=top style='width:212.4pt;padding:0cm 5.4pt 0cm 5.4pt'>
+<p class=MsoNormal><span style='font-family:Arial'>Адрес<o:p></o:p></span></p>
+</td>
+<td width=703 valign=top style='width:526.9pt;padding:0cm 5.4pt 0cm 5.4pt'>
+<p class=MsoNormal><span lang=EN-US style='font-family:Arial;mso-ansi-language:
+EN-US'>#($G(Address))#<o:p></o:p></span></p>
+</td>
+ </tr>
+ <tr style='mso-yfti-irow:2'>
+<td width=283 valign=top style='width:212.4pt;padding:0cm 5.4pt 0cm 5.4pt'>
+<p class=MsoNormal><span style='font-family:Arial'>Телефон<o:p></o:p></span></p>
+</td>
+<td width=703 valign=top style='width:526.9pt;padding:0cm 5.4pt 0cm 5.4pt'>
+<p class=MsoNormal><span lang=EN-US style='font-family:Arial;mso-ansi-language:
+EN-US'>#($G(Tel))#<o:p></o:p></span></p>
+</td>
+ </tr>
+ <tr style='mso-yfti-irow:3'>
+<td width=283 valign=top style='width:212.4pt;padding:0cm 5.4pt 0cm 5.4pt'>
+<p class=MsoNormal><span lang=EN-US style='font-family:Arial;mso-ansi-language:
+EN-US'>E-mail<o:p></o:p></span></p>
+</td>
+<td width=703 valign=top style='width:526.9pt;padding:0cm 5.4pt 0cm 5.4pt'>
+<p class=MsoNormal><span lang=EN-US style='font-family:Arial;mso-ansi-language:
+EN-US'>#($G(email))#<o:p></o:p></span></p>
+</td>
+ </tr>
+ <tr style='mso-yfti-irow:4;mso-yfti-lastrow:yes'>
+<td width=283 valign=top style='width:212.4pt;padding:0cm 5.4pt 0cm 5.4pt'>
+<p class=MsoNormal><span style='font-family:Arial'>Ф.И.О. Директора<o:p></o:p></span></p>
+</td>
+<td width=703 valign=top style='width:526.9pt;padding:0cm 5.4pt 0cm 5.4pt'>
+<p class=MsoNormal><span lang=EN-US style='font-family:Arial;mso-ansi-language:
+EN-US'>#($G(chief))#<o:p></o:p></span></p>
+</td>
+ </tr>
+</table>
+
+<p class=MsoNormal><span lang=EN-US style='font-family:Arial;mso-ansi-language:
+EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0 
+ style='width:731pt;border-collapse:collapse;border:none;mso-border-alt:
+ solid windowtext .5pt;mso-yfti-tbllook:480;mso-padding-alt:0cm 1.4pt 0cm 1.4pt;
+ mso-border-insideh:.5pt solid windowtext;mso-border-insidev:.5pt solid windowtext'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
+<td width=37 valign=top style='width:28.05pt;border:solid windowtext 1.0pt;
+mso-border-alt:solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>
+<p class=MsoNormal align=center style='text-align:center'><span
+style='font-family:Arial'>№<o:p></o:p></span></p>
+<p class=MsoNormal align=center style='text-align:center'><span class=SpellE><span
+class=GramE><span style='font-family:Arial'>п</span></span></span><span
+lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'>/</span><span
+class=SpellE><span style='font-family:Arial'>п</span></span><span
+style='font-family:Arial'><o:p></o:p></span></p>
+</td>
+<td width=129 valign=top style='width:97.1pt;border:solid windowtext 1.0pt;
+border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
+solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>
+<p class=MsoNormal align=center style='text-align:center'><span
+style='font-family:Arial'>Наименование изделия<o:p></o:p></span></p>
+</td>
+<td width=80 valign=top style='width:60.25pt;border:solid windowtext 1.0pt;
+border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
+solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>
+<p class=MsoNormal align=center style='text-align:center'><span
+style='font-family:Arial'>Модель<o:p></o:p></span></p>
+</td>
+<td width=84 valign=top style='width:63.1pt;border:solid windowtext 1.0pt;
+border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
+solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>
+<p class=MsoNormal align=center style='text-align:center'><span
+style='font-family:Arial'>Заводской №<o:p></o:p></span></p>
+</td>
+<td width=113 valign=top style='width:84.5pt;border:solid windowtext 1.0pt;
+border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
+solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>
+<p class=MsoNormal align=center style='text-align:center'><span
+style='font-family:Arial'>Гарантийный талон №<o:p></o:p></span></p>
+</td>
+<td width=89 valign=top style='width:67.1pt;border:solid windowtext 1.0pt;
+border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
+solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>
+<p class=MsoNormal align=center style='text-align:center'><span
+style='font-family:Arial'>Отрывной талон (А/</span><span lang=EN-US
+style='font-family:Arial;mso-ansi-language:EN-US'>B</span><span
+style='font-family:Arial'>/</span><span lang=EN-US style='font-family:Arial;
+mso-ansi-language:EN-US'>C</span><span style='font-family:Arial'>)<o:p></o:p></span></p>
+</td>
+<td width=105 valign=top style='width:78.75pt;border:solid windowtext 1.0pt;
+border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
+solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>
+<p class=MsoNormal align=center style='text-align:center'><span
+style='font-family:Arial'>Наименование детали<o:p></o:p></span></p>
+</td>
+<td width=47 valign=top style='width:35.55pt;border:solid windowtext 1.0pt;
+border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
+solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>
+<p class=MsoNormal align=center style='text-align:center'><span
+style='font-family:Arial'>Код<o:p></o:p></span></p>
+</td>
+<td width=73 valign=top style='width:54.8pt;border:solid windowtext 1.0pt;
+border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
+solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>
+<p class=MsoNormal align=center style='text-align:center'><span
+style='font-family:Arial'>Количество<o:p></o:p></span></p>
+</td>
+<td width=67 valign=top style='width:50.2pt;border:solid windowtext 1.0pt;
+border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
+solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>
+<p class=MsoNormal align=center style='text-align:center'><span
+style='font-family:Arial'>Цена детали<o:p></o:p></span></p>
+</td>
+<td width=77 valign=top style='width:57.7pt;border:solid windowtext 1.0pt;
+border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
+solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>
+<p class=MsoNormal align=center style='text-align:center'><span
+style='font-family:Arial'>Цена ремонта<o:p></o:p></span></p>
+</td>
+<td width=83 valign=top style='width:62.2pt;border:solid windowtext 1.0pt;
+border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
+solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>
+<p class=MsoNormal align=center style='text-align:center'><span
+style='font-family:Arial'>Источник детали<o:p></o:p></span></p>
+</td>
+ </tr>
+ <script language="cache" runat="server">
+  d:$ISOBJECT(obj.Items)
+ . s tot=0,totquant=0
+ . s i="" f  s i=obj.Items.Next(i) q:i=""  d
+ . . i $I(count)
+ . . s item=obj.Items.GetAt(i)
+ . . d:$ISOBJECT(item.Goods) 
+ . . . s izdelie=item.Goods.izdelie
+ . . . i $ISOBJECT(izdelie) s izdelie=izdelie.Name
+ . . . e  s izdelie=""
+ . . . s Property3609=item.Goods.Property3609
+ . . . s gname=item.Goods.Name
+ . . . s Property5300=item.Goods.Property5300
+ . . s serial=item.serial
+ . . s garant=item.garant
+ . . s talon=item.talon
+ . . s Price=item.Price
+ . . //s remcost=item.remcost
+ . . s Quantity=item.Quantity
+ . . s gsource=item.goodssource
+ . . s srcname=item.goodssourceLogicalToDisplay(item.goodssource)
+ . . //s sum(gsource)=$G(sum(gsource))+(Quantity*Price)
+ . . //s qtotal=$G(qtotal)+Quantity
+ . . //s qtotal(gsource)=$G(qtotal(gsource))+Quantity
+ . . //s total=$G(total)+remcost
+ . . //s total(gsource)=$G(total(gsource))+remcost
+ . . //s total(gsource,"srcname")=srcname
+ . . w "<tr style='mso-yfti-irow:1'>"
+ . . w "<td width=37 valign=top style='width:28.05pt;border:solid windowtext 1.0pt;border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'><p class=MsoNormal><span lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'>"_count_"<o:p></o:p></span></p></td>"
+ . . w "<td width=129 valign=top style='width:97.1pt;border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>"_$G(izdelie)_"</td>"
+ . . w "<td width=80 valign=top style='width:60.25pt;border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'><p class=MsoNormal>"_$G(Property3609)_"<o:p></o:p></span></p></td>"
+ . . w "<td width=84 valign=top style='width:63.1pt;border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>"_$G(serial)_"</td>"
+ . . w "<td width=113 valign=top style='width:84.5pt;border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>"_$G(garant)_"</td>"
+ . . w "<td width=89 valign=top style='width:67.1pt;border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>"_$G(talon)_"</td>"
+ . . w "<td width=105 valign=top style='width:78.75pt;border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>"_$G(gname)_"</td>"
+ . . w "<td width=47 valign=top style='width:35.55pt;border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>"_$G(Property5300)_"</td>"
+ . . w "<td width=73 valign=top style='width:54.8pt;border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>"_$G(Quantity)_"</td>"
+ . . w "<td width=67 valign=top style='width:50.2pt;border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>"_$G(Price)_"</td>"
+ . . w "<td width=77 valign=top style='width:57.7pt;border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>"_$G(remcost)_"</td>"
+ . . w "<td width=83 valign=top style='width:62.2pt;border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>"_$G(srcname)_"</td>"
+ . . w "</tr>"
+ </script>
+ <tr style='mso-yfti-irow:2;mso-yfti-lastrow:yes'>
+<td width=37 valign=top style='width:28.05pt;border:solid windowtext 1.0pt;
+border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
+padding:0cm 1.4pt 0cm 1.4pt'>
+<p class=MsoNormal><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
+</td>
+<td width=129 valign=top style='width:97.1pt;border-top:none;border-left:
+none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+mso-border-alt:solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span
+style='font-family:Arial'>Итого<o:p></o:p></span></b></p>
+</td>
+<td width=80 valign=top style='width:60.25pt;border-top:none;border-left:
+none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+mso-border-alt:solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>
+<p class=MsoNormal><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
+</td>
+<td width=84 valign=top style='width:63.1pt;border-top:none;border-left:none;
+border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+mso-border-alt:solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>
+<p class=MsoNormal><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
+</td>
+<td width=113 valign=top style='width:84.5pt;border-top:none;border-left:
+none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+mso-border-alt:solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>
+<p class=MsoNormal><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
+</td>
+<td width=89 valign=top style='width:67.1pt;border-top:none;border-left:none;
+border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+mso-border-alt:solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>
+<p class=MsoNormal><span lang=EN-US style='font-family:Arial;mso-ansi-language:
+EN-US'>&nbsp;<o:p></o:p></span></p>
+</td>
+<td width=105 valign=top style='width:78.75pt;border-top:none;border-left:
+none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+mso-border-alt:solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>
+<p class=MsoNormal><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
+</td>
+<td width=47 valign=top style='width:35.55pt;border-top:none;border-left:
+none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+mso-border-alt:solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>
+<p class=MsoNormal><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
+</td>
+<td width=73 valign=top style='width:54.8pt;border-top:none;border-left:none;
+border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+mso-border-alt:solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>
+<p class=MsoNormal>#($G(qtotal))#</p>
+</td>
+<td width=67 valign=top style='width:50.2pt;border-top:none;border-left:none;
+border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+mso-border-alt:solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>
+<p class=MsoNormal><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
+</td>
+<td width=77 valign=top style='width:57.7pt;border-top:none;border-left:none;
+border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+mso-border-alt:solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>
+<p class=MsoNormal><span style='font-family:Arial'>#($J(+$G(total),".",2))#<o:p>&nbsp;</o:p></span></p>
+</td>
+<td width=83 valign=top style='width:62.2pt;border-top:none;border-left:none;
+border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+mso-border-alt:solid windowtext .5pt;padding:0cm 1.4pt 0cm 1.4pt'>
+<p class=MsoNormal><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
+</td>
+ </tr>
+</table>
+<p align=right>
+<script language="cache" runat="server">
+//w "<table cellspacing=0 style='border-right:solid windowtext 1.0pt;border-bottom:solid windowtext 1.0pt;'><tr><td class=ss>&nbsp;<td class=ss>Количество<td class=ss>Стоимость<br>ремонта<td class=ss>Стоимость<br>деталей<td class=ss>Итого"
+ s i="" f  s i=$O(total(i)) q:i=""  d
+ . s detal=$J(+$G(sum(i)),".",2)
+ . s remo=$J(+$G(total(i)),".",2)
+ . s iiu=$J(detal+remo,".",2)
+ . s bednyiyorik=$G(bednyiyorik)+iiu
+ . //w "<tr><td class=ss><i>"_$G(total(i,"srcname"))_"</i><td class=ss>"_+$G(qtotal(i))_"<td class=ss>"_remo_"<td class=ss>"_detal_"<td class=ss>"_iiu
+ //w "<tr><td class=ss colspan=4><b>Итого</b><td class=ss>"_$J(bednyiyorik,".",2)
+ //w "</table>"
+ w "<span style='font-family:Arial'>Итого к оплате: <b>"_$J(+$G(total)+$G(sum(2)),".",2)_"</b></span>"
+ </script>
+<br>
+
+
+<p class=MsoNormal><span style='font-family:Arial'>Директор сервисного центра
+_________________ #($G(chief))#<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:Arial'>Дата<span style='mso-tab-count:
+4'>                                      </span>М.П.<o:p></o:p></span></p>
+</td></tr>
+</table>
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Goods.GoodsParams">
+<Description>
+Параметры товаров</Description>
+<Super>%Persistent,%XML.Adaptor</Super>
+<TimeCreated>60332,396.283541</TimeCreated>
+
+<Property name="Goods">
+<Description>
+Товар</Description>
+<Type>Goods.Goods</Type>
+<Cardinality>one</Cardinality>
+<Inverse>Params</Inverse>
+<Relationship>1</Relationship>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Товар"/>
+</Property>
+
+<Index name="GoodsIndex">
+<Properties>Goods</Properties>
+</Index>
+
+<Property name="Gvalue">
+<Description>
+Значение</Description>
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Значение"/>
+</Property>
+
+<Index name="ValueIndex">
+<Properties>Gvalue:EXACT</Properties>
+</Index>
+
+<Property name="Param">
+<Description>
+Свойство</Description>
+<Type>Params</Type>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Свойство"/>
+</Property>
+
+<Index name="ParamIndex">
+<Properties>Param</Properties>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Goods.GoodsParamsD</DataLocation>
+<DefaultData>GoodsParamsDefaultData</DefaultData>
+<IdLocation>^Goods.GoodsParamsD</IdLocation>
+<IndexLocation>^Goods.GoodsParamsI</IndexLocation>
+<StreamLocation>^Goods.GoodsParamsS</StreamLocation>
+<Data name="GoodsParamsDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Goods</Value>
+</Value>
+<Value name="3">
+<Value>Param</Value>
+</Value>
+<Value name="4">
+<Value>Value</Value>
+</Value>
+<Value name="5">
+<Value>Gvalue</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

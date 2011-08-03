@@ -1,0 +1,228 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ d:%request.Get("excel")
+ . set %response.ContentType = "application/x-msexcel"
+ . do %response.SetHeader("Content-Disposition","attachment;excel.xls")
+ . set %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+
+if %request.Get("word")="on"
+{
+ set %response.ContentType = "application/msword"
+ do %response.SetHeader("Content-Disposition","attachment;word.doc")
+ set %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+}
+ q 1
+
+</script>
+
+<script language="cache" runat="server">
+ s GroupCode=%request.Get("GroupCode")
+ s CatalogueID=%request.Get("CatalogueID")
+ s GroupName=%request.Get("GroupName")
+</script>
+
+<html >
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1251">
+
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 11">
+<meta name=Originator content="Microsoft Word 11">
+<title>Прайс лист #($G(GroupName))#</title>
+
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:"Arial CYR";
+	panose-1:2 11 6 4 2 2 2 2 2 4;
+	mso-font-charset:204;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:536902279 -2147483648 8 0 511 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+p.MsoHeader, li.MsoHeader, div.MsoHeader
+	{margin:0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	tab-stops:center 233.85pt right 467.75pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+p.MsoFooter, li.MsoFooter, div.MsoFooter
+	{margin:0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	tab-stops:center 233.85pt right 467.75pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+ /* Page Definitions */
+ @page
+	{mso-mirror-margins:yes;
+	mso-footnote-separator:url("Прайс.files/header.htm") fs;
+	mso-footnote-continuation-separator:url("Прайс.files/header.htm") fcs;
+	mso-endnote-separator:url("Прайс.files/header.htm") es;
+	mso-endnote-continuation-separator:url("Прайс.files/header.htm") ecs;}
+@page Section1
+	{size:595.3pt 841.9pt;
+	margin:2.0cm 2.0cm 2.0cm 2.0cm;
+	mso-header-margin:17.0pt;
+	mso-footer-margin:35.45pt;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Обычная таблица";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;
+	mso-para-margin:0cm;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";
+	mso-ansi-language:#0400;
+	mso-fareast-language:#0400;
+	mso-bidi-language:#0400;}
+</style>
+<![endif]-->
+</head>
+
+<body lang=RU style='tab-interval:35.4pt'>
+
+<table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width=627
+ style='width:470.2pt;margin-left:4.65pt;border-collapse:collapse;mso-padding-alt:
+ 0cm 5.4pt 0cm 5.4pt;border-right:solid windowtext 1.0pt;'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:21.0pt'>
+  <td width=627 nowrap colspan=6 style='width:470.2pt;border:solid windowtext 1.0pt;
+  border-right:solid black 1.0pt;padding:0cm 5.4pt 0cm 5.4pt;height:21.0pt'>
+  <p class=MsoNormal align=center style='text-align:center'><b><span
+  style='font-size:16.0pt;font-family:"Arial CYR"'>Остатки на складе</span></b></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:1;height:13.5pt'>
+  <td width=627 nowrap colspan=6 style='width:470.2pt;border-top:none;
+  border-left:solid windowtext 1.0pt;border-bottom:solid windowtext 1.0pt;
+  border-right:solid black 1.0pt;mso-border-top-alt:solid windowtext 1.0pt;
+  padding:0cm 5.4pt 0cm 5.4pt;height:13.5pt'>
+  <p class=MsoNormal><span style='font-size:8.0pt;font-family:"Arial CYR"'>Цены
+  указаны в у.е. с учетом НДС<span style='mso-spacerun:yes'>        
+  </span>#($ZD(+$H,4))#<o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:2;height:13.5pt'>
+  <td width=627 nowrap colspan=6 style='width:470.2pt;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-left-alt:solid windowtext 1.0pt;mso-border-bottom-alt:
+  solid windowtext .5pt;mso-border-right-alt:solid windowtext 1.0pt;padding:
+  0cm 5.4pt 0cm 5.4pt;height:20pt'>
+  <p class=MsoNormal align=center style='text-align:center'><b><span
+  style='font-size:16.0pt;font-family:"Arial CYR"'>#($G(GroupName))#</span></b><b><span
+  style='font-size:8.0pt;font-family:"Arial CYR"'><o:p></o:p></span></b></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:3;height:13.5pt'>
+  <td width=43 nowrap style='width:32.45pt;border:solid windowtext 1.0pt;
+  border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;
+  padding:0cm 5.4pt 0cm 5.4pt;height:13.5pt'>
+  <p class=MsoNormal align=center style='text-align:center'><b><span
+  style='font-size:8.0pt;font-family:"Arial CYR"'>№ П/П<o:p></o:p></span></b></p>
+  </td>
+  <td width=177 nowrap style='width:132.7pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+  mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt;height:13.5pt'>
+  <p class=MsoNormal align=center style='text-align:center'><b><span
+  style='font-size:8.0pt;font-family:"Arial CYR"'>Изделие<o:p></o:p></span></b></p>
+  </td>
+  <td width=119 nowrap style='width:89.25pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+  mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt;height:13.5pt'>
+  <p class=MsoNormal align=center style='text-align:center'><b><span
+  style='font-size:8.0pt;font-family:"Arial CYR"'>Модель<o:p></o:p></span></b></p>
+  </td>
+  <td width=160 nowrap style='width:119.7pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+  mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt;height:13.5pt'>
+  <p class=MsoNormal align=center style='text-align:center'><b><span
+  style='font-size:8.0pt;font-family:"Arial CYR"'>Наименование запчасти<o:p></o:p></span></b></p>
+  </td>
+  <td width=69 nowrap style='width:52.1pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+  mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt;height:13.5pt'>
+  <p class=MsoNormal align=center style='text-align:center'><b><span
+  style='font-size:8.0pt;font-family:"Arial CYR"'>Код запчасти<o:p></o:p></span></b></p>
+  </td>
+  <td width=59 nowrap style='width:44.0pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+  mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt;height:13.5pt'>
+  <p class=MsoNormal align=center style='text-align:center'><b><span
+  style='font-size:8.0pt;font-family:"Arial CYR"'>Количество<o:p></o:p></span></b></p>
+  </td>
+ </tr>
+ 
+ <script language="cache" runat="Server">
+ s glob=$NA(^mtempReport("GetGoodsFromGroup",$I))
+ s ok=##class(Reports.Analyzis).GetGoodsFromGroup(GroupCode,CatalogueID,glob)
+ s GroupCode="" f  s GroupCode=$O(@glob@(GroupCode)) q:GroupCode=""  d
+ . s GroupName=$G(@glob@(GroupCode,"GroupName"))
+ . w "<tr style='mso-yfti-irow:4;mso-yfti-lastrow:yes;height:16pt'><td colspan=6 style=""border-left:solid windowtext 1.0pt;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;""><p class=MsoNormal ><b><span style='font-size:13.0pt;font-family:Arial CYR'>"_GroupName_"</b></span></td></tr>"
+ . s GoodsID="" f  s GoodsID=$O(@glob@(GroupCode,"Goods",GoodsID)) q:GoodsID=""  d
+ . . i $I(count)
+ . . s GroupID=$G(@glob@(GroupCode,"Goods",GoodsID,"GroupID"))
+ . . s GoodsName=$G(@glob@(GroupCode,"Goods",GoodsID,"GoodsName"))
+ . . s Goodsizdelie=$G(@glob@(GroupCode,"Goods",GoodsID,"Goodsizdelie"))
+ . . s Goodsabbr=$G(@glob@(GroupCode,"Goods",GoodsID,"Goodsabbr"))
+ . . s GoodsModel=$G(@glob@(GroupCode,"Goods",GoodsID,"GoodsModel"))
+ . . s GoodsShemNumber=$G(@glob@(GroupCode,"Goods",GoodsID,"GoodsShemNumber"))
+ . . k Quantity
+ . . s ok=##class(Store.Action).GetQuantByGoods(GoodsID,.Quantity)
+ . . i '+ok s Quantity=ok
+ . . &html<<tr style='mso-yfti-irow:4;mso-yfti-lastrow:yes;height:12.75pt;'>
+  <td width=43 nowrap valign=bottom style='width:32.45pt;border:solid windowtext 1.0pt;border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt;height:12.75pt'>
+    <p class=MsoNormal align=center style='text-align:center'><span  style='font-size:10.0pt;font-family:"Arial CYR"'>#(count)#<o:p></o:p></span></p>
+  </td>
+  <td width=177 nowrap valign=bottom style='width:132.7pt;border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext 1.0pt;padding:0cm 5.4pt 0cm 5.4pt;height:12.75pt'>
+    <p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial CYR"'>#(Goodsizdelie)#</span></p>
+  </td>
+  <td width=119 nowrap valign=bottom style='width:89.25pt;border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext .5pt;mso-border-top-alt:solid windowtext .5pt;mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext 1.0pt;padding:0cm 5.4pt 0cm 5.4pt;height:12.75pt'>
+    <p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial CYR"'>#(Goodsabbr)#-#(GoodsModel)#<o:p></o:p></span></p>
+  </td>
+  <td width=160 nowrap valign=bottom style='width:119.7pt;border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext .5pt;mso-border-top-alt:solid windowtext .5pt;mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext 1.0pt;padding:0cm 5.4pt 0cm 5.4pt;height:12.75pt'>
+    <p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial CYR"'>#(GoodsName)#<o:p></o:p></span></p>
+  </td>
+  <td width=69 nowrap valign=bottom style='width:52.1pt;border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext .5pt;mso-border-top-alt:solid windowtext .5pt;mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext 1.0pt;padding:0cm 5.4pt 0cm 5.4pt;height:12.75pt'>
+    <p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial CYR"'>#(GoodsShemNumber)#<o:p></o:p></span></p>
+  </td>
+  <td valign=bottom style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;height:12.75pt' >
+    <p class=MsoNormal align=right style='text-align:right'><span style='font-size:10.0pt;font-family:"Arial CYR"'>#(+$G(Quantity))#</span></p>
+  </td>
+ </tr>
+ >
+</script>
+
+</table>
+
+
+</body>
+
+</html>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.data">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62301,49221.658509</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	s class=%request.Get("class") 
+	s fields=%request.Get("fields")
+	s params=%request.Get("params")
+	s where=%request.Get("where")
+	s param("order")=%request.Get("order")
+	s xml=%request.Get("xml")
+	s param("kolbasaddr")=+%request.Get("kolbasaddr")
+	s param("currentpage")=+%request.Get("currentpage")
+	s param("stroknastr")=+%request.Get("stroknastr")
+	i $P(class,".",1)="User" s $P(class,".",1)="SQLUser"
+	w ##class(Common.Common).showdata(class,fields,params,where,xml,"",.param)
+	Write !," ",!
+	Write " "
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\Data.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/Data.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>60556,48660</Default>
+</Parameter>
+</Class>
+</Export>

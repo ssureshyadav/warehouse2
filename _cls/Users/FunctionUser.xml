@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Users.FunctionUser">
+<Description>
+Функции пользователя</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60399,47244.799868</TimeCreated>
+
+<Method name="ReadRole">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>userid,Rol</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	k ^func(userid)
+	//в параметре получаем имя роли
+	&sql(declare sdf cursor for 
+	select NameFunction into :func
+	from Users.Roles where Name=:Rol)
+    &sql(open sdf)
+    f  &sql(fetch sdf) q:SQLCODE  d
+    . s ^func(userid,func)=1 //запишем все функции данной роли данному юзеру
+    &sql(close sdf)
+	q
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Users.FunctionUserD</DataLocation>
+<DefaultData>FunctionUserDefaultData</DefaultData>
+<IdLocation>^Users.FunctionUserD</IdLocation>
+<IndexLocation>^Users.FunctionUserI</IndexLocation>
+<StreamLocation>^Users.FunctionUserS</StreamLocation>
+<Data name="FunctionUserDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

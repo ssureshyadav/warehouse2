@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.mailsetup">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62003,36729.953656</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body onload=""load()"">"
+	Write !,"<table>",!
+	Write "<tr>",!
+	Write "	<td>",!
+	Write "		"
+	Write "<Select id=""TemplateFile"" style=""behavior:url(#default#download)"">"
+	Write !,"		"
+	Write "</Select>"
+	Write !,"	<td>",!
+	Write "		Шаблон",!
+	Write "<tr>",!
+	Write "	<td>",!
+	Write "		"
+	Write "<input type=checkbox id=""OpenMailProg"">"
+	Write !,"	<td>",!
+	Write "		Открыть почтовую программу",!
+	Write "<tr>",!
+	Write "	<td>",!
+	Write "		"
+	Write "<input type=checkbox id=""MakeDoc"">"
+	Write !,"	<td>",!
+	Write "		Создать Word файл",!
+	Write "<tr>",!
+	Write "	<td>",!
+	Write "		"
+	Write "<input type=checkbox id=""UseKontrAddress"" onclick=""ManageHandMadeAddrFn()"" checked>"
+	Write !,"	<td>",!
+	Write "		Использовать почтовый адрес контрагента",!
+	Write "<tr>",!
+	Write "	<td colspan=""2"">"
+	Write "<span id=""HandMadeAddress"" style=""display='none'"">"
+	Write !,"		Введите E-mail адрес "
+	Write "<Input type=text name=""MailAddr"">"
+	Write " ",!
+	Write "	"
+	Write "</span>"
+	Write !,"</table>",!
+	Write "<center>"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""startFun()"" TITLE=""""><center>Сохранить</center></span>"
+	Write "&nbsp;&nbsp;&nbsp;"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""window.close()"" TITLE=""""><center>Отмена</center></span>"
+	Write "</center>",!
+	Write "</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"<script language=""jscript"" src=""common.js"">"
+	Write "</script>"
+	Write !,"<script language=""Jscript"">"
+	Write !,"var MailAddress="""";",!
+	Write !,"function ManageHandMadeAddrFn(){",!
+	Write "if(UseKontrAddress.checked){HandMadeAddress.style.display='none';}",!
+	Write "else{HandMadeAddress.style.display='block';}",!
+	Write "}",!
+	Write !,"function startFun(){",!
+	Write "if(!window.confirm(""Сохранить изменения?""))return;",!
+	Write "SetCookie(""OpenMailProg"",OpenMailProg.checked);",!
+	Write "SetCookie(""MakeDoc"",MakeDoc.checked);",!
+	Write "if(!UseKontrAddress.checked)MailAddress=MailAddr.value;",!
+	Write "returnValue = MakeDoc.checked+"";""+OpenMailProg.checked+"";""+MailAddress+"";""+TemplateFile.value;",!
+	Write "window.close();",!
+	Write "}",!
+	Write !,"function load(){",!
+	Write "MakeDoc.checked=ReturnBoolean(GetCookie(""MakeDoc""));",!
+	Write "OpenMailProg.checked=ReturnBoolean(GetCookie(""OpenMailProg""));",!
+	Write "TemplateFile.startDownload('Data.csp?class=Common.Dictionary14&fields=Property3212,Name', FillTemplatesFn);",!
+	Write "}",!
+	Write !,"function FillTemplatesFn(textStr){",!
+	Write "addOptions(textStr,""TemplateFile"");",!
+	Write "}",!
+	Write "</script>"
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html XMLNS:SKLADList>"
+	Write !,"<IMPORT NAMESPACE=""SKLADList"" IMPLEMENTATION=""htc/listview.htc"">",!
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\MailSetup.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/MailSetup.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>60736,86054</Default>
+</Parameter>
+</Class>
+</Export>

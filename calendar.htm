@@ -1,0 +1,113 @@
+<HTML XMLNS:IE><HEAD><TITLE>Система складского учёта</TITLE><LINK href="style.css" type=text/css rel=stylesheet>
+<SCRIPT language=Jscript src="common.js"></SCRIPT>
+
+<STYLE>
+@media all{
+   IE\:Calendar{
+      behavior: url(htc/calendar.htc) ;
+      width : 33%;
+   }}
+</STYLE>
+
+<SCRIPT language=Jscript>
+function startFun(){
+window.returnValue=cal.value;
+window.close();
+}
+</SCRIPT>
+
+<STYLE>.WholeCalendar_ms__id2 {
+	BORDER-RIGHT: black 1px solid; BORDER-TOP: black 1px solid; BORDER-LEFT: black 1px solid; WIDTH: 100%; CURSOR: default; BORDER-BOTTOM: black 1px solid; HEIGHT: 100%; BACKGROUND-COLOR: lightgrey
+}
+.Title_ms__id2 {
+	FONT-WEIGHT: bold; FONT-SIZE: 10pt; WIDTH: 100%; COLOR: #00009f; FONT-FAMILY: Arial; HEIGHT: 1px; BACKGROUND-COLOR: lightgrey; TEXT-ALIGN: center
+}
+.DateControls_ms__id2 {
+	TEXT-ALIGN: right
+}
+.CalTable_ms__id2 {
+	BORDER-RIGHT: black 1px solid; BORDER-TOP: black 1px solid; BORDER-LEFT: black 1px solid; WIDTH: 100%; BORDER-BOTTOM: black 1px solid; HEIGHT: 100%
+}
+.DayTitle_ms__id2 {
+	BORDER-RIGHT: black 1px solid; BORDER-TOP: white 1px solid; FONT-WEIGHT: bold; FONT-SIZE: 8pt; BORDER-LEFT: white 1px solid; WIDTH: 14%; COLOR: black; BORDER-BOTTOM: black 1px solid; FONT-FAMILY: Arial; HEIGHT: 1px; BACKGROUND-COLOR: lightgrey; TEXT-ALIGN: center
+}
+.OffDay_ms__id2 {
+	BORDER-RIGHT: black 1px solid; BORDER-TOP: white 1px solid; FONT-WEIGHT: normal; FONT-SIZE: 8pt; VERTICAL-ALIGN: text-top; BORDER-LEFT: white 1px solid; WIDTH: 14%; CURSOR: hand; COLOR: #7f7f7f; BORDER-BOTTOM: black 1px solid; FONT-FAMILY: Arial; BACKGROUND-COLOR: lightgrey; TEXT-ALIGN: right
+}
+.Day_ms__id2 {
+	BORDER-RIGHT: black 1px solid; BORDER-TOP: white 1px solid; FONT-WEIGHT: normal; FONT-SIZE: 8pt; VERTICAL-ALIGN: text-top; BORDER-LEFT: white 1px solid; WIDTH: 14%; CURSOR: hand; COLOR: #00009f; BORDER-BOTTOM: black 1px solid; FONT-FAMILY: Arial; BACKGROUND-COLOR: lightgrey; TEXT-ALIGN: right
+}
+.DaySelected_ms__id2 {
+	BORDER-RIGHT: #bfbfbf 1px solid; BORDER-TOP: black 1px solid; FONT-WEIGHT: normal; FONT-SIZE: 8pt; VERTICAL-ALIGN: text-top; BORDER-LEFT: black 1px solid; WIDTH: 14%; CURSOR: hand; COLOR: yellow; BORDER-BOTTOM: #bfbfbf 1px solid; FONT-FAMILY: Arial; BACKGROUND-COLOR: #7f7f7f; TEXT-ALIGN: right
+}
+</STYLE>
+</HEAD>
+<BODY onkeypress=ManageWindow();>
+<CENTER><IE:Calendar id=cal style="BORDER-RIGHT: black 1px solid; BORDER-TOP: black 1px solid; BORDER-LEFT: black 1px solid; WIDTH: 300px; BORDER-BOTTOM: black 1px solid; HEIGHT: 275px; calTitleBackgroundColor: lightgrey; calTitleColor: #00009f; calTitleFontFamily: Arial; calTitleFontSize: 10pt; calTitleFontWeight: bold; calTitleTextAlign: center; calDayTitleBackgroundColor: lightgrey; calDayTitleColor: black; calDayTitleFontFamily: Arial; calDayTitleFontSize: 8pt; calDayTitleFontWeight: bold; calDayTitleTextAlign: center; calOffMonthBackgroundColor: lightgrey; calOffMonthColor: #7f7f7f; calOffMonthFontFamily: Arial; calOffMonthFontSize: 8pt; calOffMonthFontWeight: normal; calOffMonthTextAlign: right; calOffMonthVerticalAlign: text-top; calCurrentMonthBackgroundColor: lightgrey; calCurrentMonthColor: #00009f; calCurrentMonthFontFamily: Arial; calCurrentMonthFontSize: 8pt; calCurrentMonthFontWeight: normal; calCurrentMonthTextAlign: right; calCurrentMonthVerticalAlign: text-top; calSelectedDayBackgroundColor: #7f7f7f; calSelectedDayColor: yellow; calSelectedDayFontFamily: Arial; calSelectedDayFontSize: 8pt; calSelectedDayFontWeight: normal; calSelectedDayTextAlign: right; calSelectedDayVerticalAlign: text-top">
+<TABLE class=WholeCalendar_ms__id2 border=0>
+<TBODY>
+<TR>
+<TD class=Title_ms__id2>Июль 2007</TD>
+<TD class=DateControls_ms__id2><NOBR><SELECT><OPTION>Янвань</OPTION><OPTION>Февраль</OPTION><OPTION>Март</OPTION><OPTION>Апрель</OPTION><OPTION>Май</OPTION><OPTION>Июнь</OPTION><OPTION selected>Июль</OPTION><OPTION>Август</OPTION><OPTION>Сентябрь</OPTION><OPTION>Октябрь</OPTION><OPTION>Ноябрь</OPTION><OPTION>Декабрь</OPTION></SELECT> <SELECT><OPTION>1900</OPTION><OPTION>1901</OPTION><OPTION>1902</OPTION><OPTION>1903</OPTION><OPTION>1904</OPTION><OPTION>1905</OPTION><OPTION>1906</OPTION><OPTION>1907</OPTION><OPTION>1908</OPTION><OPTION>1909</OPTION><OPTION>1910</OPTION><OPTION>1911</OPTION><OPTION>1912</OPTION><OPTION>1913</OPTION><OPTION>1914</OPTION><OPTION>1915</OPTION><OPTION>1916</OPTION><OPTION>1917</OPTION><OPTION>1918</OPTION><OPTION>1919</OPTION><OPTION>1920</OPTION><OPTION>1921</OPTION><OPTION>1922</OPTION><OPTION>1923</OPTION><OPTION>1924</OPTION><OPTION>1925</OPTION><OPTION>1926</OPTION><OPTION>1927</OPTION><OPTION>1928</OPTION><OPTION>1929</OPTION><OPTION>1930</OPTION><OPTION>1931</OPTION><OPTION>1932</OPTION><OPTION>1933</OPTION><OPTION>1934</OPTION><OPTION>1935</OPTION><OPTION>1936</OPTION><OPTION>1937</OPTION><OPTION>1938</OPTION><OPTION>1939</OPTION><OPTION>1940</OPTION><OPTION>1941</OPTION><OPTION>1942</OPTION><OPTION>1943</OPTION><OPTION>1944</OPTION><OPTION>1945</OPTION><OPTION>1946</OPTION><OPTION>1947</OPTION><OPTION>1948</OPTION><OPTION>1949</OPTION><OPTION>1950</OPTION><OPTION>1951</OPTION><OPTION>1952</OPTION><OPTION>1953</OPTION><OPTION>1954</OPTION><OPTION>1955</OPTION><OPTION>1956</OPTION><OPTION>1957</OPTION><OPTION>1958</OPTION><OPTION>1959</OPTION><OPTION>1960</OPTION><OPTION>1961</OPTION><OPTION>1962</OPTION><OPTION>1963</OPTION><OPTION>1964</OPTION><OPTION>1965</OPTION><OPTION>1966</OPTION><OPTION>1967</OPTION><OPTION>1968</OPTION><OPTION>1969</OPTION><OPTION>1970</OPTION><OPTION>1971</OPTION><OPTION>1972</OPTION><OPTION>1973</OPTION><OPTION>1974</OPTION><OPTION>1975</OPTION><OPTION>1976</OPTION><OPTION>1977</OPTION><OPTION>1978</OPTION><OPTION>1979</OPTION><OPTION>1980</OPTION><OPTION>1981</OPTION><OPTION>1982</OPTION><OPTION>1983</OPTION><OPTION>1984</OPTION><OPTION>1985</OPTION><OPTION>1986</OPTION><OPTION>1987</OPTION><OPTION>1988</OPTION><OPTION>1989</OPTION><OPTION>1990</OPTION><OPTION>1991</OPTION><OPTION>1992</OPTION><OPTION>1993</OPTION><OPTION>1994</OPTION><OPTION>1995</OPTION><OPTION>1996</OPTION><OPTION>1997</OPTION><OPTION>1998</OPTION><OPTION>1999</OPTION><OPTION>2000</OPTION><OPTION>2001</OPTION><OPTION>2002</OPTION><OPTION>2003</OPTION><OPTION>2004</OPTION><OPTION>2005</OPTION><OPTION>2006</OPTION><OPTION selected>2007</OPTION><OPTION>2008</OPTION><OPTION>2009</OPTION><OPTION>2010</OPTION><OPTION>2011</OPTION><OPTION>2012</OPTION><OPTION>2013</OPTION><OPTION>2014</OPTION><OPTION>2015</OPTION><OPTION>2016</OPTION><OPTION>2017</OPTION><OPTION>2018</OPTION><OPTION>2019</OPTION><OPTION>2020</OPTION><OPTION>2021</OPTION><OPTION>2022</OPTION><OPTION>2023</OPTION><OPTION>2024</OPTION><OPTION>2025</OPTION><OPTION>2026</OPTION><OPTION>2027</OPTION><OPTION>2028</OPTION><OPTION>2029</OPTION><OPTION>2030</OPTION><OPTION>2031</OPTION><OPTION>2032</OPTION><OPTION>2033</OPTION><OPTION>2034</OPTION><OPTION>2035</OPTION><OPTION>2036</OPTION><OPTION>2037</OPTION><OPTION>2038</OPTION><OPTION>2039</OPTION><OPTION>2040</OPTION><OPTION>2041</OPTION><OPTION>2042</OPTION><OPTION>2043</OPTION><OPTION>2044</OPTION><OPTION>2045</OPTION><OPTION>2046</OPTION><OPTION>2047</OPTION><OPTION>2048</OPTION><OPTION>2049</OPTION><OPTION>2050</OPTION><OPTION>2051</OPTION><OPTION>2052</OPTION><OPTION>2053</OPTION><OPTION>2054</OPTION><OPTION>2055</OPTION><OPTION>2056</OPTION><OPTION>2057</OPTION><OPTION>2058</OPTION><OPTION>2059</OPTION><OPTION>2060</OPTION><OPTION>2061</OPTION><OPTION>2062</OPTION><OPTION>2063</OPTION><OPTION>2064</OPTION><OPTION>2065</OPTION><OPTION>2066</OPTION><OPTION>2067</OPTION><OPTION>2068</OPTION><OPTION>2069</OPTION><OPTION>2070</OPTION><OPTION>2071</OPTION><OPTION>2072</OPTION><OPTION>2073</OPTION><OPTION>2074</OPTION><OPTION>2075</OPTION><OPTION>2076</OPTION><OPTION>2077</OPTION><OPTION>2078</OPTION><OPTION>2079</OPTION><OPTION>2080</OPTION><OPTION>2081</OPTION><OPTION>2082</OPTION><OPTION>2083</OPTION><OPTION>2084</OPTION><OPTION>2085</OPTION><OPTION>2086</OPTION><OPTION>2087</OPTION><OPTION>2088</OPTION><OPTION>2089</OPTION><OPTION>2090</OPTION><OPTION>2091</OPTION><OPTION>2092</OPTION><OPTION>2093</OPTION><OPTION>2094</OPTION><OPTION>2095</OPTION><OPTION>2096</OPTION><OPTION>2097</OPTION><OPTION>2098</OPTION><OPTION>2099</OPTION></SELECT> </NOBR></TD></TR>
+<TR>
+<TD colSpan=3>
+<TABLE class=CalTable_ms__id2 cellSpacing=0 border=0>
+<TBODY>
+<TR>
+<TD class=DayTitle_ms__id2>Пон</TD>
+<TD class=DayTitle_ms__id2>Вт</TD>
+<TD class=DayTitle_ms__id2>Ср</TD>
+<TD class=DayTitle_ms__id2>Чт</TD>
+<TD class=DayTitle_ms__id2>Пт</TD>
+<TD class=DayTitle_ms__id2>Сб</TD>
+<TD class=DayTitle_ms__id2>Вс</TD></TR>
+<TR>
+<TD class=OffDay_ms__id2 day="25" month="6" year="2007">25</TD>
+<TD class=OffDay_ms__id2 day="26" month="6" year="2007">26</TD>
+<TD class=OffDay_ms__id2 day="27" month="6" year="2007">27</TD>
+<TD class=OffDay_ms__id2 day="28" month="6" year="2007">28</TD>
+<TD class=OffDay_ms__id2 day="29" month="6" year="2007">29</TD>
+<TD class=OffDay_ms__id2 day="30" month="6" year="2007">30</TD>
+<TD class=Day_ms__id2 day="1" month="7" year="2007">1</TD></TR>
+<TR>
+<TD class=Day_ms__id2 day="2" month="7" year="2007">2</TD>
+<TD class=Day_ms__id2 day="3" month="7" year="2007">3</TD>
+<TD class=Day_ms__id2 day="4" month="7" year="2007">4</TD>
+<TD class=Day_ms__id2 day="5" month="7" year="2007">5</TD>
+<TD class=Day_ms__id2 day="6" month="7" year="2007">6</TD>
+<TD class=Day_ms__id2 day="7" month="7" year="2007">7</TD>
+<TD class=Day_ms__id2 day="8" month="7" year="2007">8</TD></TR>
+<TR>
+<TD class=Day_ms__id2 day="9" month="7" year="2007">9</TD>
+<TD class=Day_ms__id2 day="10" month="7" year="2007">10</TD>
+<TD class=Day_ms__id2 day="11" month="7" year="2007">11</TD>
+<TD class=Day_ms__id2 day="12" month="7" year="2007">12</TD>
+<TD class=Day_ms__id2 day="13" month="7" year="2007">13</TD>
+<TD class=Day_ms__id2 day="14" month="7" year="2007">14</TD>
+<TD class=Day_ms__id2 day="15" month="7" year="2007">15</TD></TR>
+<TR>
+<TD class=Day_ms__id2 day="16" month="7" year="2007">16</TD>
+<TD class=Day_ms__id2 day="17" month="7" year="2007">17</TD>
+<TD class=Day_ms__id2 day="18" month="7" year="2007">18</TD>
+<TD class=DaySelected_ms__id2 day="19" month="7" year="2007">19</TD>
+<TD class=Day_ms__id2 day="20" month="7" year="2007">20</TD>
+<TD class=Day_ms__id2 day="21" month="7" year="2007">21</TD>
+<TD class=Day_ms__id2 day="22" month="7" year="2007">22</TD></TR>
+<TR>
+<TD class=Day_ms__id2 day="23" month="7" year="2007">23</TD>
+<TD class=Day_ms__id2 day="24" month="7" year="2007">24</TD>
+<TD class=Day_ms__id2 day="25" month="7" year="2007">25</TD>
+<TD class=Day_ms__id2 day="26" month="7" year="2007">26</TD>
+<TD class=Day_ms__id2 day="27" month="7" year="2007">27</TD>
+<TD class=Day_ms__id2 day="28" month="7" year="2007">28</TD>
+<TD class=Day_ms__id2 day="29" month="7" year="2007">29</TD></TR>
+<TR>
+<TD class=Day_ms__id2 day="30" month="7" year="2007">30</TD>
+<TD class=Day_ms__id2 day="31" month="7" year="2007">31</TD>
+<TD class=OffDay_ms__id2 day="1" month="8" year="2007">1</TD>
+<TD class=OffDay_ms__id2 day="2" month="8" year="2007">2</TD>
+<TD class=OffDay_ms__id2 day="3" month="8" year="2007">3</TD>
+<TD class=OffDay_ms__id2 day="4" month="8" year="2007">4</TD>
+<TD class=OffDay_ms__id2 day="5" month="8" year="2007">5</TD></TR></TBODY></TABLE></TD></TR></TBODY></TABLE></IE:Calendar><SPAN class=ButtonDiv onmouseover="this.className='ButtonDivHover'" style="CURSOR: hand" onclick=startFun() onmouseout="this.className='ButtonDiv'">
+<CENTER>Да</CENTER></SPAN>&nbsp;&nbsp;&nbsp; <SPAN class=ButtonDiv onmouseover="this.className='ButtonDivHover'" style="CURSOR: hand" onclick=window.close() onmouseout="this.className='ButtonDiv'">
+<CENTER>Отмена</CENTER></SPAN></CENTER></BODY></HTML>

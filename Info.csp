@@ -1,0 +1,64 @@
+<html>
+<head>
+<title>Система складского учёта</title>
+<link href="style.css" type=text/css rel=stylesheet>
+<style>
+TD{font-family:'Arial';font-size:13pt;}
+SPAN{font-family:'Arial';font-size:13pt;color:#0022aa;cursor:hand}
+</style>
+<script language="javascript">
+
+function load(){
+if(window.dialogArguments!=""){
+	maintext.value=window.dialogArguments;
+}
+
+}
+
+function wopen(url,params)
+{
+	if(typeof(params) == "undefined"){var params=""}
+	window.showModalDialog(url,params,"center:yes;status:no;dialogHeight:400px;dialogWidth:800px;resizable:yes")
+}
+
+
+function CopyInClipBoard()
+{
+   var TextAreaObj = document.getElementById("TextAreaText");
+   var TextCellObj = document.getElementById("TextCell");
+	TextAreaObj.value = TextCellObj.innerText;
+	TextAreaObj.style.display="block";
+   TextAreaObj.focus()
+   TextAreaObj.style.display="none";
+   TextAreaObj.select()
+   therange = TextAreaObj.createTextRange()
+   therange.execCommand("Copy")
+   alert("Данные успешно скопированы")
+}
+
+</script>
+</head>
+<body onload="load()" style="border:solid 1 black">
+<table cellpadding=5 height=100% width=100% border=1><tr ><td valign=top id="TextCell">
+
+<script language="cache" runat="server">
+ s docid=%request.Get("docid")
+ s class=%request.Get("class")
+ s property=%request.Get("property")
+ if docid,class'="",property'="" d
+ . s obj=$ZOBJCLASSMETHOD(class,"%OpenId",docid)
+ . d:$ISOBJECT(obj) 
+ . . s String=$ZOBJPROPERTY(obj,property)
+ . . f i=1:1:$L(String,$C(13)) d
+ . . . w $P(String,$C(13),i)_"<br>",!
+</script>
+</td></tr>
+<tr height="20px"><td valign=bottom>
+<center><br>
+<sklad:Button onclick="CopyInClipBoard()" style="width:200px" value="Скопировать в буфер">
+<sklad:Button onclick="window.close()" value="Закрыть"></center>
+</td></tr>
+</table>
+<textarea id="TextAreaText" cols=20 rows=5 style="display:none"></textarea>
+</body>
+</html>

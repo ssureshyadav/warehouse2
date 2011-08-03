@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Common.Sync">
+<Description>
+Набор методов для удалённой синхронизации</Description>
+<IncludeCode>xmlmacros</IncludeCode>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject</Super>
+<TimeCreated>60749,41339.286798</TimeCreated>
+
+<Method name="ExportSyncFile">
+<Description>
+Выгрузить последние транзакции в файл</Description>
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+ s SystemGUID=##class(%SYS.System).InstanceGUID()
+ s ok=##class(%SYNC.SyncTime).GetlTrn(SystemGUID,$ZU(5),.LastSuccessfullTransaction)
+ s MySync=##class(%SYNC.SyncSet).%New()
+ s GetLastTRN=MySync.GetLastTRN()
+ s added=MySync.AddTransactions(+LastSuccessfullTransaction,GetLastTRN)
+ s newid=GetLastTRN
+ i 'added d  q err
+ . s err="Ошибка во время экспорта"
+ . s:+GetLastTRN=+LastSuccessfullTransaction err="Все данные уже были синхронизированы. Синхронизация не требуется"
+ . d:MySync.ErrCount() 
+ . . s err="Ошибки во время экспорта: "_MySync.ErrCount()
+ . . d ..WriteSyncError(MySync)
+ . . d MySync.Clear()
+ s file="file~"_GetLastTRN_".SklExp"
+ s ExportDir=$$$TunesVariable("ExportDir")
+ s ok=MySync.ExportFile(ExportDir_file,"-d",0)
+ d MySync.Clear()
+ //хорошо бы архивировать и запаролить файл
+ i '+ok $$$WriteObjError(ok) q "Ошибка при экспорте файла с обновлениями. Синхронизация невозможна."
+ q 1_"@"_file
+]]></Implementation>
+</Method>
+
+<Method name="GetFileFromFtp">
+<Description><![CDATA[
+Скачать файл с фтп сервера, сохранить его локально
+<br><var>File</var> - файл]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>File</FormalSpec>
+<Implementation><![CDATA[
+ Set ftp=##class(%Net.FtpSession).%New()
+ s FtpServer=$$$TunesVariable("RemoteServer")
+ s Directory=$$$TunesVariable("FtpDir")
+ //соединяемся с фтп сервером
+ If 'ftp.Connect(FtpServer,$$$TunesVariable("RemoteFtpLogin"),$$$TunesVariable("RemoteFtpPassword")) q "Не удалось подключиться к удалённому серверу "_FtpServer
+ //зачем то переключаем его в двоичный режим, хз что это такое
+ If 'ftp.Binary() q "Невозможно переключить сервер в режим двоичной передачи данных."
+ //переходим в нужную директорию на сервере
+ d ftp.SetDirectory(Directory)
+ Set stream=##class(%GlobalCharacterStream).%New()
+ //скачиваем нужный файл
+ If 'ftp.Retrieve(File,stream) q "Ошибка. На сервере "_FtpServer_", в каталоге "_Directory_" недоступен файл "_File
+ //cохраняем скачаный файлик
+ s FileForSave=$$$TunesVariable("ImportDir")_File
+ s file=##class(%File).%New(FileForSave)
+ Do file.Open("WSN")
+ d file.CopyFrom(stream)
+ s ok=file.%Save()
+ i $$$ISERR(ok) $$$WriteObjError(ok) q "Ошибка. Невозможно сохранить файл "_FileForSave
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="ImportSyncFile">
+<Description>
+Импортировать файл синхронизации с другой системы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>File,Delete=1</FormalSpec>
+<ProcedureBlock>0</ProcedureBlock>
+<Implementation><![CDATA[
+ n MySync,newid,ok
+ s MySync=##class(%SYNC.SyncSet).%New()
+ // каталог1\directory1\неважночто~ВОТ_ЭТУ_ЧАСТЬ_ИЗВЛЕЧЁМ.НеважноКакоеРасширение
+ s newid=..GetSyncIDFromFile(File)
+ s ok=MySync.Import(File)
+ i MySync.ErrCount() d  q err
+ . s err="Ошибки во время импорта: "_MySync.ErrCount()_". File"
+ . d ..WriteSyncError(MySync)
+ . //d MySync.Clear()
+ //d MySync.Clear()
+ i $$$ISERR(ok) $$$WriteObjError(ok) q "Ошибка при импорте файла синхронизации "_File
+ //i Delete,##class(%File).Exists(File) s ok=##class(%File).Delete(File)
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="Synchronization">
+<Description>
+Запустить синхронизацию</Description>
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	s glob=$NA(^Synchronization)
+	d ..StartProgress()
+ 	s RemoteServer=$$$TunesVariable("RemoteServer")
+ 	i glob'="" k @glob
+ 	i glob'="" s @glob@(1)=$ZDT($H,4)_" Запущена синхронизация с сервером "_RemoteServer
+ //экспортируем файл с собственной синхронизацией
+ 	s ok=..ExportSyncFile()
+ 	i +ok s file=$P(ok,"@",2)
+ 	i '+ok d SetLast(ok) q
+ 	i glob'="" s @glob@(2)=$ZDT($H,4)_" Экспортирован файл синхронизации "_file
+ //Коннектимся к другой системе
+ 	s rc=##class(%Net.RemoteConnection).%New()
+ 	Set Status=rc.Connect(RemoteServer,$ZU(5),1972,"_system","SOS")
+ 	i $$$ISERR(Status) $$$WriteObjError(Status) d SetLast("Ошибка. Невозможно соединиться с системой "_RemoteServer) q
+ 	i glob'="" s @glob@(3)=$ZDT($H,4)_" Успешное соединение с сервером "_RemoteServer
+ //Выполняем синхронизацию на удалённой системе
+ 	s Code="Set ReturnValue=##class(Common.Sync).DownloadAndImport("""_file_""")"
+ 	d rc.ExecuteCode(.Code)
+ 	i +Code s txSIDlocal=$P(Code,"@",2)
+ 	i '+Code d SetLast(Code) q
+ 	i glob'="" s @glob@(4)=$ZDT($H,4)_" Выполнена загрузка и импорт файла синхронизации "_file_" на сервере "_RemoteServer
+ //записываем успех экспорта синхронизации
+ 	s ok=..SetExportSuccess(txSIDlocal, $ZU(5), ..GetSyncIDFromFile(file))
+ 	i '+ok d SetLast(ok) q
+ 	i glob'="" s @glob@(5)=$ZDT($H,4)_" Записан результат успешной синхронизации с сервером "_RemoteServer
+ //Заставим удалённую систему экспортировать свой файл синхронизации
+	s Code="Set ReturnValue=##class(Common.Sync).ExportSyncFile()"
+	d rc.ExecuteCode(.Code)
+ 	i +Code s file=$P(Code,"@",2)
+ 	i '+Code d SetLast(Code) q
+ 	i glob'="" s @glob@(6)=$ZDT($H,4)_" Удалённый сервер "_RemoteServer_" экспортировал собственный файл синхронизации "_file
+ //Скачаем и импортируем файл
+ 	s ok=..DownloadAndImport(file)
+ 	i +ok s txSIDlocal=$P(ok,"@",2)
+ 	i '+ok d SetLast(ok) q
+ 	i glob'="" s @glob@(7)=$ZDT($H,4)_" Загружен и успешно импортирован файл синхронизации "_file_" с удалённого сервера "_RemoteServer
+ //Запишем успех экспорта на удалённой системе
+	s Code="Set ReturnValue=##class(Common.Sync).SetExportSuccess("""_txSIDlocal_""","""_$ZU(5)_""","""_..GetSyncIDFromFile(file)_""")"
+	d rc.ExecuteCode(.Code)
+ 	i '+Code d SetLast(Code) q
+ 	i glob'="" s @glob@(8)=$ZDT($H,4)_" На удалённом сервере сделана запись об успешной синхронизации."
+ 	i glob'="" s @glob@(9)=$ZDT($H,4)_" Синхронизация с удалённым сервером "_RemoteServer_" прошла успешно."
+ 	d ..StopProgress()
+ q
+SetLast(text)
+ s ^Synchronization(($O(^Synchronization(""),-1))+1)=$G(text)
+ q
+]]></Implementation>
+</Method>
+
+<Method name="GetSyncIDFromFile">
+<Description><![CDATA[
+извлечь номер транзакции из файла (\каталог1\каталог2\...~НОМЕР_ТРАНЗАКЦИИ~....РасширениеФайла"
+<br><var>File</var> - имя файла в котором содержится номер транзакции]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>File</FormalSpec>
+<Implementation><![CDATA[	q $P($P($P(File,"\",$L(File,"\")),"."),"~",2)
+]]></Implementation>
+</Method>
+
+<Method name="SetExportSuccess">
+<Description><![CDATA[
+Установить флаг успешного экспорта указанной транзакции
+<br><var>syncSYSID</var> - ID системы с которой произошла синхронизация
+<br><var>syncNSID</var> - NameSpace в который удалённая система записала данные синхронизации
+<br><var>ltrn</var> - Успешно экспортированная транзакция]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ltrn="",syncSYSID="",syncNSID=""</FormalSpec>
+<Implementation><![CDATA[
+ i syncSYSID=""  s syncSYSID=##class(%SYS.System).InstanceGUID()
+ i syncNSID="" s syncNSID=$ZU(5)
+ q:ltrn="" "Ошибка. Не указан номер транзакции. Данные синхронизированы но результат не сохранён. Следующий экспорт повторит эти данные."
+ Set Status=##class(%SYNC.SyncTime).SetlTrn(syncSYSID, syncNSID, ltrn)
+ i $$$ISERR(Status) $$$WriteObjError(ok) q "Ошибка при записи результата транзакции. Данные синхронизированы но результат не сохранён. Следующий экспорт повторит эти данные."
+ 
+ s ok=1
+ s FileToDelete=$$$TunesVariable("ExportDir")_"file~"_ltrn_".SklExp"
+ s:##class(%File).Exists(FileToDelete) ok=##class(%File).Delete(FileToDelete)
+ i '+ok q "Ошибка при удалении файла синхронизации "_FileToDelete
+ 
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="DownloadAndImport">
+<Description><![CDATA[
+Скачать и импортировать файл синхронизации с удалённого сервера 
+<br><var>File</var> - Файл]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>File</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ //Скачиваем файл с фтп
+	s ok=..GetFileFromFtp(File) 
+ 	q:'+ok ok
+ //Импортируем скачанный файл
+ 	s ok=..ImportSyncFile($$$TunesVariable("ImportDir")_File)
+ 	q:'+ok ok
+ q 1_"@"_$$$txSIDlocal
+]]></Implementation>
+</Method>
+
+<Method name="Progress">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[ q ^Synchronization
+]]></Implementation>
+</Method>
+
+<Method name="StartProgress">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+ s ^Synchronization=1
+ q
+]]></Implementation>
+</Method>
+
+<Method name="StopProgress">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+ s ^Synchronization=0
+ q
+]]></Implementation>
+</Method>
+
+<Method name="ShowResult">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s i="" f  s i=$O(^Syncronization(i)) q:i=""  d
+ . s str=$g(str)_"<li>"_$G(^Syncronization(i))
+ q $G(str)
+]]></Implementation>
+</Method>
+
+<Method name="WriteSyncError">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>MySync</FormalSpec>
+<Implementation><![CDATA[
+ s GlobalName=MySync.GlobalName()
+ s i="" f  s i=$O(@GlobalName@("%%ERR",i)) q:i=""  d
+ . s Error=@GlobalName@("%%ERR",i,"Status")
+ . $$$WriteObjError(Error)
+ q
+]]></Implementation>
+</Method>
+
+<Method name="StartRemExport">
+<Description>
+Выполнить экспорт на удалённой машине</Description>
+<ClassMethod>1</ClassMethod>
+<ProcedureBlock>0</ProcedureBlock>
+<Implementation><![CDATA[
+ n RemoteServer,rc,Status,Code,CopyCommand,ok,file
+ s RemoteServer=$$$TunesVariable("RemoteServer")
+ s rc=##class(%Net.RemoteConnection).%New()	
+ Set Status=rc.Connect(RemoteServer,$ZU(5),1972,"_system","SOS")
+ i $$$ISERR(Status) $$$WriteObjError(Status) q "Ошибка. Невозможно соединиться с системой "_RemoteServer
+ s ok=rc.InvokeClassMethod("Common.Sync","ExportSyncFile",.Code,1)
+ i $$$ISERR(ok) $$$WriteObjError(ok) q "Ошибка выполнения экспорта на удалённом сервере."
+ i +Code s file=$P(Code,"@",2)
+ e  q "Ошибка экспорта на удалённом сервере: "_Code
+ //тянем файл с сервера
+ s ok=..GetFileFromFtp(file) q:'+ok ok 
+ //импортируем файл с локальной папки
+ s ok=..ImportSyncFile($$$TunesVariable("ImportDir")_file) 
+ d:ok
+ . //если ок установим ОК на удалённой машине
+ . d rc.ResetArguments()
+ . //добавляем аргумент к методу
+ . d rc.AddArgument(..GetSyncIDFromFile(file))
+ . //выполняем метод установки успешности транзакции на удалённом компе
+ . d rc.InvokeClassMethod("Common.Sync","SetExportSuccess")
+ q ok
+]]></Implementation>
+</Method>
+
+<Method name="Synchronization2">
+<ClassMethod>1</ClassMethod>
+<ProcedureBlock>0</ProcedureBlock>
+<Implementation><![CDATA[
+ n ok
+ d ##class(%SYSTEM.Security).Login("_system","SOS")
+ s ok=..StartRemExport()
+ s ^Sync(+$H,$P($H,",",2))=$S(ok=1:"Синхронизация успешно проведена",1:ok)
+ q
+]]></Implementation>
+</Method>
+
+<Method name="KillAllSync">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+ //k ^OBJ.GUID
+ k ^OBJ.JournalT
+ f i=1:1:$G(^OBJ.SYNCJOB) d
+ . s global="^OBJ.SYNC."_i
+ . k @global
+ k ^OBJ.SYNCJOB
+ &sql(delete from %SYNC.SyncTime)
+ q
+]]></Implementation>
+</Method>
+
+<Method name="KillTransWithoutJournal">
+<Description>
+убить транзации все для которых не сохранилось файлов журнала</Description>
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+ s journal=$NA(^OBJ.JournalT)
+ s i=""
+ f  s i=$O(@journal@(i)) q:(i="")||(##class(%File).Exists($P($LG($G(^OBJ.JournalT(i)),2),",")))  k @journal@(i)
+ q i
+]]></Implementation>
+</Method>
+</Class>
+</Export>

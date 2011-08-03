@@ -1,0 +1,141 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ s login=$G(%session.Data("user"))
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ i '##class(Common.Rights).getrights(login,1) s %response.ServerSideRedirect="norights.csp" 
+ //s Access9func=##class(Common.Rights).getrights(login,9)
+ q 1
+</script>
+<script language="Cache" method="Find" arguments="WhereToFind:%String,SearchString:%String,ShowFields:%String" returntype="%String">
+ n glob,i,res,number,GarantName,ID
+ 
+ s ShowFieldsLB = $LB("")
+ f i=1:1:$L(ShowFields) s $LIST(ShowFieldsLB,i)=$P(ShowFields,";",i)
+ 
+ // индекс свойства "комментарий" и "действителен"
+ s:$LF(ShowFieldsLB,"Comment") ListIndex("Comment") = ##class(Common.Dictionary2).GetPropertyListIndex("Comment",.DataLocation)
+ d:$LF(ShowFieldsLB,"Property9194") 
+ . s ListIndex("Property9194") = ##class(Common.Dictionary2).GetPropertyListIndex("Property9194",.DataLocation)
+ . s cl="Common.Dictionary2||Property9194"
+ . d ##class(Docs.Action2).GetDisplayListArray(cl,.Property9194Array)
+
+ //
+ 
+ s res=""
+ s glob=$NA(^Common.Dictionary2I(WhereToFind))
+ s SearchString = " "_$ZCVT(SearchString,"U")
+ 
+ if $D(@glob@(SearchString)) d
+ . s ID = $O(@glob@(SearchString,""))
+ . s GarantName=$LG(@glob@(SearchString,ID),2)
+ . if GarantName="" s GarantName="(не заполнен)"
+ . s res=res_"<a href=""javascript:s('"_ID_"')"">"_GarantName_"</a>"
+ . s:$LF(ShowFieldsLB,"Comment") res=res_" "_##class(Common.Dictionary2).GetPropertyValue(ID,"Comment",ListIndex("Comment"),.DataLocation)
+ . s Property9194 = ##class(Common.Dictionary2).GetPropertyValue(ID,"Property9194",ListIndex("Property9194"),.DataLocation)
+ . if ($LF(ShowFieldsLB,"Property9194"))&(Property9194'="") s res=res_" "_$G(Property9194Array(Property9194))
+ . s res=res_"<br>"
+ 
+ s i = SearchString
+ f  s i=$O(@glob@(i)) q:(i="")||(i'[SearchString)||($L(res)>32000)  d
+ . s ID = $O(@glob@(i,""))
+ . s GarantName=$LG(@glob@(i,ID),2)
+ . if GarantName="" s GarantName="(не заполнен)"
+ . s res=res_"<a href=""javascript:s('"_ID_"')"">"_GarantName_"</a>"
+ . s:$LF(ShowFieldsLB,"Comment") res=res_" "_##class(Common.Dictionary2).GetPropertyValue(ID,"Comment",ListIndex("Comment"),.DataLocation)
+ . s Property9194 = ##class(Common.Dictionary2).GetPropertyValue(ID,"Property9194",ListIndex("Property9194"),.DataLocation)
+ . if ($LF(ShowFieldsLB,"Property9194"))&(Property9194'="") s res=res_" "_$G(Property9194Array(Property9194))
+ . s res=res_"<br>"
+ 
+ if $L(res)>32000 s res=res_"Невозможно вывести все результаты. Уточните запрос."
+ if res="" s res=$ZDT($H)_" не найдено ни одной записи."
+ q res
+</script>
+
+<html>
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="jscript" src="common.js"></script>
+<Script language="Jscript">
+var ColCode="";
+sessionid="#(%session.SessionId)#";
+var divObj;
+var FieldToFindObj;
+
+function Find()
+{
+	var ShowFields = "";
+	if (CommentCBObj.checked) ShowFields=ShowFields+"Comment;";
+	if (Property9194CBObj.checked) ShowFields=ShowFields+"Property9194;";
+	var SearchStr = edtSearch.value;
+	ok = #server(..Find(FieldToFindObj.value,SearchStr,ShowFields))#;
+	ShowResult(ok);
+}
+
+function ShowResult(res)
+{
+	divObj.innerHTML = res;
+}
+
+function edtKeyUp()
+{
+	if(window.event.keyCode==13)Find();
+}
+
+function s(currentrecord)
+{
+	ok=window.showModalDialog("garant.csp?GarantId="+currentrecord,currentrecord+";Common.Dictionary2","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+}
+
+function load()
+{
+	divObj = document.getElementById("DivResult");
+	FieldToFindObj = document.getElementById("FieldToFind");
+	CommentCBObj = document.getElementById("CommentCB");
+	Property9194CBObj = document.getElementById("Property9194CB");
+	CommentCBObj.checked = ( GetCookie("SerialsCommentCB")== 'true');
+	Property9194CBObj.checked = (GetCookie("SerialsProperty9194CB")== 'true');
+}
+
+function newitems()
+{
+	ok=window.showModalDialog("ManyGarants.csp",";Common.Dictionary2","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+}
+
+function newitem()
+{
+	ok=window.showModalDialog("garant.csp?sessionid="+sessionid,";Common.Dictionary2","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+}
+</Script>
+
+</head>
+
+<body onload="load();">
+<sklad:Button value="Товары" onclick="window.location.href='goods.csp'"><br>
+
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<td width=10%><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
+<TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=2><strong>Управление серийными номерами</strong></TD>
+<td  width=10% align=right><!--<a href="talk.csp" ><img src="images/BIGProp.gif" width="20" height=25 border=0></a>--></td>
+</tr>
+</TABLE>
+<br><br>
+Выводить поля: 
+	<div style="border:1 solid black;display:inline">
+		<div style="margin:3px;background-color:#dedeef;display:inline;">Комментарий <input type="checkbox" id="CommentCB" style="border:none;width:15px;" onclick="SetCookie('SerialsCommentCB',this.checked)"></div>
+		<div style="margin:3px;background-color:#dedeef;display:inline;">Актуальность <input type="checkbox" id="Property9194CB" style="border:none;width:15px;" onclick="SetCookie('SerialsProperty9194CB',this.checked)"></div>
+	</div>
+<br><br>
+Первые символы 
+<select id="FieldToFind">
+	<option value="serialInd">Серийного номера</option>
+	<option value="garantInd">Гарантийного номера</option>
+</select>
+<input type="text" id="edtSearch" value="" onkeyup="edtKeyUp();" title="Достаточно ввести несколько первых символов">
+ <input type="button" value="найти" onclick="Find()" style="width:50px" title="Начать поиск по указанным символам (ENTER)">
+<br><br>
+<input type="button" value="Создать несколько записей" onclick="newitems()" title="Создать несколько серийных номеров" style="width:200px;">
+<input type="button" value="Создать одну запись" onclick="newitem()" title="Создать один серийный номер">
+<br><br>
+<div id="DivResult"></div>
+</body>
+</html>

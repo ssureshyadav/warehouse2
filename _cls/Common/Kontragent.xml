@@ -1,0 +1,781 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Common.Kontragent">
+<Description>
+Контрагенты (поставщики, производители, клиенты)</Description>
+<IncludeCode>xmlmacros</IncludeCode>
+<Super>%Persistent</Super>
+<TimeCreated>60319,62442.888387</TimeCreated>
+
+<Property name="Property126">
+<Description>
+Категория цен инструмент</Description>
+<Type>Common.Dictionary9</Type>
+<Parameter name="CAPTION" value="Категория цен"/>
+</Property>
+
+<Index name="Property126">
+<Properties>Property126</Properties>
+</Index>
+
+<Property name="Property127">
+<Description>
+Категория цен бытовка</Description>
+<Type>Common.Dictionary9</Type>
+<Parameter name="CAPTION" value="Категория цен"/>
+</Property>
+
+<Index name="Property127">
+<Properties>Property127</Properties>
+</Index>
+
+<Property name="Property2506">
+<Description>
+Вид деятельности</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Вид деятельности"/>
+<Parameter name="DISPLAYLIST" value=", -,Электроинструмент,Бытовая техника,Электроинструмент и бытовая техника"/>
+<Parameter name="VALUELIST" value=",1,2,3,23"/>
+</Property>
+
+<Property name="Property831">
+<Description>
+Способ доставки</Description>
+<Type>Common.Dictionary1</Type>
+<Parameter name="CAPTION" value="Способ доставки"/>
+</Property>
+
+<Property name="Agree">
+<Description>
+№ договора</Description>
+<Type>%String</Type>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Index name="AgreeInd">
+<Properties>Agree</Properties>
+</Index>
+
+<Property name="City">
+<Description>
+Город (факт адрес)</Description>
+<Type>%String</Type>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Index name="Cityind">
+<Properties>City</Properties>
+</Index>
+
+<Property name="CityCode">
+<Description>
+Код города</Description>
+<Type>%String</Type>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Index name="CityCodeInd">
+<Properties>CityCode</Properties>
+</Index>
+
+<Property name="Comment">
+<Description>
+Комментарий</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1000"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Index name="Commentind">
+<Properties>Comment</Properties>
+</Index>
+
+<Property name="ContPers">
+<Description>
+Контактные лица</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Index name="ContPersind">
+<Properties>ContPers</Properties>
+</Index>
+
+<Property name="EMail">
+<Description>
+e-mail</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Index name="EMailind">
+<Properties>EMail</Properties>
+</Index>
+
+<Property name="Koeff">
+<Description>
+Работает (коэфф. 1-3)</Description>
+<Type>%String</Type>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Index name="Koeffind">
+<Properties>Koeff</Properties>
+</Index>
+
+<Property name="Manager">
+<Description>
+Менеджер</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Index name="Managerind">
+<Properties>Manager</Properties>
+</Index>
+
+<Property name="Phones">
+<Description>
+Контактные телефоны</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Index name="Phonesind">
+<Properties>Phones</Properties>
+</Index>
+
+<Property name="Status">
+<Description>
+Статус</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=",Клиент,Мастерская,Клиент/Мастерская"/>
+<Parameter name="TRUNCATE" value="1"/>
+<Parameter name="VALUELIST" value=",1,2,3"/>
+</Property>
+
+<Index name="Statusind">
+<Properties>Status</Properties>
+</Index>
+
+<Property name="WCalc">
+<Description>
+Как рассчитываемся</Description>
+<Type>%String</Type>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Index name="WCalcind">
+<Properties>WCalc</Properties>
+</Index>
+
+<Property name="Address">
+<Description>
+Адрес фактический</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Index name="Addrind">
+<Properties>Address</Properties>
+</Index>
+
+<Property name="Name">
+<Description>
+Название</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Index name="Namind">
+<Properties>Name</Properties>
+</Index>
+
+<UDLText name="T">
+<Content><![CDATA[
+// Федеральный округ
+
+]]></Content>
+</UDLText>
+
+<UDLText name="T">
+<Content><![CDATA[
+//Property Region As %String(MAXLEN = 200, TRUNCATE = 1);
+
+]]></Content>
+</UDLText>
+
+<UDLText name="T">
+<Content><![CDATA[
+//Index Regind On Region;
+
+]]></Content>
+</UDLText>
+
+<Property name="chief">
+<Description>
+Директор</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
+</Property>
+
+<Property name="glavbuh">
+<Description>
+Главный бухгалтер</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
+</Property>
+
+<Index name="glavbuhInd">
+<Properties>glavbuh</Properties>
+</Index>
+
+<Property name="fax">
+<Description>
+Факс</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
+</Property>
+
+<Property name="bank">
+<Description>
+Банковские реквизиты</Description>
+<Type>Common.Bank</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Property name="region2">
+<Description>
+Регион</Description>
+<Type>User.REGION</Type>
+</Property>
+
+<Index name="region2ind">
+<Properties>region2</Properties>
+</Index>
+
+<Property name="Postalcode">
+<Description>
+Индекс (факт адрес)</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="500"/>
+</Property>
+
+<Index name="PostalcodeInd">
+<Properties>Postalcode</Properties>
+</Index>
+
+<Property name="PostalcodeUr">
+<Description>
+Индекс (юр адрес)</Description>
+<Type>%String</Type>
+</Property>
+
+<Index name="PostalcodeUrInd">
+<Properties>PostalcodeUr</Properties>
+</Index>
+
+<Property name="AddressUr">
+<Description>
+Адрес юридический</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Index name="AddrUrind">
+<Properties>AddressUr</Properties>
+</Index>
+
+<Property name="CityUr">
+<Description>
+Город (юр адрес)</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Index name="CityUrind">
+<Properties>CityUr</Properties>
+</Index>
+
+<Property name="Code">
+<Description>
+Уникальный номер </Description>
+<Type>%String</Type>
+<InitialExpression>^Common.KontragentD+1</InitialExpression>
+</Property>
+
+<Index name="CodeInd">
+<Properties>Code</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Property name="Password">
+<Description>
+Пароль</Description>
+<Type>%String</Type>
+<InitialExpression>##class(Common.Common).GeneratePassword()</InitialExpression>
+</Property>
+
+<Property name="ChangeDate">
+<Description>
+Дата последнего изменения</Description>
+<Type>%Date</Type>
+<Parameter name="CAPTION" value=",readonly"/>
+<Parameter name="FORMAT" value="4"/>
+</Property>
+
+<Index name="ChangeDateInd">
+<Properties>ChangeDate</Properties>
+</Index>
+
+<Property name="ChangeTime">
+<Description>
+Время последнего изменения</Description>
+<Type>%Time</Type>
+<Parameter name="CAPTION" value=",readonly"/>
+</Property>
+
+<Index name="ChangeTimeInd">
+<Properties>ChangeTime</Properties>
+</Index>
+
+<Property name="ChangeUser">
+<Description>
+Человек внесший изменения</Description>
+<Type>Users.Dates</Type>
+<Parameter name="CAPTION" value=",readonly"/>
+</Property>
+
+<Index name="ChangeUserInd">
+<Properties>ChangeUser</Properties>
+</Index>
+
+<Property name="OtgruzPrincip">
+<Description>
+Принцип отгрузки запчастей</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=", ,В кредит,По предоплате"/>
+<Parameter name="VALUELIST" value=",0,1,2"/>
+</Property>
+
+<Index name="OtgruzPrincipInd">
+<Properties>OtgruzPrincip</Properties>
+</Index>
+
+<Property name="Balance">
+<Description>
+Баланс</Description>
+<Type>%Numeric</Type>
+<Parameter name="CAPTION" value=",readonly"/>
+</Property>
+
+<Property name="Activity">
+<Description>
+Активность</Description>
+<Type>%String</Type>
+<InitialExpression>"1"</InitialExpression>
+<Parameter name="DISPLAYLIST" value=",Работает,Не работает"/>
+<Parameter name="VALUELIST" value=",1,0"/>
+</Property>
+
+<Index name="ActivityInd">
+<Properties>Activity</Properties>
+</Index>
+
+<Property name="NotifyEmails">
+<Description>
+Уведомлять о сообщении от этого клиента</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1024"/>
+</Property>
+
+<Property name="Currency">
+<Description>
+Валюта расчётов</Description>
+<Type>%String</Type>
+<InitialExpression>"1"</InitialExpression>
+<Parameter name="DISPLAYLIST" value=",Руб.,у.е."/>
+<Parameter name="VALUELIST" value=",1,2"/>
+</Property>
+
+<Property name="Discount">
+<Description>
+Скидка (%)</Description>
+<Type>%Numeric</Type>
+<InitialExpression>0</InitialExpression>
+</Property>
+
+<Property name="NDSPayment">
+<Description>
+Оплата по договору (с НДС, Без НДС)</Description>
+<Type>%String</Type>
+<InitialExpression>1</InitialExpression>
+<Required>1</Required>
+<Parameter name="DISPLAYLIST" value=",с ндс,без ндс"/>
+<Parameter name="VALUELIST" value=",1,0"/>
+</Property>
+
+<Index name="NDSPayment">
+<Properties>NDSPayment</Properties>
+</Index>
+
+<Property name="Federal">
+<Description>
+Федеральный округ</Description>
+<Type>Common.Dictionary18</Type>
+</Property>
+
+<Index name="Federal">
+<Properties>Federal</Properties>
+</Index>
+
+<Property name="OurCompany">
+<Description>
+Наше юр. лицо с которым работает этот контрагент</Description>
+<Type>Common.Kontragent</Type>
+</Property>
+
+<Property name="IsWe">
+<Description>
+Это юр лицо принадлежит нам</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=",Это наше юр.лицо,Это стороннее юр.лицо"/>
+<Parameter name="VALUELIST" value=",1,0"/>
+</Property>
+
+<Property name="AdPhone">
+<Description>
+Телефон указанный в рекламе</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
+</Property>
+
+<Property name="Pseudonym">
+<Description>
+Псевдоним</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="100"/>
+</Property>
+
+<Index name="PseudonymInd">
+<Properties>Pseudonym</Properties>
+</Index>
+
+<Method name="%OnBeforeSave">
+<FormalSpec>insert:%Boolean</FormalSpec>
+<Private>1</Private>
+<ProcedureBlock>0</ProcedureBlock>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ n ChangeUser
+ q:'%this.%IsModified() $$$OK
+ s MaxDiscount = $$$TunesVariableGlobal("MaxDiscount")
+ if %this.Discount>MaxDiscount Quit $$$ERROR($$$GeneralError,"Скидка "_%this.Discount_" больше максимально установленной скидки "_MaxDiscount)
+ s %this.ChangeDate=+$H
+ s %this.ChangeTime=$P($H,",",2)
+ s ChangeUser=$S($ISOBJECT($G(%session)):$G(%session.Data("user")),1:"")
+ d:ChangeUser %this.ChangeUserSetObjectId(ChangeUser)
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Trigger name="OnUpdate">
+<Code> s obj=##class(Common.Kontragent).%OpenId({ID})
+ s obj.ChangeDate=+$H
+ s obj.ChangeTime=$P($H,",",2)
+ s ChangeUser=$S($ISOBJECT($G(%session)):$G(%session.Data("user")),1:"")
+ d:ChangeUser obj.ChangeUserSetObjectId(ChangeUser)
+ d obj.%Save()</Code>
+<Event>UPDATE</Event>
+<Time>AFTER</Time>
+</Trigger>
+
+<Method name="GetPropertyListIndex">
+<ClassMethod>1</ClassMethod>
+<CodeMode>objectgenerator</CodeMode>
+<FormalSpec><![CDATA[PropertyName:%String="",&DataLocation:%String=""]]></FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<Implementation><![CDATA[
+ Do %code.WriteLine(" s DataLocation="""_%compiledclass.Storages.GetAt(1).DataLocation_"""")
+ Do %code.WriteLine(" q:PropertyName="""" """"")
+ s number=""
+ s StorageStrategy=%compiledclass.Storages.GetAt(1)
+ f i=1:1:StorageStrategy.Data.Count() d  q:StorageData.Name[%compiledclass.SqlTableName
+ . s StorageData=StorageStrategy.Data.GetAt(i)
+ s data=StorageData.Values.GetNext(.number)
+ while $ISOBJECT(data) {
+ 	s PropertyName=data.Value
+ 	s ListIndex=data.Name
+ 	Do %code.WriteLine(" s Prop( """ _ PropertyName _ """)="_ListIndex)
+ 	s data=StorageData.Values.GetNext(.number)
+ 	} 	
+ Do %code.WriteLine(" Quit $G(Prop(PropertyName))")
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetPropertyValue">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ID:%String="",Property:%String=""</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ q:ID=""
+ q:Property=""
+ s PropertyNumber=..GetPropertyListIndex(Property,.DataLocation)
+ q:Property=""
+ q $ZSTRIP($LG(@DataLocation@(ID),PropertyNumber),"<W")
+]]></Implementation>
+</Method>
+
+<Trigger name="UpdTrigger">
+<Description>
+Набор триггеров и методов для поддержки версии справочника</Description>
+<Code> d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")</Code>
+<Event>UPDATE</Event>
+<Time>AFTER</Time>
+</Trigger>
+
+<Trigger name="InsTrigger">
+<Code> d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")</Code>
+<Event>INSERT</Event>
+<Time>AFTER</Time>
+</Trigger>
+
+<Trigger name="DelTrigger">
+<Code> d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")</Code>
+<Event>DELETE</Event>
+<Time>AFTER</Time>
+</Trigger>
+
+<Method name="%OnDelete">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>oid:%ObjectIdentity</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="%OnAfterSave">
+<FormalSpec>insert:%Boolean</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	if (insert)||(%this.%IsModified()) d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetPropertyType">
+<ClassMethod>1</ClassMethod>
+<CodeMode>objectgenerator</CodeMode>
+<FormalSpec><![CDATA[PropertyName:%String="",&Data:%String=""]]></FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<Implementation><![CDATA[
+ f i=1:1:%compiledclass.Properties.Count() d
+ . Do %code.WriteLine(" Set Prop("""_%compiledclass.Properties.GetAt(i).Name_""")="""_%compiledclass.Properties.GetAt(i).Type_"""")
+ . Do %code.WriteLine(" Set Prop("""_%compiledclass.Properties.GetAt(i).Name_""",""Displaylist"")="""_%compiledclass.Properties.GetAt(i).Parameters.GetAt("DISPLAYLIST")_"""")
+ . Do %code.WriteLine(" Set Prop("""_%compiledclass.Properties.GetAt(i).Name_""",""Valuelist"")="""_%compiledclass.Properties.GetAt(i).Parameters.GetAt("VALUELIST")_"""")
+ . Do %code.WriteLine(" Set Prop("""_%compiledclass.Properties.GetAt(i).Name_""",""Description"")="""_%compiledclass.Properties.GetAt(i).Description_"""")
+ Do %code.WriteLine(" Set Data(""Description"")=$G(Prop(PropertyName,""Description""))")
+ Do %code.WriteLine(" Set Data(""Displaylist"")=$G(Prop(PropertyName,""Displaylist""))")
+ Do %code.WriteLine(" Set Data(""Valuelist"")=$G(Prop(PropertyName,""Valuelist""))")
+ Do %code.WriteLine(" Quit $G(Prop(PropertyName))")
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Common.KontragentD</DataLocation>
+<DefaultData>KontragentDefaultData</DefaultData>
+<IdLocation>^Common.KontragentD</IdLocation>
+<IndexLocation>^Common.KontragentI</IndexLocation>
+<StreamLocation>^Common.KontragentS</StreamLocation>
+<Data name="KontragentDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>NewProperty1</Value>
+</Value>
+<Value name="3">
+<Value>Comment</Value>
+</Value>
+<Value name="4">
+<Value>Contact</Value>
+</Value>
+<Value name="5">
+<Value>Name</Value>
+</Value>
+<Value name="6">
+<Value>INN</Value>
+</Value>
+<Value name="7">
+<Value>Address</Value>
+</Value>
+<Value name="8">
+<Value>Agree</Value>
+</Value>
+<Value name="9">
+<Value>City</Value>
+</Value>
+<Value name="10">
+<Value>CityCode</Value>
+</Value>
+<Value name="11">
+<Value>ContPers</Value>
+</Value>
+<Value name="12">
+<Value>EMail</Value>
+</Value>
+<Value name="13">
+<Value>Koeff</Value>
+</Value>
+<Value name="14">
+<Value>Manager</Value>
+</Value>
+<Value name="15">
+<Value>Phones</Value>
+</Value>
+<Value name="16">
+<Value>Region</Value>
+</Value>
+<Value name="17">
+<Value>State</Value>
+</Value>
+<Value name="18">
+<Value>WCalc</Value>
+</Value>
+<Value name="19">
+<Value>Poluh</Value>
+</Value>
+<Value name="20">
+<Value>Postav</Value>
+</Value>
+<Value name="21">
+<Value>Property831</Value>
+</Value>
+<Value name="22">
+<Value>Status</Value>
+</Value>
+<Value name="23">
+<Value>chief</Value>
+</Value>
+<Value name="24">
+<Value>fax</Value>
+</Value>
+<Value name="25">
+<Value>bank</Value>
+</Value>
+<Value name="26">
+<Value>Property2506</Value>
+</Value>
+<Value name="27">
+<Value>Yepercent</Value>
+</Value>
+<Value name="28">
+<Value>boss</Value>
+</Value>
+<Value name="29">
+<Value>maxcredit</Value>
+</Value>
+<Value name="30">
+<Value>Property126</Value>
+</Value>
+<Value name="31">
+<Value>region2</Value>
+</Value>
+<Value name="32">
+<Value>glavbuh</Value>
+</Value>
+<Value name="33">
+<Value>Postalcode</Value>
+</Value>
+<Value name="34">
+<Value>AddressUr</Value>
+</Value>
+<Value name="35">
+<Value>CityUr</Value>
+</Value>
+<Value name="36">
+<Value>PostalcodeUr</Value>
+</Value>
+<Value name="37">
+<Value>Code</Value>
+</Value>
+<Value name="38">
+<Value>Password</Value>
+</Value>
+<Value name="39">
+<Value>ChangeDate</Value>
+</Value>
+<Value name="40">
+<Value>ChangeTime</Value>
+</Value>
+<Value name="41">
+<Value>ChangeUser</Value>
+</Value>
+<Value name="42">
+<Value>OtgruzPrincip</Value>
+</Value>
+<Value name="43">
+<Value>Balance</Value>
+</Value>
+<Value name="44">
+<Value>Activity</Value>
+</Value>
+<Value name="45">
+<Value>Activityz</Value>
+</Value>
+<Value name="46">
+<Value>Property127</Value>
+</Value>
+<Value name="47">
+<Value>NotifyEmails</Value>
+</Value>
+<Value name="48">
+<Value>Currency</Value>
+</Value>
+<Value name="49">
+<Value>Currenc</Value>
+</Value>
+<Value name="50">
+<Value>Discount</Value>
+</Value>
+<Value name="51">
+<Value>NDSPayment</Value>
+</Value>
+<Value name="52">
+<Value>Federal</Value>
+</Value>
+<Value name="53">
+<Value>OurCompany</Value>
+</Value>
+<Value name="54">
+<Value>IsWe</Value>
+</Value>
+<Value name="55">
+<Value>LegalName</Value>
+</Value>
+<Value name="56">
+<Value>AdPhone</Value>
+</Value>
+<Value name="57">
+<Value>Pseudonym</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

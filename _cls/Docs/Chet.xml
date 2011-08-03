@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.Chet">
+<Description>
+</Description>
+<Super>Docs.Super</Super>
+<TimeCreated>60422,81959.827587</TimeCreated>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+</Storage>
+</Class>
+</Export>

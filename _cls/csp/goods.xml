@@ -1,0 +1,529 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.goods">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62301,49215.530474</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body onload=""onload()"" topmargin=4 bottommargin=0>"
+	Write !,(##class(%CSP.Response).HyperEventBody())
+	Write !,"<TABLE cellSpacing=0 width=""100%"" celpadding=""0"" border=0>",!
+	Write "<TR><td colspan=2>",!
+	Write "<TABLE cellSpacing=0 width=""100%"" celpadding=""0"" >",!
+	Write "<TR>",!
+	Write "<td width=10%>"
+	Write "<img alt=""Обновить раздел"" src=""images/refresh.gif"" onclick=""window.location.reload()"">"
+	Write "</td>",!
+	Write "<TD width=80% align=center style=""BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid"" ><strong>Товары</strong></TD>",!
+	Write "<td width=10% align=right title=""Текущая версия справочника товаров"" style=""FONT-size: 11px ; font-family: arial; COLOR: #6e6e6e;"">v "_(GoodsGoodsVersion)_"</td>",!
+	Write "</TABLE>",!
+	Write !,"<tr>",!
+	Write "	<td colspan=2>",!
+	Write "		"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;width:200px"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""window.location.href='PriceGroups.csp'"" TITLE=""""><center>Ценовые группы товаров</center></span>"
+	Write !,"		"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;width:100px"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""window.location.href='Reserves2.csp'"" TITLE=""""><center>Резервы</center></span>"
+	Write !,"		"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;width:100px"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""window.location.href='Brak.csp'"" TITLE=""""><center>Некондиция</center></span>"
+	Write !,"		"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;width:200px"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""window.location.href='Attach2Model.csp'"" TITLE=""Привязать запчасть к модели""><center>Запчасти и их модели</center></span>"
+	Write !,"		"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;width:200px"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""window.location.href='Serials.csp'"" TITLE=""Открыть страницу управления серийными номерами""><center>Cерийные номера</center></span>"
+	Write !,"	</td>",!
+	Write "	",!
+	Write "</tr>",!
+	Write "<tr>",!
+	Write " <td valign=top width=50%>",!
+	Write "  Классификатор:",!
+	Write "  "
+	Write "<select id=""Catalogues"" onchange=""LoadTree()"">"
+	Write "</select>"
+	Write "<br>",!
+	Write "  <SKLADz:treeview id=""GroupsTree"" width=300 height=160 ImagesPath="""_(%session.Data("ImagesPath"))_""" onDownloadCmpl=""GroupsTreeDnldCmpl()"" />",!
+	Write "  <Table width=""350""><tr><td>",!
+	Write "  "
+	Write !,"<img src=""images/new.gif"" onmouseover=""newgrup.src='images/Onnew.gif'"" onmouseout=""newgrup.src='images/new.gif'""  id=""newgrup"" name=""newgrup"" alt=""Новая группа"" onclick=""addGroup(0)"" style="""">"
+	Write !,"  "
+	Write !,"<img src=""images/new+.gif"" onmouseover=""newSubgrup.src='images/Onnew+.gif'"" onmouseout=""newSubgrup.src='images/new+.gif'""  id=""newSubgrup"" name=""newSubgrup"" alt=""Новая подгруппа"" onclick=""addGroup(1)"" style="""">"
+	Write !,"  "
+	Write !,"<img src=""images/edit.gif"" onmouseover=""EditGroupName.src='images/Onedit.gif'"" onmouseout=""EditGroupName.src='images/edit.gif'""  id=""EditGroupName"" name=""EditGroupName"" alt=""Редактирование названия группы"" onclick=""EditGroupNameFn()"" style="""">"
+	Write !,"  "
+	Write !,"<img src=""images/del+.gif"" onmouseover=""del22.src='images/Ondel+.gif'"" onmouseout=""del22.src='images/del+.gif'""  id=""del22"" name=""del22"" alt=""Очистить группу"" onclick=""cleargrup()"" style="""">"
+	Write !,"  "
+	Write !,"<img src=""images/history.gif"" onmouseover=""hist22.src='images/Onhistory.gif'"" onmouseout=""hist22.src='images/history.gif'""  id=""hist22"" name=""hist22"" alt=""Заполнить группу"" onclick=""fillgrup()"" style="""">"
+	Write !,"  "
+	Write !,"<img src=""images/PrintPrice.gif"" onmouseover=""PrintPriceImg.src='images/OnPrintPrice.gif'"" onmouseout=""PrintPriceImg.src='images/PrintPrice.gif'""  id=""PrintPriceImg"" name=""PrintPriceImg"" alt=""Вывести прайслист"" onclick=""PrintPriceFunc('')"" style="""">"
+	Write !,"  "
+	Write !,"<img src=""images/PrintPriceColor.gif"" onmouseover=""PrintPriceImg2.src='images/OnPrintPriceColor.gif'"" onmouseout=""PrintPriceImg2.src='images/PrintPriceColor.gif'""  id=""PrintPriceImg2"" name=""PrintPriceImg2"" alt=""Вывести прайслист c изображениями"" onclick=""PrintPriceFunc('Images')"" style="""">"
+	Write !,"  "
+	Write !,"<img src=""images/ostatki.gif"" onmouseover=""PrintStorage.src='images/Onostatki.gif'"" onmouseout=""PrintStorage.src='images/ostatki.gif'""  id=""PrintStorage"" name=""PrintStorage"" alt=""Вывести остатки"" onclick=""PrintStorageFn()"" style="""">"
+	Write !,"  </td><td>",!
+	Write "  "
+	Write !,"<img src=""images/del.gif"" onmouseover=""delgrup.src='images/Ondel.gif'"" onmouseout=""delgrup.src='images/del.gif'""  id=""delgrup"" name=""delgrup"" alt=""Удалить группу"" onclick=""delGroup()"" style="""">"
+	Write "<br>",!
+	Write "  </td></tr></table>",!
+	Write " </td>",!
+	Write " <td valign=top width=50%>",!
+	Write "  <fieldset style=""width:200;""><legend id=""TovarName""></legend>",!
+	Write "  <SKLADz:treeview id=""PropsTree"" width=300 height=160 ShowImages=0 ImagesPath="""_(%session.Data("ImagesPath"))_""" />",!
+	Write "  </fieldset>",!
+	Write "  <Table width=""350""><tr><td>",!
+	Write "  "
+	Write !,"<img src=""images/new.gif"" onmouseover=""newprop.src='images/Onnew.gif'"" onmouseout=""newprop.src='images/new.gif'""  id=""newprop"" name=""newprop"" alt=""Новое свойство"" onclick=""AddProp(0)"" style="""">"
+	Write !,"  "
+	Write !,"<img src=""images/new+.gif"" onmouseover=""newSubprop.src='images/Onnew+.gif'"" onmouseout=""newSubprop.src='images/new+.gif'""  id=""newSubprop"" name=""newSubprop"" alt=""Новое свойство в существующей группе"" onclick=""AddProp(1)"" style="""">"
+	Write !,"  </td><td>",!
+	Write "  "
+	Write !,"<img src=""images/del.gif"" onmouseover=""delprop.src='images/Ondel.gif'"" onmouseout=""delprop.src='images/del.gif'""  id=""delprop"" name=""delprop"" alt=""Удалить свойство"" onclick=""DelDopProp();"" style="""">"
+	Write !,"  </td></tr>",!
+	Write "  </table>",!
+	Write "  </td>",!
+	Write "</tr>",!
+	Write "<tr>",!
+	Write " <td colspan=2>",!
+	Write "<span id=""namfld"">"
+	Write "</span>"
+	Write "&nbsp;"
+	Write "<input type=""text"" id=""fldval"" onkeyup=""gg();"">"
+	Write !,"   <fieldset style=""""><legend>Товары</legend>",!
+	Write "  "
+	Write "<!--",!
+	Write "  <sklad:ListView id=""LV"" style=""width:100%;height:200;""  >",!
+	Write "  -->"
+	Write !," <OBJECT id=""LV"" classid=clsid:BDD1F04B-858B-11D1-B16A-00C0F0283628 style=""width:100%;height:200;behavior:url('#default#download')"" codebase=""Cab\MSComCtl.CAB"" >",!
+	Write "<PARAM NAME=""View"" VALUE=""3"">",!
+	Write "<PARAM NAME=""Appearance"" VALUE=""1"">",!
+	Write "<PARAM NAME=""FullRowSelect"" VALUE=""True"">",!
+	Write "<PARAM NAME=""MultiSelect"" VALUE=""True"">",!
+	Write "<PARAM NAME=""GridLines"" VALUE=""True"">",!
+	Write "<PARAM NAME=""LabelEdit"" VALUE=""1"">",!
+	Write "</OBJECT>",!
+	Write !,"  <Table width=100%><tr><td width=""60%"" >",!
+	If '(Access9func=1) Goto %csp00001 ;{
+	Write !,"  "
+	Write !,"<img src=""images/new.gif"" onmouseover=""newtov.src='images/Onnew.gif'"" onmouseout=""newtov.src='images/new.gif'""  id=""newtov"" name=""newtov"" alt=""Новый товар"" onclick=""addTovar()"" style="""">"
+	Write !,"  "
+	Write !,"<img src=""images/edit.gif"" onmouseover=""edittov.src='images/Onedit.gif'"" onmouseout=""edittov.src='images/edit.gif'""  id=""edittov"" name=""edittov"" alt=""Редактировать товар"" onclick=""editTovar()"" style="""">"
+	Write !,"  "
+	Write !,"<img src=""images/edit.gif"" onmouseover=""edittov2.src='images/Onedit.gif'"" onmouseout=""edittov2.src='images/edit.gif'""  id=""edittov2"" name=""edittov2"" alt=""Редактировать товар в новой форме ( CTRL+q )"" onclick=""editTovar2()"" style="""">"
+	Write !
+%csp00001	;}
+	Write !,"  "
+	Write !,"<img src=""images/card.gif"" onmouseover=""cardtov.src='images/Oncard.gif'"" onmouseout=""cardtov.src='images/card.gif'""  id=""cardtov"" name=""cardtov"" alt=""Карточка товара"" onclick=""OpenCard()"" style="""">"
+	Write !,"  "
+	Write !,"<img src=""images/new+.gif"" onmouseover=""newGprop.src='images/Onnew+.gif'"" onmouseout=""newGprop.src='images/new+.gif'""  id=""newGprop"" name=""newGprop"" alt=""Новое основное свойство"" onclick=""AddProp2()"" style="""">"
+	Write !,"  "
+	Write !,"<img src=""images/del+.gif"" onmouseover=""delGprop.src='images/Ondel+.gif'"" onmouseout=""delGprop.src='images/del+.gif'""  id=""delGprop"" name=""delGprop"" alt=""Удалить основное свойство"" onclick=""DelProp()"" style="""">"
+	Write !
+	If '(Access9func=1) Goto %csp00002 ;{
+	Write !,"  "
+	Write !,"<img src=""images/copy.gif"" onmouseover=""copy.src='images/Oncopy.gif'"" onmouseout=""copy.src='images/copy.gif'""  id=""copy"" name=""copy"" alt=""Пометить для копирования"" onclick=""cuttov()"" style="""">"
+	Write !,"  "
+	Write !,"<img src=""images/paste.gif"" onmouseover=""paste.src='images/Onpaste.gif'"" onmouseout=""paste.src='images/paste.gif'""  id=""paste"" name=""paste"" alt=""Вставить товары из буфера"" onclick=""pastetov()"" style="""">"
+	Write !,"  "
+	Write !,"<img src=""images/history.gif"" onmouseover=""buf.src='images/Onhistory.gif'"" onmouseout=""buf.src='images/history.gif'""  id=""buf"" name=""buf"" alt=""Товары в буфере обмена"" onclick=""tovbuf()"" style="""">"
+	Write !
+%csp00002	;}
+	Write !,"  "
+	Write !,"<img src=""images/price.gif"" onmouseover=""price.src='images/Onprice.gif'"" onmouseout=""price.src='images/price.gif'""  id=""price"" name=""price"" alt=""Цены товара"" onclick=""tovprice()"" style="""">"
+	Write !
+	If '(Access9func=1) Goto %csp00003 ;{
+	Write !,"  "
+	Write !,"<img src=""images/goinside.gif"" onmouseover=""btnMuiltipleEdit.src='images/Ongoinside.gif'"" onmouseout=""btnMuiltipleEdit.src='images/goinside.gif'""  id=""btnMuiltipleEdit"" name=""btnMuiltipleEdit"" alt=""Редактировать список товаров"" onclick=""fnMuiltipleEdit()"" style="""">"
+	Write !
+%csp00003	;}
+	Write !,"  "
+	Write !,"<img src=""images/find.gif"" onmouseover=""btnFindGood.src='images/Onfind.gif'"" onmouseout=""btnFindGood.src='images/find.gif'""  id=""btnFindGood"" name=""btnFindGood"" alt=""Поиск товаров"" onclick=""fnFindGood()"" style="""">"
+	Write !,"  </td>",!
+	Write "  <td align=right width=""40%""><IE:DOWNLOAD id=""downloader"" STYLE=""behavior:url(#default#download)"" />",!
+	If '(Access9func=1) Goto %csp00004 ;{
+	Write !,"  "
+	Write !,"<img src=""images/del.gif"" onmouseover=""deltov.src='images/Ondel.gif'"" onmouseout=""deltov.src='images/del.gif'""  id=""deltov"" name=""deltov"" alt=""Удалить товар"" onclick=""DelTovar()"" style="""">"
+	Write !
+%csp00004	;}
+	Write !,"  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;",!
+	Write "  "
+	Write "<span title=""Обновление таблицы после каждого сохранения товара (если отключить, то редактировать товары можно будет быстрее)"">"
+	Write !,"  	Поддерживать таблицу в актуальном состоянии",!
+	Write "  	"
+	Write "<input type=checkbox id=""makeShowDict"" checked style=""width:20pt;border:none;"">"
+	Write !,"  "
+	Write "</span>"
+	Write !,"  </td></tr></table>",!
+	Write "</fieldset></td>",!
+	Write "</tr>",!
+	Write "</TABLE>",!
+	Write "</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !,!
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,!,"<script language=""jscript"" src=""common.js"">"
+	Write "</script>"
+	Write !,"<script language=""jscript"">"
+	Write !,"var depot="""_($G(%session.Data("depot")))_"""",!
+	Write "var commongroups="""_($G(%session.Data("commongroups")))_"""",!
+	Write "var sessionid="""_(%session.SessionId)_""";",!
+	Write "var SelectedGroupCode="""";",!
+	Write "var GoodsListView=""LV"";  //id элемента ListView с товарами",!
+	Write "var ColCode="""";",!
+	Write "var where="""";",!
+	Write "function onload(){",!
+	Write "//при загрузке заполнить комбобокс Каталогов",!
+	Write "LV.AllowColumnReorder=true;",!
+	Write "downloader.startDownload(strForGroups(depot,commongroups), putCatalogue);",!
+	Write "LoadList1();",!
+	Write "document.getElementById(GoodsListView).attachEvent(""ItemClick"",LVItemClick);",!
+	Write "GroupsTree.onClick=""Click()"";",!
+	Write "LV.attachEvent(""DblClick"",OpenCard);",!
+	Write "LV.attachEvent(""ColumnClick"",colclick);",!
+	Write "LV.attachEvent(""KeyPress"",KeyPress);",!
+	Write !,"LV.Sorted =false;",!
+	Write "}",!
+	Write !,"function putCatalogue(text){",!
+	Write "addOptions(text,""Catalogues"");",!
+	Write "LoadTree();",!
+	Write "}",!
+	Write !,"function LoadTree(){",!
+	Write "GroupsTree.DownLoad('Data.csp?class=Goods.Group&fields=Parent,Code,Name,ID&params=""'+"_(%session.Data("depot"))_"+'"",""'+Catalogues.value+'""')	",!
+	Write "}",!
+	Write !,"//Показать товары в ListView",!
+	Write "function ShowTovars(where1){",!
+	Write "if(!makeShowDict.checked)return",!
+	Write "LV.Sorted =false;",!
+	Write !,"//wind=window.open(""wait.csp"",""null"",""height=100,width=200,toolbar=no,menubar=no,location=no,titlebar=no"")",!
+	Write "fields=ShowColHeads(GoodsListView,""Goods->"")",!
+	Write "where=""Groups='""+GroupsTree.NodeID+""'"";",!
+	Write "if(ReturnSpace(where1)!="""")where=where+"" and ""+where1",!
+	Write "LV.startDownload('Data.csp?class=Goods.GoodsGroup&fields=Goods->ID,'+fields+""&where=""+where, ShowTovars1);",!
+	Write "}",!
+	Write "function ShowTovars1(text){",!
+	Write "ListViewAddItems(GoodsListView,text);",!
+	Write "LoadPropTree();",!
+	Write "//wind.close();",!
+	Write "}",!
+	Write !,"//Обработка клика на ListView",!
+	Write "function LVItemClick(Item){",!
+	Write "LoadPropTree();",!
+	Write "}",!
+	Write !,"//Обработка клика на узле дерева товарных групп",!
+	Write "function Click(){",!
+	Write "ShowTovars();",!
+	Write "}",!
+	Write !,"//Загрузка колонок ListView",!
+	Write "function LoadList1(){",!
+	Write "downloader.startDownload('ListData.csp', LoadList);",!
+	Write "}",!
+	Write !,"function LoadList(text){",!
+	Write "LVAddColumns(text,GoodsListView);",!
+	Write "ShowTovars();",!
+	Write "}",!
+	Write !,"//Заполнить дерево дополнительных свойств товара",!
+	Write "function LoadPropTree(){",!
+	Write "TovarName.innerText=SelectedItemProperty(GoodsListView,'Text')",!
+	Write "Goods=SelectedItemProperty(GoodsListView,'Tag')",!
+	Write "Group=GroupsTree.NodeCode;",!
+	Write "LoadPropTree2(""PropsTree"",Goods,Group,Catalogues.value)",!
+	Write "}",!
+	Write !,"//Добавить группу",!
+	Write "function addGroup(Sub){",!
+	Write "//Sub=1 означает что желаем создать подгруппу",!
+	Write "Code=GroupsTree.NodeCode;",!
+	Write "if(Code==""""&Sub==1){alert(""Не выбрана группа для создания подгруппы"");return}",!
+	Write "Catalogue=Catalogues.value;",!
+	Write "Name=window.showModalDialog(""AddGoodsProp.csp"",""Наименование группы"",""center:yes;status:no;dialogHeight:200px"")",!
+	Write "if(Name==null)return false;",!
+	Write "ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Goods.GroupAction.createGroup:csp.goods"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',Catalogue,Name,Code,Sub)",!
+	Write "if (!isNaN(ok)){LoadTree();}",!
+	Write "else {alert(ok);}",!
+	Write "}",!
+	Write !,"//Удалить группу",!
+	Write "function delGroup(){",!
+	Write "Code=GroupsTree.NodeCode;",!
+	Write "if(Code==""""){alert(""Не выбрана группа"");return false;}",!
+	Write "GroupId=GroupsTree.NodeID;",!
+	Write "ok=window.confirm(""Удалить группу ?"")",!
+	Write "if(ok==false)return false;",!
+	Write "ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Goods.GroupAction.DelGroup:csp.goods"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',Catalogues.value,Code,GroupId)",!
+	Write "if (ok!=1){alert(ok);return false;}",!
+	Write "LoadTree();",!
+	Write "}",!
+	Write !,"//Добавить свойство к дереву дополнительных свойств",!
+	Write "function AddProp(Sub){",!
+	Write "PropName=window.showModalDialog(""AddGoodsProp.csp"",""Наименование свойства"",""cener:yes;status:no;dialogHeight:200px"")",!
+	Write "if(PropName==null)return false;",!
+	Write "Code=PropsTree.NodeCode;",!
+	Write "if((Sub==1)&(Code=="""")){alert(""Не указано свойство-родитель"");return false;}",!
+	Write "  if(window.confirm(""Общее свойство"")){GroupCode=""""}",!
+	Write "  else{",!
+	Write "     GroupCode=GroupsTree.NodeCode;",!
+	Write "     if(GroupCode==""""){alert(""Не выбрана группа"");return false;}",!
+	Write "  }",!
+	Write "ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Goods.GoodsAction.CreateProp:csp.goods"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',Catalogues.value,GroupCode,PropName,Code,Sub)",!
+	Write "if (ok==1){LoadPropTree();}",!
+	Write "else {alert(ok);}",!
+	Write "}",!
+	Write !,"//Удалить дополнительное свойство",!
+	Write "function DelDopProp(){",!
+	Write "	ParamID=PropsTree.NodeID;",!
+	Write "	if(ParamID=="""")return false;",!
+	Write "	if(!window.confirm(""Внимание!\nУдаление свойства приведёт к потере данных хранящихся в этом свойстве у ВСЕХ товаров склада "_(%session.Data("depotName"))_". \nВы хотите удалить?""))return false;",!
+	Write "	ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Goods.GoodsAction.DeleteGoodsParam:csp.goods"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',ParamID)",!
+	Write "	if (ok==1){LoadPropTree();}",!
+	Write "	else {alert(ok);}",!
+	Write "}",!
+	Write !,"//Создать основное свойство",!
+	Write "function AddProp2(){",!
+	Write "ok=window.showModalDialog(""AddGoodsProp2.csp"","""",""cener:yes;status:no;dialogHeight:300px;resizable:yes"")",!
+	Write "if(ok==1){LoadList1();return false;}",!
+	Write "if(ok==null){return false;}",!
+	Write "alert(ok)",!
+	Write "}",!
+	Write !,"//Удалить основное свойство",!
+	Write "function DelProp(){",!
+	Write "ok=window.showModalDialog(""DelGoodsProp.csp"","""",""cener:yes;status:no;dialogHeight:350px;dialogWidth:300px;resizable:yes"")",!
+	Write "if(ok==1){LoadList1();return false;}",!
+	Write "if(ok==null){return false;}",!
+	Write "alert(ok)",!
+	Write "}",!
+	Write !,"//Добавить товар",!
+	Write "function addTovar(Goods,CspFile){",!
+	Write "Goods=ReturnSpace(Goods);",!
+	Write "GroupId=GroupsTree.NodeID;",!
+	Write "if(GroupId==""""){alert(""Не выбрана группа"");return false;}",!
+	Write "GroupCode=GroupsTree.NodeCode;",!
+	Write "Name=GroupsTree.NodeCaption;",!
+	Write "var dialogHeight=600;",!
+	Write "if(ReturnSpace(Goods)=="""")",!
+	Write "	{",!
+	Write "	if(window.confirm(""Использовать новую форму?"")){var CspFile=""GoodCard.csp?GroupId=""+GroupId;}",!
+	Write "	else{var CspFile=""AddTovar.csp""}",!
+	Write "	}",!
+	Write "if(CspFile.substr(0,12)==""GoodCard.csp"")var dialogHeight=300;",!
+	Write "ok=window.showModalDialog(CspFile,Catalogues.value+InnerSplitter+GroupId+InnerSplitter+GroupCode+InnerSplitter+Goods+InnerSplitter+Name,""center:yes;status:no;dialogHeight:""+dialogHeight+""px;dialogWidth:800px;resizable:yes"")",!
+	Write "if(ok==1){ShowTovars()}",!
+	Write "}",!
+	Write !,"//Удалить товар",!
+	Write "function DelTovar(){",!
+	Write "GoodsId=SelectedItemProperty(GoodsListView,""Tag"")",!
+	Write "if(GoodsId==""""){alert(""Не выбран товар"");return false;}",!
+	Write "if(!window.confirm(""Удалить ""+document.getElementById(GoodsListView).SelectedItem+""?""))return false;",!
+	Write "ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Goods.GoodsAction.DeleteGoods:csp.goods"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',GoodsId)",!
+	Write "if(ok==1){ShowTovars()}",!
+	Write "else{alert(ok)}",!
+	Write "}",!
+	Write !,"//Редактировать товар",!
+	Write "function editTovar(){",!
+	Write "GoodsId=SelectedItemProperty(GoodsListView,'Tag');",!
+	Write "addTovar(GoodsId,""AddTovar.csp"");",!
+	Write "}",!
+	Write !,"//Редактировать товар в новой форме",!
+	Write "function editTovar2(){",!
+	Write "var GoodsId=SelectedItemProperty(GoodsListView,'Tag');",!
+	Write "addTovar(GoodsId,""GoodCard.csp?GoodId=""+GoodsId);",!
+	Write "}",!
+	Write !,!,"//Открыть карточку товара",!
+	Write "function OpenCard(){",!
+	Write "GoodsId=SelectedItemProperty(GoodsListView,""Tag"");",!
+	Write "GoodsName=SelectedItemProperty(GoodsListView,'Text');",!
+	Write "if(GoodsId=="""")return",!
+	Write "ok=window.showModalDialog(""GoodsCard.csp?GoodsId=""+GoodsId+""&groupspath=""+GroupsTree.ParentNames,GoodsId+InnerSplitter+GoodsName,""center:yes;status:no;dialogHeight:600px;dialogWidth:650px;resizable:yes"")",!
+	Write "if(ok==1){ShowTovars()}",!
+	Write "}",!
+	Write !,"function gg(){",!
+	Write "if(ColCode=="""")return false;",!
+	Write "var where = ColCode+"" %STARTSWITH '""+fldval.value+""'"";",!
+	Write "if(fldval.value=="""")where="""";",!
+	Write "ShowTovars(where);",!
+	Write "}",!
+	Write !,"function colclick(qq){",!
+	Write "	namfld.innerText=qq.Text;",!
+	Write "	ColCode=""Goods->""+qq.Key;",!
+	Write "	if(LV.SortOrder==0){LV.SortOrder=1;}",!
+	Write "	else{LV.SortOrder=0;}",!
+	Write "	LV.SortKey = qq.Index - 1;",!
+	Write "	LV.Sorted =true;",!
+	Write !,"}",!
+	Write !,"function cuttov(){",!
+	Write "var tovs=getselected();",!
+	Write "//alert(tovs)",!
+	Write "if(tovs==""""){alert(""Ничего не выбрано"");return false;}",!
+	Write "ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Goods.CardAction.SaveCard2:csp.goods"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"','"_(%session.Data("user"))_"',tovs,""Goods.Goods"")",!
+	Write "if(isNaN(ok))alert(ok);",!
+	Write "else(alert(""Выбранные товары помечены для перемещения""))",!
+	Write "}",!
+	Write !,"function pastetov(){",!
+	Write "if(!window.confirm(""Вставить товары из буфера в группу ""+GroupsTree.NodeCaption+""?""))return false;",!
+	Write "ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Goods.GoodsAction.FromCardInGroup:csp.goods"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"','"_(%session.Data("user"))_"',GroupsTree.NodeID)",!
+	Write "if(isNaN(ok)){alert(ok)}",!
+	Write "else{ShowTovars();}",!
+	Write "}",!
+	Write !,"function getselected(){",!
+	Write "textString=""""",!
+	Write "count=LV.ListItems.Count;",!
+	Write "	for (i = 1; i <= count; i++){",!
+	Write "	string = """";",!
+	Write "	if(LV.ListItems.Item(i).selected){",!
+	Write "	string=LV.ListItems.Item(i).Tag;",!
+	Write "	textString=textString+string+InnerSplitter;",!
+	Write "}}",!
+	Write "return textString;",!
+	Write "}",!
+	Write !,"//открыть окно с товарами в буфере обмена",!
+	Write "function tovbuf(){",!
+	Write "window.showModalDialog(""tovbuf.csp"","""",""center:yes;status:no;dialogHeight:430px;dialogWidth:700px;resizable:yes"")",!
+	Write "}",!
+	Write !,"//Открыть окно с ценами товара",!
+	Write "function tovprice(){",!
+	Write "var goodsid=SelectedItemProperty(GoodsListView,""Tag"");",!
+	Write "if(goodsid=="""")return",!
+	Write "window.showModalDialog(""tovprice.csp?goodsid=""+goodsid,"""",""center:yes;status:no;dialogHeight:520px;dialogWidth:700px;resizable:yes"")",!
+	Write "}",!
+	Write !,"//очистить группу",!
+	Write "function cleargrup(){",!
+	Write "if(window.confirm(""Вы уверены?"")){",!
+	Write "	var GroupId=GroupsTree.NodeID;",!
+	Write "	var ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Goods.GoodsAction.cleargrup:csp.goods"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',GroupId);",!
+	Write "	if(isNaN(ok)){alert(ok);}",!
+	Write "	else{ShowTovars();}",!
+	Write "}",!
+	Write "}",!
+	Write " ",!
+	Write "//вставить в группу все бесхозные товары",!
+	Write "function fillgrup(){",!
+	Write "	var GroupId=GroupsTree.NodeID;",!
+	Write "	var ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Goods.GoodsAction.fillgrup:csp.goods"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',GroupId);",!
+	Write "	if(isNaN(ok)){alert(ok);}",!
+	Write "	else{ShowTovars();}	",!
+	Write "}",!
+	Write !,"// распечатать прайслист",!
+	Write "function PrintPriceFunc(Suffix){",!
+	Write "	var GroupCode=GroupsTree.NodeCode;",!
+	Write "	if(GroupCode==""""){alert(""Выберете пожалуйста товарную группу"");return;}",!
+	Write "	var CatalogueID=Catalogues.value;",!
+	Write "	var GroupName=GroupsTree.NodeCaption;",!
+	Write "	var url = ""pricelist""+Suffix+"".csp?GroupCode=""+GroupCode+""&CatalogueID=""+CatalogueID+""&GroupName=""+GroupName+""&sessionid=""+sessionid;",!
+	Write "	window.open(url);",!
+	Write "}",!
+	Write !,"function EditGroupNameFn()",!
+	Write "{",!
+	Write "	var GroupId=GroupsTree.NodeID;",!
+	Write "	var GroupCode=GroupsTree.NodeCode;",!
+	Write "	if(GroupCode==""""){alert(""Выберете пожалуйста товарную группу"");return;}",!
+	Write "	var NewName=window.prompt(""Введите новое название группы"",GroupsTree.NodeCaption);",!
+	Write "	if(!NewName)return;",!
+	Write "	if(NewName==""""){alert(""Пустные имена группа не допустимы."");return false;}",!
+	Write "	var ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Goods.GroupAction.RenameGroup:csp.goods"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',GroupId,NewName)",!
+	Write "	if(isNaN(ok)){alert(ok)}",!
+	Write "	else{LoadTree();SelectedGroupCode=GroupCode;}",!
+	Write "}",!
+	Write !,"// функция после полной загрузки дерева товарных групп",!
+	Write "function GroupsTreeDnldCmpl()",!
+	Write "{",!
+	Write "	GroupsTree.SelectedItem=SelectedGroupCode;",!
+	Write "}",!
+	Write !,"/// Вывести остатки",!
+	Write "function PrintStorageFn()",!
+	Write "{",!
+	Write "	var GroupCode=GroupsTree.NodeCode;",!
+	Write "	if(GroupCode==""""){alert(""Выберете пожалуйста товарную группу"");return;}",!
+	Write "	var CatalogueID=Catalogues.value;",!
+	Write "	var GroupName=GroupsTree.NodeCaption;",!
+	Write "	window.open(""screen/OstatkiExcel.csp?excel=1&GroupCode=""+GroupCode+""&CatalogueID=""+CatalogueID+""&GroupName=""+GroupName)	",!
+	Write "}",!
+	Write !,"function KeyPress(Obj){",!
+	Write "var KeyCode=Obj.toString();",!
+	Write "if(KeyCode==17)editTovar2();",!
+	Write "}",!
+	Write !,"function fnMuiltipleEdit(){",!
+	Write "var ok=window.showModalDialog(""GoodsListEdit.csp?Where=""+where,"""",""center:yes;status:no;dialogHeight:650px;dialogWidth:1000px;resizable:yes;"")",!
+	Write "if(ok!=null)ShowTovars();",!
+	Write "}",!
+	Write !,"function fnFindGood(){",!
+	Write "var ok=window.showModalDialog(""FindGood.csp"","""",""center:yes;status:no;dialogHeight:650px;dialogWidth:800px;resizable:yes;"")",!
+	Write "}",!
+	Write !,"</script>"
+	Write !,(..HyperEventHead())
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html XMLNS:SKLADz XMLNS:SKLAD2>"
+	Write !,"<IMPORT NAMESPACE=""SKLADz"" IMPLEMENTATION=""htc/treeview.htc"">",!
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+  s login=$G(%session.Data("user"))
+  i '+login s %response.ServerSideRedirect="norights.csp" 
+  i '##class(Common.Rights).getrights(login,1) s %response.ServerSideRedirect="norights.csp" 
+  s Access9func=##class(Common.Rights).getrights(login,9)
+  s GoodsGoodsVersion = ##class(Common.Common).GetCurrentDictVersion("Goods.Goods")
+  q 1
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\goods.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/goods.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>62180,64478</Default>
+</Parameter>
+</Class>
+</Export>

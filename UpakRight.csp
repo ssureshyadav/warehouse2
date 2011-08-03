@@ -1,0 +1,192 @@
+<html XMLNS:IE XMLNS:SKLADz>
+<IMPORT NAMESPACE="SKLADz" IMPLEMENTATION="htc/treeview.htc">
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+
+<script language="jscript" src="common.js"></script>
+<script language="jscript">
+//var GoodsPropertyTree="trViewProp"; // В этой переменной лежит id элемента TreeView с дополнительными характеристиками товара
+var GoodsListView="LV";  //id элемента ListView с товарами
+function onload(){
+//при загрузке заполнить комбобокс Каталогов
+downloader.startDownload('Data.csp?class=Goods.Catalogue&fields=ID,Name', putCatalogue);
+LoadList1();
+document.getElementById(GoodsListView).attachEvent("ItemClick",LVItemClick);
+
+GroupsTree.onClick="Click()";
+document.getElementById(GoodsListView).LabelEdit=1;
+}
+function putCatalogue(text){
+addOptions(text,"Catalogues");
+GroupsTree.DownLoad('Data.csp?class=Goods.Group&fields=Parent,Code,Name,ID&params="'+#(%session.Data("depot"))#+'","'+Catalogues.value+'"')
+//LoadTree();
+}
+
+//Показать товары в ListView
+function ShowTovars(){
+fields=ShowColHeads(GoodsListView,"Goods->")
+GoodsDownloader.startDownload('Data.csp?class=Goods.GoodsGroup&fields=Goods->ID,'+fields+"&where=Groups="+GroupsTree.ID, ShowTovars1);
+}
+function ShowTovars1(text){
+ListViewAddItems(GoodsListView,text);
+}
+
+//Обработка клика на ListView
+function LVItemClick(Item){TovarName.innerText=Item;
+LoadPropTree();
+}
+
+
+//Обработка клика на узле дерева товарных групп
+function Click(){
+TovarName.innerText="";
+ShowTovars();
+LoadPropTree();
+}
+
+//Загрузка колонок ListView
+function LoadList1(){
+downloader.startDownload('ListData.csp', LoadList);
+}
+function LoadList(text){
+LVAddColumns(text,GoodsListView);
+}
+
+//Заполнить дерево дополнительных свойств товара
+function LoadPropTree(){
+Goods=SelectedItemProperty(GoodsListView,'Tag')
+Group=GroupsTree.Code
+LoadPropTree2(Goods,Group,Catalogues.value)
+}
+
+
+function LoadPropTree2(Goods,Group,Catalogue){
+PropsTree.DownLoad('GoodsParams.csp?class=Goods.Params&fields=Parent,Code,Name,ID&Goods='+Goods+'&Groups='+Group+'&Catalogue='+Catalogue)
+}
+
+
+
+
+//Добавить группу
+function addGroup(Sub){
+//Sub=1 означает что желаем создать подгруппу
+Catalogue=Catalogues.value;
+Name=window.showModalDialog("AddGoodsProp.csp","Наименование группы","cener:yes;status:no;dialogHeight:200px")
+if(Name==null)return false;
+Code=SelectedItemProperty('trView','Key')
+ok=#server(Goods.GroupAction.createGroup(Catalogue,Name,Code,Sub))#
+if (ok==1){LoadTree();}
+else {alert(ok);}
+}
+
+//Удалить группу
+function delGroup(){
+Code=SelectedItemProperty('trView','Key')
+if(Code==""){alert("Не выбрана группа");return false;}
+GroupId=SelectedItemProperty('trView','Tag')
+ok=window.confirm("Удалить группу "+trView.SelectedItem+" ?")
+if(ok==false)return false;
+ok=#server(Goods.GroupAction.DelGroup(Catalogues.value,Code,GroupId))#
+if (ok!=1){alert(ok);return false;}
+LoadTree();
+}
+
+//Добавить товар
+function addTovar(){
+GroupId=SelectedItemProperty("trView","Tag");
+GroupCode=SelectedItemProperty("trView","Key");
+if(Group==""){alert("Не выбрана группа");return false;}
+ok=window.showModalDialog("addTovar.csp",Catalogues.value+InnerSplitter+GroupId+InnerSplitter+GroupCode,"cener:yes;status:no;dialogHeight:400px;dialogWidth:600px;resizable:yes")
+if(ok==1){ShowTovars()}
+}
+
+//Добавить свойство к дереву дополнительных свойств
+function AddProp(Sub){
+PropName=window.showModalDialog("AddGoodsProp.csp","Наименование свойства","cener:yes;status:no;dialogHeight:200px")
+Codez=SelectedItemProperty(GoodsPropertyTree,'Key')
+if((Sub==1)&(Code="")){alert("Не указано свойство-родитель");return false;}
+if(PropName==null)return false;
+  if(window.confirm("Общее свойство")){Group=""}
+  else{
+     Group=SelectedItemProperty("trView","Key");
+     if(Group==""){alert("Не выбрана группа");return false;}
+  }
+ok=#server(Goods.GoodsAction.CreateProp(Catalogues.value,Group,PropName,Codez,Sub))#
+if (ok==1){LoadPropTree();}
+else {alert(ok);}
+}
+
+//Добавить свойство к основным свойствам
+function AddProp2(){
+ok=window.showModalDialog("AddGoodsProp2.csp","","cener:yes;status:no;dialogHeight:200px;resizable:yes")
+if(ok==1){LoadList1();return false;}
+if(ok==null){return false;}
+alert(ok)
+}
+
+//Удалить товар
+function DelTovar(){
+GoodsId=SelectedItemProperty(GoodsListView,"Tag")
+if(GoodsId==""){alert("Не выбран товар");return false;}
+if(!window.confirm("Удалить "+document.getElementById(GoodsListView).SelectedItem+"?"))return false;
+ok=#server(Goods.GoodsAction.DeleteGoods(GoodsId))#
+if(ok==1){ShowTovars()}
+else{alert(ok)}
+}
+
+//Сохранить значение данного свойства данного товара
+function SaveGoodsValue(GoodsId,Value,Param){
+if(GoodsId==""){alert("Не указан товар");return false;}
+if(Value==""){alert("Не указано значение свойства");return false;}
+if(Param==""){alert("Не указано свойство");return false;}
+ok=#server(Goods.GoodsAction.SaveGoodsParams(GoodsId,Value,Param))#
+if(ok!=1){alert(ok);}
+}
+</script>
+</head>
+<body onload="onload()">
+
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+ <TD style="BACKGROUND: rgb(233,243,255); FONT: bold 18px Tahoma; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=2>&nbsp;&nbsp;&nbsp;Товары</TD></tr><tr>
+ <td valign=top width=50%>
+  Классификатор:
+  <select id="Catalogues" onchange="LoadTree()"></select><br>
+  <SKLADz:treeview id="GroupsTree" width=200 height=200 >
+  <br><img src="images/new.gif">
+  <sklad:LittleButton name="new" id="newgrup" onclick="addGroup(0)" alt="Новая группа">
+  <sklad:LittleButton name="new+" id="newSubgrup" onclick="addGroup(1)" alt="Новая подгруппа">
+  <sklad:LittleButton name="del" id="delgrup" onclick="delGroup()" alt="Удалить группу"><br>
+ </td>
+ <td valign=top width=50%>
+  <fieldset style="width:200pt;height:200pt;"><legend id="TovarName"></legend>
+  <SKLADz:treeview id="PropsTree" width=200 height=200 ShowImages=0 >
+  <!--
+  <sklad:TreeView id="trViewProp" style="width:200pt;height:200pt;border:none;">
+  -->
+  </fieldset>
+  <br>
+  <sklad:LittleButton name="new" id="newprop" onclick="AddProp(0)" alt="Новое свойство">
+  <sklad:LittleButton name="new+" id="newSubprop" onclick="AddProp(1)" alt="Новое свойство в существующей группе">
+  <sklad:LittleButton name="del" id="delprop" onclick="demo()" alt="Удалить свойство">
+ </td>
+</tr>
+<tr>
+ <td colspan=2>
+   <fieldset style=""><legend>Товары</legend>
+  <sklad:ListView id="LV" style="width:100%;height:200;font:regular Arial 10" >
+  <br>
+  <sklad:LittleButton name="new" id="newtov" onclick="addTovar()" alt="Новый товар">
+  <sklad:LittleButton name="new+" id="newGprop" onclick="AddProp2()" alt="Новое основное свойство">
+  <sklad:LittleButton name="del+" id="delGprop" onclick="demo()" alt="Удалить основное свойство">
+  <sklad:LittleButton name="del" id="deltov" onclick="DelTovar()" alt="Удалить товар">
+</fieldset><br><br>
+
+ </td>
+</tr>
+</TABLE>
+<IE:DOWNLOAD id="downloader" STYLE="behavior:url(#default#download)" />
+<IE:DOWNLOAD id="GoodsDownloader" STYLE="behavior:url(#default#download)" />
+<sklad:ImageList id="imgList">
+</body>
+</html>

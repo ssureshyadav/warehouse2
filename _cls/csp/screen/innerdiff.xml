@@ -1,0 +1,407 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.screen.innerdiff">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62012,83239.153737</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body lang=RU style='tab-interval:35.4pt'>"
+	Write !,!,"<div class=Section1>"
+	Write !,!,"<p class=MsoNormal align=center style='text-align:center'>"
+	Write "<span style='font-size:16.0pt;font-family:Arial'>"
+	Write "Внутренний акт расхождения № "_($G(numb))
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<p class=MsoNormal>"
+	Write "<span style='font-family:Arial'>"
+	Write "<o:p>&nbsp;</o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<table class=MsoTableGrid border=0 cellspacing=0 cellpadding=0",!
+	Write " style='border-collapse:collapse;mso-yfti-tbllook:480;mso-padding-alt:0cm 5.4pt 0cm 5.4pt'>",!
+	Write " <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>",!
+	Write "  <td width=103 valign=top style='width:77.4pt;padding:0cm 5.4pt 0cm 5.4pt'>",!
+	Write "  <p class=MsoNormal>"
+	Write "<span style='font-family:Arial'>"
+	Write "Дата<o:p></o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write "  </td>",!
+	Write "  <td width=554 valign=top style='width:415.3pt;padding:0cm 5.4pt 0cm 5.4pt'>",!
+	Write "  <p class=MsoNormal><b style='mso-bidi-font-weight:normal'>"
+	Write "<span lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'>"
+	Write ($G(dat))_" "_($G(tim))
+	Write "</span>"
+	Write "</b></p>",!
+	Write "  </td>",!
+	Write " </tr>",!
+	Write " <tr style='mso-yfti-irow:1'>",!
+	Write "  <td width=103 valign=top style='width:77.4pt;padding:0cm 5.4pt 0cm 5.4pt'>",!
+	Write "  <p class=MsoNormal>"
+	Write "<span style='font-family:Arial'>"
+	Write "Грузчик<o:p></o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write "  </td>",!
+	Write "  <td width=554 valign=top style='width:415.3pt;padding:0cm 5.4pt 0cm 5.4pt'>",!
+	Write "  <p class=MsoNormal><b style='mso-bidi-font-weight:normal'>"
+	Write "<span lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'>"
+	Write ($G(storeman))
+	Write "</span>"
+	Write "</b><b",!
+	Write "  style='mso-bidi-font-weight:normal'>"
+	Write "<span style='font-family:Arial'>"
+	Write "<o:p></o:p>"
+	Write "</span>"
+	Write "</b></p>",!
+	Write "  </td>",!
+	Write " </tr>",!
+	Write " <tr style='mso-yfti-irow:2;mso-yfti-lastrow:yes'>",!
+	Write "  <td width=103 valign=top style='width:77.4pt;padding:0cm 5.4pt 0cm 5.4pt'>",!
+	Write "  <p class=MsoNormal>"
+	Write "<span style='font-family:Arial'>"
+	Write "Выписал<o:p></o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write "  </td>",!
+	Write "  <td width=554 valign=top style='width:415.3pt;padding:0cm 5.4pt 0cm 5.4pt'>",!
+	Write "  <p class=MsoNormal><b style='mso-bidi-font-weight:normal'>"
+	Write "<span lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'>"
+	Write ($G(user1))
+	Write "</span>"
+	Write "</b><b",!
+	Write "  style='mso-bidi-font-weight:normal'>"
+	Write "<span style='font-family:Arial'>"
+	Write "<o:p></o:p>"
+	Write "</span>"
+	Write "</b></p>",!
+	Write "  </td>",!
+	Write " </tr>",!
+	Write "</table>",!
+	Write !,"<p class=MsoNormal>"
+	Write "<span lang=EN-US style='font-family:Arial;mso-ansi-language:"_$c(13,10)_"EN-US'>"
+	Write "<o:p>&nbsp;</o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0",!
+	Write " style='border-collapse:collapse;border:none;mso-border-alt:solid windowtext .5pt;",!
+	Write " mso-yfti-tbllook:480;mso-padding-alt:0cm 5.4pt 0cm 5.4pt;mso-border-insideh:",!
+	Write " .5pt solid windowtext;mso-border-insidev:.5pt solid windowtext'>",!
+	Write " <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>",!
+	Write "  <td width=36 valign=top style='width:27.15pt;border:solid windowtext 1.0pt;mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>",!
+	Write "  <p class=MsoNormal>"
+	Write "<span style='font-family:Arial'>"
+	Write "№<o:p></o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write "  <p class=MsoNormal>"
+	Write "<span class=GramE>"
+	Write "п"
+	Write "</span>"
+	Write "<span lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'>"
+	Write "/"
+	Write "</span>"
+	Write "<span style='font-family:Arial'>"
+	Write "п<o:p></o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write "  </td>",!
+	Write "  <td width=255 valign=top style='width:191.45pt;border:solid windowtext 1.0pt;border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:",!
+	Write "  solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>",!
+	Write "  <p class=MsoNormal>"
+	Write "<span style='font-family:Arial'>"
+	Write "Товар<o:p></o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write "  </td>",!
+	Write "  <td width=122 valign=top style='width:91.35pt;border:solid windowtext 1.0pt;",!
+	Write "  border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:",!
+	Write "  solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>",!
+	Write "  <p class=MsoNormal>"
+	Write "<span style='font-family:Arial'>"
+	Write "Количество по документу<o:p></o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write "  </td>",!
+	Write "  <td width=122 valign=top style='width:91.35pt;border:solid windowtext 1.0pt;",!
+	Write "  border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:",!
+	Write "  solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>",!
+	Write "  <p class=MsoNormal>"
+	Write "<span style='font-family:Arial'>"
+	Write "Количество фактическое<o:p></o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write "  </td>",!
+	Write "  <td width=122 valign=top style='width:91.4pt;border:solid windowtext 1.0pt;",!
+	Write "  border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:",!
+	Write "  solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>",!
+	Write "  <p class=MsoNormal>"
+	Write "<span style='font-family:Arial'>"
+	Write "Расхождение количества<o:p></o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write "  </td>",!
+	Write " </tr>",!
+	d:$ISOBJECT(obj.Items)
+	. s tot=0,totquant=0
+	. s i="" f  s i=obj.Items.Next(i) q:i=""  d
+	.. s item=obj.Items.GetAt(i)
+	.. i $i(number)
+	.. s kol=item.quantdefault
+	.. s kolfact=item.quantreal
+	.. s diff=kol-kolfact
+	.. s goods=$S($ISOBJECT(item.Goods):item.Goods.FullName,1:"")
+	.. w !,"<tr style='mso-yfti-irow:1;mso-yfti-lastrow:yes'>"
+	.. w !,"<td width=36 valign=top style='width:27.15pt;border:solid windowtext 1.0pt;border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>"
+	.. w !,"<p class=MsoNormal><span lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'><o:p>"_number_"</o:p></span></p>"
+	.. w !,"</td>"
+	.. w !,"<td width=255 valign=top style='width:191.45pt;border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>"
+	.. w !,"<p class=MsoNormal><span lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'>"_$G(goods)_"<o:p></o:p></span></p>"
+	.. w !,"</td>"
+	.. w !,"<td width=122 valign=top style='width:91.35pt;border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>"
+	.. w !,"<p class=MsoNormal><span lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'>"_$G(kol)_"<o:p></o:p></span></p>"
+	.. w !,"</td>"
+	.. w !,"<td width=122 valign=top style='width:91.35pt;border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>"
+	.. w !,"<p class=MsoNormal><span lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'>"_$G(kolfact)_"<o:p></o:p></span></p>"
+	.. w !,"</td>"
+	.. w !,"<td width=122 valign=top style='width:91.4pt;border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>"
+	.. w !,"<p class=MsoNormal><span lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'>"_$G(diff)_"<o:p></o:p></span></p>"
+	.. w !,"</td>"
+	.. w !,"</tr>"
+	Write !,"</table>",!
+	Write !,"<p class=MsoNormal>"
+	Write "<span style='font-family:Arial'>"
+	Write "<o:p>&nbsp;</o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<p class=MsoNormal>"
+	Write "<span style='font-family:Arial'>"
+	Write "Собрал _______________ "
+	Write "</span>"
+	Write "<span lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'>"
+	Write ($G(storeman))
+	Write "</span>"
+	Write "<span style='font-family:Arial'>"
+	Write "<o:p></o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"</div>"
+	Write !,!,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !
+	s id=%request.Get("id")
+	s class=%request.Get("class")
+	s obj=$ZOBJCLASSMETHOD(class,"%OpenId",id)
+	d:$ISOBJECT(obj)
+	. s mn(1)="января",mn(2)="февраля",mn(3)="марта",mn(4)="апреля",mn(5)="мая",mn(6)="июня",mn(7)="июля",mn(8)="августа",mn(9)="сентября",mn(10)="октября",mn(11)="ноября",mn(12)="декабря"
+	. s numb=obj.Name
+	. s dat=obj.Dat
+	. s tim=obj.Tim
+	. s:$ISOBJECT(obj.storeman) storeman=obj.storeman.Name
+	. s:$ISOBJECT(obj.User1) user1=obj.User1.Name
+	. s day=$P($ZD(dat,4),"/",1)
+	. s month=$G(mn(+$P($ZD(dat,4),"/",2)))
+	. s year=$P($ZD(dat,4),"/",3)
+	. s dat=day_" "_month_" "_year_" г."
+	. s tim=$ZT(obj.Tim)
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<meta http-equiv=Content-Type content=""text/html; charset=windows-1251"">"
+	Write !,"<meta name=ProgId content=Word.Document>"
+	Write !,"<meta name=Generator content=""Microsoft Word 11"">"
+	Write !,"<meta name=Originator content=""Microsoft Word 11"">"
+	Write !,"<link rel=File-List href=""InnerDiff.files/filelist.xml"">"
+	Write !,"<title>Внутренний акт расхождения № "_($G(numb))_"</title>",!
+	Write "<!--[if gte mso 9]><xml>",!
+	Write " <o:DocumentProperties>",!
+	Write "  <o:Author>NB-FUJ</o:Author>",!
+	Write "  <o:LastAuthor>Артем</o:LastAuthor>",!
+	Write "  <o:Revision>2</o:Revision>",!
+	Write "  <o:TotalTime>5</o:TotalTime>",!
+	Write "  <o:Created>2007-04-28T17:18:00Z</o:Created>",!
+	Write "  <o:LastSaved>2007-04-28T17:18:00Z</o:LastSaved>",!
+	Write "  <o:Pages>1</o:Pages>",!
+	Write "  <o:Words>43</o:Words>",!
+	Write "  <o:Characters>248</o:Characters>",!
+	Write "  <o:Company>IBT</o:Company>",!
+	Write "  <o:Lines>2</o:Lines>",!
+	Write "  <o:Paragraphs>1</o:Paragraphs>",!
+	Write "  <o:CharactersWithSpaces>290</o:CharactersWithSpaces>",!
+	Write "  <o:Version>11.6360</o:Version>",!
+	Write " </o:DocumentProperties>",!
+	Write "</xml><![endif]-->"
+	Write "<!--[if gte mso 9]><xml>",!
+	Write " <w:WordDocument>",!
+	Write "  <w:GrammarState>Clean</w:GrammarState>",!
+	Write "  <w:PunctuationKerning/>",!
+	Write "  <w:ValidateAgainstSchemas/>",!
+	Write "  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>",!
+	Write "  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>",!
+	Write "  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>",!
+	Write "  <w:Compatibility>",!
+	Write "   <w:BreakWrappedTables/>",!
+	Write "   <w:SnapToGridInCell/>",!
+	Write "   <w:WrapTextWithPunct/>",!
+	Write "   <w:UseAsianBreakRules/>",!
+	Write "   <w:DontGrowAutofit/>",!
+	Write "  </w:Compatibility>",!
+	Write "  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>",!
+	Write " </w:WordDocument>",!
+	Write "</xml><![endif]-->"
+	Write "<!--[if gte mso 9]><xml>",!
+	Write " <w:LatentStyles DefLockedState=""false"" LatentStyleCount=""156"">",!
+	Write " </w:LatentStyles>",!
+	Write "</xml><![endif]-->"
+	Write !,"<style>"
+	Write !,"<!--",!
+	Write " /* Style Definitions */",!
+	Write " p.MsoNormal, li.MsoNormal, div.MsoNormal",!
+	Write "	{mso-style-parent:"""";",!
+	Write "	margin:0cm;",!
+	Write "	margin-bottom:.0001pt;",!
+	Write "	mso-pagination:widow-orphan;",!
+	Write "	font-size:12.0pt;",!
+	Write "	font-family:""Times New Roman"";",!
+	Write "	mso-fareast-font-family:""Times New Roman"";}",!
+	Write "span.GramE",!
+	Write "	{mso-style-name:"""";",!
+	Write "	mso-gram-e:yes;}",!
+	Write "@page Section1",!
+	Write "	{size:595.3pt 841.9pt;",!
+	Write "	margin:2.0cm 2.0cm 2.0cm 2.0cm;",!
+	Write "	mso-header-margin:35.45pt;",!
+	Write "	mso-footer-margin:35.45pt;",!
+	Write "	mso-paper-source:0;}",!
+	Write "div.Section1",!
+	Write "	{page:Section1;}",!
+	Write "-->"
+	Write !,"</style>"
+	Write !,"<!--[if gte mso 10]>",!
+	Write "<style>",!
+	Write " /* Style Definitions */",!
+	Write " table.MsoNormalTable",!
+	Write "	{mso-style-name:""Обычная таблица"";",!
+	Write "	mso-tstyle-rowband-size:0;",!
+	Write "	mso-tstyle-colband-size:0;",!
+	Write "	mso-style-noshow:yes;",!
+	Write "	mso-style-parent:"""";",!
+	Write "	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;",!
+	Write "	mso-para-margin:0cm;",!
+	Write "	mso-para-margin-bottom:.0001pt;",!
+	Write "	mso-pagination:widow-orphan;",!
+	Write "	font-size:10.0pt;",!
+	Write "	font-family:""Times New Roman"";",!
+	Write "	mso-ansi-language:#0400;",!
+	Write "	mso-fareast-language:#0400;",!
+	Write "	mso-bidi-language:#0400;}",!
+	Write "table.MsoTableGrid",!
+	Write "	{mso-style-name:""Сетка таблицы"";",!
+	Write "	mso-tstyle-rowband-size:0;",!
+	Write "	mso-tstyle-colband-size:0;",!
+	Write "	border:solid windowtext 1.0pt;",!
+	Write "	mso-border-alt:solid windowtext .5pt;",!
+	Write "	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;",!
+	Write "	mso-border-insideh:.5pt solid windowtext;",!
+	Write "	mso-border-insidev:.5pt solid windowtext;",!
+	Write "	mso-para-margin:0cm;",!
+	Write "	mso-para-margin-bottom:.0001pt;",!
+	Write "	mso-pagination:widow-orphan;",!
+	Write "	font-size:10.0pt;",!
+	Write "	font-family:""Times New Roman"";",!
+	Write "	mso-ansi-language:#0400;",!
+	Write "	mso-fareast-language:#0400;",!
+	Write "	mso-bidi-language:#0400;}",!
+	Write "</style>",!
+	Write "<![endif]-->"
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html xmlns:o=""urn:schemas-microsoft-com:office:office"" xmlns:w=""urn:schemas-microsoft-com:office:word"" xmlns=""http://www.w3.org/TR/REC-html40"">"
+	Write !,!
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,!,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ if %request.Get("word")="on"
+ {
+  set %response.ContentType = "application/msword"
+  do %response.SetHeader("Content-Disposition","attachment;word.doc")
+  set %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+ }
+  q 1
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CHARSET">
+<Default>windows-1251</Default>
+</Parameter>
+
+<Parameter name="CONTENTTYPE">
+<Default>text/html</Default>
+</Parameter>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\screen\InnerDiff.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/screen/InnerDiff.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>61612,41920</Default>
+</Parameter>
+</Class>
+</Export>

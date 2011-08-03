@@ -1,0 +1,581 @@
+ <script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ s login=$G(%session.Data("user"))
+ s ActRights = 1
+ //i '+login s %response.ServerSideRedirect="norights.csp" 
+ //i '##class(Common.Rights).getrights(login,3) s %response.ServerSideRedirect="norights.csp" 
+ //s ActRights = ##class(Common.Rights).getrights(login,12)
+ q 1
+</script>
+<script language="Cache" method="ShowDocItems" arguments="Class:%String,DocId:%String" returntype="%String">
+ n str,i,fields
+ s str=##class(Common.Common).showheaders(Class,,,1)
+ for i=1:1:$L(str,"#@#")
+ {
+	s header=$P(str,"#@#",i) 
+	s headerKey = $P(header,"~")
+	s fields=$G(fields)_headerKey_","
+ }
+ s fields=$E(fields,1,$L(fields)-2)
+
+ q str_$C(9)_##class(Common.Common).showdata(Class,fields,,"doc="_DocId,,1)
+</script>
+<script language="Cache" method="SaveLayout" arguments="TableName:%String,LayoutCol:%String,LayoutSort:%String">
+ q:TableName=""
+ s user=$G(%session.Data("user"),"undefined")
+ s ^Layout("Layout",user,TableName,"LayoutCol")=LayoutCol
+ s ^Layout("Layout",user,TableName,"LayoutSort")=LayoutSort
+ q
+</script>
+<script language="Cache" method="GetLayout" arguments="TableName:%String" returntype="%String">
+ 
+ if $ISOBJECT($G(%session)) s user=$G(%session.Data("user"),"undefined")
+ else  s user="undefined"
+ 
+ s ^mtempArt("TableName")=TableName
+ s ^mtempArt("user")=user
+ 
+ s LayoutCol =$G(^Layout("Layout",user,TableName,"LayoutCol"))
+ s LayoutSort=$G(^Layout("Layout",user,TableName,"LayoutSort"))
+ 
+ s ^mtempArt("layout")=LayoutCol_$C(9)_LayoutSort
+ q LayoutCol_$C(9)_LayoutSort
+</script>
+<html XMLNS:SKLADz XMLNS:SKLAD2 XMLNS:SKLADList XMLNS:SKLADiGrid>
+<IMPORT NAMESPACE="SKLADiGrid" IMPLEMENTATION="htc/iGridV8.htc">
+<IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
+<head>
+<title>#($G(%session.Data("systemname")))#</title>
+<link href="style.css" type=text/css rel=stylesheet>
+<style>
+.datar{width:70;border:none;cursor:hand}
+</style>
+
+<script language="Jscript" src="common.js"></script>
+<script language="JScript">
+var d1,d2;
+var ActRights = #(ActRights)#;
+var ItemsClassName;	//название строк класса который кликнули в списке "Типы документов"
+var LastLoadedHeadersClass;	//класс заголовки которого загружены в IGridDocstr
+var IGridDocstrObj;
+
+sessionid="#(%session.SessionId)#";
+depot="#($G(%session.Data("depot")))#"
+docssame="#($G(%session.Data("docssame")))#";
+OurName="#($G(%session.Data("OurName")))#";
+var login = '#($G(login))#';
+
+function load()
+{
+	IGridDocstrObj = document.getElementById("IGridDocstr");
+	doctypes.LoadHeaders();
+}
+
+function show()
+{
+	doctypes.DownLoad();
+}
+
+function okfunc()
+{
+	var AdditionalFieldsDocs="";
+	StorageOutField.style.display="none";
+	TypDocument.innerText=doctypes.ItemName;
+	IGridDocstrObj.Clear(true);			//очистить таблицу строк
+	var doctypesItemID=doctypes.ItemID	//название класса выбранного в списке типов документов
+	ItemsClassName = doctypesItemID+"Items";
+	docums.ClassName=doctypesItemID;
+	//if(doctypesItemID=="Docs.Platejka")return
+	if(doctypesItemID=="Docs.PrihKassOrder")return
+	//docitems.ClassName=doctypesItemID+"Items";
+	var ExcludeFields="Goods,Doc,DocType,RequestItem";
+	var AdditionalFields="";
+	if(doctypesItemID!="Docs.Platejka")var AdditionalFields="Goods->FullName~Наименование~~~@%String~~~~~#@#";
+	
+	//if(docitems.ClassName=="Docs.RashItems")
+	//{
+	//	var ExcludeFields=ExcludeFields+",ZakazGoods";
+	//	var AdditionalFields=AdditionalFields+"ZakazGoods->FullName~Заказанный товар~~~@%String~~~~~#@#";
+	//}
+	
+	if(doctypes.ItemID=="Docs.Rash"){okbwut3.style.display="inline";}
+	else{okbwut3.style.display="none";}
+	
+	if(doctypesItemID=="Docs.Otchet")
+	{
+		OtchetSpecButton.style.display="inline";
+	}
+	else{OtchetSpecButton.style.display="none";}
+	if(ActRights==1)
+	{
+		if(doctypesItemID=="Docs.Act")
+		{
+			ActSpecButton.style.display="inline";
+			ActAddFields.style.display="inline";
+		}
+		else
+		{
+			ActSpecButton.style.display="none";
+			ActAddFields.style.display="none";
+		}
+	}
+	if(doctypes.ItemID=="Docs.StorageOut"){StorageOutField.style.display="inline";}
+	
+	d1 = new Date();
+	docums.LoadHeaders("ActType","",AdditionalFieldsDocs);
+	//docitems.LoadHeaders(ExcludeFields,"",AdditionalFields);
+
+}
+
+//показать документы
+function showdocums()
+{
+	var order="";
+	//if(doctypes.ItemID=="Docs.Otchet"){var order="NameSorted"}
+	dateArr=dat1.value.split("/")
+	Data1=dateArr[2]+"-"+dateArr[1]+"-"+dateArr[0]
+	dateArr=dat2.value.split("/")
+	Data2=dateArr[2]+"-"+dateArr[1]+"-"+dateArr[0]
+	var request="Dat>=CAST('"+Data1+"' AS DATE) and Dat<=CAST('"+Data2+"' AS DATE)";
+	if(docssame==0){var requst=request+" and Depot="+depot;} //если  показ всех документов для всех складов то
+	var currentKontragent=ChooseKontragent.value;
+	if(currentKontragent!="all"){var request=request+" and Kontr="+currentKontragent}
+	if(DocName.value!=""){var request=request+" and Name %STARTSWITH '"+DocName.value+"'";}
+	var ShowUnpaidObject = document.getElementById("ShowUnpaid");
+	if(typeof(ShowUnpaid)=="object")
+	{
+		if(ShowUnpaidObject.checked)var request=request+" and Paid=0"
+	}
+	
+	
+	docums.DownLoad(request,"","",order)
+	//d2 = new Date();
+	//alert("вывод документов\n" + (d2-d1) + "\n" + d1.toLocaleTimeString() + "\n" + d2.toLocaleTimeString());
+}
+
+//показать заголовки iGrid. headers формируется в ##class(Common.Common).showheaders
+function ShowIgridHeaders(headers)
+{
+	if(LastLoadedHeadersClass == ItemsClassName) return;
+
+	IGridDocstrObj.Clear(true);
+	headersArray = headers.split("#@#");
+	var headersArraylength = headersArray.length;
+	
+	var Captions = new Array(headersArraylength-1);
+	var Keys = new Array(headersArraylength-1);
+	var Tags = new Array(headersArraylength-1);
+	var Widths = new Array(headersArraylength-1);
+	//alert(headers )
+	
+	for (var i = 0; i< headersArray.length-1; i++)
+	{
+		//здесь каждый отдельный заголовок
+		var h = headersArray[i];
+		var headerArray = h.split("~");
+		Captions[i] = headerArray[1];
+		Keys[i] = headerArray[0];
+		Tags[i] = "";
+		Widths[i] = 80;
+		//alert("headerArray[1]" + headerArray[1]);
+	}
+	
+	//alert(Captions);
+	LastLoadedHeadersClass = ItemsClassName;
+	IGridDocstrObj.DrawHeaders(Captions,Keys,Tags);
+	//GetDocstrLayout("IGridDocstr||" + ItemsClassName);	//восстановить размер и положение колонок
+}
+
+//загрузить данные в iGrid
+function LoadIgridData(DocId)
+{
+	var AllData = #server(..ShowDocItems(ItemsClassName,DocId))#
+	var headers=AllData.split("\t")[0];
+	ShowIgridHeaders(headers);
+
+	IGridDocstrObj.Clear(false);
+	IGridDocstrObj.LoadStringData(AllData.split("\t")[1]);
+}
+
+function CreateDocument(ItemID)
+{
+	CurrentDocementClass=docums.ClassName
+	if(CurrentDocementClass==""){alert("Не выбран тип документа");return}
+	ItemID=ReturnSpace(ItemID)
+	var doccsp="document.csp";
+	//if (CurrentDocementClass=="Docs.DocBrak"){alert("Документы на приём брака создаются и редактируются на рабочем месте сервис менеджера. Инструкциями с типом \"Приём брака\"");return}
+	if(CurrentDocementClass=="Docs.Rash"){var doccsp="DocsRash.csp?source="+ItemID;}
+	if(CurrentDocementClass=="Docs.Utiliz")
+	{
+		if(window.confirm("Открывать в новой форме?")){var doccsp="UtilizationDoc.csp?DocId="+ItemID}
+		else{doccsp="docutiliz.csp"}
+	}
+	if(CurrentDocementClass=="Docs.PrihKassOrder")doccsp="docplatej.csp?DocId="+ItemID;
+	if(CurrentDocementClass=="Docs.Platejka")doccsp="docplatej.csp?DocId="+ItemID;
+	if(CurrentDocementClass=="Docs.Invent")
+	{
+		if(window.confirm("Открывать в новой форме?")){var doccsp="InventarizationIgrid.csp?source="+ItemID}
+		else{doccsp="docinvent.csp"}
+	}
+	if(CurrentDocementClass=="Docs.Inner")doccsp="docinner.csp"
+	if(CurrentDocementClass=="Docs.Diff")doccsp="docdiff.csp"
+	if(CurrentDocementClass=="Docs.InnerDiff")doccsp="docinnerdiff.csp"
+	if(CurrentDocementClass=="Docs.Remont"){alert("Заявка на запчасти создается инструкцией руководителя\nили в карточке контрагента");return;}
+	if(CurrentDocementClass=="Docs.Otchet")
+	{
+		if(ItemID==""){doccsp="Otchet.csp?docid="+ItemID;}
+		else{alert("Отчёты редактировать запрещено.");return;}
+	}
+	if(CurrentDocementClass=="Docs.Act")
+	{
+		doccsp="ActFromClient.CSP?docid="+ItemID;
+		//alert("Акты технического состояния создаются только в менеджере отчётов");return;
+	}
+	if((CurrentDocementClass=="Docs.StorageIn")||(CurrentDocementClass=="Docs.StorageOut")){alert("Внутренняя инструкция создается на рабочем месте кладовщика");return;}
+	if(CurrentDocementClass=="Operation.Instructions"){doccsp="createinstructIgrid.csp?source="+ItemID}
+	WinResult=window.showModalDialog(doccsp,CurrentDocementClass+InnerSplitter+ItemID+InnerSplitter+doctypes.ItemName,"center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+	if(WinResult==1)showdocums();
+	}
+	
+//показать строки документа
+function showitems()
+{
+	//var dd1 = new Date();
+	var currentdoc=ReturnSpace(docums.ItemID);
+	if(currentdoc=="")return
+	//docitems.DownLoad("Doc="+currentdoc,1)
+	//var dd2 = new Date();
+	LoadIgridData(currentdoc);
+	//alert("вывод строк\n" + (dd2-dd1) + "\n" + dd1.toTimeString() + "\n" + dd2.toTimeString());	
+}
+
+
+function processdoc()
+{
+	if(docums.ItemID=="")return
+	var doc=docums.ItemID+"@"+doctypes.ItemID;
+	var ok=#server(Docs.Action.processdoc(doc))#
+	//alert("код результата обработки документа: " + ok);
+	if(isNaN(ok))
+		{
+			alert(ok)
+			if(doctypes.ItemID=="Docs.Otchet")
+			{
+				ShowOtchetErrorsFn();
+			}
+		}
+	else{
+			showdocums();
+		}
+}
+
+function printdoc()
+{
+	var doc=docums.ItemID+"@"+doctypes.ItemID;
+	var doccsp="document.csp";
+	if(CurrentDocementClass=="Docs.Utiliz")doccsp="docutiliz.csp"
+	if(CurrentDocementClass=="Docs.Invent")doccsp="docinvent.csp"
+	if(CurrentDocementClass=="Docs.Inner")doccsp="docinner.csp"
+	if(CurrentDocementClass=="Docs.Diff")doccsp="docdiff.csp"
+	WinResult=window.showModalDialog(doccsp,CurrentDocementClass+InnerSplitter+ItemID+InnerSplitter+doctypes.ItemName,"cener:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+	//window.open("print.csp?doc="+doc);
+}
+
+//распечатать документ
+function prnt(docid,docclass,param){
+var url="print.csp?id="+docid+"&class="+docclass+"&sessionid="+sessionid;
+if(param=="word")
+{
+	url=url+"&word=on"
+}
+if ((docclass=="Docs.Otchet")&&(param=="word"))
+{
+	if(window.confirm("Печатать все поля документа?")){url=url+"&AllColumns=1"}
+	//window.prompt(url,url);
+}
+window.open(url);
+}
+
+function makescet(cl){
+var doc=docums.ItemID;
+if(doc==""){alert("Не выбран документ - основание для формирования платежного поручения");return}
+WinResult=window.showModalDialog("makescet.csp?docid="+doc+"&class="+cl,"","cener:yes;status:no;dialogHeight:250px;dialogWidth:400px;resizable:yes;")
+}
+function maketovnakl(tovnakladn){
+var doctov=docums.ItemID;
+if(doctov==""){alert("Не выбран документ - основание для формирования товарной накладной");return}
+WinResult=window.showModalDialog("maketovnakl.csp?docid="+doctov+"&class="+tovnakladn,"","cener:yes;status:no;dialogHeight:300px;dialogWidth:450px;resizable:yes;")
+}
+
+function deldoc(){
+if(!window.confirm("Удалить документ " + docums.ItemName + " ?"))return false;
+var classname=docums.ClassName;
+var itemid=docums.ItemID;
+var ok1=#server(Docs.Action.deletedoc(classname,itemid))#
+if(isNaN(ok1)){alert(ok1)}
+else{okfunc();}
+}
+
+// Выбрать контрагента
+function ChooseKontragentFunc(){
+	var UsersSelection=ChooseKontragent.options(ChooseKontragent.selectedIndex).value;
+	if(UsersSelection=="choose")
+	{
+		var newKontragent=window.showModalDialog("Dictionary.csp","Common.Kontragent","center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");
+		if(newKontragent==null){
+			ChooseKontragent.selectedIndex=0;
+			return false;}
+		var ChooseKontragentLength = ChooseKontragent.options.length;
+		ChooseKontragent.options.length= ChooseKontragentLength + 1;
+		ChooseKontragent.options(ChooseKontragentLength).value=newKontragent.split("~")[0];
+		ChooseKontragent.options(ChooseKontragentLength).text=newKontragent.split("~")[1];
+		ChooseKontragent.selectedIndex=ChooseKontragentLength;
+	}
+}
+
+function EmailDocumentFn(ItemID,ItemClass){
+	var MailSetup=window.showModalDialog("MailSetup.csp","","center:yes;status:no;dialogHeight:200px;dialogWidth:500px;resizable:yes;");
+	//вернётся следующая строка
+	//Формировать DOC файл (false/true);Открывать Email программу (false/true);принудительный адрес отправки;Файл-шаблон
+	//например: "true;true;"
+	//или: "false;true;artemu78@rambler.ru;first-template"
+	if(MailSetup==null)return
+	var values=MailSetup.split(";");
+	
+	if(ReturnBoolean(values[0])){
+		//создать файл
+		var WaitWindow=window.open("wait.csp","win2", "status=no,width=200,height=200");
+		ok=#server(Kontragent.Action.MakeFile(ItemID,ItemClass,values[3]))#
+		WaitWindow.close();
+		if(isNaN(ok)){alert(ok);return}
+		else{alert("Файл успешно создан")}
+	}
+	if(ReturnBoolean(values[1])){
+		//открыть почтовую программу
+		if(values[2]!="")
+			{
+			var MailAddress=values[2];		//
+			}
+		else
+			{
+			var MailValues=#server(Docs.Action.EmailFromDoc(ItemID,ItemClass))#			
+			var MailValuesArray=MailValues.split(StringSplitter);
+			var MailAddress=MailValuesArray[0];
+			var KontrName=MailValuesArray[1];
+			var DocTypeName=MailValuesArray[2];
+			var DocName=MailValuesArray[3];
+			if(MailValues==""){alert("Не удалось определить E-mail у контрагента записанного в документе.\nУкажите пожалуйста адрес вручную или заполните соответствующее поле контрагента.");return}
+			
+			}
+	window.open("mailto:"+KontrName+" <"+MailAddress+">?subject="+OurName+"&body=Здравствуйте "+KontrName+"\n\n\n---------\n"+OurName)
+	}
+}
+
+//заменить товар в документе
+function ChangeTovInDocFn()
+{
+	var itemid=docums.ItemID;
+	var answer=window.showModalDialog("ChangeGoods.csp?DocId="+itemid+"&sessionid="+sessionid,"","center:yes;status:no;dialogHeight:550px;dialogWidth:800px;resizable:yes;");
+	if(answer)LoadIgridData(itemid)
+}
+
+//показать лог создания инструкции по отбору
+function ShowLogOfCreation()
+{
+	var docid=docums.ItemID;
+	if(ReturnSpace(docid)==""){alert("Не выбрана инструкция по отгрузке.");return;}
+	window.open("LogOfCreation.csp?doc="+docums.ItemID);
+}
+
+//показать ошибки отчёта
+function ShowOtchetErrorsFn()
+{
+	window.showModalDialog("Info.csp?docid="+docums.ItemID+"&class="+doctypes.ItemID+"&property=Errors","","center:yes;status:no;dialogHeight:450px;dialogWidth:600px;resizable:yes;");
+}
+
+
+function setOtchetFailed()
+{
+	if(!window.confirm("Отклонить отчёт?"))return;
+	var docid=docums.ItemID;
+	if(ReturnSpace(docid)==""){alert("Не выбран отчёт.");return;}
+	var Descr = window.prompt("Укажите причину","");
+	if(Descr==null)return;
+	var ok= #server(Docs.Otchet.SetOthcetStatFailed2(docid,Descr))#
+	if(isNaN(ok)){alert(ok)}
+	else{okfunc();}
+}
+
+function setOtchetAccepted(){
+if(!window.confirm("Поставить отчёту статус \"Принят\"?"))return;
+var docid=docums.ItemID;
+if(ReturnSpace(docid)==""){alert("Не выбран отчёт.");return;}
+var ok= #server(Docs.Otchet.SetOthcetStatAccepted(docid))#
+if(isNaN(ok)){alert(ok)}
+else{okfunc();}
+}
+
+
+function setActFailed()
+{
+	if(!window.confirm("Отклонить акт?"))return;
+	var docid=docums.ItemID;
+	if(ReturnSpace(docid)==""){alert("Не выбран акт.");return;}
+	var Descr = window.prompt("Укажите причину","");
+	var ok= #server(Docs.Act.SetActStatFailed(docid,Descr))#
+	if(isNaN(ok)){alert(ok)}
+	else{okfunc();}
+}
+
+function setActAccepted(){
+var docid=docums.ItemID;
+var ActNumber = #server(Docs.Action.getRashNumb("Docs.Act"))#;
+var ActSumma = #server(Docs.Act.GetActSumma(docid))#;
+if(isNaN(ActSumma)){alert("Невозможно расчитать сумму акта.\n"+ActSumma);return;}
+var ActType = #server(Docs.Act.GetActType(docid))#;
+if(isNaN(ActSumma)){alert("Невозможно расчитать тип акта.\n"+ActType);return;}
+var answer = window.confirm("Поставить акту статус \"Принят\"?\n"+
+	"Будущий номер акта "+ActNumber + "\n" + 
+	"Сумма акта " + ActSumma);
+if(!answer)return;
+if(ReturnSpace(docid)==""){alert("Не выбран акт.");return;}
+var ok= #server(Docs.Act.SetActStatAccepted(docid,ActNumber,ActSumma,ActType))#
+if(isNaN(ok)){alert(ok)}
+else{okfunc();}
+}
+
+function ShowReqsFromActFn()
+{
+	window.showModalDialog("widetext.csp?docid="+docums.ItemID+"&class="+doctypes.ItemID+"&property=CheckResult","","center:yes;status:no;dialogHeight:300px;dialogWidth:400px;resizable:yes;");
+}
+
+//сформировать служебную записку
+function MakeActNote()
+{
+	var newItem = "";
+	//var newItem=window.showModalDialog("Dictionary.csp","Common.Kontragent","center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");
+	//if(newItem==null)return;
+	//var newItem=newItem.split("~")[0];
+	var docids=escape(docums.ListViewGetItems('selected',1));
+	
+	var NoteId = #server(Docs.Action2.CreateActNote(docids,newItem))#
+	if(isNaN(NoteId))
+	{
+		alert(NoteId);
+	}
+	else
+	{
+		alert("Акты погашены. Сформирована служебная записка.");
+		//window.open('screen/actnote.csp?id='+NoteId+'&sessionid='+sessionid);
+	}
+}
+
+//пришло бумажное подтверждение отчёта
+function ProveOthet()
+{
+	if(!window.confirm("Указать, что к отчёту пришло бумажное подтверждение?"))return;
+	var ok = #server(Docs.Otchet.SetParerProve(docums.ItemID))#
+	if(isNaN(ok)){alert(ok)}
+	else{okfunc()}
+}
+
+//сохранить положение и размер колонок iGrid
+function SaveDocstrLayout(Obj)
+{
+	var TableName="IGridDocstr||"+ItemsClassName;
+	#call(..SaveLayout(TableName,Obj.LayoutCol,Obj.LayoutSort))#
+}
+
+//сохранить положение и размер колонок iGrid
+function GetDocstrLayout()
+{
+	var TableName="IGridDocstr||"+ItemsClassName;
+	var data = #server(..GetLayout(TableName))#;
+	alert(data);
+	Obj.LayoutCol = data.split("\t")[0];
+	//Obj.LayoutSort =data.split("\t")[1]; 
+}
+</script>
+</head>
+<body  onload="load()" >
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<td width=10%><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
+<TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" ><strong>Документы</strong></TD>
+<td width=10% align=right><a href="help/docs.htm"><img src="images/BIGHelp.bmp" width="20" height=25 border=0></a></td>
+</TABLE>
+
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<td rowspan=99 valign=top>
+<fieldset><legend>Типы документов</legend>
+ <SKLADList:listview width=200 height=300 id="doctypes" ClassName="Docs.Docs" onAddColumns="show()" zClick="okfunc()" zonDblClick="CreateDocument()"/><br>
+</fieldset>
+</td></tr>
+<tr>
+<td width=10>&nbsp;</td>
+<td width=100% valign=top>
+<fieldset><legend id="TypDocument"></legend>
+Период c <input type=text id="dat1" value="#($ZD($H-2,4))#" onclick="fnCalendar(this)" class="datar"> по <input type=text id="dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar">
+<select id="ChooseKontragent" onchange="ChooseKontragentFunc()">
+<option value="all">Все</option>
+<option value="choose">Выбрать контрагента...</option>
+</select> <input type="text" id="DocName" title="Начальные цифры номера" style="width:30px">
+ <span id="ActAddFields" style="display:none;border:solid black 1">
+ 	Неоплаченные <input type="checkbox" style="border:none;width:15px" id="ShowUnpaid" title="Выводить только неоплаченные акты">
+ </span>
+<sklad:LittleButton name="ok" id="okbut" onclick="okfunc()" alt="Показать документы"><br>
+<SKLADList:listview width=100% height=150 id="docums" onAddColumns="showdocums()" zClick="showitems()" zonDblClick="CreateDocument(docums.ItemID)" />
+  <Table width=100%><tr><td width=100%>
+<sklad:LittleButton name="new" id="newbut" onclick="CreateDocument('')" alt="Создать документ">
+<sklad:LittleButton name="edit" id="editbut" onclick="CreateDocument(docums.ItemID)" alt="Редактировать документ">
+<sklad:LittleButton name="ok" id="okbut2" onclick="processdoc()" alt="Обработать документ">
+<sklad:LittleButton name="print" id="okbwut2" onclick="prnt(docums.ItemID,docums.ClassName,'')" alt="Печать документа">
+<sklad:LittleButton name="printword" id="PrntButWord" onclick="prnt(docums.ItemID,docums.ClassName,'word')" alt="Печать документа Word">
+<sklad:LittleButton name="mail" id="EmailDocument" onclick="EmailDocumentFn(docums.ItemID,docums.ClassName)" alt="Отправить по почте">
+<span style="display:none" id="StorageOutField">
+	<sklad:LittleButton name="goinside" id="goinside" onclick="ShowLogOfCreation()" alt="Протокол сборки инструкции по отбору">
+</span>
+<span style="display:none" id="okbwut3"> 
+<sklad:LittleButton name="change" id="ChangeTovInDoc" onclick="ChangeTovInDocFn()" alt="Заменить товар в расходной накладной">
+<sklad:LittleButton name="card" id="dkfi" onclick="makescet('Docs.Chet')" alt="Сформировать счет на оплату">
+<sklad:LittleButton name="card" id="okbwut4" onclick="makescet('factura')" alt="Сформировать счет-фактуру">
+<sklad:LittleButton name="card" id="hernya" onclick="maketovnakl('tovnakladn')" alt="Сформировать товарную накладную">
+</span>
+
+<span style="display:none" id="OtchetSpecButton"> 
+<sklad:LittleButton name="txt" id="btnShowOtchetErrors" onclick="ShowOtchetErrorsFn()" alt="Показать ошибки отчёта">
+<img src="images/red_stop.gif" alt="Отклонить отчёт" width="20px" height="20px" style="cursor:hand" onclick="setOtchetFailed()">
+<img src="images/green_butt.gif" alt="Принять отчёт" width="20px" height="20px" style="cursor:hand" onclick="setOtchetAccepted()">
+<sklad:LittleButton name="txtok" id="btnProveOthet" onclick="ProveOthet()" alt="Пришло бумажное подтверждение отчёта">
+</span>
+
+<script language="cache" runat="server">
+ if  &html<
+	<span style="display:none" id="ActSpecButton"> 
+		<img src="images/txt.gif" onmouseover="btnShowReqsFromAct.src='images/Ontxt.gif'" onmouseout="btnShowReqsFromAct.src='images/txt.gif'"  id="btnShowReqsFromAct" name="btnShowReqsFromAct" alt="Показать заявки этого акта" onclick="ShowReqsFromActFn()">
+		<img src="images/red_stop.gif" alt="Отклонить акт" width="20px" height="20px" style="cursor:hand" onclick="setActFailed()">
+		<img src="images/green_butt.gif" alt="Принять акт" width="20px" height="20px" style="cursor:hand" onclick="setActAccepted()">
+		<img src="images/print.gif" onmouseout="this.src='images/print.gif'" onmouseover="this.src='images/Onprint.gif'" alt="Сформировать служебную записку" width="20px" height="20px" style="cursor:hand" onclick="MakeActNote()">
+	</span>
+	>
+</script>
+</td><td>
+<sklad:LittleButton name="del" id="dk2fi" onclick="deldoc()" alt="Удалить документ">
+</td></tr></table>
+<!--
+<sklad:LittleButton name="ok" id="okbut3" onclick="printdoc()" alt="Распечатать документ">
+-->
+</fieldset>
+<fieldset><legend>Строки документа</legend>
+<sklad:LittleButton name="mail" id="btnSaveDocstrLayout" onclick="SaveDocstrLayout(IGridDocstrObj)" alt="Удалить документ">
+<input type="button" value="get" onclick="GetDocstrLayout()">
+<SKLADiGrid:iGrid id="IGridDocstr" width="100%" height="300" Enabled="true" RowMode="true" />
+<!--
+	<SKLADList:listview width=100% height=150 id="docitems" onAddColumns="showitems()"/><br>
+-->
+</fieldset>
+
+
+</td></tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Common.Dictionary1">
+<ClassType>persistent</ClassType>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%Persistent</Super>
+<TimeCreated>60368,43326</TimeCreated>
+
+<Property name="Name">
+<Description>
+Наименование</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Наименование"/>
+</Property>
+
+<Index name="NameInd">
+<Properties>Name</Properties>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Common.Dictionary1D</DataLocation>
+<DefaultData>Dictionary1DefaultData</DefaultData>
+<IdLocation>^Common.Dictionary1D</IdLocation>
+<IndexLocation>^Common.Dictionary1I</IndexLocation>
+<StreamLocation>^Common.Dictionary1S</StreamLocation>
+<Data name="Dictionary1DefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Name</Value>
+</Value>
+<Value name="3">
+<Value>Property7023</Value>
+</Value>
+<Value name="4">
+<Value>Property5710</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

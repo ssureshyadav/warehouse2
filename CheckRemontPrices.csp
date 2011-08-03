@@ -1,0 +1,188 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ s login=$G(%session.Data("user"))
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ i '##class(Common.Rights).getrights(login,2) s %response.ServerSideRedirect="norights.csp" 
+ q 1
+</script>
+<html XMLNS:SKLADList XMLNS:SKLADz>
+<IMPORT NAMESPACE="SKLADz" IMPLEMENTATION="htc/treeview.htc">
+<IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="jscript" src="common.js"></script>
+<script language="Jscript">
+var ColCodeKontr="";
+var KontrId="";
+var GoodsId="";
+sessionid="#(%session.SessionId)#";
+var where ="";
+var depot="#($G(%session.Data("depot")))#";
+var ShowBuyPrices="#(%request.Get("ShowBuyPrices"))#";
+
+function load(){
+currentdictKontr.LoadHeaders("City,Balance,Property831,Agree,CityCode,ContPers,EMail,Manager,Phones,WCalc,Address,Region,chief,glavbuh,fax,bank,region2,Postalcode,PostalcodeUr,Password,AddressUr,CityUr,ChangeDate,ChangeTime,ChangeUser,OtgruzPrincip");
+LoadTree();
+TempGoods.attachEvent("onAddColumns", addcol)
+TempGoods.LoadHeaders("Property312,Property675,Property7053,Size1,Weight,codedetail,ModelNumber,EnglishName,Tovar,ChangeDate,ChangeTime,ChangeUser,Description,Composition,izdelie");
+}
+
+function addcol(){
+TempGoods.detachEvent("onAddColumns", addcol)
+fields=TempGoods.GetColumns("Goods->");
+//TempGoods.AddColumns("quant~Количество~~~@%String#@#")
+}
+
+
+function LoadTree(){
+CurrentClassifName.innerText = Catalogues.options(Catalogues.selectedIndex).text;
+GroupsTree.AdditionalID=Catalogues.value;
+//alert('Data.csp?class=Goods.Group&fields=Parent,Code,Name,ID&params="'+depot+'","'+Catalogues.value+'"')
+GroupsTree.DownLoad('Data.csp?class=Goods.Group&fields=Parent,Code,Name,ID&order=Name&params="'+depot+'","'+Catalogues.value+'"')	
+}
+
+function showdictionaryKontr(where){
+var where=ReturnSpace(where);
+currentdictKontr.DownLoad(where);
+}
+
+function ggKontr(){
+if(ColCodeKontr=="")return false;
+where = ColCodeKontr+" %STARTSWITH '"+fldvalKontr.value+"'";
+if(fldvalKontr.value=="")where="";
+showdictionaryKontr(where);
+}
+
+function colclickKontr(){
+	if(currentdictKontr.ColType=="%Date"){alert("Поля с датами не обрабатываются");return false;}
+	namfldKontr.innerText=currentdictKontr.ColName;
+	ColCodeKontr=currentdictKontr.ColCode;
+}
+
+function KontrClick(){
+KontrName.innerText=currentdictKontr.ItemName;
+KontrInstrPriceCateg.innerText=currentdictKontr.item("Property126->Name");
+KontrBytPriceCateg.innerText=currentdictKontr.item("Property127->Name");
+KontrId=currentdictKontr.ItemID;
+if(GoodsId!="")
+	{
+		RemontPrice.innerText = #server(Common.Common.GetGoodRemontPriceForKontr(GoodsId,KontrId))#;
+	}
+}
+
+
+function GroupsTreeClick(){
+	CurrentGroupName.innerText=GroupsTree.NodeCaption;
+	AddFromGroup();
+}
+
+function AddFromGroup(){
+var whereTovar="Groups='"+GroupsTree.NodeID+"'"
+var ShowQuantityVar=0;
+//alert(fields)
+TempGoods.loadfrommethod("Goods.GoodsAction.fromgroup",whereTovar,fields,ShowQuantityVar+ShowBuyPrices)
+}
+
+//поиск товара по параметрам
+function SearchByParams(){
+var whereTovar = "";
+var Abbr = AbbrField.value;
+var Property3609 = Property3609Field.value;
+var Name = NameField.value;
+
+if(Abbr!="")
+{
+	whereTovar="Goods->Abbr %Startswith '" + Abbr + "'";
+}
+
+if(Property3609!="")
+{
+	if(whereTovar!=""){whereTovar=whereTovar+" and Goods->Property3609 %Startswith '" + Property3609 + "'";}
+	else{whereTovar=" Goods->Property3609 %Startswith '" + Property3609 + "'";}
+}
+
+if(Name!="")
+{
+	if(whereTovar!=""){whereTovar=whereTovar+" and Goods->Name %Startswith '" + Name + "'";}
+	else{whereTovar = " Goods->Name %Startswith '" + Name + "'";}
+}
+
+if(whereTovar=="")
+{
+	alert("Не указано ни одного параметра для отбора");
+	return
+}
+
+var ShowQuantityVar=0;
+var whereTovar=whereTovar+" and Groups->Depot='"+depot+"' and Groups->Catalogue = '"+Catalogues.value+"'";
+TempGoods.loadfrommethod("Goods.GoodsAction.fromgroup",whereTovar,fields,ShowQuantityVar+ShowBuyPrices)
+}
+
+function GoodsClick(){
+GoodsId = TempGoods.ItemID;
+CurrentGoodsName.innerText = TempGoods.item("FullName");
+GoodsPriceCateg.innerText = #server(Goods.GoodsAction.GetGoodsPriceCateg(GoodsId))#;
+if(KontrId!="")
+	{
+		RemontPrice.innerText = #server(Common.Common.GetGoodRemontPriceForKontr(GoodsId,KontrId))#;
+	}
+}
+</script>
+</head>
+<body onload="load()">
+<sklad:Button value="Назад" onclick="window.location.href='tuneup.csp'"><br>
+
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<td width=10%><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
+<TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" ><strong>Проверка цен за ремонт</strong></TD>
+<td width=10% align=right><a href="help/Platej.html"><img src="images/BIGHelp.bmp" width="20" height=25 border=0></a></td>
+</TABLE>
+<br>
+<Table width=100%>
+<tr>
+	<td valign="top">
+		<fieldset><legend>Товары</legend>
+		Классификатор:<select id="Catalogues" onchange="LoadTree()" >
+		<script language="cache" runat="server">
+			w ##class(Docs.Action2).GetClassValuesOptions(,"Goods.Catalogue",,,0)
+		</script>
+		</select><br>
+  		<SKLADz:treeview id="GroupsTree" width="200" height=170 ImagesPath="#(%session.Data("ImagesPath"))#" zonClick="GroupsTreeClick();" /><br>
+		<fieldset><legend>Поиск</legend>
+  			Аббревиатура: <input type="text" id="AbbrField" style="width:35px" title="Достаточно ввести начальные буквы аббревиатуры">  Модель: <input type="text" id="Property3609Field" style="width:40px" title="Достаточно ввести начальные цифры модели"> Наименование: <input type="text" id="NameField" style="width:100px" title="Достаточно ввести начальные буквы названия"> <input type="button" value="Найти" style="width:50px" title="Поиск ведётся только по тем полям которые заполнены" onclick="SearchByParams()">
+  		</fieldset>
+  		<SKLADList:listview width=100% height=130 id="TempGoods"  ClassName="Goods.Goods" AddOnClear="false" zonDblClick="ReturnSelected();"  AddHeaders="true" zClick="GoodsClick()"/><br>
+		</fieldset>
+	</td>
+	<td valign="top">
+		<fieldset><legend>Контрагенты</legend>
+		Поиск:
+		<span id="namfldKontr"></span>&nbsp;<input type="text" id="fldvalKontr" onkeyup="ggKontr();">
+		<SKLADList:listview width=100% height=350 id="currentdictKontr" zClick="KontrClick()" zonColumnClick="colclickKontr()" onAddColumns="showdictionaryKontr()" ClassName="Common.Kontragent"/><br>
+		</fieldset>
+	</td>
+</tr>
+<tr>
+	<td valign="top">
+		<span  style="color:#001188" id="CurrentClassifName"></span>&nbsp; - <span style="color:#001188" id="CurrentGroupName">выберете группу</span>&nbsp; - <span style="color:#001188" id="CurrentGoodsName">выберете товар</span>
+	<td valign="top" BGCOLOR ="#eeeeee">
+		<span id="KontrName" style="color:#001188">Выберете контрагента</span>
+</tr>
+<tr>
+	<td colspan=2 align=center><hr width="80%">
+</td>
+<tr>
+	<td valign="top">
+		<span style="color:#444444">Ценовая группа товара </span> <span id="GoodsPriceCateg" style="color:#001188"></span><br>
+	<td valign="top" BGCOLOR ="#eeeeee">
+		<span style="color:#444444">Категория цен электроинструмент </span> <span id="KontrInstrPriceCateg" style="color:#001188"></span><br>
+		<center><hr width="80%"></center>
+		<span style="color:#444444">Категория цен бытовая техника </span> <span id="KontrBytPriceCateg" style="color:#001188"></span><br>
+	
+</tr>
+<tr>
+	<td colspan=2 align=center><hr width="80%">Цена за ремонт: <font face="Arial" size="4" color="blue" id="RemontPrice"></font>
+</td>
+</table>
+</body>
+</html>

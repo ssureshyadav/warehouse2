@@ -1,0 +1,108 @@
+<html XMLNS:SKLADList XMLNS:SKLAD2>
+<IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="jscript" src="common.js"></script>
+<script language="Jscript">
+var ColCode="";
+sessionid="#(%session.SessionId)#";
+function load(){
+currentdict.LoadHeaders();
+}
+
+function Item(ItemID){
+ItemID=ReturnSpace(ItemID)
+mok=window.showModalDialog("CreateNewDict.csp",ItemID+";"+dictionary.ClassName,"cener:yes;status:no;dialogHeight:400px;dialogWidth:400px;resizable:yes;")
+if(mok==null)return false
+if(mok==1){ShowList()}
+}
+
+function showdictionary(where){
+var where=ReturnSpace(where);
+var made=false;
+currentdict.DownLoad(where);
+}
+
+function gg(){
+if(ColCode=="")return false;
+var where = ColCode+" %STARTSWITH '"+fldval.value+"'";
+if(fldval.value=="")where="";
+showdictionary(where);
+}
+
+function colclick(){
+	if(currentdict.ColType=="%Date"){alert("Поля с датами не обрабатываются");return false;}
+	namfld.innerText=currentdict.ColName;
+	ColCode=currentdict.ColCode;
+}
+
+// 
+function addrecord(currentrecord){
+var currentrecord=ReturnSpace(currentrecord)
+ok=window.showModalDialog("kontragent.csp",currentrecord+";Common.Kontragent","cener:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+if(ok!=null)showdictionary()
+}
+
+// показать отгрузки контрагента
+function look_otgruzki(curkontr){
+otgruzki.loadfrommethod("Reports.ShowTables.otgruzki",dat1.value,dat2.value,curkontr);
+}
+
+// показать платежи контрагента
+function look_plateji(curkontr){
+plateji.loadfrommethod("Reports.ShowTables.plateji",dat1.value,dat2.value,curkontr);
+}
+
+// обработка клика на контрагенте
+function showkontr(){
+var curkontr=currentdict.ItemID;
+look_otgruzki(curkontr);
+look_plateji(curkontr);
+}
+
+function opendoc(idj){
+idj=ReturnSpace(idj);
+if(idj=="")return;
+var ItemID=idj.split("@")[0]
+var CurrentDocementClass=idj.split("@")[1]
+var doccsp="document.csp";
+if(CurrentDocementClass=="Docs.PrihKassOrder")doccsp="docprihorder.csp"
+if(CurrentDocementClass=="Docs.Platejka")doccsp="docplatej.csp"
+if(CurrentDocementClass=="Docs.Invent")doccsp="docinvent.csp"
+if(CurrentDocementClass=="Docs.Inner")doccsp="docinner.csp"
+if(CurrentDocementClass=="Docs.Diff")doccsp="docdiff.csp"
+if(CurrentDocementClass=="Docs.InnerDiff")doccsp="docinnerdiff.csp"
+WinResult=window.showModalDialog(doccsp,CurrentDocementClass+InnerSplitter+ItemID+InnerSplitter+"","cener:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+}
+</script>
+</head>
+<body onload="load()">
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR><TD align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=2><strong>Платежи</strong></TD></tr>
+</TABLE>
+<br>
+<fieldset><legend>Поиск</legend>
+<span id="namfld"></span>&nbsp;<input type="text" id="fldval" onkeyup="gg();">
+</fieldset>
+<fieldset ><legend id="CurrentDictName">Контрагенты</legend>
+<SKLADList:listview width=100% height=200 id="currentdict" zonDblClick="addrecord(currentdict.ItemID);" zonColumnClick="colclick()" onAddColumns="showdictionary()" zClick="showkontr()" ClassName="Common.Kontragent"/><br>
+  <sklad:LittleButton name="new" id="newrec" onclick="addrecord()" alt="Создать запись">
+  <sklad:LittleButton name="edit" id="addrec" onclick="addrecord(currentdict.ItemID)" alt="Редактировать запись">
+</fieldset>
+Период c <input type=text id="dat1" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar" onchange="alert(99)"> по <input type=text id="dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar">
+<sklad:LittleButton name="ok" id="okbut" onclick="showkontr()" alt="Показать документы"><br>
+
+<table width=100%><tr>
+<td width=50%>
+<fieldset><legend>Отгрузки</legend>
+<SKLADList:listview width=100% height=200 id="otgruzki" zonDblClick="opendoc(otgruzki.ItemID)"/>
+</fieldset>
+</td>
+<td width=50%>
+<fieldset><legend>Платежи</legend>
+<SKLADList:listview width=100% height=200 id="plateji" zonDblClick="opendoc(plateji.ItemID)"/>
+</fieldset>
+</td>
+</tr></table>
+</body>
+</html>

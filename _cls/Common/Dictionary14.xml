@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Common.Dictionary14">
+<ClassType>persistent</ClassType>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%Persistent</Super>
+<TimeCreated>60701,39416</TimeCreated>
+
+<Property name="Name">
+<Description>
+Наименование</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Наименование"/>
+</Property>
+
+<Property name="Property3212">
+<Description>
+Файл</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Файл"/>
+</Property>
+
+<Index name="NameInd">
+<Properties>Name</Properties>
+</Index>
+
+<Index name="Property3212Ind">
+<Properties>Property3212</Properties>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Common.Dictionary14D</DataLocation>
+<DefaultData>Dictionary14DefaultData</DefaultData>
+<IdLocation>^Common.Dictionary14D</IdLocation>
+<IndexLocation>^Common.Dictionary14I</IndexLocation>
+<StreamLocation>^Common.Dictionary14S</StreamLocation>
+<Data name="Dictionary14DefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Name</Value>
+</Value>
+<Value name="3">
+<Value>Property3212</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

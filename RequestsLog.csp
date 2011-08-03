@@ -1,0 +1,36 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ s login=$G(%session.Data("user"))
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ q 1
+</script>
+<html>
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+
+<title>	 </title>
+
+</head>
+
+<body>
+
+<sklad:Button value="Назад" onclick="window.location.href='tuneup.csp'">&nbsp;&nbsp;&nbsp;
+<sklad:Button value="Архив" onclick="window.location.href='?Archive=1'"><br>
+
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<TD align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=3><strong>Журнал доступа региональных сервисных центров к базе данных</strong></TD></tr>
+<tr>
+</table>
+<br><br>
+<script language="cache" runat="server">
+ s glob=$NA(^Requests)
+ if %request.Get("Archive")=1 s glob=$NA(^RequestsArchive)
+ s i="" f  s i=$O(@glob@(i)) q:i=""  d
+ . s z="" f  s z=$O(@glob@(i,z)) q:z=""  d
+ . . s string=$G(@glob@(i,z))
+ . . //s string=$Replace(string,"CurrentVersion","Текущая версия")
+ . . //s string=$TR(string,"CurrentVersion","Текущая версия")
+ . . w "<b title="""_i_""">"_z_"</b> "_string_"<br>",!
+</script>
+</body>
+</html>

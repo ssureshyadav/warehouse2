@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.StorageOut">
+<Super>Docs.Super</Super>
+<TimeCreated>60373,31366.642324</TimeCreated>
+
+<Property name="storeman">
+<Description>
+Грузчик</Description>
+<Type>Common.Dictionary5</Type>
+</Property>
+
+<Property name="Brak">
+<Type>%Boolean</Type>
+</Property>
+
+<Index name="BrakInd">
+<Properties>Brak</Properties>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>StorageOutDefaultData</DefaultData>
+<Data name="StorageOutDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"StorageOut"</Subscript>
+<Value name="1">
+<Value>storeman</Value>
+</Value>
+<Value name="2">
+<Value>Brak</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

@@ -1,0 +1,34 @@
+<main>
+<data>
+<script language="Cache" runat="server">
+	set ref = %request.CgiEnvs("HTTP_REFERER")
+	set type = %request.Get("type")
+	set data = %request.Get("data")
+	if $G(%session.Data("login"))=""
+	{
+		set user = %request.Get("login")
+		if user = "" set user = "undefined"
+	}
+	else
+	{
+		set user = %session.Data("login")
+	}
+	
+	set cols = %request.Get("cols")
+	set component = %request.Get("component")
+
+	if ref = "" quit
+	if cols = "" quit
+	if ref '= "" s ref = $P($P(ref,"?",1),"/",$L($P(ref,"?",1),"/"))
+	
+	if type = "save" {
+		if data = "" quit
+		set ^HTC("listview", "settings", user, component, cols, ref) = data
+	}
+
+	if type = "load" {
+		write $G(^HTC("listview", "settings", user, component, cols, ref))
+	}
+</script>
+</data>
+</main>

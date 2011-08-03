@@ -1,0 +1,1177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Reports.Analyzis">
+<Description>
+Аналитика</Description>
+<IncludeCode>xmlmacros</IncludeCode>
+<Super>%RegisteredObject</Super>
+<TimeCreated>60385,46549.566228</TimeCreated>
+
+<Method name="prihrash">
+<Description>
+показать приход расход за период
+dat - начальная и конечная даты 
+depot1 - с какого склада искать документы
+kontr -  id контрагента </Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>dat,depot1="",kontr=""</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="prihrashErr"
+ s dat1=$P(dat,"@",1)
+ s dat2=$P(dat,"@",2)
+ s dat1=$S(dat1="":"",1:$ZDH(dat1,4))
+ s dat2=$S(dat2="":"",1:$ZDH(dat2,4))
+ //s kontr=$P(third,"@",1)
+ $$$StartXML
+ s sc=xmlstr.Element("AllHeaders")
+	 $$$WriteHeader("number","№",40)
+	 $$$WriteHeader("TypDoc","Документ",120)
+	 $$$WriteHeader("DocName","№ Документа",80)
+	 $$$WriteHeader("Kontr","Контрагент",80)
+	 $$$WriteHeader("region","Регион",80)
+	 $$$WriteHeader("DocDate","Дата",85)
+	 $$$WriteHeader("DocTime","Время",70)
+	 $$$WriteHeader("prih","Приход",65)
+	 $$$WriteHeader("rash","Расход",65)
+	 $$$WriteHeader("depot","Склад",80)
+ s sc=xmlstr.EndElement()
+ 
+ s sc=xmlstr.Element("AllObjects")
+ &sql(DECLARE C1 CURSOR FOR
+    SELECT ID,Kontr->Name,Kontr,Dat,Name,Tim,DocumentClass,DocumentClass->Name,Summa,Depot,Kontr->region2->Name
+    INTO :ID,:Kontr,KontrID,:DocDate,:DocName,:DocTime,:TypDoc,:TypDocName,:Summa,:depot,:region
+    FROM Docs.Super
+    where Dat>=:dat1 and Dat<=:dat2
+ )
+ &sql(OPEN C1)
+ 
+ &sql(FETCH C1)
+ While (SQLCODE = 0) {
+  i (depot1'=depot)&(depot1'="") &sql(FETCH C1) CONTINUE
+  i (KontrID'=kontr)&(kontr'="") &sql(FETCH C1) CONTINUE
+  i (TypDoc="Docs.Prih")||(TypDoc="Docs.Rash") {
+  i $I(i)
+  if '$D(temp(depot)) {
+  	s obj=##class(Store.Depot).%OpenId(depot)
+  	i $ISOBJECT(obj) s temp(depot)=obj.Name
+  	e  s temp(depot)=""
+  }
+  s sc=xmlstr.Element("OneObject")
+  s sc=xmlstr.WriteAttribute("id",ID_"@"_TypDoc)
+  i TypDoc="Docs.Prih" s direct="prih"
+  i TypDoc="Docs.Rash" s direct="rash"
+  s DocTime=$S(DocTime="":"",1:$ZT(DocTime))
+  s DocDate=$S(DocDate="":"",1:$ZD(DocDate,4))
+  s summ=$J(Summa,".",2)
+  // вместо суммы документа подставлю cумму собранную из строк товара
+  s ok=##class(Docs.Action).GetSummByPrice(TypDoc,ID,.mummy)
+  i '+ok s summ=ok
+  e  s summ=$J(+$G(mummy),".",2)
+  $$$WriteElementTwice("number",i)
+  $$$WriteElementTwice("TypDoc",TypDocName)
+  $$$WriteElementTwice("DocName",DocName)
+  $$$WriteElementTwice("DocTime",DocTime)
+  $$$WriteElementTwice("DocDate",DocDate)
+  $$$WriteElementTwice(direct,summ)
+  $$$WriteElementTwice("depot",temp(depot))
+  $$$WriteElementTwice("Kontr",Kontr)
+  $$$WriteElementTwice("region",region)
+  s itog(direct)=$G(itog(direct))+summ
+  s sc=xmlstr.EndElement()
+  &sql(FETCH C1)
+  }
+  else{&sql(FETCH C1)}
+ }
+ &sql(CLOSE C1)
+ 
+ s sc=xmlstr.Element("OneObject")
+ $$$WriteElementTwice("TypDoc","Итого")
+ f i="prih","rash" d
+ . $$$WriteElementTwice(i,$G(itog(i)))
+ s sc=xmlstr.EndElement()
+ 
+ s sc=xmlstr.EndElement()
+ $$$EndXML
+ q 1
+prihrashErr
+ $$$WriteError($ZE)
+ q "Ошибка при формировании отчёта"
+]]></Implementation>
+</Method>
+
+<Method name="KontrsJobs">
+<Description>
+Заполнить listview работами контрагента</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Kontr,dat1,dat2</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="KontrsJobsErr"
+ s dat1=$S(dat1="":"",1:$ZDH(dat1,4))
+ s dat2=$S(dat2="":"",1:$ZDH(dat2,4))
+
+ $$$StartXML
+ 	s sc=xmlstr.Element("AllHeaders")
+		 $$$WriteHeader("number","№ заявки",80)
+		 $$$WriteHeader("dat","Дата заявки",85)
+		 $$$WriteHeader("otchet","Отчёт",85)
+		 $$$WriteHeader("otchetdat","Дата отчёта",85)
+		 $$$WriteHeader("oplata","Оплата",85)
+		 $$$WriteHeader("zapch","Запчасти",100)
+ 	s sc=xmlstr.EndElement()
+  	s sc=xmlstr.Element("AllObjects")
+  	 &sql(declare zzz cursor for select 
+  		Dat,ID,Otchet->Name,Otchet->Dat,Name into :Dat,:ID,:Otchet,:OtchetDat,:Name
+  		from Docs.Remont
+  		where Dat>=:dat1 and Dat<=:dat2 and Kontr=:Kontr)
+  	 &sql(OPEN zzz)
+  	 &sql(FETCH zzz)
+  	While (SQLCODE = 0) {
+	i $I(i)
+	s Data=$ZD(Dat,4)
+	s:OtchetDat'="" OtchetDat=$ZD(OtchetDat,4)
+	s sc=xmlstr.Element("OneObject")
+	s sc=xmlstr.WriteAttribute("id",ID)
+	$$$WriteElementTwice("number",Name)
+	$$$WriteElementTwice("dat",Data)
+	$$$WriteElementTwice("otchet",Otchet)
+	$$$WriteElementTwice("otchetdat",OtchetDat)
+	s sc=xmlstr.EndElement()
+  	&sql(FETCH zzz)
+  	}
+  	&sql(CLOSE zzz)
+  	s sc=xmlstr.EndElement()
+ $$$EndXML
+ q 1
+KontrsJobsErr
+ $$$WriteError($ZE)
+ q 0
+]]></Implementation>
+</Method>
+
+<Method name="GoodsOnKontr">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>kontr,q,w</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="GoodsOnKontrErr"
+ $$$StartXML
+ s sc=xmlstr.Element("AllHeaders")
+ s sc=xmlstr.WriteAttribute("addcols","true")
+		 $$$WriteHeader("kol","Количество",85)
+ s sc=xmlstr.EndElement()
+ s types=1
+ s goodshead=##class(Common.Common).showheaders("Goods.Goods","","","","",.types)
+ s sc=xmlstr.Element("AllObjects")
+ s i="" f  s i=$O(^t(kontr,i)) q:i=""  d
+ . s kol=$G(^t(kontr,i))
+ . q:'+$G(kol)
+ . s sc=xmlstr.Element("OneObject")
+ . s sc=xmlstr.WriteAttribute("id",i)
+ . $$$WriteElementTwice("kol",kol)
+ . d ..showxmlobj(i_"@Goods.Goods",.types,.xmlstr)
+ . s sc=xmlstr.EndElement()
+ s sc=xmlstr.EndElement()
+ $$$EndXML
+ q 1
+GoodsOnKontrErr
+ $$$WriteError($ZE)
+ q $ZE
+]]></Implementation>
+</Method>
+
+<Method name="showxmlobj">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>item,properties,xmlstr</FormalSpec>
+<Implementation><![CDATA[
+	s class=$P(item,"@",2)
+	s id=$P(item,"@",1)
+	s obj=$ZOBJCLASSMETHOD(class,"%OpenId",id)
+	i '+$ISOBJECT(obj) $$$WriteError("showxmlobj не удалось открыть объект "_id_" класса "_class) q "Извините, внутренняя ошибка программы."
+	s i="" f  s i=$O(properties(i)) q:i=""  d
+	. q:i="Images"
+	. s val=$ZOBJPROPERTY(obj,i)
+	. i $ISOBJECT(val) s val=val.Name
+	. $$$WriteElementTwice(i,val)
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+//Остаток по ячейкам
+
+]]></Content>
+</UDLText>
+
+<Method name="ostatok">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>addr,p1,param</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<Implementation><![CDATA[
+ s $ZT="ostatokErr"
+ s currentpage=$G(param("currentpage"),1)		//текущая страница в списке страниц таблицы (на стороне пользователя)
+ s stroknastr=$G(param("stroknastr"),100)		//сколько выводить строк на странице
+ s from=(currentpage*stroknastr)-stroknastr+1
+ s to=currentpage*stroknastr
+ s user=$G(%session.Data("user"),"anonim")
+ s addressdelim=$G(%session.Data("addressdelim")," - ")
+ s glob=$NA(^mtempQuant(user))
+ k @glob
+ $$$StartXML
+ s sc=xmlstr.Element("AllHeaders")
+  $$$WriteHeader("number","№",40)
+  $$$WriteHeader("addr","Ячейка",200)
+  $$$WriteHeader("tov","Товар",200)
+  $$$WriteHeader("kol1","Количество",100)
+  $$$WriteHeader("kol2","Зарезервировано",100)
+  $$$WriteHeader("percwieght","% по массе",80)
+  $$$WriteHeader("percsize","% по объему",80)
+ s sc=xmlstr.EndElement()
+ s sc=xmlstr.Element("AllObjects")
+ i addr'="" d
+ . s cell=##class(Store.Address).%OpenId(addr)
+ . i '$ISOBJECT(cell) d  q
+ . . $$$WriteError("ostatok не открылся объект ("_addr_") класса Store.Address")
+ . . s sc=xmlstr.EndElement()
+ . . $$$EndXML
+ . s parcode=cell.Code
+ . s depot=cell.Depot.%Id()
+ . s where = " and Code %STARTSWITH '"_parcode_"' and Depot="_depot
+ e  s parcode=" ",mainname="."
+ k cell
+
+ s rs=##class(%ResultSet).%New()
+ if +to>0 s top=" top "_to
+ s sql="select"_$G(top)_" a.ID,a.Code,a.Name,a.Currentweight,a.Weight,a.Currentsize,a.Size1,"
+ s sql=sql_"b.Value1 ,b.Value2,b.Goods->FullName as GoodsName,b.Goods "
+ s sql=sql_"from Store.Address a,Store.Quantity b "
+ s sql=sql_"where a.ID=b.Address "_$G(where)
+ s strcount=##class(Common.Common).Count("Store.Address a,Store.Quantity b","a.ID=b.Address "_$G(where))
+ s ok=rs.Prepare(sql)
+ i '+ok $$$WriteObjError(ok) q 0
+ s ok=rs.Execute()
+ i '+ok $$$WriteObjError(ok) q 0
+ while rs.Next(){
+ s Currentweight=$G(rs.Data("Currentweight"))
+ s Weight=$G(rs.Data("Weight"))
+ s Currentsize=$G(rs.Data("Currentsize"))
+ s Size1=$G(rs.Data("Size1"))
+ i +Weight>0 s percwieght=$J(100*(Currentweight/Weight),".",2)_" %"
+ e  s percwieght=""
+ i +Size1>0 s percsize=$J(100*(Currentsize/Size1),".",2)_" %"
+ e  s percsize=""
+ i $i(count)
+ s id=$G(rs.Data("ID"))
+ s @glob@(count,"Code")=$G(rs.Data("Code"))
+ s @glob@(count,"Name")=$G(rs.Data("Name"))
+ s @glob@(count,"id")=id
+ s @glob@(count,"percwieght")=percwieght
+ s @glob@(count,"percsize")=percsize
+ s @glob@(count,"Value1")=$G(rs.Data("Value1"))
+ s @glob@(count,"Value2")=$G(rs.Data("Value2"))
+ s @glob@(count,"GoodsName")=$G(rs.Data("GoodsName"))
+ s @glob@(count,"Goods")=$G(rs.Data("Goods"))
+ s @glob@(count,"CellName")=##class(Store.Action).AddressPath(id)
+ }
+
+ s i="" f  s i=$O(@glob@(i)) q:i=""  d
+ . s id=@glob@(i,"id")
+ . s percwieght= @glob@(i,"percwieght")
+ . s percsize=@glob@(i,"percsize")
+ . q:(i<from)&(+currentpage)	//пропускаем строки не попадающие в текущую страницу
+ . s sc=xmlstr.Element("OneObject")
+ . s Value1=@glob@(i,"Value1")
+ . s Value2=@glob@(i,"Value2")
+ . s tov=@glob@(i,"GoodsName")
+ . s GoodsId=@glob@(i,"Goods")
+ . s Name=@glob@(i,"CellName")
+ . s sc=xmlstr.WriteAttribute("id",GoodsId)
+ . $$$WriteElementTwice("number",$TR($J(i,3)," ",0))
+ . $$$WriteElementTwice("addr",Name)
+ . $$$WriteElementTwice("tov",tov)
+ . $$$WriteElementTwice("kol1",$J(Value1,".",2))
+ . $$$WriteElementTwice("kol2",$J(Value2,".",2))
+ . $$$WriteElementTwice("percwieght",percwieght)
+ . $$$WriteElementTwice("percsize",percsize)
+ . s sc=xmlstr.EndElement()
+
+ s sc=xmlstr.EndElement() 
+ $$$WriteElementTwice("strcount",strcount)
+ $$$EndXML
+ k @glob
+ q 1
+ostatokErr
+ $$$WriteError($ZE)
+ q 0
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+//Показать документы по товарам с указанными параметрами
+
+]]></Content>
+</UDLText>
+
+<Method name="docsbytovs">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>dates,where,p1</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="docsbytovsErr"
+ s dat1=$P(dates,"@",1)
+ s dat2=$P(dates,"@",2)
+ s dat1=$S(dat1="":"",1:$ZDH(dat1,4))
+ s dat2=$S(dat2="":"",1:$ZDH(dat2,4))
+ 
+ s rs=##class(%ResultSet).%New()
+ s AdditionalFields=""
+ s DocsItemsClass = p1
+ if (p1 = "undefined")||(p1="") s DocsItemsClass = "Docs.DocItems"
+ if p1 = "Brak" 
+ {
+	 s DocsItemsClass = "Docs.StorageInItems, Docs.StorageIn"
+	 s where = where_"and Docs.StorageIn.PrihodType = 1 and Docs.StorageIn.ID = Docs.StorageInItems.doc"
+	 s AdditionalFields=", quantreal"
+ }
+ 
+ 
+ s sql="select doc as docid,doc->Kontr->Name as kontrname,doc->Dat as docdat,doc->Name as docnum,doc->Tim as doctim,doc->DocumentClass as docclass,doc->DocumentClass->Name as docclassname,doc->Summa as docsumm,Goods->FullName as Goodsfullname"
+ 	_AdditionalFields
+ 	_" from "_DocsItemsClass
+ 	_" where doc->Dat>="_dat1_" and doc->Dat<="_dat2_" and "_where
+ 	_" group by doc"
+ //,doc->Depot as docdepot,doc->Depot->Name as depotname
+ 
+ s ok=rs.Prepare(sql)
+ i '+ok $$$WriteObjError(ok) q 0
+ 
+ $$$StartXML
+ s sc=xmlstr.Element("AllHeaders")
+	 $$$WriteHeader("number","№",40)
+	 $$$WriteHeader("TypDoc","Документ",150)
+	 $$$WriteHeader("DocName","№ Документа",120)
+	 $$$WriteHeader("Kontr","Контрагент",150)
+	 $$$WriteHeader("DocDate","Дата",90)
+	 $$$WriteHeader("DocTime","Время",90)
+	 $$$WriteHeader("Goods","Товар",90)
+	 $$$WriteHeader("summa","Сумма",80)
+	 if p1="Brak" $$$WriteHeader("Quantity","Количество",80)
+	 //$$$WriteHeader("depot","Склад",80)
+ s sc=xmlstr.EndElement()
+ 
+ s ok=rs.Execute()
+ i '+ok $$$WriteObjError(ok) q 0
+
+ s sc=xmlstr.Element("AllObjects")
+ While rs.Next() {
+ i $I(i)
+ s docd="",doct=""
+ s sc=xmlstr.Element("OneObject")
+ s sc=xmlstr.WriteAttribute("id",rs.Data("docid")_"@"_rs.Data("docclass"))
+ $$$WriteElementTwice("number",i)
+ $$$WriteElementTwice("TypDoc",$G(rs.Data("docclassname")))
+ $$$WriteElementTwice("DocName",$G(rs.Data("docnum")))
+ $$$WriteElementTwice("Kontr",$G(rs.Data("kontrname")))
+ i $G(rs.Data("docdat"))'="" s docd=$ZD(rs.Data("docdat"),4)
+ i $G(rs.Data("doctim"))'="" s doct=$ZT(rs.Data("doctim"))
+ 
+ $$$WriteElementTwice("DocDate",docd)
+ $$$WriteElementTwice("DocTime",doct)
+ $$$WriteElementTwice("summa",$G(rs.Data("docsumm")))
+ $$$WriteElementTwice("Goods",$G(rs.Data("Goodsfullname")))
+ if p1="Brak" $$$WriteElementTwice("Quantity",$G(rs.Data("quantreal")))
+ 
+ //$$$WriteElementTwice("depot",$G(rs.Data("depotname")))
+ 
+ s sc=xmlstr.EndElement()
+  }
+ s sc=xmlstr.EndElement()
+ 
+ $$$EndXML
+ q 1
+docsbytovsErr
+ $$$WriteError($ZE)
+ q 0
+]]></Implementation>
+</Method>
+
+<Method name="nullost">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>dat="",p1,p2</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="nullostErr"
+ s dat1=$S(dat="":+$H,1:$ZDH(dat,4))
+ s perd=$G(%session.Data("period"))
+ s data2=+$H
+ s data1=data2-perd
+ s usr=$G(%session.Data("user"),"undef")
+ s tempglob=$NA(^mtempReport(usr))
+ k @tempglob
+ //выберем курсором все записи из товарных строк расходных накладных
+ //за период указанный в настройках
+ //просуммируем по каждому товару количество и сумму
+ &sql(declare dfg cursor for
+ select Quantity,Price,Total,Goods
+ into :Quantity,:Price,:Total,:Goods 
+ from Docs.RashItems
+ where Doc->Dat>=:data1 and Doc->Dat<=:data2)
+ &sql(open dfg)
+ f  &sql(fetch dfg) q:SQLCODE  d
+ . s @tempglob@(Goods,"Quantity")=+$G(tempglob(Goods,"Quantity"))+Quantity
+ . s @tempglob@(Goods,"Total")=+$G(tempglob(Goods,"Total"))+Total
+ &sql(close dfg)
+ 
+ //добавить Property5300
+ 
+ $$$StartXML
+ s sc=xmlstr.Element("AllHeaders")
+	 $$$WriteHeader("number","№",40)
+	 $$$WriteHeader("Property7053","Изделие",120)
+	 $$$WriteHeader("Property3609","Модель",120)
+	 $$$WriteHeader("name","Наименование",120)
+	 $$$WriteHeader("Property5300","Номер по схеме",80)
+	 $$$WriteHeader("Quantity","Общий расход",90)
+	 $$$WriteHeader("d","Среднедневной расход",90)
+	 $$$WriteHeader("Total","Сумма расхода",90)
+	 $$$WriteHeader("curquant","Текущее количество",90)
+	 $$$WriteHeader("prognoz","Прогноз обнуления (дн.)",90)
+ s sc=xmlstr.EndElement()
+ //пройдемся по получившемуся списку товаров
+ //запишем каждому название и посчитаем среднедневной расход
+ s i="" f  s i=$O(@tempglob@(i)) q:i=""  d
+ . s quant=@tempglob@(i,"Quantity")
+ . s d=quant/perd //это среднедневной расход товара за период который указан в общих настройках для прогноза обнуления
+ . s curquant=##class(Goods.GoodsAction).getgoodquant(i,"")  //текущее количество
+ . q:(curquant/d)<(dat1-$H) //если обнулится меньше чем за указанный период то выходим из цикла
+ . s tov=##class(Goods.Goods).%OpenId(i)
+ . i $ISOBJECT(tov) d
+ . . s name=tov.Name
+ . . s Property7053=tov.Property7053
+ . . s Property3609=tov.Property3609
+ . . s Property5300=tov.Property5300
+ . e  d
+ . . s name="Товар с кодом "_i_" отсутствует с списке товаров"
+ . . s (Property5300,Property3609,Property7053) = ""
+ . s @tempglob@(i)=1
+ . s @tempglob@(i,"name")=name
+ . s @tempglob@(i,"Property7053")=Property7053
+ . s @tempglob@(i,"Property3609")=Property3609
+ . s @tempglob@(i,"Property5300")=Property5300
+ . s @tempglob@(i,"prognoz")=$J(curquant/d,".",0)
+ . s @tempglob@(i,"d")=$J(d,".",3)
+ . s @tempglob@(i,"curquant")=curquant
+ 
+ s sc=xmlstr.Element("AllObjects")
+ s i="" f  s i=$O(@tempglob@(i)) q:i=""  d
+ . q:'+$G(@tempglob@(i))
+ . s sc=xmlstr.Element("OneObject")
+ . s sc=xmlstr.WriteAttribute("id",i)
+ . i $I(count)
+ . $$$WriteElementTwice("number",count)
+ . $$$WriteElementTwice("Property7053",@tempglob@(i,"Property7053"))
+ . $$$WriteElementTwice("Property3609",@tempglob@(i,"Property3609"))
+ . $$$WriteElementTwice("name",@tempglob@(i,"name"))
+ . $$$WriteElementTwice("Property5300",@tempglob@(i,"Property5300"))
+ . $$$WriteElementTwice("Quantity",@tempglob@(i,"Quantity"))
+ . $$$WriteElementTwice("d",@tempglob@(i,"d"))
+ . $$$WriteElementTwice("Total",@tempglob@(i,"Total"))
+ . $$$WriteElementTwice("curquant",@tempglob@(i,"curquant"))
+ . $$$WriteElementTwice("prognoz",@tempglob@(i,"prognoz"))
+ . s sc=xmlstr.EndElement()
+ s sc=xmlstr.EndElement()
+ $$$WriteComment("Период для расчета среднедневного расхода "_perd_" дн.")
+ $$$EndXML
+ q 1
+nullostErr
+ $$$WriteError($ZE)
+ q 0
+]]></Implementation>
+</Method>
+
+<Method name="docsbypars">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>class="",params,data</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="docsbyparsErr"
+ s dat1=$P(data,"@",1)
+ s dat2=$P(data,"@",2)
+ s dat1=$S(dat1="":0,1:$ZDH(dat1,4))
+ s dat2=$S(dat2="":"",1:$ZDH(dat2,4))
+ 
+ i class="" d  q 1
+ . $$$StartXML
+ . $$$WriteError("docsbypars class=""""") 
+ . $$$WriteComment("Не указан класс документов для вывода. Отчет не может быть выполнен") 
+ . $$$EndXML
+
+ s types=1
+ s waste=##class(Common.Common).showheaders(class,"","","","",.types)
+ $$$StartXML
+ s sc=xmlstr.Element("AllHeaders")
+  $$$WriteHeader("number","№",40)
+ s i="" f  s i=$O(types(i)) q:i=""  d
+ . $$$WriteHeader(i,$G(types(i,"descr"),i),100)
+ s sc=xmlstr.EndElement()
+ 
+ s rs=##class(%ResultSet).%New()
+ s i="" f  s i=$O(types(i)) q:i=""  d
+ . s fld=i
+ . if fld="Goods" s fld="Goods->FullName as Goods"
+ . else  if types(i)'["%" s fld=i_"->Name as "_i
+ . s fields=$G(fields)_","_fld
+ //s fields=$E(fields,1,$L(fields)-1)
+ s sql="select id"_$G(fields)_" from "_class_" where "_params_" and Dat>="_dat1_" and Dat<="_dat2
+ 
+ s ok=rs.Prepare(sql)
+ i '+ok d  q 1
+ . $$$WriteObjError(ok) 
+ . $$$WriteComment("Извините, внутренняя ошибка при формировании отчета, попробуйте изменить параметры.") 
+ . $$$EndXML
+ s ok=rs.Execute()
+ i '+ok d  q 1
+ . $$$WriteObjError(ok) 
+ . $$$WriteComment("Извините, внутренняя ошибка при формировании отчета, попробуйте изменить параметры.") 
+ . $$$EndXML
+  
+ s sc=xmlstr.Element("AllObjects")
+ While rs.Next() {
+ i $I(count)
+ s sc=xmlstr.Element("OneObject")
+ $$$WriteElementTwice("number",count)
+ s i="" f  s i=$O(types(i)) q:i=""  d
+ . s txt=$G(rs.Data(i))
+ . i (types(i)="%Date")&(txt'="") s txt=$ZD(txt,4)
+ . i (types(i)="%Time")&(txt'="") s txt=$ZT(txt)
+ . i i="Summa" s txt=$J(txt,".",2),tot=$G(tot)+$J(txt,".",2)
+ . $$$WriteElementTwice(i,txt)
+ s sc=xmlstr.EndElement()
+ }
+ s sc=xmlstr.Element("OneObject")
+ $$$WriteElementTwice("Summa",$G(tot))
+ s sc=xmlstr.EndElement()
+ s sc=xmlstr.EndElement()
+ $$$EndXML
+ 
+ q 1
+docsbyparsErr
+ $$$WriteError($ZE)
+ q 0
+]]></Implementation>
+</Method>
+
+<Method name="GetGoodsFromGroup">
+<Description><![CDATA[
+Получить список товаров по id группы
+<var>GroupCode</var> - код товарной группы
+<var>CatalogueID</var> - ID каталога
+<var>Global</var> - ссылка на глобал куда скидывать результаты]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>GroupCode="",CatalogueID="",Global=""</FormalSpec>
+<Implementation><![CDATA[
+ s err="Извините, ошибка при выборке товаров группы"
+ i GroupCode="" q err
+ i CatalogueID="" q err
+ i Global="" s Global=$NA(^mtempReport("GetGoodsFromGroup",$I))
+ k @Global
+ s $ZT="GetGoodsFromGroupErr"
+ &sql(declare qwer cursor for select goo.Goods,goo.Groups,goo.Goods->Name,goo.Goods->abbr,goo.Goods->Property3609,goo.Goods->codedetail,goo.Goods->Price,gru.Name,gru.Code,goo.Goods->izdelie->Name,goo.Goods->Images
+ into :GoodsID,:GroupID,:GoodsName,:Goodsabbr,:GoodsModel,:codedetail,:GoodsPrice,:GroupName,:GroupCode,:izdelie,:Images
+ from goods.goodsgroup goo,goods.group gru 
+ where gru.Code %STARTSWITH :GroupCode and gru.Catalogue=:CatalogueID and goo.Groups=gru.ID)
+ &sql(open qwer)
+ f  &sql(fetch qwer) q:SQLCODE  d
+ . s @Global@(GroupCode,"Goods",GoodsID,"GroupID")=GroupID
+ . s @Global@(GroupCode,"Goods",GoodsID,"GoodsName")=GoodsName
+ . s @Global@(GroupCode,"Goods",GoodsID,"Goodsabbr")=Goodsabbr
+ . s @Global@(GroupCode,"Goods",GoodsID,"GoodsModel")=GoodsModel
+ . s @Global@(GroupCode,"Goods",GoodsID,"GoodsShemNumber")=codedetail
+ . s @Global@(GroupCode,"Goods",GoodsID,"GoodsPrice")=GoodsPrice
+ . s @Global@(GroupCode,"Goods",GoodsID,"Goodsizdelie")=izdelie
+ . s @Global@(GroupCode,"Goods",GoodsID,"Images")=Images
+ . s @Global@(GroupCode,"GroupName")=GroupName
+ &sql(close qwer)
+ q 1
+GetGoodsFromGroupErr
+ $$$WriteError($ZE)
+ q "Извините, ошибка при выборке товаров группы"
+]]></Implementation>
+</Method>
+
+<Method name="Zapchasti">
+<Description><![CDATA[
+Выводит отчёт Отправленные запчасти за период
+<br><var>Dates</var> дд/мм/гггг@дд/мм/гггг начало и конец периода для вывода
+<br><var>GroupModels</var> не используются
+<br><var>GroupName</var> не используются]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Dates,GroupModels,GroupName</FormalSpec>
+<Implementation><![CDATA[
+
+ $$$StartXML
+ s sc=xmlstr.Element("AllHeaders")
+  $$$WriteHeader("opl","Оплата",100)
+  $$$WriteHeader("date","Дата",80)
+  $$$WriteHeader("kontr","Контрагент",180)
+  $$$WriteHeader("sent","Способ отправки",120)
+  $$$WriteHeader("abbr","Аббревиатура",80)
+  $$$WriteHeader("Stoimost","Стоимость",80)
+  $$$WriteHeader("Cena","Цена",80)
+  
+ s sc=xmlstr.EndElement()
+ 
+ s glob=$NA(^mtempReport("Zapchasti",$I))
+ k @glob
+ s Dat1=$ZDH($P(Dates,"@",1),4)
+ s Dat2=$ZDH($P(Dates,"@",2),4)
+ s ModelsToGroup=GroupName
+ f i=1:1:$L(GroupModels,",") d
+ . s model=$P(GroupModels,",",i)
+ . q:model=""
+ . s ModelsToGroup(model)=""
+ 
+ s ok=..SentZapchasti(Dat1,Dat2,glob,.ModelsToGroup)
+ i '+ok d  q 1
+ . $$$WriteElementTwice("comment",ok)
+ . $$$EndXML
+ 
+ s sc=xmlstr.Element("AllObjects")
+ s i="" f  s i=$O(@glob@(i)) q:i=""  d
+ . s Dat="" f  s Dat=$O(@glob@(i,Dat)) q:Dat=""  d
+ . . s Kontr="" f  s Kontr=$O(@glob@(i,Dat,Kontr)) q:Kontr=""  d
+ . . . s Abbr="" f  s Abbr=$O(@glob@(i,Dat,Kontr,Abbr)) q:Abbr=""  d
+ . . . . s Cena=$G(@glob@(i,Dat,Kontr,Abbr,"Cena"))
+ . . . . s Stoimost=$G(@glob@(i,Dat,Kontr,Abbr,"Stoimost"))
+ . . . . s sc=xmlstr.Element("OneObject")
+ . . . .     $$$WriteElementTwice("opl",i)
+ . . . .	 $$$WriteElementTwice("date",$ZD(Dat,4))
+ . . . .	 $$$WriteElementTwice("kontr",Kontr)
+ . . . .	 $$$WriteElementTwice("abbr",Abbr)
+ . . . .	 $$$WriteElementTwice("Cena",Cena)
+ . . . .	 $$$WriteElementTwice("Stoimost",Stoimost)
+ . . . . s sc=xmlstr.EndElement()
+ s sc=xmlstr.EndElement()
+ $$$EndXML  
+  
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="SentZapchasti">
+<Description><![CDATA[
+Отправленные запчасти
+<br><var>Dat1</var> - Начальная дата периода (HOROLOG)
+<br><var>Dat2</var> - Конечная дата периода (HOROLOG)
+<br><var>glob</var> - ссылка на глобаль наполняемую результатами
+<br><var>ModelsToGroup</var> - группировать модели]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Dat1="",Dat2="",glob="",ModelsToGroup=""</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="SentZapchastiErr"
+ s:glob="" glob=$NA(^mtempReport("SentZapchasti",$I))
+ s:Dat1="" Dat1=+$H
+ s:Dat2="" Dat2=+$H
+ 
+ &sql(declare dfg32 cursor for Select ID,Name into :ID,:Name from Common.Dictionary7)
+ &sql(open dfg32)
+ f  &sql(fetch dfg32) q:SQLCODE  d
+ . s OplatNames(ID)=Name
+ &sql(close dfg32)
+ &sql(declare dfg33 cursor for
+ select Doc,Doc->Dat,Doc->Kontr->Name,Quantity,Price,Goods->abbr,Goods->Price
+ into :Doc,:Dat,:Kontr,:Quant,:Price,:Abbr,:Goodsprice
+ from Docs.RashItems
+ where Doc->Dat>=:Dat1 and Doc->Dat<=:Dat2)
+ &sql(open dfg33)
+ f  &sql(fetch dfg33) q:SQLCODE  d
+ . s:Abbr="" Abbr="Не указано"
+ . i $D(ModelsToGroup(Abbr)) s Abbr=ModelsToGroup  //если модель содержится в списке замены то заменяем
+ . s RashString=$G(^Docs.SuperD(Doc,"Rash")),opl=""
+ . s:RashString'="" opl=$LIST(RashString,$$$RashOpl)
+ . i opl="" s opl="Не указано"
+ . e  s opl=$G(OplatNames(opl))
+ . s Stoimost=Quant*Price
+ . s Cena=Quant*Goodsprice
+ . s @glob@(opl,Dat,Kontr,Abbr,"Cena")=$G(@glob@(opl,Dat,Kontr,Abbr,"Cena"))+Cena
+ . s @glob@(opl,Dat,Kontr,Abbr,"Stoimost")=$G(@glob@(opl,Dat,Kontr,Abbr,"Stoimost"))+Stoimost
+ &sql(close dfg33)
+ q 1
+SentZapchastiErr
+ $$$WriteError($ZE)
+ q "Извините, ошибка при формировании списка."
+]]></Implementation>
+</Method>
+
+<Method name="OtpravkaKontragentu">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Dates="",Goods="",Kontr=""</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="OtpravkaKontragentuErr"
+ s glob=$NA(^mtempReport("Zapchasti",$I))
+ k @glob
+ s Dat1=$ZDH($P(Dates,"@",1),4)
+ s Dat2=$ZDH($P(Dates,"@",2),4)
+ s $E(Goods)=""
+
+ $$$StartXML
+ s sc=xmlstr.Element("AllHeaders")
+  $$$WriteHeader("doc","Документ",100)
+  $$$WriteHeader("date","Дата",80)
+  $$$WriteHeader("oplata","Оплата",180)
+  $$$WriteHeader("tovar","Товар",180)
+  $$$WriteHeader("qnt","Количество",120)
+  $$$WriteHeader("summa","Сумма",80)
+  if Kontr="" $$$WriteHeader("Kontrname","Контрагент",80)
+ s sc=xmlstr.EndElement()
+ 
+ s sc=xmlstr.Element("AllObjects")
+ s SqlQuery="select doc->Name as docname,doc->Dat as doctat,Goods->FullName as goodsname,Quantity,Total "
+ s:Kontr="" SqlQuery=SqlQuery_", doc->Kontr->Name as Kontrname "
+ s SqlQuery=SqlQuery_"from Docs.RashItems"
+ s SqlQuery=SqlQuery_" where doc->Dat>="_Dat1_" and doc->Dat<="_Dat2
+ s:Kontr'="" SqlQuery=SqlQuery_" and doc->Kontr="_Kontr
+ s SqlQuery=SqlQuery_" and doc->Stat=2"
+ if Goods'="" s SqlQuery=SqlQuery_" and Goods in ("_Goods_") "
+ s rs=##class(%ResultSet).%New()
+ s ok=rs.Prepare(SqlQuery) i '+ok $$$WriteObjError(ok) q "Ошибка"
+ s ok=rs.Execute() i '+ok $$$WriteObjError(ok) q "Ошибка"
+ while rs.Next() {
+	s sc=xmlstr.Element("OneObject")
+	 s docname=rs.Data("docname")
+	 s doctat=rs.Data("doctat")
+	 s goodsname=rs.Data("goodsname")
+	 s Quantity=rs.Data("Quantity")
+	 s Total=rs.Data("Total")
+
+     $$$WriteElementTwice("doc",docname)
+	 $$$WriteElementTwice("date",$ZD(doctat,4))
+ 	 $$$WriteElementTwice("oplata","")
+ 	 $$$WriteElementTwice("tovar",goodsname)
+ 	 $$$WriteElementTwice("qnt",Quantity)
+ 	 $$$WriteElementTwice("summa",Total)
+ 	 if Kontr="" $$$WriteElementTwice("Kontrname",rs.Data("Kontrname"))
+ 	s sc=xmlstr.EndElement()
+ }
+ s sc=xmlstr.EndElement()
+ $$$EndXML  
+
+ q 1
+OtpravkaKontragentuErr
+ $$$WriteError($ZE)
+ q "Ошибка"
+]]></Implementation>
+</Method>
+
+<Method name="ShowInactiveKontr">
+<Description>
+Отчёт о контрагентах которые не заказывают запчасти</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Dates:%String="",p1="",p2=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="ShowInactiveKontrErr"
+ s glob=$NA(^mtempReport("ShowInactiveKontr",$I))
+ k @glob
+ s Dat1=$ZDH($P(Dates,"@",1),4)
+ s Dat2=$ZDH($P(Dates,"@",2),4)
+ $$$StartXML
+ s sc=xmlstr.Element("AllHeaders")
+  $$$WriteHeader("number","№ п/п",30)
+  $$$WriteHeader("kontr","Клиент",150)
+  $$$WriteHeader("city","Город",150)
+  $$$WriteHeader("phone","Телефон",150)
+  $$$WriteHeader("email","EMail",150)
+  $$$WriteHeader("contpers","Конт. лицо",150)
+  $$$WriteHeader("chief","Директор",150)
+  $$$WriteHeader("lastinstr","Последний заказ",150)
+  $$$WriteHeader("Result","Последний созвон",150)
+ s sc=xmlstr.EndElement()
+
+ &sql(declare Opers cursor for
+ 	select ID,Kontr
+ 	into :OperId,:KontrId
+ 	from Operation.Instructions
+ 	where Dat>=:Dat1 and Dat<=:Dat2)
+ &sql(open Opers)
+ f  &sql(fetch Opers) q:SQLCODE  d
+ . q:KontrId=""
+ . s @glob@("Exclude",KontrId)=""
+ &sql(close Opers)
+
+ &sql(declare Kontrs cursor for select ID,City,Phones,EMail,ContPers,Chief,Name into :KontrId,:City,:Phones,:EMail,:ContPers,:Chief,:KontrName from Common.Kontragent where Activity=1)
+ &sql(open Kontrs)
+ f  &sql(fetch Kontrs) q:SQLCODE  d
+ . q:$D(@glob@("Exclude",KontrId))
+ . &sql(select top 1 ID,Dat,Tim,Name,RashOplatType->Name,%external(State) into :OperId,:Dat,:Tim,:Name,:RashOplatTypeName,:State from Operation.Instructions where Kontr=:KontrId and Oper=10 order by Dat desc, Tim desc)
+ . if SQLCODE s (OperId,Dat,Tim,Name,RashOplatTypeName,State)=""
+ . if 'SQLCODE&Dat>Dat1 q		//пропустим тех кого нашли и дата его больше начальной даты заданной пользователем
+ . s @glob@("Kontrs",KontrId)=""
+ . s @glob@("Kontrs",KontrId,"Dat")=Dat
+ . s @glob@("Kontrs",KontrId,"Tim")=Tim
+ . s @glob@("Kontrs",KontrId,"Name")=Name
+ . s @glob@("Kontrs",KontrId,"RashOplatTypeName")=RashOplatTypeName
+ . s @glob@("Kontrs",KontrId,"State")=State
+ . s @glob@("Kontrs",KontrId,"City")=City
+ . s @glob@("Kontrs",KontrId,"Phones")=Phones
+ . s @glob@("Kontrs",KontrId,"EMail")=EMail
+ . s @glob@("Kontrs",KontrId,"ContPers")=ContPers
+ . s @glob@("Kontrs",KontrId,"Chief")=Chief
+ . s @glob@("Kontrs",KontrId,"KontrName")=KontrName
+ . &sql(select top 1 Dat,Tim,Result into :MeetDat,:MeetTim,:Result from Kontragent.Meeting where Kontr=:KontrId Order By Dat desc, Tim desc)
+ . d:'SQLCODE 
+ . . if MeetDat s MeetDat=$ZD(MeetDat,4)
+ . . s @glob@("Kontrs",KontrId,"Result")=MeetDat_" "_Result
+ &sql(close Kontrs)
+
+ s sc=xmlstr.Element("AllObjects")
+ s KontrId="" 
+ f  s KontrId=$O(@glob@("Kontrs",KontrId)) q:KontrId=""  d
+ . s sc=xmlstr.Element("OneObject")
+ . $$$WriteElementTwice("number",$i(count))
+ . $$$WriteElementTwice("kontr",$G(@glob@("Kontrs",KontrId,"KontrName")))
+ . $$$WriteElementTwice("city",$G(@glob@("Kontrs",KontrId,"City")))
+ . $$$WriteElementTwice("phone",$G(@glob@("Kontrs",KontrId,"Phones")))
+ . $$$WriteElementTwice("email",$G(@glob@("Kontrs",KontrId,"EMail")))
+ . $$$WriteElementTwice("contpers",$G(@glob@("Kontrs",KontrId,"ContPers")))
+ . $$$WriteElementTwice("chief",$G(@glob@("Kontrs",KontrId,"Chief")))
+ . s Dat=$G(@glob@("Kontrs",KontrId,"Dat"))
+ . if Dat s Dat=$ZD(Dat,4)
+ . else  s Dat=""
+ . s RashOplatTypeName=$G(@glob@("Kontrs",KontrId,"RashOplatTypeName"))
+ . s Name=$G(@glob@("Kontrs",KontrId,"Name"))
+ . if (Dat'="")||(RashOplatTypeName'="")||(Name'="") s lastinstr=Dat_" / "_RashOplatTypeName_" / "_Name
+ . else  s lastinstr=""
+ . $$$WriteElementTwice("lastinstr",lastinstr)
+ . $$$WriteElementTwice("Result",$G(@glob@("Kontrs",KontrId,"Result")))
+ . s sc=xmlstr.EndElement()
+ s sc=xmlstr.EndElement()
+ $$$EndXML  
+
+ q 1
+ShowInactiveKontrErr
+ $$$WriteError($ZE)
+ q 0
+]]></Implementation>
+</Method>
+
+<Method name="NullOstatokForecastPrepare">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Dates:%String="",RepTypeGoodsAbbr:%String="",param=""</FormalSpec>
+<Implementation><![CDATA[
+ s tempglob=$NA(^mtempReport(param_"@NullOstatokForecast"))
+ j ##class(Reports.Analyzis).NullOstatokForecastMake(Dates, RepTypeGoodsAbbr, param, tempglob)
+ q
+]]></Implementation>
+</Method>
+
+<Method name="NullOstatokForecastLookUp">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>param="",secondParam="@NullOstatokForecast"</FormalSpec>
+<Implementation><![CDATA[
+ s tempglob=$NA(^mtempReport(param_secondParam))
+ q $G(@tempglob)
+]]></Implementation>
+</Method>
+
+<Method name="NullOstatokForecastMake">
+<Description>
+Отчёт - прогноз обнуления остатков
+Dates - даты для расчёта среднемесячного расхода
+TermType - тип периода для расчёта среднемесячного расхода (зима, лето, год или указанные даты)</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Dates:%String="",RepTypeGoodsAbbr:%String="",param,glob=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="NullOstatokForecastErr"
+ k @glob
+ s @glob="Запущен отчёт прогноз обнуления остатков"
+ s Dat1=$ZDH($P(Dates,"@",1),4)
+ s Dat2=$ZDH($P(Dates,"@",2),4)
+ s month=+$ZD(+$H,1)
+ s year=+$ZD(+$H,3)
+ s TermType=$P(RepTypeGoodsAbbr,"@",1)
+ s GoodsAbbr=$P(RepTypeGoodsAbbr,"@",2)
+ if TermType="winter" d
+ . if (month=11)||(month=12) s year1=year,year2=year+1
+ . else  s year1=year-1,year2=year
+ . s Dat1=$ZDH("01/11/"_year1,4)
+ . s Dat2=$ZDH("28/02/"_year2,4)
+ if TermType="summer" d
+ . if month<4 s year=-1
+ . s Dat1=$ZDH("01/04/"_year,4)
+ . s Dat2=$ZDH("30/09/"_year,4)
+ if TermType="year" d
+ . s Dat1=$ZDH("01/01/"_year,4)
+ . s Dat2=+$H
+ s MonthsDiff=+$ZD(Dat2,1)-$ZD(Dat1,1)	//разница в месяцах
+ //если годы различаются
+ if +$ZD(Dat1,3)'=+$ZD(Dat2,3) d
+ . s MonthsDiff=(13-$ZD(Dat1,1))+$ZD(Dat2,1)
+ 
+ &sql(select count(ID) into :DocsCount from Docs.StorageOut where Dat>=:Dat1 and Dat<=:Dat2)
+ 
+ s i=""
+ //идём по внутренним инструкциям и суммируем продажи всех товаров в диапазоне дат 
+ //(шоп по каждому товару потом не бегать отдельно)
+ //&sql(declare rep9doc cursor for select quantreal,Goods into :quantreal,:Goods from Docs.StorageOutItems where Doc->Dat>=:Dat1 and Doc->Dat<=:Dat2 and doc->stat=2)
+ //нет! бежим по инструкциям руководителя и подсчитываем сколько чего было заказано
+ &sql(declare rep9doc cursor for select Quantity,Goods into :quantreal,:Goods from Operation.InstructionsItems where Doc->Dat>=:Dat1 and Doc->Dat<=:Dat2)
+ &sql(open rep9doc)
+ f  &sql(fetch rep9doc) q:SQLCODE  d
+ . s @glob@("Count",Goods)=$G(@glob@("Count",Goods))+quantreal
+ . s @glob="Обработано "_$I(i)_" из "_DocsCount_" документов"
+ &sql(close rep9doc)
+ s i=""
+ 
+ &sql(select count(ID) into :GoodsCount from Goods.Goods where (abbr %STARTSWITH :GoodsAbbr) OR (:GoodsAbbr is null))
+ 
+ &sql(declare rep9 cursor for 
+ 	select ID,FullName,Property5300,codedetail
+ 	into :ID,:Name,:Property5300,:codedetail
+ 	from Goods.Goods 
+ 	where (abbr %STARTSWITH :GoodsAbbr) OR (:GoodsAbbr is null)
+ 	order by abbr,Property3609)
+ &sql(open rep9)
+ f  &sql(fetch rep9) q:SQLCODE  d
+ . i $i(strcount)
+ . s @glob="Обработано "_strcount_" из "_GoodsCount_" товаров"
+ . s @glob@("Data",strcount,"Name")=Name
+ . s @glob@("Data",strcount,"Property5300")=Property5300
+ . s @glob@("Data",strcount,"codedetail")=codedetail
+ . s (@glob@("Data",strcount,"quantreal"),TotalShipmentOut)=+$G(@glob@("Count",ID))
+ . if '+TotalShipmentOut d  q
+ . . s @glob@("Data",strcount,"MonQuant")="Движения нет, подсчёт невозможен"
+ . . s @glob@("Data",strcount,"quantity")="Движения нет, подсчёт невозможен"
+ . . s @glob@("Data",strcount,"NullDate")="Движения нет, подсчёт невозможен"
+ . s @glob@("Data",strcount,"MonQuant")=$J(TotalShipmentOut/MonthsDiff,"",2)
+ . s CommonQuantity=0
+ . d ##class(Store.Action).GetQuantByGoods(ID,.CommonQuantity)
+ . s @glob@("Data",strcount,"quantity")=CommonQuantity
+ . s OutPerDay=TotalShipmentOut/(Dat2-Dat1)	//ежедневный расход
+ . s DaysLeft=$FN(CommonQuantity/OutPerDay,"",0)	//осталось дней до полного обнуления
+ . s @glob@("Data",strcount,"NullDate")=$ZD(Dat2+DaysLeft,4)
+ &sql(close rep9)
+ 
+ s @glob="stopПериод для расчёта среднемесячного расхода"_$C(13,10)_"с "_$ZD(Dat1,4)_" по "_$ZD(Dat2,4)_$C(13,10)_"Количество месяцев: "_MonthsDiff
+ q 1
+NullOstatokForecastErr
+ $$$WriteError($ZE)
+ s @glob="stopИзвините. Ошибка при формировании отчёта. Попробуйте запустить с другими параметрами."
+ q 0
+]]></Implementation>
+</Method>
+
+<Method name="NullOstatokForecastShow">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>p1,p2,param</FormalSpec>
+<Implementation><![CDATA[
+ $$$StartXML
+ s glob=$NA(^mtempReport(param_"@NullOstatokForecast"))
+
+ s currentpage=$G(param("currentpage"),1)		//текущая страница в списке страниц таблицы (на стороне пользователя)
+ s stroknastr=$G(param("stroknastr"),100)		//сколько выводить строк на странице
+ s from=(currentpage*stroknastr)-stroknastr+1
+ s to=currentpage*stroknastr
+ 
+ s sc=xmlstr.Element("AllHeaders")
+  $$$WriteHeader("Name","Название запчасти",300)
+  $$$WriteHeader("Property5300","Ном. по схеме",80)
+  $$$WriteHeader("codedetail","Код детали",80)
+  $$$WriteHeader("zakaz","Всего заказано",150)
+  $$$WriteHeader("quantity","Текущее количество",150)
+  $$$WriteHeader("MonQuant","Среднемесячный заказ",150)
+  $$$WriteHeader("NullDate","Дата обнуления остатков",150)
+ s sc=xmlstr.EndElement()
+
+ s sc=xmlstr.Element("AllObjects")
+ s i=from f  s i=$O(@glob@("Data",i)) q:(i=to)!(i="")  d
+ . s sc=xmlstr.Element("OneObject")
+ . $$$WriteElementTwice("Name",@glob@("Data",i,"Name"))
+ . $$$WriteElementTwice("Property5300",@glob@("Data",i,"Property5300"))
+ . $$$WriteElementTwice("codedetail",@glob@("Data",i,"codedetail"))
+ . //$$$WriteElementTwice("quantreal",$G(@glob@("Data",i,"quantreal")))
+ . $$$WriteElementTwice("zakaz",$G(@glob@("Data",i,"quantreal")))
+ . $$$WriteElementTwice("quantity",$G(@glob@("Data",i,"quantity")))
+ . $$$WriteElementTwice("MonQuant",$G(@glob@("Data",i,"MonQuant")))
+ . $$$WriteElementTwice("NullDate",$G(@glob@("Data",i,"NullDate")))
+ . s sc=xmlstr.EndElement()
+ s sc=xmlstr.EndElement()
+ 
+ s strcount=$O(@glob@("Data",""),-1)
+ 
+ $$$WriteElementTwice("strcount",strcount)
+ $$$EndXML
+]]></Implementation>
+</Method>
+
+<Method name="SendTermControl">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Dates:%String="",TermTypeAndTerm:%String="",param</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="SendTermControlErr"
+ s glob=$NA(^mtempReport("SendTermControl",$I))
+ k @glob
+ s currentpage=$G(param("currentpage"),1)		//текущая страница в списке страниц таблицы (на стороне пользователя)
+ s stroknastr=$G(param("stroknastr"),100)		//сколько выводить строк на странице
+ s from=(currentpage*stroknastr)-stroknastr+1
+ s to=currentpage*stroknastr
+ s ShowAllInstructions=$S($P(param,"@")="true":1,1:0)	//если передали true, значит надо показывать все инструкции а неподходящие по сроку подсвечивать
+ s TermType=$P(TermTypeAndTerm,"@",1)
+ s Term=+$P(TermTypeAndTerm,"@",2)
+ s Dat1=$ZDH($P(Dates,"@",1),4)
+ s Dat2=$ZDH($P(Dates,"@",2),4)
+
+ &sql(declare rep10 cursor for 
+ select instr,instr->Name,State,StateChangeD,instr->Dat,instr->Kontr->Name,instr->RashOplatType->Name,instr->dostavka->Name,instr->innerinstr->Name
+ into :instr,:Name,:State,:StateChangeD,:Dat,:Kontr,:Opl,:dostavka,:InnerName
+ from Operation.InstructionsHist 
+ where Instr->Dat>=:Dat1 and Instr->Dat<=:Dat2 and Instr->Oper=10
+ and (Instr->RashOplatType=:TermType OR :TermType is null))
+ &sql(open rep10)
+ f  &sql(fetch rep10) q:SQLCODE  d
+ . s @glob@("Hist",instr,"Dat")=Dat
+ . s @glob@("Hist",instr,"Kontr")=Kontr
+ . s @glob@("Hist",instr,"Opl")=Opl
+ . s @glob@("Hist",instr,"Name")=Name
+ . s @glob@("Hist",instr,"Number")=InnerName
+ . if $LF($LB(5,6,7,8,8.7,8.9),State) d
+ . . s @glob@("Hist",instr,"end")=StateChangeD
+ . . s @glob@("Hist",instr,"dostavka")=##class(Operation.Instructions).StateLogicalToDisplay(State)
+ &sql(close rep10)
+ s i="" f  s i=$O(@glob@("Hist",i)) q:i=""  d
+ . s EndDat=$G(@glob@("Hist",i,"end"))
+ . if (EndDat="")&(ShowAllInstructions) s @glob@("Hist",i,"color")=123,@glob@("Hist",i,"description")="Не отправлено"
+ . if EndDat="" q
+ . s @glob@("Hist",i,"description")="Отправлено в срок"
+ . s Dat=$G(@glob@("Hist",i,"Dat"))
+ . if (EndDat-Dat<Term)&('ShowAllInstructions) k @glob@("Hist",i) q
+ . if (EndDat-Dat>=Term)&ShowAllInstructions s @glob@("Hist",i,"color")=255,@glob@("Hist",i,"description")="Отправлено с опозданием"
+ . s @glob@("Hist",i,"Term")=(EndDat-Dat)
+ . i $i(strcount)
+ 
+ $$$StartXML
+ s sc=xmlstr.Element("AllHeaders")
+  $$$WriteHeader("Term","Срок выполнения",60)
+  $$$WriteHeader("Dat","Дата инструкции",90)
+  $$$WriteHeader("SendDat","Дата отправки",90)
+  $$$WriteHeader("Kontr","Контрагент",150)
+  $$$WriteHeader("Opl","Оплата",90)
+  $$$WriteHeader("Number","Номер инструкции",80)
+  $$$WriteHeader("Name","краткое описание",100)
+  $$$WriteHeader("dostavka","способ отправки",100)
+  if ShowAllInstructions $$$WriteHeader("description","Состояние отправки",150)
+ s sc=xmlstr.EndElement()
+
+ s sc=xmlstr.Element("AllObjects")
+ s i="" f  s i=$O(@glob@("Hist",i)) q:i=""  d
+ . i $i(count)
+ . q:(count<from)&(+currentpage)
+ . s sc=xmlstr.Element("OneObject")
+ . s color=$G(@glob@("Hist",i,"color"),0) 
+ . s sc=xmlstr.WriteAttribute("color",color)
+ . s Term=$G(@glob@("Hist",i,"Term"))
+ . s Dat=$G(@glob@("Hist",i,"Dat"))
+ . s Dat=$ZD(Dat,4)
+ . s SendDat=$G(@glob@("Hist",i,"end"))
+ . if +SendDat s SendDat=$ZD(SendDat,4)
+ . s Kontr=$G(@glob@("Hist",i,"Kontr"))
+ . s Opl=$G(@glob@("Hist",i,"Opl"))
+ . s Number=$G(@glob@("Hist",i,"Number"))
+ . s Name=$G(@glob@("Hist",i,"Name"))
+ . s dostavka=$G(@glob@("Hist",i,"dostavka"))
+ . s description=$G(@glob@("Hist",i,"description"))
+ . 	s sc=xmlstr.WriteAttribute("id",i)
+ .  $$$WriteElementTwice("Term",Term)
+ . 	$$$WriteElementTwice("Dat",Dat)
+ . 	$$$WriteElementTwice("SendDat",SendDat)
+ . 	$$$WriteElementTwice("Kontr",Kontr)
+ . 	$$$WriteElementTwice("Opl",Opl)
+ . 	$$$WriteElementTwice("Number",Number)
+ . 	$$$WriteElementTwice("Name",Name)
+ . 	$$$WriteElementTwice("dostavka",dostavka)
+ .  if ShowAllInstructions $$$WriteElementTwice("description",description)
+ . s sc=xmlstr.EndElement()
+ s sc=xmlstr.EndElement()
+ 
+ $$$WriteElementTwice("strcount",+$G(strcount))
+ 
+ $$$EndXML 
+
+ k @glob
+ q 1
+SendTermControlErr
+ $$$WriteError($ZE)
+ q 0
+]]></Implementation>
+</Method>
+
+<Method name="ShowGoodsZeroSent">
+<Description>
+Отчёт "Запчасти которые были затребованы клиентом и которые не были отправлены"</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Dates,p1,login</FormalSpec>
+<Implementation><![CDATA[
+ s $ZE="ShowGoodsZeroSentErr"
+ s glob=$NA(^mtempReport(login_"@ShowGoodsZeroSent"))
+ $$$StartXML
+ s sc=xmlstr.Element("AllHeaders")
+  $$$WriteHeader("GoodsName","Название запчасти",350)
+  $$$WriteHeader("Kontr","Клиент",200)
+  $$$WriteHeader("DocName","Номер заявки",110)
+  $$$WriteHeader("Dat","Дата",110)
+ s sc=xmlstr.EndElement()
+ 
+ s sc=xmlstr.Element("AllObjects")
+ if '+..ShowGoodsZeroSentMake(Dates,p1,login,glob) d  q 1
+ . s sc=xmlstr.EndElement()
+ . $$$WriteComment("Извините. Ошибка при поиске неотправленных запчастей. Попробуйте запустить отчёт с другими параметрами.")
+ . $$$EndXML 
+ s i="" f  s i=$O(@glob@("Data",i)) q:i=""  d
+ . s DocName=@glob@("Data",i,"DocName")
+ . s KontrName=@glob@("Data",i,"KontrName")
+ . s GoodsName=@glob@("Data",i,"GoodsName")
+ . s Goods=@glob@("Data",i,"Goods")
+ . s DocDat=@glob@("Data",i,"DocDat")
+ . s sc=xmlstr.Element("OneObject")
+ . s sc=xmlstr.WriteAttribute("id",Goods)
+ . $$$WriteElementTwice("GoodsName",GoodsName)
+ . $$$WriteElementTwice("Kontr",KontrName)
+ . $$$WriteElementTwice("DocName",DocName)
+ . $$$WriteElementTwice("Dat",DocDat)
+ . s sc=xmlstr.EndElement()
+ s sc=xmlstr.EndElement()
+ 
+ $$$EndXML 
+ q 1
+ShowGoodsZeroSentErr
+ $$$WriteError($ZE)
+ q 0
+]]></Implementation>
+</Method>
+
+<Method name="ShowGoodsZeroSentMake">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Dates,p1,p2,glob</FormalSpec>
+<Implementation><![CDATA[
+ s $ZE="ShowGoodsZeroSentMakeErr"
+ s Dat1=$ZDH($P(Dates,"@",1),4)
+ s Dat2=$ZDH($P(Dates,"@",2),4)
+ &sql(declare SGZS cursor for
+ select ID,Doc->Name,Doc->Source->Kontr->Name,Goods->FullName,Doc->Dat,Goods 
+ into :ID,:DocName,:KontrName,:GoodsName,:DocDat,:Goods
+ from Docs.StorageOutItems
+ where Doc->Dat>=:Dat1 and Doc->Dat<=:Dat2 and quantreal=0 and Doc->stat=2)
+ &sql(open SGZS)
+ f  &sql(fetch SGZS) q:SQLCODE  d
+ . s @glob@("Data",ID,"DocName")=DocName
+ . s @glob@("Data",ID,"KontrName")=KontrName
+ . s @glob@("Data",ID,"GoodsName")=GoodsName
+ . s @glob@("Data",ID,"Goods")=Goods
+ . s @glob@("Data",ID,"DocDat")=$ZD(DocDat,4)
+ &sql(close SGZS)
+ q 1
+ShowGoodsZeroSentMakeErr
+ $$$WriteError($ZE)
+ q 0
+]]></Implementation>
+</Method>
+</Class>
+</Export>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.docslist">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62178,40654.818076</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body leftmargin=""20px"" topmargin=""20px"" rightmargin=""20px"" bottommargin=""20px"">"
+	Write !,"<table border=1>",!
+	Write "	<tr>",!
+	Write "		<th>Документ",!
+	Write "		<th>Номер",!
+	Write "		<th>Дата",!
+	Write "		<th>Контрагент",!
+	Write "	</tr>",!
+	s docs=%request.Get("docs")
+	f i=1:1:$L(docs,";")
+	{
+	s docId = $P(docs,";",i)
+	CONTINUE:docId=""
+	s DocObj = ##class(Docs.Super).%OpenId(docId)
+	CONTINUE:'$ISOBJECT(DocObj)
+	w "<tr>"
+	w "<td>"_DocObj.DocumentClass.Name
+	w "<td>"_DocObj.Name
+	w "<td>"_$ZD(DocObj.Dat,4)
+	w "<td>"_DocObj.Kontr.Name
+	w "<td><a href=""print.csp?id="_docId_"&class="_DocObj.DocumentClass.%Id()_"&sessionid="_%session.SessionId_""">"_"<img src=""images/print.gif"">"_"</a>"
+	}
+	Write !,"</table>",!
+	Write "</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,!,"<!-- Put your page Title here -->"
+	Write !,"<title>	Список документов </title>",!
+	Write "<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\DocsList.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/DocsList.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>62178,7095</Default>
+</Parameter>
+</Class>
+</Export>

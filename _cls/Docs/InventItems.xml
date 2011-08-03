@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.InventItems">
+<Super>Docs.DocItems</Super>
+<TimeCreated>60394,67500.325007</TimeCreated>
+
+<Property name="quantplan">
+<Description>
+Количество по плану</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Index name="quantplanind">
+<Properties>quantplan</Properties>
+</Index>
+
+<Property name="addr">
+<Description>
+Ячейка</Description>
+<Type>Store.Address</Type>
+</Property>
+
+<Index name="addrind">
+<Properties>addr</Properties>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>InventItemsDefaultData</DefaultData>
+<Data name="InventItemsDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"InventItems"</Subscript>
+<Value name="1">
+<Value>addr</Value>
+</Value>
+<Value name="2">
+<Value>quantplan</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

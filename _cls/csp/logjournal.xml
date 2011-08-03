@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.logjournal">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62122,53212.026084</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body onload=""load()"">"
+	Write !,(##class(%CSP.Response).HyperEventBody())
+	Write !,"<TABLE cellSpacing=0 width=""100%"" celpadding=""0"" >",!
+	Write "<TR>",!
+	Write "<td width=10%></td>",!
+	Write "<TD width=80% id=""MainNameCell"" align=center style=""BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid"" ><strong>Журнал работы с системой</strong></TD>",!
+	Write "<td  width=10% align=right></td>",!
+	Write "</tr>",!
+	Write "</table><br>",!
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""window.location.href='tuneup.csp'"" TITLE=""""><center>Назад</center></span>"
+	Write "<br>",!
+	Write "<span id=""namfld"">"
+	Write "</span>"
+	Write "&nbsp;"
+	Write "<input type=""text"" id=""fldval"" onkeyup=""gg();"">"
+	Write !," <SKLADList:listview width=100% height=150 id=""Dictionary2"" zonColumnClick=""colclick()"" onAddColumns=""Show('');"" ClassName=""Users.Journal"" /><br>",!
+	Write "</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !,!
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<title>Журнал доступа к системе</title>",!
+	Write "<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"<script language=""jscript"" src=""common.js"">"
+	Write "</script>"
+	Write !,"<script language=""jscript"">"
+	Write !,"var ColCode="""";",!
+	Write !,"function gg(){",!
+	Write "if(ColCode=="""")return false;",!
+	Write "start();",!
+	Write ($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Common.Rights.CloseDeadLogins:csp.logjournal"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"')",!
+	Write "Show(ColCode+"" %STARTSWITH '""+fldval.value+""'"")",!
+	Write "}",!
+	Write !,"function colclick(){",!
+	Write "	if(Dictionary2.ColType==""%Date""){alert(""Поля с датами не обрабатываются"");return false;}",!
+	Write "	namfld.innerText=Dictionary2.ColName;",!
+	Write "	ColCode=Dictionary2.ColCode;",!
+	Write "}",!
+	Write !,"function load(){",!
+	Write "start();",!
+	Write "Dictionary2.LoadHeaders();",!
+	Write "}",!
+	Write !,"function Show(where){",!
+	Write "where=ReturnSpace(where);",!
+	Write "Dictionary2.DownLoad(where,"""","""",""Dat desc,Tim desc"");",!
+	Write "end()",!
+	Write "}",!
+	Write !,"function start(){",!
+	Write "MainNameCellText=MainNameCell.innerText;",!
+	Write "MainNameCell.innerText=""...минуточку..."";",!
+	Write "}",!
+	Write !,"function end(){",!
+	Write "MainNameCell.innerText=MainNameCellText;",!
+	Write "}",!
+	Write "</script>"
+	Write !,(..HyperEventHead())
+	Write !,!,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html XMLNS:SKLADList XMLNS:SKLAD2>"
+	Write !,"<IMPORT NAMESPACE=""SKLADList"" IMPLEMENTATION=""htc/listview.htc"">",!
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+  s login=$G(%session.Data("user"))
+  i '+login s %response.ServerSideRedirect="norights.csp" 
+  q 1
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\LogJournal.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/LogJournal.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>61710,86081</Default>
+</Parameter>
+</Class>
+</Export>

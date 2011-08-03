@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Common.Dictionary19">
+<ClassType>persistent</ClassType>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%Persistent</Super>
+<TimeCreated>61720,45343</TimeCreated>
+
+<Property name="Name">
+<Description>
+Наименование</Description>
+<Type>%String</Type>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Common.Dictionary19D</DataLocation>
+<DefaultData>Dictionary19DefaultData</DefaultData>
+<IdLocation>^Common.Dictionary19D</IdLocation>
+<IndexLocation>^Common.Dictionary19I</IndexLocation>
+<StreamLocation>^Common.Dictionary19S</StreamLocation>
+<Data name="Dictionary19DefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Name</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

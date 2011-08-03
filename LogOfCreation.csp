@@ -1,0 +1,29 @@
+<html>
+<head>
+<title>Журнал сборки инструкции по отбору</title>
+</head>
+<body>
+ <font face=Arial>
+<script language="cache" runat="server">
+ s doc=%request.Get("doc")
+ s docObject=##class(Docs.StorageOut).%OpenId(doc)
+ q:'$ISobject(docObject) 1
+ s DocName=docObject.Name
+ s DocDate=docObject.Dat
+ s:DocDate DocDate=$ZD(DocDate,4)
+ &html<
+ <center>Протокол сборки инструкции по отгрузке №<b>#(DocName)#</b> от #(DocDate)#</center>
+ <br><br>
+ >
+ s g=$NA(^LogOfCreation(doc))
+ f  s g=$Q(@g) q:(g="")||($QS(g,1)'=doc)  d
+ . if $QL(g)>=2,$G(OldGood)'=$QS(g,2) w "<hr width=80%>",!
+ . f i=2:1:$QL(g) d
+ . . w $QS(g,i)_" "
+ . w $G(@g)_"<br>",!
+ . s:$QL(g)>=2 OldGood=$QS(g,2)
+</script>
+
+</font>
+</body>
+</html>

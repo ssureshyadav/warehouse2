@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.DocItems">
+<Description>
+Записи в документах</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60361,60730.914637</TimeCreated>
+
+<Property name="Doc">
+<Description>
+Номер документа</Description>
+<Type>Docs.Super</Type>
+<Cardinality>one</Cardinality>
+<Inverse>Items</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Index name="DocInd">
+<Properties>Doc</Properties>
+</Index>
+
+<Property name="DocType">
+<Description>
+Тип документа</Description>
+<Type>Docs.Docs</Type>
+<Required>1</Required>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Index name="DocTypeInd">
+<Properties>DocType</Properties>
+</Index>
+
+<Property name="Goods">
+<Description>
+Товар</Description>
+<Type>Goods.Goods</Type>
+<Required>1</Required>
+</Property>
+
+<Index name="GInd">
+<Properties>Goods</Properties>
+</Index>
+
+<Property name="Quantity">
+<Description>
+Количество</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="Price">
+<Description>
+Цена</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="Total">
+<Description>
+Сумма</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="kurs">
+<Description>
+Курс валюты</Description>
+<Type>%Numeric</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Property name="ChangeDate">
+<Description>
+Дата закрытия</Description>
+<Type>%Date</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+<Parameter name="FORMAT" value="4"/>
+</Property>
+
+<Index name="ChangeDateInd">
+<Properties>ChangeDate</Properties>
+</Index>
+
+<Property name="ChangeTime">
+<Description>
+Время закрытия</Description>
+<Type>%Time</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Index name="ChangeTimeInd">
+<Properties>ChangeTime</Properties>
+</Index>
+
+<Property name="ChangeUser">
+<Description>
+Человек закрывший</Description>
+<Type>Users.Dates</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Index name="ChangeUserInd">
+<Properties>ChangeUser</Properties>
+</Index>
+
+<Method name="GetPropertyListIndex">
+<ClassMethod>1</ClassMethod>
+<CodeMode>objectgenerator</CodeMode>
+<FormalSpec>PropertyName:%String=""</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<Implementation><![CDATA[
+ Do %code.WriteLine(" q:PropertyName="""" """"")
+ s number=""
+ s StorageStrategy=%compiledclass.Storages.GetAt(1)
+ f i=1:1:StorageStrategy.Data.Count() d  q:StorageData.Name[%compiledclass.SqlTableName
+ . s StorageData=StorageStrategy.Data.GetAt(i)
+ s data=StorageData.Values.GetNext(.number)
+ while $ISOBJECT(data) {
+ 	s PropertyName=data.Value
+ 	s ListIndex=data.Name
+ 	Do %code.WriteLine(" s Prop( """ _ PropertyName _ """)="_ListIndex)
+ 	s data=StorageData.Values.GetNext(.number)
+ 	} 	
+ Do %code.WriteLine(" Quit $G(Prop(PropertyName))")
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="%OnBeforeSave">
+<FormalSpec>insert:%Boolean</FormalSpec>
+<Private>1</Private>
+<ProcedureBlock>0</ProcedureBlock>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ n ChangeUser
+ s %this.ChangeDate=+$H
+ s %this.ChangeTime=$P($H,",",2)
+ s ChangeUser=$S($ISOBJECT($G(%session)):$G(%session.Data("user")),1:"")
+ d:ChangeUser %this.ChangeUserSetObjectId(ChangeUser)
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Trigger name="OnUpdate">
+<Code> s obj=##class(Docs.DocItems).%OpenId({ID})
+ s obj.ChangeTime=1
+ d obj.%Save()</Code>
+<Event>UPDATE</Event>
+<Time>AFTER</Time>
+</Trigger>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Docs.DocItemsD</DataLocation>
+<DefaultData>DocItemsDefaultData</DefaultData>
+<IdLocation>^Docs.DocItemsD</IdLocation>
+<IndexLocation>^Docs.DocItemsI</IndexLocation>
+<StreamLocation>^Docs.DocItemsS</StreamLocation>
+<Data name="DocItemsDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Doc</Value>
+</Value>
+<Value name="3">
+<Value>Goods</Value>
+</Value>
+<Value name="4">
+<Value>Quantity</Value>
+</Value>
+<Value name="5">
+<Value>DocType</Value>
+</Value>
+<Value name="6">
+<Value>Price</Value>
+</Value>
+<Value name="7">
+<Value>Total</Value>
+</Value>
+<Value name="8">
+<Value>Totalka</Value>
+</Value>
+<Value name="9">
+<Value>Totalh</Value>
+</Value>
+<Value name="10">
+<Value>Dattka</Value>
+</Value>
+<Value name="11">
+<Value>dopperc</Value>
+</Value>
+<Value name="12">
+<Value>kurs</Value>
+</Value>
+<Value name="13">
+<Value>ChangeDate</Value>
+</Value>
+<Value name="14">
+<Value>ChangeTime</Value>
+</Value>
+<Value name="15">
+<Value>ChangeUser</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

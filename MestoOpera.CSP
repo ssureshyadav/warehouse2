@@ -1,0 +1,137 @@
+<html XMLNS:SKLADList XMLNS:SKLAD2>
+<IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="jscript" src="common.js"></script>
+<script language="Jscript">
+var ColCode="";
+sessionid="#(%session.SessionId)#";
+depot="#($G(%session.Data("depot")))#"
+function load(){
+listdocs.LoadHeaders("Comment,DocumentClass,Source,Tim");
+}    
+function showdocums(){ //показывает заявки
+dateArr=dat1.value.split("/")
+Data1=dateArr[2]+"-"+dateArr[1]+"-"+dateArr[0]
+dateArr=dat2.value.split("/")
+Data2=dateArr[2]+"-"+dateArr[1]+"-"+dateArr[0]
+listdocs.DownLoad("Dat>=CAST('"+Data1+"' AS DATE) and Dat<=CAST('"+Data2+"' AS DATE) and Depot="+depot);
+}
+
+function showdictionary(where){
+var where=ReturnSpace(where);
+var made=false;
+listdocs.DownLoad(where);
+}
+
+function showcreateddoc(docclID){ // показывает созданные от заявки документы 
+	qqq=1
+	docID=listdocs.ItemID;
+	createddocs.loadfrommethod("Docs.ActionZayav.Showcreateddoc",docID,qqq)
+	}
+
+
+// товарная накладная и инструкция грузчику
+function maketovnakl(cl,instrcl){
+var	kot=1;
+var doctov=listdocs.ItemID;
+if(doctov==""){alert("Не выбран документ - основание для формирования документа");return}
+WinResult=window.showModalDialog("RashIStorage.csp?docid="+doctov,"","cener:yes;status:no;dialogHeight:300px;dialogWidth:400px;resizable:yes;")
+
+}
+
+//счет-фактура
+function makeschet(cl){
+var doc=listdocs.ItemID;
+if(doc==""){alert("Не выбран документ - основание для формирования платежного поручения");return}
+//WinResult=window.showModalDialog("makescet.csp?docid="+doc+"&class="+cl,"","cener:yes;status:no;dialogHeight:250px;dialogWidth:400px;resizable:yes;")
+ok=#server(Docs.ActionZayav.SaveDocFromZayav(doc,cl))#
+if (ok){alert("Документ успешно создан")}
+else {alert(ok)};
+showcreateddoc();
+}
+
+function colclick(){
+	if(listdocs.ColType=="%Date"){alert("Поля с датами не обрабатываются");return false;}
+	namfld.innerText=listdocs.ColName;
+	ColCode=listdocs.ColCode;
+	}
+
+function ShowInstr(){
+showdocums();
+docclass="";}
+
+//печать документов
+function printdoc(){
+	var doctov=createddocs.ItemID;
+	if(doctov==""){alert("Не выбран документ - основание для печати");return}
+	var ClassName="";
+	var ItemName=createddocs.ItemName;
+	if (ItemName=='Товарная накладная'){tovnakladn="tovnakladn";WinResult=window.showModalDialog("maketovnakl.csp?docid="+doctov+"&class="+tovnakladn,"","cener:yes;status:no;dialogHeight:300px;dialogWidth:450px;resizable:yes;")}
+	else if (ItemName=='Счет-фактура'){tovnakladn='factura';WinResult=window.showModalDialog("makescet.csp?docid="+doctov+"&class="+tovnakladn,"","cener:yes;status:no;dialogHeight:250px;dialogWidth:400px;resizable:yes;")} 
+	else if (ItemName=='Инструкция грузчику'){tovnakladn='Docs.StorageOut';WinResult=window.showModalDialog("print.csp?id="+doctov+"&class="+tovnakladn,"","cener:yes;status:no;dialogHeight:250px;dialogWidth:400px;resizable:yes;")}
+	}
+function printtovnakl(){
+	var doctov=listdocs.ItemID;
+	tovnakladn="tovnakladn";
+	WinResult=window.showModalDialog("maketovnakl.csp?docid="+doctov+"&class="+tovnakladn,"","cener:yes;status:no;dialogHeight:300px;dialogWidth:450px;resizable:yes;")
+	}
+
+function CreateDocument(){
+ItemID=createddocs.ItemID;	
+createddocs.ItemName;
+if(ItemID==""){alert("Не выбран тип документа");return};
+if(createddocs.ItemName=="Товарная накладная"){CurrentDocementClass='Docs.Rash'} else 
+if(createddocs.ItemName=="Инструкция грузчику"){CurrentDocementClass='Docs.StorageOut'}
+else if(createddocs.ItemName=="Счет-фактура"){CurrentDocementClass='Docs.Factura'}
+ItemID=ReturnSpace(ItemID)
+var doccsp="ShowRash.CSP";
+WinResult=window.showModalDialog(doccsp,CurrentDocementClass+InnerSplitter+ItemID+InnerSplitter+createddocs.ItemName,"cener:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+
+}
+function processdoc(){
+if(createddocs.ItemID==""){alert("Не выбран тип документа");return};
+if(createddocs.ItemName=="Товарная накладная"){CurrentDocementClass='Docs.Rash'} else 
+if(createddocs.ItemName=="Инструкция грузчику"){CurrentDocementClass='Docs.StorageOut'}
+else if(createddocs.ItemName=="Счет-фактура"){CurrentDocementClass='Docs.Factura'}
+var doc=createddocs.ItemID+"@"+CurrentDocementClass;
+var ok=#server(Docs.ActionZayav.processdoc(doc))#
+if(isNaN(ok)){alert(ok)}
+else{showcreateddoc();alert("Документ успешно обработан");}
+}	
+</script>
+</head>
+<body onload="load()">
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR><TD align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=2><strong>Автоматическое рабочее место оператора</strong></TD></tr>
+</TABLE>
+<br>
+<table width=100%><tr>
+<td width=50%>
+<fieldset><legend id="listDocument">Cписок заявок</legend>
+Период c <input type=text id="dat1" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar" onchange="alert(99)"> по <input type=text id="dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar">
+<sklad:LittleButton name="ok" id="okbut" onclick="showdocums()" alt="Показать документы"><br>
+
+<SKLADList:listview width=100% height=200 id="listdocs" zonColumnClick="colclick()" zClick="showcreateddoc(listdocs.ItemID)" onAddColumns="showdocums()"  ClassName="Docs.Zayav" zonDblClick="CreateDocument(listdocs.ItemID)" /><br>
+  <sklad:LittleButton name="new" id="newrec1" onclick="maketovnakl('Docs.Rash')" alt="Создание товарной накладной от заявки">
+   <sklad:LittleButton name="new+" id="addschetfakt" onclick="makeschet('Docs.Factura')" alt="Создание счета-фактуры">
+  <sklad:LittleButton name="print" id="addinstr" onclick="printtovnakl()" alt="Создание инструкции грузчику ">
+ </fieldset>
+</td>
+<td width=50%>
+<fieldset><legend>Резервы</legend>
+<SKLADList:listview width=100% height=200 id="reserves" /><br>
+<sklad:LittleButton name="new" id="newrec" onclick="" alt="">
+</fieldset>
+</td>
+</tr></table>
+<table width=100%> <tr><td width=100%>
+<fieldset><legend>Список созданных документов</legend>
+<SKLADList:listview width=100% height=200 id="createddocs" onAddColumns="showdocums()"  zonDblClick="CreateDocument(createddocs.ItemID)" /><br>
+<sklad:LittleButton name="edit" id="edit" onclick="lookdoc()" onclick="CreateDocument()"alt="Просмотр документа">
+<sklad:LittleButton name="print" id="print" onclick="printdoc()" alt="печатать документ">
+<sklad:LittleButton name="ok" id="vozvrat" onclick="processdoc()" alt="обработать документ">
+</fieldset>
+</td></tr></table>
+</body>
+</html>

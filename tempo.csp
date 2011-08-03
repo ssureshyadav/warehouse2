@@ -1,0 +1,63 @@
+<html>
+<body>
+<script language="cache" runat="server">
+w "<p><h1>закачка цен по инструменту</h1></p>"
+ w "<table border=1><tr><td>№<td>модель<td>наименование<td>старая цена<td>новая цена"
+ &sql(declare kotta cursor for
+ select ID,price 
+ into :ID,:price
+ from SQLUser.instument)
+ &sql(open kotta)
+ f  &sql(fetch kotta) q:SQLCODE  d
+ . i $I(count)
+ . s newprice=+$TR(price,",",".")
+ . s goods=##class(Goods.Goods).%OpenId(+ID)
+ . i '$ISOBJECT(goods) w "<tr><td>"_count_"<td colspan=4>не смогли открыть товар "_ID_"<br>" q
+ . w "<tr><td>"_count_"<td>"_goods.abbr_"-"_goods.Property3609_"<td>"_goods.Name_"<td>"_goods.Price
+ . s goods.Price=newprice
+ . w "<td>"_goods.Price,!
+ . s ok=goods.%Save()
+ . i '+ok w "<tr><td colspan=5>не смогли обработать товар "_ID_" цена:"_newprice_" " Do DecomposeStatus^%apiOBJ(ok,.Err) w Err(Err)_"<br>",! q
+ . s price=##class(Store.Price).%New()
+ . s price.Price=newprice
+ . d price.GoodsSetObjectId(ID)
+ . d price.typcenSetObjectId(1)
+ . s price.Dat=+$H
+ . s ok=price.%Save()
+ . i '+ok w "<tr><td>"_count_"<td colspan=3>не смогли сохранить запись в справочнике цен "_ID_"<td>цена:"_newprice_" " Do DecomposeStatus^%apiOBJ(ok,.Err) w Err(Err)_"<br>",! q
+ &sql(close kotta)
+ w "</table>"
+s count=0
+w "<p><h1>закачка цен по бытовой технике</h1></p>"
+ w "<table border=1><tr><td>№ строки<td>исходная запчасть<td>модель<td>наименование<td>старая цена<td>новая цена<td>код запчасти"
+ &sql(declare skotta cursor for
+ select number,Property7053,model,name,code,price
+ into :number,:Property7053,:model,:name,:code,:price
+ from SQLUser.valera)
+ &sql(open skotta)
+ f  &sql(fetch skotta) q:SQLCODE  d
+ . i $I(count)
+ . s newprice=+$TR(price,",",".")
+ . s abbr=$P(model,"-",1),digits=+$P(model,"-",2)
+ . &sql(select id into :tovid from Goods.Goods where Property3609=:digits and abbr=:abbr and Name=:name)
+ . i SQLCODE w "<tr><td>"_count_"<td colspan=5>не смогли найти товар в базе для строки "_number_" товар "_model_" "_name,! q
+ . s goods=##class(Goods.Goods).%OpenId(tovid)
+ . i '$ISOBJECT(goods) w "<tr><td>"_count_"<td colspan=5>не смогли открыть товар "_tovid_"<br>" q
+ . w "<tr><td>"_count_"<td>"_model_" "_name_"<td>"_goods.abbr_"-"_goods.Property3609_"<td>"_goods.Name_"<td>"_goods.Price
+ . s goods.Price=newprice
+ . s goods.codedetail=code
+ . w "<td>"_goods.Price_"<td>"_code,!
+ . s ok=goods.%Save()
+ . i '+ok w "<tr><td colspan=6>не смогли обработать товар "_tovid_" цена:"_newprice_" " Do DecomposeStatus^%apiOBJ(ok,.Err) w Err(Err)_"<br>",! q
+ . s price=##class(Store.Price).%New()
+ . s price.Price=newprice
+ . d price.GoodsSetObjectId(tovid)
+ . d price.typcenSetObjectId(1)
+ . s price.Dat=+$H
+ . s ok=price.%Save()
+ . i '+ok w "<tr><td>"_count_"<td colspan=3>не смогли сохранить запись в справочнике цен "_tovid_"<td>цена:"_newprice_" " Do DecomposeStatus^%apiOBJ(ok,.Err) w Err(Err)_"<br>",! q
+ &sql(close skotta)
+ w "</table>"
+ </script>
+</body>
+</html>

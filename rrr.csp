@@ -1,0 +1,79 @@
+<html>
+<head>
+
+<!-- Put your page Title here -->
+<title>	Cache Server Page </title>
+<link href="style.css" type=text/css rel=stylesheet>
+<style>
+body{font-face: arial; font-size: 14}
+</style>
+<script language="jscript" src="common.js"></script>
+
+<script language="Jscript">
+function DateClick(koko){
+newDate=window.showModalDialog("calendar.csp","","center:yes;status:no;dialogHeight:350px;dialogWidth:310px;resizable:yes;");
+if(ReturnSpace(newDate)!=""){document.all.data.value=newDate;}
+}
+
+function DateClick2(koko){
+newDate=window.showModalDialog("calendar.csp","","center:yes;status:no;dialogHeight:350px;dialogWidth:310px;resizable:yes;");
+if(ReturnSpace(newDate)!=""){document.all.data2.value=newDate;}
+}
+
+function subm(){
+if(document.all.data.value==""){
+	DateClick()
+}
+else{
+	forma.submit();
+}
+}
+</script>
+
+</head>
+
+<body>
+<sklad:Button value="Назад" onclick="window.location.href='analyzis.csp';"><br>
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<TD align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=3><strong>Расход по брендам</strong></TD></tr>
+<tr>
+</table>
+
+<form name="forma">Дата начала<input type=text name=data id=data onclick="DateClick(this)"><br>
+Дата окончания<input type=text name=data2 id=data2 onclick="DateClick2(this)"><br>
+ <input type=button onclick="subm()" value="ok" style="width:30">
+ <input type=hidden name=ki value=1>
+ </form>
+<script language="cache" runat="server">
+ s dat1=$G(%request.Data("data",1))
+ s dat2=$G(%request.Data("data2",1))
+ s ki=$G(%request.Data("ki",1))
+ q:ki'=1
+ w "<h4>сумма расходных накладных посчитанных по цене из товарного справочника с "_dat1_" по "_dat2_"</h4><br>"
+ s dat1=$ZDH(dat1,4)
+ s dat2=$ZDH(dat2,4)
+ &sql(DECLARE C1 CURSOR FOR
+    SELECT ID
+    INTO :ID
+    FROM Docs.Rash
+    where Dat>=:dat1 and Dat<=:dat2)
+ &sql(open C1)
+ k res
+ f  &sql(fetch C1) q:SQLCODE  d
+ . i $I(count)
+ . s ok=##class(Docs.Action).GetSummByPrice("Docs.Rash",ID,.mummy)
+ . i '+ok w ok_"<br>"
+ . s i="" f  s i=$O(mummy("code",i)) q:i=""  d
+ . . s res(i)=$G(res(i))+$G(mummy("code",i))
+ . . s res=$G(res)+$G(mummy)
+ &sql(close C1)
+ w "всего обработано документов: "_count
+ w "<br>"
+ s i="" f  s i=$O(res(i)) q:i=""  d
+ . w i_" = "_$G(res(i))_"<br>"
+ w "итого: "_$G(res)
+</script>
+
+</body>
+</html>

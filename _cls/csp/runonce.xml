@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.runonce">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>60957,47013.144013</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body>"
+	Write !,!,"		"
+	Write "<!-- Put your page code here -->"
+	Write !,"		My page body",!
+	Write "</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	s ^UnRequiredFields("Docs.Utiliz","Kontr")=1
+	s ^UnRequiredFields("Docs.Utiliz","Komissia")=1
+	s ^UnRequiredFields("Docs.Rash","Platej")=1
+	s ^UnRequiredFields("Docs.Rash","OplatStatus")=1
+	s ^UnRequiredFields("Docs.Rash","OplSumma")=1
+	s ^UnRequiredFields("Docs.Platejka","Rash")=1
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,!,"<!-- Put your page Title here -->"
+	Write !,"<title>	Cache Server Page </title>",!
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\runonce.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/runonce.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>60957,43554</Default>
+</Parameter>
+</Class>
+</Export>

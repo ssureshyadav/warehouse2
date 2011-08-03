@@ -1,0 +1,58 @@
+<script language="cache" runat="server">
+s docsid=%request.Get("docid")
+</script>
+<html XMLNS:SKLAD2>
+<IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc" >
+<head>
+<title>#($G(%session.Data("systemname")))#</title>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="Jscript" src="common.js"></script>
+</head>
+<script language="jscript">
+function load(){
+PropTable1.DownLoadPairs("","","Dat,Tim,Summa,Name,DocumentClass,Stat,Source,User1,Depot,Comment");
+PropTable2.DownLoadPairs("","","StatDoc,Kontr,Dat,Tim,Summa,Name,DocumentClass,Stat,Source,User1,Depot,Comment,StatStorage");
+//downloader.startDownload('Data.csp?class=Common.Dictionary5&fields=ID,Name', putCatalogue);
+}
+function putCatalogue(text){
+addOptions(text,"roles");}
+
+function startFun(){
+	var kot=1;
+	var ok=1;
+	doctov=#(docsid)#;
+	var k1=PropTable1.item("Kontr");
+	var storeman=PropTable2.item("storeman");
+	if (k1==""||storeman==""){alert("не выбраны грузчик или контрагент"); return false}
+	ok=#server(Docs.ActionZayav.SaveRashFromZayav(doctov,k1))#;
+    kot=#server(Docs.ActionZayav.SaveStorageOut(doctov,storeman))#;
+    if (ok==1){alert("Товарная накладная успешно создана")}
+    else {alert(ok)}
+    if (kot==1){alert("Инструкция успешно создана")} else alert(kot)
+    window.close();
+    }
+</script>
+<body onload="load();" onkeypress="ManageWindow();" >
+<form name="myform" id="myform">
+<br>
+<b><center>Формирование товарной накладной</center></b>
+<br>
+<table>
+<tr><td>Грузополучатель</td><td><SKLAD2:table id="PropTable1" width=260 ClassName="Docs.Super" /></td></tr>
+</table>
+<br>
+<b><center>Формирование инструкции грузчику</center></b>
+<br>
+</form>
+<table>
+<tr><td>Грузчик&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</td><td>
+<!--<select name="roles" ID="roles">
+</select>-->
+<td>
+<SKLAD2:table id="PropTable2" width=260 ClassName="Docs.StorageOut" /></td></tr>
+</td></tr>
+</table>
+<center><br><sklad:Button value="Да" onclick="startFun();"><sklad:Button onclick="window.close()" value="Отмена"></center>
+<!--<IE:DOWNLOAD id="downloader" STYLE="behavior:url(#default#download)" />-->
+</body>
+</html>

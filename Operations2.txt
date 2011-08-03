@@ -1,0 +1,61 @@
+<html>
+<head>
+<title>	Операции </title>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="jscript">
+ sessionid="#(%session.SessionId)#";
+ 
+ function GoodCard(GoodsId){
+	InnerSplitter="~";
+	ok=window.showModalDialog("GoodsCard.csp?GoodsId="+GoodsId+"&groupspath=",GoodsId+InnerSplitter+"","center:yes;status:no;dialogHeight:600px;dialogWidth:650px;resizable:yes")
+ }
+ 
+ function print(docid,docclass){
+ window.open("print.csp?id="+docid+"&class="+docclass+"&sessionid="+sessionid)
+ }
+ 
+</script>
+</head>
+<body>
+<sklad:Button value="Назад" onclick="window.location.href='tuneup.csp'"><br>
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<td width=10%><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
+<TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" ><strong>Операции</strong></TD>
+<td width=10% align=right>&nbsp;</td>
+</TABLE>
+<br><br>
+<table>
+<thead bgcolor="#dedede">
+	<td><b>Тип операции</b></td><td><b>Товар</b></td><td><b>Ячейка</b></td><td><b>Документ</b></td><td><b>Количество</b></td><td><b>Остаток<br>после операции</b></td><td><b>Дата, время</b></td><td><b>Оператор</b></td>
+</thead>
+<script language="cache" runat="server">
+ n ID,GoodsFullName,AddrPath,Goods,Address
+  &sql(declare zzz cursor for select 
+  ID,Goods->FullName as GoodsFullName,Common.SqlProcs_AddrPath(Address) as AddrPath,Quantity,Ostatok,Goods,Address,Dat,Tim,User1->Name,%external(OperationType),DocStr->doc->name,DocStr->doc
+  into :ID,:GoodsFullName,:AddrPath,:Quantity,:Ostatok,:Goods,:Address,:Dat,:Tim,:User1,:OperationType,:Document,:DocId
+  from Operation.Operation)
+  &sql(open zzz)
+  f  &sql(fetch zzz) q:SQLCODE  d
+  . s Datetime=$S(+Dat:$ZD(Dat,4),1:"")_" "_$S(+Tim:$ZT(Tim),1:"")
+  . w "<tr bgcolor=""#effafa"" id="""_ID_""" style=""cursor:hand"" onmouseover=""this.style.backgroundColor='#efefee'"" onmouseout=""this.style.backgroundColor='#effafa'"">"
+  . w "<td>"_OperationType_"</td>"
+  . w "<td><a href=""#"" style=""text-decoration:none;color:black"" title=""Открыть карточку товара"" onclick=""GoodCard('"_Goods_"')"" onmouseover=""this.style.color='blue'"" onmouseout=""this.style.color='black'"">"_GoodsFullName_"</a></td>"
+  . w "<td>"_AddrPath_"</td>"
+  . if +DocId s DocumentString="<a href=""#"" style=""text-decoration:none;color:black"" title=""Открыть карточку товара"" onclick=""print('"_DocId_"')"" onmouseover=""this.style.color='blue'"" onmouseout=""this.style.color='black'"">"_Document_"</a>"
+  . else  s DocumentString="&nbsp;"
+  . w "<td>"_DocumentString_"</td>"
+  . w "<td>"_Quantity_"</td>"
+  . w "<td>"_Ostatok_"</td>"
+  . w "<td>"_Datetime_"</td>"
+  . w "<td>"_User1_"</td>"
+  . w "</tr>",!
+  &sql(close zzz)
+
+</script>
+</table>
+<br><p font-color=gray font-face=Arial>
+Что бы открыть карточку товара необходимо кликнуть на сам товар<br>
+<br></p>
+</body>
+</html>

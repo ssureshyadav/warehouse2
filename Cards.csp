@@ -1,0 +1,43 @@
+<html XMLNS:SKLADList>
+<IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="jscript" src="common.js"></script>
+<script language="Jscript">
+function load(){
+	instr.LoadHeaders();
+}
+
+function ShowInstr(){
+	instr.DownLoad();
+}
+
+function CardDel(){
+	if(!window.confirm("Вы хотите удалить выбранный пункт?")){return false();}
+	ok=#server(Common.Common.DeleteItem(instr.ClassName,instr.ItemID))#
+	if(ok==1){ShowInstr();}
+	else{alert(ok)}
+}
+
+function CardOpen(CardID){
+	CardID=ReturnSpace(CardID);
+	CardName=""
+	if(CardID!="")CardName=instr.ItemName;
+	ok=window.showModalDialog("addCard.csp",CardID+InnerSplitter+CardName,"cener:yes;status:no;dialogHeight:700px;dialogWidth:1000px;resizable:yes")
+	if(ok==1){ShowInstr();}
+}
+</script>
+</head>
+<body onload="load()">
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR><TD align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=2><strong>Карточки товара</strong></TD></tr>
+</TABLE>
+<br>
+<fieldset><legend>Текущие карточки</legend>
+<SKLADList:listview width=100% height=150 id="instr" onAddColumns="ShowInstr()" ClassName="Goods.Card" zonDblClick="CardOpen(instr.ItemID)" /><br>
+  <sklad:LittleButton name="new" id="newcard" onclick="CardOpen()" alt="Создать запись">
+  <sklad:LittleButton name="edit" id="editcard" onclick="CardOpen(instr.ItemID)" alt="Редактировать запись">
+  <sklad:LittleButton name="del" id="delcard" onclick="CardDel()" alt="Удалить запись">
+</fieldset>
+</body>
+</html>

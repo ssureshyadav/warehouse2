@@ -1,0 +1,31 @@
+
+<script language="cache" runat="server">
+ d:%request.ContentType="multipart/form-data"
+ . s obj=%request.MimeData("oFile1",1)
+ . q:'$ISOBJECT(obj)
+ . s Path=%request.Get("path")
+ . i $E(Path,$L(Path))'="\" s Path=Path_"\"
+ . s filepath=Path_$P(obj.FileName,"\",$L(obj.FileName,"\"))
+ . s file=##class(%File).%New(filepath)
+ . Do file.Open("WSN")
+ . d file.CopyFrom(obj)
+ . s ok=file.%Save()
+ . i '+ok d
+ . . Do DecomposeStatus^%apiOBJ(ok,.Err)
+ . . s Error=Err(Err)
+ . e  s Error="Докладываю. Файл запущенный на орбиту успешно положен "_filepath 
+</script>
+<html>
+<head>
+<title>Загрузка файлов на сервер</title>
+</head>
+<body onload="load()">
+#($G(Error))#<BR>
+<form enctype="multipart/form-data" method="post" onsubmit="return(myOnSubmitEventHandler());">
+Файл <input name="oFile1" id="oFile1" size=30 type=file ><br>
+Куда положить <input size=50 type=text name="path" id="path" value="c:\CacheSys\csp\sklad2"><br>
+<input type="submit" value="   ок   ">
+</form>
+
+</body>
+</html>

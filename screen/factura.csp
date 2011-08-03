@@ -1,0 +1,430 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+if %request.Get("word")="on"
+{
+ set %response.ContentType = "application/msword"
+ do %response.SetHeader("Content-Disposition","attachment;word.doc")
+ set %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+}
+ q 1
+</script>
+<script language="cache" runat="server">
+ s mn(1)="января",mn(2)="февраля",mn(3)="марта",mn(4)="апреля",mn(5)="мая",mn(6)="июня",mn(7)="июля",mn(8)="августа",mn(9)="сентября",mn(10)="октября",mn(11)="ноября",mn(12)="декабря"
+ s kontr2=%request.Get("kontr2")
+ s kontr=%request.Get("kontr")
+ s docid=%request.Get("id")
+ s cv1=%request.Get("cv1")
+ s DocDate=%request.Get("DocDate")
+ s NDSinside=%request.Get("NDSinside")
+ 
+ s docname2="Счет-фактура"
+ s docdate=$ZD(+$H,4)
+ s docdate2=$P(docdate,"/",1)_" "_mn(+$P(docdate,"/",2))_" "_$P(docdate,"/",3)
+ 
+ 
+ s doc=##class(Docs.Rash).%OpenId(docid)
+ d:$ISOBJECT(doc)
+ . s docname=doc.Name
+ . s:doc.Dat'="" docdate=$ZD(doc.Dat,4)
+ . s:DocDate'="" docdate=DocDate
+ . q:$G(docdate)=""
+ . s docdate=$P(docdate,"/",1)_" "_mn(+$P(docdate,"/",2))_" "_$P(docdate,"/",3)
+ . s kurs=doc.kurs
+ . if '+kurs s kurs=doc.RubSumma/doc.Summa
+
+ s k=##class(Common.Kontragent).%OpenId(kontr)
+ d:$ISOBJECT(k)
+ . s kname1=k.Name
+ . s Address1=k.Address
+ . s Address1Ur=k.AddressUr
+ . s bank1=k.bank
+ . s city1=k.City
+ . s postalcode1=k.Postalcode
+ . s city1Ur=k.CityUr
+ . s postalcode1Ur=k.PostalcodeUr
+ . d:$ISOBJECT(bank1)
+ . . s kpp1=bank1.kpp
+ . . s inn1=bank1.inn
+
+ s k=##class(Common.Kontragent).%OpenId(kontr2)
+ d:$ISOBJECT(k)
+ . s kname=k.Name
+ . s Address=k.Address
+ . s city=k.City
+ . s bank=k.bank
+ . s chief=k.chief
+ . s buh=k.glavbuh
+ . if chief="" s chief="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+ . if buh="" s buh="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+ . s postalcode=k.Postalcode
+ . d:$ISOBJECT(bank)
+ . . s kpp=bank.kpp
+ . . s inn=bank.inn
+
+ s waste=##class(Goods.GoodsAction).kurs(.other)
+ s:'+$G(kurs) kurs=waste
+ s kurs2=$J(kurs,".",2)
+ s nds=+$G(other("nds"))/100
+ s nsp=+$G(other("nsp"))/100
+ s antinds=1/(1+nds)
+ s antinsp=1/(1+nsp)
+</script>
+
+<html>
+<head>
+<style>
+	td { font-family: Arial; font-size: 11px; }
+	.norm { font-family: Arial; font-size: 12px; }
+	.sml { font-family: Arial; font-size: 9px; }
+</style>
+
+<title>#(docname2)# #(docname)#</title>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1251">
+
+</head>
+
+<body>
+
+<table cellspacing="0" width="100%">
+	<tr>
+		<td align="right" colspan="3">
+<pre style="font-family=Arial" class="sml">
+Приложение N 1
+К правилам ведения журналов учета полученных и выставленных счетов-фактур
+книг покупок и книг продаж при расчетах по налог на добавленную стоимость,
+утвержденным постановлением Правительства Российской Федерации от 2 декабря 2000г. N914 
+(в редакции постановления Правительства Российской Федерации от 15.03.2001г. N189,
+от 27.07.2002 N 575,от 16.02.2004 N 84,от 11.05.2006 N 283)</pre>
+		</td>
+	</tr>
+	<tr>
+		<td nowrap>
+		<p style="margin-left: 100px; word-spacing:50px"><b><font size="3">
+		Счет-фактура №<font color="#FFFFFF">_</font><u>#($G(docname))#</u> от <u style="word-spacing:5px">
+		#($G(docdate))#</u></font></b></td>
+		<td class="norm">(1)</td>
+		<td class="norm" width="5%">&nbsp;</td>
+	</tr>
+	<tr>
+		<td class="norm">
+		<table cellpadding="0" cellspacing="0" width="90%" bordercolor="#000000">
+			<tr>
+				<td width="0" nowrap>
+				<p class="norm">Продавец: #($G(kname))#</td>
+				<td style="border-bottom-style: solid; border-bottom-width: 1px" width="100%">
+				&nbsp;</td>
+			</tr>
+		</table>
+		</td>
+		<td class="norm">(2)</td>
+		<td class="norm">&nbsp;</td>
+	</tr>
+	<tr>
+		<td class="norm">
+		<table cellpadding="0" cellspacing="0" width="90%" bordercolor="#000000">
+			<tr>
+				<td width="0" nowrap>
+				<p class="norm">Адрес: #(postalcode)# #($G(city))# #($G(Address))#</td>
+				<td style="border-bottom-style: solid; border-bottom-width: 1px" width="100%">
+				&nbsp;</td>
+			</tr>
+		</table>
+		</td>
+		<td class="norm">(2a)</td>
+		<td class="norm">&nbsp;</td>
+	</tr>
+	<tr>
+		<td class="norm">
+		<table cellpadding="0" cellspacing="0" width="90%" bordercolor="#000000">
+			<tr>
+				<td width="0" nowrap >
+				<p class="norm">ИНН/КПП продавца: #($G(inn))# / #($G(kpp))#</td>
+				<td style="border-bottom-style: solid; border-bottom-width: 1px" width="100%">
+				&nbsp;</td>
+			</tr>
+		</table>
+		</td>
+		<td class="norm">(2б)</td>
+		<td class="norm">&nbsp;</td>
+	</tr>
+	<tr>
+		<td class="norm">
+		<table cellpadding="0" cellspacing="0" width="90%" bordercolor="#000000">
+			<tr>
+				<td width="0" nowrap>
+				<p class="norm">Грузоотправитель и его адрес: #($G(kname))#, #(postalcode)#, 
+				#($G(city))# #($G(Address))#</td>
+				<td style="border-bottom-style: solid; border-bottom-width: 1px" width="100%">
+				&nbsp;</td>
+			</tr>
+		</table>
+		</td>
+		<td class="norm">(3)</td>
+		<td class="norm">&nbsp;</td>
+	</tr>
+	<tr>
+		<td class="norm">
+		<table cellpadding="0" cellspacing="0" width="90%" bordercolor="#000000">
+			<tr>
+				<td width="0" nowrap>
+				<p class="norm">Грузополучатель и его адрес: #($G(kname1))#, 
+				#(postalcode1)# #($G(city1))# #($G(Address1))#</td>
+				<td style="border-bottom-style: solid; border-bottom-width: 1px" width="100%">
+				&nbsp;</td>
+			</tr>
+		</table>
+		</td>
+		<td class="norm">(4)</td>
+		<td class="norm">&nbsp;</td>
+	</tr>
+	<tr>
+		<td class="norm">
+		<table cellpadding="0" cellspacing="0" width="90%" bordercolor="#000000">
+			<tr>
+				<td width="0" nowrap>
+				<p class="norm">к платежно расчетному документу № #($G(cv1))#
+				<!--
+				#($G(docname))# 
+				от #($G(docdate))#
+				-->
+				</td>
+				<td style="border-bottom-style: solid; border-bottom-width: 1px" width="100%">
+				&nbsp;</td>
+			</tr>
+		</table>
+		</td>
+		<td class="norm">(5)</td>
+		<td class="norm">&nbsp;</td>
+	</tr>
+	<tr>
+		<td class="norm">
+		<table cellpadding="0" cellspacing="0" width="90%" bordercolor="#000000">
+			<tr>
+				<td width="0" nowrap>
+				<p class="norm">Покупатель: #($G(kname1))#</td>
+				<td style="border-bottom-style: solid; border-bottom-width: 1px" width="100%">
+				&nbsp;</td>
+			</tr>
+		</table>
+		</td>
+		<td class="norm">(6)</td>
+		<td class="norm">&nbsp;</td>
+	</tr>
+	<tr>
+		<td class="norm">
+		<table cellpadding="0" cellspacing="0" width="90%" bordercolor="#000000">
+			<tr>
+				<td width="0" nowrap>
+				<p class="norm">Адрес: #(postalcode1Ur)# #($G(city1Ur))# #($G(Address1Ur))#</td>
+				<td style="border-bottom-style: solid; border-bottom-width: 1px" width="100%">
+				&nbsp;</td>
+			</tr>
+		</table>
+		</td>
+		<td class="norm">(6а)</td>
+		<td class="norm">&nbsp;</td>
+	</tr>
+	<tr>
+		<td class="norm">
+		<table cellpadding="0" cellspacing="0" width="90%" bordercolor="#000000">
+			<tr>
+				<td width="0" nowrap>
+				<p class="norm">ИНН/КПП покупателя: #($G(inn1))# / #($G(kpp1))#</td>
+				<td style="border-bottom-style: solid; border-bottom-width: 1px" width="100%">
+				&nbsp;</td>
+			</tr>
+		</table>
+		</td>
+		<td class="norm">(6б)</td>
+		<td class="norm">&nbsp;</td>
+	</tr>
+</table>
+<br>
+<table style="border-collapse: collapse" border="1" bordercolor="#000000" width="100%">
+	<tr>
+		<td align="center" width="325">Наименование товара(описание выполненных 
+		работ, оказанных услуг), имущественного права</td>
+		<td align="center" width="58">Единица. измерения.</td>
+		<td align="center" width="40">Кол-во</td>
+		<td align="center" width="70">Цена (тариф) за единицу измерения.</td>
+		<td align="center" width="154">Стоимость товаров(услуг)имущественных прав всего без налога</td>
+		<td align="center" width="50">В т.ч. акциз</td>
+		<td align="center" width="50">Налого-вая ставка</td>
+		<td align="center" width="122">Сумма налога </td>
+		<td align="center" width="138">Стоимость товаров (услуг, имущественных 
+		прав, всего с учетом налога</td>
+		<td align="center" width="80">Страна происхождения</td>
+		<td align="center" width="121">Номер таможенной декларации</td>
+	</tr>
+	<tr>
+		<td align="center" width="325">1</td>
+		<td align="center">2</td>
+		<td align="center">3</td>
+		<td align="center">4</td>
+		<td align="center">5</td>
+		<td align="center">6</td>
+		<td align="center">7</td>
+		<td align="center">8</td>
+		<td align="center">9</td>
+		<td align="center">10</td>
+		<td align="center" width="121">11</td>
+	</tr>
+	
+
+
+<script language="cache" runat="server">
+ s ndsPercent=+$G(other("nds"))
+ s summpricevsegebeznal=""
+ s summsummnalog=""
+ s summpricewithnalog=""
+
+ d:$ISOBJECT(doc.Items)
+ . s tot=0,totquant=0
+ . s i="" f  s i=doc.Items.Next(i) q:i=""  d
+ . . i $I(count)
+ . . s item=doc.Items.GetAt(i)
+ . . d:$ISOBJECT(item.Goods) 
+ . . . s goods=item.Goods.FullName
+ . . . s edizm=item.Goods.Property675
+ . . s quant=item.Quantity
+ . . s itempr=item.Price
+ . . if NDSinside="false" d  //если НДС НЕ включён в цену товара
+ . . . s price=$J(kurs*itempr,".",2)
+ . . . s pricevsegebeznal=$J(quant*price,".",2)
+ . . . s summnalog=$J(pricevsegebeznal-(pricevsegebeznal*antinds),".",2)
+ . . e  d                    //если НДС включён в цену товара
+ . . . s price=$J(kurs*itempr*antinds,".",2)
+ . . . s pricevsegebeznal=$J(quant*price,".",2)
+ . . . s summnalog=$J(pricevsegebeznal*nds,".",2)
+ . . s pricewithnalog=pricevsegebeznal+summnalog
+ . . s summpricevsegebeznal=$J(summpricevsegebeznal+pricevsegebeznal,".",2)
+ . . s summsummnalog=summsummnalog+summnalog
+  . .w "<tr>"
+  . .w "<td align='left'>"_$G(goods)_"</td>"
+  . .w "<td align='center'>"_$G(edizm)_"</td>"
+  . .w "<td align='center'>"_$G(quant)_"</td>"
+  . .w "<td align='right'>"_$G(price)_"</td>"
+  . .w "<td align='right'>"_$G(pricevsegebeznal)_"</td>"
+  . .w "<td>&nbsp;</td>"
+  . .w "<td align='center'>"_$G(ndsPercent)_"%</td>"
+  . .w "<td align='right'>"_$G(summnalog)_"</td>"
+  . .w "<td align='right'>"_$G(pricewithnalog)_"</td>"
+  . .w "<td align='center'>Россия</td>"
+  . .w "<td align='center'></td>"
+  . .w "</tr>"
+  s summpricewithnalog=summpricevsegebeznal+summsummnalog
+</script>
+	
+	<tr>
+		<td width="324"><b>Всего к оплате</b></td>
+		<td width="57">&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td align='right'><b>#(summpricevsegebeznal)#</b></td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td align='right'><b>#(summsummnalog)#</b></td>
+		<td align='right'><b>#(summpricewithnalog)#</b></td>
+		<td>&nbsp;</td>
+	</tr>
+	
+</table>
+
+<br>
+<table cellpadding="0" cellspacing="0" style="width:90%" id="table1">
+	<tr>
+		<td class="norm">
+		<p align="right"><b><font face="Arial">Руководитель предприятия</font></b></td>
+		<td align="center" class="norm"><u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		</u></td>
+		<td align="center" class="norm"><u><font face="Arial">/#($G(chief))#/</font></u></td>
+		<td class="norm">&nbsp;</td>
+		<td class="norm">
+		<p align="right"><font face="Arial"><b>Главный бухгалтер</b> </font></td>
+		<td align="center" class="norm"><u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		</u></td>
+		<td align="center" class="norm"><u><font face="Arial">/#($G(buh))#/</font></u></td>
+		<td class="norm">&nbsp;</td>
+	</tr>
+	<tr>
+		<td class="norm">&nbsp;</td>
+		<td align="center" class="norm">
+		<p align="center" class="sml"><font face="Arial"><span
+  style="mso-spacerun:
+  yes">&nbsp;</span>(подпись)</font></td>
+		<td align="center" class="norm">
+		<p align="center" class="sml"><font face="Arial">(ф.и.о.)</font></td>
+		<td class="norm">&nbsp;</td>
+		<td class="norm">&nbsp;</td>
+		<td align="center" class="sml">
+		<p align="center"><font face="Arial"><span
+  style="mso-spacerun:
+  yes">&nbsp;</span>(подпись)</font></td>
+		<td align="center" class="sml">
+		<p align="center"><font face="Arial">(ф.и.о.)</font></td>
+		<td width="8" class="norm">&nbsp;</td>
+	</tr>
+	<tr>
+		<td class="norm">&nbsp;</td>
+		<td class="norm">&nbsp;</td>
+		<td class="norm">&nbsp;</td>
+		<td class="norm">&nbsp;</td>
+		<td class="norm">&nbsp;</td>
+		<td class="norm">&nbsp;</td>
+		<td class="norm">&nbsp;</td>
+		<td width="8" class="norm">&nbsp;</td>
+	</tr>
+	<tr>
+		<td class="norm">
+		<p align="right"><b><font face="Arial">Индивидуальный предприниматель</font></b></td>
+		<td align="center" class="norm"><u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		</u></td>
+		<td align="center" class="norm"><u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		</u></td>
+		<td class="norm">&nbsp;</td>
+		<td colspan="3" class="norm">
+		<p align="center"><u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+		</u></td>
+		<td width="8" class="norm">&nbsp;</td>
+	</tr>
+	<tr>
+		<td class="norm">&nbsp;</td>
+		<td align="center" class="norm">
+		<p align="center" class="sml"><font face="Arial"><span
+  style="mso-spacerun:
+  yes">&nbsp;</span>(подпись)</font></td>
+		<td align="center" class="norm">
+		<p align="center" class="sml"><font face="Arial">(ф.и.о.)</font></td>
+		<td class="norm">&nbsp;</td>
+		<td colspan="3" align="center" class="norm"><font face="Arial">
+		(реквизиты свидетельства о государственной регистрации</font></td>
+		<td width="8" class="norm">&nbsp;</td>
+	</tr>
+	<tr>
+		<td colspan="2" class="norm"><span
+  style="mso-spacerun: yes"><font face="Arial">&nbsp;&nbsp; &nbsp;</font></span></td>
+		<td class="norm">&nbsp;</td>
+		<td class="norm">&nbsp;</td>
+		<td colspan="3" align="center" class="norm"><font face="Arial">
+		индивидуального предпринимателя)</font></td>
+		<td width="8" class="norm">&nbsp;</td>
+	</tr>
+	<tr>
+		<td colspan="2" class="norm">
+		<p align="right"><font face="Arial">Примечание. Первый 
+		экземпляр-покупателю, второй экземпляр-продавцу</font></td>
+		<td class="norm">&nbsp;</td>
+		<td class="norm">&nbsp;</td>
+		<td colspan="3" class="norm">&nbsp;</td>
+		<td width="8" class="norm">&nbsp;</td>
+	</tr>
+</table>
+
+  
+
+<p>&nbsp;</p>
+
+  
+
+</body>
+
+</html>

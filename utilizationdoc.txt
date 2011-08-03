@@ -1,0 +1,374 @@
+<html>
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<Script language="cache" runat="server">
+ s DocId=%request.Get("DocId")
+ if DocId d
+ . s DocObject=##class(Docs.Utiliz).%OpenId(DocId)
+ . q:'$ISOBJECT(DocObject)
+ . s Name=DocObject.Name
+ . s Comment=DocObject.Comment
+ . s Komissia=DocObject.Komissia
+ . if $ISOBJECT(DocObject.Kontr)
+ . . s KontrId = DocObject.Kontr.%Id()
+ . . s KontrName = DocObject.Kontr.Name
+ else  d
+ . s DocObject=""
+ . s Name=##class(Docs.Action).getRashNumb("Docs.Utiliz")
+ w "<title>	Документ утилизации "
+ if $ISOBJECT(DocObject) w "№ "_DocObject.Name
+ w "</title>"
+</script>
+
+<style>
+.LeftTop{border-left : 1 solid black;border-top : 1 solid black;}
+.RightBottom{font-family:Arial;font-size:14px;border-right : 1 solid black;border-bottom : 1 solid black;}
+.checkbox{border:none;width:23px}
+</style>
+<script language="jscript" src="common.js"></script>
+<script language="javascript">
+var DetailsToSkip = "";	//строка с ID деталей
+var DocId="#(DocId)#";
+var sessionid="#(%session.SessionId)#";
+var xmlDoc = new ActiveXObject("Msxml2.DOMDocument.3.0");
+window.dialogWidth=screen.availWidth;
+window.dialogHeight=screen.availHeight;
+//Добавить товар
+function AddTovar(){
+WinResult=window.showModalDialog("selectgoods2.csp","","center:yes;status:no;dialogHeight:700px;dialogWidth:800px;resizable:yes;")
+if(WinResult==null)return
+var StringsArray = WinResult.split(StringSplitter);
+var TableObj = document.getElementById("MainTable");
+for(var i=0;i<StringsArray.length-1;i++)
+	{
+	var WinResultArray=StringsArray[i].split(InnerSplitter);
+	var ID = WinResultArray[0];
+	var FullName = WinResultArray[8];
+	var trObject = TableObj.insertRow();
+	trObject.id = ID
+
+	cellObject = trObject.insertCell();
+	cellObject.innerHTML = "<input type=\"checkbox\" onclick=\"CheckGood(this)\" id=\""+ID+"\"' class=\"checkbox\">";
+
+	cellObject = trObject.insertCell();
+	cellObject.innerText  = FullName;
+
+	cellObject = trObject.insertCell();
+	cellObject.innerHTML = "<input type=\"text\">";
+
+	cellObject = trObject.insertCell();
+	cellObject.innerHTML = "<input type=\"text\">";
+
+	cellObject = trObject.insertCell();
+	cellObject.innerHTML = "<input type=\"button\" value=\"...\" style='width:23px' onclick='SelectStorePlace(this)'><span></span>";
+	}
+}
+
+function CheckGood(obj){
+var TableObj = document.getElementById("MainTable");
+var IDs = "";
+for(var i=1;i<TableObj.rows.length;i++)
+	{
+	var RowObject = TableObj.rows(i);
+	if(RowObject.cells(0).firstChild.checked){var IDs = IDs + RowObject.id + ",";}
+	}
+document.all.DetailsFromModel.src="UtilizationDocHelper.csp?ModelsId="+IDs+"&DetailsToSkip="+DetailsToSkip;
+}
+
+// убрать отмеченные товары
+function RemoveTovars(){
+if(!window.confirm("Убрать отмеченные товары из документа?"))return
+var TableObj = document.getElementById("MainTable");
+var TableLength = TableObj.rows.length;
+for(var i=1;i<TableLength;i++)
+{
+	var RowObject = TableObj.rows(i);
+	if(RowObject.cells(0).firstChild.checked)
+	{
+		TableObj.deleteRow(i);
+		TableLength--;
+		i--;
+	}
+
+}
+}
+
+//перенести отмеченные запчасти в список запчастей на приход
+function InsertIntoDoc(InsertAll){
+var DonorTableObj = window.frames[0].DetailsTable;
+var RecepientTableObj= document.getElementById("DetailsTable");
+var DonorTableLength = DonorTableObj.rows.length;
+for(var i=1;i<DonorTableLength;i++)
+	{
+		var RowObject = DonorTableObj.rows(i);
+		if((RowObject.cells(0).firstChild.checked)||(InsertAll))
+		{
+			var CurrentGoodsId = RowObject.id;	//ID товара в текущей ячейке
+			DetailsToSkip = DetailsToSkip + CurrentGoodsId + ",";
+			NewRowObject = RecepientTableObj.insertRow();
+			NewRowObject.id = CurrentGoodsId;
+			for(var z=1;z<RowObject.cells.length;z++)
+			{
+				NewRowObject.insertCell().innerText = RowObject.cells(z).innerText;
+			}
+			
+			cellObject = NewRowObject.insertCell();
+			cellObject.innerHTML = "<input type=\"text\"  style=\"width:30px\" value=\"1\">";
+
+			cellObject = NewRowObject.insertCell();
+			cellObject.innerHTML = "<input type=\"button\" value=\"...\" style='width:23px' onclick='SelectStorePlace(this)'><span></span>";
+	
+			DonorTableObj.deleteRow(i);
+			DonorTableLength--;
+			i--;
+		}
+	}
+}
+
+// выбрать место хранения
+function SelectStorePlace(buttonObj)
+{
+	var CellObject = buttonObj.parentElement;	//ячейка таблицы в которой лежит данная кнопка
+	var goods = CellObject.parentElement.id;	//id товара в данной строке
+	newItem=window.showModalDialog("storemodal2.csp?goods="+goods+"&depot=","","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;");
+	if(newItem==null)return
+	buttonObj.id = newItem.split("~")[0];
+	var SpanObject=buttonObj.nextSibling;	//<span> справа от текущей кнопки
+	SpanObject.innerText = newItem.split("~")[1]
+}
+
+// выбор источника брака
+function FnSourceChange(){
+if(Source.value=="Kontragent"){KontrSpan.style.display="inline";}
+else{KontrSpan.style.display="none";}
+}
+
+//функция выбора контрагента (подставит выбранного в innerText переданного объекта
+function ChooseKonragent(Obj){
+newItem=window.showModalDialog("Dictionary.csp","Common.Kontragent","center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");
+if(newItem==null){return false;}
+var newArr=newItem.split(InnerSplitter);
+Obj.innerText=newArr[1];
+Obj.Tag=newArr[0];
+}
+
+//сохранить
+function startFun(){
+	var RootElement = xmlDoc.createElement("RootElement");
+	xmlDoc.documentElement=RootElement;
+	var AllObjects = xmlDoc.createElement("AllObjects");
+	
+	//Собираем строки документа
+	var TableObj = document.getElementById("MainTable");
+	for(var i=1;i<TableObj.rows.length;i++)
+	{
+		var RowObject = TableObj.rows(i);
+		var OneObject = xmlDoc.createElement("OneObject");
+		var namedNodeMap = OneObject.attributes;
+		var newAtt = xmlDoc.createAttribute("id");
+		newAtt.text=RowObject.Tag;
+		namedNodeMap.setNamedItem(newAtt);
+		//добавляем в строку информацию о товаре
+		OneObject.appendChild(InsertFieldDataIntoXml("Goods",RowObject.id,"Goods.Goods"));
+		//добавляем инфу о серийном номере
+		OneObject.appendChild(InsertFieldDataIntoXml("sn",RowObject.cells(2).firstChild.value,"%String"));
+		//добавляем инфу о гарантийном талоне
+		OneObject.appendChild(InsertFieldDataIntoXml("garant",RowObject.cells(3).firstChild.value,"%String"));
+		//указываем что это именно утилизация
+		OneObject.appendChild(InsertFieldDataIntoXml("goodsdir",1,"%String"));
+		
+		//добавляем инфу об источнике утилизации (общее кол., брак, контрагент)
+		if(Source.value=="Brak"){
+			OneObject.appendChild(InsertFieldDataIntoXml("SourceTbl",2,"%String"));
+			OneObject.appendChild(InsertFieldDataIntoXml("addr",RowObject.cells(4).firstChild.id,"Store.Address"));
+			}
+		if(Source.value=="Quantity")
+			{
+			OneObject.appendChild(InsertFieldDataIntoXml("SourceTbl",1,"%String"));
+			OneObject.appendChild(InsertFieldDataIntoXml("addr",RowObject.cells(4).firstChild.id,"Store.Address"));
+			}
+		if(Source.value=="Kontragent")
+			{
+			OneObject.appendChild(InsertFieldDataIntoXml("Client",Kontragent.Tag,"Common.Kontragent"));
+			}
+		//ставим количество 1
+		OneObject.appendChild(InsertFieldDataIntoXml("Quantity",1,"%Numeric"));
+		
+		AllObjects.appendChild(OneObject);
+		
+	}
+	
+	//теперь собираем строки запчастей, то что будем приходовать
+	var TableObj = document.getElementById("DetailsTable");
+	for(var i=1;i<TableObj.rows.length;i++)
+	{
+		var RowObject = TableObj.rows(i);
+		var Quantity = RowObject.cells(3).firstChild.value;
+		var Addr = RowObject.cells(4).firstChild.id;
+		var OneObject = xmlDoc.createElement("OneObject");
+		var namedNodeMap = OneObject.attributes;
+		var newAtt = xmlDoc.createAttribute("id");
+		newAtt.text=RowObject.Tag;
+		namedNodeMap.setNamedItem(newAtt);
+			//добавляем в строку информацию о товаре
+		OneObject.appendChild(InsertFieldDataIntoXml("Goods",RowObject.id,"Goods.Goods"));
+			//указываем что это именно оприходование
+		OneObject.appendChild(InsertFieldDataIntoXml("goodsdir",2,"%String"));
+			//указываем место
+		OneObject.appendChild(InsertFieldDataIntoXml("addr",Addr,"Store.Address"));
+			//указываем количество
+		OneObject.appendChild(InsertFieldDataIntoXml("Quantity",Quantity,"%Numeric"));
+		
+		AllObjects.appendChild(OneObject);
+	}
+
+	RootElement.appendChild(AllObjects);	
+	
+	//Собираем заголовки документа
+	InsertXmlHeader(xmlDoc,"Name",Name.value,"%String")
+	InsertXmlHeader(xmlDoc,"Komissia",Komissia.value,"%String")
+	InsertXmlHeader(xmlDoc,"Comment",Comment.value,"%String")
+	InsertXmlHeader(xmlDoc,"SourceTbl",Source.selectedIndex+1,"%String")
+	if(Source.selectedIndex=2)InsertXmlHeader(xmlDoc,"Kontr",Kontragent.Tag,"%String")
+
+	var DocID=SendXml(DocId,"Docs.Utiliz",xmlDoc,sessionid);
+	if(isNaN(DocID)){alert(DocID);}
+	else{returnValue=1;window.close();}
+}
+
+// добавить в xml данные одного поля таблицы
+function InsertFieldDataIntoXml(FieldName,FieldText,FieldType)
+{
+	var FieldElement = xmlDoc.createElement(FieldName);
+	var Fieldtext = xmlDoc.createElement("text");
+	Fieldtext.text=FieldText;
+	FieldElement.appendChild(Fieldtext);
+	var Fieldtype = xmlDoc.createElement("type");
+	Fieldtype.text=FieldType;
+	FieldElement.appendChild(Fieldtype);
+	return FieldElement;
+}
+</script>
+</head>
+
+<body>
+<br>
+<center><h2>Утилизация</h2></center>
+<br>
+<table>
+	<tr><td>Номер</td><td><input type="text" id="Name" value="#($G(Name))#"></td>
+		<td>Откуда утилизировать<td>
+<script language="cache" runat="server">
+s (QuantitySelected,BrakSelected,KontragentSelected)=""
+s DisplayKontragent="none"
+ if $ISOBJECT(DocObject) d
+ . if DocObject.SourceTbl=1 s QuantitySelected="SELECTED"
+ . if DocObject.SourceTbl=2 s BrakSelected="SELECTED"
+ . if DocObject.SourceTbl=3 s KontragentSelected="SELECTED",DisplayKontragent="block"
+w "<select id=""Source"" onchange=""FnSourceChange()"">"_
+	"<option value=""Quantity"" "_QuantitySelected_">Из общего количества</option>"_
+	"<option value=""Brak"" "_BrakSelected_">Из брака</option>"_
+	"<option value=""Kontragent"" "_KontragentSelected_">От контрагента</option>"_
+	"</select>"
+
+w "<span id=""KontrSpan"" style='display:"_DisplayKontragent_"'>Контрагент <input type='text' id='Kontragent' onmouseover=""this.style.backgroundColor='#eeffff'"" onmouseout=""this.style.backgroundColor='transparent'"" onclick=""ChooseKonragent(this)"" Tag='"_$G(KontrId)_"' value='"_$G(KontrName)_"'></span>"
+</script>
+	</tr>
+	<tr>
+		<td>Комиссия
+		<td colspan="3"><input type="text" id="Komissia" style="width:500px" value="#($G(Komissia))#">
+	</tr>
+	<tr>
+		<td>Комментарий
+		<td colspan="3"><input type="text" id="Comment" style="width:500px" value="#($G(Comment))#">
+	</tr>
+</table>
+<hr width="70%">
+<br>
+<table id="MainTable" border=2 style="border-collapse:collapse;" cellspacing=0 cellpadding=5>
+<tr bgcolor="#deeeef">
+	<td>&nbsp;<td>Товар<td>Серийный номер<td>Гарантийный талон<td>Место
+<script language="cache" runat="server">
+ if DocId
+ {
+	 &sql(declare zz cursor for
+	 	select ID,Goods,Goods->FullName,sn,garant,addr,Common.SqlProcs_AddrPath(Addr)
+	 	into :ID,:Goods,:GoodsFullName,:sn,:garant,:addr,:AddressPath
+	 	from Docs.UtilizItems
+	 	where doc = :DocId and goodsdir=1
+	 	)
+	 &sql(open zz) 
+	 f  
+	 {
+	 	&sql(fetch zz) 
+	 	q:SQLCODE
+	 	w "<tr Tag="""_ID_""" id="""_Goods_""">"
+	 	w "<td><input type=""checkbox"" onclick=""CheckGood(this)"" id="""_Goods_""" class=""checkbox"">"
+	 	w "<td>"_GoodsFullName
+	 	w "<td><input type=""text"" value="""_sn_""">"
+	 	w "<td><input type=""text"" value="""_garant_""">"
+	 	w "<td><input type=""button"" value=""..."" style='width:23px' onclick='SelectStorePlace(this)' id='"_addr_"'><span>"_AddressPath_"</span>"
+	 	w "</tr>",!
+	 }
+	 &sql(close zz)
+ }	
+</script>	
+</table>
+<sklad:Button onclick="AddTovar();" value="Добавить товар" style="width:150px">
+<sklad:Button onclick="RemoveTovars();" value="Убрать товар" style="width:150px">
+<br>
+<table width="100%">
+<tr>
+<td width="48%" valign="top">
+	<fieldset><legend>Запчасти указанной модели</legend>
+	<iframe id="DetailsFromModel" style="width:100%;height:470px;" FRAMEBORDER=0>
+	
+	</iframe>
+	</fieldset>
+<td width="5%" align="center">
+	<input type="button" value="&gt;&gt;" title="Пометить все запчасти для оприходования" style="width:30px" onclick="InsertIntoDoc(true)">
+	<br><br>
+	<input type="button" value="&gt;" title="Пометить выбранные запчасти для оприходования" style="width:30px" onclick="InsertIntoDoc(false)">
+<td width="47%" valign="top">
+	<fieldset style="height:490px;overflow-y:auto;"><legend>Запчасти подлежащие оприходованию</legend>
+	<table id="DetailsTable" border=1 style="border-collapse:collapse;margin-top:17px;margin-left:5px">
+		<tr bgcolor="#deeeef"><td>Наименование запчасти<td>Номер по схеме<td>Код<td>Количество<td>Место
+<Script language="cache" runat="server">
+ if DocId 
+ {
+ 	&sql(declare zz2 cursor for
+	 	select ID,Goods,Goods->FullName,addr,Common.SqlProcs_AddrPath(Addr),Goods->Property5300,Goods->codedetail,Quantity
+	 	into :ID,:Goods,:GoodsFullName,:addr,:AddressPath,:Property5300,:codedetail,:Quantity
+	 	from Docs.UtilizItems
+	 	where doc = :DocId and goodsdir=2)
+ 	&sql(open zz2)
+ 	f
+ 	{
+	 	&sql(fetch zz2)
+	 	q:SQLCODE
+	 	w "<tr Tag="""_ID_""" id="""_Goods_""">"
+	 	w "<td>"_GoodsFullName
+	 	w "<td>"_Property5300
+	 	w "<td>"_codedetail
+	 	w "<td><input type=""text"" style=""width:30px"" value="""_Quantity_""">"
+	 	w "<td><input type=""button"" value=""..."" style='width:23px' onclick='SelectStorePlace(this)' id='"_addr_"'><span>"_AddressPath_"</span>"
+	 	w "</tr>",!
+		s DetailsToSkip = $G(DetailsToSkip)_Goods_","
+ 	}
+ 	&sql(close zz2)
+ }
+ 
+ w "<script language=""javascript"">"
+  &JS<
+  var DetailsToSkip="#($G(DetailsToSkip))#";
+ >
+ w "</"_"script>"
+</script>
+		
+	</table>
+	</fieldset>	
+</table>
+<br>
+<center><sklad:Button value="Сохранить" onclick="startFun()" alt="Сохранить документ">&nbsp;&nbsp;&nbsp;<sklad:Button value="Отмена" onclick="windowclose()" alt="Закрыть окно, отменить все изменения"></center>
+</body>
+</html>

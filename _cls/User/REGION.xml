@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="User.REGION">
+<Description>
+</Description>
+<ClassType>persistent</ClassType>
+<DdlAllowed>1</DdlAllowed>
+<Owner>_SYSTEM</Owner>
+<ProcedureBlock>0</ProcedureBlock>
+<SqlRowIdPrivate>1</SqlRowIdPrivate>
+<SqlTableName>REGION</SqlTableName>
+<StorageStrategy/>
+<Super>%Persistent</Super>
+<TimeCreated>60541,36909.183598</TimeCreated>
+
+<Method name="%ResolveConcurrencyConflict">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[oid:%ObjectIdentity,objSS:%SYNC.SyncSet,iPtr:%Integer,&bAcceptYours:%Boolean=1]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[ q 1
+]]></Implementation>
+</Method>
+
+<Parameter name="GUIDENABLED">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="OBJJOURNAL">
+<Default>1</Default>
+</Parameter>
+
+<Property name="KOD">
+<Description>
+Код 1</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>4</SqlColumnNumber>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Index name="KODind">
+<Properties>KOD</Properties>
+</Index>
+
+<Property name="KOD1">
+<Description>
+Код 2</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>2</SqlColumnNumber>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Index name="KOD1ind">
+<Properties>KOD1</Properties>
+</Index>
+
+<Property name="KOD2">
+<Description>
+Код 3</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>3</SqlColumnNumber>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Index name="KOD2ind">
+<Properties>KOD2</Properties>
+</Index>
+
+<Property name="Name">
+<Description>
+Наименование</Description>
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>5</SqlColumnNumber>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Index name="NameInd">
+<Properties>Name</Properties>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^User.REGIOND</DataLocation>
+<DefaultData>REGIONDefaultData</DefaultData>
+<IdLocation>^User.REGIOND</IdLocation>
+<IndexLocation>^User.REGIONI</IndexLocation>
+<StreamLocation>^User.REGIONS</StreamLocation>
+<Data name="REGIONDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>KOD</Value>
+</Value>
+<Value name="3">
+<Value>KOD1</Value>
+</Value>
+<Value name="4">
+<Value>KOD2</Value>
+</Value>
+<Value name="5">
+<Value>Name</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

@@ -1,0 +1,50 @@
+<CSP:CLASS INCLUDES="xmlmacros">
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ s login=$G(%session.Data("user"))
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ q 1
+</script>
+
+<html>
+<head>
+<style>
+.Kontragent{width:170px;cursor:hand;}
+</style>
+<script language="javascript">
+
+function ChooseKonragent(Obj)
+{
+	newItem=window.showModalDialog("Dictionary.csp","Common.Kontragent","center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");
+	if(newItem==null){return false;}
+	var newArr=newItem.split(InnerSplitter);
+	Obj.innerText=newArr[1];
+	Obj.Tag=newArr[0];
+}
+
+function startFun()
+{
+	window.returnValue=dat1.value+"@"+dat2.value+"@"+Kontr.Tag;
+	window.close();
+}
+
+</script>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="jscript" src="common.js"></script>
+<title>	#(%session.Data("systemname"))# </title>
+
+</head>
+
+<body LEFTMARGIN="10px" topmargin=10 rightmargin=10 bottommargin=10 BGCOLOR="#efefef">
+<center>Период c <input type=text id="dat1" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"> по <input type=text id="dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"></center>
+<br>
+Акт сверки с 
+<script language="cache" runat="server">
+ s Kontr=$$$TunesVariableGlobal("DefaultPoluh")
+ s:Kontr KontrName=##class(Common.Kontragent).GetPropertyValue(Kontr,"Name")
+ w "<B><span title=""Для того что бы сменить контрагента по умолчанию см. Настройки -> Получатель платежа по умолчанию"" onmouseout=""UnPaint(this)"" onmouseover=""Paint(this)"" class=Kontragent onclick=""ChooseKonragent(this)"" oncontextmenu=""this.innerText='';this.Tag=''"" id=""Kontr"" Tag='"_$G(Kontr)_"'>"_$G(KontrName)_"</span></b>"
+</script><br>
+<br><br>
+<center><br><sklad:Button value="Да" onclick="startFun();"><sklad:Button onclick="window.close()" value="Отмена"></center>
+
+</body>
+</html>

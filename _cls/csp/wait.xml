@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.wait">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>61797,47448.268855</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body onload=""blink()"">"
+	Write !,"<table width=100% height=100%>",!
+	Write "<tr Valign=""top""><td align=""center"">"
+	Write "<span id=text onload=""blink(this)"">"
+	Write "Пожалуйста, ждите..."
+	Write "</span>"
+	Write "</td></tr>",!
+	Write "</table>",!
+	Write "</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write "<title>"_($G(%session.Data("systemname"),"Пожалуйста подождите"))_"</title>",!
+	Write "<Script language=""Javascript"">"
+	Write !,"var w=window.width;",!
+	Write "var h=window.height;",!
+	Write "window.moveTo((screen.width-200)/2, (screen.height-200)/2);",!
+	Write "var change=0",!
+	Write "function blink(){",!
+	Write "if (change==0)",!
+	Write "text.style.fontWeight=700",!
+	Write "else",!
+	Write "text.style.fontWeight=100",!
+	Write "change = (change==0) ? 100 : 0",!
+	Write "}",!
+	Write "setInterval(""blink()"",500)",!
+	Write "</Script>"
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\wait.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/wait.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>60709,34102</Default>
+</Parameter>
+</Class>
+</Export>

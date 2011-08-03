@@ -1,0 +1,4 @@
+<script language="cache" runat="server">
+ s %session.EndSession = 1
+ d ##class(Common.Rights).LogoutMethod()
+</script>

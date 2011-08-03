@@ -1,0 +1,56 @@
+<html XMLNS:SKLADList>
+<IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="jscript" src="common.js"></script>
+<title>	Выбор некондиционного товара </title>
+<Script language="Jscript">
+var ColCode="";
+
+function gg(){
+if(ColCode=="")return false;
+var SearchProperty = ColCode;
+var SearchValue = fldval.value;
+if(SearchValue=="")SearchProperty="";
+load(SearchProperty,SearchValue);
+}
+
+function colclick(){
+	if(currentdict.ColType=="%Date"){alert("Поля с датами не обрабатываются");return false;}
+	namfld.innerText=currentdict.ColName;
+	ColCode=currentdict.ColCode;
+}
+
+
+function load(SearchProperty,SearchValue){
+currentdict.loadfrommethod("Reports.ShowTables.ShowBrak",SearchProperty,SearchValue,dat1.value+"@"+dat2.value);
+}
+
+function startFun(){
+ResultArray=currentdict.ListViewGetItems("selected",1);
+returnValue=ResultArray;
+window.close();
+}
+</script>
+</head>
+
+<body onload="load('','')">
+<br><br>
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<td width=10%>&nbsp;</td>
+<TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid"><strong>Некондиционные товары</strong></TD>
+<td  width=10% align=right>&nbsp;</td>
+</tr>
+</TABLE>
+Период c <input type=text id="dat1" onclick="fnCalendar(this)" class="datar"> по <input type=text id="dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar">
+<sklad:LittleButton name="ok" id="okbut" onclick="load('','')" alt="Показать документы"><br>
+<br>
+<span id="namfld"></span>&nbsp;<input type="text" id="fldval" onkeyup="gg();">
+<SKLADList:listview width=100% height=150 id="currentdict" zonColumnClick="colclick()" zonDblClick="startFun();" /><br>
+<center>
+	<sklad:Button value="Выбрать" onclick="startFun()" style="width:150px" alt="Отправить выбранные некондиционные товары в инструкцию руководителя">
+	<sklad:Button value="Отмена" onclick="windowclose()" style="width:150px" alt="Закрыть окно без выбора некондиционных товаров">
+</center>
+</body>
+</html>

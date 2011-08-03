@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Goods.GoodsGroup">
+<Description>
+Товары в группах</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60324,75603.020859</TimeCreated>
+
+<Property name="Goods">
+<Description>
+Товар</Description>
+<Type>Goods</Type>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Товар"/>
+</Property>
+
+<Index name="GoodsIndex">
+<Properties>Goods</Properties>
+</Index>
+
+<Property name="Groups">
+<Description>
+Группа</Description>
+<Type>Goods.Group</Type>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Группы"/>
+</Property>
+
+<Index name="GroupIndex">
+<Properties>Groups</Properties>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Goods.GoodsGroupD</DataLocation>
+<DefaultData>GoodsGroupDefaultData</DefaultData>
+<IdLocation>^Goods.GoodsGroupD</IdLocation>
+<IndexLocation>^Goods.GoodsGroupI</IndexLocation>
+<StreamLocation>^Goods.GoodsGroupS</StreamLocation>
+<Data name="GoodsGroupDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Catalogue</Value>
+</Value>
+<Value name="3">
+<Value>Depot</Value>
+</Value>
+<Value name="4">
+<Value>Goods</Value>
+</Value>
+<Value name="5">
+<Value>Group</Value>
+</Value>
+<Value name="6">
+<Value>Groups</Value>
+</Value>
+</Data>
+<Property name="Goods"/>
+<Property name="Groups"/>
+</Storage>
+</Class>
+</Export>

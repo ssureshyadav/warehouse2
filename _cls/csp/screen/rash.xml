@@ -1,0 +1,900 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.screen.rash">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62196,41555.133175</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body>"
+	Write !,"<table x:str border=0 cellpadding=0 cellspacing=0 width=1013 style='border-collapse:",!
+	Write " collapse;table-layout:fixed;width:763pt'>",!
+	Write " <col width=19 style='mso-width-source:userset;mso-width-alt:810;width:14pt'>",!
+	Write " <col width=107 style='mso-width-source:userset;mso-width-alt:4565;width:80pt'>",!
+	Write " <col width=30 style='mso-width-source:userset;mso-width-alt:1280;width:23pt'>",!
+	Write " <col width=42 style='mso-width-source:userset;mso-width-alt:1792;width:32pt'>",!
+	Write " <col width=48 style='mso-width-source:userset;mso-width-alt:2048;width:36pt'>",!
+	Write " <col width=50 style='mso-width-source:userset;mso-width-alt:2133;width:38pt'>",!
+	Write " <col width=8 style='mso-width-source:userset;mso-width-alt:341;width:6pt'>",!
+	Write " <col width=4 style='mso-width-source:userset;mso-width-alt:170;width:3pt'>",!
+	Write " <col width=6 style='mso-width-source:userset;mso-width-alt:256;width:5pt'>",!
+	Write " <col width=19 style='mso-width-source:userset;mso-width-alt:810;width:14pt'>",!
+	Write " <col width=110 style='mso-width-source:userset;mso-width-alt:4693;width:83pt'>",!
+	Write " <col width=25 style='mso-width-source:userset;mso-width-alt:1066;width:19pt'>",!
+	Write " <col width=37 style='mso-width-source:userset;mso-width-alt:1578;width:28pt'>",!
+	Write " <col width=44 style='mso-width-source:userset;mso-width-alt:1877;width:33pt'>",!
+	Write " <col width=49 style='mso-width-source:userset;mso-width-alt:2090;width:37pt'>",!
+	Write " <col width=3 span=2 style='mso-width-source:userset;mso-width-alt:128;",!
+	Write " width:2pt'>",!
+	Write " <col width=5 style='mso-width-source:userset;mso-width-alt:213;width:4pt'>",!
+	Write " <col width=18 style='mso-width-source:userset;mso-width-alt:768;width:14pt'>",!
+	Write " <col width=110 style='mso-width-source:userset;mso-width-alt:4693;width:83pt'>",!
+	Write " <col width=32 style='mso-width-source:userset;mso-width-alt:1365;width:24pt'>",!
+	Write " <col width=35 style='mso-width-source:userset;mso-width-alt:1493;width:26pt'>",!
+	Write " <col width=7 style='mso-width-source:userset;mso-width-alt:298;width:5pt'>",!
+	Write " <col width=3 style='mso-width-source:userset;mso-width-alt:128;width:2pt'>",!
+	Write " <col width=6 style='mso-width-source:userset;mso-width-alt:256;width:5pt'>",!
+	Write " <col width=19 style='mso-width-source:userset;mso-width-alt:810;width:14pt'>",!
+	Write " <col width=110 style='mso-width-source:userset;mso-width-alt:4693;width:83pt'>",!
+	Write " <col width=27 style='mso-width-source:userset;mso-width-alt:1152;width:20pt'>",!
+	Write " <col width=37 style='mso-width-source:userset;mso-width-alt:1578;width:28pt'>",!
+	Write " <tr height=17 style='mso-height-source:userset;height:12.95pt'>",!
+	Write "  <td height=17 class=xl1917352 colspan=2 width=126 style='height:12.95pt;",!
+	Write "  width:94pt'>"
+	Write "<a name=""RANGE!R1C1:R12C29"">"
+	Write "Офис"
+	Write "</a>"
+	Write "</td>",!
+	Write "  <td class=xl1517352 width=30 style='width:23pt'></td>",!
+	Write "  <td class=xl1517352 width=42 style='width:32pt'></td>",!
+	Write "  <td class=xl1517352 width=48 style='width:36pt'>"_($G(curdat))_"</td>",!
+	Write "  <td class=xl1517352 width=50 style='width:38pt'></td>",!
+	Write "  <td class=xl1517352 width=8 style='width:6pt'></td>",!
+	Write "  <td class=xl2017352 width=4 style='width:3pt'>&nbsp;</td>",!
+	Write "  <td class=xl1517352 width=6 style='width:5pt'></td>",!
+	Write "  <td class=xl1917352 colspan=2 width=129 style='width:97pt'>Склад</td>",!
+	Write "  <td class=xl1517352 width=25 style='width:19pt'></td>",!
+	Write "  <td class=xl1517352 width=37 style='width:28pt'></td>",!
+	Write "  <td class=xl1517352 colspan=2 width=93 style='width:70pt'>"_($G(curdat))_"</td>",!
+	Write "  <td class=xl1517352 width=3 style='width:2pt'></td>",!
+	Write "  <td class=xl2017352 width=3 style='width:2pt'>&nbsp;</td>",!
+	Write "  <td class=xl1517352 width=5 style='width:4pt'></td>",!
+	Write "  <td class=xl1917352 colspan=2 width=128 style='width:97pt'>На упаковку</td>",!
+	Write "  <td class=xl1517352 colspan=2 width=67 style='width:50pt'>"_($G(curdat))_"</td>",!
+	Write "  <td class=xl1517352 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl2017352 width=3 style='width:2pt'>&nbsp;</td>",!
+	Write "  <td class=xl1517352 width=6 style='width:5pt'></td>",!
+	Write "  <td class=xl1917352 colspan=2 width=129 style='width:97pt'>В Упаковку</td>",!
+	Write "  <td class=xl1517352 colspan=2 width=64 style='width:48pt'>"_($G(curdat))_"</td>",!
+	Write " </tr>",!
+	Write " <tr height=15 style='mso-height-source:userset;height:11.25pt'>",!
+	Write "  <td height=15 class=xl1517352 style='height:11.25pt'></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352>"_($G(curtime))_"</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352 colspan=2>"_($G(curtime))_"</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352 colspan=2>"_($G(curtime))_"</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352 colspan=2>"_($G(curtime))_"</td>",!
+	Write " </tr>",!
+	Write " <tr height=12 style='mso-height-source:userset;height:9.0pt'>",!
+	Write "  <td height=12 class=xl1917352 style='height:9.0pt'></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1917352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1917352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1917352></td>",!
+	Write "  <td colspan=2 class=xl3217352>"_($g(usr))_"</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write " </tr>",!
+	Write " <tr height=17 style='mso-height-source:userset;height:12.75pt'>",!
+	Write "  <td height=17 class=xl1917352 colspan=3 style='height:12.75pt'>№ "_($G(numb))_" от "_(docdat)_"</td>",!
+	Write "  <td class=xl2117352></td>",!
+	Write "  <td class=xl2117352></td>",!
+	Write "  <td class=xl2117352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1917352 colspan=3>№ "_($G(numb))_" от "_(docdat)_"</td>",!
+	Write "  <td class=xl2117352></td>",!
+	Write "  <td class=xl2117352></td>",!
+	Write "  <td class=xl2117352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1917352 colspan=3>№ "_($G(numb))_" от "_(docdat)_"</td>",!
+	Write "  <td class=xl2117352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1917352 colspan=3>№ "_($G(numb))_" от "_(docdat)_"</td>",!
+	Write "  <td class=xl2117352></td>",!
+	Write " </tr>",!
+	Write " <tr height=9 style='mso-height-source:userset;height:6.75pt'>",!
+	Write "  <td height=9 class=xl1517352 style='height:6.75pt'></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write " </tr>",!
+	Write " <tr height=14 style='mso-height-source:userset;height:10.5pt'>",!
+	Write "  <td height=14 class=xl1917352 colspan=5 style='height:10.5pt'>Кому "_($g(kontr))_"</td>",!
+	Write "  <td class=xl2217352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1917352 colspan=5>Кому "_($g(kontr))_"</td>",!
+	Write "  <td class=xl2217352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1917352 colspan=5>Кому "_($g(kontr))_"</td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1917352 colspan=4>Кому "_($g(kontr))_"</span></td>",!
+	Write " </tr>",!
+	Write " <tr height=16 style='height:12.0pt'>",!
+	Write "  <td height=16 class=xl1517352 style='height:12.0pt'></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write " </tr>",!
+	Write " <tr height=14 style='mso-height-source:userset;height:11.1pt'>",!
+	Write "  <td height=14 class=xl2317352 style='height:11.1pt'>№</td>",!
+	Write "  <td class=xl2317352 style='border-left:none' x:str=""Наименование "">Наименование",!
+	Write "  </td>",!
+	Write "  <td class=xl2317352 style='border-left:none'>Кол</td>",!
+	Write "  <td class=xl2317352 style='border-left:none'>Цена</td>",!
+	Write "  <td class=xl2317352 style='border-left:none'>Цена(р)</td>",!
+	Write "  <td class=xl2317352 style='border-left:none'>Сумма</td>",!
+	Write "  <td class=xl2417352></td>",!
+	Write "  <td class=xl2517352>&nbsp;</td>",!
+	Write "  <td class=xl2417352></td>",!
+	Write "  <td class=xl2317352>№</td>",!
+	Write "  <td class=xl2317352 style='border-left:none' x:str=""Наименование "">Наименование",!
+	Write "  </td>",!
+	Write "  <td class=xl2317352 style='border-left:none'>Кол</td>",!
+	Write "  <td class=xl2317352 style='border-left:none'>Цена</td>",!
+	Write "  <td class=xl2317352 style='border-left:none'>Цена(р"
+	Write "<span style='display:none'>"
+	Write ")"
+	Write "</span>"
+	Write "</td>",!
+	Write "  <td class=xl2317352 style='border-left:none'>Сумма</td>",!
+	Write "  <td class=xl2417352></td>",!
+	Write "  <td class=xl2517352>&nbsp;</td>",!
+	Write "  <td class=xl2417352></td>",!
+	Write "  <td class=xl2317352>№</td>",!
+	Write "  <td colspan=2 class=xl3317352 style='border-right:1.0pt solid black;",!
+	Write "  border-left:none' x:str=""Наименование "">Наименование </td>",!
+	Write "  <td class=xl2317352 style='border-left:none'>Уп</td>",!
+	Write "  <td class=xl2417352></td>",!
+	Write "  <td class=xl2517352>&nbsp;</td>",!
+	Write "  <td class=xl2417352></td>",!
+	Write "  <td class=xl2317352>№</td>",!
+	Write "  <td colspan=2 class=xl3317352 style='border-right:1.0pt solid black;",!
+	Write "  border-left:none' x:str=""Наименование "">Наименование </td>",!
+	Write "  <td class=xl2317352 style='border-left:none'>Уп</td>",!
+	Write " </tr>",!
+	Write " ",!
+	d:$ISOBJECT(obj.Items)
+	. s tot=0,totquant=0
+	. s i="" f  s i=obj.Items.Next(i) q:i=""  d
+	. . i $I(count)
+	. . s item=obj.Items.GetAt(i)
+	. . s:$ISOBJECT(item.Goods) goods=item.Goods.FullName
+	. . s quant=item.Quantity
+	. . s total=$J(item.Total,".",2)
+	. . s price=$J(item.Price,".",2)
+	. . s totquant=totquant+quant
+	. . s tot=tot+total
+	. . s pricechanged=$J(price*kurs,".",2)
+	. . w "<tr class=xl1517352>"
+	. . w "<td class=xl2617352>"_count_"</td>"
+	. . w "<td class=xl2717352 width=107 style='border-left:none;width:80pt'>"_goods_"</td>"
+	. . w "<td class=xl2817352 style='border-left:none'>"_quant_"</td>"
+	. . w "<td class=xl2817352 style='border-left:none'>"_price_"</td>"
+	. . w "<td class=xl2817352 style='border-left:none'>"_pricechanged_"</td>"
+	. . w "<td class=xl2917352 style='border-left:none'>"_total_"</td>"
+	. . w "<td class=xl3017352></td>"
+	. . w "<td class=xl3117352>&nbsp;</td>"
+	. . w "<td class=xl3017352></td>"
+	. . w "<td class=xl2617352>"_count_"</td>"
+	. . w "<td class=xl2717352 width=110 style='border-left:none;width:83pt'>"_goods_"</td>"
+	. . w "<td class=xl2817352 style='border-left:none'>"_quant_"</td>"
+	. . w "<td class=xl2817352 style='border-left:none'>"_price_"</td>"
+	. . w "<td class=xl2817352 style='border-left:none'>"_pricechanged_"</td>"
+	. . w "<td class=xl2917352 style='border-left:none'>"_total_"</td>"
+	. . w "<td class=xl3017352></td>"
+	. . w "<td class=xl3117352>&nbsp;</td>"
+	. . w "<td class=xl3017352></td>"
+	. . w "<td class=xl2617352>"_count_"</td>"
+	. . w "<td colspan=2 class=xl3517352 width=142 style='border-right:.5pt solid black;border-left:none;width:107pt'>"_goods_"</td>"
+	. . w "<td class=xl2917352 style='border-left:none'>"_quant_"</td>"
+	. . w "<td class=xl3017352></td>"
+	. . w "<td class=xl3117352>&nbsp;</td>"
+	. . w "<td class=xl3017352></td>"
+	. . w "<td class=xl2617352>"_count_"</td>"
+	. . w "<td colspan=2 class=xl3517352 width=137 style='border-right:.5pt solid black;border-left:none;width:103pt'>"_goods_"</td>"
+	. . w "<td class=xl2917352 style='border-left:none'>"_quant_"</td>"
+	. . w "</tr>"
+	Write !," <tr height=15 style='height:11.25pt'>",!
+	Write "  <td height=15 class=xl1517352 style='height:11.25pt'></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352>"_($J(totquant,".",2))_"</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352>"_($J(tot,".",2))_"</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352>"_($J(totquant,".",2))_"</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352>"_($J(tot,".",2))_"</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write " </tr>",!
+	Write " <tr height=15 style='height:11.25pt'>",!
+	Write "  <td colspan=2 height=15 class=xl3217352 style='height:11.25pt'>Курс "_($J(kurs,".",2))_"</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352>Итого</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352>"_($J(kurs*tot,".",2))_"</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td colspan=2 class=xl3217352>Курс "_($J(kurs,".",2))_"</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352>Итого</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352 colspan=2>"_($J(kurs*tot,".",2))_"</td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write " </tr>",!
+	Write " "
+	Write "<!--",!
+	Write " <tr height=15 style='height:11.25pt'>",!
+	Write "  <td height=15 class=xl1517352 style='height:11.25pt'></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352>Итого</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352>646.74</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352>Итого</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352>26.34</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1917352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl2017352>&nbsp;</td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1917352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write "  <td class=xl1517352></td>",!
+	Write " </tr>",!
+	Write "-->"
+	Write !,"</table>",!
+	Write "</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !
+	s id=%request.Get("id")
+	s obj=##class(Docs.Rash).%OpenId(id)
+	d:$ISOBJECT(obj)
+	. s mn(1)="января",mn(2)="февраля",mn(3)="марта",mn(4)="апреля",mn(5)="мая",mn(6)="июня",mn(7)="июля",mn(8)="августа",mn(9)="сентября",mn(10)="октября",mn(11)="ноября",mn(12)="декабря"
+	. //s:$ISOBJECT(obj.User1) usr=obj.User1.Name
+	. d:$ISOBJECT(obj.Kontr)
+	. . s kontr=obj.Kontr.Name
+	. s numb=obj.Name
+	. s day=$P($ZD(obj.Dat,4),"/",1)
+	. s month=$P($ZD(obj.Dat,4),"/",2)
+	. s year=$P($ZD(obj.Dat,4),"/",3)
+	. s docdat=day_"."_month_"."_year
+	. s kurs=obj.kurs
+	s cday=$P($ZD(+$H,4),"/",1)
+	s cmonth=$P($ZD(+$H,4),"/",2)
+	s cyear=$P($ZD(+$H,4),"/",3)
+	s curdat=cday_"."_cmonth_"."_cyear
+	s curtime=$ZT($P($H,",",2))
+	s:'+kurs kurs=##class(Goods.GoodsAction).kurs()
+	s docname=##class(Docs.Action).GetDocNameFromClass("Docs.Rash")
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<meta http-equiv=Content-Type content=""text/html; charset=windows-1251"">"
+	Write !,"<title>"_(docname)_"</title>",!
+	Write "<style id=""Склад1_17352_Styles"">"
+	Write "<!--table",!
+	Write "	{mso-displayed-decimal-separator:""\,"";",!
+	Write "	mso-displayed-thousand-separator:"" "";}",!
+	Write ".xl1517352",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:8.0pt;",!
+	Write "	font-weight:400;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:general;",!
+	Write "	vertical-align:bottom;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl1917352",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:8.0pt;",!
+	Write "	font-weight:700;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:general;",!
+	Write "	vertical-align:bottom;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl2017352",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:8.0pt;",!
+	Write "	font-weight:400;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:general;",!
+	Write "	vertical-align:bottom;",!
+	Write "	border-top:none;",!
+	Write "	border-right:2.0pt double windowtext;",!
+	Write "	border-bottom:none;",!
+	Write "	border-left:2.0pt double windowtext;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl2117352",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:12.0pt;",!
+	Write "	font-weight:700;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:general;",!
+	Write "	vertical-align:bottom;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl2217352",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:8.0pt;",!
+	Write "	font-weight:700;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:general;",!
+	Write "	vertical-align:top;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl2317352",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:9.0pt;",!
+	Write "	font-weight:700;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:general;",!
+	Write "	vertical-align:bottom;",!
+	Write "	border:1.0pt solid windowtext;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl2417352",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:9.0pt;",!
+	Write "	font-weight:700;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:general;",!
+	Write "	vertical-align:bottom;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl2517352",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:9.0pt;",!
+	Write "	font-weight:700;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:general;",!
+	Write "	vertical-align:bottom;",!
+	Write "	border-top:none;",!
+	Write "	border-right:2.0pt double windowtext;",!
+	Write "	border-bottom:none;",!
+	Write "	border-left:2.0pt double windowtext;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl2617352",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:9.0pt;",!
+	Write "	font-weight:400;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:center;",!
+	Write "	vertical-align:top;",!
+	Write "	border:.5pt solid windowtext;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl2717352",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:9.0pt;",!
+	Write "	font-weight:400;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:general;",!
+	Write "	vertical-align:bottom;",!
+	Write "	border:.5pt solid windowtext;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:normal;}",!
+	Write ".xl2817352",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:9.0pt;",!
+	Write "	font-weight:400;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:center;",!
+	Write "	vertical-align:bottom;",!
+	Write "	border:.5pt solid windowtext;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl2917352",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:9.0pt;",!
+	Write "	font-weight:400;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:general;",!
+	Write "	vertical-align:bottom;",!
+	Write "	border:.5pt solid windowtext;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl3017352",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:9.0pt;",!
+	Write "	font-weight:400;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:general;",!
+	Write "	vertical-align:bottom;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl3117352",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:9.0pt;",!
+	Write "	font-weight:400;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:general;",!
+	Write "	vertical-align:bottom;",!
+	Write "	border-top:none;",!
+	Write "	border-right:2.0pt double windowtext;",!
+	Write "	border-bottom:none;",!
+	Write "	border-left:2.0pt double windowtext;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl3217352",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:8.0pt;",!
+	Write "	font-weight:400;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:left;",!
+	Write "	vertical-align:bottom;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl3317352",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:9.0pt;",!
+	Write "	font-weight:700;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:left;",!
+	Write "	vertical-align:bottom;",!
+	Write "	border-top:1.0pt solid windowtext;",!
+	Write "	border-right:none;",!
+	Write "	border-bottom:1.0pt solid windowtext;",!
+	Write "	border-left:1.0pt solid windowtext;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl3417352",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:9.0pt;",!
+	Write "	font-weight:700;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:left;",!
+	Write "	vertical-align:bottom;",!
+	Write "	border-top:1.0pt solid windowtext;",!
+	Write "	border-right:1.0pt solid windowtext;",!
+	Write "	border-bottom:1.0pt solid windowtext;",!
+	Write "	border-left:none;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl3517352",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:9.0pt;",!
+	Write "	font-weight:400;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:left;",!
+	Write "	vertical-align:bottom;",!
+	Write "	border-top:1.0pt solid windowtext;",!
+	Write "	border-right:none;",!
+	Write "	border-bottom:.5pt solid windowtext;",!
+	Write "	border-left:.5pt solid windowtext;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:normal;}",!
+	Write ".xl3617352",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:9.0pt;",!
+	Write "	font-weight:400;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:left;",!
+	Write "	vertical-align:bottom;",!
+	Write "	border-top:1.0pt solid windowtext;",!
+	Write "	border-right:.5pt solid windowtext;",!
+	Write "	border-bottom:.5pt solid windowtext;",!
+	Write "	border-left:none;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:normal;}",!
+	Write "-->"
+	Write "</style>"
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ if %request.Get("word")="on"
+ {
+  set %response.ContentType = "application/msword"
+  do %response.SetHeader("Content-Disposition","attachment;word.doc")
+  set %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+ }
+  q 1
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CHARSET">
+<Default>windows-1251</Default>
+</Parameter>
+
+<Parameter name="CONTENTTYPE">
+<Default>text/html</Default>
+</Parameter>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\screen\rash.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/screen/rash.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>61612,42074</Default>
+</Parameter>
+</Class>
+</Export>

@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Operation.StepTemplate">
+<Description>
+Шаблон шагов</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60320,45228.535448</TimeCreated>
+
+<Property name="Resource">
+<Description>
+Ресурсы</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Ресурсы"/>
+</Property>
+
+<Property name="Place">
+<Description>
+Место</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Место"/>
+</Property>
+
+<Index name="PlaceIndex">
+<Properties>Place</Properties>
+</Index>
+
+<Property name="Name">
+<Description>
+Имя</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Имя"/>
+</Property>
+
+<Property name="Comment">
+<Description>
+Справочная информация</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Справочная информация"/>
+</Property>
+
+<Property name="Duration">
+<Description>
+Средняя продолжительность</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Средняя продолжительность"/>
+</Property>
+
+<Index name="DurationIndex">
+<Properties>Duration</Properties>
+</Index>
+
+<Property name="Step">
+<Description>
+Шаг</Description>
+<Type>Operation.Step</Type>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Шаг"/>
+</Property>
+
+<Index name="StepIndex">
+<Properties>Step</Properties>
+</Index>
+
+<Property name="Sequence">
+<Description>
+Порядок</Description>
+<Type>%Integer</Type>
+<Parameter name="CAPTION" value="Порядок"/>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+// Операция
+
+]]></Content>
+</UDLText>
+
+<UDLText name="T">
+<Content><![CDATA[
+//Relationship Operation As Operation.OperTemplate [ Cardinality = one, Inverse = Steps ];
+
+]]></Content>
+</UDLText>
+
+<UDLText name="T">
+<Content><![CDATA[
+//Index OperationIndex On Operation;
+
+]]></Content>
+</UDLText>
+
+<Property name="Depot">
+<Description>
+Склад</Description>
+<Type>Store.Depot</Type>
+<Parameter name="CAPTION" value="Склад"/>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Operation.StepTemplateD</DataLocation>
+<DefaultData>StepTemplateDefaultData</DefaultData>
+<IdLocation>^Operation.StepTemplateD</IdLocation>
+<IndexLocation>^Operation.StepTemplateI</IndexLocation>
+<StreamLocation>^Operation.StepTemplateS</StreamLocation>
+<Data name="StepTemplateDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Comment</Value>
+</Value>
+<Value name="3">
+<Value>Duration</Value>
+</Value>
+<Value name="4">
+<Value>Name</Value>
+</Value>
+<Value name="5">
+<Value>Place</Value>
+</Value>
+<Value name="6">
+<Value>Resource</Value>
+</Value>
+<Value name="7">
+<Value>Sequence</Value>
+</Value>
+<Value name="8">
+<Value>Step</Value>
+</Value>
+<Value name="9">
+<Value>Operation</Value>
+</Value>
+<Value name="10">
+<Value>Depot</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

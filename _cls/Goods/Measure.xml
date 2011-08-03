@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Goods.Measure">
+<Description>
+Единицы измерения</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60319,84102.288427</TimeCreated>
+
+<Property name="Name">
+<Description>
+Наименование</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Наименование"/>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Goods.MeasureD</DataLocation>
+<DefaultData>MeasureDefaultData</DefaultData>
+<IdLocation>^Goods.MeasureD</IdLocation>
+<IndexLocation>^Goods.MeasureI</IndexLocation>
+<StreamLocation>^Goods.MeasureS</StreamLocation>
+<Data name="MeasureDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Name</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

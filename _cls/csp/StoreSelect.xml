@@ -1,0 +1,359 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.StoreSelect">
+<Description>
+диалог выбора места хранения
+для страницы storemodal3.csp (улучшение страницы storemodal2.csp)</Description>
+<Abstract>1</Abstract>
+<Super>%CSP.Page</Super>
+<TimeCreated>62300,35142.765279</TimeCreated>
+
+<Method name="getTempGln">
+<Description>
+Формирует уникальное имя временного глобала	</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ 
+	Q $na(^CacheTemp.depotTree($P_"^"_$zu(188)))
+]]></Implementation>
+</Method>
+
+<Method name="wAddressPath">
+<Description>
+Выводит путь к месту хранения товара на складе</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[depot:%String,tovid:%String,&path:%String]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+  s tovid=$g(tovid) Q:tovid="" ""
+  &sql(DECLARE sd CURSOR FOR 
+  	SELECT Address,(Value1-Value2) as Amount,%external(Address->block) 
+  	INTO :addr,:amount,:block 
+  	FROM Store.Quantity 
+  	WHERE Goods=:tovid and Address->Depot=:depot
+  ) &sql(OPEN sd)
+  if SQLCODE=100 w " Товар отсутствует на складе ",depotName Q
+  for { &sql(FETCH sd) q:SQLCODE  d
+  		w " Местоположение товара ",##class(Store.Action).AddressPath($G(addr))
+  		  ," (",amount,") <font color=darkblue>",block,"</font><br>"
+  } &sql(CLOSE sd)
+  Q ""
+]]></Implementation>
+</Method>
+
+<Method name="gBlockProp">
+<Description>
+Выводит настройки отображения для блоков с местами хранения</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>prop:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[ 	Q:$g(prop)="" "" Q $G(^Tunes(2,prop,"Value"),"undefined")
+]]></Implementation>
+</Method>
+
+<Method name="wDepotOptions">
+<Description>
+Выводит в html options список складов с выделением указанного</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>depot:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+   	
+  &sql(DECLARE deprs CURSOR FOR 
+  	SELECT ID,Name INTO :id,:name
+  	FROM Store.Depot
+  	ORDER BY Name 
+  ) &sql(OPEN deprs)
+  
+  for { &sql(FETCH deprs) Q:SQLCODE  
+  		w "<option value='",id,"'"
+  		w:id=depot " selected='selected' "
+  		w ">",name,"</option>"
+  } &sql(CLOSE deprs)
+]]></Implementation>
+</Method>
+
+<Method name="gDepotTree">
+<Description>
+Собирает дерево склада в глобал с сортировкой по наименованию</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>gln:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s depot=@gln ;получаем код склада из глобала
+	s root=$na(@gln@("root")), data=$na(@gln@("data")) ;определяем ветки в дереве
+	&sql(Declare drs CURSOR For 
+    	Select ID,ParentID,Name,Percent
+    		Into :id,:parent,:name,:percent
+    	From Store.Address
+    	Where Depot=:depot
+    	-- Сначала узлы верхнего уровня по наименованию --
+    	Order By ParentID->Name,Name
+    ) &sql(Open drs)
+    for { &sql(FETCH drs) Q:SQLCODE
+    	if parent="" {
+    		s @root@(%ROWCOUNT)=id	
+    		s @data@(id,"root")=1
+    	} else {
+	    	s @data@(parent,"child",%ROWCOUNT)=id
+    	}	
+    	s @data@(id)=name
+    	s @data@(id,"percent")=percent
+    } &sql(Close drs)
+  	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wJsDepotTree">
+<Description>
+Выводит дерево склада в объект js</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>depot:%String,jsfunc:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+ 	s gln=..getTempGln() ;временный уникальный глобал   
+ 	k @gln ;зачистка на невероятный случай
+ 	s @gln=depot ;занесли в глобал параметр
+    d ..gDepotTree(gln) ;заполнили глобал деревом склада с сортировкой по наименованию
+    s rootgl=$na(@gln@("root")) ;ветка с корневыми узлами
+    s datagl=$na(@gln@("data")) ;ветка с данными об узлах
+    w:jsfunc'="" "parent.",jsfunc,"("
+    w "{" ;Открываем js-объект
+    d ..wJsDepotNodes(datagl,rootgl)
+	w "}"
+	w:jsfunc'="" ");"
+	k @gln
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wJsDepotNodes">
+<Description>
+Выводит данные об узлах склада из dgl по отсортированному списку в rgl</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>dgl:%String,rgl:%String</FormalSpec>
+<Implementation><![CDATA[
+	
+	#; выводим собранные данные в js - необходимо квотирование
+	#define js(%str) ..QuoteJS(%str)
+	s next=0
+	s rkey="" for { s rkey=$o(@rgl@(rkey)) Q:rkey=""
+		s id=$g(@rgl@(rkey)),name=$g(@dgl@(id)),percent=+$g(@dgl@(id,"percent"))
+		s:percent name=name_" - "_percent_"%"
+    	w:next "," s:'next next=1
+     	w id,":[",$$$js(name)
+	   	if $d(@dgl@(id,"child")){
+		   	w ",{"
+			s crgl=$na(@dgl@(id,"child"))
+			d ..wJsDepotNodes(dgl,crgl)   	
+			w "}"
+		}
+		w "]"
+	}
+]]></Implementation>
+</Method>
+
+<Method name="gChilds">
+<Description>
+Собирает данные о дочерних узлах выбранного узла, с сортировкой по наименованию</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>dgl:%String</FormalSpec>
+<Implementation><![CDATA[
+ 	
+ 	 s parent=$g(@dgl@("id")),depot=$g(@dgl@("depot")) k @dgl ;очищаем перед заполнением
+ 	 if parent'="" s depot=##class(Store.Address).DepotGetStored(parent)
+ 	 &sql(Declare crs Cursor For 
+	 	Select id,name,percent,tempstore,comment
+	 	Into :id,:name,:percent,:temp,:comment From Store.Address 
+	 	Where 
+	 		Depot=:depot --дает гарантию загрузки нужного склада ---
+	 		And 
+	 		Store.Address_GetParentID(Depot,Code)=:parent 
+	 	Order By Name
+	 ) &sql(Open crs)
+	 for { &sql(Fetch crs) Q:SQLCODE
+		s:name="" name=" "
+		s @dgl@(name,id)=name,@dgl@(name,id,"percent")=percent
+		s @dgl@(name,id,"temp")=temp,@dgl@(name,id,"comment")=comment
+	 } &sql(Close crs)
+]]></Implementation>
+</Method>
+
+<Method name="wChildsHTML">
+<Description>
+Выводит данные о дочерних узлах в HTML</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>parent:%String,depot:%String</FormalSpec>
+<Implementation><![CDATA[
+	 
+   s gln=..getTempGln() k @gln  ;временная глобаль в которую будем собирать данные 
+   s parent=$g(parent), depot=$g(depot)
+   s @gln@("id")=parent,@gln@("depot")=depot ;входные параметры для отбора
+   if parent'="" { ;указан конкретный узел
+   	s hasChild=##class(Store.Address).HasChild(parent) ; is leaf?
+   	if 'hasChild d ..wPropsHTML(parent) Q 
+   }
+   d ..gChilds(gln) ;собираем данные
+   #; Выводим данные в html
+   s key="" for { s key=$o(@gln@(key)) Q:key=""
+	  s id="" for { s id=$o(@gln@(key,id)) Q:id=""
+		  s name=$g(@gln@(key,id)), percent=$g(@gln@(key,id,"percent"))
+		  s temp=$g(@gln@(key,id,"temp")), comment=$g(@gln@(key,id,"comment"))
+		  w "<div id='",id,"' class='block" w:temp "temp" w "'"
+		  w:comment " title='",comment,"'"
+		  w ">",name
+		  w "<div style='width:",$s(percent<10:"2em",1:percent_"%;")
+		  	,$s(percent>100:"background-color:red;",1:""),"'>"
+		  	,percent,"%</div></div>"
+	  } 
+    }
+]]></Implementation>
+</Method>
+
+<Method name="wPropsHTML">
+<Description>
+Выводит свойства листового элемента в таблицу</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id:%String</FormalSpec>
+<Implementation><![CDATA[
+	Q:'##class(Store.Address).%ExistsId(id)
+	s obj=##class(Store.Address).%OpenId(id)
+	w "<table><thead><th>Свойство</th><th>Значение</th></thead>"
+	  ,"<tbody>"
+			,"<tr><td>Наименование</td><td>",obj.Name,"</td></tr>"
+			,"<tr><td>Состояние</td><td></td></tr>"
+			,"<tr><td>Справочная информация</td><td>",obj.Comment,"</td></tr>"
+			,"<tr><td>Текущий объем</td><td>",obj.Currentsize,"</td></tr>"
+			,"<tr><td>Текущая нагрузка</td><td>",obj.Currentweight,"</td></tr>"
+			,"<tr><td>Старый номер</td><td>",obj.oldnumb,"</td></tr>"
+			,"<tr><td>Максимальный объем</td><td>",obj.Size1,"</td></tr>"
+			,"<tr><td>Скорость доступа</td><td>",obj.speed,"</td></tr>"
+			,"<tr><td>Временное хранение</td><td>",obj.tempstore,"</td></tr>"
+			,"<tr><td>Максимальная нагрузка</td><td>",obj.Weight,"</td></tr>"
+		,"</tbody></table>"
+	d obj.%Close() k obj
+]]></Implementation>
+</Method>
+
+<Method name="ShowChilds">
+<Description>
+Выводит данные о дочерних узлах в HTML</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>parent:%String,depot:%String,jsfunc:%String="alert"</FormalSpec>
+<Implementation><![CDATA[
+	 w "parent.",jsfunc,"("""
+     d ..wChildsHTML(parent,depot)
+    w """);"
+]]></Implementation>
+</Method>
+
+<Method name="OnPage">
+<Description><![CDATA[
+Event handler for <b>PAGE</b> event: this is invoked in order to  
+generate the content of a csp page.]]></Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+ &html<<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html XMLNS:SKLADz><head>
+<meta http-equiv="Content-Language" content="ru"><meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<link href="style.css" type=text/css rel=stylesheet>
+<style>
+    .vat {vertical-align:top;}
+    .temp {background-color: #efefef; } /*места временного хранения*/
+	#addrBar {font-color: #447788; }
+	#addrBar a {padding:5px;}
+	#depotSelect {width:150px;}
+	#tblMoveField {border-collapse:collapse;}
+	#tblMoveField td {margin:0px;padding:0px;vertical-align:top;}
+	#MoveField {height:300px; overflow:auto;margin:0px;padding:3px; border:1px solid #333;}
+	#MoveField table {border-collapse:collapse;}
+	#MoveField table th,#MoveField table td {padding:2px;border:1px solid #777;}
+	#tv {width:250px;height:308px;}
+	#tvToggle {width:auto;}
+	#dlgBar {text-align:center;margin-left:auto;margin-right:auto;margin-top:20px;}
+	#dlgBar button { height:48px; font-size:110%;margin:5px;}
+	#addrPath {padding:3px 0px;}
+	/*обычное место хранения*/
+	.block div {background-color:#ccc;font-size:90%;color:#fff;margin-left:auto;margin-right:auto;}
+	.block { margin-bottom:6px; margin-right:6px;font-size:90%; float:left;border:1px solid #777;overflow:hidden;text-align:center; vertical-align:center;
+		height:#(..gBlockProp("BlockHeight"))#px;
+		width:#(..gBlockProp("BlockWidth"))#px;
+	}
+</style>>
+ #; Инициализация глобальных (для формирования страницы) переменных на стороне сервера
+ #; склад - склад из запроса переопределяет склад в сессии
+ s depot=$G(%session.Data("depot")), rdepot=%request.Get("depot") if rdepot'="" s depot=rdepot, %session.Data("depot")=depot
+ s depotName="склад не найден" s:##class(Store.Depot).%ExistsId(depot) depotName=##class(Store.Depot).NameGetStored(depot)
+ #; товар
+ s tovid=%request.Get("goods")
+ #; путь к изображению
+ s imgPath=$g(%session.Data("ImagesPath"))
+ w ..HyperEventHead()
+ &html<</head><body>
+<div id="adressPath">#(..wAddressPath(depot,tovid))#</div>
+<div id="addrPath">
+<select id="depotSelect" name="depotSelect">>
+	  d ..wDepotOptions(depot)
+ &html<</select>
+<span id="addrBar"></span>
+</div>
+<table id="tblMoveField"><tr>
+	<td id="tdTree">
+		<OBJECT id="tv" classid="clsid:C74190B6-8589-11D1-B16A-00C0F0283628" codebase="Cab\MSComCtl.CAB">
+		</OBJECT>
+		<br/>
+		<OBJECT id="tvil" classid="clsid:2C247F23-8591-11D1-B16A-00C0F0283628" codebase="Cab\MSComCtl.CAB">
+		</OBJECT>
+		<input type="checkbox" id="tvToggle" checked="true"/>
+		<label for='tvToggle'>Скрыть/Показать</label>
+	</td>
+	<td id="tdContent">
+		<div id="MoveField">>
+		
+	d ..wChildsHTML("",depot) ;чтобы сразу показать рутовые узлы выбранного склада 
+		
+		&html<</div>
+	</td>
+	</tr>
+	<tr><td colspan="2">
+		<div id='dlgBar'>
+			<button id="btnSelect" title="Выбрать место хранения и закрыть окно">Выбрать</button>
+			<button id="btnCancel" title="Отказаться от выбора и закрыть окно">Отмена</button>
+		</div>
+	</td></tr>
+</table>
+<script type="text/javascript" src="common.js"></script>
+<script language="VBScript" src="js/LoadPicture.vbs"></script>
+<script type="text/javascript" src="js/m.js"></script>
+<script type="text/javascript" src="js/axtv.js"></script>
+<script type="text/javascript" >
+//сюда сложим все функции и переменные этой страницы
+window.page={
+	toChange:null //timeout обработкой смены узла, при быстрой смене узлов клавиатурой
+	,scShowChilds: function(nid) { //вызов сервера
+		#call(..ShowChilds(nid,depot,"page.ShowChilds"))#; //асинхронно вызываем загрузку схемы выбранного узла	
+	}
+	,scDepotChange: function(depot){
+		#call(..wJsDepotTree(depot,"page.depotChange"))#;
+	}
+}; 
+var depot='#($G(depot))#';
+var ColumnHeight='#(..gBlockProp("ColumnHeight"))#';
+//Дерево склада в js-объекте
+var DepotData=
+	#(..wJsDepotTree(depot))#
+;
+</script>
+<script type="text/javascript" src="js/csp.StoreSelect.js"></script>>
+ Write ..HyperEventFrame(),!
+ &html<</body></html>>
+ Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

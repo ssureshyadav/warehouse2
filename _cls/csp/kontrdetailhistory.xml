@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.kontrdetailhistory">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>61937,52469.103672</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body>"
+	Write !
+	s KontrId=+%request.Get("KontrId")
+	s GoodsId=+%request.Get("GoodsId")
+	s user = +$G(%session.Data("user"))
+	if '+KontrId w "Невозможно вывести историю, так как не указан контрагент.<br>" q
+	if '+GoodsId w "Невозможно вывести историю, так как не указан товар.<br>" q
+	s glob = $NA(^mtempRep(user,"KontrDetailHistory"))
+	k @glob
+	//цикл по основной глобали
+	s i="" f  s i = $O(^t(KontrId,GoodsId,i)) q:i=""  d
+	. q:'+i
+	. s datetime=$G(^t(KontrId,GoodsId,i,"datetime"))
+	. s user = $G(^t(KontrId,GoodsId,i,"user"))
+	. s count = $G(^t(KontrId,GoodsId))
+	. s date=$P(datetime,",",1)
+	. s time=$P(datetime,",",2)
+	. s counter=$i(@glob)
+	. s @glob@(+date,+time,counter,"count")= count
+	. s @glob@(+date,+time,counter,"user")=user
+	. s @glob@(+date,+time,counter,"type")="Добавление"
+	//цикл по глобали c историей
+	s i="" f  s i = $O(^tHistory(KontrId,GoodsId,i)) q:i=""  d
+	. q:'+i
+	. s z="" f  s z = $O(^tHistory(KontrId,GoodsId,i,"history",z)) q:z=""  d
+	. . q:'+z
+	. . s datetime=$G(^tHistory(KontrId,GoodsId,i,"history",z,"datetime"))
+	. . s user = $G(^tHistory(KontrId,GoodsId,i,"history",z,"user"))
+	. . s date=$P(datetime,",",1)
+	. . s time=$P(datetime,",",2)
+	. . s counter=$i(@glob)
+	. . s @glob@(+date,+time,counter,"user")=user
+	. . s @glob@(+date,+time,counter,"type")="Добавление"
+	. s datetime=$G(^tHistory(KontrId,GoodsId,i,"datetime"))
+	. s user = $G(^tHistory(KontrId,GoodsId,i,"user"))
+	. s date=$P(datetime,",",1)
+	. s time=$P(datetime,",",2)
+	. s counter=$i(@glob)
+	. s @glob@(+date,+time,counter,"user")=user
+	. s @glob@(+date,+time,counter,"type")="Удаление"
+	//zw @glob
+	s date=""
+	w "<table cellpadding=8 cellspacing=0 >"
+	for
+	{
+	s date=$O(@glob@(date))
+	QUIT:date=""
+	s time=""
+	for
+	{
+	s time=$O(@glob@(date,time))
+	QUIT:time=""
+	s counter=""
+	for
+	{
+	s counter=$O(@glob@(date,time,counter))
+	QUIT:counter=""
+	continue:'+counter
+	s user=$G(@glob@(date,time,counter,"user"))
+	s type=$G(@glob@(date,time,counter,"type"))
+	s DateString = $S(+date:$ZD(date,4),1:"")
+	s TimeString = $S(+time:$ZT(time),1:"")
+	s UserString = $S(+user:##class(Users.Dates).GetPropertyValue(user,"Name"),1:"")
+	w "<tr>"
+	w "<td>"_type
+	w "<td>"_DateString
+	w "<td>"_TimeString
+	w "<td>"_UserString
+	w "</tr>"
+	}
+	}
+	}
+	w "</table>"
+	k @glob
+	Write !,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,!,"<!-- Put your page Title here -->"
+	Write !,"<title>	История детали на балансе контрагента </title>",!
+	Write "<style>"
+	Write !,"TABLE {border-left : solid 1 black; border-top : solid 1 black;}",!
+	Write "TD {border-right : solid 1 black; border-bottom : solid 1 black}",!
+	Write !,"</style>"
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\KontrDetailHistory.CSP</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/KontrDetailHistory.CSP</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>61937,52470</Default>
+</Parameter>
+</Class>
+</Export>

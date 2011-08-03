@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.BrandPlatej">
+<Description>
+Платежи разбитые по брендам</Description>
+<Super>%Persistent</Super>
+<TimeCreated>61720,54706.239143</TimeCreated>
+
+<Property name="Doc">
+<Description>
+Документ</Description>
+<Type>Docs.Platejka</Type>
+</Property>
+
+<Index name="DocInd">
+<Properties>Doc</Properties>
+</Index>
+
+<Property name="Brand">
+<Description>
+Бренд</Description>
+<Type>Common.Dictionary19</Type>
+</Property>
+
+<Index name="BrandInd">
+<Properties>Brand</Properties>
+</Index>
+
+<Property name="RubSumma">
+<Description>
+Сумма в рублях</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="CurrSumma">
+<Description>
+Сумма в валюте</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Index name="NewIndex1">
+<Properties>Doc,Brand</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Docs.BrandPlatejD</DataLocation>
+<DefaultData>BrandPlatejDefaultData</DefaultData>
+<IdLocation>^Docs.BrandPlatejD</IdLocation>
+<IndexLocation>^Docs.BrandPlatejI</IndexLocation>
+<StreamLocation>^Docs.BrandPlatejS</StreamLocation>
+<Data name="BrandPlatejDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Brand</Value>
+</Value>
+<Value name="3">
+<Value>CurrSumma</Value>
+</Value>
+<Value name="4">
+<Value>Doc</Value>
+</Value>
+<Value name="5">
+<Value>RubSumma</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

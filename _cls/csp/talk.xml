@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.talk">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>60836,64751.539772</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body>"
+	Write !,"<input type=""button"" value=""спросить"" onclick=""sds()"">"
+	Write "<br>",!
+	Write "<span id=""kulla"" style=""display:none"">"
+	Write !,"<form>"
+	Write !,..InsertHiddenFields(""),!
+	Write !," "
+	Write "<textarea name=""answer"" id=""answer"" style=""width:400pt;height:200pt"">"
+	Write "</textarea>"
+	Write !," "
+	Write "<input type=""hidden"" id=""numbar"" name=""numbar"">"
+	Write !," <br>"
+	Write "<input type=""submit"" value=""ok"">"
+	Write !,"</form>"
+	Write !,"</span>"
+	Write !,"<br>",!
+	Write "<span id=""kkk"" style=""display:none"">"
+	Write !,"<form>"
+	Write !,..InsertHiddenFields(""),!
+	Write !,"<input type=""hidden"" id=""okka"" name=""okka"" value=1>"
+	Write !,"Вопрос: "
+	Write "<textarea name=""quest"" id=""quest"" style=""width:400pt;height:200pt"">"
+	Write "</textarea>"
+	Write !,"<br>",!
+	Write "<input type=""submit"" value=""ok"">"
+	Write !,"</form>"
+	Write !,"</span>"
+	Write !,"<form id=""jigga"" style=""display:none"">"
+	Write !,..InsertHiddenFields(""),!
+	Write !,"<input type=""hidden"" name=""udal"" id=""udal"">"
+	Write !,"<input type=""hidden"" name=""kum"" id=""kum"" value=1>"
+	Write !,"</form>"
+	Write !,"<centeR><h3>Вопросы</h3></center>",!
+	s usr=%session.Data("user")
+	s quest=%request.Get("quest")
+	s okka=%request.Get("okka")
+	s kum=0
+	i usr=7 s kum=1
+	s numbar=%request.Get("numbar")
+	s answer=%request.Get("answer")
+	s udal=%request.Get("udal")
+	d:okka
+	. s q=##class(Common.talking).%New()
+	. s q.quest=quest
+	. s ok=q.%Save()
+	d:numbar
+	. s q=##class(Common.talking).%OpenId(numbar)
+	. i $ISOBJECT(q) d
+	. . s q.answ=answer
+	. . s q.answdat=+$H
+	. . s q.answtim=$P($H,",",2)
+	. . d q.%Save()
+	. e  w "<br><b><i>не удалось открыть вопрос №"_numbar_"</i></b><br>"
+	d:udal
+	. &sql(delete from Common.talking where id=:udal)
+	s dat2=%request.Get("dat2")
+	s dat1=%request.Get("dat1")
+	s:dat1="" dat1=+$H
+	s:dat2="" dat2=+$H
+	&sql(declare dfg cursor for 
+	select id,dat,tim,quest,answ,answdat,answtim,User1->Name
+	into :id,:dat,:tim,:quest,:answ,:answdat,:answtim,:user1 
+	from Common.talking)
+	//where dat>=:dat1 and dat<=:dat2)
+	&sql(open dfg)
+	f  &sql(fetch dfg) q:SQLCODE  d
+	. w "№ "_id_" <b>"_user1_"</b>&nbsp;<font color=#007788 fontface=Arial size=-1>"_$ZD(dat,4)_" "_$ZT(tim)_"</font> <b>Вопрос:</b> <font color=#005566 fontface=Arial>"_quest_"</font><br>"
+	. w "<font color=#004455 fontface=Arial size=-1>"_$S(answdat'="":$ZD(answdat,4),1:"")_" "_$S(answtim'="":$ZT(answtim),1:"")_"</font> <b>Ответ:</b> <font color=grey fontface=Arial>"_answ_"</font><br>"
+	. if kum w "<input type=button value='ответить за базар' onclick=""morda('"_id_"')""><br>"
+	. if kum w "<input type=button value='удалить' onclick=""udalit('"_id_"')""><br>"
+	. w "<hr width=80%>"
+	&sql(close dfg)
+	Write !,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<title>Вопросы </title>",!
+	Write "<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"<style>"
+	Write !,"body{font-face: arial; font-size: 14}",!
+	Write "</style>"
+	Write !,"<script language=""jscript"" src=""common.js"">"
+	Write "</script>"
+	Write !,"<script language=""javascript"">"
+	Write !," function sds(){",!
+	Write " if(kkk.style.display==""none""){kkk.style.display=""block""}",!
+	Write " else{}",!
+	Write " }",!
+	Write " function morda(ikka){",!
+	Write " document.all.numbar.value=ikka;",!
+	Write " kulla.style.display=""block"";",!
+	Write " }",!
+	Write " function udalit(ikka){",!
+	Write " document.all.udal.value=ikka;",!
+	Write " document.all.jigga.submit();",!
+	Write " }",!
+	Write "</script>"
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\talk.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/talk.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>60619,55638</Default>
+</Parameter>
+</Class>
+</Export>

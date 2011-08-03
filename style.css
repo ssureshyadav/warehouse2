@@ -1,0 +1,80 @@
+img{cursor:hand;border:none}
+
+input{border:solid 1 grey;width:150px}
+
+legend{font-face:Arial;font-size:12pt;}
+
+body{
+font-family:Arial;
+font-size:12px;
+}
+
+
+A:visited{
+font-family:Arial;
+font-size:14px;
+color:rgb(0,0,90);
+text-decoration : none;
+}
+
+A:hover{
+font-family:Arial;
+font-size:14px;
+color:rgb(90,0,0);
+text-decoration : underline;
+}
+A:link{
+font-family:Arial;
+font-size:14px;
+color:rgb(0,0,90);
+text-decoration : none;
+}
+A:active{
+font-family:Arial;
+font-size:14px;
+color:rgb(0,0,90);
+text-decoration : none;
+}
+.ButtonDiv
+{
+background-color: rgb(233,243,255);
+border: solid 1 #004444;
+width:100px;
+padding:5px;
+margin:5px;
+}
+
+.ButtonDivWait
+{
+background-color: rgb(255,217,105);
+border: solid 1 #004444;
+width:100px;
+padding:5px;
+margin:5px;
+}
+
+.ButtonDivHover
+{
+background-color: rgb(203,213,225);
+border: solid 1 #004444;
+width:100px;
+padding:5px;
+margin:5px;
+}
+
+.datar {width:70;border:none;cursor:hand}
+.datar:hover {width:70;border:none;cursor:hand;background-color: rgb(203,213,225);}
+
+.textlikelink2{
+font-family:Arial;
+font-size:14px;
+color:#112266;
+text-decoration : underline;
+cursor:hand;}
+
+.textlikelink{
+font-family:Arial;
+font-size:14px;
+color:#112266;}
+
+.Kontragent{width:170px;cursor:hand;border: solid 1 black}

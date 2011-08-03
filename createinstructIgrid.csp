@@ -1,0 +1,265 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ i %session.NewSession d
+ . s %session.EndSession=1
+ . s sessionid=%request.Get("sessionid",1)
+ . s %session=%session.GetSession(sessionid)
+ .  s login=$G(%session.Data("user"))
+ . i '+login s %response.ServerSideRedirect="norights.csp" 
+ e  s sessionid=%session.SessionId
+ 
+Quit 1
+</script>
+<html XMLNS:SKLADiGrid>
+<IMPORT NAMESPACE="SKLADiGrid" IMPLEMENTATION="htc/iGridV9.htc">
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<style>
+.LeftTop{border-left : 1 solid black;border-top : 1 solid black;}
+.RightBottom{font-family:Arial;font-size:14px;border-right : 1 solid black;border-bottom : 1 solid black;}
+SELECT{width:170px}
+.Kontragent{width:170px;cursor:hand;}
+.ZakazInstr{display:inline;}
+</style>
+<script language="jscript" src="common.js"></script>
+<title>Инструкция руководителя</title>
+
+<script language="Jscript">
+var DocId='#(%request.Get("source"))#';
+var OriginalInstructionId=DocId;
+var sessionid="#(sessionid)#";
+
+//функция выбора контрагента (подставит выбранного в innerText переданного объекта
+function ChooseKonragent(Obj){
+newItem=window.showModalDialog("Dictionary.csp","Common.Kontragent","center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");
+if(newItem==null){return false;}
+var newArr=newItem.split(InnerSplitter);
+Obj.innerText=newArr[1];
+Obj.Tag=newArr[0];
+}
+
+// Скрыть или показать 
+function ShowHideRashOplatType(Obj){
+if(Obj.value==10)
+	{
+	ZakazInstr1.style.display='inline';
+	ZakazInstr2.style.display='inline';
+	ZakazInstr3.style.display='inline';
+	ZakazInstr4.style.display='inline';
+	ZakazInstr5.style.display='inline';
+	ZakazInstr6.style.display='inline';
+	}
+else
+	{
+	ZakazInstr1.style.display='none';
+	ZakazInstr2.style.display='none';
+	ZakazInstr3.style.display='none';
+	ZakazInstr4.style.display='none';
+	ZakazInstr5.style.display='none';
+	ZakazInstr6.style.display='none';
+	}
+}
+
+function load(){
+ShowHideRashOplatType(document.getElementById('Oper'));
+FillDocStr();
+}
+
+function FillDocStr(){
+var Captions = new Array(4);
+var Keys = new Array(4);
+var Tags = new Array(4);
+var Widths = new Array(4);
+
+Captions[0]="Товар";
+Captions[1]="Количество";
+Captions[2]="Цена";
+Captions[3]="Сумма";
+Captions[4]="Отзыв клиента";
+
+Tags[0]="Goods.Goods";
+Tags[1]="%Numeric";
+Tags[2]="%Numeric";
+Tags[3]="%Numeric";
+Tags[4]="%String";
+
+Keys[0]="Goods";
+Keys[1]="Quantity";
+Keys[2]="Price";
+Keys[3]="Total";
+Keys[4]="BrakComment";
+
+Widths[0]=400;
+Widths[1]=80;
+Widths[2]=80;
+Widths[3]=80;
+Widths[4]=80;
+docstr.DrawHeaders(Captions,Keys,Tags, Widths);
+if(DocId!="")
+	{
+	docstr.loadfrommethod("Docs.Action2.ChiefInstructStr",DocId);
+	}
+}
+
+// сохранить
+function startFun(){
+xmlDoc=docstr.GetXmlContentByRows();
+InsertXmlHeader(xmlDoc,"Summa",docstr.GetTableSumma(),"%String")
+InsertXmlHeader(xmlDoc,"Oper",Oper.value,"Operation.OperTemplate")
+InsertXmlHeader(xmlDoc,"Name",Name.value,"%String")
+InsertXmlHeader(xmlDoc,"Comment",Comment.value,"%String")
+InsertXmlHeader(xmlDoc,"InstDate",InstDate.value,"%Date")
+InsertXmlHeader(xmlDoc,"Kontr",Kontr.Tag,"Common.Kontragent")
+InsertXmlHeader(xmlDoc,"imp",imp.value,"%String")
+InsertXmlHeader(xmlDoc,"showcolor",showcolor.value,"%String")
+InsertXmlHeader(xmlDoc,"Depot1",Depot1.value,"Store.Depot")
+if(Oper.value==10){
+	InsertXmlHeader(xmlDoc,"RashOplatType",RashOplatType.value,"Common.Dictionary7");
+	InsertXmlHeader(xmlDoc,"dostavka",dostavka.value,"Common.Dictionary1");
+	}
+
+var DocID=SendXml(DocId,"Operation.Instructions",xmlDoc,sessionid);
+if(isNaN(DocID)){alert(DocID)}
+else{returnValue=1;window.close();}
+}
+
+function AddBrak(){
+WinResult=window.showModalDialog("SelectBrak.csp","","center:yes;status:no;dialogHeight:700px;dialogWidth:800px;resizable:yes;")
+if(WinResult==null)return
+var ok=#server(Docs.Action2.MakeBrakInstruction(WinResult,ReturnSpace(DocId)))#
+if(isNaN(ok)){alert(ok)}
+else{
+	//alert('Надо перезагрузить таблицу строк');
+	DocId=ok;
+	docstr.Clear();
+	docstr.loadfrommethod("Docs.Action2.ChiefInstructStr",DocId);
+	}
+}
+
+// Добавить товар
+function AddGood()
+{
+	if(Oper.value==11)
+		{
+		AddBrak();
+		return;
+		}
+	WinResult=window.showModalDialog("selectgoods2.csp","","center:yes;status:no;dialogHeight:700px;dialogWidth:800px;resizable:yes;");
+	if(WinResult==null)return;
+	WinResult=WinResult.split(StringSplitter);
+	docstr.AddRowsInstruct(WinResult);
+}
+
+// удалить строку
+function RemoveRow(){
+docstr.RemoveSelectedRows();
+}
+
+// Очистить список
+function ClearGrid(){
+if(window.confirm("Удалить все товарные строки?"))docstr.Clear()	
+}
+
+function windowclose(){
+if(window.confirm("Вы уверены?")){
+	if((OriginalInstructionId=="")&&(DocId!=""))
+		{
+		#server(Docs.Action.deletedoc("Operation.Instructions",DocId))#
+		}
+	window.close();
+}
+}
+
+</script>
+</head>
+
+<body onload="load()" onkeypress="ManageWindow();">
+<table width=100%><tr><td>
+<table class="LeftTop" cellspacing=0 width=100%>
+<script language="cache" runat="server">
+ s InstrID=%request.Get("source")
+ i InstrID {
+ 	&sql(select Oper,Name,Comment,InstDate,Kontr,imp,showcolor,Depot1,dostavka,RashOplatType,Kontr->Name,CloseDate,CloseTime,CloseUser->Name,Stat,postnumber,postdata,Summa,%external(HasBeenSent),BrakComment,PhotoFile 
+ 	into 
+ 	:Oper,:Name,:Comment,:InstDate,:Kontr,:imp,:showcolor,:Depot1,:dostavka,:RashOplatType,:KontrName,:CloseDate,:CloseTime,:CloseUserName,:Stat,:postnumber,:postdata,:Summa,:HasBeenSent,:BrakComment,:PhotoFile
+ 	from Operation.Instructions where ID=:InstrID)
+ 	i SQLCODE w "<tr><td colspan=4>Ошибка при выводе инструкции "_InstrID_"<br>SQLCODE="_SQLCODE_"</td></tr>"
+ 	i Stat=2 d
+ 	. s ClosedString=CloseUserName_" "_$S(CloseDate:$ZD(CloseDate,4),1:"")_" "_$S(CloseTime:$ZT(CloseTime),1:"")
+ 	. s ClosedString=ClosedString_" "_HasBeenSent
+ 	. s SaveButtonStyle="display:none"
+ 	i postdata s postdata=$ZD(postdata,4)
+ }
+
+w "<tr>"
+	w "<td class=RightBottom>Шаблон операции"
+	w "<td class=RightBottom>"
+	w "<select id='Oper' onchange='ShowHideRashOplatType(this)'>"
+	w ##class(Docs.Action2).GetClassValuesOptions($G(Oper),"Operation.OperTemplate")
+	w "</select>"
+	w "<td class=RightBottom>Сумма"
+	w "<td class=RightBottom>"_$G(Summa)_"&nbsp;"
+w "</tr>"
+
+w "<tr>"
+	w "<td class=RightBottom>Краткое описание (номер)<td class=RightBottom><input type=text id=Name MAXLENGTH=50 value='"_$G(Name)_"'>"
+	w "<td class=RightBottom>Комментарий<td class=RightBottom><input type=text id=Comment MAXLENGTH=1000 Value='"_$G(Comment)_"'>"
+w "</tr>"
+
+w "<tr>"
+	w "<td class=RightBottom>Дата<td class=RightBottom><input type=text id=""InstDate"" value='"_$ZD($G(InstDate,$H),4)_"' onclick=""fnCalendar(this)"" class=""datar"" onmouseout=""UnPaint(this)"" onmouseover=""Paint(this)"">"
+	w "<td class=RightBottom>Контрагент<td class=RightBottom><span onmouseout=""UnPaint(this)"" onmouseover=""Paint(this)"" class=Kontragent onclick=""ChooseKonragent(this)"" oncontextmenu=""this.innerText='';this.Tag=''"" id=""Kontr"" Tag='"_$G(Kontr)_"'>"_$G(KontrName)_"</span>"
+w "</tr>"
+
+w "<tr>"
+	w "<td class=RightBottom>Важность"
+	w "<td class=RightBottom>"
+	w "<select id=""imp"">"
+	w ##class(Docs.Action2).GetDisplaylistOptions($G(imp),"Operation.Instructions||imp")
+	w "</select>&nbsp;",!
+	w "<td class=RightBottom>Выделить цветом"
+	w "<td class=RightBottom>"
+	w "<select id=""showcolor"">"
+	w ##class(Docs.Action2).GetDisplaylistOptions($G(showcolor),"Operation.Instructions||showcolor")
+	w "</select>"
+
+w "<tr>"
+	w "<td class=RightBottom>Склад"
+	w "<td class=RightBottom>"
+	w "<select id='Depot1'>"
+	w ##class(Docs.Action2).GetClassValuesOptions($G(Depot1),"Store.Depot")
+	w "</select>"
+	w "<td class=RightBottom><span id=ZakazInstr5 class=ZakazInstr>Почтовый документ</span>&nbsp;"
+	w "<td class=RightBottom><span id=ZakazInstr6 class=ZakazInstr>"_$G(postnumber)_"&nbsp;"_$G(postdata)_"</span>&nbsp;"
+
+w "<tr>"
+	w "<td class=RightBottom><span id=ZakazInstr1 class=ZakazInstr>Способ оплаты</span>&nbsp;"
+	w "<td class=RightBottom><span id=ZakazInstr2 class=ZakazInstr><select id='RashOplatType'>"
+	w ##class(Docs.Action2).GetClassValuesOptions($G(RashOplatType),"Common.Dictionary7")
+	w "</select></span>&nbsp;"
+	w "<td class=RightBottom><span id=ZakazInstr3 class=ZakazInstr>Способ доставки</span>&nbsp;"
+	w "<td class=RightBottom><span id=ZakazInstr4 class=ZakazInstr>"
+	w "<select id='dostavka'>"
+	w ##class(Docs.Action2).GetClassValuesOptions($G(dostavka),"Common.Dictionary1")
+	w "</select></span>&nbsp;"
+	w "</tr>"
+
+if $G(BrakComment)'="" d
+	. w "<tr>"
+	. w "<td class=RightBottom>Комментарий клиента&nbsp;"
+	. w "<td class=RightBottom colspan=""3"">"_$G(BrakComment)
+	. w:$G(PhotoFile)'="" " <a href=""ClientImages\"_$G(PhotoFile)_""" target=_blank>фотоприложение</a>"
+
+w:$G(ClosedString)'="" "<tr><td colspan=4 class=RightBottom>Инструкция завершена <i>"_ClosedString_"</i>"
+</script>
+</table>
+<tr height=100%><td>
+<SKLADiGrid:iGrid id="docstr" width="100%" height="300" Enabled="true" RowMode="true" /><br>
+<sklad:Button value="Добавить товар" onclick="AddGood();" style="width:150px">
+<sklad:Button value="Удалить строку" onclick="RemoveRow();" style="width:150px">
+<sklad:Button value="Очистить строки" onclick="ClearGrid();" style="width:150px">
+<tr><td>
+<center><br><sklad:Button value="Сохранить" onclick="startFun();" style="#($G(SaveButtonStyle))#"><sklad:Button onclick="windowclose();" value="Отмена"></center>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,187 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ s login=$G(%session.Data("user"))
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ i '##class(Common.Rights).getrights(login,4) s %response.ServerSideRedirect="norights.csp" 
+ q 1
+</script>
+
+<html XMLNS:SKLADList XMLNS:SKLAD2>
+<IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview.htc">
+<IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc">
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="jscript" src="common.js"></script>
+<script language="Jscript">
+var ColCode="";
+sessionid="#(%session.SessionId)#";
+var where="";
+
+function load(){
+	//currentdict.attachEvent("onAddColumns", showdictionary)
+	dictionary.LoadHeaders();
+}
+
+function Item(ItemID){
+ItemID=ReturnSpace(ItemID)
+mok=window.showModalDialog("CreateNewDict.csp",ItemID+";"+dictionary.ClassName,"center:yes;status:no;dialogHeight:400px;dialogWidth:400px;resizable:yes;")
+if(mok==null)return false
+if(mok==1){ShowList()}
+}
+
+function ShowList(){
+	dictionary.DownLoad();
+}
+
+function AddProp(){
+ItemID=ReturnSpace(dictionary.ItemID)
+if(ItemID=="")return
+ok=window.showModalDialog("AddGoodsProp2.csp?ItemID="+ItemID,ItemID,"center:yes;status:no;dialogHeight:330px;resizable:yes")
+if(ok==1){ShowList();return false;}
+if(ok==null){return false;}
+alert(ok)
+}
+
+function ShowProps(){
+	ItemID=ReturnSpace(dictionary.ItemID);
+	//PropTable.ClearRows();
+	//PropTable.DownLoadPairs(ItemID,'');	
+	CurrentDictName.innerText=dictionary.ItemName;
+	currentdict.ClassName=ItemID;
+	var made=false;
+	if(ItemID=="Common.Dictionary4"){
+		//товар и его аналоги
+		currentdict.loadfrommethod("Reports.ShowTables.showanalogs","");
+		var made=true;
+	}
+	if(ItemID=="Common.Dictionary2"){
+		//гарантийные талоны
+		currentdict.loadfrommethod("Reports.ShowTables.showgarants","");
+		var made=true;
+	}
+	var AdditionalFields="";  //добавочные поля
+	if(ItemID=="Common.Dictionary10"){var AdditionalFields="Property7148->ModelNumber~Модель~~~@%String~~~~~#@#"}
+	if(!made){currentdict.LoadHeaders("","",AdditionalFields);}
+}
+
+function showdictionary(where){
+if(!makeShowDict.checked)return
+where=ReturnSpace(where);
+var made=false;
+KontrGroup.style.display="none";
+EditList.style.display="none";
+if(currentdict.ClassName=="Common.Dictionary4"){
+	currentdict.loadfrommethod("Reports.ShowTables.showanalogs",where);
+	var made=true;
+}
+if(currentdict.ClassName=="Common.Dictionary2"){
+	currentdict.loadfrommethod("Reports.ShowTables.showgarants",where);
+	var made=true;
+} 
+if(currentdict.ClassName=="Common.Kontragent"){
+	KontrGroup.style.display="inline";
+	EditList.style.display="inline";
+	var Add="";
+	if(where!=""){var Add=" and ";}
+	if(KontrGroupSel.value!=""){
+		where=where+Add+"Property2506="+KontrGroupSel.value;
+		}
+}
+if(!made){
+	currentdict.DownLoad(where);}
+}
+
+function addrecord(currentrecord){
+var currentrecord=ReturnSpace(currentrecord)
+var currentclass=currentdict.ClassName;
+var made=false;
+if(currentclass=="Common.Kontragent"){
+	//ok=window.showModalDialog("kontragent.csp",currentrecord+";"+currentclass,"center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+	ok=window.showModalDialog("kontragent.csp?KontrId="+currentrecord,currentrecord+";"+currentclass,"center:yes;status:no;dialogHeight:520px;dialogWidth:800px;resizable:yes;")
+	var made=true;}
+if((currentclass=="Common.Dictionary2")&(currentrecord=="")){
+	ok=window.showModalDialog("ManyGarants.csp",currentrecord+";"+currentclass,"center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+	var made=true;}
+if(!made){ok=window.showModalDialog("DictItem.csp",currentrecord+";"+currentclass,"center:yes;status:no;dialogHeight:350px;dialogWidth:400px;resizable:yes;")}
+if(ok!=null)showdictionary()
+}
+
+function gg(){
+if(ColCode=="")return false;
+where = ColCode+" %STARTSWITH '"+fldval.value+"'";
+if(fldval.value=="")where="";
+showdictionary(where);
+}
+
+function colclick(){
+	if(currentdict.ColType=="%Date"){alert("Поля с датами не обрабатываются");return false;}
+	namfld.innerText=currentdict.ColName;
+	ColCode=currentdict.ColCode;
+}
+
+function fnKontrList(){
+var ok=window.showModalDialog("KontragentsListEdit.csp?Where="+where,"","center:yes;status:no;dialogHeight:650px;dialogWidth:1000px;resizable:yes;")
+if(ok!=null)showdictionary()
+}
+
+function showReport8(){
+var Dates=rep7dat1.value+"@"+rep7dat2.value;
+report8.loadfrommethod("Reports.Analyzis.OtpravkaKontragentu",Dates,TovarIDs,KontrID)
+}
+
+function fnMeetingResult(){
+var KontrId=currentdict.ItemID;
+if(KontrId=="")return;
+var ok=window.showModalDialog("KontrMeetingResult.csp?Kontr="+KontrId,"","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+}
+</script>
+</head>
+<body onload="load()" >
+
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<td width=10%><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
+<TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=2><strong>Справочники</strong></TD>
+<td width=10% align=right><a href="help/dictshelp.htm"><img src="images/BIGHelp.bmp" width="20" height=25 border=0></a></td>
+</TABLE>
+
+<br>
+<fieldset><legend>Справочники</legend>
+ <SKLADList:listview width=100% height=150 id="dictionary" onAddColumns="ShowList()" ClassName="Common.Dicts" zonDblClick="Item()" zClick="ShowProps()"/><br>
+  <sklad:LittleButton name="new" id="newtov1" onclick="Item()" alt="Создать справочник">
+  <!--
+  <sklad:LittleButton name="edit" id="edititem" onclick="Item(dictionary.ItemID)" alt="Редактировать справочник">
+  -->
+  <sklad:LittleButton name="new+" id="newprop" onclick="AddProp()" alt="Добавить поле справочника">
+</fieldset>
+<br>
+<span id="namfld"></span>&nbsp;<input type="text" id="fldval" onkeyup="gg();">
+<span id="KontrGroup" style="display:none">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+	Вид деятельности: 
+	<select id="KontrGroupSel" onchange="showdictionary()">
+	<script language="Cache" runat="server">
+		w ##class(Docs.Action2).GetDisplaylistOptions(,"Common.Kontragent||Property2506")
+	</script>
+	</select>
+</span>
+
+<fieldset ><legend id="CurrentDictName"></legend>
+<!--
+<SKLAD2:table id="PropTable" width=400 height=200 DisplaySecondCol="none" />
+-->
+<SKLADList:listview width=100% height=150 id="currentdict" zonDblClick="addrecord(currentdict.ItemID);" zonColumnClick="colclick()" onAddColumns="showdictionary()" /><br>
+<table width=100%><tr><td>
+  <sklad:LittleButton name="new" id="newrec" onclick="addrecord()" alt="Создать запись">
+  <sklad:LittleButton name="edit" id="addrec" onclick="addrecord(currentdict.ItemID)" alt="Редактировать запись">
+<span id="EditList" style="display:none">
+  <sklad:LittleButton name="history" id="btnKontrListEdit" onclick="fnKontrList()" alt="Редактировать список контрагентов">
+  <sklad:LittleButton name="user" id="btnUser" onclick="fnMeetingResult()" alt="История общения с контрагентом">
+</span>
+</td>
+<td align=right>
+Поддерживать таблицу в актуальном состоянии
+<input type=checkbox id="makeShowDict" checked style="width:20pt;border:none;">
+</td>
+</tr>
+</fieldset>
+</body>
+</html>

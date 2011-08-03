@@ -1,0 +1,17 @@
+<html>
+<head>
+
+<!-- Put your page Title here -->
+<title>	Cache Server Page </title>
+
+</head>
+
+<body>
+<table border=1>
+<script language="Cache" runat="server">
+ if %request.Get("password")="mamuka" d ^FixReserves
+ else  w "не указан пароль, фиксация остатков невозможна"
+</script>
+</table>
+</body>
+</html>

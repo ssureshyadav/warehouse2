@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.kontrmeetingresult">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62196,52560.687375</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body style=""fontface:Arial"" onload=""load();"">"
+	Write !,(##class(%CSP.Response).HyperEventBody())
+	Write !
+	s KontrId=%request.Get("Kontr")
+	s KontrObj=##class(Common.Kontragent).%OpenId(KontrId)
+	w "<table width=100% height=100% border=0 id=""MainTable"">",!
+	d:$ISOBJECT(KontrObj) 
+	. w "<tr height=1%><td>"
+	. w "<p align=center>"_KontrObj.Name_"</p>",!
+	. w "Город: "_KontrObj.City_"<br>",!
+	. w "Директор: "_KontrObj.chief_" Контактные лица:"_KontrObj.ContPers_"<br>",!
+	. w "Контакты: "_KontrObj.Phones_" <a href=""mailto:"_$ZCVT(KontrObj.Name,"O","HTML")_" <"_KontrObj.EMail_">"_""">"_KontrObj.EMail_"</a><br>",!
+	. w "</td></tr>",!
+	w "<tr height=96%><td valign=top>"
+	w "<table width=100% border=1 id=""ResTable"">",!
+	w "<tr><td width=1%>Дата, время</td><td width=98%>Результат разговора</td><td width=1%>&nbsp;</td></tr>"
+	&sql(declare zz cursor for 
+	select ID,Dat,Tim,Result,User1->Name,MessageType,%external(MessageType)
+	into :ID,:Dat,:Tim,:Result,:User1,:MessageType,:MessageTypeText
+	from Kontragent.Meeting where Kontr=:KontrId)
+	&sql(open zz)
+	f  &sql(fetch zz) q:SQLCODE  d
+	. if MessageType=2 s color="#defefe"
+	. else  if MessageType=3 s color="#deefef"
+	. else  s color="#ffffff"
+	. w "<tr bgcolor="""_color_""">"
+	. w "<td>"_$ZDT(Dat_","_Tim,4)_"</td>"
+	. w "<td><b><font size=-1>"_MessageTypeText_"</font></b> <div style=""display:inline"" id="""_ID_""" onclick=""CopyInClipBoard('"_ID_"')"">"_Result_"</div>"
+	. w "<img src=""images/txt.gif"" onmouseover=""this.src='images/Ontxt.gif'"" onmouseout=""this.src='images/txt.gif'""  alt=""Копировать в буфер обмена"" onclick=""CopyInClipBoard('"_ID_"')"" style=""cursor:hand;float:right;"">"
+	. w "</td>"
+	. w "<td>"_User1_"</td>"
+	. w "</tr>",!
+	&sql(close zz)
+	w "</table>",!
+	w "</td></tr>"
+	Write !,"<tr height=1% id=""AddMessageRow""><td>",!
+	Write "	"
+	Write "<input type=""text"" class=""datar"" id=""dat"" value="""_($ZD(+$H,4))_""">"
+	Write " ",!
+	Write "	"
+	Write "<input type=""text"" id=""tim"" style=""width:70px;border:none"" value="""_($ZT($P($H,",",2)))_""">"
+	Write "<br>",!
+	Write "	"
+	Write "<Textarea id=""NewResult"" cols=60 rows=5>"
+	Write "</Textarea>"
+	Write "<br>",!
+	Write "	"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""AddResult(0);"" TITLE=""Эту запись контрагент не увидит, такая запись видна только сервис менеджеру.""><center>Добавить защищённую запись</center></span>"
+	Write !,"	"
+	If '(HaveRightToWrite=1) Goto %csp00001 ;{
+	Write "	",!
+	Write "	"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""AddResult(3);"" TITLE=""Эту запись контрагент может увидеть в МО в пункте Справка\Обратиться в офис""><center>Добавить ответ клиенту</center></span>"
+	Write !,"	"
+%csp00001	;}
+	Write !,"</td></tr>",!
+	Write "<tr height=1% id=""ButtonsRow""><td align=right>"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""PrintHistory();"" TITLE=""""><center>Печать</center></span>"
+	Write "&nbsp;&nbsp;"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""window.close();"" TITLE=""""><center>Закрыть</center></span>"
+	Write "</td></tr>",!
+	Write "</table>",!
+	Write "<textarea id=""TextAreaText"" cols=20 rows=5 style=""display:none"">"
+	Write "</textarea>"
+	Write !,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !,!
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"<!-- Put your page Title here -->"
+	Write !,"<title>Результаты общений с контрагентом</title>",!
+	Write "<script language=""jscript"">"
+	Write !,!,"//добавить результат",!
+	Write "function AddResult(MessageType)",!
+	Write "{",!
+	Write "	var Result=NewResult.value;",!
+	Write "	var Dat=dat.value;",!
+	Write "	var Tim=tim.value;",!
+	Write "	var KontrId="""_(%request.Get("Kontr"))_""";",!
+	Write "	var ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Kontragent.Action.AddMeetingResult:csp.kontrmeetingresult"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',Result,Dat,Tim,KontrId,MessageType)",!
+	Write "	if(isNaN(ok)){alert(ok)}",!
+	Write "	else",!
+	Write "		{",!
+	Write "		var trObject=ResTable.insertRow();",!
+	Write "		if(MessageType==3)trObject.style.backgroundColor=""#deefef"";",!
+	Write "		var tdObject=trObject.insertCell();",!
+	Write "		tdObject.innerText=Dat+"" ""+Tim;",!
+	Write "		var tdObject=trObject.insertCell();",!
+	Write "		tdObject.innerText=Result;",!
+	Write "		}",!
+	Write "}",!
+	Write !,"//вывести на печать",!
+	Write "function PrintHistory()",!
+	Write "{",!
+	Write "	AddMessageRow.style.display=""none"";",!
+	Write "	ButtonsRow.style.display=""none"";",!
+	Write "	MainTable.height=""1%"";",!
+	Write "	window.print();",!
+	Write "	MainTable.height=""100%"";",!
+	Write "	AddMessageRow.style.display=""block"";",!
+	Write "	ButtonsRow.style.display=""block"";",!
+	Write "}",!
+	Write !,"//копировать в буфер обмена",!
+	Write "function CopyInClipBoard(TextCellId)",!
+	Write "{",!
+	Write "   var TextAreaObj = document.getElementById(""TextAreaText"");",!
+	Write "   var TextCellObj = document.getElementById(TextCellId);",!
+	Write "	TextAreaObj.value = TextCellObj.innerText;",!
+	Write "	TextAreaObj.style.display=""block"";",!
+	Write "   TextAreaObj.focus()",!
+	Write "   TextAreaObj.style.display=""none"";",!
+	Write "   TextAreaObj.select()",!
+	Write "   therange = TextAreaObj.createTextRange()",!
+	Write "   therange.execCommand(""Copy"")",!
+	Write "   alert(""Данные успешно скопированы"")",!
+	Write "}",!
+	Write !,"function load()",!
+	Write "{",!
+	Write "	var id = setInterval(UpdateTime, 1000);",!
+	Write "}",!
+	Write !,"function UpdateTime()",!
+	Write "{",!
+	Write "	var dateObj = new Date();",!
+	Write "	var m = TwoDigits(dateObj.getMinutes());",!
+	Write "	var h = TwoDigits(dateObj.getHours()); // + dateObj.getTimezoneOffset() / 60;",!
+	Write "	var s = TwoDigits(dateObj.getSeconds());",!
+	Write "	tim.value = h + "":"" + m + "":"" + s;",!
+	Write "}",!
+	Write !,"function TwoDigits(variable)",!
+	Write "{",!
+	Write "	//if (variable.length==1) variable=""0""+variable;",!
+	Write "	varStr=variable.toString();",!
+	Write "	if(varStr.length==1)varStr=""0""+varStr;",!
+	Write "	return varStr;",!
+	Write "}",!
+	Write "</script>"
+	Write !,(..HyperEventHead())
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+  s login=$G(%session.Data("user"))
+  i '+login s %response.ServerSideRedirect="norights.csp" 
+  i '##class(Common.Rights).getrights(login,3) s %response.ServerSideRedirect="norights.csp" 
+  s HaveRightToWrite = ##class(Common.Rights).getrights(login,19)
+  q 1
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\KontrMeetingResult.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/KontrMeetingResult.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>62115,45983</Default>
+</Parameter>
+</Class>
+</Export>

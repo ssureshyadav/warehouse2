@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.StorageInItems">
+<Super>Docs.DocItems</Super>
+<TimeCreated>60373,30721.033797</TimeCreated>
+
+<Property name="addr">
+<Description>
+Адрес</Description>
+<Type>Store.Address</Type>
+</Property>
+
+<Property name="quantdefault">
+<Description>
+Количество по накладной</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="quantreal">
+<Description>
+Количество фактическое</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>StorageInItemsDefaultData</DefaultData>
+<Data name="StorageInItemsDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"StorageInItems"</Subscript>
+<Value name="1">
+<Value>addr</Value>
+</Value>
+<Value name="2">
+<Value>quantdefault</Value>
+</Value>
+<Value name="3">
+<Value>quantreal</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

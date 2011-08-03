@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.DocBrakItems">
+<Super>Docs.DocItems</Super>
+<TimeCreated>60520,61965.645477</TimeCreated>
+
+<Property name="result">
+<Description>
+Результат</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=", ,принят,передан в мастерскую,списано,передано на склад ГП,утерян,не получено,расформировано на зч"/>
+<Parameter name="VALUELIST" value=",1,2,3,4,5,6,7,8"/>
+</Property>
+
+<Index name="resultind">
+<Properties>result</Properties>
+</Index>
+
+<Property name="PlanQuant">
+<Description>
+Планируемое количество</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Index name="PlanQuantInd">
+<Properties>PlanQuant</Properties>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>DocBrakItemsDefaultData</DefaultData>
+<Data name="DocBrakItemsDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"DocBrakItems"</Subscript>
+<Value name="1">
+<Value>result</Value>
+</Value>
+<Value name="2">
+<Value>PlanQuant</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

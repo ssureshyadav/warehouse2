@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.waste">
+<Super>%Persistent</Super>
+<TimeCreated>60423,63900.223959</TimeCreated>
+
+<Property name="meas">
+<Description>
+Единица</Description>
+<Type>Store.Measures</Type>
+</Property>
+
+<Property name="DocumentClass">
+<Description>
+Тип документа</Description>
+<Type>Docs.Docs</Type>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Docs.wasteD</DataLocation>
+<DefaultData>wasteDefaultData</DefaultData>
+<IdLocation>^Docs.wasteD</IdLocation>
+<IndexLocation>^Docs.wasteI</IndexLocation>
+<StreamLocation>^Docs.wasteS</StreamLocation>
+<Data name="wasteDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>meas</Value>
+</Value>
+<Value name="3">
+<Value>DocumentClass</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

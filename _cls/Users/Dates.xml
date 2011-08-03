@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Users.Dates">
+<Description>
+Данные пользователей</Description>
+<IncludeCode>xmlmacros</IncludeCode>
+<Super>%Persistent</Super>
+<TimeCreated>60369,60019.41823</TimeCreated>
+
+<Property name="Name">
+<Description>
+Ф.И.О пользователя</Description>
+<Type>%String</Type>
+<Required>1</Required>
+</Property>
+
+<Property name="Login">
+<Description>
+Логин</Description>
+<Type>%String</Type>
+<Required>1</Required>
+</Property>
+
+<Property name="Password">
+<Description>
+Пароль</Description>
+<Type>%String</Type>
+<Required>1</Required>
+</Property>
+
+<Property name="Rol">
+<Description>
+Роль</Description>
+<Type>%String</Type>
+<Required>1</Required>
+</Property>
+
+<Method name="SaveUser">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>famil:%String,logi:%String,passwor:%String,rol:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s pass=$System.Encryption.MD5Hash(passwor)
+	&sql(insert into Users.Dates (Name,Login,Password,Rol)
+	values(:famil,:logi,:pass,:rol))
+	q
+]]></Implementation>
+</Method>
+
+<Method name="DeleteUser">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>iden:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s qwer=0
+	&sql(select Rol into:role from Users.Dates where ID=:iden)
+	&sql(select count(ID) into :count from Users.Dates Where Rol=:role)
+	if count>1 {&sql(delete from Users.Dates Where ID=:iden) q}else {&sql(select count(ID) into :countnum from Users.Roles where NameFunction=6)} 
+	if countnum=1	{q "Невозможно удалить данного пользователя"} else {&sql(declare curs cursor for select Name into :namerol from Users.Roles Where NameFunction=6)
+	&sql(open curs)
+	f  &sql(fetch curs) q:SQLCODE  d
+	.i $I(i)
+	.s namerol(i)=namerol
+	&sql(close curs)}
+	f j=1:1:i q:SQLCODE  d
+	.s param=namerol(j)
+	.&sql(select count(ID) into :counter from Users.Dates where Rol=:param)
+	.s qwer=qwer+counter
+	i qwer>1 {&sql(delete from Users.Dates Where ID=:iden) q} else {q "Невозможно удалить данного пользователя"}
+	q
+]]></Implementation>
+</Method>
+
+<Method name="Input">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>login1:%String,password:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	
+    &sql( select Login into:logname
+    from Users.Dates where Login=:login1&Password=:pass)
+ 	q logname
+]]></Implementation>
+</Method>
+
+<Method name="check">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>login,pass</FormalSpec>
+<Implementation><![CDATA[
+ s passw=$System.Encryption.MD5Hash(pass)
+ q:login="" "Не указано имя пользователя"
+ q:passw="" "Не указан пароль"
+ &sql(select ID,Password into :ID,:Password from Users.Dates where Login=:login)
+ q:SQLCODE=100 "Не найден пользователь с указанным именем"
+ q:passw'=Password "Пароль указан неверно"
+ q ID
+]]></Implementation>
+</Method>
+
+<Method name="UpdateUser">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>famil="",log="",pas="",rol="",identificator=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s $ZT="UpdateUserErr"
+	q:identificator="" 1
+	s usr=##class(Users.Dates).%OpenId(identificator)
+	q:'$ISOBJECT(usr) 1
+	s:famil'="" usr.Name=famil
+	s:log'="" usr.Login=log
+	s:pas'="" usr.Password=$System.Encryption.MD5Hash(pas)
+	s:rol'="" usr.Rol=rol
+	s ok=usr.%Save()
+	q:ok=1
+	q 1
+	s counter=0
+ &sql(select Login,Name,Password,Rol  into :login,:name,:pass,:roles from Users.Dates where ID=:identificator) //считываю старые данные
+	i pas'="" s password=$System.Encryption.MD5Hash(pas) else  s password=pass
+	i roles=rol {&sql(update Users.Dates set Name=:famil,Login=:log,Password=:password where ID=:identificator) q} //если роль не меняется,то изменяем
+	&sql(declare perscurs cursor for select Rol into :namerol from Users.Dates)
+	&sql(open perscurs)
+	f  &sql(fetch perscurs) q:SQLCODE  d
+	.i $I(i)
+	.s namerol(i)=namerol
+	&sql(close perscurs)
+	f j=1:1:i d
+	.s namerole=namerol(j) //находим все роли пользователей 
+	.&sql(select count(ID) into :count from Users.Roles where Name=:namerole&NameFunction=6)
+	.s counter=counter+count //находим сколько пользователей имеют доступ к настройкам
+	i counter>1 {&sql(update Users.Dates set Name=:famil,Login=:log,Password=:password where ID=:identificator) q}
+	q 1
+UpdateUserErr
+ $$$WriteError($ZE)
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="GetPropertyListIndex">
+<ClassMethod>1</ClassMethod>
+<CodeMode>objectgenerator</CodeMode>
+<FormalSpec><![CDATA[PropertyName:%String="",&DataLocation:%String=""]]></FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<Implementation><![CDATA[
+ Do %code.WriteLine(" s DataLocation="""_%compiledclass.Storages.GetAt(1).DataLocation_"""")
+ Do %code.WriteLine(" q:PropertyName="""" """"")
+ s number=""
+ s StorageStrategy=%compiledclass.Storages.GetAt(1)
+ f i=1:1:StorageStrategy.Data.Count() d  q:StorageData.Name[%compiledclass.SqlTableName
+ . s StorageData=StorageStrategy.Data.GetAt(i)
+ s data=StorageData.Values.GetNext(.number)
+ while $ISOBJECT(data) {
+ 	s PropertyName=data.Value
+ 	s ListIndex=data.Name
+ 	Do %code.WriteLine(" s Prop( """ _ PropertyName _ """)="_ListIndex)
+ 	s data=StorageData.Values.GetNext(.number)
+ 	} 	
+ Do %code.WriteLine(" Quit $G(Prop(PropertyName))")
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetPropertyValue">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ID:%String="",Property:%String=""</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ q:ID=""
+ q:Property=""
+ s PropertyNumber=..GetPropertyListIndex(Property,.DataLocation)
+ q:Property=""
+ q $ZSTRIP($LG(@DataLocation@(ID),PropertyNumber),"<W")
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Users.DatesD</DataLocation>
+<DefaultData>DatesDefaultData</DefaultData>
+<IdLocation>^Users.DatesD</IdLocation>
+<IndexLocation>^Users.DatesI</IndexLocation>
+<StreamLocation>^Users.DatesS</StreamLocation>
+<Data name="DatesDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Family</Value>
+</Value>
+<Value name="3">
+<Value>Login</Value>
+</Value>
+<Value name="4">
+<Value>Password</Value>
+</Value>
+<Value name="5">
+<Value>Role</Value>
+</Value>
+<Value name="6">
+<Value>Rol</Value>
+</Value>
+<Value name="7">
+<Value>Name</Value>
+</Value>
+<Value name="8">
+<Value>AspectID</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.archivebase">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>61144,44472.909263</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body onload=""FillArchivePath()"">"
+	Write !,(##class(%CSP.Response).HyperEventBody())
+	Write !,!,"<span class=ButtonDiv style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""window.location.href='tuneup.csp'"" ><center>Назад</center></span>"
+	Write "<br>",!
+	Write "<TABLE cellSpacing=0 width=""100%"" celpadding=""0"" >",!
+	Write "<TR>",!
+	Write "<TD align=center style=""BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid"" colspan=3><strong>Подключение к архивной базе данных</strong></TD></tr>",!
+	Write "<tr>",!
+	Write "</table>",!
+	Write "<br><br>",!
+	Write "Путь к архивным базам: "
+	Write "<input type=""text"" id=""ArchivePath"" value="""">"
+	Write " "
+	Write !,"<img src=""images/ok.gif"" onmouseover=""savePath.src='images/Onok.gif'"" onmouseout=""savePath.src='images/ok.gif'""  id=""savePath"" name=""savePath"" alt=""Запомнить и перечитать список архивных баз"" onclick=""fnReload()"" style="""">"
+	Write !,"<br><br>",!
+	Write "Ниже указаны копии базы данных сделанные на указанное число. Выберете одну из них и нажмите кнопку ""Подключить"".<br>",!
+	s ArchivePath=%request.GetCookie("ArchivePath")
+	w "<SELECT ID=""ArchiveItSelf"" NAME=""Cars"" SIZE=""15"" style=""border:solid 1 grey;width:400px"">",!
+	if ArchivePath'="" {
+	//s str="Архивная папка "_ArchivePath
+	s qw=##class(%ResultSet).%New("%Library.File:FileSet")
+	//s ok=qw.Prepare(ArchivePath)
+	//if '+ok s str=ok
+	s ok=qw.Execute(ArchivePath)
+	if '+ok s str=ok
+	while qw.Next(.ok) {
+	if $$$ISERR(ok) s str=ok
+	if qw.Data("Type")="F" CONTINUE	//пропускаем файлы
+	w "<OPTION VALUE="""_$G(qw.Data("Name"))_""">"_$G(qw.Data("Name")),!
+	}
+	If $$$ISERR(ok) Do DisplayError^%apiOBJ(ok) Quit
+	}
+	else { s str="Не указана архивная папка"}
+	w "</SELECT>",!
+	w "<br>"_$G(str)_"<br>",!
+	Write !,"<br>",!
+	Write !,"<span class=ButtonDiv style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""startFun()"" ><center>Подключить</center></span>"
+	Write "<br>",!
+	Write "<!--",!
+	Write "<input type=""checkbox"" id=""OpenDatabase"" checked style=""border:none;width:15px""> Открыть архивную базу.",!
+	Write "-->"
+	Write !,"<br><br>",!
+	Write "<center><h4>"
+	Write "<span id=""MethodResult"">"
+	Write "</span>"
+	Write "</h4></center>",!
+	Write "</body>"
+	Write !,(..HyperEventFrame(0))
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"<script language=""jscript"" src=""common.js"">"
+	Write "</script>"
+	Write !,"<script language=""jscript"">"
+	Write !,"function fnReload(){",!
+	Write "SetCookie(""ArchivePath"", ArchivePath.value);",!
+	Write "window.location.reload();",!
+	Write "}",!
+	Write !,"function startFun(){",!
+	Write "if(ArchiveItSelf.value==""""){alert(""Не выбрана архивная база;"");return}",!
+	Write "if(!window.confirm(""Подключить архивную базу ""+ArchiveItSelf.value+"" ?""))return;",!
+	Write "cspCallServerMethod('"_(..Encrypt($listbuild("Common.Common.PlugArchiveBase:csp.archivebase"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:"")_"&WCHARSET="_%response.CharSet)_"',ArchiveItSelf.value)",!
+	Write "iTimerID = window.setInterval(LookUp, 2000)",!
+	Write "}",!
+	Write !,"function FillArchivePath(){",!
+	Write "var ArchivePathvalue=GetCookie(""ArchivePath"");",!
+	Write "if(typeof(ArchivePathvalue)==""undefined"")var ArchivePathvalue=""\\\\fileserver\\DISTRIB\\BackupCache"";",!
+	Write "ArchivePath.value=ArchivePathvalue;",!
+	Write "}",!
+	Write !,"function LookUp(){",!
+	Write "var answer="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Common.Common.PlugArchiveBase:csp.archivebase"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"')",!
+	Write "var command = answer.substr(0, 4);",!
+	Write "if(command!=""stop""){MethodResult.innerText=answer;}",!
+	Write "else{",!
+	Write "	window.clearInterval();",!
+	Write "	MethodResult.innerText=answer.substr(4, answer.length);",!
+	Write "	//if(OpenDatabase.checked)",!
+	Write "	//	{",!
+	Write "	//	window.open(""../sklad/index.hta"",null,""height=500,width=700,status=no,toolbar=no,menubar=no,location=no"");",!
+	Write "	//	}",!
+	Write "	}",!
+	Write "}",!
+	Write "</script>"
+	Write !,(..HyperEventHead())
+	Write !,!,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\ArchiveBase.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/ArchiveBase.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>61053,33359</Default>
+</Parameter>
+</Class>
+</Export>

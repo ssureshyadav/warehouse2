@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.classmethod">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62301,49234.763318</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	s classmethod=%request.Get("classmethod")
+	s param1=%request.Get("param1")
+	s param2=%request.Get("param2")
+	s param3=%request.Get("param3")
+	s param3("currentpage")=%request.Get("currentpage")
+	s param3("stroknastr")=%request.Get("stroknastr")
+	s class=$P(classmethod,".",1,$L(classmethod,".")-1)
+	s method=$P(classmethod,".",$L(classmethod,"."))
+	//s ^mtempArt("class")=class
+	//s ^mtempArt("method")=method
+	//s ^mtempArt("param1")=param1
+	//s ^mtempArt("param2")=param2
+	//s ^mtempArt("param3")=param3
+	d $ZOBJCLASSMETHOD(class,method,param1,param2,.param3)
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\classmethod.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/classmethod.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>60556,48712</Default>
+</Parameter>
+</Class>
+</Export>

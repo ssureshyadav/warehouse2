@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.UtilizItems">
+<Super>Docs.DocItems</Super>
+<TimeCreated>60382,50526.753113</TimeCreated>
+
+<Property name="goodsdir">
+<Description>
+Действие с товаром</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=",Утилизация,Оприходование"/>
+<Parameter name="VALUELIST" value=",1,2"/>
+</Property>
+
+<Index name="Goodind">
+<Properties>goodsdir</Properties>
+</Index>
+
+<Property name="spravka">
+<Description>
+№ и дата выписки Справки</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="Client">
+<Description>
+Клиент</Description>
+<Type>Common.Kontragent</Type>
+</Property>
+
+<Index name="ClInd">
+<Properties>Client</Properties>
+</Index>
+
+<Property name="addr">
+<Description>
+Место</Description>
+<Type>Store.Address</Type>
+</Property>
+
+<Property name="garant">
+<Description>
+Гарантийный талон</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="sn">
+<Description>
+Серийный номер изделия</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="SourceTbl">
+<Description>
+Откуда утилизировать</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=",Общее количество,Брак"/>
+<Parameter name="VALUELIST" value=",1,2"/>
+</Property>
+
+<Index name="SourceTblInd">
+<Properties>SourceTbl</Properties>
+</Index>
+
+<Property name="Brak">
+<Type>Store.Brak</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>UtilizItemsDefaultData</DefaultData>
+<Data name="UtilizItemsDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"UtilizItems"</Subscript>
+<Value name="1">
+<Value>goodsdir</Value>
+</Value>
+<Value name="2">
+<Value>Client</Value>
+</Value>
+<Value name="3">
+<Value>spravka</Value>
+</Value>
+<Value name="4">
+<Value>Store</Value>
+</Value>
+<Value name="5">
+<Value>garant</Value>
+</Value>
+<Value name="6">
+<Value>sn</Value>
+</Value>
+<Value name="7">
+<Value>addr</Value>
+</Value>
+<Value name="8">
+<Value>SourceTbl</Value>
+</Value>
+<Value name="9">
+<Value>Brak</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

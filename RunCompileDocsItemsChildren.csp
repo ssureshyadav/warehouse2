@@ -1,0 +1,15 @@
+<html>
+<head>
+
+<!-- Put your page Title here -->
+<title>	Cache Server Page </title>
+
+</head>
+
+<body>
+<script language="cache" runat="server">
+ job ^CompileDocItemsChildren
+</script>
+ запущен в фоне ^CompileDocsItemsChildren
+</body>
+</html>

@@ -1,0 +1,93 @@
+<script language="cache" runat="server">
+ s docid=%request.Get("docid")
+ s class=%request.Get("class")
+
+ // Получатель платежа
+ s SelfKontragentID=%request.GetCookie("SelfKontragentID")
+ d:SelfKontragentID'=""
+ . s SelfKontragentObj=##class(Common.Kontragent).%OpenId(SelfKontragentID)
+ . q:'$ISOBJECT(SelfKontragentObj)
+ . s SelfKontragentName=$ZCVT(SelfKontragentObj.Name,"O","JS")
+ 
+ s formirovanie=$S(class="Docs.Chet":"счета на оплату",class="factura":"счет-фактуры",1:"")
+ s DocObject=##class(Docs.Super).%OpenId(docid)
+ d:$ISOBJECT(DocObject)
+ . s DocDate=$ZD(DocObject.Dat,4)
+ . s KontrID=DocObject.Kontr.%Id()
+ . s KontrName=$ZCVT(DocObject.Kontr.Name,"O","JS")
+</script>
+<html XMLNS:SKLAD2>
+<IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc" >
+<head>
+<title>#($G(%session.Data("systemname")))#</title>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="Jscript" src="common.js"></script>
+<script language="JScript">
+var sessionid="#(%session.SessionId)#";
+var docid="#($G(docid))#";
+var clas="#($G(class))#";
+var DocDate="#($G(DocDate))#";
+var KontrID="#($G(KontrID))#";
+var KontrName="#($G(KontrName))#";
+var SelfKontragentID="#($G(SelfKontragentID))#";
+var SelfKontragentName="#($G(SelfKontragentName))#";
+window.dialogHeight="275px";
+window.dialogWidth="600px";
+
+function startFun(){
+var k1=PropTable1.item("Kontr")
+var k2=PropTable2.item("Kontr")
+SetCookie("SelfKontragentID",k2);
+if(k1==""){alert("Не заполнено поле ПЛАТЕЛЬЩИК");return}
+if(k2==""){alert("Не заполнено поле ПОЛУЧАТЕЛЬ ПЛАТЕЖА");return}
+window.open("print.csp?id="+docid+"&class="+clas+"&kontr="+k2+"&kontr2="+k1+"&cv1="+cv1.value+"&NDSinside="+NDSinside.checked+"&DocDate="+Dat.innerText+"&sessionid="+sessionid+"&CalculateInRubles="+CalculateInRubles.checked);
+}
+
+function load(){
+Dat.innerText=DocDate;
+//SelfKontragentID=ReturnSpace(GetCookie("SelfKontragentID"));
+PropTable1.DownLoadPairs("","","Dat,Tim,Summa,Name,DocumentClass,Stat,Source,User1,Depot,Comment,CloseDate,CloseTime,CloseUser");
+PropTable2.DownLoadPairs("","","Dat,Tim,Summa,Name,DocumentClass,Stat,Source,User1,Depot,Comment,CloseDate,CloseTime,CloseUser");
+}
+
+function OpenCalendar(InputObj){
+var newDate=window.showModalDialog("calendar.csp","","center:yes;status:no;dialogHeight:350px;dialogWidth:310px;resizable:yes;");
+if(ReturnSpace(newDate)!=""){InputObj.innerText=newDate;}
+}
+
+function LoadProp1Complite(){
+	PropTable1.setCellValue("Kontr",KontrName,KontrID);
+}
+
+function LoadProp2Complite(){
+	if(SelfKontragentID!="")
+	{
+	PropTable2.setCellValue("Kontr",SelfKontragentName,SelfKontragentID);
+	}
+}
+
+</script>
+</head>
+<body  onload="load();" onkeypress="ManageWindow();" >
+<b><center>Формирование #($G(formirovanie))#</center></b>
+<table>
+<tr><td>Дата документа</td><td><div onclick="OpenCalendar(this)" name="Dat" id="Dat" style="border:solid 1 grey;width:150px;cursor:hand"></div></td></tr>
+<tr><td>Плательщик</td><td><SKLAD2:table id="PropTable1" width=260 ClassName="Docs.Super" onLoadComplete="LoadProp1Complite()"/></td></tr>
+<tr><td>Получатель платежа</td><td><SKLAD2:table id="PropTable2" width=260 ClassName="Docs.Super" onLoadComplete="LoadProp2Complite()"/></td></tr>
+
+<tr>
+	<td>К платежно расчетному документу №</td><td> <input type="text" name="cv1" size="20"></td>
+</tr>
+
+<tr>
+	<td>НДС включён в цену товара</td><td> <input type="checkbox" name="NDSinside" CHECKED style="width:15px;border:none"></td>
+</tr>
+<tr>
+	<td>Пересчитывать в рубли</td><td> <input type="checkbox" name="CalculateInRubles" CHECKED style="width:15px;border:none"></td>
+</tr>
+
+<!-- <tr><td>Рассчитывать рублёвую сумму на дату документа</td><td> <input type="checkbox" name="KursFromDoc" id="KursFromDoc" CHECKED ></td></tr> -->
+</table>
+<center><br><sklad:Button value="Да" onclick="startFun();"><sklad:Button onclick="window.close()" value="Отмена"></center>
+</body>
+</html>

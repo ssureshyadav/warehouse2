@@ -1,0 +1,52 @@
+<script language="cache" runat="server">
+s data=$G(%request.Data("data",1))
+
+</script>
+<html>
+<head>
+<title>Ошибки</title>
+<link href="style.css" type=text/css rel=stylesheet>
+<style>
+body{font-face: arial; font-size: 14}
+</style>
+<script language="jscript" src="common.js"></script>
+<script language="Jscript">
+function DateClick(){
+newDate=window.showModalDialog("calendar.csp","","center:yes;status:no;dialogHeight:350px;dialogWidth:310px;resizable:yes;");
+if(ReturnSpace(newDate)!=""){document.all.data.value=newDate;}
+}
+function subm(){
+if(document.all.data.value==""){
+	DateClick()
+}
+else{
+	forma.submit();
+}
+}
+</script>
+</head>
+
+<body>
+
+<csp:IF CONDITION='data=""'>
+<center><h2>Ошибки</h2></center>
+<form name="forma">Дата <input type=text value=#($ZD(+$H,4))# name=data id=data onclick="DateClick()"> <input type=button onclick="subm()" value="ok" style="width:30"></form>
+<csp:ELSE>
+<a href="error.csp">выбрать дату</a><br>
+ошибки на дату #(data)#
+<table border=1><tr><td>Дата, время<td>Содержание ошибки<td>Уточнение
+<script language="cache" runat="server">
+ s datah=$ZDH(data,4)
+ s i="" f  s i=$O(^Errors(i)) q:i=""  d
+ . q:+i'=datah
+ . s f="" f  s f=$O(^Errors(i,f)) q:f=""  d
+ . . s value=$G(^Errors(i,f))
+ . . s value=$TR(value,"<","(")
+ . . s value=$TR(value,">",")")
+ . . w "<tr><td>"_$ZDT(i,4)_"<td>"_value_"<td>"_f
+ 
+</script>
+</table>
+</csp:IF>
+</body>
+</html>

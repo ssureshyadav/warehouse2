@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.PlatejkaItems">
+<Description>
+Строки платёжного поручения</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60967,85699.67393</TimeCreated>
+
+<Property name="Rash">
+<Description>
+Отгрузка</Description>
+<Type>Docs.Rash</Type>
+</Property>
+
+<Index name="RashInd">
+<Properties>Rash</Properties>
+</Index>
+
+<Property name="Summa">
+<Description>
+Cумма</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="Doc">
+<Type>Docs.Platejka</Type>
+<Cardinality>one</Cardinality>
+<Inverse>PlatejkaItems</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Index name="DocIndex">
+<Properties>Doc</Properties>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Docs.PlatejkaItemsD</DataLocation>
+<DefaultData>PlatejkaItemsDefaultData</DefaultData>
+<IdLocation>^Docs.PlatejkaItemsD</IdLocation>
+<IndexLocation>^Docs.PlatejkaItemsI</IndexLocation>
+<StreamLocation>^Docs.PlatejkaItemsS</StreamLocation>
+<Data name="PlatejkaItemsDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Rash</Value>
+</Value>
+<Value name="3">
+<Value>Summa</Value>
+</Value>
+<Value name="4">
+<Value>Platejka</Value>
+</Value>
+<Value name="5">
+<Value>Doc</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

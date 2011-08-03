@@ -1,0 +1,167 @@
+Cache for Windows^MAC^routine output by %apiRTN^^~Format=Cache.S~
+%RO on 09 Oct 2008 04:13:53PM
+PutReport^MAC^^61273,37270^0
+#;-------------- Утилиты работы с отчетом ----------
+#;  Структура данных:
+#;  ^SCReports(ГодМесяц,Узел С.Ц.)=Статус (0/1/2 - создан/отправлен/обработан)
+#;  ^SCReports(ГодМесяц,Узел С.Ц.,i)=строка данных отчета:
+#;  1 - Код изделия (ремонт)
+#;  2 - Заводской номер
+#;  3 - Номер талона
+#;  4 - Код типа талона
+#;  5 - дата
+#;  6 - Код изделия (деталь)
+#;  7 - Количество
+#;  8 - Цена детали/ремонта
+#;  9 - Комментарий
+#;  10- Тип ремонта
+#;  разделитель "^"
+ 
+PutReport
+     n Node,Period,Data,g,i,M,ReportCreateResult,start
+     s $zt="onError"
+     s start=$P($H,",",2)
+     s Node=%request.Get("N",1),err=""
+     s M=$G(%request.Data("M",1))
+     s Period=%request.Get("P")
+     s Password=%request.Get("Pwd")
+     s CurrentVersion=%request.Get("CurrentVersion")
+     s KontrId=##class(Common.Rights).CheckKontragentLoginPassword(Node,Password)
+     if 'KontrId w "Неверный пароль или номер сервисного центра. Уточните свой номер и пароль." q
+     g:M="GetOtchetStatus" GetOtchetStatus
+     g:M="GetReqStatus" GetRequestStatus
+     g:M="GetDictionaries" GetDictionaries
+     g:M="SendReport" SaveOtchet
+     q
+#;-------- Выгрузка отчета в глобал ----------
+SaveOtchet
+     s g=$NA(^SCReports(Period,Node))
+     k @g
+     for i=0:1 q:'$D(%request.Data("D"_i))  d
+     . s @g@(i)=$G(%request.Data("D"_i,1))
+     s ReportCreateResult=$$MakeDocument^ReportsDemon(g)
+     if '+ReportCreateResult do
+     . w "Извините. Ошибка при создании отчёта на сервере."
+     else  w "Ok"
+     s ^Requests($I(^Requests),$zdt($H,4))="Код центра "_Node_" CurrentVersion="_CurrentVersion_" М="_M_" время на обработку запроса: "_$ZT($P($H,",",2)-start)
+     q
+onError
+	w "Внутренняя ошибка на сервере. Сообщите пожалуйста в службу сервиса."
+     s ^Errors($h,"PutReport")=$ze
+     q
+#;-------- Получение статуса отчета ---------------
+GetOtchetStatus
+	//формат первой строки Статус+^+Период+^+Сумма+^+кол. строк
+     s OtchetFirstString=%request.Get("OtchetFirstString")	//первая строка отчёта, для которого хотят узнать статус
+     s Period=$P(OtchetFirstString,"^",2)
+	 w ##class(Common.Common).GetOtchetStatus(Period,KontrId)
+     s ^Requests($I(^Requests),$zdt($H,4))="Код центра "_Node_" CurrentVersion="_CurrentVersion_" М="_$G(%request.Data("M",1))_" время на обработку запроса: "_$ZT($P($H,",",2)-start)
+     q
+#;------ Выгрузка справочников -------------
+GetDictionaries
+     s ok=##class(Common.Common).SaveGoodsDictionary(Node)
+     i '+ok w ok q
+     s ok=##class(Common.Common).SaveGroupsDictionary(Node)
+     i '+ok w ok q
+     s ^Requests($I(^Requests),$zdt($H,4))="Код центра "_Node_" CurrentVersion="_CurrentVersion_" М="_$G(%request.Data("M",1))_" время на обработку запроса: "_$ZT($P($H,",",2)-start)
+     w "Ok" q
+#;------ 
+GetRequestStatus
+	 w ##class(Common.Common).GetRequestStatus(%request.Get("RequestIDs"))
+	 s ^Requests($I(^Requests),$zdt($H,4))="Код центра "_Node_" CurrentVersion="_CurrentVersion_" М="_$G(%request.Data("M",1))_" время на обработку запроса: "_$ZT($P($H,",",2)-start)
+	 q
+
+ReportsDemon^MAC^^61277,4008^0
+#define NewReport			1
+#define ReportDocMade		2
+#define ReportInProgress	3
+#define ReportError			4
+#define ErrorNode			"%%ERR"
+ 
+ n period,klient,ReportState
+ 
+ s period="" f  s period=$O(^SCReports(period)) q:period=""  d
+ . s klient="" f  s klient=$O(^SCReports(period,klient)) q:klient=""  d
+ . . s ReportState=$G(^SCReports(period,klient))
+ . . i ReportState=$$$NewReport d MakeDocument($NA(^SCReports(period,klient)))
+ q
+MakeDocument(glob)
+ n str,ReportMonth,Depot,Kontragent,ReportDoc,DocName,Delimeter,Summa,Total,
+ Depot,RemTovar,serial,garant,talon,Goods,remcost,Price,Quantity,Summa,
+ ReportStr,ok,StringTypeOld,RemTypes,ReportCreateResult,StringType
+ //формат первой строки Статус+^+Период+^+Сумма+^+кол. строк
+ //Формат последующих строк:
+ //Если это модель отчёта
+ //Model+^+Id+^+''+^+Серийный номер+^+Гарантийный талон+^+Отрывной талон+^+Тип ремонта+^+Цена ремонта
+ //или (если это деталь модели)
+ //Detail+^+DetailId+^+''+^+Количество+^+Цена;
+ s $ZT="onError"
+ s RemTypes("ActPriceInstrument")=1
+ s RemTypes("DiagPriceInstrument")=2
+ s RemTypes("ActPriceTechnic")=3
+ s RemTypes("DiagPriceTechnic")=4
+ s @glob=$$$ReportInProgress	//ставим метку "в обработке"
+ s ReportMonth=$QSUBSCRIPT(glob,1)
+ s Kontragent=##class(Kontragent.Action).GetKontrIdFromCode($QSUBSCRIPT(glob,2))
+ s Depot=1,Delimeter="^",Summa=0
+ s DocName=$P($G(@glob@(0)),Delimeter,2)
+ s ReportDoc=##class(Docs.Otchet).%New()
+ s ReportDoc.Depot=Depot
+ d ReportDoc.KontrSetObjectId(Kontragent)
+ s ReportDoc.Name=DocName
+ s ReportDoc.Summa=+$P($G(@glob@(0)),Delimeter,3)
+ s str="" f  s str=$O(@glob@(str)) q:str=""  d
+ . q:str=$$$ErrorNode
+ . q:@glob@(str)=""
+ . s StringType=$P($G(@glob@(str)),Delimeter,1)
+ . s (RemTovar,serial,garant,talon,RemType,Goods,Quantity,Price,Comment,Date)=""
+ . d:StringType="Model"
+ . . i $I(Groups)
+ . . s (RemTovar,Goods)=$P($G(@glob@(str)),Delimeter,2)
+ . . s serial=$P($G(@glob@(str)),Delimeter,4)
+ . . s garant=$P($G(@glob@(str)),Delimeter,5)
+ . . s talon=$P($G(@glob@(str)),Delimeter,6)
+ . . s RemType=$P($G(@glob@(str)),Delimeter,7)
+ . . s RemType=+$G(RemTypes(RemType))
+ . . s (remcost,Price)=$P($G(@glob@(str)),Delimeter,8)
+ . . s Quantity=1
+ . . s StringTypeOld=0
+ . . s Date=$P($G(@glob@(str)),Delimeter,9)
+ . . if Date?1.2N1"."1.2N1"."4N s Date=$ZDH($TR(Date,".","/"),4)
+ . . s Comment=$P($G(@glob@(str)),Delimeter,10)
+ . d:StringType="Detail"
+ . . s Goods=$P($G(@glob@(str)),Delimeter,2)
+ . . s Quantity=$P($G(@glob@(str)),Delimeter,4)
+ . . s Price=$P($G(@glob@(str)),Delimeter,5)
+ . . s (RemTovar,serial,garant,talon,RemType)=""
+ . . s StringTypeOld=1
+ . q:'$LF($LB("Model","Detail"),StringType)
+ . s Total=Price*Quantity
+ . s ReportStr=##class(Docs.OtchetItems).%New()
+ . s ReportStr.serial=serial
+ . s ReportStr.garant=garant
+ . s ReportStr.talon=talon
+ . s ReportStr.remcost=remcost
+ . s ReportStr.Price=+Price
+ . s ReportStr.Quantity=Quantity
+ . s ReportStr.Total=Total
+ . s:+Date ReportStr.Dat=+Date
+ . d ReportStr.GoodsSetObjectId(Goods)
+ . d:+RemTovar ReportStr.RemTovarSetObjectId(RemTovar)
+ . s ReportStr.Comment=Comment
+ . s ReportStr.RemType=RemType
+ . s ReportStr.Groups=+$G(Groups)
+ . s ReportStr.StringType=StringTypeOld
+ . d ReportStr.DocTypeSetObjectId("Docs.Otchet")
+ . s InsertResult=ReportDoc.Items.Insert(ReportStr)
+ . s Summa=Summa+Total
+ s ReportCreateResult=ReportDoc.%Save() 
+ if +ReportCreateResult q 1
+ do saveobjerror^saveerror(ReportCreateResult,"Отчёт клиента "_Node)
+ q 0
+onError
+ s ^Errors($h,"PutReport")=$ze
+ q 0
+
+
+

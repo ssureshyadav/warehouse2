@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Store.Measures">
+<Super>%Persistent</Super>
+<TimeCreated>60386,83433.772024</TimeCreated>
+
+<Property name="Type">
+<Description>
+Тип</Description>
+<Type>%String</Type>
+</Property>
+
+<Index name="TypeInd">
+<Properties>Type</Properties>
+</Index>
+
+<Property name="Name">
+<Description>
+Наименование</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="Factor">
+<Description>
+Коэффициент</Description>
+<Type>%Numeric</Type>
+<Parameter name="SCALE" value="6"/>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Store.MeasuresD</DataLocation>
+<DefaultData>MeasuresDefaultData</DefaultData>
+<IdLocation>^Store.MeasuresD</IdLocation>
+<IndexLocation>^Store.MeasuresI</IndexLocation>
+<StreamLocation>^Store.MeasuresS</StreamLocation>
+<Data name="MeasuresDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Factor</Value>
+</Value>
+<Value name="3">
+<Value>Name</Value>
+</Value>
+<Value name="4">
+<Value>Type</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

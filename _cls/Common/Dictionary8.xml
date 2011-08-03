@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Common.Dictionary8">
+<ClassType>persistent</ClassType>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%Persistent</Super>
+<TimeCreated>60526,37094</TimeCreated>
+
+<Property name="Name">
+<Description>
+Ценовая категория контрагента</Description>
+<Type>Common.Dictionary9</Type>
+<Parameter name="CAPTION" value="Категория"/>
+</Property>
+
+<Index name="NameInd">
+<Properties>Name</Properties>
+</Index>
+
+<Property name="Property2969">
+<Description>
+цена</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Цена руб"/>
+</Property>
+
+<Property name="PriceUE">
+<Description>
+цена уе</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Цена уе"/>
+</Property>
+
+<Property name="Goods">
+<Description>
+Товар</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Товар"/>
+</Property>
+
+<Index name="GoodsInd">
+<Properties>Goods</Properties>
+</Index>
+
+<Property name="GoodsCateg">
+<Description>
+Категория товара</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=", -,Электроинструмент,Бытовая техника"/>
+<Parameter name="VALUELIST" value=",1,2,3"/>
+</Property>
+
+<Index name="GoodsCategInd">
+<Properties>GoodsCateg</Properties>
+</Index>
+
+<Property name="izdelie">
+<Description>
+Ценовая группа</Description>
+<Type>Common.Dictionary12</Type>
+</Property>
+
+<Index name="IzdelieInd">
+<Properties>izdelie</Properties>
+</Index>
+
+<Index name="NewIndex1">
+<Data>Property2969,PriceUE</Data>
+<Properties>Name,izdelie</Properties>
+</Index>
+
+<Trigger name="UpdTrigger">
+<Description>
+Набор триггеров и методов для поддержки версии справочника</Description>
+<Code> d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")</Code>
+<Event>UPDATE</Event>
+<Time>AFTER</Time>
+</Trigger>
+
+<Trigger name="InsTrigger">
+<Code> d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")</Code>
+<Event>INSERT</Event>
+<Time>AFTER</Time>
+</Trigger>
+
+<Trigger name="DelTrigger">
+<Code> d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")</Code>
+<Event>DELETE</Event>
+<Time>AFTER</Time>
+</Trigger>
+
+<Method name="%OnDelete">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>oid:%ObjectIdentity</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="%OnAfterSave">
+<FormalSpec>insert:%Boolean</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	if (insert)||(%this.%IsModified()) d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Common.Dictionary8D</DataLocation>
+<DefaultData>Dictionary8DefaultData</DefaultData>
+<IdLocation>^Common.Dictionary8D</IdLocation>
+<IndexLocation>^Common.Dictionary8I</IndexLocation>
+<StreamLocation>^Common.Dictionary8S</StreamLocation>
+<Data name="Dictionary8DefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Name</Value>
+</Value>
+<Value name="3">
+<Value>Property2969</Value>
+</Value>
+<Value name="4">
+<Value>Goods</Value>
+</Value>
+<Value name="5">
+<Value>Property4232</Value>
+</Value>
+<Value name="6">
+<Value>GoodsCateg</Value>
+</Value>
+<Value name="7">
+<Value>Izdelie</Value>
+</Value>
+<Value name="8">
+<Value>izdelie</Value>
+</Value>
+<Value name="9">
+<Value>PriceUE</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

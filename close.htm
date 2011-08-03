@@ -1,0 +1,20 @@
+<html>
+<head>
+<script language="JavaScript">
+// посылает сигнал на сервер о завершении сессии
+function sendclose(){
+var xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+xmlhttp.open("POST","CloseSession.csp", false);
+xmlhttp.send();
+window.parent.close()
+}
+</script>
+</head>
+<body TOPMARGIN=0 >
+<table border=0 width=100% height=100% cellpadding=0 cellspacing=0><tr>
+<td align=right valign=middle>
+<a href="#" onclick="sendclose()"><img src="images/exit.gif" border=0></a>
+</td>
+</tr>
+</body>
+</html>

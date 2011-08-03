@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="User.valera">
+<Description>
+</Description>
+<ClassType>persistent</ClassType>
+<DdlAllowed>1</DdlAllowed>
+<Owner>_SYSTEM</Owner>
+<ProcedureBlock>0</ProcedureBlock>
+<SqlRowIdPrivate>1</SqlRowIdPrivate>
+<SqlTableName>valera</SqlTableName>
+<StorageStrategy/>
+<Super>%Persistent</Super>
+<TimeCreated>60541,57593.687823</TimeCreated>
+
+<Property name="Property7053">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>3</SqlColumnNumber>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="code">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>6</SqlColumnNumber>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="model">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>4</SqlColumnNumber>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="name">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>5</SqlColumnNumber>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="number">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>2</SqlColumnNumber>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="price">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>7</SqlColumnNumber>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^User.valeraD</DataLocation>
+<DefaultData>valeraDefaultData</DefaultData>
+<IdLocation>^User.valeraD</IdLocation>
+<IndexLocation>^User.valeraI</IndexLocation>
+<StreamLocation>^User.valeraS</StreamLocation>
+<Data name="valeraDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>code</Value>
+</Value>
+<Value name="3">
+<Value>model</Value>
+</Value>
+<Value name="4">
+<Value>name</Value>
+</Value>
+<Value name="5">
+<Value>number</Value>
+</Value>
+<Value name="6">
+<Value>price</Value>
+</Value>
+<Value name="7">
+<Value>Property7053</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

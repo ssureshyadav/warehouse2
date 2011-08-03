@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.ActNote">
+<Description>
+Служебная записка на погашение актов</Description>
+<Super>Docs.Super</Super>
+<TimeCreated>61623,56813.354029</TimeCreated>
+
+<Property name="PaymentPoluh">
+<Description>
+Получатель платежа</Description>
+<Type>Common.Kontragent</Type>
+</Property>
+
+<Property name="Manager">
+<Description>
+Менеджер</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="Chief">
+<Description>
+Начальник</Description>
+<Type>Users.Dates</Type>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>ActNoteDefaultData</DefaultData>
+<Data name="ActNoteDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"ActNote"</Subscript>
+<Value name="1">
+<Value>Act</Value>
+</Value>
+<Value name="2">
+<Value>Poluh</Value>
+</Value>
+<Value name="3">
+<Value>PaymentPoluh</Value>
+</Value>
+<Value name="4">
+<Value>Chief</Value>
+</Value>
+<Value name="5">
+<Value>Manager</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

@@ -1,0 +1,81 @@
+<html>
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="jscript" src="common.js"></script>
+<script language="jscript">
+function fnReload(){
+SetCookie("ArchivePath", ArchivePath.value);
+window.location.reload();
+}
+
+function startFun(){
+if(ArchiveItSelf.value==""){alert("Не выбрана архивная база;");return}
+if(!window.confirm("Подключить архивную базу "+ArchiveItSelf.value+" ?"))return;
+#call(Common.Common.PlugArchiveBase(ArchiveItSelf.value))#
+iTimerID = window.setInterval(LookUp, 2000)
+}
+
+function FillArchivePath(){
+var ArchivePathvalue=GetCookie("ArchivePath");
+if(typeof(ArchivePathvalue)=="undefined")var ArchivePathvalue="\\\\fileserver\\DISTRIB\\BackupCache";
+ArchivePath.value=ArchivePathvalue;
+}
+
+function LookUp(){
+var answer=#server(Common.Common.PlugArchiveBase())#
+var command = answer.substr(0, 4);
+if(command!="stop"){MethodResult.innerText=answer;}
+else{
+	window.clearInterval();
+	MethodResult.innerText=answer.substr(4, answer.length);
+	//if(OpenDatabase.checked)
+	//	{
+	//	window.open("../sklad/index.hta",null,"height=500,width=700,status=no,toolbar=no,menubar=no,location=no");
+	//	}
+	}
+}
+</script>
+
+</head>
+
+<body onload="FillArchivePath()">
+<sklad:Button value="Назад" onclick="window.location.href='tuneup.csp'"><br>
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<TD align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=3><strong>Подключение к архивной базе данных</strong></TD></tr>
+<tr>
+</table>
+<br><br>
+Путь к архивным базам: <input type="text" id="ArchivePath" value=""> <sklad:LittleButton name="ok" id="savePath" onclick="fnReload()" alt="Запомнить и перечитать список архивных баз">
+<br><br>
+Ниже указаны копии базы данных сделанные на указанное число. Выберете одну из них и нажмите кнопку "Подключить".<br>
+<script language="cache" runat="server">
+ s ArchivePath=%request.GetCookie("ArchivePath")
+ w "<SELECT ID=""ArchiveItSelf"" NAME=""Cars"" SIZE=""15"" style=""border:solid 1 grey;width:400px"">",!
+ if ArchivePath'="" {
+	//s str="Архивная папка "_ArchivePath
+ 	s qw=##class(%ResultSet).%New("%Library.File:FileSet")
+ 	//s ok=qw.Prepare(ArchivePath)
+ 	//if '+ok s str=ok
+ 	s ok=qw.Execute(ArchivePath)
+ 	if '+ok s str=ok
+ 	while qw.Next(.ok) {
+	 	if $$$ISERR(ok) s str=ok
+	 	if qw.Data("Type")="F" CONTINUE	//пропускаем файлы
+  		w "<OPTION VALUE="""_$G(qw.Data("Name"))_""">"_$G(qw.Data("Name")),!
+ 		}
+ 	If $$$ISERR(ok) Do DisplayError^%apiOBJ(ok) Quit
+  }
+  else { s str="Не указана архивная папка"}
+ w "</SELECT>",!
+ w "<br>"_$G(str)_"<br>",!
+</script>
+<br>
+<sklad:Button value="Подключить" onclick="startFun()"><br>
+<!--
+<input type="checkbox" id="OpenDatabase" checked style="border:none;width:15px"> Открыть архивную базу.
+-->
+<br><br>
+<center><h4><span id="MethodResult"></span></h4></center>
+</body>
+</html>

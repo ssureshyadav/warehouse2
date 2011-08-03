@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Store.Params">
+<Description>
+Параметры хранения</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60319,67195.774833</TimeCreated>
+
+<Property name="Name">
+<Description>
+Наименование</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Наименование"/>
+</Property>
+
+<Property name="Comments">
+<Description>
+Справочная информация</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Справочная информация"/>
+</Property>
+
+<Property name="Type">
+<Description>
+Тип</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Тип"/>
+<Parameter name="DISPLAYLIST" value=",Числовой,Строчный"/>
+<Parameter name="VALUELIST" value=",1,2"/>
+</Property>
+
+<Index name="TypeIndex">
+<Properties>Type</Properties>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Store.ParamsD</DataLocation>
+<DefaultData>ParamsDefaultData</DefaultData>
+<IdLocation>^Store.ParamsD</IdLocation>
+<IndexLocation>^Store.ParamsI</IndexLocation>
+<StreamLocation>^Store.ParamsS</StreamLocation>
+<Data name="ParamsDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Comments</Value>
+</Value>
+<Value name="3">
+<Value>Name</Value>
+</Value>
+<Value name="4">
+<Value>Type</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

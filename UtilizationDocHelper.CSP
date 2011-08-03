@@ -1,0 +1,49 @@
+<CSP:CLASS INCLUDES="xmlmacros">
+<html>
+<head>
+
+<!-- Put your page Title here -->
+<title>	Cache Server Page </title>
+
+</head>
+
+<body>
+<script language="cache" runat="server">
+ n ModelId,DetailsToSkip,i,CurrentDetail,ID,FullName,Property5300,codedetail
+ s ModelsId=%request.Get("ModelsId")
+ if $E(ModelsId,$L(ModelsId))="," s ModelsId=$E(ModelsId,1,$L(ModelsId)-1)
+ s DetailsToSkip=%request.Get("DetailsToSkip")
+ f i=1:1:$L(DetailsToSkip,",") d
+ . s CurrentDetail=$P(DetailsToSkip,",",i)
+ . q:CurrentDetail=""
+ . s DetailsToSkip(CurrentDetail)=""
+ &html<
+ 	<table id="DetailsTable" border=1 style="border-collapse:collapse;">
+	<tr bgcolor="#deeeef"><td>&nbsp;<td>Наименование запчасти<td>Номер по схеме<td>Код
+ >
+ if ModelsId'="" 
+ {
+ 	s rs=##class(%ResultSet).%New()
+ 	s SqlQuery="select ID,FullName,Property5300,codedetail from Goods.Goods where Tovar in ("_ModelsId_")"
+ 	s ok=rs.Prepare(SqlQuery)
+ 	if '+ok $$$WriteObjError(ok) w "Извините. Ошибка при подготовке запроса."
+ 	s ok=rs.Execute()
+ 	if '+ok $$$WriteObjError(ok) w "Извините. Ошибка при выполнении запроса."
+ 	while rs.Next() 
+ 	{
+ 		for i="ID","FullName","Property5300","codedetail" 
+ 		{
+	 		s @i=rs.Data(i)
+ 		}
+ 		if $D(DetailsToSkip(ID)) CONTINUE
+ 		w "<tr id="""_ID_""">"
+ 		w "<td><input type=""checkbox"">"
+ 		w "<td>"_FullName
+ 		w "<td>"_Property5300
+ 		w "<td>"_codedetail
+ 	}
+ }
+ w "</table>",!
+</script>
+</body>
+</html>

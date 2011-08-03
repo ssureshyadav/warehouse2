@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Common.talking">
+<Super>%Persistent</Super>
+<TimeCreated>60481,41373.48396</TimeCreated>
+
+<Property name="dat">
+<Description>
+Дата вопроса</Description>
+<Type>%Date</Type>
+<InitialExpression>+$H</InitialExpression>
+<Parameter name="FORMAT" value="4"/>
+</Property>
+
+<Property name="tim">
+<Description>
+Время вопроса</Description>
+<Type>%Time</Type>
+<InitialExpression>$PIECE($H,",",2)</InitialExpression>
+</Property>
+
+<Property name="quest">
+<Description>
+Вопрос</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Property name="answ">
+<Description>
+Ответ</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Property name="answdat">
+<Description>
+Дата ответа</Description>
+<Type>%Date</Type>
+</Property>
+
+<Property name="answtim">
+<Description>
+Время ответа</Description>
+<Type>%Time</Type>
+</Property>
+
+<Property name="User1">
+<Description>
+Юзер</Description>
+<Type>Users.Dates</Type>
+<InitialExpression>$S($ISOBJECT($G(%session)):$G(%session.Data("user")),1:"")</InitialExpression>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Common.talkingD</DataLocation>
+<DefaultData>talkingDefaultData</DefaultData>
+<IdLocation>^Common.talkingD</IdLocation>
+<IndexLocation>^Common.talkingI</IndexLocation>
+<StreamLocation>^Common.talkingS</StreamLocation>
+<Data name="talkingDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>answ</Value>
+</Value>
+<Value name="3">
+<Value>answdat</Value>
+</Value>
+<Value name="4">
+<Value>answtim</Value>
+</Value>
+<Value name="5">
+<Value>dat</Value>
+</Value>
+<Value name="6">
+<Value>quest</Value>
+</Value>
+<Value name="7">
+<Value>tim</Value>
+</Value>
+<Value name="8">
+<Value>User1</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

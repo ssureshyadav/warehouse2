@@ -1,0 +1,252 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+if %request.Get("word")="on"
+{
+ set %response.ContentType = "application/msword"
+ do %response.SetHeader("Content-Disposition","attachment;word.doc")
+ set %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+}
+ q 1
+</script>
+<script language="cache" runat="server">
+ s id=%request.Get("id")
+ s class=%request.Get("class")
+ 
+ s obj=$ZOBJCLASSMETHOD(class,"%OpenId",id)
+ d:$ISOBJECT(obj)
+ . s mn(1)="января",mn(2)="февраля",mn(3)="марта",mn(4)="апреля",mn(5)="мая",mn(6)="июня",mn(7)="июля",mn(8)="августа",mn(9)="сентября",mn(10)="октября",mn(11)="ноября",mn(12)="декабря"
+ . s numb=obj.Name
+ . s dat=obj.Dat
+ . s tim=obj.Tim
+ . s:$ISOBJECT(obj.storeman) storeman=obj.storeman.Name
+ . s:$ISOBJECT(obj.User1) user1=obj.User1.Name
+ . s day=$P($ZD(dat,4),"/",1)
+ . s month=$G(mn(+$P($ZD(dat,4),"/",2)))
+ . s year=$P($ZD(dat,4),"/",3)
+ . s dat=day_" "_month_" "_year_" г."
+ . s tim=$ZT(obj.Tim)
+</script>
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1251">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 11">
+<meta name=Originator content="Microsoft Word 11">
+<link rel=File-List href="InnerDiff.files/filelist.xml">
+<title>Внутренний акт расхождения № #($G(numb))#</title>
+<!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:Author>NB-FUJ</o:Author>
+  <o:LastAuthor>Артем</o:LastAuthor>
+  <o:Revision>2</o:Revision>
+  <o:TotalTime>5</o:TotalTime>
+  <o:Created>2007-04-28T17:18:00Z</o:Created>
+  <o:LastSaved>2007-04-28T17:18:00Z</o:LastSaved>
+  <o:Pages>1</o:Pages>
+  <o:Words>43</o:Words>
+  <o:Characters>248</o:Characters>
+  <o:Company>IBT</o:Company>
+  <o:Lines>2</o:Lines>
+  <o:Paragraphs>1</o:Paragraphs>
+  <o:CharactersWithSpaces>290</o:CharactersWithSpaces>
+  <o:Version>11.6360</o:Version>
+ </o:DocumentProperties>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:GrammarState>Clean</w:GrammarState>
+  <w:PunctuationKerning/>
+  <w:ValidateAgainstSchemas/>
+  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+  <w:Compatibility>
+   <w:BreakWrappedTables/>
+   <w:SnapToGridInCell/>
+   <w:WrapTextWithPunct/>
+   <w:UseAsianBreakRules/>
+   <w:DontGrowAutofit/>
+  </w:Compatibility>
+  <w:BrowserLevel>MicrosoftInternetExplorer4</w:BrowserLevel>
+ </w:WordDocument>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:LatentStyles DefLockedState="false" LatentStyleCount="156">
+ </w:LatentStyles>
+</xml><![endif]-->
+<style>
+<!--
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-parent:"";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:"Times New Roman";}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
+@page Section1
+	{size:595.3pt 841.9pt;
+	margin:2.0cm 2.0cm 2.0cm 2.0cm;
+	mso-header-margin:35.45pt;
+	mso-footer-margin:35.45pt;
+	mso-paper-source:0;}
+div.Section1
+	{page:Section1;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:"Обычная таблица";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;
+	mso-para-margin:0cm;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";
+	mso-ansi-language:#0400;
+	mso-fareast-language:#0400;
+	mso-bidi-language:#0400;}
+table.MsoTableGrid
+	{mso-style-name:"Сетка таблицы";
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	border:solid windowtext 1.0pt;
+	mso-border-alt:solid windowtext .5pt;
+	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;
+	mso-border-insideh:.5pt solid windowtext;
+	mso-border-insidev:.5pt solid windowtext;
+	mso-para-margin:0cm;
+	mso-para-margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	font-family:"Times New Roman";
+	mso-ansi-language:#0400;
+	mso-fareast-language:#0400;
+	mso-bidi-language:#0400;}
+</style>
+<![endif]-->
+</head>
+
+<body lang=RU style='tab-interval:35.4pt'>
+
+<div class=Section1>
+
+<p class=MsoNormal align=center style='text-align:center'><span
+style='font-size:16.0pt;font-family:Arial'>Внутренний акт расхождения № #($G(numb))#</span></p>
+
+<p class=MsoNormal><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
+
+<table class=MsoTableGrid border=0 cellspacing=0 cellpadding=0
+ style='border-collapse:collapse;mso-yfti-tbllook:480;mso-padding-alt:0cm 5.4pt 0cm 5.4pt'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
+  <td width=103 valign=top style='width:77.4pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span style='font-family:Arial'>Дата<o:p></o:p></span></p>
+  </td>
+  <td width=554 valign=top style='width:415.3pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'>#($G(dat))# #($G(tim))#</span></b></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:1'>
+  <td width=103 valign=top style='width:77.4pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span style='font-family:Arial'>Грузчик<o:p></o:p></span></p>
+  </td>
+  <td width=554 valign=top style='width:415.3pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span lang=EN-US
+  style='font-family:Arial;mso-ansi-language:EN-US'>#($G(storeman))#</span></b><b
+  style='mso-bidi-font-weight:normal'><span style='font-family:Arial'><o:p></o:p></span></b></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:2;mso-yfti-lastrow:yes'>
+  <td width=103 valign=top style='width:77.4pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span style='font-family:Arial'>Выписал<o:p></o:p></span></p>
+  </td>
+  <td width=554 valign=top style='width:415.3pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span lang=EN-US
+  style='font-family:Arial;mso-ansi-language:EN-US'>#($G(user1))#</span></b><b
+  style='mso-bidi-font-weight:normal'><span style='font-family:Arial'><o:p></o:p></span></b></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal><span lang=EN-US style='font-family:Arial;mso-ansi-language:
+EN-US'><o:p>&nbsp;</o:p></span></p>
+
+<table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0
+ style='border-collapse:collapse;border:none;mso-border-alt:solid windowtext .5pt;
+ mso-yfti-tbllook:480;mso-padding-alt:0cm 5.4pt 0cm 5.4pt;mso-border-insideh:
+ .5pt solid windowtext;mso-border-insidev:.5pt solid windowtext'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
+  <td width=36 valign=top style='width:27.15pt;border:solid windowtext 1.0pt;mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span style='font-family:Arial'>№<o:p></o:p></span></p>
+  <p class=MsoNormal><span class=GramE>п</span><span
+  lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'>/</span><span style='font-family:Arial'>п<o:p></o:p></span></p>
+  </td>
+  <td width=255 valign=top style='width:191.45pt;border:solid windowtext 1.0pt;border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
+  solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span style='font-family:Arial'>Товар<o:p></o:p></span></p>
+  </td>
+  <td width=122 valign=top style='width:91.35pt;border:solid windowtext 1.0pt;
+  border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
+  solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span style='font-family:Arial'>Количество по документу<o:p></o:p></span></p>
+  </td>
+  <td width=122 valign=top style='width:91.35pt;border:solid windowtext 1.0pt;
+  border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
+  solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span style='font-family:Arial'>Количество фактическое<o:p></o:p></span></p>
+  </td>
+  <td width=122 valign=top style='width:91.4pt;border:solid windowtext 1.0pt;
+  border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
+  solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span style='font-family:Arial'>Расхождение количества<o:p></o:p></span></p>
+  </td>
+ </tr>
+<script language="cache" runat="server">
+ d:$ISOBJECT(obj.Items)
+ . s tot=0,totquant=0
+ . s i="" f  s i=obj.Items.Next(i) q:i=""  d
+ .. s item=obj.Items.GetAt(i)
+ .. i $i(number)
+ .. s kol=item.quantdefault
+ .. s kolfact=item.quantreal
+ .. s diff=kol-kolfact
+ .. s goods=$S($ISOBJECT(item.Goods):item.Goods.FullName,1:"")
+ .. w !,"<tr style='mso-yfti-irow:1;mso-yfti-lastrow:yes'>"
+ .. w !,"<td width=36 valign=top style='width:27.15pt;border:solid windowtext 1.0pt;border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>"
+ .. w !,"<p class=MsoNormal><span lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'><o:p>"_number_"</o:p></span></p>"
+ .. w !,"</td>"
+ .. w !,"<td width=255 valign=top style='width:191.45pt;border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>"
+ .. w !,"<p class=MsoNormal><span lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'>"_$G(goods)_"<o:p></o:p></span></p>"
+ .. w !,"</td>"
+ .. w !,"<td width=122 valign=top style='width:91.35pt;border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>"
+ .. w !,"<p class=MsoNormal><span lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'>"_$G(kol)_"<o:p></o:p></span></p>"
+ .. w !,"</td>"
+ .. w !,"<td width=122 valign=top style='width:91.35pt;border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>"
+ .. w !,"<p class=MsoNormal><span lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'>"_$G(kolfact)_"<o:p></o:p></span></p>"
+ .. w !,"</td>"
+ .. w !,"<td width=122 valign=top style='width:91.4pt;border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>"
+ .. w !,"<p class=MsoNormal><span lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'>"_$G(diff)_"<o:p></o:p></span></p>"
+ .. w !,"</td>"
+ .. w !,"</tr>"
+</script>
+</table>
+
+<p class=MsoNormal><span style='font-family:Arial'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span style='font-family:Arial'>Собрал _______________ </span><span lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'>#($G(storeman))#</span><span style='font-family:Arial'><o:p></o:p></span></p>
+
+</div>
+
+</body>
+
+</html>

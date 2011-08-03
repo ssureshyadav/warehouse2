@@ -1,0 +1,21 @@
+<html>
+<head>
+
+<!-- Put your page Title here -->
+<title>	 </title>
+<script language="jscript">
+function printpage(){
+ window.print();
+}
+</script>
+</head>
+
+<body onload="printpage();">
+
+<script language="cache" runat="server">
+ w "<img src="""
+ w %request.Get("ImageSrc")
+ w """>"
+</script>
+</body>
+</html>

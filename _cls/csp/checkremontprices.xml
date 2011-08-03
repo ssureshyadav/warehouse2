@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.checkremontprices">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62178,33066.623942</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body onload=""load()"">"
+	Write !,(##class(%CSP.Response).HyperEventBody())
+	Write !,!,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""window.location.href='tuneup.csp'"" TITLE=""""><center>Назад</center></span>"
+	Write "<br>",!
+	Write !,"<TABLE cellSpacing=0 width=""100%"" celpadding=""0"" >",!
+	Write "<TR>",!
+	Write "<td width=10%>"
+	Write "<img alt=""Обновить раздел"" src=""images/refresh.gif"" onclick=""window.location.reload()"">"
+	Write "</td>",!
+	Write "<TD width=80% align=center style=""BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid"" ><strong>Проверка цен за ремонт</strong></TD>",!
+	Write "<td width=10% align=right>"
+	Write "<a href=""help/Platej.html"">"
+	Write "<img src=""images/BIGHelp.bmp"" width=""20"" height=25 border=0>"
+	Write "</a>"
+	Write "</td>",!
+	Write "</TABLE>",!
+	Write "<br>",!
+	Write "<Table width=100%>",!
+	Write "<tr>",!
+	Write "	<td valign=""top"">",!
+	Write "		<fieldset><legend>Товары</legend>",!
+	Write "		Классификатор:"
+	Write "<select id=""Catalogues"" onchange=""LoadTree()"">"
+	Write !,"		"
+	w ##class(Docs.Action2).GetClassValuesOptions(,"Goods.Catalogue",,,0)
+	Write !,"		"
+	Write "</select>"
+	Write "<br>",!
+	Write "  		<SKLADz:treeview id=""GroupsTree"" width=""200"" height=170 ImagesPath="""_(%session.Data("ImagesPath"))_""" zonClick=""GroupsTreeClick();"" /><br>",!
+	Write "		<fieldset><legend>Поиск</legend>",!
+	Write "  			Аббревиатура: "
+	Write "<input type=""text"" id=""AbbrField"" style=""width:35px"" title=""Достаточно ввести начальные буквы аббревиатуры"">"
+	Write "  Модель: "
+	Write "<input type=""text"" id=""Property3609Field"" style=""width:40px"" title=""Достаточно ввести начальные цифры модели"">"
+	Write " Наименование: "
+	Write "<input type=""text"" id=""NameField"" style=""width:100px"" title=""Достаточно ввести начальные буквы названия"">"
+	Write " "
+	Write "<input type=""button"" value=""Найти"" style=""width:50px"" title=""Поиск ведётся только по тем полям которые заполнены"" onclick=""SearchByParams()"">"
+	Write !,"  		</fieldset>",!
+	Write "  		<SKLADList:listview width=100% height=130 id=""TempGoods""  ClassName=""Goods.Goods"" AddOnClear=""false"" zonDblClick=""ReturnSelected();""  AddHeaders=""true"" zClick=""GoodsClick()""/><br>",!
+	Write "		</fieldset>",!
+	Write "	</td>",!
+	Write "	<td valign=""top"">",!
+	Write "		<fieldset><legend>Контрагенты</legend>",!
+	Write "		Поиск:",!
+	Write "		"
+	Write "<span id=""namfldKontr"">"
+	Write "</span>"
+	Write "&nbsp;"
+	Write "<input type=""text"" id=""fldvalKontr"" onkeyup=""ggKontr();"">"
+	Write !,"		<SKLADList:listview width=100% height=350 id=""currentdictKontr"" zClick=""KontrClick()"" zonColumnClick=""colclickKontr()"" onAddColumns=""showdictionaryKontr()"" ClassName=""Common.Kontragent""/><br>",!
+	Write "		</fieldset>",!
+	Write "	</td>",!
+	Write "</tr>",!
+	Write "<tr>",!
+	Write "	<td valign=""top"">",!
+	Write "		"
+	Write "<span style=""color:#001188"" id=""CurrentClassifName"">"
+	Write "</span>"
+	Write "&nbsp; - "
+	Write "<span style=""color:#001188"" id=""CurrentGroupName"">"
+	Write "выберете группу"
+	Write "</span>"
+	Write "&nbsp; - "
+	Write "<span style=""color:#001188"" id=""CurrentGoodsName"">"
+	Write "выберете товар"
+	Write "</span>"
+	Write !,"	<td valign=""top"" BGCOLOR =""#eeeeee"">",!
+	Write "		"
+	Write "<span id=""KontrName"" style=""color:#001188"">"
+	Write "Выберете контрагента"
+	Write "</span>"
+	Write !,"</tr>",!
+	Write "<tr>",!
+	Write "	<td colspan=2 align=center><hr width=""80%"">",!
+	Write "</td>",!
+	Write "<tr>",!
+	Write "	<td valign=""top"">",!
+	Write "		"
+	Write "<span style=""color:#444444"">"
+	Write "Ценовая группа товара "
+	Write "</span>"
+	Write " "
+	Write "<span id=""GoodsPriceCateg"" style=""color:#001188"">"
+	Write "</span>"
+	Write "<br>",!
+	Write "	<td valign=""top"" BGCOLOR =""#eeeeee"">",!
+	Write "		"
+	Write "<span style=""color:#444444"">"
+	Write "Категория цен электроинструмент "
+	Write "</span>"
+	Write " "
+	Write "<span id=""KontrInstrPriceCateg"" style=""color:#001188"">"
+	Write "</span>"
+	Write "<br>",!
+	Write "		<center><hr width=""80%""></center>",!
+	Write "		"
+	Write "<span style=""color:#444444"">"
+	Write "Категория цен бытовая техника "
+	Write "</span>"
+	Write " "
+	Write "<span id=""KontrBytPriceCateg"" style=""color:#001188"">"
+	Write "</span>"
+	Write "<br>",!
+	Write "	",!
+	Write "</tr>",!
+	Write "<tr>",!
+	Write "	<td colspan=2 align=center><hr width=""80%"">Цена за ремонт: <font face=""Arial"" size=""4"" color=""blue"" id=""RemontPrice""></font>",!
+	Write "</td>",!
+	Write "</table>",!
+	Write "</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"<script language=""jscript"" src=""common.js"">"
+	Write "</script>"
+	Write !,"<script language=""Jscript"">"
+	Write !,"var ColCodeKontr="""";",!
+	Write "var KontrId="""";",!
+	Write "var GoodsId="""";",!
+	Write "sessionid="""_(%session.SessionId)_""";",!
+	Write "var where ="""";",!
+	Write "var depot="""_($G(%session.Data("depot")))_""";",!
+	Write "var ShowBuyPrices="""_(%request.Get("ShowBuyPrices"))_""";",!
+	Write !,"function load(){",!
+	Write "currentdictKontr.LoadHeaders(""City,Balance,Property831,Agree,CityCode,ContPers,EMail,Manager,Phones,WCalc,Address,Region,chief,glavbuh,fax,bank,region2,Postalcode,PostalcodeUr,Password,AddressUr,CityUr,ChangeDate,ChangeTime,ChangeUser,OtgruzPrincip"");",!
+	Write "LoadTree();",!
+	Write "TempGoods.attachEvent(""onAddColumns"", addcol)",!
+	Write "TempGoods.LoadHeaders(""Property312,Property675,Property7053,Size1,Weight,codedetail,ModelNumber,EnglishName,Tovar,ChangeDate,ChangeTime,ChangeUser,Description,Composition,izdelie"");",!
+	Write "}",!
+	Write !,"function addcol(){",!
+	Write "TempGoods.detachEvent(""onAddColumns"", addcol)",!
+	Write "fields=TempGoods.GetColumns(""Goods->"");",!
+	Write "//TempGoods.AddColumns(""quant~Количество~~~@%String#@#"")",!
+	Write "}",!
+	Write !,!,"function LoadTree(){",!
+	Write "CurrentClassifName.innerText = Catalogues.options(Catalogues.selectedIndex).text;",!
+	Write "GroupsTree.AdditionalID=Catalogues.value;",!
+	Write "//alert('Data.csp?class=Goods.Group&fields=Parent,Code,Name,ID&params=""'+depot+'"",""'+Catalogues.value+'""')",!
+	Write "GroupsTree.DownLoad('Data.csp?class=Goods.Group&fields=Parent,Code,Name,ID&order=Name&params=""'+depot+'"",""'+Catalogues.value+'""')	",!
+	Write "}",!
+	Write !,"function showdictionaryKontr(where){",!
+	Write "var where=ReturnSpace(where);",!
+	Write "currentdictKontr.DownLoad(where);",!
+	Write "}",!
+	Write !,"function ggKontr(){",!
+	Write "if(ColCodeKontr=="""")return false;",!
+	Write "where = ColCodeKontr+"" %STARTSWITH '""+fldvalKontr.value+""'"";",!
+	Write "if(fldvalKontr.value=="""")where="""";",!
+	Write "showdictionaryKontr(where);",!
+	Write "}",!
+	Write !,"function colclickKontr(){",!
+	Write "	if(currentdictKontr.ColType==""%Date""){alert(""Поля с датами не обрабатываются"");return false;}",!
+	Write "	namfldKontr.innerText=currentdictKontr.ColName;",!
+	Write "	ColCodeKontr=currentdictKontr.ColCode;",!
+	Write "}",!
+	Write !,"function KontrClick(){",!
+	Write "KontrName.innerText=currentdictKontr.ItemName;",!
+	Write "KontrInstrPriceCateg.innerText=currentdictKontr.item(""Property126->Name"");",!
+	Write "KontrBytPriceCateg.innerText=currentdictKontr.item(""Property127->Name"");",!
+	Write "KontrId=currentdictKontr.ItemID;",!
+	Write "if(GoodsId!="""")",!
+	Write "	{",!
+	Write "		RemontPrice.innerText = "_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Common.Common.GetGoodRemontPriceForKontr:csp.checkremontprices"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',GoodsId,KontrId);",!
+	Write "	}",!
+	Write "}",!
+	Write !,!,"function GroupsTreeClick(){",!
+	Write "	CurrentGroupName.innerText=GroupsTree.NodeCaption;",!
+	Write "	AddFromGroup();",!
+	Write "}",!
+	Write !,"function AddFromGroup(){",!
+	Write "var whereTovar=""Groups='""+GroupsTree.NodeID+""'""",!
+	Write "var ShowQuantityVar=0;",!
+	Write "//alert(fields)",!
+	Write "TempGoods.loadfrommethod(""Goods.GoodsAction.fromgroup"",whereTovar,fields,ShowQuantityVar+ShowBuyPrices)",!
+	Write "}",!
+	Write !,"//поиск товара по параметрам",!
+	Write "function SearchByParams(){",!
+	Write "var whereTovar = """";",!
+	Write "var Abbr = AbbrField.value;",!
+	Write "var Property3609 = Property3609Field.value;",!
+	Write "var Name = NameField.value;",!
+	Write !,"if(Abbr!="""")",!
+	Write "{",!
+	Write "	whereTovar=""Goods->Abbr %Startswith '"" + Abbr + ""'"";",!
+	Write "}",!
+	Write !,"if(Property3609!="""")",!
+	Write "{",!
+	Write "	if(whereTovar!=""""){whereTovar=whereTovar+"" and Goods->Property3609 %Startswith '"" + Property3609 + ""'"";}",!
+	Write "	else{whereTovar="" Goods->Property3609 %Startswith '"" + Property3609 + ""'"";}",!
+	Write "}",!
+	Write !,"if(Name!="""")",!
+	Write "{",!
+	Write "	if(whereTovar!=""""){whereTovar=whereTovar+"" and Goods->Name %Startswith '"" + Name + ""'"";}",!
+	Write "	else{whereTovar = "" Goods->Name %Startswith '"" + Name + ""'"";}",!
+	Write "}",!
+	Write !,"if(whereTovar=="""")",!
+	Write "{",!
+	Write "	alert(""Не указано ни одного параметра для отбора"");",!
+	Write "	return",!
+	Write "}",!
+	Write !,"var ShowQuantityVar=0;",!
+	Write "var whereTovar=whereTovar+"" and Groups->Depot='""+depot+""' and Groups->Catalogue = '""+Catalogues.value+""'"";",!
+	Write "TempGoods.loadfrommethod(""Goods.GoodsAction.fromgroup"",whereTovar,fields,ShowQuantityVar+ShowBuyPrices)",!
+	Write "}",!
+	Write !,"function GoodsClick(){",!
+	Write "GoodsId = TempGoods.ItemID;",!
+	Write "CurrentGoodsName.innerText = TempGoods.item(""FullName"");",!
+	Write "GoodsPriceCateg.innerText = "_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Goods.GoodsAction.GetGoodsPriceCateg:csp.checkremontprices"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',GoodsId);",!
+	Write "if(KontrId!="""")",!
+	Write "	{",!
+	Write "		RemontPrice.innerText = "_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Common.Common.GetGoodRemontPriceForKontr:csp.checkremontprices"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',GoodsId,KontrId);",!
+	Write "	}",!
+	Write "}",!
+	Write "</script>"
+	Write !,(..HyperEventHead())
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html XMLNS:SKLADList XMLNS:SKLADz>"
+	Write !,"<IMPORT NAMESPACE=""SKLADz"" IMPLEMENTATION=""htc/treeview.htc"">",!
+	Write "<IMPORT NAMESPACE=""SKLADList"" IMPLEMENTATION=""htc/listview2.htc"">",!
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+  s login=$G(%session.Data("user"))
+  i '+login s %response.ServerSideRedirect="norights.csp" 
+  i '##class(Common.Rights).getrights(login,2) s %response.ServerSideRedirect="norights.csp" 
+  q 1
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\CheckRemontPrices.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/CheckRemontPrices.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>62164,45128</Default>
+</Parameter>
+</Class>
+</Export>

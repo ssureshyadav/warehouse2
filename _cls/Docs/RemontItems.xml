@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.RemontItems">
+<Super>Docs.DocItems</Super>
+<TimeCreated>60386,52123.380286</TimeCreated>
+
+<Property name="garant">
+<Description>
+№ Гарантийного талона</Description>
+<Type>%String</Type>
+</Property>
+
+<Index name="NewIndex1">
+<Properties>garant</Properties>
+</Index>
+
+<Property name="serial">
+<Description>
+Серийный номер</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="seller">
+<Description>
+Организация продавшая товар</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="100"/>
+</Property>
+
+<Property name="Name">
+<Description>
+Описание поломки</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>RemontItemsDefaultData</DefaultData>
+<Data name="RemontItemsDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"RemontItems"</Subscript>
+<Value name="1">
+<Value>garant</Value>
+</Value>
+<Value name="2">
+<Value>seller</Value>
+</Value>
+<Value name="3">
+<Value>NewProperty1</Value>
+</Value>
+<Value name="4">
+<Value>Name</Value>
+</Value>
+<Value name="5">
+<Value>serial</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

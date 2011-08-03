@@ -1,0 +1,61 @@
+<Script language="cache" runat="server">
+ s fields=%request.Get("fields")
+ i fields="" w "Error=Не указаны поля" q
+ s FromTree=%request.Get("FromTree")
+ s FromTable=%request.Get("FromTable")
+ s Number=%request.Get("Number")
+ w "#@#"
+ i Number>1 d 
+ .for i=1:1:Number d
+ .. s ParamsFrom=$G(ParamsFrom)_"Goods.GoodsParams t"_i_","
+ .for i=2:1:Number d
+ .. s ParamsWhere1=$G(ParamsWhere1)_" t1.Goods=t"_i_".Goods and"
+ .s ParamsWhere1=$E(ParamsWhere1,1,$L(ParamsWhere1)-4)
+ .s ParamsWhere1=" ("_ParamsWhere1_") and "
+ .s ParamsFrom=$E(ParamsFrom,1,$L(ParamsFrom)-1)
+ e  d
+ . s ParamsFrom="Goods.GoodsParams t1"
+ . s ParamsWhere1=""
+ 
+ f i=1:1:$L(fields,",") d
+ . s ParamsFields=$G(ParamsFields)_"t1.Goods->"_$P(fields,",",i)_","
+ s ParamsFields=$E(ParamsFields,1,$L(ParamsFields)-1)
+
+ s ParamsSql="select t1.Goods,"_$G(ParamsFields)_" from "_ParamsFrom_" where "_ParamsWhere1_"("_FromTree_")"
+
+ s result = ##class(%ResultSet).%New()
+ d result.Prepare(ParamsSql)
+ s result.RuntimeMode=2
+ s ok=result.Execute()
+
+ While result.Next() {
+ s somethg=1
+ s val=result.GetData(1)
+ s $P(OutString,"~",1)=val
+ s IDS(val)=1
+ f i=2:1:result.GetColumnCount() d
+ . s $P(OutString,"~",i)=result.GetData(i)
+ w OutString_"#@#"
+ }
+ 
+ s result = ##class(%ResultSet).%New()
+ s GoodsSql="SELECT ID,"_fields_" FROM Goods.Goods where ("_FromTable_")"
+ 
+ d result.Prepare(GoodsSql)
+ s result.RuntimeMode=2
+ s ok=result.Execute()
+
+ While result.Next() {
+ s somethg=1
+ s val=result.GetData(1)
+ s $P(OutString,"~",1)=val
+ s IDS(val)=1
+ f i=2:1:result.GetColumnCount() d
+ . s $P(OutString,"~",i)=result.GetData(i)
+ w OutString_"#@#"
+ }
+ 
+ w:'+$G(somethg) "0"
+ </script>
+ 
+ 

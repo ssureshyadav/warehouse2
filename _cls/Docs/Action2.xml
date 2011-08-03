@@ -1,0 +1,1034 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.Action2">
+<Description>
+Дополнительные методы для работы с документами</Description>
+<IncludeCode>xmlmacros</IncludeCode>
+<Super>%RegisteredObject</Super>
+<TimeCreated>60841,85070.746555</TimeCreated>
+
+<Method name="InnerInstructNewStr">
+<Description><![CDATA[
+Сформировать и вывести xml с данными строк указанной внутренней инструкции
+<br><var>DocId</var> - ID]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DocId,p1,ClassName</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="InnerInstructNewStrErr"
+
+ s Fields("addr","ValueField")="Common.SqlProcs_AddrPath(addr)"
+ s Fields("addr","ValueAlias")="addrName"
+ s Fields("addr","IDField")="addr"
+ s Fields("addr","IDAlias")="addr"
+ 
+ s Fields("Goods","ValueField")="Goods->FullName"
+ s Fields("Goods","ValueAlias")="GoodsFullName"
+ s Fields("Goods","IDField")="Goods"
+ s Fields("Goods","IDAlias")="Goods"
+ 
+ s Fields("quantdefault","ValueField")="quantdefault"
+ 
+ s Fields("quantreal","ValueField")="quantreal"
+
+ q ..SqlQuery(.Fields,ClassName,"Doc="_DocId)
+InnerInstructNewStrErr
+ $$$WriteError($ZE)
+ q "Ошибка при формировании списка строк"
+]]></Implementation>
+</Method>
+
+<Method name="ChiefInstructStr">
+<Description><![CDATA[
+Сформировать и вывести xml с данными строк указанной инструкции руководителя
+<br><var>DocId</var> - ID]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DocId,Class:%String="Operation.InstructionsItems",p2</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="ChiefInstructStrErr"
+ if Class="undefined" s Class = "Operation.InstructionsItems"
+ s Fields("Goods","ValueField")="Goods->FullName"
+ s Fields("Goods","ValueAlias")="GoodsFullName"
+ s Fields("Goods","IDField")="Goods"
+ s Fields("Goods","IDAlias")="Goods"
+ 
+ s Fields("Quantity","ValueField")="Quantity"
+ 
+ s Fields("Price","ValueField")="Price"
+ 
+ s Fields("Total","ValueField")="Total"
+ s:Class="Operation.InstructionsItems" Fields("BrakComment","ValueField")="BrakComment"
+
+ q ..SqlQuery(.Fields,Class,"Doc="_DocId)
+ChiefInstructStrErr
+ $$$WriteError($ZE)
+ q "Ошибка при формировании списка строк"
+]]></Implementation>
+</Method>
+
+<Method name="SqlQuery">
+<Description><![CDATA[
+Выполнить SQL запрос вернуть его в виде XML
+<br><var>Fields</var> - массив с полями запроса
+<br><var>ClassName</var> - From
+<br><var>DocId</var> - Where 
+<br><var>IdField</val> - поле значение которого будет трактоваться как ID записи (по умолчанию ID)]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Fields:%String,ClassName:%String,Where:%String="",IdField:%String="ID"</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="SqlQueryErr"
+
+ $$$StartXML
+ s sc=xmlstr.Element("AllObjects")
+ 
+ s Fields=""
+ s i="" f  s i=$O(Fields(i)) q:i=""  d
+ . s ValueField=Fields(i,"ValueField")
+ . s ValueAlias=$G(Fields(i,"ValueAlias"),Fields(i,"ValueField"))
+ . s IDField=$G(Fields(i,"IDField"))
+ . s IDAlias=$G(Fields(i,"IDAlias"))
+ . s Fields=Fields_ValueField_" As "_ValueAlias_","
+ . s:IDField'="" Fields=Fields_IDField_" As "_IDAlias_","
+ s Fields=$E(Fields,1,$L(Fields)-1)
+ s sql="select "_IdField_" as ID,"_Fields_" from "_ClassName
+ i Where'="" s sql=sql_" where "_Where
+ s result = ##class(%ResultSet).%New()
+ s ok=result.Prepare(sql)
+ i '+ok $$$WriteObjError(ok) q 0
+ s ok=result.Execute()
+ i '+ok $$$WriteObjError(ok) q 0
+ While result.Next() {
+
+ s ID=$G(result.Data("ID"))
+ 
+	s sc=xmlstr.Element("OneObject")
+	s sc=xmlstr.WriteAttribute("id",ID)
+	
+		s i="" f  s i=$O(Fields(i)) q:i=""  d
+		. s ValueAlias=$G(Fields(i,"ValueAlias"),Fields(i,"ValueField"))
+		. s IDAlias=$G(Fields(i,"IDAlias"))
+		. s sc=xmlstr.Element(i)
+		. s Value=$ZCVT($G(result.Data(ValueAlias)),"O","HTML")
+		. 	s sc=xmlstr.WriteAttribute("Value",Value)
+		. 	s:IDAlias'="" sc=xmlstr.WriteAttribute("id",$G(result.Data(IDAlias)))
+		. s sc=xmlstr.EndElement()
+		
+	s sc=xmlstr.EndElement()
+ } 
+ 
+ s sc=xmlstr.EndElement()
+ 
+ $$$EndXML
+ q 1
+SqlQueryErr
+ $$$WriteError($ZE)
+ q "Ошибка при формировании списка строк"
+]]></Implementation>
+</Method>
+
+<Method name="GetDisplayListArray">
+<Description><![CDATA[
+Получить массив значений DisplayList = ValueList
+<br><val>ClassProperty</val> - Класс||Свойство (например "Operation.Instructions||State")]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[ClassProperty:%String="",&Array]]></FormalSpec>
+<Implementation><![CDATA[
+ k Array
+ s cl=##class(%Dictionary.PropertyDefinition).%OpenId(ClassProperty)
+ s DISPLAYLIST=cl.Parameters.GetAt("DISPLAYLIST")
+ s VALUELIST=cl.Parameters.GetAt("VALUELIST")
+ f i=1:1:$L(DISPLAYLIST,",") d
+ . s ValueItem=$P(VALUELIST,",",i)
+ . s DisplayItem=$P(DISPLAYLIST,",",i)
+ . s:ValueItem'="" Array(ValueItem)=DisplayItem
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="GetDisplaylistOptions">
+<Description><![CDATA[
+Получить строку элементов <option> для HTML элемента <SELECT>
+в которой DISPLAYLIST и VALUELIST для свойства указанного свойства
+<br><val>DefaultValue</var> - значение из списка VALUELIST элемент с которым следует сделать SELECTED 
+<br><val>ClassProperty</val> - Класс||Свойство (например "Operation.Instructions||State")]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DefaultValue:%String="",ClassProperty:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="GetDisplaylistErr"
+ q:ClassProperty="" "<option>Ошибка. Не указано имя поля для вывода начальных значений.</option>"
+ k ResultArray
+ s cl=##class(%Dictionary.PropertyDefinition).%OpenId(ClassProperty)
+ s DISPLAYLIST=cl.Parameters.GetAt("DISPLAYLIST")
+ s VALUELIST=cl.Parameters.GetAt("VALUELIST")
+ f i=1:1:$L(DISPLAYLIST,",") d
+ . s OptionValue=$P(VALUELIST,",",i)
+ . i OptionValue=DefaultValue s SELECTED="SELECTED"
+ . e  s SELECTED=""
+ . s result=$G(result)_"<option value="""_OptionValue_""" "_SELECTED_">"_$P(DISPLAYLIST,",",i)_"</option>"
+ q $G(result)
+GetDisplaylistErr
+ $$$WriteError($ZE)
+ q "<option>Извините. Ошибка при заполнении начальных значений поля.</option>"
+]]></Implementation>
+</Method>
+
+<Method name="GetClassValuesOptions">
+<Description><![CDATA[
+Получить строку элементов <option> для HTML элемента <SELECT>
+в которой значения указанного класса (ID,Name)
+<br><val>DefaultValue</val> - значение поля OptionValueField которое следует подсветить
+<br><val>Classname</val> - Имя класса (например Common.Dictionary7)
+<br><val>OptionValueField</val> - Имя поля которое будет в атрибуте VALUE элемента OPTION (по умолчанию ID)
+<br><val>OptionTextField</val> - Имя поля которое будет значением элемента OPTION (по умолчанию Name)
+<br><val>AddEmptyOption</val> - Добавить пустой элемент (по умолчанию да)]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DefaultValue:%String="",Classname:%String="",OptionValueField:%String="ID",OptionTextField:%String="Name",AddEmptyOption:%Boolean=1</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="GetClassValuesOptionsErr"
+ i AddEmptyOption s result="<option></option>"
+ if $ISOBJECT(DefaultValue) s DefaultValue=DefaultValue.%Id()
+ s sql="select "_OptionValueField_","_OptionTextField_" from "_Classname
+ s rs = ##class(%ResultSet).%New()
+ s ok=rs.Prepare(sql)
+ i '+ok $$$WriteObjError(ok) q 0
+ s ok=rs.Execute()
+ i '+ok $$$WriteObjError(ok) q 0
+ While rs.Next() {
+	s OptionText = $G(rs.Data(OptionTextField))
+	s OptionValue = $G(rs.Data(OptionValueField))
+	i OptionValue=DefaultValue s SELECTED="SELECTED"
+	e  s SELECTED=""
+	s result=$G(result)_"<option value="""_OptionValue_""" "_SELECTED_">"_OptionText_"</option>"
+ }
+ q $G(result)
+GetClassValuesOptionsErr
+ $$$WriteError($ZE)
+ q "<option>Извините. Ошибка при заполнении начальных значений поля.</option>"
+]]></Implementation>
+</Method>
+
+<Method name="BlockAndShowCells">
+<Description><![CDATA[
+Заблокировать и вывести ячейки принадлежащие указанной
+<br><var>CellId</var> - Id из справочника Store.Address]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>CellId,p1,p2</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="BlockAndShowCellsErr"
+ s addrobj=##class(Store.Address).%OpenId(CellId)
+ s depot=addrobj.Depot.%Id()
+ s OriginalCode=addrobj.Code
+ s ParentCode=addrobj.Code_"*"
+ s ok=##class(Store.Action).BlockCells(addrobj)
+ i '+ok q ok
+ s Fields("addr","ValueField")="Common.SqlProcs_AddrPath(Address)"
+ s Fields("addr","ValueAlias")="addr"
+ s Fields("addr","IDField")="Address"
+ s Fields("addr","IDAlias")="Address"
+ 
+ s Fields("Goods","ValueField")="Goods->FullName"
+ s Fields("Goods","ValueAlias")="GoodsFullName"
+ s Fields("Goods","IDField")="Goods"
+ s Fields("Goods","IDAlias")="Goods"
+ 
+ s Fields("quantplan","ValueField")="Value1"
+ 
+ s Fields("Price","ValueField")="Goods->Price"
+ s Fields("Price","ValueAlias")="GoodsPrice"
+
+ s Fields("Total","ValueField")="(Goods->Price*Value1)"
+ s Fields("Total","ValueAlias")="Summa"
+ 
+ q ..SqlQuery(.Fields,"Store.Quantity","(Address->code %STARTSWITH '"_ParentCode_"' OR Address->code='"_OriginalCode_"') and Address->Depot="_depot)
+BlockAndShowCellsErr
+ $$$WriteError($ZE)
+ q "Ошибка формирования строк инвентаризации"
+]]></Implementation>
+</Method>
+
+<Method name="InventStr">
+<Description><![CDATA[
+Вывести строки инвентаризации
+<br><var>DocId</var> - Id документа]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DocId:%String="",p1,p2</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="InventStrErr"
+
+ s Fields("addr","ValueField")="Common.SqlProcs_AddrPath(addr)"
+ s Fields("addr","ValueAlias")="addr"
+ s Fields("addr","IDField")="addr"
+ s Fields("addr","IDAlias")="Address"
+ 
+ s Fields("Goods","ValueField")="Goods->FullName"
+ s Fields("Goods","ValueAlias")="GoodsFullName"
+ s Fields("Goods","IDField")="Goods"
+ s Fields("Goods","IDAlias")="Goods"
+ 
+ s Fields("quantplan","ValueField")="quantplan"
+ s Fields("Quantity","ValueField")="Quantity"
+  
+ s Fields("Price","ValueField")="Price"
+
+ s Fields("Total","ValueField")="Total"
+ 
+ q ..SqlQuery(.Fields,"Docs.InventItems","Doc="_DocId)
+InventStrErr
+ $$$WriteError($ZE)
+ q "Ошибка формирования строк инвентаризации"
+]]></Implementation>
+</Method>
+
+<Method name="CreateUtiliz">
+<Description><![CDATA[
+Создать документ утилизации с товарами подлежащими утилизации
+<br>BrakIDs - строка с ID из таблицы Store.Brak для ]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>BrakIDs:%String=""</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="CreateUtilizErr",ok=1
+ 
+ f i=1:1:$L(BrakIDs,"#@#") d
+ . s GoodsId=$P(BrakIDs,"#@#",i)
+ . q:'+GoodsId
+ . s IdsList=$G(IdsList)_GoodsId_","
+ i $E(IdsList,$L(IdsList))="," s $E(IdsList,$L(IdsList))=""
+	//извлечём данные о товаре, количестве и месте его расположения из таблицы брака
+ s sql="select ID,Goods,Address,Qnt from Store.Brak where ID in ("_IdsList_")"
+ s rs=##class(%ResultSet).%New()
+ s ok=rs.Prepare(sql) i '+ok $$$WriteObjError(ok) q "Ошибка при создании документа утилизации"
+ s ok=rs.Execute() i '+ok $$$WriteObjError(ok) q "Ошибка при создании документа утилизации"
+ while rs.Next() {
+ 	s ID=rs.Data("ID")
+ 	s BrakData(ID,"Goods")=rs.Data("Goods")
+ 	s BrakData(ID,"Address")=rs.Data("Address")
+ 	s BrakData(ID,"Qnt")=rs.Data("Qnt")
+ }
+ 
+ s doc=##class(Docs.Utiliz).%New() 	
+ s DocName=##class(Docs.Action).getRashNumb("Docs.Utiliz")
+ s doc.Name=DocName
+ f i=1:1:$L(BrakIDs,"#@#") d  q:'+ok
+ . s BrakID=$P(BrakIDs,"#@#",i)
+ . q:'+BrakID
+ . s item=##class(Docs.UtilizItems).%New()
+ . d item.GoodsSetObjectId(BrakData(BrakID,"Goods"))
+ . s item.Quantity=BrakData(BrakID,"Qnt")
+ . d item.addrSetObjectId(BrakData(BrakID,"Address"))
+ . s item.goodsdir=1
+ . s item.SourceTbl=2
+ . d item.BrakSetObjectId(BrakID)
+ . d item.DocTypeSetObjectId("Docs.Utiliz")
+ . s ok=doc.Items.Insert(item)
+ . i '+ok $$$WriteObjError(ok)
+ i '+ok q "Ошибка при создании документа утилизации."
+ s ok=doc.%Save()
+ i '+ok $$$WriteObjError(ok) q "Ошибка при создании документа утилизации"
+ q doc.%Id()
+CreateUtilizErr
+ $$$WriteError($ZE)
+ q "Ошибка при создании документа утилизации"
+]]></Implementation>
+</Method>
+
+<Method name="CreateBrakremont">
+<Description><![CDATA[
+Создать документ утилизации с товарами подлежащими утилизации
+<br>BrakIDs - строка с ID из таблицы Store.Brak для ]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>BrakIDs:%String=""</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="CreateBrakremontErr",ok=1
+ 
+ f i=1:1:$L(BrakIDs,"#@#") d
+ . s GoodsId=$P(BrakIDs,"#@#",i)
+ . q:'+GoodsId
+ . s IdsList=$G(IdsList)_GoodsId_","
+ i $E(IdsList,$L(IdsList))="," s $E(IdsList,$L(IdsList))=""
+	//извлечём данные о товаре, количестве и месте его расположения из таблицы брака
+ s sql="select ID,Goods,Address,Qnt from Store.Brak where ID in ("_IdsList_")"
+ s rs=##class(%ResultSet).%New()
+ s ok=rs.Prepare(sql) i '+ok $$$WriteObjError(ok) q "Ошибка при создании документа передачи брака в ремонт"
+ s ok=rs.Execute() i '+ok $$$WriteObjError(ok) q "Ошибка при создании документа передачи брака в ремонт"
+ while rs.Next() {
+ 	s ID=rs.Data("ID")
+ 	s BrakData(ID,"Goods")=rs.Data("Goods")
+ 	s BrakData(ID,"Address")=rs.Data("Address")
+ 	s BrakData(ID,"Qnt")=rs.Data("Qnt")
+ }
+ 
+ s doc=##class(Docs.Brakremont).%New() 	
+ s DocName=##class(Docs.Action).getRashNumb("Docs.Brakremont")
+ s doc.Name=DocName
+ f i=1:1:$L(BrakIDs,"#@#") d  q:'+ok
+ . s BrakID=$P(BrakIDs,"#@#",i)
+ . q:'+BrakID
+ . s item=##class(Docs.BrakremontItems).%New()
+ . d item.GoodsSetObjectId(BrakData(BrakID,"Goods"))
+ . s item.Quantity=BrakData(BrakID,"Qnt")
+ . d item.addrSetObjectId(BrakData(BrakID,"Address"))
+ . d item.BrakSetObjectId(BrakID)
+ . d item.DocTypeSetObjectId("Docs.Brakremont")
+ . s ok=doc.Items.Insert(item)
+ . i '+ok $$$WriteObjError(ok)
+ i '+ok q "Ошибка при создании документа передачи брака в ремонт"
+ s ok=doc.%Save()
+ i '+ok $$$WriteObjError(ok) q "Ошибка при создании документа передачи брака в ремонт"
+ q doc.%Id()
+CreateBrakremontErr
+ $$$WriteError($ZE)
+ q "Ошибка при создании документа передачи брака в ремонт"
+]]></Implementation>
+</Method>
+
+<Method name="ImportDocsGlobal">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>file</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="ImportDocsGlobalErr"
+ s Resultglob="^mtempHiddenImport"_$J
+ s SourceFieldListIndex=##class(Docs.Super).GetPropertyListIndex("Source")
+ s docFieldListIndex=##class(Docs.DocItems).GetPropertyListIndex("Doc")
+ k @Resultglob,^OldAndNewDocs
+ j Import^ExportImport(Resultglob,file)
+ f  h .01 q:$G(@Resultglob)'=""
+ s ok=$S(+@Resultglob:"Загрузка завершилась успешно. Импортированные элементы: "_@Resultglob@("loadedlist"),1:@Resultglob)
+ w ok,!
+ s glob=$P(@Resultglob@("loadedlist"),".")
+ s LastDocid=$G(^Docs.SuperD)				//ID последнего док. в системе
+ w "ID последнего документа в системе "_LastDocid,!
+ s i="" f  s i=$o(@glob@("Docs",i)) q:i=""  d
+ . //цикл по документам в пакете импорта
+ . q:i=""
+ . i $i(count)
+ . s NewDocId=count+LastDocid				//ID вновь создаваемого документа в системе из пакета импорта
+ . m @glob@("NewDocs",NewDocId)=@glob@("Docs",i)	//в новую структуру пишем документы c ID которые вставятся в Docs.Super
+ . s ^OldAndNewDocs(0,i)=NewDocId	//соответствие старых и новых ID
+ . s ^OldAndNewDocs(1,NewDocId)=i	//соответствие новых и старых ID
+ w "прошли "_+$G(count)_" документов, id последнего будет: ",NewDocId,!
+ w "Соответствие старых и новых ID в ^mtempArt(""Equal"")",!
+
+ //в новых документах заменим поле Source
+ s i="" f  s i=$o(@glob@("NewDocs",i)) q:i=""  d
+ . //цикл по документам в пакете импорта с новыми ID, которые позже запишутся в Docs.Super
+ . s Source=$LG(@glob@("NewDocs",i),SourceFieldListIndex)	//поле Source
+ . //если в нашем пакете импорта есть тот документ на который ссылается это поле Source
+ . q:'+Source
+ . d:$D(^OldAndNewDocs(0,Source))
+ . . //в поле Source старый ID меняем на тот, который был создан
+ . . s $LI(@glob@("NewDocs",i),SourceFieldListIndex)=^OldAndNewDocs(0,Source)
+
+ s count=""
+ s LastItemId=$G(^Docs.DocItemsD)				//ID последнего док. в системе
+ s i="" f  s i=$o(@glob@("Items",i)) q:i=""  d
+ . //цикл по строкам в пакете импорта
+ . i $I(count)
+ . s NewItemId=count+LastItemId				//ID вновь создаваемого документа в системе из пакета импорта
+ . s OlddocValue=$LG(@glob@("Items",i),docFieldListIndex)
+ . q:'$D(OldAndNewDocs(0,OlddocValue))
+ . s $LI(@glob@("Items",i),docFieldListIndex)=OldAndNewDocs(0,OlddocValue)
+ . m @glob@("NewItems",NewItemId)=@glob@("Items",i)
+
+ m ^Docs.SuperD=@glob@("NewDocs")
+ w "Добавили в ^Docs.SuperD "_glob_"(""NewDocs"")",!
+ i +$G(NewDocId) d
+ . w "Последний id в ^Docs.SuperD теперь "_NewDocId+1
+ . s ^Docs.SuperD=NewDocId+1
+ m ^Docs.DocItemsD=@glob@("NewItems")
+ w "Добавили в ^Docs.DocItemsD "_glob_"(""NewItems"")",!
+ i +$G(NewItemId) d
+ . w "Последний id в ^Docs.DocItemsD теперь "_NewItemId+1
+ . s ^Docs.DocItemsD=NewItemId+1
+ 
+ w "Удаление индексов Docs.Super ..."
+ d ##class(Docs.Super).%PurgeIndices()
+ w "ok",!
+ w "Удаление индексов Docs.DocItems..."
+ d ##class(Docs.DocItems).%PurgeIndices()
+ w "ok",!
+ w "Перестройка индексов Docs.Super ..."
+ d ##class(Docs.Super).%BuildIndices()
+ w "ok",!
+ w "Перестройка индексов Docs.DocItems ..."
+ d ##class(Docs.DocItems).%BuildIndices()
+ w "ok",!
+ //увеличим ID каждого документа на 
+
+ q ok
+ImportDocsGlobalErr
+ $$$WriteError($ZE)
+ q "Ошибка импорта документов"
+]]></Implementation>
+</Method>
+
+<Method name="ExportDocsGlobal">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>dat1="",dat2="",p1</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="ExportDocsGlobalErr"
+ s dat1=$ZDH(dat1,4)
+ s dat2=$ZDH(dat2,4)
+ s glob="^mtempHiddenExport"_$J
+ k @glob
+ //выгружаем документы
+ &sql(declare zzz cursor for select id into :DocId from Docs.Super where (Dat>=:dat1 and Dat<=:dat2) or (ChangeDate>=:dat1 and ChangeDate<=:dat2))
+ &sql(open zzz)
+ f  &sql(fetch zzz) q:SQLCODE  d
+ . m @glob@("Docs",DocId)=^Docs.SuperD(DocId)
+ &sql(close zzz)
+ //выгружаем строки
+ &sql(declare zz cursor for select id into :ItemId from Docs.DocItems where (doc->Dat>=:dat1 and doc->Dat<=:dat2) or (doc->ChangeDate>=:dat1 and doc->ChangeDate<=:dat2))
+ &sql(open zz)
+ f  &sql(fetch zz) q:SQLCODE  d
+ . m @glob@("Items",ItemId)=^Docs.DocItemsD(ItemId)
+ &sql(close zz)
+ s file="c:\DocsGlobalExport.gbl"
+ s globFile=$E(glob,2,$L(glob))_".gbl"
+ j Export^ExportImport(globFile,file,glob)
+ f  h .01 q:$G(@glob)'=""
+ s ok=$S(+@glob:"Выгрузка завершилась успешно. Файлj экспорта "_file,1:@glob)
+ k @glob
+ q ok
+ExportDocsGlobalErr
+ $$$WriteError($ZE)
+ q "Ошибка при выгрузке документов."
+]]></Implementation>
+</Method>
+
+<Method name="MakeStoreOutBrak">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[RashObj,&StoreObj]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s InstructionObj=RashObj.Source	//инструкция руководителя
+ s StoreObj.Brak=1
+ s i="",ok=1
+ f  s i=InstructionObj.Items.Next(i) q:(i="")!('+ok)  d
+ . s Item=InstructionObj.Items.GetAt(i)	//строка инструкции руководителя
+ . s StoreItemObj=##class(Docs.StorageOutItems).%New()	//строка внутренней инструкции
+ . d StoreItemObj.DocTypeSetObjectId("Docs.StorageOut")
+ . s StoreItemObj.Goods=Item.Goods
+ . s StoreItemObj.Price=Item.Price
+ . s StoreItemObj.quantdefault=Item.Quantity
+ . s StoreItemObj.Total=Item.Total
+ . s StoreItemObj.addr=Item.addr
+ . s ok=StoreObj.Items.Insert(StoreItemObj)
+ i '+ok d  q "Извините. Ошибка при создании внутренней инструкции."
+ s ok=StoreObj.%Save()
+ i '+ok d  q "Извините. Ошибка при создании внутренней инструкции."
+ . $$$WriteObjError(ok)
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="MakeStoreOut">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[RashID:%String,&StoreObj:Docs.StorageOut=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="MakeStoreOutErr"
+ TSTART
+ s kurs=##class(Goods.GoodsAction).kurs(.other)
+ s glob=$NA(^mtempMakeStoreOut($J)) k @glob
+ i $ISOBJECT(RashID) s RashObj=RashID,RashID=RashObj.%Id()
+ e  s RashObj=##class(Docs.Rash).%OpenId(RashID)
+ s RashObj.kurs=kurs
+ i '$ISOBJECT(StoreObj) d
+ . s StoreObj=##class(Docs.StorageOut).%New()
+ . s StoreObj.Name=RashObj.Name_"-о"
+ . s StoreObj.Comment=RashObj.Comment
+ . s StoreObj.Depot=RashObj.Depot
+ . s StoreObj.Source=RashObj
+ . s StoreObj.Kontr=RashObj.Kontr
+ . d StoreObj.%Save()
+ 
+ // если это от инструкции руководителя "отправка некондиционных товаров" то создаём другим методом
+ if RashObj.Source.Oper.%Id()=11 d  q ok
+ . s ok=..MakeStoreOutBrak(RashObj,.StoreObj)
+ . if ok TCOMMIT
+ . else  TROLLBACK
+ s StoreID=StoreObj.%Id()
+ k ^LogOfCreation(StoreID)
+ s i="",ok=1
+ f  s i=RashObj.Items.Next(i) q:(i="")!('+ok)  d
+ . s Item=RashObj.Items.GetAt(i)
+ . q:'$ISOBJECT(Item)
+ . q:Item.JustCreated
+ . s (QntStillNeeded,Qnt)=Item.Quantity				//Нужное количество товара
+ . s GoodsId=Item.Goods.%Id()		//ID нужного товара
+ . s GoodsName=Item.Goods.FullName
+ . s ^LogOfCreation(StoreID,GoodsName,$I(^LogOfCreation(StoreID,GoodsName)))="    Товар "_GoodsName_" Нужно "_Qnt
+ . k Found, @glob
+ . s ok=##class(Store.Action).FindGoodsPlaces(GoodsId,.Found)
+ . q:'+ok
+ . //Перепишем массив с найденными ячейками во временную глобальку что бы передавать в процедуры
+ . m @glob=Found
+ . s ^LogOfCreation(StoreID,GoodsName,$I(^LogOfCreation(StoreID,GoodsName)))="Всего нашли "_Found
+ . if Found>=Qnt d  q
+ . . //нашли сколько нужно или даже больше
+ . . //найдём в списке найденных ячеек количество такое же или больше чем нам надо
+ . . s Quantity=$O(Found(1,(Qnt-0.000001)))	//количество в ячейке которая соответствует нужному количеству
+ . . s ^LogOfCreation(StoreID,GoodsName,$I(^LogOfCreation(StoreID,GoodsName)))= "Нашли больше чем надо"
+ . . if Quantity d
+ . . . //нашли нужное количество в одной ячейке
+ . . . s StoreQntID = Found(1,Quantity,"ID")	//ID записи в Store.Quantity
+ . . . s AddressID=Found(1,Quantity)			//ID ячейки с нужным количеством товара
+ . . . s ^LogOfCreation(StoreID,GoodsName,$I(^LogOfCreation(StoreID,GoodsName)))="Количество в ближайшей ячейке "_Quantity_" Адрес "_##class(Store.Action).AddressPath(AddressID)
+ . . . d MakeStorageItem(StoreObj,GoodsId,Qnt,AddressID,StoreQntID,GoodsName)	//пишем в инструкцию по отгрузке
+ . . e  d
+ . . . //Нужное количество нашли но оно разбросано
+ . . . s ^LogOfCreation(StoreID,GoodsName,$I(^LogOfCreation(StoreID,GoodsName)))="Собираем из разных ячеек"
+ . . . s QntStillNeeded=$$CollectGoodFromCells(glob,StoreObj,GoodsId,Qnt,,,,GoodsName)
+ . //отсюда идёт ветка набора остатков товара
+ . //если мы здесь значит для текущего товара (GoodsId) нет нужного количества на складе
+ . //сколько его вообще затребовали, если хоть один товар будет найден на местах хранения, QntStillNeeded - будет означать сколькр ещ1 товара осталось набрать
+ . if Found>=1 d
+ . . //нашли хотя бы один требуемый товар
+ . . //QntStillNeeded - количество которое ещё требуется доложить по данному товару
+ . . //т.е. CollectGoodFromCells набирает сколько может из представленного массива, 
+ . . //но этого не хватит, и вот количество которого не хватает это QntStillNeeded
+ . . s ^LogOfCreation(StoreID,GoodsName,$I(^LogOfCreation(StoreID,GoodsName)))="Сколько нужно не нашли, но вообще количество есть"
+ . . s QntStillNeeded=$$CollectGoodFromCells(glob,StoreObj,GoodsId,QntStillNeeded,,,,GoodsName)
+ . . s ^LogOfCreation(StoreID,GoodsName,$I(^LogOfCreation(StoreID,GoodsName)))="После сбора из всех ячеек остался недобор "_QntStillNeeded
+ . . //после того как набрали сколько могли товара объявляем сколько требовалось и сколько мы набрали
+ . . s Item.Quantity=(Qnt-QntStillNeeded)
+ . . s Item.Zakaz=Qnt
+ . //теперь пошли по аналогам товара
+ . //попытаемся найти такой аналог у которого в одной ячейке лежало бы нужное количество товара
+ . &sql(select d4.Property6625,d4.Property6625->FullName,stq.ID,stq.Address into :AnalogId,:AnalogName,:StoreQntID,:AddressId from Common.Dictionary4 d4, Store.Quantity stq where d4.Name=:GoodsId and stq.Goods=d4.Property6625 and stq.Value1>=:QntStillNeeded order by Value1 asc)
+ . if 'SQLCODE do  q
+ . . //нашли аналог у которого нужное количество есть в одной ячейке, добавляем его и выходим
+ . . s ^LogOfCreation(StoreID,GoodsName,$I(^LogOfCreation(StoreID,GoodsName)))="Нашли аналог "_AnalogName_" который сосредоточен в одной ячейке "_##class(Store.Action).AddressPath(AddressId)
+ . . d MakeStorageItem(StoreObj,AnalogId,QntStillNeeded,AddressId,StoreQntID,GoodsName)
+ . . //выставляем в расходной накладной факт замены
+ . . d Item.GoodsSetObjectId(AnalogId)
+ . . s Item.Zakaz=Qnt
+ . . d Item.ZakazGoodsSetObjectId(GoodsId)
+ . . s Item.ZakazDat=+$H
+ . . s Item.ZakazTim=$P($H,",",2)
+ . //последний этап.
+ . //Если мы здесь значит для строки расходной накладной не смогли набрать нужного товара 
+ . //и не нашли такой аналог что бы нужное количество было на одной полке
+ . &sql(declare analogs cursor for select Property6625,Property6625->FullName into :Property6625,:Property6625FullName from Common.Dictionary4 where Name=:GoodsId)
+ . &sql(open analogs)
+ . f  &sql(fetch analogs) q:SQLCODE  d
+ . . s Analogs(Property6625)=""		//массив в котором узлы это ID товаров - аналогов текущего
+ . . s Analogs(Property6625,"FullName")=Property6625FullName
+ . &sql(close analogs)
+ . //пошли по сформированному массиву с аналогами для каждого находим количество
+ . s ^LogOfCreation(StoreID,GoodsName,$I(^LogOfCreation(StoreID,GoodsName)))="Нашли несколько аналогов."
+ . s AnalogId="" f  s AnalogId=$O(Analogs(AnalogId)) q:(AnalogId="")||('+ok)||('+QntStillNeeded)  d
+ . . k Found, @glob
+ . . s ok=##class(Store.Action).FindGoodsPlaces(AnalogId,.Found)
+ . . q:('+ok)||(Found<1)
+ . . m @glob=Found
+ . . s AnalogFullName=Analogs(AnalogId,"FullName")
+ . . s ^LogOfCreation(StoreID,GoodsName,$I(^LogOfCreation(StoreID,GoodsName)))="Аналог "_AnalogFullName_" количество "_Found
+ . . s QntStillNeeded=$$CollectGoodFromCells(glob,StoreObj,AnalogId,QntStillNeeded,1,GoodsId,RashObj,GoodsName)
+ . . s ^LogOfCreation(StoreID,GoodsName,$I(^LogOfCreation(StoreID,GoodsName)))="После него ещё необходимо набрать "_QntStillNeeded
+ . if Qnt>=QntStillNeeded,QntStillNeeded d MakeStorageItem(StoreObj,GoodsId,QntStillNeeded,"","",GoodsName)
+ if '+ok TROLLBACK  q ok
+ 
+ s ok=StoreObj.%Save()
+ i '+ok d  q "Извините. Ошибка при создании внутренней инструкции."
+ . TROLLBACK
+ . $$$WriteObjError(ok)
+ s ^LogOfCreation(StoreID,GoodsName,$I(^LogOfCreation(StoreID,GoodsName)))="код в структуре остатков StoreObj.%Id()="_StoreObj.%Id()
+ 
+ s ok=RashObj.%Save()
+ i '+ok d  q "Извините. Ошибка при создании внутренней инструкции."
+ . TROLLBACK
+ . $$$WriteObjError(ok)
+ 
+ TCOMMIT
+ q 1
+
+ //Создать строку инструкции по отгрузке и прикрепить к этой инструкции
+MakeStorageItem(StoreObj,GoodsId,Qnt,Address="",StoreQntID="", GoodName)
+ s StoreObjId=StoreObj.%Id()
+ s GoodName2 = ##class(Goods.Goods).GetPropertyValue(GoodsId,"abbr")_"-"_##class(Goods.Goods).GetPropertyValue(GoodsId,"Property3609")_" "_##class(Goods.Goods).GetPropertyValue(GoodsId,"Name")
+ s ^LogOfCreation(StoreObjId,GoodName,$I(^LogOfCreation(StoreObjId,GoodName)))= "Записываем строку в инструкцию по отгрузке. Товар:"_GoodName2_" ("_GoodsId_") количество: "_Qnt_" ячейка: "_##class(Store.Action).AddressPath(Address)
+ s StorageItem=##class(Docs.StorageOutItems).%New()
+ d StorageItem.GoodsSetObjectId(GoodsId)
+ s StorageItem.quantdefault=Qnt
+ s StorageItem.Quantity=Qnt
+ d:StoreQntID StorageItem.StoreQntIDSetObjectId(StoreQntID)
+ d:Address StorageItem.addrSetObjectId(Address)
+ d StorageItem.DocTypeSetObjectId("Docs.StorageOut")
+ s StorageItem.serial=Item.serial
+ s StorageItem.comment=Item.comment
+ d StorageItem.%Save()
+ d StoreObj.Items.Insert(StorageItem)
+ d:StoreQntID SetRezerv(StoreQntID,Qnt,StoreObj.Name,GoodsId,GoodName,StorageItem.%Id())	//ставим резерв 
+ q
+
+ //создать строку расходной накладной
+MakeRashItem(RashObj,GoodsId,ZakazId,Quantity,ZakazQuant,GoodName,StoreObjId)
+ s $ZT="MakeRashItemErr"
+ s ^LogOfCreation(StoreObjId,GoodName,$I(^LogOfCreation(StoreObjId,GoodName)))="  Делаем новую строку в расходной накладной №"_RashObj.Name_" Товар: "_GoodName_" ("_GoodsId_") Количество: "_Quantity_" Заказанное Количество: "_ZakazQuant
+ s RashItem=##class(Docs.RashItems).%New()
+ d RashItem.GoodsSetObjectId(GoodsId)
+ s RashItem.Quantity=Quantity
+ d RashItem.ZakazGoodsSetObjectId(ZakazId)
+ s RashItem.Zakaz=ZakazQuant
+ s RashItem.ZakazDat=+$H
+ s RashItem.ZakazTim=$P($H,",",2)
+ d RashItem.DocTypeSetObjectId("Docs.Rash")
+ s RashItem.JustCreated = 1
+ d RashObj.Items.Insert(RashItem)
+ q 
+MakeRashItemErr
+ $$$WriteError($ZE)
+ q
+ //glob		ссылка на глобаль с данными (формат см. Store.Action.FindGoodsPlaces()
+ //StoreObj
+ //GoodsId
+ //Qnt
+ //StoreQntID
+CollectGoodFromCells(glob,StoreObj,GoodsId,Qnt,CreateRashItem=0,ZakazGood,RashObj,GoodName)
+ //цикл по массиву с найденными ячейками, 
+ //в цикле набираем нужное количество (Qnt) товара (GoodsId) 
+ //и создаём строки инструкции по отгрузке, которые привязываем к самой инстр. по отгрузке
+ s StoreObjId=StoreObj.%Id()
+ s ^LogOfCreation(StoreObjId,GoodName,$I(^LogOfCreation(StoreObjId,GoodName)))= "  Собираем из разных ячеек, всего нужно набрать "_Qnt_" в переданном массиве: "_Found_" "_$S(CreateRashItem:"Необходимо создать строку в расходной накладной.",1:"")
+ k Found
+ m Found=@glob
+ q:'+$G(Found)
+ s AddressID="" f  s AddressID=$O(Found(0,AddressID)) q:(AddressID="")||('Qnt)  d
+ . s StoreQntID = Found(0,AddressID,"ID")
+ . s QntInCell = Found(0,AddressID)
+ . //если Количество в ячейке больше чем нужно то в строку вставляем просто то количество которое нужно
+ . //иначе в строку вставляем всё количество ячейки
+ . if QntInCell>Qnt s QntForString=Qnt
+ . e  s QntForString=QntInCell
+ . s Qnt=Qnt-QntForString
+ . s ^LogOfCreation(StoreObjId,GoodName,$I(^LogOfCreation(StoreObjId,GoodName)))="Ячейка: "_##class(Store.Action).AddressPath(AddressID)_" в ней: "_QntInCell_" берём в строку: "_QntForString
+ . d MakeStorageItem(StoreObj,GoodsId,QntForString,AddressID,StoreQntID,GoodName)
+ d:CreateRashItem MakeRashItem(RashObj,GoodsId,ZakazGood,QntForString,QntForString,GoodName,StoreObjId)
+ s ^LogOfCreation(StoreObjId,GoodName,$I(^LogOfCreation(StoreObjId,GoodName)))="после набора остался недобор: "_Qnt
+ q Qnt
+ 
+ //Установить резерв
+SetRezerv(StoreQntID,Qnt,StoreID,GoodsId,GoodName,StorageItemId)
+ //&sql(update Store.Quantity set Value1=(Value1-:Qnt),Value2=(Value2+:Qnt) where ID=:StoreQntID)
+ d ##class(Docs.StorageOutItems).SetReserve(StoreQntID,Qnt,StorageItemId)
+ i $G(StoreID)'="",$G(GoodsId)'="" s ^LogOfCreation(StoreID,GoodName,$I(^LogOfCreation(StoreID,GoodName)))="Ставим резерв "_GoodName_" StoreQntID="_StoreQntID_" Qnt="_Qnt_" SQLCODE="_SQLCODE
+ q
+ 
+ //Ошибка
+MakeStoreOutErr
+ TROLLBACK
+ $$$WriteError($ZE)
+ q "Извините, ошибка при создании инструкции по отгрузке."
+]]></Implementation>
+</Method>
+
+<Method name="KontragentsList">
+<Description><![CDATA[
+Вывести список контрагентов
+<br><var>Where</var> - where для SQL запроса]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Where:%String="",p1,p2</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="KontragentsListErr"
+ s Fields("Name","ValueField")="Name"
+ s Fields("Code","ValueField")="Code"
+ s Fields("Address","ValueField")="Address"
+ s Fields("EMail","ValueField")="EMail"
+ s Fields("Agree","ValueField")="Agree"
+ s Fields("chief","ValueField")="chief"
+ s Fields("Status","ValueField")="Status"
+ s Fields("Property2506","ValueField")="Property2506"
+ s Fields("Activity","ValueField")="Activity"
+ s Fields("Region","ValueField")="Region"
+ s Fields("City","ValueField")="City"
+ s Fields("Phones","ValueField")="Phones"
+ s Fields("ContPers","ValueField")="ContPers"
+ s Fields("Federal","ValueField")="Federal"
+ 
+ /*
+ s Fields("region2","ValueField")="region2->Name"
+ s Fields("region2","ValueAlias")="region2Name"
+ s Fields("region2","IDField")="region2"
+ s Fields("region2","IDAlias")="region2"
+
+ s Fields("Property126","ValueField")="Property126->Name"
+ s Fields("Property126","ValueAlias")="Property126Name"
+ s Fields("Property126","IDField")="Property126"
+ s Fields("Property126","IDAlias")="Property126"
+ */
+ 
+ q ..SqlQuery(.Fields,"Common.Kontragent",Where)
+KontragentsListErr
+ $$$WriteError($ZE)
+ q "Ошибка формирования строк инвентаризации"
+]]></Implementation>
+</Method>
+
+<Method name="RashStr">
+<Description><![CDATA[
+Вывести строки расходной накладной
+<br><var>DocId</var> - Id документа]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DocId:%String="",p2,p3</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="RashStrErr"
+ 
+ s Fields("Goods","ValueField")="Goods->FullName"
+ s Fields("Goods","ValueAlias")="GoodsFullName"
+ s Fields("Goods","IDField")="Goods"
+ s Fields("Goods","IDAlias")="Goods"
+ s Fields("Quantity","ValueField")="Quantity"
+ s Fields("Price","ValueField")="Price"
+ s Fields("Total","ValueField")="Total"
+ s Fields("ZakazGoods","ValueField")="ZakazGoods->FullName"
+ s Fields("ZakazGoods","ValueAlias")="ZakazGoodsFullName"
+ s Fields("ZakazGoods","IDField")="ZakazGoods"
+ s Fields("ZakazGoods","IDAlias")="ZakazGoods"
+ s Fields("Zakaz","ValueField")="Zakaz"
+ s Fields("ZakazDat","ValueField")="%external(ZakazDat)"
+ s Fields("ZakazDat","ValueAlias")="ZakazDat"
+ s Fields("ZakazTim","ValueField")="%external(ZakazTim)"
+ s Fields("ZakazTim","ValueAlias")="ZakazTim"
+ s Fields("ZakazUser1","ValueField")="ZakazUser1->Name"
+ s Fields("ZakazUser1","ValueAlias")="ZakazUser1Name"
+ s Fields("ZakazUser1","IDField")="ZakazUser1"
+ s Fields("ZakazUser1","IDAlias")="ZakazUser1"
+  
+ q ..SqlQuery(.Fields,"Docs.RashItems","Doc="_DocId)
+RashStrErr
+ $$$WriteError($ZE)
+ q "Ошибка формирования строк инвентаризации"
+]]></Implementation>
+</Method>
+
+<Method name="ShowHeaders">
+<Description><![CDATA[
+Написать JS код для формирования массивов с наименованиями колонок компонента iGrid
+<br>ClassName - Имя класса
+<br>Fields - название полей класса через запятую, которые необходимо вывести как поля iGrid
+<br>ComponentID - ID компонента iGrid (для полей-комбобоксов)]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassName,Fields,componentID</FormalSpec>
+<Implementation><![CDATA[
+ if $G(componentID)="" s componentID=0
+ s fieldsquantity=$L(Fields,",")
+ w "Captions = new Array("_fieldsquantity_");",!
+ w "Keys = new Array("_fieldsquantity_");",!
+ w "Tags = new Array("_fieldsquantity_");",!
+ w "Widths = new Array("_fieldsquantity_");",!
+ w "Combos = new Array("_fieldsquantity_");",!
+ f i=0:1:fieldsquantity-1 d
+ . s FieldName=$P(Fields,",",i+1)
+ . s PropertyType=$ZOBJCLASSMETHOD(ClassName,"GetPropertyType",FieldName,.Data)
+ . w "Captions["_i_"]="""_Data("Description")_""";",!
+ . w "Tags["_i_"]="""_PropertyType_""";",!
+ . w "Keys["_i_"]="""_FieldName_""";",!
+ . w "Widths["_i_"]="_$G(^HTC("igrid","settings",componentID,FieldName,"Width"),80)_";",!
+ . if $G(Data("Valuelist"))'="" d
+ . . s ComboName=FieldName_"Combo"
+ . . w "Combos["_i_"]='"_ComboName_"'",!
+ . . w componentID_".MakeCombo('"_Data("Displaylist")_"','"_Data("Valuelist")_"','"_ComboName_"');",!
+ . if $E(PropertyType)'="%" d
+ . . s ComboName=FieldName_"Combo"
+ . . w "Combos["_i_"]='"_ComboName_"'",!
+ . . s sql="select ID,Name from "_PropertyType
+ . . s rs=##class(%Library.ResultSet).%New()
+ . . s ok=rs.Prepare(sql)
+ . . s ok=rs.Execute()
+ . . s (Displaylist,Valuelist)=""
+ . . while rs.Next() { s Displaylist=$G(Displaylist)_","_rs.Data("Name"),Valuelist=$G(Valuelist)_","_rs.Data("ID") }
+ . . w:Displaylist'="" componentID_".MakeCombo('"_Displaylist_"','"_Valuelist_"','"_ComboName_"');",!
+ q
+]]></Implementation>
+</Method>
+
+<Method name="MakeBrakInstruction">
+<Description><![CDATA[
+Создать или открыть инструкцию руководителя и внести в неё некондиционные товары (с адресом и количеством)
+<br>StoreBrakId - список ID Store.Brak]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>StoreBrakId:%String,InstructionId:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="MakeBrakInstructionErr"
+ if InstructionId'="" s ChiefInstrObj=##class(Operation.Instructions).%OpenId(InstructionId)
+ else  d
+ . s ChiefInstrObj=##class(Operation.Instructions).%New()
+ . d ChiefInstrObj.OperSetObjectId(11)
+ . s ChiefInstrObj.Name=##class(Docs.Action).getRashNumb("Operation.Instructions")
+ . d ChiefInstrObj.Depot1SetObjectId(1)
+ . s ChiefInstrObj.Depot=1
+ . s ChiefInstrObj.InstDate=+$H
+ f i=1:1:$L(StoreBrakId,"#@#")-1 d
+ . s StoreBrakObj=##class(Store.Brak).%OpenId($P(StoreBrakId,"#@#",i))
+ . s GoodsId=StoreBrakObj.Goods.%Id()
+ . s AddressId=StoreBrakObj.Address.%Id()
+ . s Qnt=StoreBrakObj.Qnt
+ . s Price=StoreBrakObj.Goods.Price
+ . s Total=Qnt*Price
+ . //теперь формируем строку инструкции руководителя
+ . s ChiefInstrItemObj=##class(Operation.InstructionsItems).%New()
+ . d ChiefInstrItemObj.DocTypeSetObjectId("Operation.Instructions")
+ . d ChiefInstrItemObj.addrSetObjectId(AddressId)
+ . d ChiefInstrItemObj.GoodsSetObjectId(GoodsId)
+ . s ChiefInstrItemObj.Quantity=Qnt
+ . s ChiefInstrItemObj.Price=Price
+ . s ChiefInstrItemObj.Total=Total
+ . d ChiefInstrObj.Items.Insert(ChiefInstrItemObj)
+ . s Summa=$G(Summa)+Total
+ s ChiefInstrObj.Summa=+ChiefInstrObj.Summa+$G(Summa)
+ s ok=ChiefInstrObj.%Save()
+ if $$$ISERR(ok) $$$WriteObjError(ok) q "Извините, ошибка при создании инструкции на отгрузку некондиционного товара."
+ q ChiefInstrObj.%Id()
+MakeBrakInstructionErr
+ $$$WriteError($ZE)
+ q "Извините. Ошибка при создании инструкции руководителя."
+]]></Implementation>
+</Method>
+
+<Method name="GetSummsByBrands">
+<Description>
+Получить сумму документа по брендам</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[DocId:%String,&Summ:%String]]></FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	//n SQLCODE,MM,VC,TL,abbr,Total,ID
+ s $ZT="GetSummsByBrandsErr"
+ k Summ
+ s Summ=0
+ s MM=$$$TunesVariableGlobal("MM")	//список аббревиатур мастермакс через запятую
+ s VC=$$$TunesVariableGlobal("VC")
+ s TL=$$$TunesVariableGlobal("TL")
+  //списки которые через запятую перегоним в массивы, и вырежем пробелы
+ f i=1:1:$L(MM,",") d
+ . //обрезаем пробелы
+ . s abbr=$TR($P(MM,",",i)," ","")
+ . q:abbr=""
+ . s MM(abbr)=""
+
+ f i=1:1:$L(VC,",") d
+ . //обрезаем пробелы
+ . s abbr=$TR($P(VC,",",i)," ","")
+ . q:abbr=""
+ . s VC(abbr)=""
+
+ f i=1:1:$L(TL,",") d
+ . //обрезаем пробелы
+ . s abbr=$TR($P(TL,",",i)," ","")
+ . q:abbr=""
+ . s TL(abbr)=""
+
+ 
+ &sql(declare BrandSumms cursor for 
+ select ID,Goods->abbr,Total
+ into :ID,:abbr,:Total
+ from Docs.StorageOutItems
+ where doc = :DocId)
+ &sql(open BrandSumms)
+ f  &sql(fetch BrandSumms) q:SQLCODE  d
+ . s Summ=Summ+Total
+ . s brand="undefined"
+ . if abbr'="",$d(MM(abbr)) s brand="MM"
+ . if abbr'="",$d(TL(abbr)) s brand="TL"
+ . if abbr'="",$d(VC(abbr)) s brand="VC"
+ . if brand="undefined" s Summ(brand,"names")=$G(Summ(brand,"names"))_", "_abbr
+ . s Summ(brand)=$G(Summ(brand))+Total
+ &sql(close BrandSumms)
+ q 1
+GetSummsByBrandsErr
+ $$$WriteError($ZE)
+ q "Извините. Ошибка при подсчёте суммы."
+]]></Implementation>
+</Method>
+
+<Method name="CreateActNote">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>docids:%String="",PoluhId:%String="",Comment:%String=""</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="CreateActNoteErr"
+ s ok=1
+ 
+ s NoteObj=##class(Docs.ActNote).%New()
+ f i=1:1:$L(docids,"%23@%23")-1
+ {
+	 s docid=$P(docids,"%23@%23",i)
+	 
+	 s DocObj = ##class(Docs.Act).%OpenId(docid)
+	 if $ISOBJECT(DocObj),DocObj.Stat=2,DocObj.Paid=0
+	 {
+	 	s glob(docid)=""
+	 	s glob(docid,"goodsid")=DocObj.Goods.%Id()
+	 	s glob(docid,"price")=DocObj.Summa
+		s ActName=DocObj.Name
+		s:DocObj.Paid ErrorActs=$G(ErrorActs)_ActName_", "
+		if $ISOBJECT(DocObj.Kontr) 
+		{
+			s Manager=DocObj.Kontr.Manager
+			s Kontr=DocObj.Kontr
+			s KontrId=DocObj.Kontr.%Id()
+		}
+	 }
+ }
+ 
+ if $G(ErrorActs)'="" q "Невозможно сформировать служебную записку на оплату акта, так как нектоорые из перечисленных актов уже оплачены: "_ErrorActs
+ s NoteObj.Name=##class(Docs.Action).getRashNumb("Docs.ActNote")
+ 
+ //если получателя не указали, то им будет контрагент последнего акта
+ if PoluhId="" s PoluhId=KontrId
+ d:PoluhId NoteObj.PaymentPoluhSetObjectId(PoluhId)
+ 
+ s NoteObj.Manager=$G(Manager)
+ s login=$$$SessionData("login")
+ if +login d NoteObj.ChiefSetObjectId(login)
+ 
+ s actid="" f  s actid=$O(glob(actid)) q:(actid="")||('+ok)  d
+ . s item = ##class(Docs.ActNoteItems).%New()
+ . d item.ActSetObjectId(actid)
+ . d item.GoodsSetObjectId(glob(actid,"goodsid"))
+ . d item.DocTypeSetObjectId("Docs.ActNote")
+ . s item.Price = glob(actid,"price")
+ . s ok = NoteObj.Items.Insert(item)
+ . if '+ok $$$WriteObjError(ok)
+ 
+ if '+ok q "Извините. Ошибка при записи строк служебной записки."
+ 
+ s ok=NoteObj.%Save()
+ 
+ s result=NoteObj.%Id()
+ 
+ //если всё хорошо, то гасим акты и вернём ID служ. записки
+ if +ok d  q result
+ . s actid="" f  s actid=$O(glob(actid)) q:actid=""  d
+ . . s DocObj = ##class(Docs.Act).%OpenId(docid)
+ . . q:'$ISOBJECT(DocObj)
+ . . s DocObj.Paid=1
+ . . s DocObj.PaidDate=+$H
+ . . s DocObj.PaidTime=$P($H,",",2)
+ . . s DocObj.PaidUser=$S($ISOBJECT($G(%session)):$G(%session.Data("user")),1:"")
+ . . s DocObj.Comment=DocObj.Comment_" "_Comment
+ . . s ok=DocObj.%Save()
+ . . if '+ok d
+ . . . $$$WriteObjError(ok)
+ . . . if +result s result=""	//если произошла ошибка то стираем номер записки из переменной которая вернётся пользователю
+ . . . s result=result_"Ошибка при гашении акта "_DocObj.Name_", "
+
+ $$$WriteObjError(ok)
+ q "Извините, ошибка при формировании служебной записки."
+CreateActNoteErr
+ q $ZE
+]]></Implementation>
+</Method>
+</Class>
+</Export>

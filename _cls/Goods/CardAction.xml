@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Goods.CardAction">
+<Description>
+Действия с карточками товаров</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject</Super>
+<TimeCreated>60353,59475.901363</TimeCreated>
+
+<Method name="SaveCard">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id="",CardData,Name="",CardClass="undefined"</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="SaveCardErr"
+ i id="" s card=##class(Goods.Card).%New()
+ e  d
+ . s card=##class(Goods.Card).%OpenId(id)
+ . i '$ISOBJECT(card) s card=##class(Goods.Card).%New()
+ s card.Name=Name
+ s ok=card.%Save()
+ q:'+ok ok
+ s ^Cards(CardClass,card.%Id())=CardData
+ q ok
+SaveCardErr
+ s ^Errors($H,"$ZE")=$ZE
+ q "Goods.CardAction.SaveCard() "_$ZE
+]]></Implementation>
+</Method>
+
+<Method name="SaveCard2">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id="1",CardData,CardClass="undefined"</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="SaveCardErr"
+ s ^Cards(CardClass,id)=CardData
+ q 1
+SaveCardErr
+ s ^Errors($H,"$ZE")=$ZE
+ q "Goods.CardAction.SaveCard() "_$ZE
+]]></Implementation>
+</Method>
+
+<Method name="GetCard">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id="",CardClass="undefined"</FormalSpec>
+<Implementation><![CDATA[
+ q:id="" ""
+ q:CardClass="" ""
+ q $G(^Cards(CardClass,id))
+]]></Implementation>
+</Method>
+
+<Method name="DelCard">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id="",CardClass=""</FormalSpec>
+<Implementation><![CDATA[
+ q:id=""
+ q:CardClass=""
+ k ^Cards(CardClass,id)
+ q
+]]></Implementation>
+</Method>
+
+<Method name="GetGoods">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>kontr=1</FormalSpec>
+<Implementation><![CDATA[
+ q:kontr="" ""
+ s res=""
+ s glob=$NA(^Kontr(0,kontr))
+ s i="" f  s i=$O(@glob@(i)) q:i=""  d
+ . s res=res_i_"~"
+ q $E(res,1,$L(res)-1)
+]]></Implementation>
+</Method>
+
+<Method name="GetKontr">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>tovar=1</FormalSpec>
+<Implementation><![CDATA[
+ q:tovar="" ""
+ s res=""
+ s glob=$NA(^Kontr(1,tovar))
+ s i="" f  s i=$O(@glob@(i)) q:i=""  d
+ . s res=res_i_"~"
+ q $E(res,1,$L(res)-1)
+]]></Implementation>
+</Method>
+</Class>
+</Export>

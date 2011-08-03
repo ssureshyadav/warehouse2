@@ -1,0 +1,92 @@
+<script language="cache" runat="server">
+s instr=%request.Get("instr")
+</script>
+<html XMLNS:SKLADList XMLNS:SKLAD2>
+<IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
+<IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc" >
+<head>
+<style>
+table{
+	border-top:none;
+	border-right:.5pt solid windowtext;
+	border-bottom:.5pt solid windowtext;
+	border-left:none;
+	cellpadding:0;
+	cellspacing:0;}
+td{
+	border-top:.5pt solid windowtext;
+	border-right:none;
+	border-bottom:none;
+	border-left:.5pt solid windowtext;}
+</style>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="jscript" src="common.js"></script>
+<script language="Jscript">
+sessionid="#(%session.SessionId)#";
+window.dialogWidth=screen.availWidth+"px";
+
+function load(){
+//ddd.loadfrommethod("Docs.Action.ShowGarantHistory",1,2,3)
+}
+
+</script>
+</head>
+<body onload="load()" >
+<table border=0 cellspacing=0 cellpadding=0 width=100%>
+ <script language="cache" runat="server">
+ s user=$G(%session.Data("user"),"undefined")
+ s i="" f  s i=$O(^mtempCurrentRemDoc(user,"body",i)) q:i=""  d
+ . s gar=$G(^mtempCurrentRemDoc(user,"body",i,"garant"))
+ . q:gar=""
+ . s garants(gar)=1
+ s garant="" f  s garant=$O(garants(garant)) q:garant=""  d
+ . i $I(i)
+ . w "<tr><td colspan=99>&nbsp;</td></tr>"
+ . w "<tr><td valign=top>"
+ . w "<SKLAD2:table id=""PropTable"_i_""" width=""100%"" />"
+ . w "</td>"
+ . w "<td valign=top>"
+ . w "<table cellspacing=0 cellpadding=0><tr><td>Дата ремонта<td>Запчасть<td>Количество<td>Описание поломки"
+ . s gar=##class(Common.Dictionary2).%OpenId(garant)
+ . if $ISOBJECT(gar) d
+ . . s key=""
+ . . d:$ISOBJECT(gar.remont1)
+ . . . s dat=$S(gar.remont1.Dat'="":$ZD(gar.remont1.Dat,4),1:"")
+ . . . s str="",ccc=1
+ . . . f  Set itemobj = gar.remont1.Items.GetNext(.key) q:key=""  d
+ . . . . q:itemobj.garant'=garant
+ . . . . i $I(ccc)
+ . . . . s str=str_"<tr><td>"_itemobj.Goods.Name_"<td>"_itemobj.Quantity_"<td>"_itemobj.Name
+ . . . w "<tr><td rowspan="_ccc_">"_dat
+ . . . w str
+ . . s key=""
+ . . d:$ISOBJECT(gar.remont2)
+ . . . s dat=$S(gar.remont2.Dat'="":$ZD(gar.remont2.Dat,4),1:"")
+ . . . s str="",ccc=1
+ . . . f  Set itemobj = gar.remont2.Items.GetNext(.key) q:key=""  d
+ . . . . q:itemobj.garant'=garant
+ . . . . i $I(ccc)
+ . . . . s str=str_"<tr><td>"_itemobj.Goods.Name_"<td>"_itemobj.Quantity_"<td>"_itemobj.Name
+ . . . w "<tr><td rowspan="_ccc_">"_dat
+ . . . w str
+ . . s key=""
+ . . d:$ISOBJECT(gar.remont3)
+ . . . s dat=$S(gar.remont3.Dat'="":$ZD(gar.remont3.Dat,4),1:"")
+ . . . s str="",ccc=1
+ . . . f  Set itemobj = gar.remont3.Items.GetNext(.key) q:key=""  d
+ . . . . q:itemobj.garant'=garant
+ . . . . i $I(ccc)
+ . . . . s str=str_"<tr><td>"_itemobj.Goods.Name_"<td>"_itemobj.Quantity_"<td>"_itemobj.Name
+ . . . w "<tr><td rowspan="_ccc_">"_dat
+ . . . w str
+ . w "</table>"
+ w "<script language=""Jscript"">"
+ s i=0
+ s garant="" f  s garant=$O(garants(garant)) q:garant=""  d
+ . i $I(i)
+ . w "PropTable"_i_".DownLoadPairs('Common.Dictionary2','"_garant_"','');"
+ w "</"_"script>"
+  </script>
+</table>
+</body>
+</html>

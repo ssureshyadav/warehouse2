@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.carddata">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62196,39187.529688</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	s fields=%request.Get("fields")
+	s ClassName=%request.Get("ClassName")
+	s CardID=%request.Get("CardID")
+	s XML=%request.Get("XML")
+	s loadfrom=%request.Get("loadfrom")
+	s zamena=%request.Get("zamena")
+	s tovar=%request.Get("tovar")
+	s kontr=%request.Get("kontr")
+	i CardID="" d
+	. s:+kontr IDS=##class(Goods.CardAction).GetGoods(kontr)
+	. s:+tovar IDS=##class(Goods.CardAction).GetKontr(tovar)
+	. s:loadfrom'="" IDS=@loadfrom
+	e  d
+	. s IDS=##class(Goods.CardAction).GetCard(CardID,ClassName)
+	f i=1:1:$L(IDS,"~") d
+	. s id=$P(IDS,"~",i)
+	. q:id=""
+	. s Objects(id)=1
+	d ##class(Goods.GoodsAction).ShowObjects(ClassName,fields,.Objects,+XML,zamena)
+	Write !," ",!
+	Write " "
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\CardData.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/CardData.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>60743,5728</Default>
+</Parameter>
+</Class>
+</Export>

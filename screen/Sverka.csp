@@ -1,0 +1,427 @@
+<script language="cache" runat="server">
+ s Kontr1Id=%request.Get("Kontr1Id")
+ s Kontr2Id=%request.Get("Kontr2Id")
+ s dat1=%request.Get("dat1")
+ s dat2=%request.Get("dat2")
+ 
+ s date1=$S(dat1="":"",1:$ZDH(dat1,4))
+ s date2=$S(dat2="":"",1:$ZDH(dat2,4))
+
+ 
+ s Kontr1Obj=##class(Common.Kontragent).%OpenId(Kontr1Id)
+ if $ISOBJECT(Kontr1Obj) d
+ . s Kontr1Name=Kontr1Obj.Name
+ . s Kontr1inn=Kontr1Obj.bank.inn
+ 
+ s Kontr2Obj=##class(Common.Kontragent).%OpenId(Kontr2Id)
+ if $ISOBJECT(Kontr2Obj) d
+ . s Kontr2Name=Kontr2Obj.Name
+ . s Kontr2inn=Kontr2Obj.bank.inn 
+</script>
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1251">
+<style>
+<!--table
+	{mso-displayed-decimal-separator:"\,";
+	mso-displayed-thousand-separator:" ";}
+@page
+	{margin:1.0in .24in 1.0in .24in;
+	mso-header-margin:.5in;
+	mso-footer-margin:.5in;}
+-->
+tr
+	{mso-height-source:auto;}
+col
+	{mso-width-source:auto;}
+br
+	{mso-data-placement:same-cell;}
+.style0
+	{mso-number-format:General;
+	text-align:general;
+	vertical-align:bottom;
+	white-space:nowrap;
+	mso-rotate:0;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	color:windowtext;
+	font-size:8.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:Arial, sans-serif;
+	mso-font-charset:0;
+	border:none;
+	mso-protection:locked visible;
+	mso-style-name:Обычный;
+	mso-style-id:0;}
+td
+	{mso-style-parent:style0;
+	padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:8.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:Arial, sans-serif;
+	mso-font-charset:0;
+	mso-number-format:General;
+	text-align:left;
+	vertical-align:bottom;
+	border:none;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	mso-protection:locked visible;
+	white-space:nowrap;
+	mso-rotate:0;}
+.xl60
+	{mso-style-parent:style0;
+	border-top:none;
+	border-right:none;
+	border-bottom:.5pt solid windowtext;
+	border-left:none;}
+.xl61
+	{mso-style-parent:style0;
+	font-weight:700;
+	font-family:Arial, sans-serif;
+	mso-font-charset:186;
+	text-align:right;
+	border:.5pt solid windowtext;}
+.xl62
+	{mso-style-parent:style0;
+	border:.5pt solid windowtext;}
+.xl63
+	{mso-style-parent:style0;
+	mso-number-format:Standard;
+	text-align:right;
+	border:.5pt solid windowtext;}
+.xl64
+	{mso-style-parent:style0;
+	text-align:right;
+	border:.5pt solid windowtext;}
+.xl65
+	{mso-style-parent:style0;
+	border-top:.5pt solid windowtext;
+	border-right:none;
+	border-bottom:.5pt solid windowtext;
+	border-left:none;}
+.xl66
+	{mso-style-parent:style0;
+	font-weight:700;
+	font-family:Arial, sans-serif;
+	mso-font-charset:186;
+	mso-number-format:Standard;
+	text-align:right;
+	border:.5pt solid windowtext;}
+.xl67
+	{mso-style-parent:style0;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;
+	text-align:justify;
+	white-space:normal;}
+.xl68
+	{mso-style-parent:style0;
+	font-weight:700;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;}
+.xl69
+	{mso-style-parent:style0;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;
+	mso-number-format:Standard;
+	text-align:right;
+	border:.5pt solid windowtext;}
+.xl70
+	{mso-style-parent:style0;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;
+	text-align:right;
+	border:.5pt solid windowtext;}
+.xl71
+	{mso-style-parent:style0;
+	font-weight:700;
+	font-family:Arial, sans-serif;
+	mso-font-charset:186;}
+.xl72
+	{mso-style-parent:style0;
+	font-weight:700;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;
+	border-top:.5pt solid windowtext;
+	border-right:none;
+	border-bottom:.5pt solid windowtext;
+	border-left:.5pt solid windowtext;}
+.xl73
+	{mso-style-parent:style0;
+	text-align:center;
+	border:.5pt solid windowtext;}
+.xl74
+	{mso-style-parent:style0;
+	mso-number-format:"Short Date";
+	text-align:center;
+	border:.5pt solid windowtext;}
+.xl75
+	{mso-style-parent:style0;
+	text-align:justify;
+	white-space:normal;}
+.xl76
+	{mso-style-parent:style0;
+	font-weight:700;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;
+	text-align:center;
+	vertical-align:middle;
+	border:.5pt solid windowtext;}
+.xl77
+	{mso-style-parent:style0;
+	font-weight:700;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;
+	text-align:center;
+	vertical-align:middle;
+	border-top:.5pt solid windowtext;
+	border-right:.5pt solid windowtext;
+	border-bottom:.5pt solid windowtext;
+	border-left:none;}
+.xl78
+	{mso-style-parent:style0;
+	font-size:14.0pt;
+	font-weight:700;
+	font-family:Tahoma, sans-serif;
+	mso-font-charset:204;
+	text-align:center;
+	vertical-align:middle;}
+.xl79
+	{mso-style-parent:style0;
+	font-size:12.0pt;
+	font-weight:700;
+	font-family:Tahoma, sans-serif;
+	mso-font-charset:204;
+	text-align:center;
+	vertical-align:middle;}
+.xl80
+	{mso-style-parent:style0;
+	font-size:9.0pt;
+	font-weight:700;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;
+	text-align:center;
+	white-space:normal;}
+.xl81
+	{mso-style-parent:style0;
+	font-size:9.0pt;
+	font-weight:700;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;
+	text-align:center;}
+</style>
+
+</head>
+
+<body link=blue vlink=purple>
+
+<table border=0 cellpadding=0 cellspacing=0 width=768 style='border-collapse:
+ collapse;table-layout:fixed;width:576pt'>
+ <col width=16 style='mso-width-source:userset;mso-width-alt:682;width:12pt'>
+ <col width=78 style='mso-width-source:userset;mso-width-alt:3328;width:59pt'>
+ <col width=364 style='mso-width-source:userset;mso-width-alt:15530;width:273pt'>
+ <col width=100 style='mso-width-source:userset;mso-width-alt:4266;width:75pt'>
+ <col width=119 style='mso-width-source:userset;mso-width-alt:5077;width:89pt'>
+ <col width=27 style='mso-width-source:userset;mso-width-alt:1152;width:20pt'>
+ <col width=64 style='width:48pt'>
+ <tr height=24 style='height:18.0pt'>
+  <td height=24 width=16 style='height:18.0pt;width:12pt'><a name="Print_Area"></a></td>
+  <td colspan=4 class=xl78 width=661 style='width:496pt'>Акт</td>
+  <td width=27 style='width:20pt'></td>
+  <td width=64 style='width:48pt'></td>
+ </tr>
+ <tr height=20 style='height:15.0pt'>
+  <td height=20 style='height:15.0pt'></td>
+  <td colspan=4 class=xl79>сверки взаимных расчетов</td>
+  <td colspan=2 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=16 style='mso-height-source:userset;height:12.6pt'>
+  <td height=16 style='height:12.6pt'></td>
+  <td colspan=4 class=xl80 width=661 style='width:496pt'>между #($G(Kontr1Name))# и #($G(Kontr2Name))#</td>
+  <td colspan=2 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=16 style='height:12.0pt'>
+  <td height=16 style='height:12.0pt'></td>
+  <td colspan=4 class=xl81>на период: #($G(dat1))# - #($G(dat2))#</td>
+  <td colspan=2 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=15 style='height:11.25pt'>
+  <td height=15 colspan=7 style='height:11.25pt;mso-ignore:colspan'></td>
+ </tr>
+ <tr height=43 style='mso-height-source:userset;height:32.85pt'>
+  <td height=43 style='height:32.85pt'></td>
+  <td colspan=4 class=xl75 width=661 style='width:496pt'><span
+  style='mso-spacerun:yes'>   </span>Мы, нижеподписавшиеся, главный бухгалтер
+  #($G(Kontr1Name))# ___________________________________ с одной стороны и
+  главный бухгалтер #($G(Kontr2Name))#
+  ___________________________________, с другой стороны, произвели сверку
+  взаимных расчетов</td>
+  <td colspan=2 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=15 style='height:11.25pt'>
+  <td height=15 colspan=7 style='height:11.25pt;mso-ignore:colspan'></td>
+ </tr>
+ <tr height=15 style='height:11.25pt'>
+  <td height=15 style='height:11.25pt'></td>
+  <td rowspan=2 class=xl76>Дата</td>
+  <td rowspan=2 class=xl76>Наименование операции, документ</td>
+  <td rowspan=2 class=xl76>Дебет</td>
+  <td rowspan=2 class=xl77>Кредит</td>
+  <td colspan=2 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=15 style='height:11.25pt'>
+  <td height=15 style='height:11.25pt'></td>
+  <td colspan=2 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=15 style='height:11.25pt'>
+  <td height=15 class=xl71 style='height:11.25pt'></td>
+  <td class=xl72 style='border-top:none' colspan=2>Остаток на #(dat1)#</td>
+  <td class=xl61 style='border-top:none'>&nbsp;</td>
+  <td class=xl61 style='border-top:none;border-left:none'>&nbsp;</td>
+  <td colspan=2 style='mso-ignore:colspan'></td>
+ </tr>
+ <!--
+ <tr height=15 style='height:11.25pt'>
+  <td height=15 style='height:11.25pt'></td>
+  <td class=xl73 style='border-top:none'>15.01.2009</td>
+  <td class=xl62 style='border-top:none;border-left:none'>Технический отчёт № 7
+  от 15.01.2009<span style='mso-spacerun:yes'> </span></td>
+  <td class=xl63 style='border-top:none;border-left:none'>405 221,00</td>
+  <td class=xl64 style='border-top:none;border-left:none'>&nbsp;</td>
+  <td colspan=2 style='mso-ignore:colspan'></td>
+ </tr>
+ -->
+ <script language="cache" runat="server">
+ &sql(declare z1 cursor for
+ select ID,Summa,Name,Dat
+ into :ID,:Summa,:Name,:Dat
+ from Docs.Otchet
+ where Stat=2
+ 	and Dat>=:date1 and Dat<=:date2
+ 	and Kontr=:Kontr2Id)
+ &sql(Open z1)
+ f  &sql(Fetch z1) q:SQLCODE  d
+ . s Docs(ID,"Name")=Name
+ . s Docs(ID,"Dat")=Dat
+ . s Docs(ID,"Summa")=Summa
+ . s Docs(ID,"Type")="Docs.Otchet"
+ &sql(Close z1)
+ 
+ &sql(declare z2 cursor for
+ select ID,RubSumma,Dat,Name
+ into :ID,:Summa,:Dat,:Name
+ from Docs.Platejka
+ where Dat>=:date1 and Dat<=:date2
+ 	and Poluh=:Kontr1Id and Kontr=:Kontr2Id)
+ &sql(Open z2)
+ f  &sql(fetch z2) q:SQLCODE  d
+ . s Docs(ID,"Name")=Name
+ . s Docs(ID,"Dat")=Dat
+ . s Docs(ID,"Summa")=Summa
+ . s Docs(ID,"Type")="Docs.Platejka"
+ &sql(close z2)
+ 
+ s (AllDebet,AllCredit)=0
+ s ID="" f  s ID=$O(Docs(ID)) q:ID=""  d
+ . w "<tr height=15 style='height:11.25pt'>",!
+ . w "<td height=15 style='height:11.25pt'></td>",!
+ . w "<td class=xl73 style='border-top:none'>"_$ZD(Docs(ID,"Dat"),4)_"</td>",!
+ . if Docs(ID,"Type")="Docs.Otchet" s DocTypeName="Технический отчёт ",Debet=Docs(ID,"Summa"),Credit=""
+ . e  s DocTypeName="Платёжное поручение № ",Debet="",Credit=Docs(ID,"Summa")
+ . s Debet=$J(Debet,"",2)
+ . s Credit=$J(Credit,"",2)
+ . w "<td class=xl62 style='border-top:none;border-left:none'>"_DocTypeName_" "_Docs(ID,"Name")_"</td>"
+ . w "<td class=xl63 style='border-top:none;border-left:none'>"_Debet_"</td>"
+ . w "<td class=xl64 style='border-top:none;border-left:none'>"_Credit_"</td>"
+ . w "<td colspan=2 style='mso-ignore:colspan'></td>",!
+ . w "</tr>",!
+ . s AllCredit=AllCredit+Credit
+ . s AllDebet=AllDebet+Debet
+ 
+ if AllCredit>AllDebet s Kreditor=Kontr1Name
+ if AllCredit<AllDebet s Kreditor=Kontr2Name
+ </script>
+ <tr height=15 style='height:11.25pt'>
+  <td height=15 class=xl71 style='height:11.25pt'></td>
+  <td class=xl72 colspan=2 style='mso-ignore:colspan'>Обороты за период</td>
+  <td class=xl66 style='border-top:none'>#($J(AllDebet,"",2))#</td>
+  <td class=xl66 style='border-top:none;border-left:none'>#($J(AllCredit,"",2))#</td>
+  <td colspan=2 style='mso-ignore:colspan'></td>
+ </tr>
+ 
+ <tr height=15 style='height:11.25pt'>
+  <td height=15 class=xl71 style='height:11.25pt'></td>
+  <td class=xl72 colspan=2 style='mso-ignore:colspan'>Остаток на #($G(dat2))#</td>
+  <td class=xl66 style='border-top:none'>#($G(Ostatok))#</td>
+  <td class=xl61 style='border-top:none;border-left:none'>&nbsp;</td>
+  <td colspan=2 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 style='height:11.85pt'></td>
+  <td class=xl67></td>
+  <td colspan=5 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=29 style='mso-height-source:userset;height:22.35pt'>
+  <td height=29 style='height:22.35pt'></td>
+  <td colspan=4 class=xl67 width=661 style='width:496pt'>Задолженность на
+  #($G(dat2))# в пользу #($G(Kreditor))# составляет #($G(debt))# #($G(debtString))#</td>
+  <td colspan=2 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=15 style='height:11.25pt'>
+  <td height=15 colspan=7 style='height:11.25pt;mso-ignore:colspan'></td>
+ </tr>
+ <tr height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 style='height:11.85pt'></td>
+  <td colspan=4 class=xl67 width=661 style='width:496pt'>Один экземпляр акта
+  просим подписать и вернуть в наш адрес в течении 10 дней со дня получения.</td>
+  <td colspan=2 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 style='height:11.85pt'></td>
+  <td colspan=4 class=xl67 width=661 style='width:496pt'>В противном случае
+  считаем данную задолженность подтвержденной с Вашей стороны.</td>
+  <td colspan=2 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 style='height:11.85pt'></td>
+  <td colspan=4 class=xl67 width=661 style='width:496pt'>Настоящий акт
+  составлен в двух экземплярах.</td>
+  <td colspan=2 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=15 style='height:11.25pt'>
+  <td height=15 colspan=7 style='height:11.25pt;mso-ignore:colspan'></td>
+ </tr>
+ <tr height=15 style='height:11.25pt'>
+  <td height=15 style='height:11.25pt'></td>
+  <td class=xl68 colspan=2 style='mso-ignore:colspan'>#($G(Kontr1Name))#</td>
+  <td class=xl68 colspan=2 style='mso-ignore:colspan'>#($G(Kontr2Name))#</td>
+  <td colspan=2 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=15 style='height:11.25pt'>
+  <td height=15 style='height:11.25pt'></td>
+  <td class=xl68 colspan=2 style='mso-ignore:colspan'>ИНН: #($G(Kontr1inn))#</td>
+  <td class=xl68>ИНН: #($G(Kontr2inn))#</td>
+  <td colspan=3 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=21 style='mso-height-source:userset;height:15.75pt'>
+  <td height=21 style='height:15.75pt'></td>
+  <td colspan=2 style='mso-ignore:colspan'>Главный бухгалтер
+  ____________________________</td>
+  <td colspan=4 style='mso-ignore:colspan'>Главный бухгалтер
+  ___________________________</td>
+ </tr>
+ 
+</table>
+
+</body>
+
+</html>

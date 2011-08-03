@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.StorageOutItems">
+<IncludeCode>xmlmacros</IncludeCode>
+<Super>Docs.DocItems</Super>
+<TimeCreated>60373,31441.72857</TimeCreated>
+
+<Property name="addr">
+<Description>
+Адрес</Description>
+<Type>Store.Address</Type>
+</Property>
+
+<Property name="quantdefault">
+<Description>
+Количество по накладной</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="quantreal">
+<Description>
+Количество фактическое</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="StoreQntID">
+<Description>
+ID в Store.Quantity</Description>
+<Type>Store.Quantity</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Index name="StoreQntIDIndex">
+<Properties>StoreQntID</Properties>
+</Index>
+
+<Property name="garant">
+<Description>
+Гарантийный талон</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="100"/>
+</Property>
+
+<Property name="serial">
+<Description>
+Гарантийный талон</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="100"/>
+</Property>
+
+<Property name="comment">
+<Description>
+Гарантийный талон</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
+</Property>
+
+<Trigger name="OnDelete">
+<Code> n StoreQntID,quantdefault,StatPropertyListIndex,docid
+ s docid={Doc}
+ s StatPropertyListIndex=##class(Docs.Super).GetPropertyListIndex("Stat")
+ i docid,$LG(^Docs.SuperD(docid),StatPropertyListIndex)=2 q
+ s StoreQntID={StoreQntID}
+ s quantdefault={quantdefault}
+ s CurrentStringId={ID}
+ //уменьшаем резерв и увеличиваем товар в ячейке которая привязана к данной строке
+ d ..RemoveReserve(StoreQntID,quantdefault,CurrentStringId)</Code>
+<Event>DELETE</Event>
+</Trigger>
+
+<Method name="%OnDelete">
+<Description><![CDATA[
+This callback method is invoked by the <METHOD>%Delete</METHOD> method to 
+provide notification that the object specified by <VAR>oid</VAR> is being deleted.
+
+<P>If this method returns an error then the object will not be deleted.]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>oid:%ObjectIdentity</FormalSpec>
+<Private>1</Private>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ s CurrentStringId=$LG(oid,1)
+ s docid=$LG(^Docs.DocItemsD(CurrentStringId),##class(Docs.DocItems).GetPropertyListIndex("Doc"))
+ s StatPropertyListIndex=##class(Docs.Super).GetPropertyListIndex("Stat")
+ i docid,$LG(^Docs.SuperD(docid),StatPropertyListIndex)=2 q
+ s StoreQntID=$LG(^Docs.DocItemsD(CurrentStringId,"StorageOutItems"),..GetPropertyListIndex("StoreQntID"))
+ s quantdefault=$LG(^Docs.DocItemsD(CurrentStringId,"StorageOutItems"),..GetPropertyListIndex("quantdefault"))
+
+ d:StoreQntID ..RemoveReserve(StoreQntID,quantdefault,CurrentStringId)
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="RemoveReserve">
+<Description>
+Перевести резерв в основное количество</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>StoreQntID:%String="",value:%Numeric=0,DocStr:Docs.DocItems=""</FormalSpec>
+<ProcedureBlock>0</ProcedureBlock>
+<Implementation><![CDATA[
+ n Goods,Address,Value1,Value2
+ &sql(update Store.Quantity set Value2=(Value2-:value),Value1=(Value1+:value) where ID=:StoreQntID)
+ if SQLCODE $$$WriteError("Ошибка update Store.Quantity SQLCODE="_SQLCODE)
+ &sql(select Goods,Address,Value1,Value2 into :Goods,:Address,:Value1,:Value2 from Store.Quantity where ID=:StoreQntID)
+ if SQLCODE<0 $$$WriteError("Ошибка select Store.Quantity SQLCODE="_SQLCODE)
+ &sql(insert into Operation.Operation (Goods,Address,OperationType,Quantity,Ostatok,DocStr,Rezerv) VALUES (:Goods,:Address,2,:value,:Value1,:DocStr,:Value2))
+ if SQLCODE<0 $$$WriteError("Ошибка insert into Operation.Operation SQLCODE="_SQLCODE)
+ q
+]]></Implementation>
+</Method>
+
+<Method name="SetReserve">
+<Description>
+Поставить резерв</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>StoreQntID:%String="",value:%Numeric=0,DocStr:Docs.DocItems=""</FormalSpec>
+<ProcedureBlock>0</ProcedureBlock>
+<Implementation><![CDATA[
+ n Goods,Address,Value1,Value2
+ 
+ &sql(update Store.Quantity set Value1=(Value1-:value),Value2=(Value2+:value) where ID=:StoreQntID)
+ if SQLCODE<0 $$$WriteError("Ошибка update Store.Quantity SQLCODE="_SQLCODE)
+ &sql(select Goods,Address,Value1,Value2 into :Goods,:Address,:Value1,:Value2 from Store.Quantity where ID=:StoreQntID)
+ if SQLCODE<0 $$$WriteError("Ошибка select Store.Quantity SQLCODE="_SQLCODE)
+ &sql(insert into Operation.Operation (Goods,Address,OperationType,Quantity,Ostatok,DocStr,Rezerv) VALUES (:Goods,:Address,1,:value,:Value1,:DocStr,:Value2))
+ if SQLCODE<0 $$$WriteError("Ошибка insert into Operation.Operation SQLCODE="_SQLCODE)
+ q
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>StorageOutItemsDefaultData</DefaultData>
+<Data name="StorageOutItemsDefaultData">
+<Subscript>"StorageOutItems"</Subscript>
+<Value name="1">
+<Value>addr</Value>
+</Value>
+<Value name="2">
+<Value>quantdefault</Value>
+</Value>
+<Value name="3">
+<Value>quantreal</Value>
+</Value>
+<Value name="4">
+<Value>StoreQntID</Value>
+</Value>
+<Value name="5">
+<Value>garant</Value>
+</Value>
+<Value name="6">
+<Value>comment</Value>
+</Value>
+<Value name="7">
+<Value>serial</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

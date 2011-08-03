@@ -1,0 +1,632 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.screen.act">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<IncludeCode>xmlmacros</IncludeCode>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62196,49323.90688</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body lang=RU style='tab-interval:35.4pt'>"
+	Write !,!,"<div class=Section1>"
+	Write !,!,"<p class=MsoNormal><o:p>&nbsp;</o:p></p>",!
+	Write !,"<p class=MsoNormal align=center style='text-align:center'><b>"
+	Write "<span style='font-family:Arial'>"
+	Write "АКТ ТЕХНИЧЕСКОГО ОСМОТРА № <u>"_($G(Name))_"</u>"
+	Write "</span>"
+	Write "</b></p>",!
+	Write !,"<p class=MsoNormal>"
+	Write "<span style='font-family:Arial'>"
+	Write "<o:p>&nbsp;</o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<ol style='margin-top:0cm' start=1 type=1>",!
+	Write " <li class=MsoNormal style='mso-list:l0 level1 lfo1;tab-stops:list 36.0pt'>"
+	Write "<span style='font-family:Arial'>"
+	Write "Наименование фирмы производителя "
+	Write "<span class=SpellE>"
+	Write "изделия"
+	Write "<span class=GramE>"
+	Write ": <u>"_($G(BrandName))_"</u>"
+	Write "</span>"
+	Write "</span>"
+	Write "<span class=GramE>"
+	Write ";"
+	Write "</span>"
+	Write "</span>"
+	Write "</li>",!
+	Write "</ol>",!
+	Write !,"<p class=MsoNormal style='margin-left:18.0pt'>"
+	Write "<span style='font-family:Arial'>"
+	Write "<o:p>&nbsp;</o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<ol style='margin-top:0cm' start=2 type=1>",!
+	Write " <li class=MsoNormal style='mso-list:l0 level1 lfo1;tab-stops:list 36.0pt'>"
+	Write "<span class=SpellE>"
+	Write "<span style='font-family:Arial'>"
+	Write "Изделие"
+	Write "<span class=GramE>"
+	Write ": <u>"_($G(GoodsName))_"</u>"
+	Write "</span>"
+	Write "</span>"
+	Write "</span>"
+	Write "<span class=GramE>"
+	Write "<span style='font-family:Arial'>"
+	Write "; "
+	Write "</span>"
+	Write "</span>"
+	Write "<span class=SpellE>"
+	Write "<span style='font-family:Arial'>"
+	Write "Модель <u>"
+	Write "<span class=""ClickSpan"" style=""cursor:hand"" onclick=""wopen('GoodCard.csp?GoodId="_($G(GoodsId))_"')"">"
+	Write ($G(GoodsModel))
+	Write "</span>"
+	Write "</u>"
+	Write "</span>"
+	Write "</span>"
+	Write "<span style='font-family:Arial'>"
+	Write "; "
+	Write "</span>"
+	Write "</li>",!
+	Write "</ol>",!
+	Write !,"<p class=MsoNormal>"
+	Write "<span style='font-family:Arial'>"
+	Write "<o:p>&nbsp;</o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<ol style='margin-top:0cm' start=3 type=1>",!
+	Write " <li class=MsoNormal style='mso-list:l0 level1 lfo1;tab-stops:list 36.0pt'>"
+	Write "<span style='font-family:Arial'>"
+	Write "Заводской"
+	Write "<span class=GramE>"
+	Write !,"     №: <u>"_($G(Serial))_"</u>; "
+	Write "</span>"
+	Write "Гарантийный талон №: <u>"_($G(Garant))_"</u>;"
+	Write "</span>"
+	Write "<br>",!
+	Write " 	"
+	Write "<span style='font-family:Arial'>"
+	Write "История изменения номеров: "_($G(NumbersHistory))_";"
+	Write "</span>"
+	Write "</li>",!
+	Write "</ol>",!
+	Write !,"<p class=MsoNormal style='margin-left:18.0pt'>"
+	Write "<span style='font-family:Arial'>"
+	Write "<o:p>&nbsp;</o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<ol style='margin-top:0cm' start=4 type=1>",!
+	Write " <li class=MsoNormal style='mso-list:l0 level1 lfo1;tab-stops:list 36.0pt'>"
+	Write "<span style='font-family:Arial'>"
+	Write "Наименование продавца,"
+	Write "<span style='mso-spacerun:yes'>"
+	Write " <u>"_($G(SellerName))_"</u> "
+	Write "</span>"
+	Write "<span class=SpellE>"
+	Write "адрес"
+	Write "<span class=GramE>"
+	Write ":<u>"_($G(SellerAddress))_"</u>"
+	Write "</span>"
+	Write "</span>"
+	Write "<span class=GramE>"
+	Write "; "
+	Write "</span>"
+	Write "<span class=SpellE>"
+	Write "Телефон:<u>"_($G(SellerPhone))_"</u>"
+	Write "</span>"
+	Write ";",!
+	Write "     Дата продажи:"
+	Write "<span style='mso-spacerun:yes'>"
+	Write " ",!
+	Write "     "
+	Write "</span>"
+	Write "<u>"_($G(SellerDate))_"</u>;"
+	Write "</span>"
+	Write "</li>",!
+	Write "</ol>",!
+	Write !,"<p class=MsoNormal>"
+	Write "<span style='font-family:Arial'>"
+	Write "<o:p>&nbsp;</o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<ol style='margin-top:0cm' start=5 type=1>",!
+	Write " <li class=MsoNormal style='text-align:justify;mso-list:l0 level1 lfo1;",!
+	Write "     tab-stops:list 36.0pt'>"
+	Write "<span style='font-family:Arial'>"
+	Write "Наименование",!
+	Write "     сервисного центра"
+	Write "<span class=GramE>"
+	Write ": <u>"
+	Write "<span onclick=""wopen('kontragent.csp?KontrId="_($G(KontrId))_"')"">"
+	Write ($G(SrvName))
+	Write "</span>"
+	Write "</u>"
+	Write "</span>"
+	Write "<span class=GramE>"
+	Write "; <br>"
+	Write "</span>"
+	Write "Адрес: <u>"_($G(SrvAddr))_"</u>;"
+	Write "</span>"
+	Write !,"</li>",!
+	Write "</ol>",!
+	Write !,"<p class=MsoNormal style='text-align:justify'>"
+	Write "<span style='font-family:Arial'>"
+	Write "<o:p>&nbsp;</o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<ol style='margin-top:0cm' start=6 type=1>",!
+	Write " <li class=MsoNormal style='text-align:justify;mso-list:l0 level1 lfo1;",!
+	Write "     tab-stops:list 36.0pt'>"
+	Write "<span style='font-family:Arial'>"
+	Write "     Дата осмотра: "
+	Write "<span class=SpellE>"
+	Write ($G(ExpertDate))
+	Write "</span>"
+	Write "; Дата поступления в",!
+	Write "     ремонт: "
+	Write "<span class=SpellE>"
+	Write ($G(RemontDate))
+	Write "</span>"
+	Write "; "
+	Write "<span class=SpellE>"
+	Write !,"	 <br>Телефон: <u>"_($G(SrvPhone))_"</u>"
+	Write "</span>"
+	Write "; Ф.И.О. директора: "
+	Write "<span class=SpellE>"
+	Write "<u>"_($G(SrvFIO))_"</u>"
+	Write "</span>"
+	Write ";"
+	Write "</span>"
+	Write !,"</li>",!
+	Write "</ol>",!
+	Write !,"<p class=MsoNormal style='text-align:justify'>"
+	Write "<span style='font-family:Arial'>"
+	Write "<o:p>&nbsp;</o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<ol style='margin-top:0cm' start=7 type=1>",!
+	Write " <li class=MsoNormal style='text-align:justify;mso-list:l0 level1 lfo1;",!
+	Write "     tab-stops:list 36.0pt'>"
+	Write "<span style='font-family:Arial'>"
+	Write "Количество",!
+	Write "     проведенных ремонтов данного изделия <u>"_($G(RepairsQnt))_"</u>"
+	Write "</span>"
+	Write "</li>",!
+	Write "</ol>",!
+	Write !,"<p class=MsoNormal style='text-align:justify'>"
+	Write "<span style='font-family:Arial'>"
+	Write "<o:p>&nbsp;</o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<ol style='margin-top:0cm' start=8 type=1>",!
+	Write " <li class=MsoNormal style='text-align:justify;mso-list:l0 level1 lfo1;",!
+	Write "     tab-stops:list 36.0pt'>"
+	Write "<span style='font-family:Arial'>"
+	Write "Подробное описание неисправности: <u>"_($G(DefectDescription))_"</u>;"
+	Write "</span>"
+	Write "</li>",!
+	Write "</ol>",!
+	Write !,"<p class=MsoNormal style='text-align:justify'>"
+	Write "<span style='font-family:Arial'>"
+	Write "<o:p>&nbsp;</o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<ol style='margin-top:0cm' start=9 type=1>",!
+	Write " <li class=MsoNormal style='text-align:justify;mso-list:l0 level1 lfo1;",!
+	Write "     tab-stops:list 36.0pt'>"
+	Write "<span style='font-family:Arial'>"
+	Write "Предполагаемая",!
+	Write "     причина возникновения неисправности"
+	Write "<span class=GramE>"
+	Write ": <u>"_($G(DefectEstimate))_"</u>;"
+	Write "</span>"
+	Write "</span>"
+	Write "</li>",!
+	Write "</ol>",!
+	Write !,"<p class=MsoNormal style='text-align:justify'>"
+	Write "<span style='font-family:Arial'>"
+	Write "<o:p>&nbsp;</o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<ol style='margin-top:0cm' start=10 type=1>",!
+	Write " <li class=MsoNormal style='text-align:justify;mso-list:l0 level1 lfo1;",!
+	Write "     tab-stops:list 36.0pt'>"
+	Write "<span class=GramE>"
+	Write "<span style='font-family:Arial'>"
+	Write "Классификация",!
+	Write "     происхождения дефекта: <u>"_($G(DefectClass))_" "_($G(DefectClassDescr))_"</u>;"
+	Write "</span>"
+	Write "</span>"
+	Write "<span style='font-family:Arial'>"
+	Write "</span>"
+	Write "</li>",!
+	Write "</ol>",!
+	Write !,"<p class=MsoNormal style='text-align:justify'>"
+	Write "<span style='font-family:Arial'>"
+	Write "<o:p>&nbsp;</o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<ol style='margin-top:0cm' start=11 type=1>",!
+	Write " <li class=MsoNormal style='mso-list:l0 level1 lfo1;tab-stops:list 36.0pt'>"
+	Write "<span style='font-family:Arial'>"
+	Write "Причина отказа в проведении гарантийного ремонта"
+	Write "<span class=GramE>"
+	Write " :<u>"_($G(RepairRefuseReason))_"</u>"
+	Write "</span>"
+	Write "</span>"
+	Write "</li>;",!
+	Write "</ol>",!
+	Write !,"<p class=MsoNormal style='text-align:justify'>"
+	Write "<span style='font-family:Arial'>"
+	Write "<o:p>&nbsp;</o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<ol style='margin-top:0cm' start=12 type=1>",!
+	Write " <li class=MsoNormal style='text-align:justify;mso-list:l0 level1 lfo1;",!
+	Write "     tab-stops:list 36.0pt'>"
+	Write "<span class=GramE>"
+	Write "<span style='font-family:Arial'>"
+	Write "Заявка"
+	Write "</span>"
+	Write "</span>"
+	Write "<span style='font-family:Arial'>"
+	Write " по которой были заказаны запчасти и не",!
+	Write "     поступили (номер, дата, заявленные запчасти): <u>"_($G(RequestRows))_"</u>",!
+	Write "     ",!
+	Write "     "
+	Write "</span>"
+	Write "</li>",!
+	Write "</ol>",!
+	Write !,"<p class=MsoNormal style='text-align:justify'>"
+	Write "<span style='font-family:Arial'>"
+	Write "<o:p>&nbsp;</o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<ol style='margin-top:0cm' start=13 type=1>",!
+	Write " <li class=MsoNormal style='mso-list:l0 level1 lfo1;tab-stops:list 36.0pt'>"
+	Write "<span style='font-family:Arial'>"
+	Write "Ф.И.О. потребителя, его паспортные данные, адрес",!
+	Write "     и контактный телефон: <u>"_($G(CustomerName))_" "_($G(CustomerDoc))_" "_($G(CustomerAddress))_" "_($G(CustomerPhone))_"</u>"
+	Write "</span>"
+	Write "</li>",!
+	Write "</ol>",!
+	Write !,"<p class=MsoNormal>"
+	Write "<span style='font-family:Arial'>"
+	Write "<o:p>&nbsp;</o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<ol style='margin-top:0cm' start=14 type=1>",!
+	Write " <li class=MsoNormal style='mso-list:l0 level1 lfo1;tab-stops:list 36.0pt'>"
+	Write "<span style='font-family:Arial'>"
+	Write "Товар оставлен в сервисном центре на",!
+	Write "     ответственное хранение <u>"_($G(GoodsKeeping))_"</u>;"
+	Write "</span>"
+	Write "</li>",!
+	Write "</ol>",!
+	Write !,"<p class=MsoNormal>"
+	Write "<span style='font-family:Arial'>"
+	Write "<o:p>&nbsp;</o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<ol style='margin-top:0cm' start=15 type=1>",!
+	Write " <li class=MsoNormal style='mso-list:l0 level1 lfo1;tab-stops:list 36.0pt'>"
+	Write "<span style='font-family:Arial'>"
+	Write "Дата выписывания акта: "_($G(ActDate))
+	Write "</span>"
+	Write "</li>",!
+	Write "</ol>",!
+	Write !,"<p class=MsoNormal style='margin-left:18.0pt'>"
+	Write "<span style='font-family:Arial'>"
+	Write "<o:p>&nbsp;</o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<p class=MsoNormal style='margin-left:18.0pt'>"
+	Write "<span style='font-family:Arial'>"
+	Write "Подпись",!
+	Write "директора"
+	Write "<span style='mso-tab-count:6'>"
+	Write "                                                                "
+	Write "</span>"
+	Write "Подпись",!
+	Write "потребителя:"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<p class=MsoNormal style='margin-left:18.0pt'>"
+	Write "<span style='font-family:Arial'>"
+	Write "Сервисного",!
+	Write "центра:"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<p class=MsoNormal style='margin-left:18.0pt'>"
+	Write "<span style='font-family:Arial'>"
+	Write "<span style='mso-tab-count:9'>"
+	Write "                                                                                                    "
+	Write "</span>"
+	Write "___________________"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<p class=MsoNormal style='margin-left:18.0pt'>"
+	Write "<span style='font-family:Arial'>"
+	Write "<span style='mso-tab-count:9'>"
+	Write "                                                                                                    "
+	Write "</span>"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<p class=MsoNormal style='margin-left:18.0pt'>"
+	Write "<span style='font-family:Arial'>"
+	Write "________________"
+	Write "<span style='mso-tab-count:2'>"
+	Write "                 "
+	Write "</span>"
+	Write "<b>М.П.</b>"
+	Write "<span style='mso-tab-count:2'>"
+	Write "               "
+	Write "</span>"
+	Write "</span>"
+	Write "<span lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'>"
+	Write "<span style='mso-tab-count:"_$c(13,10)_"1'>"
+	Write "            "
+	Write "</span>"
+	Write "</span>"
+	Write "<span style='font-family:Arial'>"
+	Write "<span style='mso-tab-count:1'>"
+	Write "            "
+	Write "</span>"
+	Write "___________________"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<p class=MsoNormal style='margin-left:18.0pt'>"
+	Write "<span style='font-family:Arial'>"
+	Write "<span style='mso-tab-count:9'>"
+	Write "                                                                                                    "
+	Write "</span>"
+	Write "фамилия",!
+	Write "потребителя"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"</div>"
+	Write !,!,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !,!
+	s DocId=%request.Get("id")
+	s:DocId DocObj = ##class(Docs.Act).%OpenId(DocId)
+	d:$ISOBJECT($G(DocObj))
+	. d:$ISOBJECT(DocObj.Kontr)
+	. . s KontrName=DocObj.Kontr.Name
+	. . s KontrAddress=DocObj.Kontr.Address
+	. . s KontrId=DocObj.Kontr.%Id()
+	. f i="Name","Goods","Serial","Garant","SellerName","SellerAddress","SellerPhone","RepairsQnt","DefectDescription","DefectEstimate","DefectClass","RepairRefuseReason","CustomerName","CustomerAddress","CustomerDoc","CustomerPhone","DefectClassDescr","GoodsKeeping","SrvName","SrvAddr","SrvPhone","SrvFIO","NumbersHistory" d
+	. . s @i=$ZOBJPROPERTY(DocObj,i)
+	. s DefectClass=##class(Docs.Act).DefectClassLogicalToDisplay(DefectClass)
+	. s GoodsKeeping=##class(Docs.Act).GoodsKeepingLogicalToDisplay(GoodsKeeping)
+	. f i="ExpertDate","ExpertDate","RemontDate","ActDate","SellerDate" d
+	. . s @i=$ZOBJPROPERTY(DocObj,i)
+	. . if @i?5N s @i=$ZD(@i,4)
+	. if $ISOBJECT(Goods) d
+	. . s GoodsName=Goods.Name
+	. . s GoodsId = Goods.%Id()
+	. . s GoodsModel=Goods.ModelNumber
+	. . s GoodsAbbr=Goods.abbr
+	. e  s (GoodsName,GoodsModel)="не указано"
+	. s RequestRows=""
+	. q:'$ISOBJECT(DocObj.Items)
+	. s i="" f  s i=DocObj.Items.Next(i) q:i=""  d
+	. . s item=DocObj.Items.GetAt(i)
+	. . //q:'$ISOBJECT(item.Request)
+	. . s RequestRows=RequestRows_item.Request.Name_" "_$ZD(item.Request.Dat,4)_" "_item.RequestItem.Goods.FullName_"; "
+	. s MM=$$$TunesVariableGlobal("MM")	//список аббревиатур мастермакс через запятую
+	. s VC=$$$TunesVariableGlobal("VC")
+	. s TL=$$$TunesVariableGlobal("TL")
+	. f brandname="MM","VC","TL" d
+	. . f i=1:1:$L(@brandname,",") d
+	. . . //обрезаем пробелы
+	. . . s abbr=$TR($P(@brandname,",",i)," ","")
+	. . . q:abbr=""
+	. . . s @brandname@(abbr)=""
+	. s BrandName=$S($D(MM(GoodsAbbr)):"Mastermax",$D(VC(GoodsAbbr)):"Viconte",$D(TL(GoodsAbbr)):"Tull",1:"")
+	Write !,!
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<meta http-equiv=Content-Type content=""text/html; charset=windows-1251"">"
+	Write !,"<title>Акт технической экспертизы "_($G(Name))_"</title>",!
+	Write "<style>"
+	Write !,".ClickSpan{cursor:hand;}",!
+	Write ".ClickSpan:hover{",!
+	Write "font-family:Arial;",!
+	Write "font-size:14px;",!
+	Write "color:rgb(90,0,0);",!
+	Write "text-decoration : underline;",!
+	Write "}",!
+	Write "<!--",!
+	Write " /* Font Definitions */",!
+	Write " @font-face",!
+	Write "	{font-family:""Arial Unicode MS"";",!
+	Write "	panose-1:2 11 6 4 2 2 2 2 2 4;",!
+	Write "	mso-font-charset:0;",!
+	Write "	mso-generic-font-family:roman;",!
+	Write "	mso-font-format:other;",!
+	Write "	mso-font-pitch:variable;",!
+	Write "	mso-font-signature:3 0 0 0 1 0;}",!
+	Write "@font-face",!
+	Write "	{font-family:Tahoma;",!
+	Write "	panose-1:2 11 6 4 3 5 4 4 2 4;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-generic-font-family:swiss;",!
+	Write "	mso-font-pitch:variable;",!
+	Write "	mso-font-signature:1627421319 -2147483648 8 0 66047 0;}",!
+	Write " /* Style Definitions */",!
+	Write " p.MsoNormal, li.MsoNormal, div.MsoNormal",!
+	Write "	{mso-style-parent:"""";",!
+	Write "	margin:0cm;",!
+	Write "	margin-bottom:.0001pt;",!
+	Write "	mso-pagination:widow-orphan;",!
+	Write "	font-size:12.0pt;",!
+	Write "	font-family:""Times New Roman"";",!
+	Write "	mso-fareast-font-family:""Times New Roman"";}",!
+	Write "h1",!
+	Write "	{mso-style-next:Обычный;",!
+	Write "	margin:0cm;",!
+	Write "	margin-bottom:.0001pt;",!
+	Write "	mso-pagination:widow-orphan;",!
+	Write "	page-break-after:avoid;",!
+	Write "	mso-outline-level:1;",!
+	Write "	font-size:14.0pt;",!
+	Write "	mso-bidi-font-size:12.0pt;",!
+	Write "	font-family:Arial;",!
+	Write "	mso-fareast-font-family:""Arial Unicode MS"";",!
+	Write "	mso-font-kerning:0pt;}",!
+	Write "p.MsoDocumentMap, li.MsoDocumentMap, div.MsoDocumentMap",!
+	Write "	{mso-style-noshow:yes;",!
+	Write "	margin:0cm;",!
+	Write "	margin-bottom:.0001pt;",!
+	Write "	mso-pagination:widow-orphan;",!
+	Write "	background:navy;",!
+	Write "	font-size:12.0pt;",!
+	Write "	font-family:Tahoma;",!
+	Write "	mso-fareast-font-family:""Times New Roman"";}",!
+	Write "span.SpellE",!
+	Write "	{mso-style-name:"""";",!
+	Write "	mso-spl-e:yes;}",!
+	Write "span.GramE",!
+	Write "	{mso-style-name:"""";",!
+	Write "	mso-gram-e:yes;}",!
+	Write "@page Section1",!
+	Write "	{size:595.3pt 841.9pt;",!
+	Write "	margin:2.0cm 42.5pt 2.0cm 3.0cm;",!
+	Write "	mso-header-margin:35.4pt;",!
+	Write "	mso-footer-margin:35.4pt;",!
+	Write "	mso-paper-source:0;}",!
+	Write "div.Section1",!
+	Write "	{page:Section1;}",!
+	Write " /* List Definitions */",!
+	Write " @list l0",!
+	Write "	{mso-list-type:hybrid;}",!
+	Write "@list l0:level1",!
+	Write "	{mso-level-tab-stop:36.0pt;",!
+	Write "	mso-level-number-position:left;",!
+	Write "	text-indent:-18.0pt;}",!
+	Write "ol",!
+	Write "	{margin-bottom:0cm;}",!
+	Write "ul",!
+	Write "	{margin-bottom:0cm;}",!
+	Write "-->"
+	Write !,"</style>"
+	Write !,"<!--[if gte mso 10]>",!
+	Write "<style>",!
+	Write " /* Style Definitions */",!
+	Write " table.MsoNormalTable",!
+	Write "	{mso-style-name:""Обычная таблица"";",!
+	Write "	mso-tstyle-rowband-size:0;",!
+	Write "	mso-tstyle-colband-size:0;",!
+	Write "	mso-style-noshow:yes;",!
+	Write "	mso-style-parent:"""";",!
+	Write "	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;",!
+	Write "	mso-para-margin:0cm;",!
+	Write "	mso-para-margin-bottom:.0001pt;",!
+	Write "	mso-pagination:widow-orphan;",!
+	Write "	font-size:10.0pt;",!
+	Write "	font-family:""Times New Roman"";",!
+	Write "	mso-ansi-language:#0400;",!
+	Write "	mso-fareast-language:#0400;",!
+	Write "	mso-bidi-language:#0400;}",!
+	Write "</style>",!
+	Write "<![endif]-->"
+	Write !,"<script language=""javascript"" type=""text/javascript"">"
+	Write !,"function wopen(url,params)",!
+	Write "{",!
+	Write "	if(typeof(params) == ""undefined""){var params=""""}",!
+	Write "	//window.showModalDialog(url,params,""center:yes;status:no;dialogHeight:400px;dialogWidth:800px;resizable:yes"")",!
+	Write "	window.open(url);",!
+	Write "}",!
+	Write "</script>"
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html xmlns:o=""urn:schemas-microsoft-com:office:office"" xmlns:w=""urn:schemas-microsoft-com:office:word"" xmlns=""http://www.w3.org/TR/REC-html40"">"
+	Write !,!
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,!,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ if %request.Get("word")="on"
+ {
+  set %response.ContentType = "application/msword"
+  do %response.SetHeader("Content-Disposition","attachment;word.doc")
+  set %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+ }
+  q 1
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CHARSET">
+<Default>windows-1251</Default>
+</Parameter>
+
+<Parameter name="CONTENTTYPE">
+<Default>text/html</Default>
+</Parameter>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\screen\Act.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/screen/Act.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>62003,593</Default>
+</Parameter>
+</Class>
+</Export>

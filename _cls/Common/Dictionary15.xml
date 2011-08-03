@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Common.Dictionary15">
+<ClassType>persistent</ClassType>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%Persistent</Super>
+<TimeCreated>60778,62993</TimeCreated>
+
+<Property name="Name">
+<Description>
+Товары</Description>
+<Type>Goods.Goods</Type>
+<Parameter name="CAPTION" value="Товары"/>
+</Property>
+
+<Property name="Property1490">
+<Description>
+Дата приема</Description>
+<Type>%Date</Type>
+<Parameter name="CAPTION" value="Дата приема"/>
+<Parameter name="FORMAT" value="4"/>
+</Property>
+
+<Property name="Property6403">
+<Description>
+Количество</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Количество"/>
+</Property>
+
+<Index name="NameInd">
+<Properties>Name</Properties>
+</Index>
+
+<Index name="Property1490Ind">
+<Properties>Property1490</Properties>
+</Index>
+
+<Index name="Property6403Ind">
+<Properties>Property6403</Properties>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Common.Dictionary15D</DataLocation>
+<DefaultData>Dictionary15DefaultData</DefaultData>
+<IdLocation>^Common.Dictionary15D</IdLocation>
+<IndexLocation>^Common.Dictionary15I</IndexLocation>
+<StreamLocation>^Common.Dictionary15S</StreamLocation>
+<Data name="Dictionary15DefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Property1490</Value>
+</Value>
+<Value name="3">
+<Value>Property4876</Value>
+</Value>
+<Value name="4">
+<Value>Name</Value>
+</Value>
+<Value name="5">
+<Value>Property6403</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

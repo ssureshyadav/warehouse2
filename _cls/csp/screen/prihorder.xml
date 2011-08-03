@@ -1,0 +1,2208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.screen.prihorder">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>61612,42056.799165</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body>"
+	Write !,!,"<div id=""Прихкассор_3614"" align=center x:publishsource=""Excel"">"
+	Write !,!,"<table x:str border=0 cellpadding=0 cellspacing=0 width=967 class=xl233614",!
+	Write " style='border-collapse:collapse;table-layout:fixed;width:695pt'>",!
+	Write " <col class=xl233614 width=7 span=87 style='mso-width-source:userset;",!
+	Write " mso-width-alt:224;width:5pt'>",!
+	Write " <col class=xl233614 width=19 style='mso-width-source:userset;mso-width-alt:",!
+	Write " 608;width:14pt'>",!
+	Write " <col class=xl233614 width=8 style='mso-width-source:userset;mso-width-alt:",!
+	Write " 256;width:6pt'>",!
+	Write " <col class=xl233614 width=3 style='mso-width-source:userset;mso-width-alt:",!
+	Write " 96;width:2pt'>",!
+	Write " <col class=xl233614 width=7 span=32 style='mso-width-source:userset;",!
+	Write " mso-width-alt:224;width:5pt'>",!
+	Write " <col class=xl233614 width=5 style='mso-width-source:userset;mso-width-alt:",!
+	Write " 160;width:4pt'>",!
+	Write " <col class=xl233614 width=7 span=4 style='mso-width-source:userset;mso-width-alt:",!
+	Write " 224;width:5pt'>",!
+	Write " <col class=xl233614 width=5 style='mso-width-source:userset;mso-width-alt:",!
+	Write " 160;width:4pt'>",!
+	Write " <col class=xl233614 width=9 span=2 style='mso-width-source:userset;mso-width-alt:",!
+	Write " 288;width:7pt'>",!
+	Write " <col class=xl233614 width=7 style='mso-width-source:userset;mso-width-alt:",!
+	Write " 224;width:5pt'>",!
+	Write " <col class=xl233614 width=5 style='mso-width-source:userset;mso-width-alt:",!
+	Write " 160;width:4pt'>",!
+	Write " <col class=xl233614 width=9 style='mso-width-source:userset;mso-width-alt:",!
+	Write " 288;width:7pt'>",!
+	Write " <col class=xl233614 width=7 style='mso-width-source:userset;mso-width-alt:",!
+	Write " 224;width:5pt'>",!
+	Write " <col class=xl233614 width=12 style='mso-width-source:userset;mso-width-alt:",!
+	Write " 384;width:9pt'>",!
+	Write " <col class=xl233614 width=8 style='mso-width-source:userset;mso-width-alt:",!
+	Write " 256;width:6pt'>",!
+	Write " <tr height=14 style='mso-height-source:userset;height:11.1pt'>",!
+	Write "  <td height=14 class=xl233614 width=7 style='height:11.1pt;width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl283614 colspan=25 width=175 style='width:125pt'>Унифицированная",!
+	Write "  форма № КО-1</td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl253614 width=19 style='width:14pt'>&nbsp;</td>",!
+	Write "  <td class=xl233614 width=8 style='width:6pt'></td>",!
+	Write "  <td class=xl243614 width=3 style='width:2pt'>&nbsp;</td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=5 style='width:4pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=5 style='width:4pt'></td>",!
+	Write "  <td class=xl233614 width=9 style='width:7pt'></td>",!
+	Write "  <td class=xl233614 width=9 style='width:7pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=5 style='width:4pt'></td>",!
+	Write "  <td class=xl233614 width=9 style='width:7pt'></td>",!
+	Write "  <td class=xl233614 width=7 style='width:5pt'></td>",!
+	Write "  <td class=xl233614 width=12 style='width:9pt'></td>",!
+	Write "  <td class=xl233614 width=8 style='width:6pt'></td>",!
+	Write " </tr>",!
+	Write " <tr height=14 style='mso-height-source:userset;height:11.1pt'>",!
+	Write "  <td height=14 class=xl233614 style='height:11.1pt'></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl283614 colspan=30>Утверждена постановлением Госкомстата</td>",!
+	Write "  <td class=xl253614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write " </tr>",!
+	Write " <tr height=17 style='mso-height-source:userset;height:12.95pt'>",!
+	Write "  <td height=17 class=xl233614 style='height:12.95pt'></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl443614 colspan=20>России от 18.08.98 г. № 88</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl253614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td colspan=45 class=xl693614>&nbsp;</td>",!
+	Write " </tr>",!
+	Write " <tr height=15 style='mso-height-source:userset;height:11.25pt'>",!
+	Write "  <td height=15 class=xl233614 style='height:11.25pt'></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl353614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td colspan=45 class=xl563614>(организация)</td>",!
+	Write " </tr>",!
+	Write " <tr height=25 style='mso-height-source:userset;height:18.75pt'>",!
+	Write "  <td height=25 class=xl233614 style='height:18.75pt'></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td colspan=16 class=xl943614>Код</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl353614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write " </tr>",!
+	Write " <tr height=25 style='mso-height-source:userset;height:18.75pt'>",!
+	Write "  <td height=25 class=xl233614 style='height:18.75pt'></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  "
+	Write "<td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl333614 colspan=15>Форма по ОКУД</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td colspan=16 class=xl913614 style='border-right:1.0pt solid black'>0310001</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl353614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td colspan=45 class=xl1023614>КВИТАНЦИЯ</td>",!
+	Write " </tr>",!
+	Write " <tr height=25 style='mso-height-source:userset;height:18.75pt'>",!
+	Write "  <td colspan=58 height=25 class=xl523614 style='height:18.75pt'>"_($G(poluhName))_"</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl333614 colspan=9>по ОКПО</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td colspan=16 class=xl883614 style='border-right:1.0pt solid black'>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl253614>&nbsp;</td>",!
+	Write "  <td class=xl263614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write " </tr>",!
+	Write " <tr height=11 style='mso-height-source:userset;height:8.45pt'>",!
+	Write "  <td height=11 class=xl323614 style='height:8.45pt'></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl433614 colspan=9>(организация)</td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl293614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td colspan=16 rowspan=2 class=xl953614 style='border-right:1.0pt solid black;",!
+	Write "  border-bottom:1.0pt solid black'>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl253614>&nbsp;</td>",!
+	Write "  <td class=xl263614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write " </tr>",!
+	Write " <tr height=17 style='mso-height-source:userset;height:12.95pt'>",!
+	Write "  <td colspan=69 height=17 class=xl533614 style='border-right:1.0pt solid black;",!
+	Write "  height:12.95pt'>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl253614>&nbsp;</td>",!
+	Write "  <td class=xl263614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl323614 colspan=32>к приходному кассовому ордеру № </td>",!
+	Write "  <td colspan=13 class=xl693614>&nbsp;"_($g(numb))_"</td>",!
+	Write " </tr>",!
+	Write " <tr height=16 style='mso-height-source:userset;height:12.0pt'>",!
+	Write "  <td height=16 class=xl233614 style='height:12.0pt'></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl303614 colspan=18>(структурное подразделение)</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td rowspan=19 class=xl1033614>Л<br>и<br>н<br>и<br>я<br><br><br>о<br>т<br>р<br>е<br>з<br>а</td>",!
+	Write "  <td class=xl263614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl323614 colspan=3 >от </td>",!
+	Write "  <td class=xl333614>«</td>",!
+	Write "  <td colspan=3 class=xl693614>"_($G(day))_"</td>",!
+	Write "  <td class=xl403614 colspan=2>»</td>",!
+	Write "  <td colspan=13 class=xl693614>"_($G(month))_"</td>",!
+	Write "  <td class=xl393614></td>",!
+	Write "  <td colspan=7 class=xl693614>"_($G(year))_"</td>",!
+	Write "  <td class=xl393614 colspan=3>г.</td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write " </tr>",!
+	Write " <tr height=39 style='mso-height-source:userset;height:29.25pt'>",!
+	Write "  <td height=39 class=xl233614 style='height:29.25pt'></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td colspan=13 class=xl873614 width=91 style='width:65pt'>Номер документа</td>",!
+	Write "  <td colspan=13 class=xl873614 width=91 style='border-left:none;width:65pt'>Дата",!
+	Write "  составления</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl263614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl323614 colspan=10>Принято от</td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td colspan=34 class=xl503614>"_($G(Kontr))_"</td>",!
+	Write " </tr>",!
+	Write " <tr height=24 style='mso-height-source:userset;height:18.0pt'>",!
+	Write "  <td height=24 class=xl233614 style='height:18.0pt'></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl383614 colspan=34>ПРИХОДНЫЙ КАССОВЫЙ ОРДЕР</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td colspan=13 class=xl843614>"_($G(numb))_"</td>",!
+	Write "  <td colspan=13 class=xl853614 style='border-right:1.0pt solid black;border-left:none'>"_($G(dat))_"</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl263614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td colspan=45 class=xl503614>&nbsp;</td>",!
+	Write " </tr>",!
+	Write " <tr height=20 style='mso-height-source:userset;height:15.0pt'>",!
+	Write "  <td height=20 class=xl233614 style='height:15.0pt'></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl263614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl393614 colspan=11>Основание:</td>",!
+	Write "  <td colspan=34 class=xl503614>"_($G(reason))_"</td>",!
+	Write " </tr>",!
+	Write " <tr height=20 style='mso-height-source:userset;height:15.0pt'>",!
+	Write "  <td colspan=7 rowspan=4 height=80 class=xl463614 style='height:60.0pt'>Дебет</td>",!
+	Write "  <td colspan=41 class=xl573614 style='border-left:none'>Кредит</td>",!
+	Write "  <td colspan=18 rowspan=4 class=xl703614 width=126 style='width:90pt'>Сумма,",!
+	Write "  руб. коп.</td>",!
+	Write "  <td colspan=13 rowspan=4 class=xl703614 width=91 style='width:65pt'>Код",!
+	Write "  целевого назначения</td>",!
+	Write "  <td colspan=6 rowspan=4 class=xl593614 width=42 style='border-right:.5pt solid black;",!
+	Write "  border-bottom:.5pt solid black;width:30pt'>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl263614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td colspan=45 class=xl503614>&nbsp;</td>",!
+	Write " </tr>",!
+	Write " <tr height=20 style='mso-height-source:userset;height:15.0pt'>",!
+	Write "  <td colspan=5 rowspan=3 height=60 class=xl593614 width=35 style='border-right:",!
+	Write "  .5pt solid black;border-bottom:.5pt solid black;height:45.0pt;width:25pt'>&nbsp;</td>",!
+	Write "  <td colspan=13 rowspan=3 class=xl483614 width=91 style='width:65pt'>код",!
+	Write "  структур- ного подраз- деления</td>",!
+	Write "  <td colspan=12 rowspan=3 class=xl483614 width=84 style='width:60pt'>корреспон-",!
+	Write "  дирующий счет, субсчет</td>",!
+	Write "  <td colspan=11 rowspan=3 class=xl483614 width=77 style='width:55pt'>код",!
+	Write "  аналити- ческого учета</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl263614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td colspan=45 class=xl513614>&nbsp;</td>",!
+	Write " </tr>",!
+	Write " <tr height=20 style='mso-height-source:userset;height:15.0pt'>",!
+	Write "  <td height=20 class=xl233614 style='height:15.0pt'></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl263614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td colspan=45 class=xl513614>&nbsp;</td>",!
+	Write " </tr>",!
+	Write " <tr height=20 style='mso-height-source:userset;height:15.0pt'>",!
+	Write "  <td height=20 class=xl233614 style='height:15.0pt'></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl263614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  "
+	Write "<td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write " </tr>",!
+	Write " <tr height=16 style='mso-height-source:userset;height:12.0pt'>",!
+	Write "  <td colspan=7 rowspan=2 height=37 class=xl463614 style='height:27.75pt'>&nbsp;</td>",!
+	Write "  <td colspan=5 rowspan=2 class=xl463614>&nbsp;</td>",!
+	Write "  <td colspan=13 rowspan=2 class=xl453614 width=91 style='width:65pt'>&nbsp;</td>",!
+	Write "  <td colspan=12 rowspan=2 class=xl483614 width=84 style='width:60pt'>&nbsp;</td>",!
+	Write "  <td colspan=11 rowspan=2 class=xl453614 width=77 style='width:55pt'>&nbsp;</td>",!
+	Write "  <td colspan=18 rowspan=2 class=xl723614 style='border-right:.5pt solid black;",!
+	Write "  border-bottom:.5pt solid black'>&nbsp;</td>",!
+	Write "  <td colspan=13 rowspan=2 class=xl783614 style='border-right:.5pt solid black;",!
+	Write "  border-bottom:.5pt solid black'>&nbsp;</td>",!
+	Write "  <td colspan=6 rowspan=2 class=xl463614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl263614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write " </tr>",!
+	Write " <tr height=21 style='mso-height-source:userset;height:15.75pt'>",!
+	Write "  <td height=21 class=xl233614 style='height:15.75pt'></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl263614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl323614 colspan=7>Сумма</td>",!
+	Write "  <td colspan=24 class=xl683614>&nbsp;</td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614 colspan=5>руб.</td>",!
+	Write "  <td colspan=3 class=xl693614>&nbsp;</td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614 colspan=4>коп.</td>",!
+	Write " </tr>",!
+	Write " <tr height=20 style='mso-height-source:userset;height:15.0pt'>",!
+	Write "  <td height=20 class=xl233614 style='height:15.0pt'></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl263614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td colspan=25 class=xl553614>(цифрами)</td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write " </tr>",!
+	Write " <tr height=20 style='mso-height-source:userset;height:15.0pt'>",!
+	Write "  <td height=20 class=xl323614 colspan=10 style='height:15.0pt'>Принято от</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td colspan=73 class=xl473614>"_($G(Kontr))_"</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl263614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td colspan=45 class=xl473614>&nbsp;</td>",!
+	Write " </tr>",!
+	Write " <tr height=12 style='mso-height-source:userset;height:9.0pt'>",!
+	Write "  <td height=12 class=xl223614 style='height:9.0pt'></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl263614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td colspan=45 class=xl1013614>(прописью)</td>",!
+	Write " </tr>",!
+	Write " <tr height=17 style='mso-height-source:userset;height:12.75pt'>",!
+	Write "  <td height=17 class=xl323614 colspan=11 style='height:12.75pt'>Основание: "_($G(reason))_"</td>",!
+	Write !,"  <td class=xl233614></td>",!
+	Write "  <td colspan=73 class=xl473614>"_($G(reason))_"</td>",!
+	Write "  ",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl263614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td colspan=45 class=xl473614>&nbsp;</td>",!
+	Write " </tr>",!
+	Write " <tr height=27 style='mso-height-source:userset;height:20.25pt'>",!
+	Write "  <td colspan=85 height=27 class=xl503614 style='height:20.25pt'>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl263614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td colspan=31 class=xl513614>&nbsp;</td>",!
+	Write "  <td class=xl373614 style='border-top:none'>&nbsp;</td>",!
+	Write "  <td class=xl323614 colspan=4>руб.</td>",!
+	Write "  <td class=xl373614 style='border-top:none'>&nbsp;</td>",!
+	Write "  <td colspan=3 class=xl1043614>&nbsp;</td>",!
+	Write "  <td class=xl373614 style='border-top:none'>&nbsp;</td>",!
+	Write "  <td class=xl323614 colspan=4>коп.</td>",!
+	Write " </tr>",!
+	Write " <tr height=27 style='mso-height-source:userset;height:20.25pt'>",!
+	Write "  <td height=27 class=xl323614 colspan=7 style='height:20.25pt'>Сумма</td>",!
+	Write "  <td colspan=78 class=xl513614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl263614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl323614 colspan=11>В том числе</td>",!
+	Write "  <td colspan=34 class=xl503614>&nbsp;</td>",!
+	Write " </tr>",!
+	Write " <tr height=12 style='mso-height-source:userset;height:9.0pt'>",!
+	Write "  <td height=12 class=xl223614 style='height:9.0pt'></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td colspan=78 class=xl1013614>(прописью)</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write " </tr>",!
+	Write " <tr height=16 style='mso-height-source:userset;height:12.0pt'>",!
+	Write "  <td colspan=61 height=16 class=xl503614 style='height:12.0pt'>&nbsp;</td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614 colspan=5>руб.</td>",!
+	Write "  <td colspan=11 class=xl693614>&nbsp;</td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614 colspan=5>коп.</td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl333614>«</td>",!
+	Write "  <td colspan=3 class=xl693614>&nbsp;</td>",!
+	Write "  <td class=xl403614 colspan=2>»</td>",!
+	Write "  <td colspan=13 class=xl693614>&nbsp;</td>",!
+	Write "  <td class=xl393614></td>",!
+	Write "  <td colspan=7 class=xl693614>&nbsp;</td>",!
+	Write "  <td class=xl393614 colspan=3>"
+	Write "<span style='mso-spacerun:yes'>"
+	Write " "
+	Write "</span>"
+	Write "г.</td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write " </tr>",!
+	Write " <tr height=26 style='mso-height-source:userset;height:19.5pt'>",!
+	Write "  <td height=26 class=xl323614 colspan=11 style='height:19.5pt'>В том числе</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td colspan=73 class=xl503614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl343614></td>",!
+	Write "  <td class=xl343614></td>",!
+	Write "  <td class=xl343614></td>",!
+	Write "  <td class=xl343614></td>",!
+	Write "  <td class=xl343614></td>",!
+	Write "  <td class=xl343614></td>",!
+	Write "  <td class=xl343614></td>",!
+	Write "  <td class=xl343614></td>",!
+	Write "  <td class=xl343614></td>",!
+	Write "  <td class=xl343614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write " </tr>",!
+	Write " <tr height=27 style='mso-height-source:userset;height:20.25pt'>",!
+	Write "  <td height=27 class=xl323614 colspan=12 style='height:20.25pt'>Приложение</td>",!
+	Write "  <td colspan=73 class=xl513614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl353614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl363614 colspan=14>М.П. (штампа)</td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write " </tr>",!
+	Write " <tr height=9 style='mso-height-source:userset;height:6.75pt'>",!
+	Write "  <td height=9 class=xl223614 style='height:6.75pt'></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl353614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write " </tr>",!
+	Write " <tr height=20 style='mso-height-source:userset;height:15.0pt'>",!
+	Write "  <td height=20 class=xl323614 colspan=17 style='height:15.0pt'>Главный",!
+	Write "  бухгалтер</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td colspan=18 class=xl693614>&nbsp;</td>",!
+	Write "  <td class=xl413614></td>",!
+	Write "  <td class=xl413614></td>",!
+	Write "  <td class=xl413614></td>",!
+	Write "  <td colspan=27 class=xl693614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl353614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl323614 colspan=17>Главный бухгалтер</td>",!
+	Write "  <td colspan=12 class=xl693614>&nbsp;</td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td colspan=15 class=xl693614>&nbsp;</td>",!
+	Write " </tr>",!
+	Write " <tr height=12 style='mso-height-source:userset;height:9.0pt'>",!
+	Write "  <td height=12 class=xl223614 style='height:9.0pt'></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td colspan=18 class=xl1013614>(подпись)</td>",!
+	Write "  <td class=xl313614></td>",!
+	Write "  <td class=xl313614></td>",!
+	Write "  <td class=xl313614></td>",!
+	Write "  <td colspan=27 class=xl1013614>(расшифровка подписи)</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl353614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl223614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td colspan=12 class=xl1013614>(подпись)</td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td colspan=15 class=xl1013614>(расшифровка подписи)</td>",!
+	Write " </tr>",!
+	Write " <tr height=18 style='height:13.5pt'>",!
+	Write "  <td height=18 class=xl323614 colspan=15 style='height:13.5pt'>Получил кассир</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td colspan=18 class=xl693614>&nbsp;</td>",!
+	Write "  <td class=xl413614></td>",!
+	Write "  <td class=xl413614></td>",!
+	Write "  <td class=xl413614></td>",!
+	Write "  <td colspan=27 class=xl693614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl353614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl323614 colspan=7>Кассир</td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td colspan=12 class=xl693614>&nbsp;</td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td colspan=20 class=xl693614>&nbsp;</td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write " </tr>",!
+	Write " <tr height=12 style='mso-height-source:userset;height:9.0pt'>",!
+	Write "  <td height=12 class=xl223614 style='height:9.0pt'></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td colspan=18 class=xl1013614>(подпись)</td>",!
+	Write "  <td class=xl313614></td>",!
+	Write "  <td class=xl313614></td>",!
+	Write "  <td class=xl313614></td>",!
+	Write "  <td colspan=27 class=xl1013614>(расшифровка подписи)</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl353614 style='border-left:none'>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl243614>&nbsp;</td>",!
+	Write "  <td class=xl233614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td colspan=12 class=xl1013614>(подпись)</td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td colspan=20 class=xl1013614>(расшифровка подписи)</td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write "  <td class=xl323614></td>",!
+	Write " </tr>",!
+	Write "</table>",!
+	Write !,"</div>"
+	Write !,!,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !
+	s id=%request.Get("id")
+	s obj=##class(Docs.PrihKassOrder).%OpenId(id)
+	d:$ISOBJECT(obj)
+	. s mn(1)="января",mn(2)="февраля",mn(3)="марта",mn(4)="апреля",mn(5)="мая",mn(6)="июня",mn(7)="июля",mn(8)="августа",mn(9)="сентября",mn(10)="октября",mn(11)="ноября",mn(12)="декабря"
+	. s:$ISOBJECT(obj.User1) usr=obj.User1.Name
+	. s numb=obj.Name
+	. s day=$P($ZD(obj.Dat,4),"/",1)
+	. s month=$G(mn(+$P($ZD(obj.Dat,4),"/",2)))
+	. s year=$P($ZD(obj.Dat,4),"/",3)
+	. s dat=$ZD(obj.Dat,4)
+	. s poluh=obj.Poluh
+	. s plat=obj.Plat
+	. i $ISOBJECT(poluh) d
+	. . s poluhName=poluh.Name
+	. i $ISOBJECT(Kontr) d
+	. . s Kontr=Kontr.Name
+	. s reason=obj.Reason
+	. d:$ISOBJECT(obj.bank)
+	. . //s okpo=
+	//s ^mtempArt=platName
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<link href=""prihorder.css"" type=text/css rel=stylesheet>"
+	Write !,"<link href=""screen/prihorder.css"" type=text/css rel=stylesheet>"
+	Write !,"<meta http-equiv=Content-Type content=""text/html; charset=windows-1251"">"
+	Write !,!,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html xmlns:o=""urn:schemas-microsoft-com:office:office"" xmlns:x=""urn:schemas-microsoft-com:office:excel"" xmlns=""http://www.w3.org/TR/REC-html40"">"
+	Write !,!
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,!,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ if %request.Get("word")="on"
+ {
+  set %response.ContentType = "application/msword"
+  do %response.SetHeader("Content-Disposition","attachment;word.doc")
+  set %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+ }
+  q 1
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CHARSET">
+<Default>windows-1251</Default>
+</Parameter>
+
+<Parameter name="CONTENTTYPE">
+<Default>text/html</Default>
+</Parameter>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\screen\prihorder.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/screen/prihorder.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>61612,42055</Default>
+</Parameter>
+</Class>
+</Export>

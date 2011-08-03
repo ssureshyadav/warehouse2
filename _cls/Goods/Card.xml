@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Goods.Card">
+<Description>
+Карточка товара</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60348,6676.247999</TimeCreated>
+
+<Property name="Name">
+<Description>
+Наименование</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="100"/>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Goods.CardD</DataLocation>
+<DefaultData>CardDefaultData</DefaultData>
+<IdLocation>^Goods.CardD</IdLocation>
+<IndexLocation>^Goods.CardI</IndexLocation>
+<StreamLocation>^Goods.CardS</StreamLocation>
+<Data name="CardDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Name</Value>
+</Value>
+<Value name="3">
+<Value>Store</Value>
+</Value>
+<Value name="4">
+<Value>GoodsStore</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

@@ -1,0 +1,103 @@
+<script language="cache" runat="server">
+ s source=%request.Get("source")
+ s:source'="" DocClass=##class(Docs.Action).GetClassFromSource(source)
+ s:source'="" DocType=##class(Docs.Action).GetDocNameFromClass(DocClass)
+ s silent=%request.Get("silent")
+</script>
+<html XMLNS:SKLAD2 >
+<IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc">
+<head>
+<title>#($G(%session.Data("systemname")))#</title>
+<link href="style.css" type=text/css rel=stylesheet>
+
+<script language="Jscript" src="common.js"></script>
+<script language="JScript">
+var Arguments=window.dialogArguments.split(InnerSplitter);
+var ClassName=Arguments[0];
+var DocID=ReturnSpace(Arguments[1]);
+var DocID333=DocID;
+var DocType=Arguments[2];
+//alert("ClassName="+ClassName+"\nDocID="+DocID+"\nDocType="+DocType)
+var source="#(source)#";
+if(source!=""){
+	var ClassName="#($G(DocClass))#"
+	var DocType="#($G(DocType))#"
+}
+
+function load(){
+PropTable.ClassName=ClassName;
+TypDocument.innerText=DocType;
+PropTable.DownLoadPairs("",DocID,"Dat,Tim,Stat,Source,DocType,User1",source);
+//docstr.ClassName=ClassName+"Items";
+//if(source!=""){docstr.attachEvent("onAddColumns",loadgoods)}
+//else{docstr.attachEvent("onAddColumns",loadgoods2)}
+//docstr.LoadHeadersXML("Doc,DocType");
+}
+
+function startFun(){
+DocID=ReturnSpace(Arguments[1])
+var xmldoc=PropTable.GetXmlContent();
+//var xmldoc2=docstr.GetXmlContent();
+var DocID=SplitSendXml(DocID,ClassName,xmldoc,"","#(%session.SessionId)#");
+if(isNaN(DocID)){
+	alert(DocID);
+}
+else{
+ if(source!=""){
+	var ok2=#server(Docs.Action.SetSourceDoc(ClassName,DocID,source))#
+ 	if(isNaN(ok2))alert(ok2)
+ }
+ if(ClassName=="Docs.Prih"){
+ 	var ok3=#server(Docs.Action.PrihNeedsDiff(DocID))#
+ 	if(isNaN(ok3)&&(ok3!="yes"))alert(ok3)
+ 	if(ok3=="yes"){
+	 	okdiff=window.showModalDialog("docdiff.csp?source="+DocID,"Docs.Diff"+InnerSplitter+""+InnerSplitter+"","cener:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+	 	if(okdiff!=1){alert(okdiff);return false;}
+	 	var ok2=#server(Docs.Action.SetSourceDoc("Docs.Diff",okdiff,DocID))#
+ 	}	 
+ }returnValue=1;
+ window.close();
+}
+}
+
+
+function addtovars(){
+WinResult=window.showModalDialog("selectgoods2.csp","","cener:yes;status:no;dialogHeight:700px;dialogWidth:800px;resizable:yes;")
+if(WinResult==null)return
+WinResult=WinResult.split(StringSplitter)
+var FieldCaption = new Array();
+var FieldValue = new Array();
+for(i=0 ; i<WinResult.length-1 ; i++){
+	var onestr=WinResult[i].split(InnerSplitter);
+	FieldCaption["Goods"]=onestr[1];
+	FieldValue["Goods"]=onestr[0];
+	FieldCaption["Price"]=getPrice(FieldValue["Goods"]);
+	docstr.AddRow(FieldCaption,FieldValue);
+}
+}
+
+
+function fillrash(){
+if((ClassName=="Docs.Rash")&(DocID=="")){
+var val=#server(Docs.Action.getRashNumb())#
+PropTable.setCellValue("Name",val);
+PropTable.Silent="Name";}
+}
+
+</script>
+</head>
+<body  onload="load()" onkeypress="ManageWindow()">
+<center id="TypDocument" style="font-size:14pt;font:Arial;color:#112255"></center>
+<SKLAD2:table id="PropTable" width=400 height=200 onLoadComplete="fillrash()" />
+<!--
+<fieldset><legend>Строки документа</legend>
+<SKLAD2:table id="docstr" width=100% height=200 CountTotal="true" Totalchange="setsumm()" displaybar=true />
+<sklad:LittleButton name="new+" id="add2" onclick="addtovars()" alt="Вставить товары">
+<sklad:LittleButton name="print" id="apint" onclick="prntdoc()" alt="Распечатать документ">
+</fieldset>
+-->
+<csp:IF CONDITION=silent'="true">
+<center><sklad:Button value="Да" onclick="startFun()">&nbsp;&nbsp;&nbsp;<sklad:Button value="Отмена" onclick="window.close()"></center>
+</csp:IF>
+</body>
+</html>

@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.screen.otchet2">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62196,31196.261037</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<BODY LANG=""ru-RU"" TEXT=""#000000"" LINK=""#000080"" VLINK=""#800000"" DIR=""LTR"">"
+	Write !,"<H1><FONT SIZE=3><U>ПРИЛОЖЕНИЕ 3. </U></FONT>",!
+	Write "</H1>",!
+	Write "<DL>",!
+	Write "	<DT><BR>",!
+	Write "	<DT><FONT FACE=""Arial"">К ДОГОВОРУ НА ПРОВЕДЕНИЕ СЕРВИСНОГО",!
+	Write "	ОБСЛУЖИВАНИЯ  №_____   от ______________20__ г.      </FONT>",!
+	Write "	<DT><BR>",!
+	Write "	<DT><FONT FACE=""Arial""><B>Технический отчет за "_($G(OtchetMonth))_" "_($G(OtchetYear))_" г.</B></FONT><DT>",!
+	Write "	<BR>",!
+	Write "	<DT><FONT FACE=""Arial"">Наименование сервисного	центра: "_($G(KontragentName))_";",!
+	Write "	Адрес: "_($G(City))_" "_($G(Address))_"; </FONT>",!
+	Write "	<DT><FONT FACE=""Arial"">Телефон: "_($G(Phones))_";",!
+	Write "	Факс: "_($G(fax))_"; </FONT>",!
+	Write "	<DT>E-mail<FONT FACE=""Arial"">: "_($G(EMail))_";</FONT><DT>",!
+	Write "	<FONT FACE=""Arial"">Ф.И.О.",!
+	Write "	директора: "_($G(chief))_".</FONT><DT>",!
+	Write "	<BR>",!
+	Write "	<DT><BR>",!
+	Write "	<DT><FONT FACE=""Arial"">(Форма и образец заполнения</FONT>)<DT>",!
+	Write "	<BR>",!
+	Write "</DL>",!
+	Write "<TABLE BORDER=1 CELLPADDING=7 CELLSPACING=0>",!
+	Write "<!--",!
+	Write "	<COL WIDTH=21>",!
+	Write "	<COL WIDTH=101>",!
+	Write "	<COL WIDTH=58>",!
+	Write "	<COL WIDTH=106>",!
+	Write "	<COL WIDTH=70>",!
+	Write "	<COL WIDTH=46>",!
+	Write "	<COL WIDTH=118>",!
+	Write "	<COL WIDTH=82>",!
+	Write "	<COL WIDTH=34>",!
+	Write "	<COL WIDTH=70>",!
+	Write "	<COL WIDTH=58>",!
+	Write "	-->"
+	Write !,"	<TR VALIGN=TOP>",!
+	Write "		<TD WIDTH=21>",!
+	Write "			<P ALIGN=CENTER>№<P ALIGN=CENTER>",!
+	Write "			<FONT FACE=""Arial""><FONT SIZE=2>п/п</FONT></FONT></TD>",!
+	Write "		<TD WIDTH=101  >",!
+	Write "			<P ALIGN=CENTER><FONT FACE=""Arial""><FONT SIZE=2>Наименование </FONT></FONT>",!
+	Write "			<P ALIGN=CENTER><FONT FACE=""Arial""><FONT SIZE=2>изделия</FONT></FONT>",!
+	Write "		</TD>",!
+	Write "		<TD WIDTH=58>",!
+	Write "			<P ALIGN=CENTER><FONT FACE=""Arial""><FONT SIZE=2>Модель</FONT></FONT></TD>",!
+	Write "		<TD WIDTH=106>",!
+	Write "			<P ALIGN=CENTER><FONT FACE=""Arial""><FONT SIZE=2>Заводской №</FONT></FONT></TD>",!
+	Write "		<TD WIDTH=70>",!
+	Write "			<P ALIGN=CENTER><FONT FACE=""Arial""><FONT SIZE=2>Гарант. </FONT></FONT>",!
+	Write "			<P ALIGN=CENTER><FONT FACE=""Arial""><FONT SIZE=2>талон №</FONT></FONT></TD>",!
+	Write "		<TD WIDTH=46>",!
+	Write "			<P ALIGN=CENTER><FONT FACE=""Arial""><FONT SIZE=2>Отр. </FONT></FONT>",!
+	Write "			<P ALIGN=CENTER><FONT FACE=""Arial""><FONT SIZE=2>талон (</FONT></FONT><FONT FACE=""Arial""><FONT SIZE=2>"
+	Write "<SPAN LANG=""en-US"">"
+	Write "A"
+	Write "</SPAN>"
+	Write "</FONT></FONT><FONT FACE=""Arial""><FONT SIZE=2>/</FONT></FONT><FONT FACE=""Arial""><FONT SIZE=2>"
+	Write "<SPAN LANG=""en-US"">"
+	Write "B"
+	Write "</SPAN>"
+	Write "</FONT></FONT><FONT FACE=""Arial""><FONT SIZE=2>/</FONT></FONT><FONT FACE=""Arial""><FONT SIZE=2>"
+	Write "<SPAN LANG=""en-US"">"
+	Write "C"
+	Write "</SPAN>"
+	Write "</FONT></FONT><FONT FACE=""Arial""><FONT SIZE=2>)</FONT></FONT></TD>",!
+	Write "		<TD WIDTH=118>",!
+	Write "			<P ALIGN=CENTER><FONT FACE=""Arial""><FONT SIZE=2>Наименование</FONT></FONT><P ALIGN=CENTER>",!
+	Write "			<FONT FACE=""Arial""><FONT SIZE=2>детали</FONT></FONT></TD>",!
+	Write "		<TD WIDTH=82>",!
+	Write "			<P ALIGN=CENTER><FONT FACE=""Arial""><FONT SIZE=2>Марка </FONT></FONT>",!
+	Write "			<P ALIGN=CENTER><FONT FACE=""Arial""><FONT SIZE=2>детали</FONT></FONT></TD>",!
+	Write "		<TD WIDTH=34>",!
+	Write "			<P ALIGN=CENTER><FONT FACE=""Arial""><FONT SIZE=2>Кол-во</FONT></FONT></TD>",!
+	Write "		<TD WIDTH=70>",!
+	Write "			<P ALIGN=CENTER><FONT FACE=""Arial""><FONT SIZE=2>Цена </FONT></FONT>",!
+	Write "			<P ALIGN=CENTER><FONT FACE=""Arial""><FONT SIZE=2>детали</FONT></FONT></TD>",!
+	Write "		<TD WIDTH=58>",!
+	Write "			<P ALIGN=CENTER><FONT FACE=""Arial""><FONT SIZE=2>Цена </FONT></FONT>",!
+	Write "			<P ALIGN=CENTER><FONT FACE=""Arial""><FONT SIZE=2>ремонта</FONT></FONT></TD>",!
+	Write "	",!
+	if AllColumns,WordFormat
+	{
+	w "<td>Примечание"
+	w "<td>Дата"
+	//w "<td>Источник товара"
+	w "<td>Тип ремонта"
+	//w "<td>Сумма"
+	}
+	/*
+	//s ^mtempArt("AllColumns")=AllColumns
+	if (AllColumns)
+	{
+	s SkipFields = "RemTovar,serial,garant,talon,Quantity,remcost,Price,Goods,DocType"
+	s headers=##class(Common.Common).showheaders("Docs.OtchetItems","",SkipFields)
+	s ^mtempArt("headers")=headers
+	for i=1:1:($L(headers,"#@#")-1)
+	{
+	s fieldStr = $P(headers,"#@#",i)
+	s FieldDescr = $P(fieldStr,"~",2)
+	w "<TD>"_FieldDescr
+	}
+	}
+	*/
+	w "</TR>",!
+	#include xmlmacros
+	//соберём в одну глобаль все модели и запчасти
+	n glob,i,count,item,z
+	s MM=$$$TunesVariableGlobal("MM")	//список аббревиатур мастермакс через запятую
+	s VC=$$$TunesVariableGlobal("VC")
+	s TL=$$$TunesVariableGlobal("TL")
+	//списки которые через запятую перегоним в массивы, и вырежем пробелы
+	f brandname="MM","VC","TL" d
+	. f i=1:1:$L(@brandname,",") d
+	. . //обрезаем пробелы
+	. . s abbr=$TR($P(@brandname,",",i)," ","")
+	. . q:abbr=""
+	. . s @brandname@(abbr)=""
+	s glob=$NA(^mtempOthcet($J))
+	k @glob
+	d:$ISOBJECT(obj.Items)
+	. s i="" f  s i=obj.Items.Next(i) q:i=""  d
+	. . s item=obj.Items.GetAt(i)
+	. . s groups=+item.Groups
+	. . q:'$ISOBJECT(item.Goods)
+	. . s GoodsId = item.Goods.%Id()
+	. . &sql(select Groups->Catalogue->Name into :CatalogueName from Goods.GoodsGroup where Goods=:GoodsId)
+	. . else  s CatalogueName="Каталог не найден"
+	. . if SQLCODE s CatalogueName="Каталог не найден"
+	. . s Summa=item.CalculatedStringRubSumma()
+	. . s SumsArray(CatalogueName)=$G(SumsArray(CatalogueName))+Summa
+	. . if $ISOBJECT(item.RemTovar) d
+	. . . //это модель
+	. . . s @glob@(groups,"ModelName")=item.RemTovar.Name
+	. . . s @glob@(groups,"AbbrNumber")=item.RemTovar.ModelNumber
+	. . . s Abbr=item.RemTovar.abbr
+	. . . s @glob@(groups,"Serial")=item.serial
+	. . . s @glob@(groups,"Garant")=item.garant
+	. . . s @glob@(groups,"Talon")=item.talonLogicalToDisplay(item.talon)
+	. . . s @glob@(groups,"Quantity")=item.Quantity
+	. . . s @glob@(groups,"RemontCost")=item.remcost
+	. . . s @glob@(groups,"RemType")=item.RemType
+	. . . s @glob@(groups,"ActNumber")=item.ActNumber
+	. . . s:AllColumns&WordFormat @glob@(groups,"Comment")=item.Comment
+	. . . s:AllColumns&WordFormat @glob@(groups,"Dat")=$S(+item.Dat:$ZD(item.Dat,4),1:"")
+	. . . //s:AllColumns&WordFormat @glob@(groups,"goodssource")= ##class(Docs.OtchetItems).goodssourceLogicalToDisplay(item.goodssource)
+	. . . s:AllColumns&WordFormat @glob@(groups,"RemType")=##class(Docs.OtchetItems).RemTypeLogicalToDisplay(item.RemType)
+	. . . //s @glob@(groups,"Total")=item.Total
+	. . . s @glob@(groups,"Summa")=Summa
+	. . else  d
+	. . . //это запчасть
+	. . . i $I(DetailCount)
+	. . . s @glob@(groups,DetailCount,"DetailName")=item.Goods.Name
+	. . . s @glob@(groups,DetailCount,"DetailBrand")=item.Goods.abbr_"-"_item.Goods.Property3609
+	. . . s Abbr=item.Goods.abbr
+	. . . s @glob@(groups,DetailCount,"Quantity")=item.Quantity
+	. . . s @glob@(groups,DetailCount,"DetailPrice")=item.Price
+	. . . s:WordFormat @glob@(groups,DetailCount,"Comment")=item.Comment
+	. . . s @glob@(groups,DetailCount,"Dat")=$S(+item.Dat:$ZD(item.Dat,4),1:"")
+	. . . s @glob@(groups,DetailCount,"goodssource")= ##class(Docs.OtchetItems).goodssourceLogicalToDisplay(item.goodssource)
+	. . . s @glob@(groups,DetailCount,"RemType")=##class(Docs.OtchetItems).RemTypeLogicalToDisplay(item.RemType)
+	. . . s @glob@(groups,DetailCount,"Summa")=Summa
+	. . . //s @glob@(groups,DetailCount,"Total")=item.Total
+	. . s var=$S($D(MM(Abbr)):"MM",$D(VC(Abbr)):"VC",$D(TL(Abbr)):"TL",1:"untitled")
+	. . s @var=+$G(@var)+Summa
+	s i="" f  s i=$O(@glob@(i)) q:i=""  d
+	. s ModelName=$G(@glob@(i,"ModelName"))
+	. s AbbrNumber=$G(@glob@(i,"AbbrNumber"))
+	. s Serial=$G(@glob@(i,"Serial"))
+	. s GarantId = $G(@glob@(i,"Garant"))
+	. s Garant= GarantId
+	. //s:GarantId'="" Garant=Garant_"/"_##class(Common.Dictionary2).GetPropertyValue(GarantId,"Property9194")
+	. s Talon=$G(@glob@(i,"Talon"))
+	. s Quantity=$G(@glob@(i,"Quantity"))
+	. s RemontCost=$G(@glob@(i,"RemontCost"))
+	. s Comment=$G(@glob@(i,"Comment"))
+	. s Dat=$G(@glob@(i,"Dat"))
+	. s goodssource=$G(@glob@(i,"goodssource"))
+	. s RemType=$G(@glob@(i,"RemType"))
+	. s ActNumber=$G(@glob@(i,"ActNumber"))
+	. s ActNumberName=$S(ActNumber="":"",1:" Акт "_ActNumber)
+	. s RemTypeName = ##class(Docs.OtchetItems).RemTypeLogicalToDisplay(RemType)
+	. //s Total=$G(@glob@(i,"Total"))
+	. s (DetailPrice,DetailName)="&nbsp;"
+	. i $I(count)
+	. w "<TR VALIGN=TOP>"
+	. w "<TD WIDTH=21><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2 title="""_Comment_""">"_$G(count)_"</FONT></FONT></TD>"
+	. w "<TD WIDTH=101 style=""word-break:break-all""><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(ModelName)_"</FONT></FONT></TD>"
+	. w "<TD WIDTH=58><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(AbbrNumber)_"</FONT></FONT></TD>"
+	. w "<TD WIDTH=106><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(Serial)_"</FONT></TD>"
+	. w "<TD WIDTH=70><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(Garant)_"</FONT></FONT></TD>"
+	. w "<TD WIDTH=46><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(Talon)_" ("_RemTypeName_ActNumberName_")"_"</FONT></FONT></TD>"
+	. w "<TD WIDTH=118><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(DetailName)_"</FONT></FONT></TD>"
+	. w "<TD WIDTH=82><P ALIGN=JUSTIFY><BR></TD>"
+	. w "<TD WIDTH=34><P ALIGN=JUSTIFY><FONT FACE=""Arial"">"_$G(Quantity)_"</FONT></TD>"
+	. w "<TD WIDTH=70><P ALIGN=JUSTIFY><FONT FACE=""Arial"">-</FONT></TD>"
+	. w "<TD WIDTH=58>"_$G(RemontCost)_"</TD>"
+	. if WordFormat&AllColumns w "<td>"_$G(Comment)	//примечание
+	. if WordFormat&AllColumns w "<td>"_$G(Dat)	//дата
+	. if WordFormat&AllColumns w "<td>"_$G(goodssource)	//источник товара
+	. if WordFormat&AllColumns w "<td>"_$G(RemType)	//тип ремонта
+	. //if WordFormat w "<td>"_$G(Total)	//сумма
+	. w "</TR>",!
+	. s z="" f  s z=$O(@glob@(i,z)) q:z=""  d
+	. . q:'+z
+	. . i $I(count)
+	. . s DetailName=@glob@(i,z,"DetailName")
+	. . s DetailBrand=@glob@(i,z,"DetailBrand")
+	. . s Quantity=@glob@(i,z,"Quantity")
+	. . s DetailPrice=@glob@(i,z,"DetailPrice")
+	. . s Comment=$G(@glob@(i,"Comment"))
+	. . s Dat=$G(@glob@(i,"Dat"))
+	. . s goodssource=$G(@glob@(i,"goodssource"))
+	. . s RemType=$G(@glob@(i,"RemType"))
+	. . s ActNumber=$G(@glob@(i,"ActNumber"))
+	. . //s Total=$G(@glob@(i,"Total"))
+	. . s (ModelName,AbbrNumber,Serial,Garant,Talon,RemontCost)="&nbsp;"
+	. . if Quantity="" s Quantity="&nbsp;"
+	. . if DetailPrice="" s DetailPrice="&nbsp;"
+	. . if DetailName="" s DetailName="&nbsp;"
+	. . s Summa = $G(@glob@(i,z,"Summa"))
+	. . w "<TR VALIGN=TOP>"
+	. . w "<TD WIDTH=21><P ALIGN=JUSTIFY><FONT FACE=""Arial"" SIZE=2>"_$G(count)_"</FONT></TD>"
+	. . w "<TD WIDTH=101 style=""word-break:break-all""><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(ModelName)_"</FONT></FONT></TD>"
+	. . w "<TD WIDTH=58><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(AbbrNumber)_"</FONT></FONT></TD>"
+	. . w "<TD WIDTH=106><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(Serial)_"</FONT></TD>"
+	. . w "<TD WIDTH=70><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(Garant)_"</FONT></FONT></TD>"
+	. . w "<TD WIDTH=46><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(Talon)_"</FONT></FONT></TD>"
+	. . w "<TD WIDTH=118><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(DetailName)_"</FONT></FONT></TD>"
+	. . w "<TD WIDTH=82><P ALIGN=JUSTIFY>"_$G(DetailBrand)_"</TD>"
+	. . w "<TD WIDTH=34><P ALIGN=JUSTIFY><FONT FACE=""Arial"">"_$G(Quantity)_"</FONT></TD>"
+	. . w "<TD WIDTH=70><P ALIGN=JUSTIFY><FONT FACE=""Arial"">"_$G(Summa)_"</FONT></TD>"
+	. . w "<TD WIDTH=58>"_$G(RemontCost)_"</TD>"
+	. . if WordFormat&AllColumns w "<td>"_$G(Comment)	//примечание
+	. . if WordFormat&AllColumns w "<td>"_$G(Dat)	//дата
+	. . if WordFormat&AllColumns w "<td>"_$G(goodssource)	//источник товара
+	. . if WordFormat&AllColumns w "<td>"_$G(RemType)	//тип ремонта
+	. . //if WordFormat w "<td>"_$G(Total)	//сумма
+	. . w "</TR>"
+	k @glob
+	&html<
+	</TABLE><br>
+	<FONT FACE="Arial">Сумма отчёта #($G(summa))#
+	>
+	if +$G(DocKurs) w "Курс "_$G(DocKurs)
+	w "<br><br>Сумма сгруппированная по классификаторам<table>"
+	f i="" f  s i=$O(SumsArray(i)) q:i=""  d
+	. w "<tr><td>"_i_"<td>"_$J($G(SumsArray(i)),"",2)
+	w "</table>"
+	w "<br>Сумма сгруппированная по брендам<table>"
+	w "<tr><td>Mastermax<td>"_$J($G(MM),"",2)
+	w "<tr><td>Viconte<td>"_$J($G(VC),"",2)
+	w "<tr><td>Tull<td>"_$J($G(TL),"",2)
+	w:+$G(untitled) "<tr><td>Товары с неизвестным брендом<td>"_$J($G(untitled),"",2)
+	w "</table><br>" 
+	w "Валюта расчётов с клиентом: "_$G(CurrencyName)
+	Write !,"</font>",!
+	Write "<DL>",!
+	Write "	<DT>			<DT>",!
+	Write "	<BR>",!
+	Write "	<DT><BR>",!
+	Write "	<DT><FONT FACE=""Arial"">Директор сервисного",!
+	Write "	центра					/______________/</FONT><DT>",!
+	Write "	<BR>",!
+	Write "	<DT><FONT FACE=""Arial"">&laquo;___&raquo;________________200</FONT>_<FONT FACE=""Arial"">г.												М.П.</FONT><DT>",!
+	Write "												</DL>",!
+	Write "</BODY>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !
+	n id,obj
+	s mn(1)="Январь",mn(2)="Февраль",mn(3)="Март",mn(4)="Апрель",mn(5)="Май",mn(6)="Июнь",mn(7)="Июль",mn(8)="Август",mn(9)="Сентябрь",mn(10)="Октябрь",mn(11)="Ноябрь",mn(12)="Декабрь"
+	s id=%request.Get("id")
+	s obj=##class(Docs.Otchet).%OpenId(id)
+	d:$ISOBJECT(obj)
+	. s OtchetMonth=$G(mn(+obj.Name))
+	. s OtchetYear=$P(obj.Name,"\",2)
+	. d:$ISOBJECT(obj.Kontr)
+	. . s KontragentName=obj.Kontr.Name
+	. . s Address=obj.Kontr.Address
+	. . s City=obj.Kontr.City
+	. . s Phones=obj.Kontr.Phones
+	. . s EMail=obj.Kontr.EMail
+	. . s chief=obj.Kontr.chief
+	. . s CurrencyName = ##class(Common.Kontragent).CurrencyLogicalToDisplay(obj.Kontr.Currency)
+	. s summa = $J(obj.Summa,".",2)
+	. s DocKurs = obj.Kurs
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<HEAD>"
+	Write !,"	"
+	Write "<META HTTP-EQUIV=""CONTENT-TYPE"" CONTENT=""text/html; charset=windows-1251"">"
+	Write !,"	<TITLE>№ </TITLE>",!
+	Write "</HEAD>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<HTML>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</HTML>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ s AllColumns = %request.Get("AllColumns")
+ 
+ if %request.Get("word")="on"
+ {
+ 	 set %response.ContentType = "application/msword"
+ 	 do %response.SetHeader("Content-Disposition","attachment;word.doc")
+ 	 set %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+ 	 s WordFormat=1
+ }
+ else
+ {
+ 	s WordFormat=0
+ }
+  q 1
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CHARSET">
+<Default>windows-1251</Default>
+</Parameter>
+
+<Parameter name="CONTENTTYPE">
+<Default>text/html</Default>
+</Parameter>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\screen\otchet2.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/screen/otchet2.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>62108,62958</Default>
+</Parameter>
+</Class>
+</Export>

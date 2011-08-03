@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Common.Dictionary13">
+<ClassType>persistent</ClassType>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%Persistent</Super>
+<TimeCreated>60643,55217</TimeCreated>
+
+<Property name="Name">
+<Description>
+Тип платежа</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Тип платежа"/>
+</Property>
+
+<Property name="Property2274">
+<Description>
+Пояснение</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Пояснение"/>
+<Parameter name="MAXLEN" value="400"/>
+</Property>
+
+<Index name="NameInd">
+<Properties>Name</Properties>
+</Index>
+
+<Index name="Property2274Ind">
+<Properties>Property2274</Properties>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Common.Dictionary13D</DataLocation>
+<DefaultData>Dictionary13DefaultData</DefaultData>
+<IdLocation>^Common.Dictionary13D</IdLocation>
+<IndexLocation>^Common.Dictionary13I</IndexLocation>
+<StreamLocation>^Common.Dictionary13S</StreamLocation>
+<Data name="Dictionary13DefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Name</Value>
+</Value>
+<Value name="3">
+<Value>Property2274</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

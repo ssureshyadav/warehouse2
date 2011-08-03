@@ -1,0 +1,49 @@
+<html>
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<SCRIPT Language="VBScript">
+
+Sub Window_onLoad()
+
+Set o1=LV.ColumnHeaders.Add(,,"Шаблон")
+o1.Width=120
+Set o1=LV.ColumnHeaders.Add(,,"Наименование")
+o1.Width=220
+Set o1=LV.ColumnHeaders.Add(,,"Начало")
+o1.Width=110
+o1=LV.ColumnHeaders.Add(,,"Прошло времени")
+o1=LV.ColumnHeaders.Add(,,"Статус")
+o1=LV.ListItems.Add(,,"Подбор товара")
+d=LV.ListItems.Item(1).ListSubItems.Add(,,"Игрушки для ООО Детский мир") //Наименование
+d=LV.ListItems.Item(1).ListSubItems.Add(,,"22/02/06 11:30")  //Начало
+d=LV.ListItems.Item(1).ListSubItems.Add(,,"0 дней 3 ч. 45 мин.")  //С начала прошло
+d=LV.ListItems.Item(1).ListSubItems.Add(,,"В процессе")  //Статус
+
+o1=LV.ListItems.Add(,,"Маркировка")
+d=LV.ListItems.Item(2).ListSubItems.Add(,,"Маркировка электропроводов") //Наименование
+d=LV.ListItems.Item(2).ListSubItems.Add(,,"22/02/06 12:45")  //Начало
+d=LV.ListItems.Item(2).ListSubItems.Add(,,"0 дн. 2 ч. 05 мин.")  //С начала прошло
+d=LV.ListItems.Item(2).ListSubItems.Add(,,"В процессе")  //Статус
+End Sub
+
+
+</SCRIPT>
+<script language="jscript" src="common.js"></script>
+</head>
+<body>
+<TABLE cellSpacing=0 width="100%" celpadding="0" border=0>
+<TBODY>
+<TR>
+<TD style="BACKGROUND: rgb(233,243,255); FONT: bold 18px Tahoma; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid">&nbsp;&nbsp;&nbsp;Текущие операции</TD></tr>
+<tr>
+<td valign=top>
+<br>
+<sklad:ListView id="LV" style="width:100%;height:300;font:regular Arial 10" >
+<img src="images/new.gif" onmouseover="newgr.src='images/Onnew.gif'" onmouseout="newgr.src='images/new.gif'"  ig="newgr" name="newgr" alt="Новая операция" onclick="demo()">
+<img src="images/pause.gif" onmouseover="pausop.src='images/Onpause.gif'" onmouseout="pausop.src='images/pause.gif'"  ig="pausop" name="pausop" alt="Приостановить операцию" onclick="demo()">
+<img src="images/del.gif" onmouseover="delgr.src='images/Ondel.gif'" onmouseout="delgr.src='images/del.gif'"  ig="delgr" name="delgr" alt="Завершить операцию" onclick="demo()">
+</td>
+</tr>
+</TABLE>
+</body>
+</html>

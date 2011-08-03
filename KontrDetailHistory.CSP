@@ -1,0 +1,103 @@
+<html>
+<head>
+
+<!-- Put your page Title here -->
+<title>	История детали на балансе контрагента </title>
+<style>
+TABLE {border-left : solid 1 black; border-top : solid 1 black;}
+TD {border-right : solid 1 black; border-bottom : solid 1 black}
+
+</style>
+</head>
+
+<body>
+<script language="cache" runat="server">
+ s KontrId=+%request.Get("KontrId")
+ s GoodsId=+%request.Get("GoodsId")
+ s user = +$G(%session.Data("user"))
+ 
+ if '+KontrId w "Невозможно вывести историю, так как не указан контрагент.<br>" q
+ if '+GoodsId w "Невозможно вывести историю, так как не указан товар.<br>" q
+ 
+ s glob = $NA(^mtempRep(user,"KontrDetailHistory"))
+ k @glob
+ 
+ 
+ //цикл по основной глобали
+ s i="" f  s i = $O(^t(KontrId,GoodsId,i)) q:i=""  d
+ . q:'+i
+ . s datetime=$G(^t(KontrId,GoodsId,i,"datetime"))
+ . s user = $G(^t(KontrId,GoodsId,i,"user"))
+ . s quantity = $G(^t(KontrId,GoodsId))
+ . s date=$P(datetime,",",1)
+ . s time=$P(datetime,",",2)
+ . s counter=$i(@glob)
+ . s @glob@(+date,+time,counter,"quantity")= quantity
+ . s @glob@(+date,+time,counter,"user")=user
+ . s @glob@(+date,+time,counter,"type")="Добавление"
+
+ //цикл по глобали c историей
+ s i="" f  s i = $O(^tHistory(KontrId,GoodsId,i)) q:i=""  d
+ . q:'+i
+ . s z="" f  s z = $O(^tHistory(KontrId,GoodsId,i,"history",z)) q:z=""  d
+ . . q:'+z
+ . . s datetime=$G(^tHistory(KontrId,GoodsId,i,"history",z,"datetime"))
+ . . s user = $G(^tHistory(KontrId,GoodsId,i,"history",z,"user"))
+ . . s date=$P(datetime,",",1)
+ . . s time=$P(datetime,",",2)
+ . . s counter=$i(@glob)
+ . . s @glob@(+date,+time,counter,"user")=user
+ . . s @glob@(+date,+time,counter,"type")="Добавление"
+ . s datetime=$G(^tHistory(KontrId,GoodsId,i,"datetime"))
+ . s user = $G(^tHistory(KontrId,GoodsId,i,"user"))
+ . s date=$P(datetime,",",1)
+ . s time=$P(datetime,",",2)
+ . s counter=$i(@glob)
+ . s @glob@(+date,+time,counter,"user")=user
+ . s @glob@(+date,+time,counter,"type")="Удаление"
+
+ //zw @glob
+
+ s date=""
+ w "<table cellpadding=8 cellspacing=0 >"
+ for
+ {
+	 s date=$O(@glob@(date))
+	 QUIT:date=""
+	 
+	 s time=""
+	 for
+	 {
+		s time=$O(@glob@(date,time))
+	 	QUIT:time=""
+	 	
+	 	s counter=""
+	 	for
+	 	{
+		 	s counter=$O(@glob@(date,time,counter))
+		 	QUIT:counter=""
+		 	continue:'+counter
+		 	
+		 	s user=$G(@glob@(date,time,counter,"user"))
+		 	s type=$G(@glob@(date,time,counter,"type"))
+		 	
+		 	s DateString = $S(+date:$ZD(date,4),1:"")
+		 	s TimeString = $S(+time:$ZT(time),1:"")
+		 	s UserString = $S(+user:##class(Users.Dates).GetPropertyValue(user,"Name"),1:"")
+		 	
+		 	w "<tr>"
+		 		w "<td>"_type
+		 		w "<td>"_DateString
+		 		w "<td>"_TimeString
+		 		w "<td>"_UserString
+		 	w "</tr>"
+	 	}
+	 }
+ }
+ w "</table>"
+
+ 
+ k @glob
+</script>
+</body>
+</html>

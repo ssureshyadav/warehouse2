@@ -1,0 +1,666 @@
+<public:component tagname='listview'>
+<PUBLIC:DEFAULTS viewLinkContent />
+<public:ATTACH EVENT="ondocumentready" HANDLER="init"/>
+<PUBLIC:PROPERTY NAME="width" />
+<PUBLIC:PROPERTY NAME="height" />
+<PUBLIC:PROPERTY NAME="ItemID" VALUE="" get="GetItemID" />
+<PUBLIC:PROPERTY NAME="ItemName" VALUE="" get="getItemName" put="setItemName" />
+<PUBLIC:PROPERTY NAME="ClassName" VALUE="" />
+<PUBLIC:PROPERTY NAME="AddOnClear" VALUE="true" PUT="setAddOnClear" />
+<PUBLIC:PROPERTY NAME="Skip" VALUE="" />
+<PUBLIC:PROPERTY NAME="ColName" VALUE="" />
+<PUBLIC:PROPERTY NAME="ColCode" VALUE="" />
+<PUBLIC:PROPERTY NAME="ColType" VALUE="" />
+<PUBLIC:PROPERTY NAME="AddHeaders" VALUE="false" />
+<PUBLIC:PROPERTY NAME="Count" VALUE="" />
+<PUBLIC:PROPERTY NAME="doitogo" VALUE="" />
+<PUBLIC:PROPERTY NAME="login" VALUE="" />
+<public:method name = "LoadHeaders" />
+<public:method name = "DownLoad" />
+<public:method name = "GoodsFromGroup" />
+<public:method name = "LoadGoods" />
+<public:method name = "DelItems" />
+<public:method name = "GetAllItems" />
+<public:method name = "ListViewGetItems" />
+<public:method name = "ListViewAddItems" />
+<public:method name = "GetFromCard" />
+<public:method name = "AddColumns" />
+<public:method name = "GetAllItemsArray" />
+<public:method name = "loadfrommethod" />
+<public:method name = "item" />
+<public:method name = "itogo" />
+<public:method name = "GetColumns" />
+<public:method name = "addrow" />
+<public:method name = "getHiddenField" />
+<public:method name = "ColumnWidth" />
+<public:method name = "saveColunmsSettings" />
+<public:method name = "ColumnPosition" />
+<public:method name = "setCellValue" />
+<public:method name = "ChangeCell" />
+
+<public:EVENT name="onAddColumns" id="onAddColumns" />
+<public:EVENT name="zonDblClick" id="zonDblClick" />
+<public:EVENT name="zClick" id="zClick" />
+<public:EVENT name="onMethodComplite" id="onMethodComplite" />
+<public:EVENT name="zonColumnClick" id="zonColumnClick" />
+<public:EVENT name="onLoadComplete" id="onLoadComplete" />
+<public:EVENT name="onColumnChange" id="onColumnChange" />
+<html>
+<head>
+<SCRIPT LANGUAGE="Javascript" src="listview.js"></script>
+<SCRIPT LANGUAGE="Javascript">
+SkipFields = new Array();
+CountFields = new Array();
+SummaFields = new Array();
+var Type = new Array();
+var Type2 = new Array();
+var HiddenFields = new Array();
+var Name2 = new Array();  //Name2[им€ пол€]=номер столбца
+var Name = new Array();  //Name[номер столбца]=им€ пол€
+var oldcolparams = new Object();
+var oInteval;
+
+function checkColChange() {
+	return		//отключаю, а то он задолбал апач своими запросами на сохранение
+	var updated = false;
+	var cols = GetColumns().split(",");
+	for (i=0; i<cols.length; i++) {
+		if (oldcolparams[cols[i]] == undefined) {
+			oldcolparams[cols[i]] = new Object();
+			oldcolparams[cols[i]].widht = ColumnWidth(cols[i]) 
+			oldcolparams[cols[i]].pos = ColumnPosition(cols[i])
+			oldcolparams[cols[i]].sort = ListViewID.SortKey;
+			oldcolparams[cols[i]].order = ListViewID.SortOrder;
+		}
+			
+		if (oldcolparams[cols[i]].widht != ColumnWidth(cols[i])) { 	updated = true;	oldcolparams[cols[i]].widht = ColumnWidth(cols[i]); }
+		if (oldcolparams[cols[i]].pos != ColumnPosition(cols[i])) {	updated = true; oldcolparams[cols[i]].widht = ColumnWidth(cols[i]); }
+		if (oldcolparams[cols[i]].sort != ListViewID.SortKey) {		updated = true;	oldcolparams[cols[i]].sort = ListViewID.SortKey; }
+		if (oldcolparams[cols[i]].order != ListViewID.SortOrder) {	updated = true;	oldcolparams[cols[i]].sort = ListViewID.SortKey; }
+	}
+	if (updated) {
+		saveColunmsSettings()
+		onColumnChange.fire()
+	}
+}
+
+
+var currentpage=1;
+var allpages=1;
+var customrows="";
+function init(){
+strrr.innerText=currentpage;
+vsegostrok.innerText=allpages;
+
+ListViewID.AllowColumnReorder=true;
+ListViewID.Sorted =false;
+ListViewID.style.width=width;
+ListViewID.style.height=height+'px';
+ListViewID.attachEvent("DblClick",ListDblClick);
+ListViewID.attachEvent("Click",ListClick);
+ListViewID.attachEvent("ColumnClick",onColumnClick);
+
+var countarray=Count.split(",")
+if(Count=="")countarray=""
+	for (i = 0; i < countarray.length; i++){
+		var fld=countarray[i];
+		CountFields[fld]=true;
+	}
+
+var skiparray=Skip.split(",")
+if(Skip=="")skiparray=""
+	for (i = 0; i < skiparray.length; i++){
+		var fld=skiparray[i];
+		SkipFields[fld]=true;
+	}
+}
+
+function onColumnClick(ss){
+ColName=ss.Text;
+ColCode=ss.Key;
+ColType=Type2[ColCode];
+if(ListViewID.SortOrder==0){ListViewID.SortOrder=1;}
+else{ListViewID.SortOrder=0;}
+ListViewID.SortKey = ss.Index - 1;
+ListViewID.Sorted =true;
+zonColumnClick.fire();
+}
+
+//функци€ рисует колонки
+//AddColumns - текстова€ строка с параметрами дл€ отрисовки таблиц, следующего формата:
+// код_колонки~Ќазвание~~~@“ип_Cache~~~~~#@#
+function AddColumns(textString){
+//alert("AddColumns\n"+AddHeaders)
+textString+=customrows;
+//alert(textString)
+if(AddHeaders!="true")ListViewID.ColumnHeaders.Clear();
+if (textString=="") return false;
+var strings = textString.split(StringSplitter);
+	for (i = 0; i < strings.length-1; i++){
+	string = strings[i].split(InnerSplitter);
+	fieldname=string[0];
+	Type2[fieldname]=string[4].split("@")[1];
+	Type[i]=string[4].split("@")[1];
+	if(!SkipFields[fieldname]){
+		o1=ListViewID.ColumnHeaders.Add();
+		count=ListViewID.ColumnHeaders.Count
+		//alert("text="+string[1]+"\nkey="+fieldname)
+		ListViewID.ColumnHeaders.Item(count).Text=string[1];
+		ListViewID.ColumnHeaders.Item(count).Key=fieldname;
+		Name2[fieldname]=count;
+		Name[count]=fieldname;
+		//alert("fieldname="+fieldname+"\n"+"count="+count)
+		}
+	}
+		try{
+		ListViewID.ColumnHeaders.Item("brandName").Position=1
+		ListViewID.ColumnHeaders.Item("artic").Position=2
+		ListViewID.ColumnHeaders.Item("digits").Position=3
+		ListViewID.ColumnHeaders.Item("Name").Position=4
+		}
+		catch(e){
+		}
+onAddColumns.fire();
+}
+
+function LoadHeaders(skip,addarrow, ccustomrows){
+customrows = ccustomrows;
+skip=ReturnSpace(skip)
+if(ReturnSpace(addarrow)==""){addarrow=1;}
+ListViewID.startDownload("ListData.csp?Class="+ClassName+"&AddArrow="+addarrow+"&skip="+skip+"",AddColumns)
+}
+
+function GetColumns(InsBefore,oldfield,newfield){
+fields="";
+InsBefore=ReturnSpace(InsBefore);
+count=ListViewID.ColumnHeaders.Count;
+for (z = 1; z < count+1; z++){
+  str=ListViewID.ColumnHeaders.Item(z).Key
+  if(str==oldfield)str=newfield;
+  fields=fields+InsBefore+str+",";
+}
+return fields.substr(0,fields.length-1);
+}
+
+// разбить строку в массив скрытых полей Array[поле]=номер
+function MakeHiddenArray(stroka){
+tempArr=stroka.split(",");
+for(var i=0;i<tempArr.length;i++){
+HiddenFields[tempArr[i]]=i
+}
+}
+
+function DownLoad(where,kolbasaddr,hidden,order){
+var order=ReturnSpace(order);
+var where=ReturnSpace(where);
+var kolbasaddr=ReturnSpace(kolbasaddr);
+fields=GetColumns();
+if(ReturnSpace(hidden)!=""){
+	fields=fields+","+hidden;
+	MakeHiddenArray(hidden)
+	}
+whereZZ=where;
+kolbasaddrZZ=kolbasaddr;
+orderZZ=order;
+hiddenZZ=hidden;
+loadedfrom="Download";
+ListViewID.Enabled=false;
+ListViewID.startDownload("Data.csp?class="+ClassName+"&fields=ID,"+fields+"&where="+where+"&kolbasaddr="+kolbasaddr+"&stroknastr="+stroknastr.value+"&currentpage="+currentpage+"&order="+order, ListViewAddItems);
+//window.open("Data.csp?class="+ClassName+"&fields=ID,"+fields+"&where="+where+"&kolbasaddr="+kolbasaddr+"&stroknastr="+stroknastr.value+"&currentpage="+currentpage+"&order="+order);
+}
+
+function ListViewAddItems(textString){
+//alert("ѕроверка.\n textString \n" + textString);
+ListViewID.Sorted =false;
+if (textString=="") return false;
+if(AddOnClear=="true"){ListViewID.ListItems.Clear();}
+var strings = textString.split(StringSplitter);
+strcount=strings[0];  //здесь количество переданных строк
+//alert("ѕроверка.\n strcount = " + strcount + "\n strings" + strings);
+//проверим указано ли количество строк
+if(!isNaN(strcount)){
+	PagesControl.style.display="inline";
+}
+else{PagesControl.style.display="none";}
+	for (i = 1; i < strings.length-1; i++){
+	string = strings[i].split(InnerSplitter);
+	//alert("ѕроверка.\n" + string);
+	//добавл€ем только если такого пункта ещЄ нет
+	try{itemz=ListViewID.ListItems.Item("key"+string[0])}
+	catch(e){itemz="nullz"}
+	if(itemz=="nullz"){
+	ListViewID.ListItems.Add();
+	count=ListViewID.ListItems.Count;
+	ListViewID.ListItems.Item(count).Tag=string[0];
+	//alert(string+"\n"+HiddenFields[string[0]])
+	ListViewID.ListItems.Item(count).Key="key"+string[0];
+	ListViewID.ListItems.Item(count).Text=string[1];
+	//
+	if (string.length>1){
+	  for (z = 2; z < string.length; z++){
+	   ListViewID.ListItems.Item(count).ListSubItems.Add();
+	   ListViewID.ListItems.Item(count).ListSubItems.Item(z-1).Text=string[z];
+	   }
+	  }
+	}
+}
+pagesnumbers();
+showbuttons();
+if (doitogo){
+	var itg=doitogo.split(";");
+	itogo(itg[0], itg[1]);
+}
+loadColunmsSettings();
+//oInterval = setInterval(checkColChange, 3000);
+onLoadComplete.fire();
+ListViewID.Enabled=true;
+}
+
+// получить список значений строк
+// condition - если устновлено "selected" то только выбранные строки учитываютс€
+// OnlyID - выбирать только ID строк
+function ListViewGetItems(condition,OnlyID){
+var textString="";
+var OnlyID=ReturnSpace(OnlyID);
+count=ListViewID.ListItems.Count;
+	for (i = 1; i <= count; i++){
+	if (ListViewID.ListItems.Item(i).Key=="keyitogo") continue;
+	string = "";
+	if((ListViewID.ListItems.Item(i).selected)||(condition!="selected")){
+	string=ListViewID.ListItems.Item(i).Tag+InnerSplitter;
+	if(OnlyID!=1){
+		string=string+ListViewID.ListItems.Item(i).Text+InnerSplitter;
+		subitems=ListViewID.ListItems.Item(i).ListSubItems.Count
+		if (subitems>1)
+		{
+			for (z = 1; z <= subitems; z++)
+				{
+				string=string+ListViewID.ListItems.Item(i).ListSubItems.Item(z).Text+InnerSplitter;
+				}
+		}
+	}
+	string=string.substr(0,string.length-1);
+	textString=textString+string+StringSplitter;
+}}
+return textString;
+}
+
+function GetItemID(){
+if(ListViewID.SelectedItem==null){return "";}
+return ListViewID.SelectedItem.Tag;
+}
+
+function getItemName(){
+if(ListViewID.SelectedItem==null)return ""
+return ListViewID.SelectedItem.Text;
+}
+
+function setItemName(Value){
+ListViewID.SelectedItem.Text=Value;
+}
+
+//ƒвойной клик
+function ListDblClick(){
+zonDblClick.fire();
+}
+
+//ќдинарный клик
+function ListClick(){
+if(ListViewID.ListItems.Count==0)return "";
+CurrentString=ListViewID.SelectedItem.Key;
+zClick.fire();
+
+}
+
+//«агрузить товары определЄнной группы
+function GoodsFromGroup(Group){
+fields=GetColumns("Goods->");
+ListViewID.startDownload("Data.csp?class=Goods.GoodsGroup&fields=Goods->ID,"+fields+"&where=Groups='"+Group+"'", ListViewAddItems);
+}
+
+function GetFromCard(CardID,kontr,tovar,loadfrom){
+fields=GetColumns();
+kontr=ReturnSpace(kontr);
+tovar=ReturnSpace(tovar);
+loadfrom=ReturnSpace(loadfrom);
+ListViewID.startDownload("CardData.csp?ClassName="+ClassName+"&CardID="+CardID+"&fields="+fields+"&kontr="+kontr+"&tovar="+tovar+"&loadfrom="+loadfrom, ListViewAddItems);
+}
+
+function lookError(){
+if (xmlDoc.parseError.errorCode != 0) {
+   var myError = xmlDoc.parseError;
+   alert("ќшибка анализа XML\n" + myError.reason);
+   window.showModalDialog(xmlDoc.parseError.url,"","cener:yes;status:no;dialogHeight:700px;dialogWidth:600px;resizable:yes;");
+   return false
+} else {
+   return true
+}
+}
+
+function loadfrommethod(classmethod,param1,param2,param3){
+xmlDoc = new ActiveXObject("Msxml2.DOMDocument.3.0");
+xmlDoc.async = false;
+xmlDoc.validateOnParse = false;
+classmethodZZ=classmethod
+param1ZZ=param1
+param2ZZ=param2
+param3ZZ=param3
+loadedfrom="loadfrommethod";
+ListViewID.Enabled=false;
+var xmlurl="classmethod.csp?classmethod="+classmethod+"&param1="+param1+"&param2="+param2+"&param3="+param3+"&stroknastr="+stroknastr.value+"&currentpage="+currentpage;
+xmlDoc.load(xmlurl);
+ok=lookError();
+if(!ok)return false
+parseresult(xmlDoc);
+if (doitogo){
+	var itg=doitogo.split(";");
+	itogo(itg[0], itg[1]);
+}
+onMethodComplite.fire()
+}
+
+function parseresult(xmlobj){
+//window.open(xmlobj.url);alert("stop")
+ListViewID.Sorted =false;
+if(AddOnClear=="true"){ListViewID.ListItems.Clear();}
+var oNodeList = xmlobj.selectNodes("//AllHeaders/*");  //здесь заголовки
+var headersnode=xmlobj.selectSingleNode("//AllHeaders")
+if(headersnode!=null){
+	var addcols=headersnode.getAttribute("addcols");
+	}
+else{var addcols=false;}
+if((oNodeList.length>0)&(!addcols))ListViewID.ColumnHeaders.Clear();
+for (var i=0; i<oNodeList.length; i++) {
+	var currentobj=oNodeList.item(i)
+	var textz=currentobj.selectSingleNode("text").text
+	var key=currentobj.selectSingleNode("key").text
+	var colWidth=selSingleNode(currentobj,"Width")
+	//посмотрим есть ли заголовок c таким key, если есть то добавл€ть не будем
+	try{var head=ListViewID.ColumnHeaders.Item(key)}
+	catch(e){var head=""}
+	if(head==""){
+		var o1=ListViewID.ColumnHeaders.Add()
+		var count=ListViewID.ColumnHeaders.Count
+		if(key=="depot1"){ListViewID.ColumnHeaders.Item(count).Position=2}
+		if(key=="depot2"){ListViewID.ColumnHeaders.Item(count).Position=3}
+		ListViewID.ColumnHeaders.Item(count).Text=textz;
+		ListViewID.ColumnHeaders.Item(count).Key=key;
+		if(colWidth!="")ListViewID.ColumnHeaders.Item(count).Width=colWidth;
+		Name2[key]=count;
+		Name[count]=key;
+	}
+}
+oNodeList = xmlobj.selectNodes("//AllObjects/*"); //«десь строки
+countheaders=ListViewID.ColumnHeaders.Count  //количество колонок у ListView
+for (var i=0; i<oNodeList.length; i++){ 
+ if(i>2000){alert("ѕревышено масимально допустимое количество строк в таблице 500 шт. ¬ывод строк прекращаетс€.");break;}
+ OneObject = oNodeList.item(i);
+ attributeId=OneObject.getAttribute("id");
+ var curcolor=OneObject.getAttribute("color");
+ if(ReturnSpace(curcolor)=="")var curcolor=0;
+ ListViewID.ListItems.Add();
+ count=ListViewID.ListItems.Count;
+ ListViewID.ListItems.Item(count).Tag=attributeId;
+ if(ReturnSpace(attributeId)!=""){
+	try{
+		ListViewID.ListItems.Item(count).Key="KEY~"+attributeId;
+		}
+	catch(e){
+	}
+	}
+ ListViewID.ListItems.Item(count).ForeColor=curcolor;
+ for(col=1;col<=countheaders;col++){
+ 	currentkey=ListViewID.ColumnHeaders.Item(col).Key;
+ 	currenttext=returnSingleSubNode(OneObject,currentkey,"text")
+	if(col==1)
+		{
+		ListViewID.ListItems.Item(count).Text=currenttext;
+		ListViewID.ListItems.Item(count).ForeColor=curcolor;
+		}
+	else{
+	  ListViewID.ListItems.Item(count).ListSubItems.Add();
+      ListViewID.ListItems.Item(count).ListSubItems.Item(col-1).Text=currenttext;
+	  ListViewID.ListItems.Item(count).ListSubItems.Item(col-1).ForeColor=curcolor;
+	  }
+  }
+ }
+if(xmlobj.selectSingleNode("root/comment")!=null){
+	var xmlcomment=xmlobj.selectSingleNode("root/comment").text;
+	if(xmlcomment!="")alert(xmlcomment)}
+strcount="";
+
+if(xmlobj.selectSingleNode("root/strcount")!=null){
+	strcount=xmlobj.selectSingleNode("root/strcount").text;
+	PagesControl.style.display="inline";
+}
+else{PagesControl.style.display="none";}
+pagesnumbers();
+showbuttons();
+ListViewID.Enabled=true;
+loadColunmsSettings();
+//oInterval = setInterval(checkColChange, 3000);
+}
+
+// написать на странице кака€ сейчас страница из списка выведена и сколько всего страниц
+function pagesnumbers(){
+strrr.innerText=currentpage;
+allpages=Math.ceil(strcount/stroknastr.value);
+vsegostrok.innerText=allpages;
+}
+
+function returnSingleSubNode(obj,node,subnode){
+if(obj.selectSingleNode(node)==null) return "";
+if(obj.selectSingleNode(node).selectSingleNode(subnode)==null) return "";
+return obj.selectSingleNode(node).selectSingleNode(subnode).text;
+}
+
+function selSingleNode(currentobj,nod){
+var nodeobj=currentobj.selectSingleNode(nod);
+if(nodeobj==null)return ""
+return nodeobj.text
+}
+
+function item(nam,StringId){
+try{
+	var num=ListViewID.ColumnHeaders.Item(nam).Index;
+}
+catch(e){
+	return ""
+}
+// если не указали строку то будем править текущую выбранную
+if(ReturnSpace(StringId)==""){
+	if(ReturnSpace(ListViewID.SelectedItem)=="")return ""
+	var currentSTR=ListViewID.SelectedItem;
+}
+else{
+	try{var currentSTR=ListViewID.ListItems.Item("KEY~"+StringId)
+		var StringFound=true;}
+	catch(e){
+		var StringFound=false;}
+	if(!StringFound)return	""
+	}
+if(num>1)return currentSTR.ListSubItems.Item(num-1).Text
+return currentSTR.Text
+}
+
+function setAddOnClear(value){
+//alert("set="+value)
+//AddOnClear=value;
+}
+
+// добавить строку
+// rowid - id строки
+// arr[номер пол€] = значение (данные дл€ строки)
+function addrow(rowid,arr,who){
+try{var itemz=ListViewID.ListItems.Item("key"+rowid);}
+catch(e){var itemz="nullz";}
+if(typeof(itemz)!="object"){
+	ListViewID.ListItems.Add();
+	var count=ListViewID.ListItems.Count;
+	var currentitem=ListViewID.ListItems.Item(count)
+	}
+else{var currentitem=ListViewID.ListItems.Item("key"+rowid);}
+	var countheaders=ListViewID.ColumnHeaders.Count;  //количество колонок у ListView
+	currentitem.Tag=rowid;
+	currentitem.Key="key"+rowid;
+	for(col=1;col<=countheaders;col++){
+		var fldname=ListViewID.ColumnHeaders.Item(col).Key;
+		if(CountFields[fldname]){
+			if(typeof(SummaFields[fldname])=="undefined"){SummaFields[fldname]=0;}
+			//alert(typeof(SummaFields[fldname]))
+			SummaFields[fldname]=SummaFields[fldname]+arr[col]}
+		if(col==1){currentitem.Text=arr[1]}
+		else{
+		if(typeof(itemz)!="object"){currentitem.ListSubItems.Add();}
+		currentitem.ListSubItems.Item(col-1).Text=arr[col];
+		//alert("col="+col+"\n"+"arr[col]="+arr[col])
+		}
+	}
+if(typeof(SummaFields["summa"])=="number"){tempForNothing.innerHTML="<b>—умма: "+SummaFields["summa"].toFixed(2)+"</b>";}
+//SummaFields["summa"].toFixed(2)
+//alert(Name.length)
+//var newarray=new Array()
+//for(numfld=1;numfld<=Name.length+1;numfld++){
+//	var namefld=Name[numfld];
+//	var fldsum=SummaFields[namefld];
+//	if(typeof(fldsum)!=number){var fldsum="";}
+//	var newarray[numfld]=fldsum
+//}
+
+if (who!="itogo")
+if (doitogo) {
+	var itg=doitogo.split(";");
+	itogo(itg[0], itg[1]);
+}
+
+}
+
+//вернуть содержимое скрытого пол€
+function getHiddenField(fld){
+//alert(fld)
+var number=HiddenFields[fld]+ListViewID.ColumnHeaders.Count
+//alert(number+"\n"+ListViewID.SelectedItem.ListSubItems.Item(number))
+return ListViewID.SelectedItem.ListSubItems.Item(number).Text
+}
+
+//вернуть ширину указанной колонки
+function ColumnWidth(fld){
+var colnumber=Name2[fld];
+if(colnumber==null)return ""
+return ListViewID.ColumnHeaders.Item(colnumber).Width
+}
+
+function ColumnPosition(fld){
+var colnumber=Name2[fld];
+if(colnumber==null)return ""
+return ListViewID.ColumnHeaders.Item(colnumber).Position
+}
+
+function loadColunmsSettings(xmlString) {
+	if (xmlString == undefined) {
+		var xml = new ActiveXObject("Msxml2.DOMDocument.3.0");
+		xml.async = true;
+		xml.ondataavailable = function () { loadColunmsSettings(xml.text);	}
+		xml.load('htc/settingsLoader.csp?type=load&component='+id+"~"+ClassName+'&cols='+GetColumns().split(",").length);
+		return false;
+	} else {
+		var xml = new Object();
+		xml.text = xmlString;
+	}
+	//alert(xml.text)
+	if (!xml.text) return false;
+	
+	var columns = xml.text.split("~");
+	var columnParams;
+	var columnId;
+	var sort = columns[0].split(":")	//SortKey, SortOrder, posHeight
+	
+	//alert(id + "\n" + sort);
+	if (sort.length == 3)
+	{
+		ListViewID.SortOrder= sort[1];	
+		ListViewID.SortKey =  sort[0];
+		ListViewID.Sorted =true;
+		ListViewID.style.posHeight = sort[2];
+	}
+	
+	for (i=1; i<columns.length; i++) {
+		columnParams = columns[i].split(":")
+		columnId = Name2[columnParams[0]];
+		
+		if (columnId != null) {
+			ListViewID.ColumnHeaders.Item(columnId).Position = columnParams[2]
+			ListViewID.ColumnHeaders.Item(columnId).Width = columnParams[1]
+		}
+	}
+}  
+
+function saveColunmsSettings() {
+	var returnString = String(ListViewID.SortKey)+":"+String(ListViewID.SortOrder)+":"+String(ListViewID.style.posHeight)+"~";
+	var cols = GetColumns().split(",");
+	for (i=0; i<cols.length; i++) { 
+		var returnString = returnString + cols[i]+":"+ColumnWidth(cols[i])+":"+ColumnPosition(cols[i])
+		if (i<cols.length-1) {var returnString = returnString + "~";}
+	}
+	xml = new ActiveXObject("Msxml2.DOMDocument.3.0");
+	xml.async = true;
+	xml.load('htc/settingsLoader.csp?type=save&component='+id+"~"+ClassName+'&data='+returnString+'&cols='+cols.length+'&login='+login);
+	alert('Ќастройки таблицы сохранены')
+	return returnString;
+}  
+
+
+
+
+function itogo(cols, itigicol) {
+	var ok=false
+	try{ListViewID.ListItems.Item('keyitogo').Key}
+	catch(e){ok=true}
+	if (!ok) { ListViewID.ListItems.Remove(ListViewID.ListItems.Item('keyitogo').Key); }
+
+	var itms= ListViewGetItems();
+	var res = new Array();
+	itms = itms.split('#@#');
+	cols = cols.split(',');
+    for (i=0;i<itms.length-1;i++) {
+        itm = itms[i].split('~');
+		for (j=0;j<cols.length;j++) {
+			if (res[ColumnPosition(cols[j])] == undefined) res[ColumnPosition(cols[j])] = 0;
+			res[ColumnPosition(cols[j])] += itm[ColumnPosition(cols[j])];
+		}
+    }
+	if (itms.length>1) {
+		if(itigicol) res[ColumnPosition(itigicol)] = '»того:'
+		addrow('itogo',res, "itogo");
+	}
+}
+
+</script>
+</head>
+
+<body>
+<table CELLPADDING=0 CELLSPACING=0 border=0><tr><td rowspan=2>
+	<img src="images/excel.gif" onmouseover="this.src='images/Onexcel.gif'" onmouseout="this.src='images/excel.gif'" onclick="copyclip()" style="cursor:hand" alt="ќткрыть в Excel">
+	<img src="images/mail.gif" onmouseover="this.src='images/Onmail.gif'" onmouseout="this.src='images/mail.gif'" onclick="saveColunmsSettings()" style="cursor:hand" alt="—охранить положение и размер колонок">
+	<span id="PagesControl" style="display:none"><input type="button" value="<<" style="width:20px" disabled onclick="fullleft();" id="fullleftbut"><input id="leftbut" type="button" value="<" onclick="moveleft();" style="width:20px" disabled> стр. <span id="strrr"></span> из <span id="vsegostrok"></span> <input type="button" value=">" style="width:20px" onclick="moveright()" id="rightbut" disabled><input type="button" id="fullrightbut" value=">>" style="width:20px" disabled onclick="fullright()"> строк на странице 
+	<input type=text style="width:40" id="stroknastr" value="100"></span> <span id="tempForNothing"></span>
+	&nbsp;&nbsp;&nbsp;&nbsp;
+</td><td>
+	<img src="images/UpSmall.gif" style="cursor:hand" onmouseover="this.src='images/onUpSmall.gif'" onmouseout="this.src='images/UpSmall.gif'" onclick="ListViewID.style.posHeight=ListViewID.style.posHeight+20" alt="”величить размер таблицы">
+</td></tr>
+<tr><td>
+	<img src="images/DownSmall.gif" style="cursor:hand" onmouseover="this.src='images/onDownSmall.gif'" onmouseout="this.src='images/DownSmall.gif'" onclick="ListViewID.style.posHeight=ListViewID.style.posHeight-20" alt="”меньшить размер таблицы">
+</td></tr>
+</table>
+<OBJECT id="ListViewID" classid="clsid:BDD1F04B-858B-11D1-B16A-00C0F0283628" style="border:none;behavior:url('#default#download')" codebase="Cab\MSComCtl.CAB#Version=6,0,88,62">
+<PARAM NAME="View" VALUE="3">
+<PARAM NAME="Appearance" VALUE="1">
+<PARAM NAME="FullRowSelect" VALUE="True">
+<PARAM NAME="MultiSelect" VALUE="True">
+<PARAM NAME="GridLines" VALUE="True">
+<PARAM NAME="LabelEdit" VALUE="1">
+</OBJECT>
+<span id="joka"></span>
+</body>
+</html>
+</public:component>

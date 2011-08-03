@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Kontragent.SendMailLog">
+<Description>
+Лог отправки писем</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60764,86119.599953</TimeCreated>
+
+<Property name="Dat">
+<Description>
+Дата</Description>
+<Type>%Date</Type>
+<InitialExpression>+$H</InitialExpression>
+<Parameter name="FORMAT" value="4"/>
+</Property>
+
+<Index name="DatInd">
+<Properties>Dat</Properties>
+</Index>
+
+<Property name="Tim">
+<Description>
+Время</Description>
+<Type>%Time</Type>
+<InitialExpression>$P($H,",",2)</InitialExpression>
+</Property>
+
+<Index name="TimInd">
+<Properties>Tim</Properties>
+</Index>
+
+<Property name="MessageTo">
+<Description>
+Кому</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="100"/>
+</Property>
+
+<Index name="MessageToInd">
+<Properties>MessageTo</Properties>
+</Index>
+
+<Property name="Cc">
+<Description>
+Копия</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="100"/>
+</Property>
+
+<Index name="CcInd">
+<Properties>Cc</Properties>
+</Index>
+
+<Property name="Attach">
+<Description>
+Файл</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
+</Property>
+
+<Index name="AttachInd">
+<Properties>Attach</Properties>
+</Index>
+
+<Property name="Result">
+<Description>
+Результат</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="500"/>
+</Property>
+
+<Index name="ResultInd">
+<Properties>Result</Properties>
+</Index>
+
+<Property name="Comment">
+<Description>
+Комментарий</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
+</Property>
+
+<Index name="CommentInd">
+<Properties>Comment</Properties>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Kontragent.SendMailLogD</DataLocation>
+<DefaultData>SendMailLogDefaultData</DefaultData>
+<IdLocation>^Kontragent.SendMailLogD</IdLocation>
+<IndexLocation>^Kontragent.SendMailLogI</IndexLocation>
+<StreamLocation>^Kontragent.SendMailLogS</StreamLocation>
+<Data name="SendMailLogDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Attach</Value>
+</Value>
+<Value name="3">
+<Value>Cc</Value>
+</Value>
+<Value name="4">
+<Value>Dat</Value>
+</Value>
+<Value name="5">
+<Value>Tim</Value>
+</Value>
+<Value name="6">
+<Value>MessageTo</Value>
+</Value>
+<Value name="7">
+<Value>Result</Value>
+</Value>
+<Value name="8">
+<Value>Comment</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

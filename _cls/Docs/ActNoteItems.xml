@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.ActNoteItems">
+<Description>
+Строки служебной записки на погашение актов</Description>
+<Super>Docs.DocItems</Super>
+<TimeCreated>61623,56517.272486</TimeCreated>
+
+<Property name="Act">
+<Description>
+Акт</Description>
+<Type>Docs.Act</Type>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>ActNoteItemsDefaultData</DefaultData>
+<Data name="ActNoteItemsDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"ActNoteItems"</Subscript>
+<Value name="1">
+<Value>Act</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

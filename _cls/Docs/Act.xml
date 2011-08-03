@@ -1,0 +1,529 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.Act">
+<Description>
+Акт неремонтопригодности</Description>
+<IncludeCode>xmlmacros</IncludeCode>
+<Super>Docs.Super</Super>
+<TimeCreated>61508,50126.133794</TimeCreated>
+
+<Property name="Goods">
+<Description>
+Изделие</Description>
+<Type>Goods.Goods</Type>
+<Required>1</Required>
+</Property>
+
+<Property name="NumbersHistory">
+<Description>
+История изменений номеров</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="2048"/>
+</Property>
+
+<Property name="Serial">
+<Description>
+Серийный номер</Description>
+</Property>
+
+<Property name="Garant">
+<Description>
+Гарантийный номер</Description>
+</Property>
+
+<Property name="SellerName">
+<Description>
+Продавец</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="512"/>
+</Property>
+
+<Property name="SellerAddress">
+<Description>
+Адрес продавца</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="512"/>
+</Property>
+
+<Property name="SellerDate">
+<Description>
+Дата продажи</Description>
+<Type>%Date</Type>
+</Property>
+
+<Property name="SellerPhone">
+<Description>
+Телефон продавца</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="512"/>
+</Property>
+
+<Property name="ExpertDate">
+<Description>
+Дата экспертизы</Description>
+<Type>%Date</Type>
+</Property>
+
+<Property name="RemontDate">
+<Description>
+Дата поступления в ремонт</Description>
+<Type>%Date</Type>
+</Property>
+
+<Property name="RepairsQnt">
+<Description>
+Количество ремонтов</Description>
+</Property>
+
+<Property name="DefectDescription">
+<Description>
+Неисправность</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="2024"/>
+</Property>
+
+<Property name="DefectEstimate">
+<Description>
+Прогноз дефекта</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="512"/>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+//Property DefectClass As %String(DISPLAYLIST = ",Заводской,Внешние факторы,Вина потребителя,Иное", VALUELIST = ",0,1,2,3");
+
+]]></Content>
+</UDLText>
+
+<Property name="DefectClass">
+<Description>
+Классификация дефекта</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=",Заводской,Предпродажный,Иное,Вина потребителя"/>
+<Parameter name="VALUELIST" value=",0,1,2,3"/>
+</Property>
+
+<Property name="DefectClassDescr">
+<Description>
+Описание классификации дефекта (это если в форме выбрали ИНОЕ)</Description>
+</Property>
+
+<Property name="RepairRefuseReason">
+<Description>
+Причина отказа в ремонте</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="512"/>
+</Property>
+
+<Property name="CustomerName">
+<Description>
+Потребитель</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="512"/>
+</Property>
+
+<Property name="CustomerDoc">
+<Description>
+Потребитель</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="512"/>
+</Property>
+
+<Property name="CustomerAddress">
+<Description>
+Потребитель</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="512"/>
+</Property>
+
+<Property name="CustomerPhone">
+<Description>
+Потребитель</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="512"/>
+</Property>
+
+<Property name="ActDate">
+<Description>
+Дата акта</Description>
+<Type>%Date</Type>
+<Parameter name="FORMAT" value="4"/>
+</Property>
+
+<Property name="GoodsKeeping">
+<Description>
+Товар оставлен в сервисном центре</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=",Нет,Да"/>
+<Parameter name="VALUELIST" value=",0,-1"/>
+</Property>
+
+<Property name="SrvName">
+<Description>
+Наименование сервисного центра</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="512"/>
+</Property>
+
+<Property name="SrvAddr">
+<Description>
+Адрес сервисного центра</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="512"/>
+</Property>
+
+<Property name="SrvPhone">
+<Description>
+Телефон сервисного центра</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="512"/>
+</Property>
+
+<Property name="SrvFIO">
+<Description>
+Директор сервисного центра</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="512"/>
+</Property>
+
+<Property name="Stat">
+<Description>
+Статус</Description>
+<Type>%String</Type>
+<InitialExpression>"1"</InitialExpression>
+<Parameter name="DISPLAYLIST" value=",Создан,Обработан и принят,Акт не принят"/>
+<Parameter name="VALUELIST" value=",1,2,3"/>
+</Property>
+
+<Property name="CheckResult">
+<Description>
+Результаты проверки</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="5000"/>
+</Property>
+
+<Property name="ActType">
+<Description>
+Тип акта</Description>
+<Type>%String</Type>
+</Property>
+
+<Index name="ActType">
+<Properties>ActType</Properties>
+</Index>
+
+<Property name="Paid">
+<Description>
+Погашен</Description>
+<Type>%String</Type>
+<InitialExpression>"0"</InitialExpression>
+<Parameter name="DISPLAYLIST" value=",Нет,Да"/>
+<Parameter name="VALUELIST" value=",0,1"/>
+</Property>
+
+<Index name="PaidIndex">
+<Properties>Paid</Properties>
+</Index>
+
+<Property name="PaidDate">
+<Description>
+Дата погашения</Description>
+<Type>%Date</Type>
+<Parameter name="FORMAT" value="4"/>
+</Property>
+
+<Property name="PaidTime">
+<Description>
+Время погашения</Description>
+<Type>%Time</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Property name="PaidUser">
+<Description>
+Оператор погасивший</Description>
+<Type>Users.Dates</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Method name="SetActStatFailed">
+<Description><![CDATA[
+Поставить акту статус "не принят"
+<br>ActId - ID акта или объект акта
+<br>Comment - ]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ActId:%String="",Comment:%String=""</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s $ZT="SetActStatFailedError"
+	if ActId="" q "Не указан ID акта."
+	if '$ISOBJECT(ActId) s ActObj = ##class(Docs.Act).%OpenId(ActId)
+	else  s ActObj=ActId
+	if '$ISOBJECT(ActObj) q "Невозможно найти акт "_ActId
+	s ActObj.Stat=3
+	s ActObj.Name=""
+	s ActObj.Summa=0
+	s ActObj.CloseDate=""
+	s ActObj.CloseTime=""
+ 	s ActObj.CloseUser=""
+	s ActObj.Comment=Comment
+	
+	s ok=ActObj.%Save()
+	if ok q 1
+	$$$WriteObjError(ok)
+	q "Извините. Ошибка при отклонении акта."
+SetActStatFailedError
+ $$$WriteError($ZE)
+ q "Извините. Ошибка при отклонении акта."
+]]></Implementation>
+</Method>
+
+<Property name="NameSorted">
+<Description>
+Номер пригодный для сортировки</Description>
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {*}=$P({Name},"-",2)_"-"_$TR($J($P({Name},"-",1),3)," ",0)</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+<Parameter name="CAPTION" value="display:none,"/>
+</Property>
+
+<Method name="GetActSumma">
+<Description>
+Вернёт расчётную сумму акта, тип акта возвращается в третьем параметре по ссылке
+Если указать параметр GetActType =1 то вернёт тип акта</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[ActId:%String="",GetActType:%Boolean=0,&D9Field:%String=""]]></FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s $ZT="GetActSummaError"
+	if ActId = "" q "Не указан ID акта."
+	if '$ISOBJECT(ActId) s ActObj = ##class(Docs.Act).%OpenId(ActId)
+	else  s ActObj=ActId
+	if '$ISOBJECT(ActObj) q "Невозможно найти акт "_ActId
+	s KontrObj = ActObj.Kontr
+	if '$ISOBJECT(KontrObj) q "В акте не указан контрагент. Вычисление суммы невозможно."
+	
+	s RemTovar = ActObj.Goods
+	if '$ISOBJECT(RemTovar.izdelie) q "У товара "_RemTovar.FullName_" не указана ценовая группа."
+	s izdelieRazdel=RemTovar.izdelie.Razdel
+	if izdelieRazdel="" q "У ценовой группы "_RemTovar.izdelie.Name_" не указан раздел (бытовая техника или электроинструмент), поэтому невозможно посчитать сумму акта."
+ 	s izdelieRazdelName=##class(Common.Dictionary12).RazdelLogicalToDisplay(izdelieRazdel)
+ 	
+ 	//бытовка
+ 	if izdelieRazdel = 1 s KontragentCenaKateg = "Property127",D9Field="ActPriceTechnic"
+ 	//инструмент
+ 	if izdelieRazdel = 2 s KontragentCenaKateg = "Property126",D9Field="ActPriceInstrument"	
+ 	
+ 	if GetActType q $G(D9Field)
+ 	//возьмём у контрагента Property126 или Property127
+ 	s KontrCenaObj = $ZOBJPROPERTY(KontrObj,KontragentCenaKateg)
+ 	
+ 	if '$ISOBJECT(KontrCenaObj) q "У контрагента "_Kontr.Name_" не указана категория цен "_izdelieRazdelName
+	
+	s Summa=$ZOBJPROPERTY(KontrCenaObj,D9Field)
+	
+	if Summa="<remont>" q ##class(Common.Common).GetRemontPrice(ActObj.Kontr.Code,RemTovar.izdelie.%Id())
+	if Summa="" q "Для категории цен "_KontrCenaObj.Name_" не установлены необходимые цены за акт."
+	q Summa
+GetActSummaError
+ $$$WriteError($ZE)
+ q "Извините. Ошибка при вычислении суммы акта."
+]]></Implementation>
+</Method>
+
+<Method name="GetActType">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ActId:%String=""</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	q ..GetActSumma(ActId,1)
+GetActTypeError
+ $$$WriteError($ZE)
+ q "Извините. Ошибка при вычислении типа акта."
+]]></Implementation>
+</Method>
+
+<Method name="SetActStatAccepted">
+<Description><![CDATA[
+Поставить акту тип "Принят"
+<br> ActId - ID акта
+<br> ActNumber - номер акта
+<br> ActSumma - сумма акта
+<br> ActType - тип акта]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ActId:%String="",ActNumber:%String="",ActSumma:%String="",ActType:%String=""</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s $ZT="SetActStatAcceptedError"
+	if ActId="" q "Не указан ID акта."
+	
+	if ActSumma="" s ActSumma=..GetActSumma(ActId,0,ActType)
+	if ActSumma="" q "Невозможно утвердить акт, так как невозможно рассчитать его сумму."
+	if '+ActSumma q ActSumma
+	if ActNumber="" s ActNumber=##class(Docs.Action).getRashNumb("Docs.Act")
+	if '$ISOBJECT(ActId) s ActObj = ##class(Docs.Act).%OpenId(ActId)
+	else  s ActObj=ActId
+	if '$ISOBJECT(ActObj) q "Невозможно найти акт "_ActId
+	s ActObj.Stat=2
+	s ActObj.Name=ActNumber
+	s ActObj.Summa=ActSumma
+	s ActObj.ActType=ActType
+	
+	//сделаем гарантийный талон недействительным
+	s ActObjGarant = ActObj.Garant
+	if ActObjGarant'=""
+	{
+		s GarantObj = ##class(Common.Dictionary2).%OpenId(ActObjGarant)
+		if $ISOBJECT(GarantObj)
+		{
+			
+		}
+	}
+	
+	s ok=ActObj.%Save()
+	if ok q 1
+	$$$WriteObjError(ok)
+	q "Извините. Ошибка при утверждении акта."
+SetActStatAcceptedError
+ $$$WriteError($ZE)
+ q "Извините. Ошибка при отклонении акта."
+]]></Implementation>
+</Method>
+
+<Method name="SetActPaid">
+<Description>
+установить акту статус "Оплачен"</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ActID:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	&sql(select Paid into :Paid from Docs.Act where id=:ActID)
+	if SQLCODE q "Извините. Ошибка чтения. SQLCODE="_SQLCODE
+	if Paid=1 q "Акт уже оплачен."
+	s PaidUser=$$$SessionData("user")
+	s PaidTime=$P($H,",",2)
+	s PaidDate=+$H
+	&sql(update Docs.Act set PaidUser=:PaidUser,PaidTime=:PaidTime,PaidDate=:PaidDate,Paid=1 where id=:ActID)
+	if 'SQLCODE q 1
+	else  q "Извините. Ошибка записи. SQLCODE="_SQLCODE
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>ActDefaultData</DefaultData>
+<Data name="ActDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"Act"</Subscript>
+<Value name="1">
+<Value>Garant</Value>
+</Value>
+<Value name="2">
+<Value>Goods</Value>
+</Value>
+<Value name="3">
+<Value>Serial</Value>
+</Value>
+<Value name="4">
+<Value>SellerDate</Value>
+</Value>
+<Value name="5">
+<Value>SellerName</Value>
+</Value>
+<Value name="6">
+<Value>SellerPhone</Value>
+</Value>
+<Value name="7">
+<Value>Customer</Value>
+</Value>
+<Value name="8">
+<Value>DefectClass</Value>
+</Value>
+<Value name="9">
+<Value>DefectDescription</Value>
+</Value>
+<Value name="10">
+<Value>DefectEstimate</Value>
+</Value>
+<Value name="11">
+<Value>ExpertDate</Value>
+</Value>
+<Value name="12">
+<Value>RemontDate</Value>
+</Value>
+<Value name="13">
+<Value>RepairRefuseReason</Value>
+</Value>
+<Value name="14">
+<Value>RepairsQnt</Value>
+</Value>
+<Value name="15">
+<Value>SellerAddress</Value>
+</Value>
+<Value name="16">
+<Value>DefectClassDescr</Value>
+</Value>
+<Value name="17">
+<Value>CustomerName</Value>
+</Value>
+<Value name="18">
+<Value>CustomerDoc</Value>
+</Value>
+<Value name="19">
+<Value>CustomerAddress</Value>
+</Value>
+<Value name="20">
+<Value>CustomerPhone</Value>
+</Value>
+<Value name="21">
+<Value>ActDate</Value>
+</Value>
+<Value name="22">
+<Value>GoodsKeeping</Value>
+</Value>
+<Value name="23">
+<Value>SrvAddr</Value>
+</Value>
+<Value name="24">
+<Value>SrvFIO</Value>
+</Value>
+<Value name="25">
+<Value>SrvName</Value>
+</Value>
+<Value name="26">
+<Value>SrvPhone</Value>
+</Value>
+<Value name="27">
+<Value>ActNumber</Value>
+</Value>
+<Value name="28">
+<Value>CheckResult</Value>
+</Value>
+<Value name="29">
+<Value>ActType</Value>
+</Value>
+<Value name="30">
+<Value>Paid</Value>
+</Value>
+<Value name="31">
+<Value>PaidDate</Value>
+</Value>
+<Value name="32">
+<Value>PaidTime</Value>
+</Value>
+<Value name="33">
+<Value>PaidUser</Value>
+</Value>
+<Value name="34">
+<Value>NumbersHistory</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

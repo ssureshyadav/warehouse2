@@ -1,0 +1,38 @@
+<html>
+<head>
+<title>Система складского учёта</title>
+<link href="style.css" type=text/css rel=stylesheet>
+<style>
+TD{font-family:'Arial';font-size:13pt;}
+</style>
+<script language="javascript">
+function startFun(){
+window.returnValue=ComboBox.value;
+window.close();
+}
+
+function windowclose(){
+if(window.confirm("Закрыть окно без сохранения изменений?")){
+	window.close()	
+	}
+}
+
+</script>
+</head>
+<body style="border:solid 1 black">
+<table cellpadding=5 height=100% width=100% ><tr><td valign=top >
+<select id="ComboBox">
+<script language="cache" runat="server">
+s ClassProperty=%request.Get("ClassProperty")
+s CurrentSelection=%request.Get("CurrentSelection")
+w ##class(Docs.Action2).GetDisplaylistOptions(CurrentSelection,ClassProperty)
+</script>
+</select>
+</td></tr>
+<tr><td valign=bottom>
+<center><br><sklad:Button value="Да" onclick="startFun();"><sklad:Button onclick="windowclose()" value="Отмена"></center>
+</td></tr>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.printinnerfromchief">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62196,38482.025171</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body>"
+	Write !,"<h2>Инструкция руководителя не имеет привязки к инструкции на складе</h2>",!
+	Write "</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	s sessionid=%request.Get("sessionid",1)
+	d:%session.NewSession 
+	. s %session.EndSession=1
+	. s %session=%session.GetSession(sessionid)
+	s super=%request.Get("super")
+	i super'="" 
+	{
+	s superdoc=##class(Operation.Instructions).%OpenId(super)
+	s instr=superdoc.innerinstr
+	i $ISOBJECT(instr)
+	{
+	s docid=instr.%Id()
+	s DocClass=$P(instr,"@",2)
+	s %response.ServerSideRedirect="print.csp?id="_docid_"&class="_DocClass_"&sessionid="_sessionid
+	}
+	}
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,!,"<!-- Put your page Title here -->"
+	Write !,"<title>	Cache Server Page </title>",!
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\PrintInnerFromChief.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/PrintInnerFromChief.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>62182,46764</Default>
+</Parameter>
+</Class>
+</Export>

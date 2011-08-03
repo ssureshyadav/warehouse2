@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.Platejka">
+<Super>Docs.Super</Super>
+<TimeCreated>60456,54011.254885</TimeCreated>
+
+<Property name="Poluh">
+<Description>
+Получатель</Description>
+<Type>Common.Kontragent</Type>
+<InitialExpression>$$$TunesVariableGlobal("DefaultPoluh")</InitialExpression>
+</Property>
+
+<Index name="PoluhInd">
+<Properties>Poluh</Properties>
+</Index>
+
+<Property name="Typeplatej">
+<Description>
+Тип платежа</Description>
+<Type>Common.Dictionary13</Type>
+<InitialExpression>$$$TunesVariableGlobal("DefaultPlatejType")</InitialExpression>
+</Property>
+
+<Index name="TypeplatejInd">
+<Properties>Typeplatej</Properties>
+</Index>
+
+<Property name="PlatejkaItems">
+<Description>
+Строки платёжки - расходные документы и суммы на них</Description>
+<Type>Docs.PlatejkaItems</Type>
+<Cardinality>many</Cardinality>
+<Inverse>Doc</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="RubSumma">
+<Description>
+Рублёвая сумма</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="Kurs">
+<Description>
+Курс</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="ViconteSummRub">
+<Description>
+Сумма Viconte в рублях</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="ViconteSummCurr">
+<Description>
+Сумма Viconte в валюте</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="MastermaxSummRub">
+<Description>
+Сумма Mastermax в рублях</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="MastermaxSummCurr">
+<Description>
+Сумма Mastermax в валюте</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="TullSummRub">
+<Description>
+Сумма Tull в рублях</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="TullSummCurr">
+<Description>
+Сумма Tull в валюте</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="PlatejDate">
+<Description>
+Дата платёжного поручения</Description>
+<Type>%Date</Type>
+<InitialExpression>+$H</InitialExpression>
+</Property>
+
+<Index name="PlatejDate">
+<Properties>PlatejDate</Properties>
+</Index>
+
+<Method name="GetFreeSumma">
+<Description>
+Вернуть неизрасходованную сумму, т.е. сумму которую ещё не разнесли по расходным накладным</Description>
+<Implementation><![CDATA[
+ s DocId=%this.%Id()
+ &sql(Select SUM(OplSumma) into :OplSumma from Docs.Rash where Platej=:DocId)
+ i SQLCODE s OplSumma=0
+ q %this.Summa-OplSumma
+]]></Implementation>
+</Method>
+
+<Method name="GetRashSumma">
+<Description>
+Вернуть сумму зачисленную на расходные накладные, т.е. сумму которую уже разнесли по расходным накладным</Description>
+<Implementation><![CDATA[
+ s DocId=%this.%Id()
+ &sql(Select SUM(OplSumma) into :OplSumma from Docs.Rash where Platej=:DocId)
+ i SQLCODE s OplSumma=0
+ q OplSumma
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>PlatejkaDefaultData</DefaultData>
+<Data name="PlatejkaDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"Platejka"</Subscript>
+<Value name="1">
+<Value>Plat</Value>
+</Value>
+<Value name="2">
+<Value>Poluh</Value>
+</Value>
+<Value name="3">
+<Value>Typeplatej</Value>
+</Value>
+<Value name="4">
+<Value>Rash</Value>
+</Value>
+<Value name="5">
+<Value>RubSumma</Value>
+</Value>
+<Value name="6">
+<Value>Kurs</Value>
+</Value>
+<Value name="7">
+<Value>VCSummRub</Value>
+</Value>
+<Value name="8">
+<Value>VCSummCurr</Value>
+</Value>
+<Value name="9">
+<Value>MMSummRub</Value>
+</Value>
+<Value name="10">
+<Value>MMSummCurr</Value>
+</Value>
+<Value name="11">
+<Value>TLSummRub</Value>
+</Value>
+<Value name="12">
+<Value>TLSummCurr</Value>
+</Value>
+<Value name="13">
+<Value>ViconteSummRub</Value>
+</Value>
+<Value name="14">
+<Value>ViconteSummCurr</Value>
+</Value>
+<Value name="15">
+<Value>MastermaxSummRub</Value>
+</Value>
+<Value name="16">
+<Value>MastermaxSummCurr</Value>
+</Value>
+<Value name="17">
+<Value>TullSummRub</Value>
+</Value>
+<Value name="18">
+<Value>TullSummCurr</Value>
+</Value>
+<Value name="19">
+<Value>PlatejDate</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

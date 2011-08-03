@@ -1,0 +1,32 @@
+<html>
+<head>
+
+<!-- Put your page Title here -->
+<title>	Cache Server Page </title>
+
+</head>
+
+<body>
+<script language="cache" runat="server">
+ s SourceDoc=%request.Get("SourceDoc")
+ s DestinationDoc=%request.Get("DestinationDoc")
+ s SourceDocObj=##class(Docs.Super).%OpenId(SourceDoc)
+ s DestinationDocObj=##class(Docs.Super).%OpenId(DestinationDoc)
+ s i="" f  s i=SourceDocObj.Items.Next(i) q:i=""  d
+ . s ItremObj = SourceDocObj.Items.GetAt(i)
+ . s GoodsId=ItremObj.Goods.%Id()
+ . s Quantity=ItremObj.quantreal
+ . if $ISOBJECT(ItremObj.addr) s addrId = ItremObj.addr.%Id()
+ . else  s addrId = ""
+ . s InventItem = ##class(Docs.InventItems).%New()
+ . d InventItem.GoodsSetObjectId(GoodsId)
+ . d:addrId InventItem.addrSetObjectId(addrId)
+ . d InventItem.DocTypeSetObjectId(DestinationDocObj.%ClassName(1))
+ . s InventItem.Quantity = Quantity
+ . d DestinationDocObj.Items.Insert(InventItem)
+ s ok=DestinationDocObj.%Save()
+ if ok w "Документ "_DestinationDocObj.Name_"&nbsp;&nbsp;&nbsp;&nbsp;"_DestinationDocObj.Comment_" успешно сохранён используя данные "_SourceDocObj.Name
+ else  w "Ошибка при сохранении "_DestinationDocObj.Name_"&nbsp;&nbsp;&nbsp;&nbsp;"_DestinationDocObj.Comment_"<br>"_$$GetOneErrorText^%apiOBJ(ok,1)
+</script>
+</body>
+</html>

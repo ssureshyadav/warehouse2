@@ -1,0 +1,95 @@
+
+
+<html>
+
+<head>
+
+
+<script language="javascript" type="text/javascript">
+
+// это вызовется при загрузке страницы
+function onload()
+{
+	//загрузим Listview
+	InitListView();
+	
+	//загрузим дерево, 
+	//почему то функции работы с картинками работают только в VB
+	VBLoad();
+}
+
+// Инициализируем listview
+function InitListView()
+{
+	//размеры
+	ListViewID.style.width="200pt";
+	ListViewID.style.height="100pt";
+	
+	//первая колонка
+	o1=ListViewID.ColumnHeaders.Add();
+	ListViewID.ColumnHeaders.Item(1).Text="Колонка";
+	
+	//второй столбец
+	o1=ListViewID.ColumnHeaders.Add();
+	ListViewID.ColumnHeaders.Item(2).Text="Столбец";
+	
+	ListViewID.ListItems.Add();
+	ListViewID.ListItems.Item(1).Text="Текст в колонке";
+	ListViewID.ListItems.Item(1).ListSubItems.Add();
+    ListViewID.ListItems.Item(1).ListSubItems.Item(1).Text="Текст в столбце";
+}
+
+
+</script>
+
+<script language="VBscript">
+
+Sub VBLoad()
+	TreeViewID.style.width="200pt"
+	TreeViewID.style.height="100pt"
+	Set o=TreeImgList.ListImages.Add(1,"open",LoadPicture("c:/fopen.bmp"))
+	Set o=TreeImgList.ListImages.Add(1,"close",LoadPicture("c:/fclose.bmp"))
+	TreeViewID.ImageList=TreeImgList
+	
+	Set node = TreeViewID.Nodes.Add(,,"key1"," Первая нода")
+		node.Image="close"
+		node.SelectedImage="open"
+		
+	Set node = TreeViewID.Nodes.Add("key1",4,"key11"," Первая дочерняя нода")
+		node.Image="close"
+		node.SelectedImage="open"
+		
+	Set node = TreeViewID.Nodes.Add(,,"key2"," Вторая нода")
+		node.Image="close"
+		node.SelectedImage="open"
+End Sub
+</script>
+
+</head>
+<body onload="onload()" topmargin=4 bottommargin=0>
+
+<table cellpadding=20>
+<tr>
+	<Td>Treeview ActiveX<br>
+		<OBJECT id="TreeViewID" classid="clsid:C74190B6-8589-11D1-B16A-00C0F0283628" style="border:none;behavior:url('#default#download')"  codebase="Cab\MSComCtl.CAB">
+		</OBJECT>
+		<OBJECT id="TreeImgList" classid="clsid:2C247F23-8591-11D1-B16A-00C0F0283628" codebase="Cab\MSComCtl.CAB"><PARAM NAME="ImageWidth" VALUE="16">
+			<PARAM NAME="ImageHeight" VALUE="16">
+		</OBJECT>
+	</td>
+	<td>Listview ActiveX<br>
+		<OBJECT id="ListViewID" classid="clsid:BDD1F04B-858B-11D1-B16A-00C0F0283628" style="border:none;behavior:url('#default#download')" codebase="Cab\MSComCtl.CAB#Version=6,0,88,62">
+			<PARAM NAME="View" VALUE="3">
+			<PARAM NAME="Appearance" VALUE="1">
+			<PARAM NAME="FullRowSelect" VALUE="True">
+			<PARAM NAME="MultiSelect" VALUE="True">
+			<PARAM NAME="GridLines" VALUE="True">
+			<PARAM NAME="LabelEdit" VALUE="1">
+		</OBJECT>
+	</td>
+</tr>
+</table>
+
+
+</body>
+</html>

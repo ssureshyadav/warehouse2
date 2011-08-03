@@ -1,0 +1,335 @@
+<public:component tagname='iGrid'>
+<PUBLIC:DEFAULTS viewLinkContent />
+<public:ATTACH EVENT="ondocumentready" HANDLER="init"/>
+<PUBLIC:PROPERTY NAME="width" VALUE="" />
+<PUBLIC:PROPERTY NAME="height" VALUE="" />
+<PUBLIC:PROPERTY NAME="rows" VALUE="0" get="getrows" />
+<PUBLIC:PROPERTY NAME="cols" VALUE="0" get ="getcols" />
+<PUBLIC:PROPERTY NAME="Enabled" VALUE="1" />
+<PUBLIC:PROPERTY NAME="RowMode" VALUE="false" />
+
+<public:method name = "RemoveSelectedRows" />
+<public:method name = "Clear" />
+<public:method name = "AddRow" />
+<public:method name = "loadfrommethod" />
+<public:method name = "GetXmlContentByRows" />
+<public:method name = "DrawHeaders" />
+<public:method name = "AddRowsInstruct" />
+<public:method name = "GetTableSumma" />
+<public:method name = "MakeCombo" />
+<public:event name="onLoadComplete" id="onLoadComplete" />
+
+<HTML>
+<head>
+<script language="Jscript">
+function init(){
+	iGrid.style.width=width;
+	iGrid.style.height=height;
+	iGrid.Enabled=Enabled;
+	iGrid.MultiSelect=true;
+	iGrid.RowMode=RowMode;
+}
+
+function ReturnSpace(Txt){
+if(Txt==null)return "";
+return Txt;
+}
+
+function loadfrommethod(classmethod,param1,param2,param3){
+//window.open("classmethod.csp?classmethod="+classmethod+"&param1="+param1+"&param2="+param2+"&param3="+param3)
+var xmlDoc = new ActiveXObject("Msxml2.DOMDocument.3.0");
+xmlDoc.async = false;
+xmlDoc.validateOnParse = false;
+xmlDoc.load("classmethod.csp?classmethod="+classmethod+"&param1="+param1+"&param2="+param2+"&param3="+param3);
+ok=lookError(xmlDoc);
+if(!ok)return false
+parseresult(xmlDoc);
+onLoadComplete.fire();
+}
+
+function lookError(xmlDoc){
+if (xmlDoc.parseError.errorCode != 0) {
+   var myError = xmlDoc.parseError;
+   alert("Ошибка анализа XML\n" + myError.reason);
+   return false
+} else {
+   return true
+}
+}
+
+function DrawHeaders(Captions,Keys,Tags,Widths,Combos){
+iGrid.Redraw = false
+for (var i = 0; i < Captions.length; i++)
+	{
+	var Caption = Captions[i];
+	var Key = Keys[i];
+	var HdrTextFlag = 0;
+	var iIconIndex = -1;
+	//если передали ширину колокни, используем, а иначе 130
+	if(typeof(Widths)!="undefined"){var Width=Widths[i];}
+	else{var Width = 130;}
+	var bVisible = true;
+	var colobj=iGrid.AddCol(Key,Caption,HdrTextFlag,iIconIndex,Width,bVisible);
+	if(ReturnSpace(Combos)!="")
+		{
+		if(Combos[i])
+			{
+			colobj.eType=1;
+			colobj.sCtrlKey =Combos[i];
+			}
+		}
+	iGrid.ColSortType(i+1)=11;
+	iGrid.ColTag(i+1)=Tags[i]
+	iGrid.ColDefaultCell(i+1).eTextFlags = 16
+	}
+iGrid.Redraw = true
+}
+
+function getAttrib(xmlnode,attr){
+if(xmlnode==null)return ""
+if(xmlnode.getAttribute(attr)==null)return ""
+return xmlnode.getAttribute(attr);
+}
+
+function returnSingleSubNode(obj,node,subnode){
+if(obj.selectSingleNode(node)==null) return "";
+if(obj.selectSingleNode(node).selectSingleNode(subnode)==null) return "";
+return obj.selectSingleNode(node).selectSingleNode(subnode).text;
+}
+
+function GetXmlContentByRows(){
+var Name = new Array();  //Name[номер столбца]=имя поля
+Name[1]="addr";
+Name[2]="Goods";
+Name[3]="quantdefault";
+Name[4]="quantreal";
+var xmlDoc = new ActiveXObject("Msxml2.DOMDocument.3.0");
+var RootElement = xmlDoc.createElement("RootElement");
+xmlDoc.documentElement=RootElement;
+var AllObjects = xmlDoc.createElement("AllObjects");
+if(iGrid.RowCount==0){
+	RootElement.appendChild(AllObjects);
+	return xmlDoc;
+	}
+for (var y = 1; y <= iGrid.RowCount; y++)
+	{
+	var OneObject = xmlDoc.createElement("OneObject");
+	var newAtt = xmlDoc.createAttribute("id");
+   	var namedNodeMap = OneObject.attributes;
+	newAtt.text=iGrid.RowKey(y)
+	namedNodeMap.setNamedItem(newAtt);
+		for(var x=1; x<=iGrid.ColCount; x++){
+		var FieldName=iGrid.ColKey(x)
+		var FieldElement = xmlDoc.createElement(FieldName);
+		var Fieldtext = xmlDoc.createElement("text");
+		var CellValue = iGrid.CellValue(y, x);
+		if(typeof(CellValue)=="object")var CellValue=CellValue.ObjectId;
+		Fieldtext.text=CellValue
+		FieldElement.appendChild(Fieldtext);
+		var Fieldtype = xmlDoc.createElement("type");
+		Fieldtype.text=iGrid.ColTag(x);
+		FieldElement.appendChild(Fieldtype);
+		OneObject.appendChild(FieldElement);
+		}
+	AllObjects.appendChild(OneObject);
+   }
+RootElement.appendChild(AllObjects);
+return xmlDoc;
+}
+
+function AddRowsInstruct(StringsArray){
+iGrid.Redraw = false;
+var RowCount=iGrid.RowCount;
+for(var i=0; i<StringsArray.length-1; i++)
+	{
+	var onestr=StringsArray[i].split("~");
+	var Goods=onestr[9];
+	var GoodsID=onestr[0];
+	var Price=onestr[10];
+	iGrid.AddRow()
+	SetInnerObjectInCell(iGrid.ColIndex("Goods"),RowCount+i+1,Goods,GoodsID)
+	iGrid.CellValue(RowCount+i+1,iGrid.ColIndex("Price"))=Price
+	iGrid.AutoHeightRow(RowCount+i+1)
+	}
+iGrid.Redraw = true;
+}
+
+function GetTableSumma(){
+var TotalIndex = iGrid.ColIndex("Total")
+var GetTableSumma=0
+	for(var I=1; I<=iGrid.RowCount; I++){
+		var CellValue=iGrid.CellValue(I,TotalIndex)
+		CellValue = new Number(CellValue) 	//придётся перевести в число 	
+		var GetTableSumma = GetTableSumma + CellValue
+		}
+return GetTableSumma.toFixed(2).toString()
+}
+
+function MultipleFn(Multiplic1,Multiplic2,ColKey,lRow){
+var NumberResult=Multiplic1*Multiplic2
+//укоротим до 2 цифр после запятой, переведём в тип String
+var StringResult=NumberResult.toFixed(2).toString()
+iGrid.CellValue(lRow,iGrid.ColIndex(ColKey))=StringResult
+return "fuck off"
+}
+</script>
+
+<script language="VBscript">
+Dim SystemDecimalDelimeter
+SystemDecimalDelimeter = ","
+
+Function iGrid_CellSelectionChange(y,x,sel)
+Dim ItemText,newItem,ItemArray,goods
+If sel And iGrid.ColKey(x)="addr" Then 
+	Call ChangeAddressPath(x,y,1)
+End If 
+If sel And iGrid.ColKey(x)="image" Then 
+	Call ShowImages(y)
+End If 
+End Function
+
+Function iGrid_ColWidthChanged(lCol, lWidth)
+Dim i
+With iGrid	
+	For i=1 To .RowCount
+		.AutoHeightRow(i)
+	Next
+End With
+End Function
+
+//Показать изображение товара
+Sub ShowImages(y)
+Dim CellObject,goods,newItem
+	If TypeName(iGrid.CellValue(y,2))="CellInnerObject" Then
+		Set CellObject = iGrid.CellValue(y,2)
+		goods=CellObject.ObjectId 
+		newItem=window.showModalDialog("showgoodsimages.csp?GoodsId="&goods,"","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+	End If
+End Sub
+
+//Сменить место хранения для ячейки в таблице
+Sub ChangeAddressPath(x,y,depot)
+Dim CellObject,goods,newItem
+	If TypeName(iGrid.CellValue(y,x))="CellInnerObject" Then
+		Set CellObject = iGrid.CellValue(y,x)
+		goods=CellObject.ObjectId 
+	End If
+	newItem=window.showModalDialog("storemodal2.csp?goods="&goods&"&depot="&depot,"Store.Address","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+	
+	If newItem<>"" Then
+		ItemArray=Split(newItem, "~")
+		if IsArray(ItemArray) Then
+			if ItemArray(0)="changedepot" Then
+				Call ChangeAddressPath(x,y,ItemArray(1))
+			end if
+			Set CellObject = New CellInnerObject
+			CellObject.ObjectId = ItemArray(0)
+			CellObject.ObjectName = ItemArray(1)
+			Set iGrid.CellValue(y, x)=CellObject
+		End If
+	End If
+End Sub
+
+Sub MakeCombo(DISPLAYLIST,VALUELIST,ComboName)
+Dim VALUELISTarray,DISPLAYLISTarray,I
+   With iGrid
+      With .Combos.Add(ComboName)
+	  DISPLAYLISTarray= Split(DISPLAYLIST, ",")
+	  VALUELISTarray = Split(VALUELIST, ",")
+	  if IsArray(DISPLAYLISTarray) And UBound(DISPLAYLISTarray)>-1 Then
+			For I=1 TO UBound(DISPLAYLISTarray)
+			.AddItem DISPLAYLISTarray(I), VALUELISTarray(I)
+			Next
+	  End If
+      End With
+   End With
+End Sub
+
+Function Clear()
+	iGrid.Clear()
+End Function
+
+Function RemoveSelectedRows()
+Dim i
+With iGrid
+.Redraw = False
+   For i = .RowCount To 1 Step -1
+      If .CellSelected(i, 1) Then
+        .RemoveRow(i)
+      End If
+   Next
+.Redraw = True
+End With 
+End Function
+
+Function parseresult(xmlDoc)
+Dim oNodeList,i,OneObject,ColIndex,ColumnKey,CurrentNode,CellInnerObject,RowId
+Set oNodeList = xmlDoc.selectNodes("//AllObjects/*")
+With iGrid 
+	.Redraw = False
+	.DefaultRowHeight = 20
+	.RowCount = oNodeList.length
+	For i = 1 To oNodeList.length
+		Set OneObject = oNodeList.item(i-1)		'Текущий узел (строка из базы)
+		RowId = getAttrib(OneObject,"id")		'ID строки в базе
+		FOR ColIndex=1 To iGrid.ColCount		'цикл по колонкам грида
+			ColumnKey=iGrid.ColKey(ColIndex)	'Имя свойства в Cache (например Goods или Quantity) 
+			Set CurrentNode = OneObject.selectSingleNode(ColumnKey)	//Текущая нода - в ней данные для текущей ячейки грида
+			CurrentId = getAttrib(CurrentNode,"id")
+			CurrentValue = getAttrib(CurrentNode,"Value")
+			CurrentValue = Replace(CurrentValue,"&quot;",Chr(34))
+			CurrentValue = Replace(CurrentValue,"&#39;",Chr(39))
+			CurrentValue = Replace(CurrentValue,"&lt;",Chr(60))
+			CurrentValue = Replace(CurrentValue,"&gt;",Chr(62))
+			IF CurrentId<>"" Then
+					//создаём и заполняем объект который запишем в ячейку
+				Call SetInnerObjectInCell(ColIndex,i,CurrentValue,CurrentId)
+			Else
+				iGrid.CellValue(i, ColIndex) = CurrentValue
+			End If
+		Next
+	//msgbox "RowId=" & RowId & vbCr & ".RowCount=" & .RowCount & vbCr & oNodeList.length & vbCr & "i=" & i
+	.RowKey(i) = RowId
+	.AutoHeightRow(i)
+	Next
+	.Redraw = True
+End With
+End Function
+
+Sub SetInnerObjectInCell(x,y,Name,ID)
+Set CellObject = New CellInnerObject
+CellObject.ObjectId = ID
+CellObject.ObjectName = Name
+Set iGrid.CellValue(y, x) = CellObject
+End Sub
+
+Private Sub iGrid_TextEditChange(lRow , lCol)
+Dim Fields(3000),Price,Quantity,res
+	With iGrid
+		IF .ColKey(lCol)="Price" Then
+			Quantity = .CellValue(lRow,.ColIndex("Quantity"))
+			Price = .TextEditText
+			res = MultipleFn(Quantity,Price, "Total",lRow)
+		End If
+		IF .ColKey(lCol)="Quantity" Then
+			Price = .CellValue(lRow,.ColIndex("Price"))
+			Quantity = .TextEditText
+			res = MultipleFn(Quantity,Price, "Total",lRow)
+		End If
+	End With
+End Sub
+
+Class CellInnerObject
+Dim ObjectId,ObjectName
+Function ToString()
+	ToString = ObjectName
+End Function 
+End Class
+</script>
+</head>
+<body>
+<span id="zzz"></span>
+<OBJECT id="iGrid" classid="clsid:0FB5EC68-94BB-4C4B-8F0A-2AADD6671E9E" codebase="Cab\igrid.cab#Version=2,50,0,420" style="behavior:url('#default#download');"></OBJECT>
+</body>
+</html>
+</public:component>

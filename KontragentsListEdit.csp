@@ -1,0 +1,56 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ i %session.NewSession d
+ . s %session.EndSession=1
+ . s sessionid=%request.Get("sessionid",1)
+ . s %session=%session.GetSession(sessionid)
+ . s login=$G(%session.Data("user"))
+ . //i '+login s %response.ServerSideRedirect="norights.csp" 
+ e  s sessionid=%session.SessionId
+ s Where=%request.Get("Where")
+Quit 1
+</script>
+
+<html XMLNS:SKLADiGrid>
+<IMPORT NAMESPACE="SKLADiGrid" IMPLEMENTATION="htc/iGridV7.htc">
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<title>Редактирование списка контрагентов</title>
+<script language="jscript" src="common.js"></script>
+ <script language="cache" runat="server">
+ w "<script language=""jscript"">",!
+ w "function InitFieldsArrays(){"
+ s Fields="Name,Code,Address,EMail,Agree,chief,Status,Property2506,Activity,Region,City,Phones,ContPers,Federal"
+ d ##class(Docs.Action2).ShowHeaders("Common.Kontragent",Fields,"docstr")
+ w "}",!
+ w "</"_"script>",!
+ </script>
+<script language="jscript">
+var sessionid="#(sessionid)#";
+var Where="#(Where)#";
+
+function FillDocStr(){
+InitFieldsArrays();
+docstr.DrawHeaders(Captions,Keys,Tags, Widths, Combos);
+docstr.loadfrommethod("Docs.Action2.KontragentsList",Where);
+}
+
+function startFun(){
+xmlDoc=docstr.GetXmlContentByRows();
+var ok=SendXml(1,"Common.Kontragent",xmlDoc,sessionid);
+if(isNaN(ok)){alert(ok)}
+else{returnValue=1;window.close();}
+}
+</script>
+</head>
+
+<body onload="FillDocStr();" onkeypress="ManageWindow();">
+<table width=100% height=100%>
+<tr height=95% valign=top><td>
+	<SKLADiGrid:iGrid id="docstr" width="100%" height="550" Enabled="true"  /><br>
+</td></tr>
+<tr height=5% valign=bottom><td>
+	<center><br><sklad:Button value="Сохранить" onclick="startFun();" style="#($G(SaveButtonStyle))#"><sklad:Button onclick="windowclose();" value="Отмена"></center>
+</tr></td>
+</table>
+</body>
+</html>

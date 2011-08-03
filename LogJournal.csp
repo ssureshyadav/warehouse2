@@ -1,0 +1,63 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ s login=$G(%session.Data("user"))
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ q 1
+</script>
+
+<html XMLNS:SKLADList XMLNS:SKLAD2>
+<IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
+<head>
+<title>Журнал доступа к системе</title>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="jscript" src="common.js"></script>
+<script language="jscript">
+var ColCode="";
+
+function gg(){
+if(ColCode=="")return false;
+start();
+#server(Common.Rights.CloseDeadLogins())#
+Show(ColCode+" %STARTSWITH '"+fldval.value+"'")
+}
+
+function colclick(){
+	if(Dictionary2.ColType=="%Date"){alert("Поля с датами не обрабатываются");return false;}
+	namfld.innerText=Dictionary2.ColName;
+	ColCode=Dictionary2.ColCode;
+}
+
+function load(){
+start();
+Dictionary2.LoadHeaders();
+}
+
+function Show(where){
+where=ReturnSpace(where);
+Dictionary2.DownLoad(where,"","","Dat desc,Tim desc");
+end()
+}
+
+function start(){
+MainNameCellText=MainNameCell.innerText;
+MainNameCell.innerText="...минуточку...";
+}
+
+function end(){
+MainNameCell.innerText=MainNameCellText;
+}
+</script>
+
+</head>
+<body onload="load()">
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<td width=10%></td>
+<TD width=80% id="MainNameCell" align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" ><strong>Журнал работы с системой</strong></TD>
+<td  width=10% align=right></td>
+</tr>
+</table><br>
+<sklad:Button value="Назад" onclick="window.location.href='tuneup.csp'"><br>
+<span id="namfld"></span>&nbsp;<input type="text" id="fldval" onkeyup="gg();">
+ <SKLADList:listview width=100% height=150 id="Dictionary2" zonColumnClick="colclick()" onAddColumns="Show('');" ClassName="Users.Journal" /><br>
+</body>
+</html>

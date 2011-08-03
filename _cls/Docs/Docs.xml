@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.Docs">
+<Super>%Persistent</Super>
+<TimeCreated>60360,82943.788788</TimeCreated>
+
+<Property name="Name">
+<Description>
+Наименование</Description>
+<Type>%String</Type>
+<Required>1</Required>
+</Property>
+
+<Index name="NameInd">
+<Properties>Name</Properties>
+</Index>
+
+<Property name="Cl">
+<Description>
+Имя класса</Description>
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Property name="OperType">
+<Description>
+Тип Операции</Description>
+<Type>%String</Type>
+</Property>
+
+<Index name="ClIndex">
+<IdKey>1</IdKey>
+<Properties>Cl</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Docs.DocsD</DataLocation>
+<DefaultData>DocsDefaultData</DefaultData>
+<IdLocation>^Docs.DocsD</IdLocation>
+<IndexLocation>^Docs.DocsI</IndexLocation>
+<StreamLocation>^Docs.DocsS</StreamLocation>
+<Data name="DocsDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Name</Value>
+</Value>
+<Value name="3">
+<Value>Cl</Value>
+</Value>
+<Value name="4">
+<Value>OperType</Value>
+</Value>
+</Data>
+<Property name="Cl"/>
+<Property name="Name"/>
+<Property name="OperType"/>
+</Storage>
+</Class>
+</Export>

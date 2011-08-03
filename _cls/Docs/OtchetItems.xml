@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.OtchetItems">
+<Super>Docs.DocItems</Super>
+<TimeCreated>60392,65765.800838</TimeCreated>
+
+<Property name="goodssource">
+<Description>
+Источник товара</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=",Склад,Покупка"/>
+<Parameter name="VALUELIST" value=",1,2"/>
+</Property>
+
+<Property name="serial">
+<Description>
+Серийный номер</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="garant">
+<Description>
+Гарантийный талон</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="talon">
+<Description>
+Отрывной талон</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=",,А,Б,В,Предпрод."/>
+<Parameter name="VALUELIST" value=",0,1,2,3,4"/>
+</Property>
+
+<Property name="Dat">
+<Description>
+Дата</Description>
+<Type>%Date</Type>
+<Parameter name="FORMAT" value="4"/>
+</Property>
+
+<Index name="DatInd">
+<Properties>Dat</Properties>
+</Index>
+
+<Property name="Comment">
+<Description>
+Примечание</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="500"/>
+</Property>
+
+<Property name="RemType">
+<Description>
+Тип ремонта</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=",Ремонт,Акт (Электроинструмент),Диагностика (Электроинструмент),Акт (Бытовая техника),Диагностика (Бытовая техника),Не указано"/>
+<Parameter name="VALUELIST" value=",0,1,2,3,4,-1"/>
+</Property>
+
+<Index name="RemTypeInd">
+<Properties>RemType</Properties>
+</Index>
+
+<Property name="StringType">
+<Description>
+Тип строки</Description>
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="DISPLAYLIST" value=",Ремонт,Отчёт за деталь"/>
+<Parameter name="VALUELIST" value=",0,1"/>
+</Property>
+
+<Index name="StringTypeInd">
+<Properties>StringType</Properties>
+</Index>
+
+<Property name="remcost">
+<Description>
+Стоимость ремонта</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="RemTovar">
+<Description>
+Ремонтируемый товар</Description>
+<Type>Goods.Goods</Type>
+</Property>
+
+<Index name="RemTovarInd">
+<Properties>RemTovar</Properties>
+</Index>
+
+<Property name="Groups">
+<Description>
+Группировка моделей и деталей принадлежащих им</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Property name="ActNumber">
+<Description>
+Номер акта</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="SummaRub">
+<Description>
+Рублёвая стоимость</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="Currency">
+<Description>
+Валюта в которой считали</Description>
+<Type>%String</Type>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+/*
+Method CalculatedStringRubSumma()
+{
+	s Result = ..Total
+	
+	if (..StringType=1)&&(..Currency="Рубли") d
+	. //если строка - деталь и указана сумма в рублях
+	. s Result = $J(..Quantity*..SummaRub,"",2)
+	if (..StringType=1)&&(..Currency'="Рубли") d
+	. //если строка - деталь и не указана сумма в рублях
+	. s innerkurs=##class(Goods.GoodsAction).kurs(.w,..Doc.Dat)	//найдём курс на дату отчёта
+	. s Result = $J(..Total * innerkurs,"",2)
+	
+	q Result
+}
+*/
+]]></Content>
+</UDLText>
+
+<Method name="CalculatedStringRubSumma">
+<Implementation><![CDATA[
+	s Result = ..Total
+	
+	if (..StringType=1) d
+	. s innerkurs=##class(Goods.GoodsAction).kurs(.w,..Doc.Dat)	//найдём курс на дату отчёта
+	. s KontrCurrency=..Doc.Kontr.Currency
+ 	. if (..Currency="Рубли")&&(KontrCurrency=1) s Result = $J(..Quantity*..SummaRub,"",2)
+ 	. if (..Currency="Рубли")&&(KontrCurrency=2) s Result = $J(..Quantity*..SummaRub*(1/innerkurs),"",2)
+ 	. if (..Currency["Долл")&&(KontrCurrency=1) s Result = $J(..Quantity*..Price*innerkurs,"",2)
+ 	. if (..Currency["Долл")&&(KontrCurrency=2) s Result = $J(..Quantity*..Price,"",2)
+	
+	q Result
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>OtchetItemsDefaultData</DefaultData>
+<Data name="OtchetItemsDefaultData">
+<Subscript>"OtchetItems"</Subscript>
+<Value name="1">
+<Value>goodssource</Value>
+</Value>
+<Value name="2">
+<Value>serial</Value>
+</Value>
+<Value name="3">
+<Value>remcost</Value>
+</Value>
+<Value name="4">
+<Value>garant</Value>
+</Value>
+<Value name="5">
+<Value>talon</Value>
+</Value>
+<Value name="6">
+<Value>RemTovar</Value>
+</Value>
+<Value name="7">
+<Value>Dat</Value>
+</Value>
+<Value name="8">
+<Value>Comment</Value>
+</Value>
+<Value name="9">
+<Value>RemType</Value>
+</Value>
+<Value name="10">
+<Value>StringType</Value>
+</Value>
+<Value name="11">
+<Value>Groups</Value>
+</Value>
+<Value name="12">
+<Value>ActNumber</Value>
+</Value>
+<Value name="13">
+<Value>SummaRub</Value>
+</Value>
+<Value name="14">
+<Value>Currency</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

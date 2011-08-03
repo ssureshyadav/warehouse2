@@ -1,0 +1,1031 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+if %request.Get("word")="on"
+{
+ set %response.ContentType = "application/msword"
+ do %response.SetHeader("Content-Disposition","attachment;word.doc")
+ set %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+}
+ q 1
+</script>
+<script language="cache" runat="server">
+ s mn(1)="января",mn(2)="февраля",mn(3)="марта",mn(4)="апреля",mn(5)="мая",mn(6)="июня",mn(7)="июля",mn(8)="августа",mn(9)="сентября",mn(10)="октября",mn(11)="ноября",mn(12)="декабря"
+ s docid=%request.Get("id")
+ s doc=##class(Docs.Prih).%OpenId(docid)
+ d:$ISOBJECT(doc)
+ . s docname=doc.Name
+ . s docdate=doc.Dat
+ . d:docdate'=""
+ . . s docdate=$ZD(docdate,4)
+ . . s docdate=$P(docdate,"/",1)_" "_mn(+$P(docdate,"/",2))_" "_$P(docdate,"/",3)
+ . s kontr=doc.Kontr
+ . d:$ISOBJECT(kontr)
+ . . s kname=doc.Kontr.Name
+ . . s kaddr=doc.Kontr.Address
+ . . s bank=doc.Kontr.bank
+ . . d:$ISOBJECT(bank)
+ . . . s pbank=bank.pbank
+ . . . s city=bank.city
+ . . . s kpp=bank.kpp
+ . . . s inn=bank.inn
+ . . . s bik=bank.bik
+ . . . s rsch=bank.rsch
+ . . . s ksch=bank.ksch
+ . . . s code=bank.code
+ . . . s okpo=bank.okpo
+ s kurs=##class(Goods.GoodsAction).kurs(.other)
+ s kurs2=$J(kurs,".",2)
+ s nds=+$G(other("nds"))/100
+ s nsp=+$G(other("nsp"))/100
+ i nds'=0 s antinds=1/(1+nds)
+ e  s antinds=1
+ i nsp'=0 s antinsp=1/(1+nsp)
+ e  s antinsp=1
+ s docname2=##class(Docs.Action).GetDocNameFromClass("Docs.Prih")
+</script>
+<html>
+
+<head>
+<title>#(docname2)#</title>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1251">
+<style id="Приходная накл_3173_Styles">
+<!--table
+	{mso-displayed-decimal-separator:"\,";
+	mso-displayed-thousand-separator:" ";}
+.xl153173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:10.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:Arial;
+	mso-generic-font-family:auto;
+	mso-font-charset:0;
+	mso-number-format:General;
+	text-align:general;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl223173
+	{color:windowtext;
+	font-size:8.5pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:left;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;
+	padding-left:12px;
+	mso-char-indent-count:1;}
+.xl233173
+	{color:windowtext;
+	font-size:10.0pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:left;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;
+	padding-left:12px;
+	mso-char-indent-count:1;}
+.xl243173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:9.0pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:left;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl253173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:8.5pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:left;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl263173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:12.0pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:left;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl273173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:8.5pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:Fixed;
+	text-align:left;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl283173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:8.5pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:Fixed;
+	text-align:general;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl293173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:8.5pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:general;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl303173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:10.0pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:Fixed;
+	text-align:left;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl313173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:8.5pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:left;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl323173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:8.5pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:Fixed;
+	text-align:general;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl333173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:8.5pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:general;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl343173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:9.0pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:Fixed;
+	text-align:general;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl353173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:10.0pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:Fixed;
+	text-align:general;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl363173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:9.0pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:center;
+	vertical-align:bottom;
+	border:.5pt solid windowtext;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl373173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:9.0pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:Fixed;
+	text-align:center;
+	vertical-align:bottom;
+	border:.5pt solid windowtext;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl383173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:8.5pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:center;
+	vertical-align:bottom;
+	border:.5pt solid windowtext;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl393173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:8.5pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:general;
+	vertical-align:bottom;
+	border:.5pt solid windowtext;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl403173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:8.5pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:left;
+	vertical-align:bottom;
+	border:.5pt solid windowtext;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl413173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:8.5pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:Fixed;
+	text-align:general;
+	vertical-align:bottom;
+	border:.5pt solid windowtext;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl423173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:9.0pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:Fixed;
+	text-align:center-across;
+	vertical-align:bottom;
+	border:.5pt solid windowtext;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl433173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:8.5pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:center;
+	vertical-align:bottom;
+	border-top:.5pt solid windowtext;
+	border-right:.5pt solid windowtext;
+	border-bottom:none;
+	border-left:.5pt solid windowtext;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl443173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:8.5pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:left;
+	vertical-align:bottom;
+	border-top:.5pt solid windowtext;
+	border-right:.5pt solid windowtext;
+	border-bottom:none;
+	border-left:.5pt solid windowtext;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl453173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:8.5pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:Fixed;
+	text-align:general;
+	vertical-align:bottom;
+	border-top:.5pt solid windowtext;
+	border-right:.5pt solid windowtext;
+	border-bottom:none;
+	border-left:.5pt solid windowtext;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl463173
+	{color:windowtext;
+	font-size:8.5pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:left;
+	vertical-align:bottom;
+	border-top:1.0pt solid windowtext;
+	border-right:none;
+	border-bottom:1.0pt solid windowtext;
+	border-left:1.0pt solid windowtext;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;
+	padding-left:12px;
+	mso-char-indent-count:1;}
+.xl473173
+	{color:windowtext;
+	font-size:8.5pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:left;
+	vertical-align:bottom;
+	border-top:1.0pt solid windowtext;
+	border-right:none;
+	border-bottom:1.0pt solid windowtext;
+	border-left:none;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;
+	padding-left:12px;
+	mso-char-indent-count:1;}
+.xl483173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:8.5pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:left;
+	vertical-align:bottom;
+	border-top:1.0pt solid windowtext;
+	border-right:none;
+	border-bottom:1.0pt solid windowtext;
+	border-left:none;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl493173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:8.5pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:Fixed;
+	text-align:general;
+	vertical-align:bottom;
+	border-top:1.0pt solid windowtext;
+	border-right:none;
+	border-bottom:1.0pt solid windowtext;
+	border-left:none;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl503173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:8.5pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:Fixed;
+	text-align:general;
+	vertical-align:bottom;
+	border-top:1.0pt solid windowtext;
+	border-right:none;
+	border-bottom:1.0pt solid windowtext;
+	border-left:none;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl513173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:8.5pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:Fixed;
+	text-align:general;
+	vertical-align:bottom;
+	border-top:1.0pt solid windowtext;
+	border-right:none;
+	border-bottom:1.0pt solid windowtext;
+	border-left:1.0pt solid windowtext;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl523173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:8.5pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:Fixed;
+	text-align:general;
+	vertical-align:bottom;
+	border:1.0pt solid windowtext;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl533173
+	{color:windowtext;
+	font-size:8.5pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:left;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;
+	padding-left:12px;
+	mso-char-indent-count:1;}
+.xl543173
+	{color:windowtext;
+	font-size:9.0pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:left;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;
+	padding-left:12px;
+	mso-char-indent-count:1;}
+.xl553173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:9.0pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:general;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl563173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:9.0pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:Fixed;
+	text-align:left;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl573173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:9.0pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:general;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl583173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:9.0pt;
+	font-weight:700;
+	font-style:italic;
+	text-decoration:none;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:general;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl593173
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:9.0pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:left;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+-->
+</style>
+</head>
+
+<body>
+
+<table x:str border=0 cellpadding=0 cellspacing=0 width=981 class=xl333173
+ style='border-collapse:collapse;table-layout:fixed;width:735pt'>
+ <col class=xl333173 width=47 style='mso-width-source:userset;mso-width-alt:
+ 1718;width:35pt'>
+ <col class=xl333173 width=128 style='mso-width-source:userset;mso-width-alt:
+ 4681;width:96pt'>
+ <col class=xl333173 width=108 style='mso-width-source:userset;mso-width-alt:
+ 3949;width:81pt'>
+ <col class=xl333173 width=363 style='mso-width-source:userset;mso-width-alt:
+ 13275;width:272pt'>
+ <col class=xl333173 width=40 style='mso-width-source:userset;mso-width-alt:
+ 1462;width:30pt'>
+ <col class=xl333173 width=51 style='mso-width-source:userset;mso-width-alt:
+ 1865;width:38pt'>
+ <col class=xl333173 width=59 style='mso-width-source:userset;mso-width-alt:
+ 2157;width:44pt'>
+ <col class=xl333173 width=80 style='mso-width-source:userset;mso-width-alt:
+ 2925;width:60pt'>
+ <col class=xl333173 width=105 style='mso-width-source:userset;mso-width-alt:
+ 3840;width:79pt'>
+ <tr class=xl293173 height=21 style='height:15.75pt'>
+  <td height=21 class=xl223173 colspan=4 width=646 style='height:15.75pt;
+  width:484pt'> Накладная на поступление № #($G(docname))# от #($G(docdate))# г. <!-- по счету на покупку N 361 от 17.05.2005 -->
+ </td>
+  <td class=xl273173 width=40 style='width:30pt'></td>
+  <td class=xl283173 width=51 style='width:38pt'></td>
+  <td class=xl283173 width=59 style='width:44pt'></td>
+  <td class=xl283173 width=80 style='width:60pt'></td>
+  <td class=xl283173 width=105 style='width:79pt'></td>
+ </tr>
+ <!--
+ <tr class=xl293173 height=17 style='height:12.75pt'>
+  <td height=17 class=xl223173 colspan=3 style='height:12.75pt'><span
+  style="mso-spacerun: yes">              </span>действительна до 20 мая 2005
+  г.</td>
+  <td class=xl303173></td>
+  <td class=xl313173></td>
+  <td class=xl253173></td>
+  <td class=xl253173></td>
+  <td class=xl253173></td>
+  <td class=xl253173></td>
+ </tr>
+ -->
+ <tr height=17 style='height:12.75pt'>
+  <td height=17 class=xl223173 style='height:12.75pt'></td>
+  <td class=xl223173></td>
+  <td class=xl233173></td>
+  <td class=xl323173></td>
+  <td class=xl323173></td>
+  <td class=xl323173></td>
+  <td class=xl323173></td>
+  <td class=xl323173></td>
+  <td class=xl323173></td>
+ </tr>
+ <tr class=xl293173 height=17 style='height:12.75pt'>
+  <td height=17 class=xl223173 colspan=9 style='height:12.75pt'>Поставщик: #($G(kname))#</td>
+ </tr>
+ <tr class=xl293173 height=17 style='height:12.75pt'>
+  <td height=17 class=xl223173 style='height:12.75pt' colspan=9>Адрес: #($G(kaddr))#</td>
+ </tr>
+ <tr class=xl293173 height=17 style='height:12.75pt'>
+  <td height=17 class=xl223173 colspan=9 style='height:12.75pt'>#($G(pbank))# #($G(city))# Р/С #($G(rsch))#, БИК #($G(bik))# </td>
+ </tr>
+ <tr class=xl293173 height=17 style='height:12.75pt'>
+  <td height=17 class=xl223173 colspan=2 style='height:12.75pt'>К/С #($G(ksch))#,ИНН #($G(inn))#</td>
+ </tr>
+ <!--
+ <tr class=xl253173 height=17 style='height:12.75pt'>
+  <td height=17 class=xl223173 colspan=4 style='height:12.75pt'>Представитель Мартиросова К.В.</td>
+  <td class=xl353173></td>
+  <td class=xl283173></td>
+  <td class=xl283173></td>
+  <td class=xl283173></td>
+  <td class=xl283173></td>
+ </tr>
+ -->
+ <tr class=xl253173 height=17 style='height:12.75pt'>
+  <td height=17 class=xl223173 style='height:12.75pt'></td>
+  <td class=xl223173></td>
+  <td class=xl233173></td>
+  <td class=xl283173></td>
+  <td class=xl253173></td>
+  <td class=xl253173></td>
+  <td class=xl253173></td>
+  <td class=xl253173></td>
+  <td class=xl253173></td>
+ </tr>
+ <tr height=16 style='height:12.0pt'>
+  <td height=16 class=xl363173 style='height:12.0pt'>N п/п</td>
+  <td class=xl363173 style='border-left:none'>Артикул</td>
+  <td class=xl363173 style='border-left:none'>Код</td>
+  <td class=xl363173 style='border-left:none'>Наименование</td>
+  <td class=xl373173 style='border-left:none'>Кол-во</td>
+  <td class=xl373173 style='border-left:none'>Цена.</td>
+  <td class=xl373173 style='border-left:none'>Сумма</td>
+  <td class=xl373173 style='border-left:none'>Цена(руб.)</td>
+  <td class=xl373173 style='border-left:none'>Сумма(руб.)</td>
+ </tr>
+ <tr height=16 style='height:12.0pt'>
+  <td height=16 class=xl383173 style='height:12.0pt;border-top:none'>&nbsp;</td>
+  <td class=xl383173 style='border-top:none;border-left:none'>&nbsp;</td>
+  <td class=xl393173 style='border-top:none;border-left:none'>&nbsp;</td>
+  <td class=xl403173 style='border-top:none;border-left:none'>&nbsp;</td>
+  <td class=xl413173 style='border-top:none;border-left:none'>&nbsp;</td>
+  <td class=xl373173 style='border-top:none;border-left:none'><a
+  name="RANGE!R11C6"><span style="mso-spacerun: yes"> </span>за ед.</a></td>
+  <td class=xl423173 style='border-top:none;border-left:none'>&nbsp;</td>
+  <td class=xl423173 style='border-top:none;border-left:none'>&nbsp;</td>
+  <td class=xl423173 style='border-top:none;border-left:none'>&nbsp;</td>
+ </tr>
+<script language="cache" runat="server">
+ s tot=0,totquant=0,totch=0
+ d:$ISOBJECT(doc.Items)
+ . s i="" f  s i=doc.Items.Next(i) q:i=""  d
+ . . i $I(count)
+ . . s item=doc.Items.GetAt(i)
+ . . s:$ISOBJECT(item.Goods) goods=item.Goods.FullName
+ . . s quant=item.Quantity
+ . . s total=$J(item.Total,".",2)
+ . . s price=$J(item.Price,".",2)
+ . . s totquant=totquant+quant
+ . . s tot=tot+total
+ . . s pricechanged=$J(price*kurs,".",2)
+ . . s totchanged=$J(total*kurs,".",2)
+ . . s totch=totch+totchanged
+ . . w "<tr class=xl253173 height=15 style='height:11.25pt'>"
+ . . w "<td height=15 class=xl433173 style='height:11.25pt;border-top:none'>"_count_"</td>"
+ . . w "<td class=xl433173 style='border-top:none;border-left:none' x:num>4</td>"
+ . . w "<td class=xl443173 style='border-top:none;border-left:none'></td>"
+ . . w "<td class=xl443173 style='border-top:none;border-left:none'  >"_goods_"</td>"
+ . . w "<td class=xl453173 align=right style='border-top:none;border-left:none' >"_quant_"</td>"
+ . . w "<td class=xl453173 align=right style='border-top:none;border-left:none' >"_price_"</td>"
+ . . w "<td class=xl453173 align=right style='border-top:none;border-left:none' >"_total_"</td>"
+ . . w "<td class=xl453173 align=right style='border-top:none;border-left:none' >"_pricechanged_"</td>"
+ . . w "<td class=xl453173 align=right style='border-top:none;border-left:none' >"_totchanged_"</td>"
+ . . w "</tr>"
+ s totch=$J(totch,".",2)
+ s tot=$J(tot,".",2)
+ s totnds=$J(totch-(totch*antinds),".",2)
+ s totnsp=$J(totch-(totch*antinsp),".",2)
+ s ^mtempArt("totch")=totch
+</script>
+
+ <tr class=xl253173 height=17 style='height:12.75pt'>
+  <td height=17 class=xl463173 colspan=2 style='height:12.75pt'>Итого по документу</td>
+  <td class=xl483173>&nbsp;</td>
+  <td class=xl483173>&nbsp;</td>
+  <td class=xl493173>&nbsp;</td>
+  <td class=xl503173>&nbsp;</td>
+  <td class=xl513173 align=right >#($G(tot))#</td>
+  <td class=xl513173>&nbsp;</td>
+  <td class=xl523173 align=right >#($G(totch))#</td>
+ </tr>
+ <tr height=15 style='height:11.25pt'>
+  <td height=15 class=xl533173 style='height:11.25pt'></td>
+  <td class=xl533173></td>
+  <td class=xl333173></td>
+  <td class=xl253173></td>
+  <td class=xl283173></td>
+  <td class=xl283173></td>
+  <td class=xl283173></td>
+  <td class=xl283173></td>
+  <td class=xl283173></td>
+ </tr>
+ <tr height=16 style='height:12.0pt'>
+  <td height=16 class=xl543173 colspan=2 style='height:12.0pt'>Итого наименований</td>
+  <td class=xl333173 align=right>#(count)#</td>
+  <td class=xl243173></td>
+  <td class=xl343173></td>
+  <td class=xl283173></td>
+  <td class=xl283173></td>
+  <td class=xl283173></td>
+  <td class=xl283173></td>
+ </tr>
+ <tr height=16 style='height:12.0pt'>
+  <td height=16 class=xl543173 colspan=2 style='height:12.0pt'>Сумма к оплате</td>
+  <td class=xl293173 colspan=2> (#(totch)# руб.)</td>
+  <td class=xl563173></td>
+  <td class=xl283173></td>
+  <td class=xl283173></td>
+  <td class=xl283173></td>
+  <td class=xl283173></td>
+ </tr>
+ <tr height=16 style='height:12.0pt'>
+  <td height=16 class=xl543173 colspan=2 style='height:12.0pt'>Включая НДС</td>
+  <td class=xl333173 colspan=7>#(totnds)# руб.</td>
+ </tr>
+ <tr height=16 style='height:12.0pt'>
+  <td height=16 class=xl543173 colspan=2 style='height:12.0pt'>Включая НП</td>
+  <td class=xl333173>#(totnsp)# руб.</td>
+  <td class=xl553173></td>
+  <td class=xl563173></td>
+  <td class=xl283173></td>
+  <td class=xl283173></td>
+  <td class=xl283173></td>
+  <td class=xl283173></td>
+ </tr>
+ <tr height=17 style='height:12.75pt'>
+  <td height=17 class=xl573173 style='height:12.75pt'></td>
+  <td class=xl573173></td>
+  <td class=xl333173></td>
+  <td class=xl583173>Отпустил ___________________</td>
+  <td class=xl593173></td>
+  <td class=xl153173></td>
+  <td class=xl153173></td>
+  <td class=xl153173></td>
+  <td class=xl153173></td>
+ </tr>
+ <tr height=17 style='height:12.75pt'>
+  <td height=17 class=xl333173 style='height:12.75pt'></td>
+  <td class=xl333173></td>
+  <td class=xl333173></td>
+  <td class=xl153173></td>
+  <td class=xl153173></td>
+  <td class=xl153173></td>
+  <td class=xl153173></td>
+  <td class=xl153173></td>
+  <td class=xl153173></td>
+ </tr>
+ <tr height=17 style='height:12.75pt'>
+  <td height=17 class=xl333173 style='height:12.75pt'></td>
+  <td class=xl333173></td>
+  <td class=xl333173></td>
+  <td class=xl583173>Получил<span style="mso-spacerun: yes"> 
+  </span>___________________</td>
+  <td class=xl583173></td>
+  <td class=xl153173></td>
+  <td class=xl153173></td>
+  <td class=xl153173></td>
+  <td class=xl153173></td>
+ </tr>
+ 
+</table>
+
+</body>
+
+</html>

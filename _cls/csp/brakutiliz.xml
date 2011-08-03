@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.brakutiliz">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62179,58085.986973</TimeCreated>
+
+<Method name="GetUtilizItemFromStoreBrakID">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>ID</FormalSpec>
+<Language>cache</Language>
+<ReturnType>Docs.UtilizItems</ReturnType>
+<Implementation><![CDATA[
+  if $G(ID)="" q "<font color=""red""> Извините. При попытке создания документа утилизации произошла ошибка: не указана ячейка брака </font>"
+  s BrakObj=##class(Store.Brak).%OpenId(ID)
+  if '$ISOBJECT(BrakObj) q "<font color=""red"">Извините. При попытке создания документа утилизации произошла ошибка: невозможно прочесть ячейку брака "_ID_"</font>"
+  //
+  s obj=##class(Docs.UtilizItems).%New()
+  s obj.goodsdir=1
+  s obj.addr=BrakObj.Address
+  s obj.Goods=BrakObj.Goods
+  s obj.SourceTbl=2
+  s obj.Brak=BrakObj
+  d obj.DocTypeSetObjectId("Docs.Utiliz")
+  s obj.Quantity = 1
+  if $ISOBJECT(BrakObj.Kontr) s obj.Client=BrakObj.Kontr
+  	 
+  q obj
+ 
+]]></Implementation>
+</Method>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body>"
+	Write !,!,!,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""window.location.href='emplight.csp'"" TITLE=""""><center>Назад</center></span>"
+	Write "<br>",!
+	Write "<TABLE cellSpacing=0 width=""100%"" celpadding=""0"" >",!
+	Write "<TR>",!
+	Write "<td width=10%>"
+	Write "<img alt=""Обновить раздел"" src=""images/refresh.gif"" onclick=""window.location.reload()"">"
+	Write "</td>",!
+	Write "<TD width=80% align=center style=""BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid"" colspan=2><strong>Утилизация брака</strong></TD>",!
+	Write "<td  width=10% align=right>&nbsp;</td>",!
+	Write "</tr>",!
+	Write "</TABLE>",!
+	//проверим передавали ли нам указание создать документ утилизации
+	s StartUtilizName = "utiliz_"
+	if $O(%request.Data(StartUtilizName))["utiliz"
+	{
+	s docUtiliz = ##class(Docs.Utiliz).%New()
+	s docUtiliz.Name=##class(Docs.Action).getRashNumb("Docs.Utiliz")
+	s docUtiliz.SourceTbl=2
+	while ($O(%request.Data(StartUtilizName))["utiliz")
+	{
+	set StartUtilizName = $O(%request.Data(StartUtilizName))
+	s ID = $P(StartUtilizName,"_",2)
+	s brakQnt = "qntBrak_"_ID
+	for i=1:1:+%request.Get(brakQnt)
+	{
+	s ItemObj = ..GetUtilizItemFromStoreBrakID(ID)
+	if '$ISOBJECT(ItemObj) 
+	{
+	w ItemObj
+	CONTINUE
+	}
+	d docUtiliz.Items.Insert(ItemObj)
+	}
+	}
+	s ok = docUtiliz.%Save()
+	w "<br><font color=""#006767""><b>"
+	if '+ok 
+	{
+	w "Извините. Ошибка при сохранении документа утилизации. "
+	Do $system.OBJ.DisplayError(ok)
+	}
+	else
+	{
+	w "Создан и сохранён документ утилизации "_docUtiliz.Name
+	}
+	w "<b></font><br><br>",!
+	}
+	if $O(%request.Data("remont"))["remont" 
+	{
+	w "Необходимо создать документ на ремонт /"_$O(%request.Data("remont_"))_"/<br>"
+	}
+	Write !,"<table cellpadding=13 border=1>",!
+	Write "<tr>",!
+	Write "	<td>Контрагент",!
+	Write "	<td>Место на складе",!
+	Write "	<td rowspan=2>"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""javascript:ShowBrak()"" TITLE=""""><center>Показать брак</center></span>"
+	Write !,"<tr>",!
+	Write "	<td>",!
+	Write "		"
+	Write "<!-- <span style=""width:200px;height:20px"" onmouseout=""UnPaint(this)"" onmouseover=""Paint(this)"" class=""Kontragent"" onclick=""ChooseKonragent(this)"" oncontextmenu=""this.innerText='';this.Tag=''"" id=""Kontr"" Tag=""#($G(Kontr))#"">#($G(KontrName))#</span> -->"
+	Write !,"		"
+	Write "<span style=""width:200px;height:20px"" onmouseout=""UnPaint(this)"" onmouseover=""Paint(this)"" class=""Kontragent"" onclick=""ChooseKonragent(this)"" oncontextmenu=""this.innerText='';this.Tag=''"" id=""Kontr"" Tag="""_($G(KontragentId))_""">"
+	Write ($G(KontrName))
+	Write "</span>"
+	Write !,"	<td>"
+	Write "<span style=""width:250px;height:20px"" onmouseout=""UnPaint(this)"" onmouseover=""Paint(this)"" class=""Kontragent"" onclick=""ChooseAddress(this)"" oncontextmenu=""this.innerText='';this.Tag=''"" id=""Address"" Tag="""_($G(AddressId))_""">"
+	Write ($G(AddressPath))
+	Write "</span>"
+	Write !,"</table>",!
+	Write "<Br>",!
+	Write "<form METHOD=""POST"">"
+	Write !,..InsertHiddenFields(""),!
+	Write !,"	<table border=1>",!
+	Write " 		<tr bgcolor=""#dedede"">",!
+	Write " 		<td>Товар",!
+	Write " 		<td>Адрес",!
+	Write " 		<td>Контрагент",!
+	Write " 		<td>Дата",!
+	Write " 		<td>Количество",!
+	Write " 		<td>Утилизировать",!
+	Write " 		"
+	Write "<!-- <td>В ремонт -->"
+	Write !,"	"
+	//показать брак по контрагенту и адресу
+	if AddressId d ..ShowBrak(KontragentId,AddressId)
+	Write !,"	</table>",!
+	Write "	"
+	Write "<input type=""submit"" value=""ДА"">"
+	Write !,"</form>"
+	Write !,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	s AddressId=%request.Get("AddressId")
+	s KontragentId=%request.Get("KontragentId")
+	s AddressPath = ##class(Store.Action).AddressPath(AddressId)
+	if +KontragentId s KontrName = ##class(Common.Kontragent).GetPropertyValue(KontragentId,"Name")
+	Write !,!,!,!,!,!
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,!,"<!-- Put your page Title here -->"
+	Write !,"<title> "_($G(%session.Data("systemname")))_" </title>",!
+	Write "<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"<style>"
+	Write !,".ChkBox{border:none;width:20px}",!
+	Write ".Txt{width:40px}",!
+	Write "</style>"
+	Write !,"<script language=""javascript"" type=""text/javascript"" src=""common.js"">"
+	Write "</script>"
+	Write !,"<script language=""javascript"" type=""text/javascript"">"
+	Write !,"// вывести брак указанной ячейки и контрагента",!
+	Write "function ShowBrak()",!
+	Write "{",!
+	Write "	if(Address.Tag=="""")",!
+	Write "	{",!
+	Write "		alert(""Не указан адрес ячейки."");",!
+	Write "		return;",!
+	Write "	}",!
+	Write "	window.location.href=""?KontragentId=""+Kontr.Tag+""&AddressId=""+Address.Tag",!
+	Write "}",!
+	Write !,"//выбрать адрес ячейки",!
+	Write "function ChooseAddress(Obj,depot)",!
+	Write "{",!
+	Write "	var depot=ReturnSpace(depot);",!
+	Write "	var newItem=window.showModalDialog(""storemodal2.csp?depot=""+depot,"""",""center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;"");",!
+	Write "	if(newItem!=null){if(newItem.split(""~"")[0]==""changedepot""){DictClick(tr,newItem.split(""~"")[1])}}",!
+	Write "	if(newItem==null){return false;}",!
+	Write "	var newArr=newItem.split(InnerSplitter);",!
+	Write "	",!
+	Write "	Obj.innerText=newArr[1];",!
+	Write "	Obj.Tag=newArr[0];",!
+	Write "}",!
+	Write !,"// поставить количество браку",!
+	Write "function SetBrakQnt(obj)",!
+	Write "{",!
+	Write "	var objname=obj.name;",!
+	Write "	var QntObjName=""qnt_""+objname.split(""_"")[1];",!
+	Write "	var QntBrakObjName=""qntBrak_""+objname.split(""_"")[1];",!
+	Write "	ObjQntBrak = document.getElementById(QntBrakObjName);",!
+	Write "	ObjQnt = document.getElementById(QntObjName);",!
+	Write !,"	if (obj.checked)",!
+	Write "	{",!
+	Write "		ObjQntBrak.value=ObjQnt.value;",!
+	Write "		ObjQnt.value=""0"";",!
+	Write "	}",!
+	Write "	else",!
+	Write "	{",!
+	Write "		ObjQnt.value=ObjQntBrak.value;",!
+	Write "		ObjQntBrak.value=""0"";		",!
+	Write "	}",!
+	Write "}",!
+	Write "</script>"
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+  
+  i %session.NewSession d
+  . s %session.EndSession=1
+  . s sessionid=%request.Get("sessionid",1)
+  . s %session=%session.GetSession(sessionid)
+  .  s login=$G(%session.Data("user"))
+  . i '+login s %response.ServerSideRedirect="norights.csp" 
+  e  s sessionid=%session.SessionId
+  
+ Quit 1
+ 
+]]></Implementation>
+</Method>
+
+<Method name="ShowBrak">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>KontragentId,AddressId</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+  
+  if AddressId="" q "Невозможно вывести остаток по браку. Не указан адрес"
+ 
+  //найдём код этого места хранения	
+  	&sql(select Code into :Code from Store.Address where id=:AddressId)
+  	if SQLCODE q "Ошибка при проверке места хранения "_Address_" SQLCODE="_SQLCODE
+  	 	
+  	&sql(declare zzz cursor for
+  		select ID,Goods->FullName,Address,Qnt,%external(SourceDoc->Dat),Kontr->Name
+  		into :ID,:GoodsName,:Address,:Qnt,:Dat,:KontrName
+  		FROM Store.Brak
+  		WHERE 
+  			( (Kontr=:KontragentId) OR (:KontragentId='') OR (:KontragentId IS NULL) ) AND 
+  			(Address->Code %STARTSWITH :Code))
+  	&sql(open zzz)
+  	f  &sql(fetch zzz) q:SQLCODE  d
+  	. w "<tr>"
+  	. w "<td>"_$ZCVT(GoodsName,"O","HTML")
+  	. w "<td>"_$ZCVT(##class(Store.Action).AddressPath(Address),"O","HTML")
+  	. w "<td>"_$ZCVT(KontrName,"O","HTML")
+  	. w "<td>"_Dat
+ 	. s qntName="qnt_"_ID
+  	. s utilizName="utiliz_"_ID
+  	. s remontName="remont_"_ID
+  	. s qntBrakName="qntBrak_"_ID
+  	. s utilizChecked=$S($D(%request.Data(utilizName)):"CHECKED",1:"")
+  	. s remontChecked=$S($D(%request.Data(remontName)):"CHECKED",1:"")
+  	. s qntBrakValue=%request.Get(qntBrakName)
+  	. w "<td><input class=""Txt"" type=""text"" value="""_Qnt_""" name="""_qntName_""" id="""_qntName_""">"
+  	. w "<td><input class=""Txt"" type=""text"" value="""_qntBrakValue_""" name="""_qntBrakName_""" id="""_qntBrakName_""">"
+  	. 	w "<input class=""ChkBox"" type=""checkbox"" onclick=""SetBrakQnt(this)"" name="""_utilizName_""" "_utilizChecked_">"
+  	. //w "<td><input class=""ChkBox"" type=""checkbox"" name="""_remontName_""" "_remontChecked_">"
+  	. w "</tr>",!
+  	&sql(close zzz)
+   q
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\BrakUtiliz.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/BrakUtiliz.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>62038,6727</Default>
+</Parameter>
+</Class>
+</Export>

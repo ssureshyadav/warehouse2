@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Common.Dictionary16">
+<Description>
+История курсов валют</Description>
+<Super>%Persistent</Super>
+<TimeCreated>61438,58034.12288</TimeCreated>
+
+<Property name="Name">
+<Description>
+Курс</Description>
+</Property>
+
+<Property name="Dat">
+<Description>
+Дата</Description>
+<Type>%Library.Date</Type>
+<Parameter name="FORMAT" value="4"/>
+</Property>
+
+<Index name="Dat">
+<Properties>Dat</Properties>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Common.Dictionary16D</DataLocation>
+<DefaultData>Dictionary16DefaultData</DefaultData>
+<IdLocation>^Common.Dictionary16D</IdLocation>
+<IndexLocation>^Common.Dictionary16I</IndexLocation>
+<StreamLocation>^Common.Dictionary16S</StreamLocation>
+<Data name="Dictionary16DefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Dat</Value>
+</Value>
+<Value name="3">
+<Value>Name</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

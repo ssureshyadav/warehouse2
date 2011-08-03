@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Goods.Catalogue">
+<Description>
+Каталог групп</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60320,34623.276743</TimeCreated>
+
+<Property name="Name">
+<Description>
+Наименование</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Наименование"/>
+</Property>
+
+<Property name="Comment">
+<Description>
+Справочная информация</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Справочная информация"/>
+</Property>
+
+<Property name="Depot">
+<Description>
+Склад</Description>
+<Type>Store.Depot</Type>
+<Parameter name="CAPTION" value="Склад"/>
+</Property>
+
+<Index name="DepotIndex">
+<Properties>Depot</Properties>
+</Index>
+
+<Query name="Common">
+<Type>%SQLQuery</Type>
+<FormalSpec>depot:%String=$G(%session.Data("depot"))</FormalSpec>
+<SqlQuery> SELECT %ID,Name,Comment,Main FROM Catalogue
+ WHERE (Depot = :depot)
+ ORDER BY Name</SqlQuery>
+<Parameter name="CONTAINID" value="1"/>
+</Query>
+
+<Property name="Main">
+<Description>
+Основной</Description>
+<Type>%Boolean</Type>
+<Parameter name="CAPTION" value="Основной"/>
+</Property>
+
+<Index name="MainIndex">
+<Properties>Main</Properties>
+</Index>
+
+<Property name="ShowClients">
+<Description>
+Отправлять клиентам</Description>
+<Type>%String</Type>
+<InitialExpression>1</InitialExpression>
+<Parameter name="DISPLAYLIST" value=",Никому не отправлять,Всем отправлять, -,Электроинструмент,Бытовая техника,Электроинструмент и бытовая техника"/>
+<Parameter name="VALUELIST" value=",4,0,1,2,3,23"/>
+</Property>
+
+<Index name="ShowClientsIndex">
+<Properties>ShowClients</Properties>
+</Index>
+
+<Property name="ShowPrice">
+<Description>
+Показывать цену клиентам</Description>
+<Type>%String</Type>
+<InitialExpression>1</InitialExpression>
+<Parameter name="DISPLAYLIST" value=",Да,Нет"/>
+<Parameter name="VALUELIST" value=",1,0"/>
+</Property>
+
+<Index name="ShowPriceIndex">
+<Properties>ShowPrice</Properties>
+</Index>
+
+<Method name="GetPropertyListIndex">
+<ClassMethod>1</ClassMethod>
+<CodeMode>objectgenerator</CodeMode>
+<FormalSpec>PropertyName:%String=""</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<Implementation><![CDATA[
+ Do %code.WriteLine(" q:PropertyName="""" """"")
+ s number=""
+ s StorageStrategy=%compiledclass.Storages.GetAt(1)
+ f i=1:1:StorageStrategy.Data.Count() d  q:StorageData.Name[%compiledclass.SqlTableName
+ . s StorageData=StorageStrategy.Data.GetAt(i)
+ s data=StorageData.Values.GetNext(.number)
+ while $ISOBJECT(data) {
+ 	s PropertyName=data.Value
+ 	s ListIndex=data.Name
+ 	Do %code.WriteLine(" s Prop( """ _ PropertyName _ """)="_ListIndex)
+ 	s data=StorageData.Values.GetNext(.number)
+ 	} 	
+ Do %code.WriteLine(" Quit $G(Prop(PropertyName))")
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Trigger name="UpdTrigger">
+<Description>
+Набор триггеров и методов для поддержки версии справочника</Description>
+<Code> d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Group")</Code>
+<Event>UPDATE</Event>
+<Time>AFTER</Time>
+</Trigger>
+
+<Trigger name="InsTrigger">
+<Code> d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Group")</Code>
+<Event>INSERT</Event>
+<Time>AFTER</Time>
+</Trigger>
+
+<Trigger name="DelTrigger">
+<Code> d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Group")</Code>
+<Event>DELETE</Event>
+<Time>AFTER</Time>
+</Trigger>
+
+<Method name="%OnDelete">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>oid:%ObjectIdentity</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Group")
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="%OnAfterSave">
+<FormalSpec>insert:%Boolean</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	if (insert)||(%this.%IsModified()) d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Group")
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Goods.CatalogueD</DataLocation>
+<DefaultData>CatalogueDefaultData</DefaultData>
+<IdLocation>^Goods.CatalogueD</IdLocation>
+<IndexLocation>^Goods.CatalogueI</IndexLocation>
+<StreamLocation>^Goods.CatalogueS</StreamLocation>
+<Data name="CatalogueDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Comment</Value>
+</Value>
+<Value name="3">
+<Value>Name</Value>
+</Value>
+<Value name="4">
+<Value>Depot</Value>
+</Value>
+<Value name="5">
+<Value>Main</Value>
+</Value>
+<Value name="6">
+<Value>ShowClients</Value>
+</Value>
+<Value name="7">
+<Value>ShowPrice</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

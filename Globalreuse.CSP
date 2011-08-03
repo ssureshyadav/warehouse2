@@ -1,0 +1,42 @@
+<html>
+<head>
+<script language="JScript">
+var znachen="";
+var listItemText;
+function globvalue(){
+	var list = document.Globform.Glob;
+	listItemText =list.options[list.selectedIndex].text; //получаю выбранный текст из select
+	document.Globform.nameglob.value=listItemText;
+	znachen="";
+	ok=#server(Users.RenameGlobal.Rename(listItemText,znachen))#; // получаю значение глобальки
+	document.Globform.globval.value=ok; //получаю значение переменной
+}
+function saveglob(){
+	znachen=document.Globform.globval.value;
+	listItemText=document.Globform.nameglob.value;
+	ok=#server(Users.RenameGlobal.Rename(listItemText,znachen))#; // записываю ее	
+	alert('ok');
+		}
+</script>
+</head>
+<body>
+<form name="Globform" id="Globform">
+<table><tr><td>
+<script language="cache" runat="server">
+w "<select name=""","Glob"""," ","ID=""","Glob""","onChange=""","globvalue()""",">"
+s qwer=$Q(^UnRequiredFields("")),i=1  w "<option name=""",i,"""",">",qwer,"</OPTION>"
+s i=i+1
+f  s qwer=$Q(@qwer) q:qwer=""  d
+ .w "<option name=""",i,"""",">",qwer,"</option>"
+ .s i=i+1
+w "</select>"
+</script>
+</td><td></td></tr>
+<tr><td>название глобали:</td><td>&nbsp значение:</td></tr>
+<tr><td>
+<input type="text" name="nameglob" value="" size=59></td><td>=<input type="text" name="globval" size=10></td></tr>
+<tr><td>
+<input type="button" value="сохранить" onclick="saveglob()"></td><td></td></tr>
+</form>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<script language="cache" runat="server">
+ s Kontr=%request.Get("Kontr")
+ s silent=%request.Get("silent")
+</script>
+<html XMLNS:SKLADz XMLNS:SKLAD2 XMLNS:SKLADList>
+<IMPORT NAMESPACE="SKLADz" IMPLEMENTATION="htc/treeview.htc">
+<IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc">
+<IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
+<head>
+<title>#($G(%session.Data("systemname")))#</title>
+<link href="style.css" type=text/css rel=stylesheet>
+
+<script language="Jscript" src="common.js"></script>
+<script language="JScript">
+var Arguments=window.dialogArguments.split(InnerSplitter);
+var ClassName=Arguments[0];
+var DocID=Arguments[1];
+var DocType="Заявка на комплектующие";
+var source="";
+var Kontr="#(Kontr)#";
+
+function load(){
+PropTable.ClassName=ClassName;
+TypDocument.innerText=DocType;
+var hidefields="Dat,Tim,Stat,Source,DocType,Kontr,Otchet,User1";
+if(DocID=="")var hidefields=hidefields+",Oplacheno"
+PropTable.DownLoadPairs("",DocID,hidefields,source);
+docstr.ClassName=ClassName+"Items";
+if(source!=""){docstr.attachEvent("onAddColumns",loadgoods)}
+else{docstr.attachEvent("onAddColumns",loadgoods2)}
+docstr.LoadHeadersXML("Doc,DocType");
+}
+
+function loadgoods(){
+docstr.GetFromCard(source,"Goods.Goods","Name","AllDocuments")
+}
+
+function loadgoods2(){
+if(DocID!=""){
+docstr.loadfrommethod("Docs.Action.GetStrFromDoc",DocID,2,3)}
+}
+
+function startFun(){
+var xmldoc=PropTable.GetXmlContent();
+xmldoc=addnode(xmldoc,"Kontr",Kontr+"@Common.Kontragent")
+var xmldoc2=docstr.GetXmlContent();
+var ok=SplitSendXml("",ClassName,xmldoc,xmldoc2,"#(%session.SessionId)#");
+if(isNaN(ok)){
+	alert(ok);
+}
+else{
+ if(source!=""){
+	var ok=#server(Docs.Action.SetSourceDoc(ClassName,ok,source))#
+ 	if(isNaN(ok))alert(ok)
+ }
+ returnValue=1;
+ window.close();
+}
+}
+
+function addtovars(){
+WinResult=window.showModalDialog("selectgoods2.csp","","cener:yes;status:no;dialogHeight:700px;dialogWidth:800px;resizable:yes;")
+if(WinResult==null)return
+WinResult=WinResult.split(StringSplitter)
+var FieldCaption = new Array();
+var FieldValue = new Array();
+for(i=0 ; i<WinResult.length-1 ; i++){
+	var onestr=WinResult[i].split(InnerSplitter);
+	FieldCaption["Goods"]=onestr[1];
+	FieldValue["Goods"]=onestr[0];
+	FieldCaption["Price"]=getPrice(FieldValue["Goods"]);
+	docstr.AddRow(FieldCaption,FieldValue);
+}
+}
+
+function getPrice(tovid){
+return #server(Goods.GoodsAction.getprice(tovid))#;
+}
+
+function checkgarant(){
+var xmldoc=PropTable.GetXmlContent();
+var xmldoc2=docstr.GetXmlContent();
+var ok=SplitSendXml("",ClassName,xmldoc,xmldoc2,"#(%session.SessionId)#","Docs.Action.checkgarant");
+if(isNaN(ok)){alert(ok);return}
+WinResult=window.showModalDialog("checkgarant.csp","","cener:yes;status:no;dialogHeight:700px;dialogWidth:800px;resizable:yes;")
+}
+
+function setsumm(){
+var val=docstr.Total;
+var val=val.toFixed(2);
+PropTable.setCellValue("Summa",val);
+}
+
+</script>
+</head>
+<body  onload="load()" onkeypress="ManageWindow()">
+<center id="TypDocument" style="font-size:14pt;font:Arial;color:#112255"></center>
+<SKLAD2:table id="PropTable" width=400 height=200  />
+<fieldset><legend>Строки документа</legend>
+<SKLAD2:table id="docstr" width=100% height=200 Silent="Goods" CountTotal="true" Totalchange="setsumm()" displaybar=true />
+<sklad:LittleButton name="new+" id="add2" onclick="addtovars()" alt="Вставить товары">
+<sklad:LittleButton name="print" id="apint" onclick="prntdoc()" alt="Распечатать документ">
+<sklad:LittleButton name="ok" id="ddgr" onclick="checkgarant()" alt="Проверить гарантийные номера">
+</fieldset>
+<csp:IF CONDITION=silent'="true">
+<center><sklad:Button value="Да" onclick="startFun()">&nbsp;&nbsp;&nbsp;<sklad:Button value="Отмена" onclick="window.close()"></center>
+</csp:IF>
+</body>
+</html>

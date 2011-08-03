@@ -1,0 +1,133 @@
+<script language="cache" runat="server">
+ s source=%request.Get("source")
+
+ i source'=""
+ {
+	 s DocClass=##class(Docs.Action).GetClassFromSource(source)
+	 s naklad=##class(Docs.Super).%OpenId(source)
+	 s instrname=naklad.Name_$S(DocClass="Docs.StorageOut":"-о",DocClass="Docs.StorageIn":"-р")
+ }
+ 
+ s super=%request.Get("super")
+ i super'="" 
+ {
+	 s superdoc=##class(Operation.Instructions).%OpenId(super)
+	 s instr=superdoc.innerinstr
+	 i $ISOBJECT(instr)
+	 {
+		 s doc=instr.%Id()
+		 s DocClass=$P(instr,"@",2)
+	 }
+ }
+ s:$G(DocClass)'="" DocType=##class(Docs.Action).GetDocNameFromClass(DocClass)
+ k ^mtempAddress($G(%session.Data("user"),"undef"))
+</script>
+<html XMLNS:SKLADz XMLNS:SKLAD2 XMLNS:SKLADList>
+<IMPORT NAMESPACE="SKLADz" IMPLEMENTATION="htc/treeview.htc">
+<IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc">
+<IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
+<head>
+<title>#($G(%session.Data("systemname")))#</title>
+<link href="style.css" type=text/css rel=stylesheet>
+
+<script language="Jscript" src="common.js"></script>
+<script language="JScript">
+if(("#($G(doc))#"=="")&&("#($G(super))#"!="")){alert("Внутренняя инструкция ещё не привязана к данной инструкции");window.close();}
+var Arguments=window.dialogArguments.split(InnerSplitter);
+var ClassName=ReturnSpace(Arguments[0]);
+var DocID=ReturnSpace(Arguments[1]);
+var DocType=ReturnSpace(Arguments[2]);
+var source="#(source)#";
+if("#($G(DocClass))#"!=""){
+	var ClassName="#($G(DocClass))#"
+}
+if("#($G(DocType))#"!=""){
+	var DocType="#($G(DocType))#"
+}
+if("#($G(doc))#"!=""){
+	var DocID="#($G(doc))#"
+}
+function load(){
+if(ClassName!="Docs.StorageOut")docstr.runValidateAddress="true";
+PropTable.ClassName=ClassName;
+TypDocument.innerText=DocType;
+PropTable.DownLoadPairs("",DocID,"Dat,Tim,Stat,Source,DocType,Summa,Kontr,User1");
+docstr.ClassName=ClassName+"Items";
+docstr.LoadHeadersXML("Doc,DocType,Quantity,Price,Total");
+}
+
+function startFun(){
+DocID=ReturnSpace(Arguments[1]);
+var xmldoc=PropTable.GetXmlContent();
+var xmldoc2=docstr.GetXmlContent();
+var DocID=SplitSendXml(DocID,ClassName,xmldoc,xmldoc2,"#(%session.SessionId)#");
+if(isNaN(DocID)){alert(DocID);return}
+if(source!=""){
+	var ok=#server(Docs.Action.SetSourceDoc(ClassName,DocID,source))#;
+	if(isNaN(ok)){alert(ok);return;}
+}
+var ok3=#server(Docs.Action.PrihNeedsDiff(DocID))#
+if(isNaN(ok3)&&(ok3!="yes")){alert(ok3);return false;}
+if(ok3=="yes"){
+	okdiff=window.showModalDialog("docinnerdiff.csp?source="+DocID,"Docs.InnerDiff"+InnerSplitter+""+InnerSplitter+"","cener:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+	if(okdiff!=1){
+		if(okdiff!=null)alert(okdiff);
+		return false;}
+ 	var ok2=#server(Docs.Action.SetSourceDoc("Docs.InnerDiff",okdiff,DocID))#
+ 	}	 
+returnValue=1;
+window.close();
+}
+
+function LoadTovars(){
+if(source==""){var doc=DocID;}
+else{var doc=source;}
+docstr.loadfrommethod("Docs.Action.GetStrFromDoc",doc,"",ClassName);
+}
+
+//function ValidateAddress(Goods, Address, Value){
+function ValidateAddress(RowArray2){
+var Address=RowArray2["addr"]
+var Value=RowArray2["quantdefault"]
+var Goods=RowArray2["Goods"]
+
+var ret=#server(Store.Action.validate(Goods,Address,Value))#
+if(ret==1) return true;
+return ret;
+}
+
+function fillname(){
+if(DocID==""){
+PropTable.setCellValue("Name","#($G(instrname))#");}
+}
+
+function addtovars(){
+WinResult=window.showModalDialog("selectgoods2.csp","","center:yes;status:no;dialogHeight:700px;dialogWidth:800px;resizable:yes;")
+if(WinResult==null)return
+WinResult=WinResult.split(StringSplitter)
+var FieldCaption = new Array();
+var FieldValue = new Array();
+for(i=0 ; i<WinResult.length-1 ; i++){
+	var onestr=WinResult[i].split(InnerSplitter);
+	FieldCaption["Goods"]=onestr[1];
+	FieldValue["Goods"]=onestr[0];
+	//FieldCaption["Price"]=getPrice(FieldValue["Goods"]);
+	docstr.AddRow(FieldCaption,FieldValue);
+}
+}
+
+</script>
+</head>
+<body  onload="load()" onkeypress="ManageWindow()">
+<center id="TypDocument" style="font-size:14pt;font:Arial;color:#112255"></center>
+<SKLAD2:table id="PropTable" width=320 height=200 onLoadComplete="fillname();" />
+<fieldset><legend>Строки документа</legend>
+<SKLAD2:table id="docstr" width=100% height=200 Silent="Goods" onAddColumns="LoadTovars()" QuantityField="quantdefault"/>
+<sklad:LittleButton name="new+" id="add2" onclick="addtovars()" alt="Вставить товары">
+<!--
+<sklad:LittleButton name="print" id="apint" onclick="prntdoc()" alt="Распечатать документ">
+-->
+</fieldset>
+<center><sklad:Button value="Да" onclick="startFun()">&nbsp;&nbsp;&nbsp;<sklad:Button value="Отмена" onclick="window.close()"></center>
+</body>
+</html>

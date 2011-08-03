@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Goods.Group">
+<Description>
+Группа</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60319,84605.823539</TimeCreated>
+
+<Property name="Depot">
+<Description>
+Склад</Description>
+<Type>Store.Depot</Type>
+<Parameter name="CAPTION" value="Склад"/>
+</Property>
+
+<Property name="Catalogue">
+<Description>
+Каталог</Description>
+<Type>Goods.Catalogue</Type>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Каталог"/>
+</Property>
+
+<Property name="Name">
+<Description>
+Наименование</Description>
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Наименование"/>
+</Property>
+
+<Index name="DepotIndex">
+<Properties>Depot</Properties>
+</Index>
+
+<Index name="CatalogueIndex">
+<Properties>Catalogue</Properties>
+</Index>
+
+<Property name="Code">
+<Description>
+Код группы</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Код группы"/>
+</Property>
+
+<Index name="CodeIndex">
+<Properties>Code</Properties>
+</Index>
+
+<Property name="Parent">
+<Description>
+Группа родитель</Description>
+<Type>%String</Type>
+<SqlComputeCode> Set {*} = $Piece({Code},"*",1,$Length({Code},"*")-1)</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+<Parameter name="CAPTION" value="Группа - родитель"/>
+</Property>
+
+<Index name="ParentIndex">
+<Properties>Parent</Properties>
+</Index>
+
+<Query name="Common">
+<Type>%SQLQuery</Type>
+<FormalSpec>Depot,Catalogue</FormalSpec>
+<SqlQuery>SELECT Parent,Code,Name,ID FROM "Group"
+where Catalogue=:Catalogue
+ ORDER BY Code</SqlQuery>
+</Query>
+
+<Method name="GetPropertyListIndex">
+<ClassMethod>1</ClassMethod>
+<CodeMode>objectgenerator</CodeMode>
+<FormalSpec>PropertyName:%String=""</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<Implementation><![CDATA[
+ Do %code.WriteLine(" q:PropertyName="""" """"")
+ s number=""
+ s StorageStrategy=%compiledclass.Storages.GetAt(1)
+ f i=1:1:StorageStrategy.Data.Count() d  q:StorageData.Name[%compiledclass.SqlTableName
+ . s StorageData=StorageStrategy.Data.GetAt(i)
+ s data=StorageData.Values.GetNext(.number)
+ while $ISOBJECT(data) {
+ 	s PropertyName=data.Value
+ 	s ListIndex=data.Name
+ 	Do %code.WriteLine(" s Prop( """ _ PropertyName _ """)="_ListIndex)
+ 	s data=StorageData.Values.GetNext(.number)
+ 	} 	
+ Do %code.WriteLine(" Quit $G(Prop(PropertyName))")
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Trigger name="UpdTrigger">
+<Description>
+Набор триггеров и методов для поддержки версии справочника</Description>
+<Code> d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Group")</Code>
+<Event>UPDATE</Event>
+<Time>AFTER</Time>
+</Trigger>
+
+<Trigger name="InsTrigger">
+<Code> d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Group")</Code>
+<Event>INSERT</Event>
+<Time>AFTER</Time>
+</Trigger>
+
+<Trigger name="DelTrigger">
+<Code> d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Group")</Code>
+<Event>DELETE</Event>
+<Time>AFTER</Time>
+</Trigger>
+
+<Method name="%OnDelete">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>oid:%ObjectIdentity</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Group")
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="%OnAfterSave">
+<FormalSpec>insert:%Boolean</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	if (insert)||(%this.%IsModified()) d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Group")
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Goods.GroupD</DataLocation>
+<DefaultData>GroupDefaultData</DefaultData>
+<IdLocation>^Goods.GroupD</IdLocation>
+<IndexLocation>^Goods.GroupI</IndexLocation>
+<StreamLocation>^Goods.GroupS</StreamLocation>
+<Data name="GroupDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Code</Value>
+</Value>
+<Value name="3">
+<Value>Name</Value>
+</Value>
+<Value name="4">
+<Value>Catalogue</Value>
+</Value>
+<Value name="5">
+<Value>Depot</Value>
+</Value>
+<Value name="6">
+<Value>Parent</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

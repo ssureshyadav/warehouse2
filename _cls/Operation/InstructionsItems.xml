@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Operation.InstructionsItems">
+<Super>Docs.DocItems</Super>
+<TimeCreated>60410,44053.384771</TimeCreated>
+
+<Property name="quantplan">
+<Description>
+Количество по плану</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Index name="quantplanind">
+<Properties>quantplan</Properties>
+</Index>
+
+<Property name="addr">
+<Description>
+Ячейка</Description>
+<Type>Store.Address</Type>
+</Property>
+
+<Index name="indaddr">
+<Properties>addr</Properties>
+</Index>
+
+<Property name="addr2">
+<Description>
+Место назначения</Description>
+<Type>Store.Address</Type>
+</Property>
+
+<Index name="indaddr2">
+<Properties>addr2</Properties>
+</Index>
+
+<Property name="spravka">
+<Description>
+№ и дата выписки Справки</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="Client">
+<Description>
+Клиент</Description>
+<Type>Common.Kontragent</Type>
+</Property>
+
+<Property name="goodsdir">
+<Description>
+Действие с товаром</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=",Утилизация,Оприходование"/>
+<Parameter name="VALUELIST" value=",1,2"/>
+</Property>
+
+<Property name="garant">
+<Description>
+Гарантийный талон</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="sn">
+<Description>
+Серийный номер изделия</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="seller">
+<Description>
+Организация продавшая товар</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="opispolomki">
+<Description>
+Описание поломки</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Property name="BrakComment">
+<Description>
+Комментарий клиента</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Property name="SellDate">
+<Description>
+Комментарий клиента</Description>
+<Type>%Date</Type>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>InstructionsItemsDefaultData</DefaultData>
+<Data name="InstructionsItemsDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"InstructionsItems"</Subscript>
+<Value name="1">
+<Value>addr</Value>
+</Value>
+<Value name="2">
+<Value>addr2</Value>
+</Value>
+<Value name="3">
+<Value>quantplan</Value>
+</Value>
+<Value name="4">
+<Value>Client</Value>
+</Value>
+<Value name="5">
+<Value>garant</Value>
+</Value>
+<Value name="6">
+<Value>goodsdir</Value>
+</Value>
+<Value name="7">
+<Value>sn</Value>
+</Value>
+<Value name="8">
+<Value>spravka</Value>
+</Value>
+<Value name="9">
+<Value>seller</Value>
+</Value>
+<Value name="10">
+<Value>opispolomki</Value>
+</Value>
+<Value name="11">
+<Value>BrakComment</Value>
+</Value>
+<Value name="12">
+<Value>SellDate</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

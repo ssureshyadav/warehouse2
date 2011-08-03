@@ -1,0 +1,418 @@
+<public:component tagname='treeview'>
+
+<PUBLIC:DEFAULTS viewLinkContent />
+<public:ATTACH EVENT="ondocumentready" HANDLER="init"/>
+
+<PUBLIC:PROPERTY NAME="width" />
+<PUBLIC:PROPERTY NAME="height" />
+<PUBLIC:PROPERTY NAME="border" VALUE=1 />
+<PUBLIC:PROPERTY NAME="ShowImages" />
+<PUBLIC:PROPERTY NAME="ImagesPath" />
+<PUBLIC:PROPERTY NAME="LabelEdit" VALUE="1" />
+<PUBLIC:PROPERTY NAME="SelectedItem" get="getSelectedItem" put="putSelectedItem" />
+<public:property name="onClick" put="putAttachClick" VALUE="" />
+<public:property name="NodeID"  get="getID" VALUE=""/>
+<public:property name="NodeCode" get="getCode" VALUE=""/>
+<public:property name="NodeCaption" get="getCaptionVB" put="putCaptionVB" VALUE=""/>
+<public:property name="NodeValue" get="getValueVB" put="putValueVB" VALUE=""/>
+<public:property name="NodeType" VALUE=""/>
+<public:property name="NodeSplitter" VALUE=": "/>
+<public:property name="CodesStr" get="getCodesStr" />
+<public:property name="IDsStr" get="getIDsStr" />
+<public:property name="ValuesStr" get="getValuesStr" />
+<public:property name="ParentNames" get="getParentNames" />
+<public:property name="ParentCodes" get="getParentCodes" />
+<public:property name="ChildNames" get="getChildNames"  />
+<public:property name="ChildCodes" get="getChildCodes"  />
+<public:property name="ChildIDs" get="getChildIDs"  />
+<public:property name="condition" VALUE="" />
+<public:property name="AdditionalID" VALUE="" get="getAdditionalID" put="putAdditionalID"/>
+<public:method name = "AddTreeView" />
+<public:method name = "DownLoad" />
+<public:event name="zonClick" id="zonClick" />
+<public:event name="onDownloadCmpl" id="onDownloadCmpl" />
+<html>
+<script language="JScript">
+var StringSplitter = "#@#";
+var InnerSplitter = "~";
+var Values = new Array();
+var Types = new Array();
+var Captions = new Array();
+var CurrentIndex;
+var UniqueVariable="";
+
+function init(){
+TreeViewID.Sorted=false;
+TreeViewID.style.width=width+"pt";
+TreeViewID.style.height=height+"pt";
+TreeViewID.BorderStyle=border;
+TreeViewID.Appearance=0;
+var ChildNamesStr="";
+var ChildCodesStr="";
+var ChildQuantityStr="";
+loadIMG();
+if(ShowImages!=0){TreeViewID.ImageList=TreeImgList;}
+TreeViewID.LabelEdit=LabelEdit;
+TreeViewID.Indentation=5;
+TreeViewID.attachEvent("Click",TreeViewIDClick);
+}
+
+function TreeViewIDClick(){
+if(TreeViewID.SelectedItem==null)return
+CurrentIndex=TreeViewID.SelectedItem.Index;
+if (onclick!=""){eval(onclick)}
+NodeType=Types[CurrentIndex];
+//TreeViewID.SelectedItem.Sorted=true;
+zonClick.fire();
+}
+
+function putAttachClick(funct){
+onclick=funct;
+}
+
+function DownLoad(urlStr){
+TreeViewID.startDownload(urlStr,AddTreeView);
+}
+
+function AddTreeView(textString){
+IdForOpenClose="treeclosed-"+UniqueVariable+"-"+window.location.pathname;
+TreeViewID.Nodes.Clear();
+if (textString=="") return false;
+TreeIsClosed = ReturnBoolean(GetCookie(IdForOpenClose));
+document.all.showclosed.checked=TreeIsClosed;
+VBLoad(textString, !TreeIsClosed);
+return;
+//alert(textString)
+//уникальное им€ дерева дл€ задани€ имени куки определ€ющей открыть или закрыть всЄ дерево полностью
+selimage="open";
+NodeImage="close";
+var strings = textString.split(StringSplitter);
+	for (i = 0; i < strings.length-1; i++){
+	string = strings[i].split(InnerSplitter);
+	NodeParent=string[0];
+	key=string[1];
+	NodeText=string[2];
+	NodeTag=string[3];
+	if(string[5]!=null){NodeValueStr=NodeSplitter+string[5];}
+	else{NodeValueStr="";}
+	 TreeViewID.Nodes.Add();
+	 node=TreeViewID.Nodes.Count;
+	 Captions[node]=NodeText;
+	 Values[node]=string[5];
+	 Types[node]=string[4];
+	 if(NodeParent!=""){
+			try{
+	 		TreeViewID.Nodes.Item(node).Parent=TreeViewID.Nodes.Item(NodeParent);
+	 		}
+	 		catch(e){}
+	 	}
+	 TreeViewID.Nodes.Item(node).Key=key;
+	 TreeViewID.Nodes.Item(node).Tag=NodeTag;
+	 TreeViewID.Nodes.Item(node).Text=NodeText+NodeValueStr;
+	 if(ShowImages!=0){
+	  if(condition!=""){
+			if(eval(condition)){var NodeImage="close2";var selimage="open2";}
+			else{var NodeImage="close";var selimage="open";}
+			}
+ 	  if(TreeViewID.ImageList!=null){
+	     TreeViewID.Nodes.Item(node).Image=NodeImage;
+	     TreeViewID.Nodes.Item(node).SelectedImage=selimage;
+	   }
+  	 }
+	 }
+sorttree();
+onDownloadCmpl.fire();
+document.all.showclosed.checked=ReturnBoolean(GetCookie(IdForOpenClose));
+OpenCloseTree();
+}
+
+function sorttree(){
+nodescount=TreeViewID.Nodes.Count;
+for(var i=1;i<nodescount;i++){
+	TreeViewID.Nodes.Item(i).Sorted=true;
+}
+}
+
+function closetree(){
+nodescount=TreeViewID.Nodes.Count;
+for(var i=1;i<nodescount;i++){
+	TreeViewID.Nodes.Item(i).Expanded=false;
+}
+}
+
+function opentree(){
+nodescount=TreeViewID.Nodes.Count;
+for(var i=1;i<nodescount;i++){
+	TreeViewID.Nodes.Item(i).Expanded=true;
+}
+}
+
+function getCode(){
+if (TreeViewID.SelectedItem==null) return "";
+return TreeViewID.SelectedItem.Key;
+}
+
+function getID(){
+if (TreeViewID.SelectedItem==null) return "";
+return TreeViewID.SelectedItem.Tag;
+}
+
+function getValue(){
+if (CurrentIndex==null) return "";
+return Values[CurrentIndex];
+}
+
+function putValue(newVal){
+Values[CurrentIndex]=newVal;
+TreeViewID.Nodes.Item(CurrentIndex).Text=Captions[CurrentIndex]+NodeSplitter+newVal;
+}
+
+function getCaption(){
+return Captions[CurrentIndex];
+}
+
+function putCaption(){
+}
+
+function getCodesStr(){
+res="";
+for (z = 1; z <= TreeViewID.Nodes.Count; z++){
+  res=res+TreeViewID.Nodes.Item(z).Key+InnerSplitter;
+}
+return res;
+}
+
+function getValuesStr(){
+res="";
+
+for (z = 1; z < Values.length; z++){
+  res=res+Values[z]+InnerSplitter;
+}
+return res;
+}
+
+function getIDsStr(){
+res="";
+for (z = 1; z <= TreeViewID.Nodes.Count; z++){
+  res=res+TreeViewID.Nodes.Item(z).Tag+InnerSplitter;
+}
+return res;
+}
+
+function getSelectedItem(){
+if(TreeViewID.SelectedItem==null)return ""
+return TreeViewID.SelectedItem.Key
+}
+
+function putSelectedItem(val){
+try{
+	TreeViewID.SelectedItem=TreeViewID.Nodes.Item(val);
+	}
+catch(e){}
+}
+
+function getParentNames(){
+if(TreeViewID.SelectedItem==null)return "";
+node=TreeViewID.SelectedItem;
+index=TreeViewID.SelectedItem.Index;
+str=node+InnerSplitter;
+ while (TreeViewID.Nodes.Item(index).Parent!=null) {
+   node=TreeViewID.Nodes.Item(index).Parent
+   index=TreeViewID.Nodes.Item(index).Parent.Index;
+   str=str+node+InnerSplitter;
+ }
+ return Reverse(str);
+}
+
+function getParentCodes(){
+if(TreeViewID.SelectedItem==null)return "";
+node=TreeViewID.SelectedItem.Key;
+index=TreeViewID.SelectedItem.Index;
+str=node+InnerSplitter;
+ while (TreeViewID.Nodes.Item(index).Parent!=null) {
+   node=TreeViewID.Nodes.Item(index).Parent.Key
+   index=TreeViewID.Nodes.Item(index).Parent.Index;
+   str=str+node+InnerSplitter;
+ }
+ return Reverse(str);
+}
+
+function Reverse(str){
+res=""
+arr=str.split(InnerSplitter);
+	for(i=arr.length-2;i>=0;i--){
+	 res=res+arr[i]+InnerSplitter;
+	}
+res=res.substr(0,res.length-1);
+return res;
+}
+
+function getChildCodes(){
+lookChildren();
+return ChildCodesStr;
+}
+
+function getChildNames(){
+lookChildren();
+return ChildNamesStr;
+}
+
+function getChildIDs(){
+lookChildren();
+return ChildIDStr;
+}
+
+function lookChildren(){
+ChildNamesStr="";
+ChildCodesStr="";
+ChildIDStr="";
+if(TreeViewID.SelectedItem==null)return false;
+if(TreeViewID.SelectedItem.Children==0)return false;
+Obj=TreeViewID.SelectedItem.Child;
+ChildNamesStr=ChildNamesStr+Obj.Text+InnerSplitter;
+ChildCodesStr=ChildCodesStr+Obj.Key+InnerSplitter;
+ChildIDStr=ChildIDStr+Obj.Tag+InnerSplitter;
+while(Obj.Next!=null){
+	Obj=Obj.Next;
+	ChildNamesStr=ChildNamesStr+Obj.Text+InnerSplitter;
+	ChildCodesStr=ChildCodesStr+Obj.Key+InnerSplitter;
+	ChildIDStr=ChildIDStr+Obj.Tag+InnerSplitter;
+	index=Obj.Index
+	
+	}
+}
+
+function getChildren(){
+if(TreeViewID.SelectedItem==null)return "";
+return TreeViewID.SelectedItem.Children;
+}
+
+//открыть или закрыть дерево
+function OpenCloseTree(){
+SetCookie(IdForOpenClose,document.all.showclosed.checked)
+if(document.all.showclosed.checked)
+	{
+	closetree();
+	}
+else
+	{
+	opentree();
+	}
+}
+
+function getAdditionalID(){
+return ReturnSpace(UniqueVariable);
+}
+
+function putAdditionalID(valuez){
+UniqueVariable=valuez;
+}
+</script>
+
+<script language="VBscript">
+Dim Captions(),NodeText(),Values()
+Sub loadIMG
+Set o=TreeImgList.ListImages.Add(1,"open",LoadPicture(ImagesPath & "fopen.bmp"))
+Set o=TreeImgList.ListImages.Add(1,"close",LoadPicture(ImagesPath & "fclose.bmp"))
+Set o=TreeImgList.ListImages.Add(1,"open2",LoadPicture(ImagesPath & "fopen2.bmp"))
+Set o=TreeImgList.ListImages.Add(1,"close2",LoadPicture(ImagesPath & "fclose2.bmp"))
+End Sub
+
+Sub VBLoad(textString,TreeIsClosed)
+Dim node,I,SingleNodeString,strings,InnerSplitter,NodeText,NodeTag,key,NodeParent,Captions(2000),Values(2000),SingleNodeArray5,Blocked
+strings = Split(textString, StringSplitter)
+InnerSplitter="~"
+For I = 0 To (UBound(strings)-1)
+	SingleNodeString = strings(I)
+	SingleNodeArray = Split(SingleNodeString, InnerSplitter)
+	NodeParent=SingleNodeArray(0)
+	key=SingleNodeArray(1)
+	//msgbox "VarType SingleNodeArray ="&VarType(SingleNodeArray)&vbCr&"VarType NodeText ="&VarType(NodeText)&vbCr&"UBound="&UBound(SingleNodeArray)
+	NodeText=SingleNodeArray(2)
+	NodeTag=SingleNodeArray(3)
+	IF UBound(SingleNodeArray)>=4 Then
+		Blocked=SingleNodeArray(4)
+	ELSE
+		Blocked=1
+	End If
+	//if(SingleNodeArray(5)!=null){NodeValueStr=NodeSplitter+SingleNodeArray(5);}
+	IF NodeParent="" Then
+		Set node = TreeViewID.Nodes.Add(,,key, NodeText)
+	ELSE
+		Set node = TreeViewID.Nodes.Add(NodeParent,4,key, NodeText)
+	End IF
+	node.Tag=NodeTag
+	node.sorted=true
+	IF Blocked="0" Then
+		node.Image="close2"
+		node.SelectedImage="open2"
+	End IF
+	IF Blocked="1" Then
+		node.Image="close"
+		node.SelectedImage="open"
+	End IF
+	node.expanded=TreeIsClosed
+	Captions(I+1)=NodeText
+	IF UBound(SingleNodeArray)>5 Then
+		SingleNodeArray5=SingleNodeArray(5)
+	Else
+		SingleNodeArray5=""
+	End If
+	Values(I+1)=SingleNodeArray5
+Next
+	//string = Split(strings(I),InnerSplitter);
+	//NodeParent=string(0);
+	//key=string(1);
+	//NodeText=string(2);
+	//NodeTag=string(3);
+	//if(string(5)!=null){NodeValueStr=NodeSplitter+string(5);}
+
+	//Set node = TreeViewID.Nodes.Add(,,key, NodeText)
+	//
+	//node.expanded=true
+	//Set node = TreeViewID.Nodes.Add(ParentKey, 4, Key2, Text)
+
+End Sub
+
+Function getCaptionVB()
+getCaptionVB = TreeViewID.SelectedItem
+	IF TreeViewID.SelectedItem<>Null Then
+		//CurrentIndex=TreeViewID.SelectedItem.Index
+		//getCaptionVB = Captions(CurrentIndex)
+		
+	ELSE
+		//getCaptionVB = ""
+	End IF
+End Function
+
+Sub putCaptionVB(Value)
+
+End Sub
+
+Function getValueVB()
+	IF TreeViewID.SelectedItem<>Null Then
+		CurrentIndex=TreeViewID.SelectedItem.Index
+		getValueVB = Values(CurrentIndex)
+	ELSE
+		getValueVB = ""
+	End IF
+End Function 
+
+Function putValueVB(newVal)
+	IF TreeViewID.SelectedItem<>Null Then
+		CurrentIndex=TreeViewID.SelectedItem.Index
+		//msgbox "кладЄм " & newVal & " в " & CurrentIndex
+		Values(CurrentIndex)=newVal
+		TreeViewID.Nodes.Item(CurrentIndex).Text=Captions(CurrentIndex)+NodeSplitter+newVal
+	End IF
+End Function 
+</script>
+<head>
+</head>
+<body>
+<OBJECT id="TreeViewID" classid="clsid:C74190B6-8589-11D1-B16A-00C0F0283628" style="border:none;behavior:url('#default#download')"  codebase="Cab\MSComCtl.CAB"></OBJECT>
+<OBJECT id="TreeImgList" classid="clsid:2C247F23-8591-11D1-B16A-00C0F0283628" codebase="Cab\MSComCtl.CAB"><PARAM NAME="ImageWidth" VALUE="16"><PARAM NAME="ImageHeight" VALUE="16"></OBJECT>
+<br><input type=checkbox name="showclosed" id="showclosed" onclick="OpenCloseTree()"> ¬се ветки закрыты
+</body>
+</html>
+</public:component>

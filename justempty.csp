@@ -1,0 +1,5 @@
+<script language="cache" runat="server">
+ //эту страницу вызывает страница toolbar.csp для поддержания сессии
+ s ses=%request.Get("sessionid",1)
+ s %session=%session.GetSession(ses)
+</script>

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Operation.InstructionsHist">
+<Description>
+Изменение состояний инструкции</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60383,58765.719923</TimeCreated>
+
+<Property name="instr">
+<Description>
+Инструкция</Description>
+<Type>Operation.Instructions</Type>
+<Cardinality>parent</Cardinality>
+<Inverse>ChangesChain</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="State">
+<Description>
+Состояние</Description>
+<Type>%String</Type>
+<InitialExpression>"1"</InitialExpression>
+<Parameter name="DISPLAYLIST" value=",Создана,Утверждена,Принята,Укомплектовано,Отправлено в офис,Отправлено c товаром,Отправлено из офиса,Отправлено экпресс-почтой,Нет в наличии,Отклонена,Самовывоз,Отправлено транспортной компанией,Завершена"/>
+<Parameter name="VALUELIST" value=",1,2,3,4,5,6,7,8,8.5,8.6,8.7,8.9,9"/>
+</Property>
+
+<Property name="StateChangeD">
+<Description>
+Дата перехода</Description>
+<Type>%Date</Type>
+</Property>
+
+<Property name="StateChangeT">
+<Description>
+Время перехода</Description>
+<Type>%Time</Type>
+</Property>
+
+<Property name="User1">
+<Description>
+Оператор</Description>
+<Type>Users.Dates</Type>
+<InitialExpression>$S($ISOBJECT($G(%session)):$G(%session.Data("user")),1:"")</InitialExpression>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Operation.InstructionsHistD</DataLocation>
+<DefaultData>InstructionsHistDefaultData</DefaultData>
+<IdLocation>^Operation.InstructionsHistD</IdLocation>
+<IndexLocation>^Operation.InstructionsHistI</IndexLocation>
+<StreamLocation>^Operation.InstructionsHistS</StreamLocation>
+<Data name="InstructionsHistDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>instr</Value>
+</Value>
+<Value name="3">
+<Value>Stat</Value>
+</Value>
+<Value name="4">
+<Value>StatChange</Value>
+</Value>
+<Value name="5">
+<Value>StatChangeD</Value>
+</Value>
+<Value name="6">
+<Value>StatChangeT</Value>
+</Value>
+<Value name="7">
+<Value>State</Value>
+</Value>
+<Value name="8">
+<Value>StateChange</Value>
+</Value>
+<Value name="9">
+<Value>StateChangeD</Value>
+</Value>
+<Value name="10">
+<Value>StateChangeT</Value>
+</Value>
+<Value name="11">
+<Value>user</Value>
+</Value>
+<Value name="12">
+<Value>User1</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

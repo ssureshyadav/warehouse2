@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Common.SqlProcs">
+<Description>
+Класс хранящий SQL процедуры</Description>
+<IncludeCode>xmlmacros</IncludeCode>
+<Super>%Persistent</Super>
+<TimeCreated>60584,53222.083348</TimeCreated>
+
+<Method name="AddrPath">
+<Description><![CDATA[
+Показывает адрес ячейки по id
+<br><var>addr</var> - id ячейки]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>addr:%String</FormalSpec>
+<ReturnType>%Integer</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+ s n=##class(Store.Action).AddressPath(addr,0)
+ q n
+]]></Implementation>
+</Method>
+
+<Method name="DocQuant">
+<Description><![CDATA[
+Возвращает количество из ячейки согласно типу документа
+<br><var>StringID</var> - id строки в Docs.DocItems
+<br><var>DocClass</var> - id класса (например Docs.Invent)]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>StringID=0,DocClass=""</FormalSpec>
+<ReturnType>%Integer</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+ s return=0
+ if DocClass="Docs.StorageOut" &sql(select quantreal into :return from Docs.StorageOutItems where ID=:StringID) q return
+ if DocClass="Docs.StorageIn"  &sql(select quantreal into :return from Docs.StorageInItems where ID=:StringID) q return
+ &sql(select Quantity into :return from Docs.StorageInItems where ID=:StringID)
+ q return
+]]></Implementation>
+</Method>
+
+<Method name="GroupFullName">
+<Description><![CDATA[
+построить полное имя товарной группы исходя из ID
+<br><var>GroupId</var> - ID или объект товарной группы]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>GroupId="",Delimeter=" - "</FormalSpec>
+<ReturnType>%String</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+ i $ISOBJECT(GroupId) s GroupObject=GroupId
+ s err="Ошибка при определении полного наименования группы."
+ e  s GroupObject=##class(Goods.Group).%OpenId(GroupId)
+ q:'$ISOBJECT(GroupObject) ""
+ s GroupCode=GroupObject.Code
+ s GroupCatalogue=$S($ISOBJECT(GroupObject.Catalogue):GroupObject.Catalogue.%Id(),1:"")
+ s GroupCatalogueName=$S($ISOBJECT(GroupObject.Catalogue):GroupObject.Catalogue.Name,1:"")
+ s GroupDepot=$S($ISOBJECT(GroupObject.Depot):GroupObject.Depot.%Id(),1:"")
+ f i=2:1:$L(GroupCode,"*") d
+ . s Nodes=$G(Nodes)_",'"_$P(GroupCode,"*",1,i)_"'"
+ q:$G(Nodes)="" ""
+ s Nodes=$E(Nodes,2,$L(Nodes))
+ s QueryObject=##class(%ResultSet).%New()
+ s sql="select ID,Name from Goods.Group where Code in ("_Nodes_") and Catalogue='"_GroupCatalogue_"' and Depot='"_GroupDepot_"'"
+ s ok=QueryObject.Prepare(sql)
+ i '+ok $$$WriteObjError(ok) q err
+ s ok=QueryObject.Execute()
+ i '+ok $$$WriteObjError(ok) q err
+ s GroupFullName=""
+ While QueryObject.Next() {
+  s GroupFullName = GroupFullName_Delimeter_QueryObject.Data("Name")
+ }
+ s:GroupFullName'="" GroupFullName=$E(GroupFullName,$L(Delimeter)+1,$L(GroupFullName))
+ q GroupFullName
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Common.SqlProcsD</DataLocation>
+<DefaultData>SqlProcsDefaultData</DefaultData>
+<IdLocation>^Common.SqlProcsD</IdLocation>
+<IndexLocation>^Common.SqlProcsI</IndexLocation>
+<StreamLocation>^Common.SqlProcsS</StreamLocation>
+<Data name="SqlProcsDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

@@ -1,0 +1,83 @@
+<html>
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="cache" runat="server">
+ s user=$G(%request.Data("user",1))
+ s useres="" s ^passworders=""
+  s password=$G(%request.Data("password",1))
+ s depot=$G(%request.Data("depot",1))
+ s SystDisk=$G(%request.Data("SystemDrive",1))
+ s result=""
+ i $D(%request.Data("user",1)) d
+ . s:%request.IsDefinedCgiEnv("REMOTE_ADDR") REMOTEADDR=%request.GetCgiEnv("REMOTE_ADDR")
+ . s LoginRight=##class(Common.Rights).login(user,password,depot,SystDisk,$G(REMOTEADDR))
+ . i +$G(LoginRight) d
+ . . s result="hui();"
+ . e  s result="alert('"_LoginRight_"');"_result
+ s login=$G(%session.Data("user"))
+</script>
+<script language="jscript">
+ function startFun()
+ {
+	forma.submit();
+ }
+		 
+function onload(){
+#(result)#
+}
+
+function hui()
+{
+	frameElement.document.all.MainFrameSet.rows="37px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,*,20px";
+	frameElement.document.all.statusFR.src='status.csp';
+	frameElement.document.all.topFR.src='toolbar.csp';
+	frameElement.document.all.goods.src="goods.csp";
+	frameElement.document.all.docs.src="docs.csp";
+	frameElement.document.all.dicts.src="dicts.csp";
+	frameElement.document.all.store.src="store.csp";
+	frameElement.document.all.tuneup.src="tuneup.csp";
+	frameElement.document.all.chief.src="chief.csp";
+	frameElement.document.all.emplight.src="emplight.csp";
+	frameElement.document.all.analyzis.src="analyzis.csp";
+	frameElement.document.all.kontr.src="kontr.csp";
+	frameElement.document.all.finance.src="finance.csp";
+	frameElement.document.all.director.src="director.csp";
+}
+
+</script>
+<script language="jscript" src="common.js"></script>
+
+</head>
+<body onload="onload()" onkeypress="ManageWindow(this)" >
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+
+<TR>
+<TD align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=2><strong>Регистрация</strong></TD></tr>
+<tr><td colspan=2 align=right><br><br></td></tr>
+<form name="forma" id="forma"><input type="hidden" id="SystemDrive" name="SystemDrive">
+<tr><td width=50%><img src="images/brace.gif" width=200px height=1>Склад:</td><td width=50%>
+<select style="width:150px" name="depot">
+<script language="cache" runat="server">
+ w ##class(Docs.Action2).GetClassValuesOptions(,"Store.Depot",,,0)
+</script>
+</select>
+</td></tr>
+<tr><td width=50% valign=right><img src="images/brace.gif" width=200px height=1>Имя пользователя:</td><td width=50%><input type="text" name="user" value=#($G(%session.Data("login")))#></td></tr>
+<tr><td width=50%><img src="images/brace.gif" width=200px height=1>Пароль:</td><td width=50%><input type="password" name="password" value=#($G(%session.Data("passworders")))#></td></tr>
+<tr><td colspan=2 align=center><sklad:Button onclick="startFun()" value="ok"></td></tr>
+</form>
+</TABLE>
+
+<span id="MustExist" name="MustExist" style="display:none">
+<script language="cache" runat="server">
+ //Здесь лежат названия файлов которые должны быть на локальном диске
+ s i="" f  s i=$O(^MustExist(i)) q:i=""  d
+ . w i_"/"
+</script>
+</span>
+<CSP:IF CONDITION="login=7">
+	<input type="text" id="edtText" style="width:300px">
+<input type="button" value="test" onclick="alert(eval(edtText.value));">
+</CSP:IF>
+</body>
+</html>

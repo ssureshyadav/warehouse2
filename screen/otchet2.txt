@@ -1,0 +1,168 @@
+<script language="cache" runat="server">
+ n id,obj
+ s mn(1)="Январь",mn(2)="Февраль",mn(3)="Март",mn(4)="Апрель",mn(5)="Май",mn(6)="Июнь",mn(7)="Июль",mn(8)="Август",mn(9)="Сентябрь",mn(10)="Октябрь",mn(11)="Ноябрь",mn(12)="Декабрь"
+ s id=%request.Get("id")
+ s obj=##class(Docs.Otchet).%OpenId(id)
+ d:$ISOBJECT(obj)
+ . s OtchetDate=obj.GetOtchetDat()
+ . s OtchetMonth=mn(+$ZD(OtchetDate,1))
+ . s OtchetYear=+$ZD(OtchetDate,3)
+ . d:$ISOBJECT(obj.Kontr)
+ . . s KontragentName=obj.Kontr.Name
+ . . s Address=obj.Kontr.Address
+ . . s Phones=obj.Kontr.Phones
+ . . s EMail=obj.Kontr.EMail
+ . . s chief=obj.Kontr.chief
+</script>
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=windows-1251">
+	<TITLE>№ </TITLE>
+</HEAD>
+<BODY LANG="ru-RU" TEXT="#000000" LINK="#000080" VLINK="#800000" DIR="LTR">
+<H1><FONT SIZE=3><U>ПРИЛОЖЕНИЕ 3. </U></FONT>
+</H1>
+<DL>
+	<DT><BR>
+	<DT><FONT FACE="Arial">К ДОГОВОРУ НА ПРОВЕДЕНИЕ СЕРВИСНОГО
+	ОБСЛУЖИВАНИЯ  №_____   от ______________20__ г.      </FONT>
+	<DT><BR>
+	<DT><FONT FACE="Arial"><B>Технический отчет за #($G(OtchetMonth))# #($G(OtchetYear))# г.</B></FONT><DT>
+	<BR>
+	<DT><FONT FACE="Arial">Наименование сервисного	центра: #($G(KontragentName))#;
+	Адрес: #($G(Address))#; </FONT>
+	<DT><FONT FACE="Arial">Телефон: #($G(Phones))#;
+	Факс: #($G(fax))#; </FONT>
+	<DT>E-mail<FONT FACE="Arial">: #($G(EMail))#;</FONT><DT>
+	<FONT FACE="Arial">Ф.И.О.
+	директора: #($G(chief))#.</FONT><DT>
+	<BR>
+	<DT><BR>
+	<DT><FONT FACE="Arial">(Форма и образец заполнения</FONT>)<DT>
+	<BR>
+</DL>
+<TABLE WIDTH=920 BORDER=1 CELLPADDING=7 CELLSPACING=0>
+	<COL WIDTH=21>
+	<COL WIDTH=101>
+	<COL WIDTH=58>
+	<COL WIDTH=106>
+	<COL WIDTH=70>
+	<COL WIDTH=46>
+	<COL WIDTH=118>
+	<COL WIDTH=82>
+	<COL WIDTH=34>
+	<COL WIDTH=70>
+	<COL WIDTH=58>
+	<TR VALIGN=TOP>
+		<TD WIDTH=21>
+			<P ALIGN=CENTER>№<P ALIGN=CENTER>
+			<FONT FACE="Arial"><FONT SIZE=2>п/п</FONT></FONT></TD>
+		<TD WIDTH=101>
+			<P ALIGN=CENTER><FONT FACE="Arial"><FONT SIZE=2>Наименование </FONT></FONT>
+			<P ALIGN=CENTER><FONT FACE="Arial"><FONT SIZE=2>изделия</FONT></FONT></TD>
+		<TD WIDTH=58>
+			<P ALIGN=CENTER><FONT FACE="Arial"><FONT SIZE=2>Модель</FONT></FONT></TD>
+		<TD WIDTH=106>
+			<P ALIGN=CENTER><FONT FACE="Arial"><FONT SIZE=2>Заводской №</FONT></FONT></TD>
+		<TD WIDTH=70>
+			<P ALIGN=CENTER><FONT FACE="Arial"><FONT SIZE=2>Гарант. </FONT></FONT>
+			<P ALIGN=CENTER><FONT FACE="Arial"><FONT SIZE=2>талон №</FONT></FONT></TD>
+		<TD WIDTH=46>
+			<P ALIGN=CENTER><FONT FACE="Arial"><FONT SIZE=2>Отр. </FONT></FONT>
+			<P ALIGN=CENTER><FONT FACE="Arial"><FONT SIZE=2>талон (</FONT></FONT><FONT FACE="Arial"><FONT SIZE=2><SPAN LANG="en-US">A</SPAN></FONT></FONT><FONT FACE="Arial"><FONT SIZE=2>/</FONT></FONT><FONT FACE="Arial"><FONT SIZE=2><SPAN LANG="en-US">B</SPAN></FONT></FONT><FONT FACE="Arial"><FONT SIZE=2>/</FONT></FONT><FONT FACE="Arial"><FONT SIZE=2><SPAN LANG="en-US">C</SPAN></FONT></FONT><FONT FACE="Arial"><FONT SIZE=2>)</FONT></FONT></TD>
+		<TD WIDTH=118>
+			<P ALIGN=CENTER><FONT FACE="Arial"><FONT SIZE=2>Наименование</FONT></FONT><P ALIGN=CENTER>
+			<FONT FACE="Arial"><FONT SIZE=2>детали</FONT></FONT></TD>
+		<TD WIDTH=82>
+			<P ALIGN=CENTER><FONT FACE="Arial"><FONT SIZE=2>Марка </FONT></FONT>
+			<P ALIGN=CENTER><FONT FACE="Arial"><FONT SIZE=2>детали</FONT></FONT></TD>
+		<TD WIDTH=34>
+			<P ALIGN=CENTER><FONT FACE="Arial"><FONT SIZE=2>Кол-во</FONT></FONT></TD>
+		<TD WIDTH=70>
+			<P ALIGN=CENTER><FONT FACE="Arial"><FONT SIZE=2>Цена </FONT></FONT>
+			<P ALIGN=CENTER><FONT FACE="Arial"><FONT SIZE=2>детали</FONT></FONT></TD>
+		<TD WIDTH=58>
+			<P ALIGN=CENTER><FONT FACE="Arial"><FONT SIZE=2>Цена </FONT></FONT>
+			<P ALIGN=CENTER><FONT FACE="Arial"><FONT SIZE=2>ремонта</FONT></FONT></TD>
+	</TR>
+<script language="cache" runat="server">
+ //соберём в одну глобаль все модели и запчасти
+ n glob,i,count,item,z
+ s glob=$NA(^mtempOthcet($J))
+ k @glob
+ d:$ISOBJECT(obj.Items)
+ . s i="" f  s i=obj.Items.Next(i) q:i=""  d
+ . . s item=obj.Items.GetAt(i)
+ . . s groups=+item.Groups
+ . . if $ISOBJECT(item.RemTovar) d
+ . . . //это модель
+ . . . s @glob@(groups,"ModelName")=item.RemTovar.Name
+ . . . s @glob@(groups,"AbbrNumber")=item.RemTovar.ModelNumber
+ . . . s @glob@(groups,"Serial")=item.serial
+ . . . s @glob@(groups,"Garant")=item.garant
+ . . . s @glob@(groups,"Talon")=item.talon
+ . . . s @glob@(groups,"Quantity")=item.Quantity
+ . . . s @glob@(groups,"RemontCost")=item.remcost
+ . . if $ISOBJECT(item.Goods) d
+ . . . //это запчасть
+ . . . i $I(DetailCount)
+ . . . s @glob@(groups,DetailCount,"DetailName")=item.Goods.Name
+ . . . s @glob@(groups,DetailCount,"Quantity")=item.Quantity
+ . . . s @glob@(groups,DetailCount,"DetailPrice")=item.Price
+ m ^mtempArt("zz")=@glob
+ s i="" f  s i=$O(@glob@(i)) q:i=""  d
+ . s ModelName=@glob@(i,"ModelName")
+ . s AbbrNumber=@glob@(i,"AbbrNumber")
+ . s Serial=@glob@(i,"Serial")
+ . s Garant=@glob@(i,"Garant")
+ . s Talon=@glob@(i,"Talon")
+ . s Quantity=@glob@(i,"Quantity")
+ . s RemontCost=@glob@(i,"RemontCost")
+ . s (DetailPrice,DetailName)=""
+ . i $I(count)
+ . w "<TR VALIGN=TOP>"
+ . w "<TD WIDTH=21><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(count)_"</FONT></FONT></TD>"
+ . w "<TD WIDTH=101><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(ModelName)_"</FONT></FONT></TD>"
+ . w "<TD WIDTH=58><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(AbbrNumber)_"</FONT></FONT></TD>"
+ . w "<TD WIDTH=106><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(Serial)_"</FONT></TD>"
+ . w "<TD WIDTH=70><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(Garant)_"</FONT></FONT></TD>"
+ . w "<TD WIDTH=46><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(Talon)_"</FONT></FONT></TD>"
+ . w "<TD WIDTH=118><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(DetailName)_"</FONT></FONT></TD>"
+ . w "<TD WIDTH=82><P ALIGN=JUSTIFY><BR></TD>"
+ . w "<TD WIDTH=34><P ALIGN=JUSTIFY><FONT FACE=""Arial"">"_$G(Quantity)_"</FONT></TD>"
+ . w "<TD WIDTH=70><P ALIGN=JUSTIFY><FONT FACE=""Arial"">"_$G(DetailPrice)_"</FONT></TD>"
+ . w "<TD WIDTH=58>"_$G(RemontCost)_"</TD>"
+ . w "</TR>"
+ . s z="" f  s z=$O(@glob@(i,z)) q:z=""  d
+ . . q:'+z
+ . . s DetailName=$G(@glob@(i,z,"DetailName"))
+ . . s Quantity=@glob@(i,z,"Quantity")
+ . . s DetailPrice=@glob@(i,z,"DetailPrice")
+ . . s (ModelName,AbbrNumber,Serial,Garant,Talon,Quantity,RemontCost)=""
+ . . w "<TR VALIGN=TOP>"
+ . . w "<TD WIDTH=21><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(count)_"</FONT></FONT></TD>"
+ . . w "<TD WIDTH=101><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(ModelName)_"</FONT></FONT></TD>"
+ . . w "<TD WIDTH=58><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(AbbrNumber)_"</FONT></FONT></TD>"
+ . . w "<TD WIDTH=106><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(Serial)_"</FONT></TD>"
+ . . w "<TD WIDTH=70><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(Garant)_"</FONT></FONT></TD>"
+ . . w "<TD WIDTH=46><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(Talon)_"</FONT></FONT></TD>"
+ . . w "<TD WIDTH=118><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(DetailName)_"</FONT></FONT></TD>"
+ . . w "<TD WIDTH=82><P ALIGN=JUSTIFY><BR></TD>"
+ . . w "<TD WIDTH=34><P ALIGN=JUSTIFY><FONT FACE=""Arial"">"_$G(Quantity)_"</FONT></TD>"
+ . . w "<TD WIDTH=70><P ALIGN=JUSTIFY><FONT FACE=""Arial"">"_$G(DetailPrice)_"</FONT></TD>"
+ . . w "<TD WIDTH=58>"_$G(RemontCost)_"</TD>"
+ . . w "</TR>"
+ k @glob
+</script>
+</TABLE>
+<DL>
+	<DT>			<DT>
+	<BR>
+	<DT><BR>
+	<DT><FONT FACE="Arial">Директор сервисного
+	центра					/______________/</FONT><DT>
+	<BR>
+	<DT><FONT FACE="Arial">&laquo;___&raquo;________________200</FONT>_<FONT FACE="Arial">г.												М.П.</FONT><DT>
+												</DL>
+</BODY>
+</HTML>

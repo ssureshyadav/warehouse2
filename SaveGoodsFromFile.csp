@@ -1,0 +1,136 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ i %session.NewSession d
+ . s %session.EndSession=1
+ . s sessionid=%request.Get("sessionid",1)
+ . s %session=%session.GetSession(sessionid)
+ e  s sessionid=%session.SessionId
+ s login=$G(%session.Data("user"))
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ s Access9func=##class(Common.Rights).getrights($G(login,0),9)
+ if 'Access9func s Func9Refuse="return;"
+Quit 1
+</script>
+
+<html XMLNS:SKLADz >
+
+<IMPORT NAMESPACE="SKLADz" IMPLEMENTATION="htc/treeview.htc">
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="Jscript" src="common.js"></script>
+
+<script language="javascript">
+var depot="#($G(%session.Data("depot")))#"
+
+// показать дерево групп
+function LoadTree(){
+	if(typeof(Catalogues) == "object")
+	{
+		GroupsTree.AdditionalID=Catalogues.value;
+		GroupsTree.DownLoad('Data.csp?class=Goods.Group&fields=Parent,Code,Name,ID&params="'+depot+'","'+Catalogues.value+'"')	
+	}
+}
+
+// загрузить товары из файла в базу
+function LoadGoods(){
+var Group=ReturnSpace(GroupsTree.NodeID);
+if(Group==""){alert("Укажите пожалуйста группу, в которую необходимо записать новые товары.");return false;}
+if(document.all.oFile1.value.length<2){alert("Укажите, пожалуйста, файл с новыми товарами.");return false;}
+document.all.GroupId.value = Group;
+LoadButton.style.display="none";
+MyForm.submit();
+}
+
+//скрыть показать справку по формату файла
+function ShowHideFormatHelp() 
+{
+	if(HelpSpan.style.display=="none"){HelpSpan.style.display="block"}
+	else{HelpSpan.style.display="none"}
+}
+</script>
+</head>
+
+<body onload="LoadTree();">
+<sklad:Button value="Назад" onclick="window.location.href='tuneup.csp'"><br>
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<TD align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=3><strong>Создание товаров на основании текстового файла</strong></TD></tr>
+<tr>
+</table>
+
+<script language="cache" runat="server">
+ s GroupId = %request.Get("GroupId")
+</script>
+
+<CSP:IF condition='GroupId=""'>
+<table>
+<tr><td valign="top">
+	<font face="Arial" size=+1 color="darkblue"><br><font size=+2>1</font> Выберете группу в которую запишутся новые товары</font>
+		<br><br>
+		Классификатор:<select id="Catalogues" onchange="LoadTree()" >
+		<script language="cache" runat="server">
+			w ##class(Docs.Action2).GetClassValuesOptions(,"Goods.Catalogue",,,0)
+		</script>
+		</select><br>
+		<SKLADz:treeview id="GroupsTree" width="300" height="350" ImagesPath="#(%session.Data("ImagesPath"))#" />
+	</td>
+	<form enctype="multipart/form-data" method="post" id="MyForm">
+	<td valign="top" align="middle" style="border-left:1 solid black">
+		<font face="Arial" size=+1 color="darkblue"><br><font size=+2>2</font> Укажите файл с новыми товарами</font>
+		<br><br><br><br><br><br><br><br>
+		<p align="left">Файл с данными товаров: </p>
+		<input name="oFile1" id="oFile1" size=30 type=file style="width:300px">
+		<br><br>
+		<a href="#" onclick="ShowHideFormatHelp()">формат файла</a>
+		<P id="HelpSpan" align="left" style="display:none;">
+		<br><br>
+		Каждый товар должен быть записан отдельной строкой.<br>
+		Первым должно идти наименование товара.<br>
+		После символа табуляции должна быть записана аббревиатура и номер модели через тире (например SC - 489).<br>
+		После следующего символа табуляции может быть записана цена товара в рублях.
+		<br><br>
+		Ниже приведён пример содержания файла с новыми товарами. Знаком &#60;TAB&#62; обозначен символ табуляции.<br>
+		<span style="border:solid 1 black">
+		Часы&#60;TAB&#62;SC - 09B&#60;TAB&#62;195<br>
+		Часы&#60;TAB&#62;SC - 09D&#60;TAB&#62;195<br>
+		Часы&#60;TAB&#62;SC - 16D&#60;TAB&#62;195<br>
+		</span>
+		
+		</P>
+	</td>
+	<td valign="top" align="middle" style="border-left:1 solid black">
+		<font face="Arial" size=+1 color="darkblue"><br><font size=+2>3</font> Нажмите кнопку "Загрузить"</font>
+		<br><br><br><br><br><br><br><br>
+		<center><sklad:Button value="Загрузить" onclick="LoadGoods()" id="LoadButton"></center>
+	</td>
+	<input name="GroupId" id="GroupId" type="hidden">
+	</form>
+</tr>
+<table>
+<CSP:ELSE>
+<br><br>
+<font face="Arial" size=+1 color="darkblue">
+<script language="cache" runat="server">
+ d:%request.ContentType="multipart/form-data"
+ . if '+$G(GroupId) w "Ошибка. Не указана товарная группа в которую необходимо загрузить товары. Необходимо повторить загрузку товаров." q
+ . s grObj=##class(Goods.Group).%OpenId(GroupId)
+ . if '$ISOBJECT(grObj) w "ВНИМАНИЕ! Указана несуществующая товарная группа. Необходимо повторить загрузку товаров." q
+ . s obj=%request.MimeData("oFile1",1)
+ . q:'$ISOBJECT(obj)
+ . s filename=$J_$P(obj.FileName,"\",$L(obj.FileName,"\"))
+ . s fileObj=##class(%File).%New(filename)
+ . Do fileObj.Open("WSN")
+ . d fileObj.CopyFrom(obj)
+ . s ok=fileObj.%Save()
+ . if 'ok w "Извините. Ошибка сохранения файла "_obj.FileName_". Попробуйте уменьшить файл и повторить загрузку товаров."  q
+ . k fileObj
+ . s ok=$$ProcessFile^ReadGoodsFromFile(filename,GroupId)
+ . if 'ok w ok
+ . else  w "Новые товары успешно загружены в группу "_grObj.Name_"<br>"
+ . s ok=##class(%File).Delete(filename)
+ . if '+ok w " Не удалось удалить временный файл "_filename_"<br>"
+
+</script>
+</font>
+</CSP:IF>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.toolbar">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62301,49211.939968</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body bgcolor=""ButtonFace"" leftmargin=5 rightmargin=5 topmargin=1 bottommargin=5>"
+	Write !,"<Table width=100%><tr><td>",!
+	s login=$G(%session.Data("user"))
+	s:##class(Common.Rights).getrights(login,1) i($i(i))="goods",i(i,"alt")="Товары"
+	s:##class(Common.Rights).getrights(login,3) i($i(i))="docs",i(i,"alt")="Документы"
+	s:##class(Common.Rights).getrights(login,4) i($i(i))="dicts",i(i,"alt")="Справочники"
+	s:##class(Common.Rights).getrights(login,15) i($i(i))="store",i(i,"alt")="Места хранения"
+	s:##class(Common.Rights).getrights(login,16) i($i(i))="tunes",i(i,"alt")="Настройки"
+	s:##class(Common.Rights).getrights(login,2) i($i(i))="chief",i(i,"alt")="Рабочее место сервис менеджера"
+	s:##class(Common.Rights).getrights(login,5) i($i(i))="employee",i(i,"alt")="Рабочее место на складе"
+	s:##class(Common.Rights).getrights(login,17) i($i(i))="analyzis",i(i,"alt")="Аналитика"
+	s:##class(Common.Rights).getrights(login,18) i($i(i))="kontr",i(i,"alt")="Учёт отгрузок и платежей"
+	s:##class(Common.Rights).getrights(login,14) i($i(i))="finance",i(i,"alt")="Финансы"
+	s:##class(Common.Rights).getrights(login,13) i($i(i))="director",i(i,"alt")="Рабочее место директора"
+	s i($i(i))="login",i(i,"alt")="Вход в систему"
+	s i="" f  s i=$O(i(i)) q:i=""  d
+	. w "<img src=""images/big/on"_i(i)_".gif"" width=1 height=1 style=""display:none"">"
+	. w "<img src=""images/big/"_i(i)_".gif"" alt="""_i(i,"alt")_"""onmouseover=""this.src='images/big/on"_i(i)_".gif'"" onmouseout=""this.src='images/big/"_i(i)_".gif'"" onclick=""ChangePage('"_i(i)_"');"" style=""cursor:hand"" width=30 height=30>&nbsp;",!
+	Write !,"</td><td align=right>",!
+	Write "<img src=""images/big/onexit.gif"" width=1 height=1 style=""display:none"">"
+	Write "&nbsp;",!
+	Write "<img src=""images/big/exit.gif"" onmouseover=""this.src='images/big/onexit.gif'"" onmouseout=""this.src='images/big/exit.gif'"" onclick=""ChangePage('exit');"" style=""cursor:hand"" width=30 height=30>"
+	Write "&nbsp;",!
+	Write "<img src=""images/big/onhelp.gif"" width=1 height=1 style=""display:none"">"
+	Write "&nbsp;",!
+	Write "<img src=""images/big/help.gif"" onmouseover=""this.src='images/big/onhelp.gif'"" onmouseout=""this.src='images/big/help.gif'"" onclick=""window.open('help/index.html');"" style=""cursor:hand"" width=30 height=30>"
+	Write "&nbsp;",!
+	Write "</td></tr></table>",!
+	Write "</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<SCRIPT Language=""jscript"">"
+	Write !,"gobo = Image('');",!
+	Write "function ChangePage(BtnKey){",!
+	Write "RowsStr=""37px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,*,20px""",!
+	Write "if(BtnKey==""goods""){RowsStr=""37px,*,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,20px""}",!
+	Write "if(BtnKey==""docs""){RowsStr=""37px,0px,*,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,20px""}",!
+	Write "if(BtnKey==""dicts""){RowsStr=""37px,0px,0px,*,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,20px""}",!
+	Write "if(BtnKey==""store""){RowsStr=""37px,0px,0px,0px,*,0px,0px,0px,0px,0px,0px,0px,0px,0px,20px""}",!
+	Write "if(BtnKey==""tunes""){RowsStr=""37px,0px,0px,0px,0px,*,0px,0px,0px,0px,0px,0px,0px,0px,20px""}",!
+	Write "if(BtnKey==""chief""){RowsStr=""37px,0px,0px,0px,0px,0px,*,0px,0px,0px,0px,0px,0px,0px,20px""}",!
+	Write "if(BtnKey==""employee""){RowsStr=""37px,0px,0px,0px,0px,0px,0px,*,0px,0px,0px,0px,0px,0px,20px""}",!
+	Write "if(BtnKey==""analyzis""){RowsStr=""37px,0px,0px,0px,0px,0px,0px,0px,*,0px,0px,0px,0px,0px,20px""}",!
+	Write "if(BtnKey==""kontr""){RowsStr=""37px,0px,0px,0px,0px,0px,0px,0px,0px,*,0px,0px,0px,0px,20px""}",!
+	Write "if(BtnKey==""finance""){RowsStr=""37px,0px,0px,0px,0px,0px,0px,0px,0px,0px,*,0px,0px,0px,20px""}",!
+	Write "if(BtnKey==""director""){RowsStr=""37px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,*,0px,0px,20px""}",!
+	Write "if(BtnKey==""login""){RowsStr=""37px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,*,0px,20px""}",!
+	Write "if(BtnKey==""exit""){",!
+	Write "	if(window.confirm(""Выйти из программы?"")){",!
+	Write "		var xmlhttp = new ActiveXObject(""Msxml2.XMLHTTP"");",!
+	Write "		try{",!
+	Write "			xmlhttp.open(""POST"",""CloseSession.csp"",false)",!
+	Write "			xmlhttp.send()",!
+	Write "			}",!
+	Write "		catch(e){",!
+	Write "			}",!
+	Write "		window.parent.close()",!
+	Write "	}",!
+	Write "}",!
+	Write !,"frameElement.document.all.MainFrameSet.rows = RowsStr",!
+	Write "}",!
+	Write "</SCRIPT>"
+	Write !,!,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,!,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+  s login=$G(%session.Data("user"))
+  i '+login s %response.ServerSideRedirect="norights.csp" 
+  q 1
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\toolbar.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/toolbar.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>61811,65704</Default>
+</Parameter>
+</Class>
+</Export>

@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Operation.OperationHistory">
+<Description>
+История операций</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60320,47712.963472</TimeCreated>
+
+<Property name="instruction">
+<Description>
+Инструкция</Description>
+<Type>Operation.Instructions</Type>
+</Property>
+
+<Property name="Resource">
+<Description>
+Ресурсы</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Ресурсы"/>
+</Property>
+
+<Property name="Place">
+<Description>
+Место</Description>
+<Type>Store.Address</Type>
+<Parameter name="CAPTION" value="Место"/>
+</Property>
+
+<Index name="PlaceIndex">
+<Properties>Place</Properties>
+</Index>
+
+<Property name="Name">
+<Description>
+Имя</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Имя"/>
+</Property>
+
+<Property name="Comment">
+<Description>
+Справочная информация</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Справочная информация"/>
+</Property>
+
+<Property name="Start">
+<Description>
+Дата начала</Description>
+<Type>%Date</Type>
+<Parameter name="CAPTION" value="Дата начала"/>
+</Property>
+
+<Property name="StartTime">
+<Description>
+Время начала</Description>
+<Type>%Time</Type>
+</Property>
+
+<Property name="EndDate">
+<Description>
+Дата завершения</Description>
+<Type>%Date</Type>
+<Parameter name="CAPTION" value="Конец"/>
+</Property>
+
+<Property name="EndTime">
+<Description>
+Время завершения</Description>
+<Type>%Time</Type>
+</Property>
+
+<Property name="OperTemplate">
+<Description>
+Шаблон</Description>
+<Type>Operation.OperTemplate</Type>
+<Parameter name="CAPTION" value="Шаблон"/>
+</Property>
+
+<Index name="OperTemplate">
+<Properties>OperTemplate</Properties>
+</Index>
+
+<UDLText name="T">
+<Content><![CDATA[
+//Relationship StepHistory As Operation.StepHistory [ Cardinality = many, Inverse = OperationHistory ];
+
+]]></Content>
+</UDLText>
+
+<Property name="Depot">
+<Description>
+Склад</Description>
+<Type>Store.Depot</Type>
+<Parameter name="CAPTION" value="Склад"/>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Operation.OperationHistoryD</DataLocation>
+<DefaultData>OperationHistoryDefaultData</DefaultData>
+<IdLocation>^Operation.OperationHistoryD</IdLocation>
+<IndexLocation>^Operation.OperationHistoryI</IndexLocation>
+<StreamLocation>^Operation.OperationHistoryS</StreamLocation>
+<Data name="OperationHistoryDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Comment</Value>
+</Value>
+<Value name="3">
+<Value>End</Value>
+</Value>
+<Value name="4">
+<Value>Name</Value>
+</Value>
+<Value name="5">
+<Value>Object</Value>
+</Value>
+<Value name="6">
+<Value>OperTemplate</Value>
+</Value>
+<Value name="7">
+<Value>Place</Value>
+</Value>
+<Value name="8">
+<Value>Resource</Value>
+</Value>
+<Value name="9">
+<Value>Start</Value>
+</Value>
+<Value name="10">
+<Value>Depot</Value>
+</Value>
+<Value name="11">
+<Value>Card</Value>
+</Value>
+<Value name="12">
+<Value>EndTime</Value>
+</Value>
+<Value name="13">
+<Value>StartTime</Value>
+</Value>
+<Value name="14">
+<Value>EndDate</Value>
+</Value>
+<Value name="15">
+<Value>instruction</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

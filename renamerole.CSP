@@ -1,0 +1,74 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ s login=$G(%session.Data("user"))
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ q 1
+</script>
+
+<html>
+<head>
+<script language="cache" runat="server">
+s sbor="",sborka=""
+	&sql(declare perscur Cursor for
+	select ID,Name into :IDname,:Funcname 
+	from Users.Functions)
+	&sql(open perscur)
+	f  &sql(fetch perscur) q:SQLCODE  d
+	.i $I(i)
+	.s iden(i)=IDname
+	.s func(i)=Funcname
+	&sql(close perscur)
+s namerole=""
+s namerole=$G(%request.Data("rolename",1))
+	&sql(declare mycursor Cursor for
+	select NameFunction into :namefunc from Users.roles where Name=:namerole)
+	&sql(open mycursor)
+	f  &sql(fetch mycursor) q:SQLCODE  d
+		.i $I(c)
+		.s function(c)=namefunc
+	&sql(close mycursor)
+f j=1:1:$G(c) {i function(j) s sbor=sbor_"myform.comp"_j_".checked=true; " else  s sbor=sbor_"myform.comp"_j_".checked=false; "}
+f k=1:1:i d
+ .s sborka=sborka_"if (myform.comp"_k_".checked==true){(func["_k_"]="_iden(k)_")};                                                           "
+ 
+</script>
+<script language="Jscript" src="common.js"></script>
+<script language="JScript">
+var func=new Array();
+var rolesavearr=new Array();
+function loadbody(){ 
+	number='#(namerole)#';
+	document.myform.rolename.value=number;
+	 #(sbor)#
+     }
+	
+	function Savechange(){
+	qwe=#(i)#;
+	param=true;
+	for(l=1;l<=qwe;l++){
+		 func[l]=0;}
+		role=document.myform.rolename.value;
+		#(sborka)#
+		 var str = func.join("~"); 
+		ok=#server(Users.Roles.RenameRole(number,role,str))#;
+		if (ok==1){alert("невозможно изменить данную роль");}
+	    	ok="";
+	    	window.close();
+	}
+</script>
+<title>	Пользователи </title>
+</head>
+<body onload="loadbody()">
+<table><tr><td>
+<form name="myform">
+Введите название роли:</td><td>
+<input type="text" name="rolename" width=100 value=""></td></tr>
+<tr><td>Функции роли:</td><td>
+<script language="cache" runat="server">
+f j=1:1:i w "<INPUT TYPE=checkbox NAME=""comp"_j,""" VALUE=""",j,""">",func(j),"</td></tr><tr><td></td><td>",!
+</script>
+</td></tr><tr><td></td><td>
+<input type="button" value="Изменить" onclick="Savechange()">
+</form>
+</table>
+</body>
+</html>
