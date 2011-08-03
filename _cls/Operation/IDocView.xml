@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Operation.IDocView">
+<Description>
+инструкции в состоянии 2-9 вместе со связанными документами</Description>
+<ClassType>view</ClassType>
+<CompileAfter>Docs.Super,Operation.Instructions</CompileAfter>
+<Owner>_SYSTEM</Owner>
+<ProcedureBlock>0</ProcedureBlock>
+<SqlTableName>IDocView</SqlTableName>
+<TimeCreated>62305,79283.444657</TimeCreated>
+<ViewQuery><![CDATA[ 
+  
+  		SELECT I.ID as IID,I.Name as INAME, I.InstDate as IDATE
+  				, I.State as ISTATE,%external(I.State) as ISTATENAME
+  				, I.Depot1 as IDEPOT1, I.Kontr as IKONTR, I.Kontr->Name as IKONTRNAME
+  				, I.Oper as IOPER, I.Oper->Name as IOPERNAME
+  				, I.dostavka as IDOSTAVKA, I.dostavka->Name as IDOSTAVKANAME 
+  				, I.User1 as IUSER,I.User1->Name as IUSERNAME
+  				, I.postnumber as IPOSTNUM, I.POSTDATA as IPOSTDATE
+  				, I.RashOplatType->Name as IROTNAME
+  				, I.ShowColor as ICOLOR
+  			   ,D.DocumentClass as DCLASS,D.ID as DOCID,D.Name as DNAME
+  			   
+  				
+  		FROM Operation.Instructions as I Inner Join Docs.Super as D 
+  			On ($PIECE(I.Oper->cl,',')=D.DocumentClass And I.ID=D.Source)
+
+   
+   ]]></ViewQuery>
+</Class>
+</Export>
