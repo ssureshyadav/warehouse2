@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.fillinnerstorage">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>60913,45995.324916</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body>"
+	Write !,!,"<form>"
+	Write !,..InsertHiddenFields(""),!
+	Write !,"Пароль "
+	Write "<input type=""text"" name=""dfg"">"
+	Write "<br>",!
+	Write "Введите номер расходной накладной<br>",!
+	Write "<input type=text name=""zzz"" value="""_(%request.Get("zzz"))_""">"
+	Write "<input type=submit value=""Отправить"">"
+	Write !,"</form>"
+	Write !
+	s dfg=%request.Get("dfg")
+	s zzz=%request.Get("zzz")
+	i (dfg'="mahmah")&(zzz'="") w "Пароль неверный."
+	i (dfg="mahmah")&(zzz'="") d
+	. s Name=%request.Get("dfg")
+	. &sql(select ID into :DocId from Docs.Rash where Name=:zzz)
+	. &sql(select ID,Name,Dat into :StoreId,:StName,:StDat from Docs.StorageOut where Source=:DocId)
+	. i SQLCODE w "Не найдено внутренних инструкций от расходной "_zzz_" ("_DocId_")" q
+	. w "Обработана внутренняя инструкция №"_StName_" ("_StoreId_") от "_$ZD(StDat,4)_"<br>"
+	. &sql(declare h1 cursor for select Goods->FullName,ID,Goods,Price,Quantity,Total,Zakaz into :GoodsFullName,:ID,:Goods,:Price,:Quantity,:Total,:Zakaz  from Docs.RashItems where doc=:DocId)
+	. &sql(OPEN h1)
+	. F  &SQL(fetch h1) q:SQLCODE  d
+	. . &sql(select id from Docs.StorageOutItems where doc=:StoreId and Goods=:Goods)
+	. . d:SQLCODE
+	. . . //если не нашли внутреннюю строку с таким же товаров как у расходной строки
+	. . . &sql(insert into Docs.StorageOutItems (DocType,doc,Goods,quantdefault,Price,Total) VALUES ('Docs.StorageOut',:StoreId,:Goods,:Quantity,:Price,:Total))
+	. . . i SQLCODE w "SQLCODE="_SQLCODE_"<br>"
+	. . . e  w "Добавлена строка с товаром "_GoodsFullName_"<br>"
+	. &sql(close h1)
+	Write !,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,!,"<!-- Put your page Title here -->"
+	Write !,"<title>Дополнить внутренние инструкции недостающими строками</title>",!
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\FillInnerStorage.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/FillInnerStorage.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>60913,44856</Default>
+</Parameter>
+</Class>
+</Export>

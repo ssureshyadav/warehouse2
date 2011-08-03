@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Users.RenameGlobal">
+<Super>%Persistent</Super>
+<TimeCreated>60460,76842.066988</TimeCreated>
+
+<Method name="Rename">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Globalname:%String,Globalvalue:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	i Globalvalue="" q @Globalname //@Globalname
+	s @Globalname=Globalvalue
+	q @Globalname
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Users.RenameGlobalD</DataLocation>
+<DefaultData>RenameGlobalDefaultData</DefaultData>
+<IdLocation>^Users.RenameGlobalD</IdLocation>
+<IndexLocation>^Users.RenameGlobalI</IndexLocation>
+<StreamLocation>^Users.RenameGlobalS</StreamLocation>
+<Data name="RenameGlobalDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

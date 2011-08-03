@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Common.Bank">
+<Description>
+Банковские реквизиты</Description>
+<Super>%SerialObject</Super>
+<TimeCreated>60419,3535.784217</TimeCreated>
+
+<Parameter name="GUIDENABLED">
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="OBJJOURNAL">
+<Default>1</Default>
+</Parameter>
+
+<Property name="kpp">
+<Description>
+КПП</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="bik">
+<Description>
+БИК</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="rsch">
+<Description>
+Расчетный счет</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="ksch">
+<Description>
+Корреспондетский счет</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="inn">
+<Description>
+ИНН</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="pbank">
+<Description>
+Банк</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="code">
+<Description>
+Банк</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="city">
+<Description>
+Город банка</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="okpo">
+<Description>
+ОКПО</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="okud">
+<Description>
+ОКУД</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="okdp">
+<Description>
+Деятельность по ОКДП</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="okonh">
+<Description>
+ОКОНХ</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="ogrn">
+<Description>
+ОГРН</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="okato">
+<Description>
+ОКАТО</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="regnumber">
+<Description>
+Свидетельство о регистрации</Description>
+<Type>%String</Type>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheSerialState</Type>
+<State>BankState</State>
+<StreamLocation>^Common.BankS</StreamLocation>
+<Data name="BankState">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>account1</Value>
+</Value>
+<Value name="2">
+<Value>account2</Value>
+</Value>
+<Value name="3">
+<Value>bik</Value>
+</Value>
+<Value name="4">
+<Value>inn</Value>
+</Value>
+<Value name="5">
+<Value>kpp</Value>
+</Value>
+<Value name="6">
+<Value>ksch</Value>
+</Value>
+<Value name="7">
+<Value>pbank</Value>
+</Value>
+<Value name="8">
+<Value>rsch</Value>
+</Value>
+<Value name="9">
+<Value>code</Value>
+</Value>
+<Value name="10">
+<Value>city</Value>
+</Value>
+<Value name="11">
+<Value>okpo</Value>
+</Value>
+<Value name="12">
+<Value>okdp</Value>
+</Value>
+<Value name="13">
+<Value>okud</Value>
+</Value>
+<Value name="14">
+<Value>okonh</Value>
+</Value>
+<Value name="15">
+<Value>ogrn</Value>
+</Value>
+<Value name="16">
+<Value>okato</Value>
+</Value>
+<Value name="17">
+<Value>regnumber</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

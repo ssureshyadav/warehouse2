@@ -1,0 +1,117 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ s login=$G(%session.Data("user"))
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ q 1
+</script>
+<html XMLNS:SKLADList>
+<IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="jscript" src="common.js"></script>
+<title>	Cache Server Page </title>
+<Script language="Jscript">
+var ColCode="";
+sessionid="#(%session.SessionId)#";
+
+function gg(){
+if(ColCode=="")return false;
+var SearchProperty = ColCode;
+var SearchValue = fldval.value;
+if(SearchValue=="")SearchProperty="";
+load(SearchProperty,SearchValue);
+}
+
+function colclick(){
+	if(currentdict.ColType=="%Date"){alert("Поля с датами не обрабатываются");return false;}
+	namfld.innerText=currentdict.ColName;
+	ColCode=currentdict.ColCode;
+}
+
+
+function load(SearchProperty,SearchValue){
+currentdict.loadfrommethod("Reports.ShowTables.ShowBrak",SearchProperty,SearchValue,dat1.value+"@"+dat2.value);
+}
+
+function fnUtiliz(){
+var StoreBrakIDs=currentdict.ListViewGetItems("selected",1);
+var UtilizID=#server(Docs.Action2.CreateUtiliz(StoreBrakIDs))#
+if(isNaN(UtilizID)){alert(UtilizID);return}
+
+WinResult=window.showModalDialog("docutiliz.csp","Docs.Utiliz"+InnerSplitter+UtilizID+InnerSplitter+"Утилизация","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+if(WinResult!=null)
+	{
+		if(window.confirm("Обработать документ? (Нажмите 'отмена', если хотите внести изменения перед обработкой документа)")){processdoc(UtilizID+"@Docs.Utiliz")}
+		else{alert("Документ успешно создан. Зайдите в раздел Документы, проверьте его и укажите системе обработать.")}
+		load("","")
+	}
+}
+
+function processdoc(doc)
+{
+	var ok=#server(Docs.Action.processdoc(doc))#
+	if(isNaN(ok)){alert(ok)}
+	else{alert("Документ успешно обработан");}
+}
+
+
+function fnSendToRemont(){
+var StoreBrakIDs=currentdict.ListViewGetItems("selected",1);
+var BrakremontID=#server(Docs.Action2.CreateBrakremont(StoreBrakIDs))#
+if(isNaN(BrakremontID)){alert(BrakremontID);return}
+if(window.confirm("Документ успешно создан. Открыть форму документа?")){
+	WinResult=window.showModalDialog("document.csp","Docs.Brakremont"+InnerSplitter+BrakremontID+InnerSplitter+"Передача документа в ремонт","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;");
+	}
+if(window.confirm("Обработать документ? (Нажмите 'отмена', если хотите внести изменения перед обработкой документа)"))
+	{
+	processdoc(BrakremontID+"@Docs.Brakremont")
+	load("","")
+	}
+else{alert("Документ успешно создан. Зайдите в раздел Документы, проверьте его и укажите системе обработать.")}
+}
+
+//переместить 
+function fnSendToNormal(){
+var StoreBrakIDs=currentdict.ListViewGetItems("selected",1);
+var InstrId=#server(Docs.Action2.MakeBrakInstruction(StoreBrakIDs))#
+if(isNaN(InstrId)){alert(InstrId);}
+else{
+	window.showModalDialog("createinstructIgrid.csp?source="+InstrId,"","center:yes;status:no;dialogHeight:600px;dialogWidth:720px;resizable:yes;")
+	}
+}
+
+//нажали зелёную галочку справа от дат
+function okbutFunc()
+{
+	var SearchValue = "";
+	var SearchProperty = "";
+	
+	if((ColCode!="")&&(fldval.value!=""))
+	{
+		var SearchProperty = ColCode;
+		var SearchValue = fldval.value;
+	}
+	load(SearchProperty,SearchValue);
+}
+</script>
+</head>
+
+<body onload="load('','')">
+<sklad:Button value="Товары" onclick="window.location.href='goods.csp'"><br>
+
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<td width=10%><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
+<TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=2><strong>Некондиционные товары</strong></TD>
+<td  width=10% align=right><!--<a href="talk.csp" ><img src="images/BIGProp.gif" width="20" height=25 border=0></a>--></td>
+</tr>
+</TABLE>
+Период c <input type=text id="dat1" onclick="fnCalendar(this)" class="datar"> по <input type=text id="dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar">
+<sklad:LittleButton name="ok" id="okbut" onclick="okbutFunc()" alt="Показать документы"><br>
+<br>
+<span id="namfld"></span>&nbsp;<input type="text" id="fldval" onkeyup="gg();">
+<SKLADList:listview width=100% height=150 id="currentdict" zonColumnClick="colclick()" /><br>
+<sklad:Button value="Утилизировать" onclick="fnUtiliz()" style="width:150px" alt="Создать документ 'Утилизация'">
+<sklad:Button value="Отправить в ремонт" onclick="fnSendToRemont()" style="width:150px" alt="Создать документ 'Передача брака в ремонт'">
+<sklad:Button value="Инструкция 'Некондиция'" alt="Создать инструкцию руководителя по отправке некондиционного товара" onclick="fnSendToNormal()" style="width:160px"><br>
+</body>
+</html>

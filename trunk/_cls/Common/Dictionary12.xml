@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Common.Dictionary12">
+<ClassType>persistent</ClassType>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%Persistent</Super>
+<TimeCreated>60643,52734</TimeCreated>
+
+<Property name="Name">
+<Description>
+Изделие</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Изделие"/>
+</Property>
+
+<Index name="NameInd">
+<Properties>Name</Properties>
+</Index>
+
+<Property name="Razdel">
+<Description>
+Раздел</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=",Бытовая техника,Электроинструмент"/>
+<Parameter name="VALUELIST" value=",1,2"/>
+</Property>
+
+<Index name="RazdelIndex">
+<Properties>Razdel</Properties>
+</Index>
+
+<Trigger name="UpdTrigger">
+<Description>
+Набор триггеров и методов для поддержки версии справочника</Description>
+<Code> d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")</Code>
+<Event>UPDATE</Event>
+<Time>AFTER</Time>
+</Trigger>
+
+<Trigger name="InsTrigger">
+<Code> d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")</Code>
+<Event>INSERT</Event>
+<Time>AFTER</Time>
+</Trigger>
+
+<Trigger name="DelTrigger">
+<Code> d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")</Code>
+<Event>DELETE</Event>
+<Time>AFTER</Time>
+</Trigger>
+
+<Method name="%OnDelete">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>oid:%ObjectIdentity</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="%OnAfterSave">
+<FormalSpec>insert:%Boolean</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	if (insert)||(%this.%IsModified()) d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetPropertyListIndex">
+<ClassMethod>1</ClassMethod>
+<CodeMode>objectgenerator</CodeMode>
+<FormalSpec><![CDATA[PropertyName:%String="",&DataLocation:%String=""]]></FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<Implementation><![CDATA[
+ Do %code.WriteLine(" s DataLocation="""_%compiledclass.Storages.GetAt(1).DataLocation_"""")
+ Do %code.WriteLine(" q:PropertyName="""" """"")
+ s number=""
+ s StorageStrategy=%compiledclass.Storages.GetAt(1)
+ f i=1:1:StorageStrategy.Data.Count() d  q:StorageData.Name[%compiledclass.SqlTableName
+ . s StorageData=StorageStrategy.Data.GetAt(i)
+ s data=StorageData.Values.GetNext(.number)
+ while $ISOBJECT(data) {
+ 	s PropertyName=data.Value
+ 	s ListIndex=data.Name
+ 	Do %code.WriteLine(" s Prop( """ _ PropertyName _ """)="_ListIndex)
+ 	s data=StorageData.Values.GetNext(.number)
+ 	} 	
+ Do %code.WriteLine(" Quit $G(Prop(PropertyName))")
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetPropertyValue">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ID:%String="",Property:%String=""</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ q:ID=""
+ q:Property=""
+ s PropertyNumber=..GetPropertyListIndex(Property,.DataLocation)
+ q:Property=""
+ q $ZSTRIP($LG($G(@DataLocation@(ID)),PropertyNumber),"<W")
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Common.Dictionary12D</DataLocation>
+<DefaultData>Dictionary12DefaultData</DefaultData>
+<IdLocation>^Common.Dictionary12D</IdLocation>
+<IndexLocation>^Common.Dictionary12I</IndexLocation>
+<StreamLocation>^Common.Dictionary12S</StreamLocation>
+<Data name="Dictionary12DefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Name</Value>
+</Value>
+<Value name="3">
+<Value>Razdel</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

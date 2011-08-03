@@ -1,0 +1,5 @@
+<script language="cache" runat="server">
+w ##class(Common.Common).GetCurrentDictVersion("Goods.Goods")
+w $C(9)
+w ##class(Common.Common).GetCurrentDictVersion("Goods.Group")
+</script>

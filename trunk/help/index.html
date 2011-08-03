@@ -1,0 +1,27 @@
+<html>
+<head>
+<title>Система складского учёта "Aska"</title>
+<script language="Jscript">
+function SetContentSrc(){
+var SearchPart=window.location.search.split("?")[1];
+if((SearchPart!="")&&(typeof(SearchPart)!="undefined"))
+	{
+		content.location=SearchPart;
+	}
+}
+</script>
+</head>
+<FRAMESET rows="40px,*" id="SuperMainFrameSet" noresize onload="SetContentSrc()">
+
+<FRAMESET COLS="100%,*" noresize>
+<FRAME SRC="top.html" frameborder="0" scrolling=no noresize>
+<FRAME frameborder="0" scrolling=no noresize>
+</FRAMESET>
+
+<FRAMESET cols="300px,*" id="MainFrameSet" >
+<FRAME src="toc.html" name="toc" id="toc"  frameborder="0" scrolling=auto>
+<FRAME src="empty.html" name="content" id="content"  frameborder="0" scrolling=auto>
+</FRAMESET>
+
+</FRAMESET>
+</html>

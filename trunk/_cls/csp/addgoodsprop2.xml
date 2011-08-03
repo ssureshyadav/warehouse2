@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.addgoodsprop2">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62013,62679.795468</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body onkeypress=""ManageWindow()"" onload=""load()"">"
+	Write !,(##class(%CSP.Response).HyperEventBody())
+	Write !,"<center><font size=+2>Справочник <b>"_($G(ClassDisplayName))_"</b></font></center>",!
+	Write "<table width=100% cellspacing=10>",!
+	Write "<tr><td>Наименование поля: </td><td> "
+	Write "<input type=""text"" name=""PropDesc"" onkeypress=""ManageWindow()"">"
+	Write "<br></td></tr>",!
+	Write "<tr><td>Поле является ссылкой на справочник</td><td> "
+	Write "<input type=""checkbox"" id=""DictFld"" onclick=""DateFld.checked=false;chbx.checked=false;DictField();"" style=""border:none;width:15px"">"
+	Write "</td></tr>",!
+	Write "<tr id=""dict"" style=""display:none""><td colspan=2 align=center id=""DictName""></td></tr>",!
+	Write "<tr><td>В поле будет записана дата</td><td> "
+	Write "<input type=""checkbox"" id=""DateFld"" onclick=""chbx.checked=false;DictFld.checked=false;DateField();"" style=""border:none;width:15px"">"
+	Write "</td></tr>",!
+	Write "<tr><td>Значения поля ограничены списком</td><td> "
+	Write "<input type=""checkbox"" id=""chbx"" onclick=""DateFld.checked=false;DictFld.checked=false;showflex();"" style=""border:none;width:15px"">"
+	Write "</td></tr>",!
+	Write "<tr id=""flex"" style=""display:none""><td colspan=2 align=center>",!
+	Write "<SKLAD2:table id=""jhu"" width=220 height=100 rows=1 cols=1 />",!
+	Write !,"<img src=""images/ok.gif"" onmouseover=""but21.src='images/Onok.gif'"" onmouseout=""but21.src='images/ok.gif'""  id=""but21"" name=""but21"" alt=""Вставить строку"" onclick=""jhu.Insrow('')"" style="""">"
+	Write !,!,"<img src=""images/del.gif"" onmouseover=""but1.src='images/Ondel.gif'"" onmouseout=""but1.src='images/del.gif'""  id=""but1"" name=""but1"" alt=""Удалить строку"" onclick=""jhu.Delrow()"" style="""">"
+	Write "</td></tr>",!
+	Write !,"<tr style=""display:none""><td>Тип свойства: смешанный (любые символы)</td><td>"
+	Write "<input type=""checkbox"" id=""Pattern"" style=""border:none;width:15px"" onclick=""PatternClick(!this.checked)"" checked>"
+	Write "</td></tr>",!
+	Write "<tr id=""PatternDescr"" style=""display:none""><td colspan=2>",!
+	Write "<table>",!
+	Write "<tr>",!
+	Write "	<td width=15>&nbsp;</td><td>"
+	Write "<input type=""radio"" name=""PatternType2"" style=""border:none;width:15px"" CHECKED>"
+	Write !,"	Запрещены к использованию следующие символы:</td><td>"
+	Write "<input type=""text"" id=""CharsProhibit"">"
+	Write "</td>",!
+	Write "</tr>",!
+	Write "<tr>",!
+	Write "	<td width=15>&nbsp;</td><td>"
+	Write "<input type=""radio"" name=""PatternType2"" style=""border:none;width:15px"">"
+	Write !,"	Используются только цифры:</td><td></td>",!
+	Write "</tr>",!
+	Write "<tr>",!
+	Write "	<td width=15>&nbsp;</td><td>"
+	Write "<input type=""radio"" name=""PatternType2"" style=""border:none;width:15px"">"
+	Write !,"	Используются только символы:</td><td></td>",!
+	Write "</tr>",!
+	Write "<tr style=""display:none"">",!
+	Write "	<td width=15>&nbsp;</td><td>"
+	Write "<input type=""radio"" name=""PatternType2"" style=""border:none;width:15px"">"
+	Write !,"	Используется шаблон:</td><td>"
+	Write "<input type=""text"" id=""CachePattern"">"
+	Write "</td>",!
+	Write "</tr>",!
+	Write "</table>",!
+	Write "</td></tr>",!
+	Write !,"<tr id=""osnprop"" style=""display:none""><td>Это поле является главным</td><td> "
+	Write "<input type=""checkbox"" id=""KeyProp"" style=""border:none;width:15px"">"
+	Write "</td></tr>",!
+	Write "<tr><td colspan=2 align=""center""><br>"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""startFun();"" TITLE=""""><center>Да</center></span>"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""window.close()"" TITLE=""""><center>Отмена</center></span>"
+	Write "</td></tr>",!
+	Write "</table>",!
+	Write !,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	s ClassName=%request.Get("ItemID")
+	s havename="false"
+	i ClassName'="" d
+	. s havename=##class(Common.Common).ClassHaveProperty($G(ClassName),"Name")
+	. s havename=$S(havename:"false",1:"true")
+	. s ClassObj=##class(Common.Dicts).%OpenId(ClassName)
+	. i ' $ISOBJECT(ClassObj) q
+	. s ClassDisplayName=ClassObj.Name
+	. k ClassObj
+	Write !,!
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write "<title>"_($G(%session.Data("systemname")))_"</title>",!
+	Write "<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"<style>"
+	Write !,"body{font-face: arial; font-size: 12}",!
+	Write "</style>"
+	Write !,!,"<script language=""Jscript"" src=""common.js"">"
+	Write "</script>"
+	Write !,"<script language=""jscript"">"
+	Write !,"var FieldType=""%String"";",!
+	Write "var Res="""";",!
+	Write "var argArr=window.dialogArguments.split("";"");",!
+	Write "var ClassName=ReturnSpace(argArr[0]);",!
+	Write "var PatternType;",!
+	Write "var PatternValue;",!
+	Write !,"function startFun(){",!
+	Write "Proper=PropDesc.value;",!
+	Write "if(Proper==""""){alert(""Не заполнено Наименование свойства"");return false;}",!
+	Write "if(window.confirm(""Создасть свойство ""+Proper+""?"")==false)return false;",!
+	Write "if(FieldType==""enumerated""){Res=jhu.ColumnData(0);}",!
+	Write "if(!Pattern.checked)PatternFun();",!
+	Write "wind=window.open(""wait.csp"",null,""height=100,width=200,toolbar=no,menubar=no,location=no,titlebar=no"")",!
+	Write "ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Goods.GoodsAction.addClassProperty:csp.addgoodsprop2"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',Proper,Res,FieldType,ClassName,KeyProp.checked,PatternType,PatternValue)",!
+	Write "wind.close();",!
+	Write "if(ok==1){returnValue=1;window.close();}",!
+	Write "else{alert(ok)}",!
+	Write "}",!
+	Write !,"function showflex(){",!
+	Write "if (chbx.checked){",!
+	Write "	window.dialogHeight=""400px"";",!
+	Write "	document.all.flex.style.display=""block"";",!
+	Write "	FieldType=""enumerated"";",!
+	Write "	}",!
+	Write "else{",!
+	Write "	document.all.flex.style.display=""none"";",!
+	Write "	window.dialogHeight=""300px"";",!
+	Write "	}",!
+	Write "}",!
+	Write !,"function delStr(){",!
+	Write "itemz=flexgrid.Row;",!
+	Write "if(flexgrid.Rows==1){alert(""Невозможно удалить единственную строку"");return false;}",!
+	Write "flexgrid.RemoveItem(itemz);",!
+	Write "}",!
+	Write !,"function DateField(){",!
+	Write "	FieldType=""%Date"";",!
+	Write "	showflex();",!
+	Write "	showDicts();",!
+	Write "}",!
+	Write !,"function DictField(){",!
+	Write "	showflex();",!
+	Write "	showDicts();",!
+	Write "	",!
+	Write "}",!
+	Write "function showDicts(){",!
+	Write "	if (DictFld.checked){",!
+	Write "		document.all.dict.style.display=""block"";",!
+	Write "		newItem=window.showModalDialog(""Dictionary.csp"",""Common.Dicts"",""cener:yes;status:no;dialogHeight:350px;dialogWidth:600px;resizable:yes;"");",!
+	Write "		if(newItem==null){return false;}",!
+	Write "		newArr=newItem.split(InnerSplitter);",!
+	Write "		DictName.innerText=newArr[1];",!
+	Write "		FieldType=newArr[0];",!
+	Write "		Res=newArr[0];",!
+	Write "	}",!
+	Write "	else{",!
+	Write "		document.all.dict.style.display=""none"";",!
+	Write "	}",!
+	Write "}",!
+	Write !,"function load(){",!
+	Write "	if(ClassName!=""""){",!
+	Write "		KeyProp.checked="_(havename)_";",!
+	Write "		osnprop.style.display="""";",!
+	Write "		}",!
+	Write "}",!
+	Write !,"function PatternClick(show){",!
+	Write "if(show){PatternDescr.style.display=""inline"";window.dialogHeight=""420px"";}",!
+	Write "else{PatternDescr.style.display=""none"";window.dialogHeight=""300px"";}",!
+	Write "}",!
+	Write !,"function PatternFun(){",!
+	Write "if(PatternType2[0].checked){",!
+	Write "	PatternType=""prohibited"";",!
+	Write "	PatternValue=CharsProhibit.value;}",!
+	Write "if(PatternType2[1].checked){",!
+	Write "	PatternType=""%Numeric"";",!
+	Write "	PatternValue="""";}",!
+	Write "if(PatternType2[2].checked){",!
+	Write "	PatternType=""%String"";",!
+	Write "	PatternValue="""";}",!
+	Write "if(PatternType2[3].checked){",!
+	Write "	PatternType=""cachepattern"";",!
+	Write "	PatternValue=CachePattern.value;}",!
+	Write "}",!
+	Write "</script>"
+	Write !,(..HyperEventHead())
+	Write !,!,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html XMLNS:SKLAD2>"
+	Write !,"<IMPORT NAMESPACE=""SKLAD2"" IMPLEMENTATION=""htc/table.htc"">",!
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\AddGoodsProp2.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/AddGoodsProp2.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>60619,65772</Default>
+</Parameter>
+</Class>
+</Export>

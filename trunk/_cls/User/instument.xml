@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="User.instument">
+<Description>
+</Description>
+<ClassType>persistent</ClassType>
+<DdlAllowed>1</DdlAllowed>
+<Owner>_SYSTEM</Owner>
+<ProcedureBlock>0</ProcedureBlock>
+<SqlRowIdPrivate>1</SqlRowIdPrivate>
+<SqlTableName>instument</SqlTableName>
+<StorageStrategy/>
+<Super>%Persistent</Super>
+<TimeCreated>60541,57163.508644</TimeCreated>
+
+<Property name="ID">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>2</SqlColumnNumber>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="price">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>3</SqlColumnNumber>
+<Parameter name="MAXLEN" value="255"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^User.instumentD</DataLocation>
+<DefaultData>instumentDefaultData</DefaultData>
+<IdLocation>^User.instumentD</IdLocation>
+<IndexLocation>^User.instumentI</IndexLocation>
+<StreamLocation>^User.instumentS</StreamLocation>
+<Data name="instumentDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>ID</Value>
+</Value>
+<Value name="3">
+<Value>price</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

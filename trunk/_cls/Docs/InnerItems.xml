@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.InnerItems">
+<Super>Docs.DocItems</Super>
+<TimeCreated>60395,4693.327331</TimeCreated>
+
+<Property name="addr2">
+<Description>
+Текущее место </Description>
+<Type>Store.Address</Type>
+</Property>
+
+<Property name="addr">
+<Description>
+Место назначения</Description>
+<Type>Store.Address</Type>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>InnerItemsDefaultData</DefaultData>
+<Data name="InnerItemsDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"InnerItems"</Subscript>
+<Value name="1">
+<Value>addr2</Value>
+</Value>
+<Value name="2">
+<Value>addr</Value>
+</Value>
+</Data>
+<Property name="Doc"/>
+<Property name="DocType"/>
+<Property name="Goods"/>
+<Property name="Price"/>
+<Property name="Quantity"/>
+<Property name="Total"/>
+<Property name="addr"/>
+<Property name="addr2"/>
+</Storage>
+</Class>
+</Export>

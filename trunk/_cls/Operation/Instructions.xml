@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Operation.Instructions">
+<Description>
+Инструкции</Description>
+<Super>Docs.Super</Super>
+<TimeCreated>60368,686.374027</TimeCreated>
+
+<Property name="InstDate">
+<Description>
+Дата</Description>
+<Type>%Date</Type>
+<Parameter name="FORMAT" value="4"/>
+</Property>
+
+<Index name="InstDateIndex">
+<Properties>InstDate</Properties>
+</Index>
+
+<Property name="Name">
+<Description>
+Краткое описание</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="Depot1">
+<Description>
+Склад</Description>
+<Type>Store.Depot</Type>
+</Property>
+
+<Index name="DepotIndex">
+<Type>bitmap</Type>
+<Properties>Depot</Properties>
+</Index>
+
+<Property name="State">
+<Description>
+Состояние</Description>
+<Type>%String</Type>
+<InitialExpression>"1"</InitialExpression>
+<Parameter name="DISPLAYLIST" value=",Создана,Утверждена,Принята,Укомплектовано,Отправлено в офис,Отправлено c товаром,Отправлено из офиса,Отправлено экпресс-почтой,Нет в наличии,Отклонена,Самовывоз,Отправлено транспортной компанией,Завершена"/>
+<Parameter name="VALUELIST" value=",1,2,3,4,5,6,7,8,8.5,8.6,8.7,8.9,9"/>
+</Property>
+
+<Index name="StateIndex">
+<Type>bitmap</Type>
+<Properties>State</Properties>
+</Index>
+
+<Property name="Oper">
+<Description>
+Шаблон операции</Description>
+<Type>Operation.OperTemplate</Type>
+</Property>
+
+<Index name="OperInd">
+<Type>bitmap</Type>
+<Properties>Oper</Properties>
+</Index>
+
+<Property name="Operation">
+<Description>
+Текущая операция</Description>
+<Type>Operation.OperationHistory</Type>
+</Property>
+
+<Property name="innerinstr">
+<Description>
+Внутренняя инструкция</Description>
+<Type>Docs.Super</Type>
+</Property>
+
+<Property name="dostavka">
+<Description>
+Способ доставки</Description>
+<Type>Common.Dictionary1</Type>
+</Property>
+
+<Property name="imp">
+<Description>
+Важность</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=", ,Важно"/>
+<Parameter name="VALUELIST" value=",1,2"/>
+</Property>
+
+<Property name="ChangesChain">
+<Type>Operation.InstructionsHist</Type>
+<Cardinality>children</Cardinality>
+<Inverse>instr</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="showcolor">
+<Description>
+Выделить цветом</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=",,Красным,Синим"/>
+<Parameter name="VALUELIST" value=",,red,blue"/>
+</Property>
+
+<Property name="postnumber">
+<Description>
+Номер почтового документа</Description>
+<Type>%String</Type>
+</Property>
+
+<Index name="postnumbind">
+<Properties>postnumber</Properties>
+</Index>
+
+<Property name="postdata">
+<Description>
+Дата почтового документа</Description>
+<Type>%Date</Type>
+<Parameter name="FORMAT" value="4"/>
+</Property>
+
+<Index name="PostDataIndex">
+<Properties>postdata</Properties>
+</Index>
+
+<Property name="RashOplatType">
+<Description>
+Тип оплаты</Description>
+<Type>Common.Dictionary7</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Index name="RashOplatTypeInd">
+<Properties>RashOplatType</Properties>
+</Index>
+
+<Property name="HasBeenSent">
+<Description>
+Инструкция отправлена</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=",Отправлена,Не отправлена"/>
+<Parameter name="VALUELIST" value=",1,0"/>
+</Property>
+
+<Index name="HasBeenSent">
+<Properties>HasBeenSent</Properties>
+</Index>
+
+<Property name="PhotoFile">
+<Description>
+путь к файлу с фотографией</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+<Parameter name="MAXLEN" value="255"/>
+</Property>
+
+<Property name="BrakComment">
+<Description>
+Комментарий клиента</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Property name="BrakCommentDat">
+<Description>
+Комментарий клиента</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Property name="BrakCommentAnswer">
+<Description>
+Ответ сервис менеджера на негативный отзыв</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Property name="BrakCommentAnswerUser">
+<Description>
+Сервис менеджер ответивший на негативный отзыв</Description>
+<Type>Users.Dates</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Property name="BrakCommentAnswerDat">
+<Description>
+Дата ответа сервис менеджера</Description>
+<Type>%Date</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Property name="RefuseReason">
+<Description>
+Причина отклонения заявки</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Property name="RefuseReasonUser">
+<Description>
+Сервис менеджер написавший причину отклонения</Description>
+<Type>Users.Dates</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Property name="RefuseReasonDat">
+<Description>
+Дата отклонения заявки</Description>
+<Type>%Date</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>InstructionsDefaultData</DefaultData>
+<Data name="InstructionsDefaultData">
+<Subscript>"Instructions"</Subscript>
+<Value name="1">
+<Value>Comment</Value>
+</Value>
+<Value name="2">
+<Value>Contr</Value>
+</Value>
+<Value name="3">
+<Value>Depot</Value>
+</Value>
+<Value name="4">
+<Value>InstDate</Value>
+</Value>
+<Value name="5">
+<Value>State</Value>
+</Value>
+<Value name="6">
+<Value>OperType</Value>
+</Value>
+<Value name="7">
+<Value>Oper</Value>
+</Value>
+<Value name="8">
+<Value>Kontrag</Value>
+</Value>
+<Value name="9">
+<Value>child</Value>
+</Value>
+<Value name="10">
+<Value>innerinstr</Value>
+</Value>
+<Value name="11">
+<Value>Operation</Value>
+</Value>
+<Value name="12">
+<Value>Depot1</Value>
+</Value>
+<Value name="13">
+<Value>dostavka</Value>
+</Value>
+<Value name="14">
+<Value>imp</Value>
+</Value>
+<Value name="15">
+<Value>showcolor</Value>
+</Value>
+<Value name="16">
+<Value>postdata</Value>
+</Value>
+<Value name="17">
+<Value>postnumber</Value>
+</Value>
+<Value name="18">
+<Value>RashOplatType</Value>
+</Value>
+<Value name="19">
+<Value>HasBeenSent</Value>
+</Value>
+<Value name="20">
+<Value>BrakComment</Value>
+</Value>
+<Value name="21">
+<Value>PhotoFile</Value>
+</Value>
+<Value name="22">
+<Value>BrakCommentAnswer</Value>
+</Value>
+<Value name="23">
+<Value>BrakCommentDat</Value>
+</Value>
+<Value name="24">
+<Value>BrakCommentAnswerDat</Value>
+</Value>
+<Value name="25">
+<Value>BrakCommentAnswerUser</Value>
+</Value>
+<Value name="26">
+<Value>RefuseReason</Value>
+</Value>
+<Value name="27">
+<Value>RefuseReasonDat</Value>
+</Value>
+<Value name="28">
+<Value>RefuseReasonUser</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

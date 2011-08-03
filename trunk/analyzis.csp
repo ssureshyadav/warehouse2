@@ -1,0 +1,454 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ s login=$G(%session.Data("user"))
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ i '##class(Common.Rights).getrights(login,17) s %response.ServerSideRedirect="norights.csp" 
+ 
+ s YearBeginDate = "01/01/"_(+$ZD($H,3))
+ q 1
+</script>
+
+<html XMLNS:SKLADz XMLNS:SKLAD2 XMLNS:SKLADList>
+<IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc">
+<IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
+<head>
+<title>#($G(%session.Data("systemname")))#</title>
+<link href="style.css" type=text/css rel=stylesheet>
+<style>
+.Kontragent{width:230px;cursor:hand;border:solid 1 black}
+.ta{border-left:1.0pt solid windowtext;border-top:1.0pt solid windowtext;}
+.td{border-right:1.0pt solid windowtext;border-bottom:1.0pt solid windowtext;}
+</style>
+
+<script language="Jscript" src="common.js"></script>
+<script language="JScript">
+sessionid="#(%session.SessionId)#";
+login="#(%session.Data("login"))#";
+var goodspars="";
+var docparams="";
+
+// разбор ItemID и вывод документа на печать
+function PrintDocument(ItemID)
+{
+var docid = ItemID.split("@")[0];
+var docclass = ItemID.split("@")[1];
+var url="print.csp?id="+docid+"&class="+docclass+"&sessionid="+sessionid;	
+window.open(url);
+}
+
+function ff(){
+var DocName=report.item("TypDoc")
+ var idclass=report.ItemID;
+ if(ReturnSpace(idclass)=="")return;
+ var arr=idclass.split("@")
+ if(arr.length>1){
+	 WinResult=window.showModalDialog("document.csp?silent=true",arr[1]+InnerSplitter+arr[0]+InnerSplitter+DocName,"cener:yes;status:no;dialogHeight:600px;dialogWidth:600px;resizable:yes;")
+	 }
+ }
+ 
+function load(){
+depotelem.startDownload('Data.csp?class=Store.Depot&fields=ID,Name', put);
+PropTable1.DownLoadPairs("","","Dat,Tim,Summa,Name,DocumentClass,Stat,Source,User1,Depot,Comment,CloseDate,CloseTime,CloseUser");
+PropTable.DownLoadPairs("","","Doc,DocType,Goods,Quantity,Price,Total,quantplan,Comment,kurs,dopperc");
+//typdocs.DownLoadPairs("","","meas");
+Rep9SelectFn()
+}
+ 
+function put(textStr){
+addOptions(textStr,"depotelem");
+var oOption = document.createElement("OPTION");
+depotelem.options.add(oOption);
+oOption.innerText = "Все склады";
+oOption.value = "";
+}
+
+//отчет о приходе расходе
+function show(){
+var kontr=PropTable1.item("Kontr")
+report.loadfrommethod("Reports.Analyzis.prihrash",dat1.value+"@"+dat2.value,depotelem.value,kontr)
+rep1.checked=false;
+}
+
+//отчет об остатках
+function showost(){
+var addr=PropTable.item("addr");
+rep2.checked=false;
+report2.loadfrommethod("Reports.Analyzis.ostatok",addr)
+}
+
+//прогноз обнуления остатков
+function shownull(){
+rep3.checked=false;
+report3.loadfrommethod("Reports.Analyzis.nullost",rep4dat1.value)
+}
+
+//показать документы по аттрибутам товара
+function showdocs(){
+if(goodspars==""){alert("Не установлены параметры товаров для отбора");return}
+rep4.checked=false;
+report4.loadfrommethod("Reports.Analyzis.docsbytovs",rep4dat1.value+"@"+rep4dat2.value,goodspars,Rep4DocsSelector.value)
+}
+
+//показать документы по указанным аттрибутам
+function showdocs2(){
+if(docparams==""){alert("Не установлены параметры документов для отбора");return}
+rep5.checked=false;
+report5.loadfrommethod("Reports.Analyzis.docsbypars",doctyp,docparams,rep5dat1.value+"@"+rep5dat2.value)
+}
+
+//показать скрыть 
+function showhide(but){
+var replist="";
+if(but=="rep1")replist="report";
+if(but=="rep2")replist="report2";
+if(but=="rep3")replist="report3";
+if(but=="rep4")replist="report4span";
+if(but=="rep5")replist="report5";
+if(but=="rep6")replist="report6";
+if(but=="rep7")replist="report7";
+if(but=="rep8")replist="report8";
+if(but=="rep9")replist="report9";
+if(but=="rep10")replist="report10";
+if(but=="rep11")replist="report11";
+if(replist=="")return
+if(document.getElementById(replist).style.display=="none"){document.getElementById(replist).style.display="block";}
+else{document.getElementById(replist).style.display="none";}
+}
+
+function rep4help(){
+goodspars=window.showModalDialog("selgoodsparams.csp","","center:yes;status:no;dialogHeight:370px;dialogWidth:600px;resizable:yes;");
+goodspars=ReturnSpace(goodspars);
+}
+
+//открыть карточку товара
+function gcard(tovid){
+	alert(tovid)
+if(ReturnSpace(tovid)=="")return
+ok=window.showModalDialog("GoodsCard.csp?GoodsId="+tovid+"&groupspath="+"",tovid+InnerSplitter+"","center:yes;status:no;dialogHeight:600px;dialogWidth:650px;resizable:yes")
+}
+
+// открыть окно с параметрами документа
+function rep5params(){
+doctyp=typDocsSel.value;
+if(doctyp==""){alert("Не указан тип документа");return}
+docparams=window.showModalDialog("seldocparams.csp?docclass="+doctyp,"","center:yes;status:no;dialogHeight:600px;dialogWidth:650px;resizable:yes")
+docparams=ReturnSpace(docparams);
+}
+
+function showReport6(){
+report6.loadfrommethod("Reports.Analyzis.Zapchasti",rep6dat1.value+"@"+rep6dat2.value,rep6models.value,rep6group.value)
+}
+
+//функция выбора контрагента (подставит выбранного в innerText переданного объекта
+function ChooseKonragent(Obj){
+newItem=window.showModalDialog("Dictionary.csp","Common.Kontragent","center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");
+if(newItem==null){return false;}
+var newArr=newItem.split(InnerSplitter);
+Obj.innerText=newArr[1];
+Obj.Tag=newArr[0];
+}
+
+function GoodsForRep7(){
+WinResult=window.showModalDialog("selectgoods2.csp","","center:yes;status:no;dialogHeight:700px;dialogWidth:800px;resizable:yes;")
+if(WinResult==null)return
+var TovarsString="";
+var IDsString="";
+var TovarsArray=WinResult.split(StringSplitter)
+for(var i=0; i<TovarsArray.length-1; i++) 
+	{
+	var SingleTovarArray=TovarsArray[i].split(InnerSplitter)
+	var IDsString=IDsString+","+SingleTovarArray[0];
+	var TovarsString=TovarsString+" "+SingleTovarArray[8];
+	}
+Rep7TovarNames.innerText=TovarsString;
+Rep7TovarNames.Tag=IDsString;
+}
+
+function showReport7(){
+var Dates=rep7dat1.value+"@"+rep7dat2.value;
+var TovarIDs=Rep7TovarNames.Tag
+var KontrID=Kontr.Tag
+report7.loadfrommethod("Reports.Analyzis.OtpravkaKontragentu",Dates,TovarIDs,KontrID)
+}
+
+function showReport8(){
+var Dates=rep8dat1.value+"@"+rep8dat2.value;
+report8.loadfrommethod("Reports.Analyzis.ShowInactiveKontr",Dates,"","")
+}
+
+//функции отчёта "Прогноз остатков"
+	function showReport9(){
+		Dates=rep9dat1.value+"@"+rep9dat2.value;
+		rep9.checked=false;
+		RepTypeGoodsAbbr=Rep9Select.value+"@"+Rep9abbr.value;
+		#call(Reports.Analyzis.NullOstatokForecastPrepare(Dates,RepTypeGoodsAbbr,login))#
+		Rep9TimerID = window.setInterval(LookUpRep9, 2000)
+	}
+
+	function LookUpRep9(){
+		var answer=#server(Reports.Analyzis.NullOstatokForecastLookUp(login))#
+		var command = answer.substr(0, 4);
+		if(command=="stop")
+			{
+			window.clearInterval(Rep9TimerID);
+			report9.loadfrommethod("Reports.Analyzis.NullOstatokForecastShow",Dates,Rep9Select.value,login)
+			var answer=answer.substr(4, answer.length);
+			}
+		Rep9Result.innerHTML=answer+"<br>";
+	}
+
+	function Rep9SelectFn(){
+		if(Rep9Select.value=="term"){var color="#000000";}
+		else{var color="#aaaaaa";}
+		Rep9Term.style.color=color;
+		rep9dat1.style.color=color;
+		rep9dat2.style.color=color;
+	}
+
+//Отчёт "Контроль сроков обработки"
+function showReport10(){
+rep10.checked=false;
+var Dates=rep10dat1.value+"@"+rep10dat2.value;
+var Term=Rep10Select.value+"@"+rep10term.value;
+var ShowAllInstr=Rep10checkbox.checked;
+report10.loadfrommethod("Reports.Analyzis.SendTermControl",Dates,Term,ShowAllInstr)
+if(ShowAllInstr){Rep10Legend.style.display="block";}
+else{Rep10Legend.style.display="none";}
+}
+
+//Отчёт "Запчасти которые требовал клиент и которые не были отправлены"
+function showReport11()
+{
+	rep11.checked=false;
+	var Dates=rep11dat1.value+"@"+rep11dat2.value;
+	report11.loadfrommethod("Reports.Analyzis.ShowGoodsZeroSent",Dates,"",login)
+}
+
+function showReport12(){
+window.open("Report12.csp?ContentType="+rep12select.value+"&showdate="+"rep12cb.checked"+"&Dat1="+rep12dat1.value+"&Dat2="+rep12dat2.value+"&sessionid="+sessionid);
+}
+
+function showReport13(){
+window.open("Report13.csp?ContentType="+rep13select.value+"&Dat1="+rep13dat1.value+"&Dat2="+rep13dat2.value+"&sessionid="+sessionid);
+}
+
+function showReport14()
+{
+window.open("Report14.csp?ContentType="+rep14select.value+"&sessionid="+sessionid+"&Rezerv="+rep14Rezerv.checked+"&Catalogue="+rep14CatalogueSelect.value);
+}
+
+function showReport15()
+{
+	var url = "Report15.csp?ContentType="+rep15select.value+"&sessionid="+sessionid+"&Dat1="+rep15dat1.value+"&Dat2="+rep15dat2.value+"&State="+rep15Select.value;
+	window.open(url);
+}
+</script>
+</head>
+<body onload="load();">
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<td width=10%><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
+<TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=3><strong>Аналитика</strong></TD>
+<td width=10%></td>
+</tr>
+</table>
+<table width=100%><tr><td>Приход/расход за период c <input type=text id="dat1" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"> по <input type=text id="dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar">
+<select style="width:150px" id="depotelem" style='behavior:url(#default#download)'></select>
+<SKLAD2:table id="PropTable1" width=260 ClassName="Docs.Super" />
+<sklad:LittleButton name="ok" id="okbut" onclick="show()" alt="Показать документы">
+<td align="right">скрыть <input type="checkbox" style="border:0;width:15" id="rep1" CHECKED onclick="showhide(this.id)">
+</table>
+<SKLADList:listview width=100% height=200 id="report" style="display:none" onMethodComplite="this.style.display=''" ClassName="Operation.Instructions" zonDblClick="ff()"/><br>
+
+
+<hr width=80%>
+<table width=100%><tr><td><nobr>Текущий остаток </nobr><td><SKLAD2:table id="PropTable" width=260 ClassName="Docs.InventItems" /><td><sklad:LittleButton name="ok" id="okbut2" onclick="showost()" alt="Показать остатки">
+<td align="right" width=100%>скрыть <input type="checkbox" style="border:0;width:15" id="rep2" CHECKED onclick="showhide(this.id)">
+</table>
+<SKLADList:listview width=100% height=200 id="report2" style="display:none" onMethodComplite="this.style.display=''" zonDblClick="gcard(this.ItemID)"/><br>
+
+
+<hr width=80%>
+<table width=100% ><tr><td align=left>Поиск 
+<select id="Rep4DocsSelector">
+<option value="">Всех документов</option>
+<option value="Brak">Документов брака</option>
+</select> за период c <input type=text id="rep4dat1" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"> по <input type=text id="rep4dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"> по атрибутам товаров <input type="button" value="установить значения свойств" onclick="rep4help();"><sklad:LittleButton name="ok" id="okbut4" onclick="showdocs()" alt="Показать остатки">
+<td align="right" >скрыть <input type="checkbox" style="border:0;width:15" id="rep4" CHECKED onclick="showhide(this.id)">
+</table>
+<span id="report4span" style="display:none">
+<SKLADList:listview width=100% height=200 id="report4" onMethodComplite="report4span.style.display=''" zonDblClick="PrintDocument(this.ItemID)"/><br>
+<br><font size="3" color="lightgrey">Двойной клик откроет форму печати документа</font>
+</span>
+
+<hr width=80%>
+<table width=100% ><tr><td align=left>Прогноз обнуления остатков на дату <input type=text id="dat3" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"><sklad:LittleButton name="ok" id="okbut3" onclick="shownull()" alt="Показать прогноз">
+<td align="right" >скрыть <input type="checkbox" style="border:0;width:15" id="rep3" CHECKED onclick="showhide(this.id)">
+</table>
+<SKLADList:listview width=100% height=200 id="report3" style="display:none" onMethodComplite="this.style.display=''" zonDblClick="gcard(this.ItemID)"/><br>
+
+<hr width=80%>
+<table width=100% ><tr><td align=left>Поиск  за период c <input type=text id="rep5dat1" value="" onclick="fnCalendar(this)" class="datar"> по <input type=text id="rep5dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"> 
+<select id="typDocsSel" >
+<script language="cache" runat="server">
+ w ##class(Docs.Action2).GetClassValuesOptions("","Docs.Docs")
+</script>
+</select>
+<input type="button" value="Параметры" onclick="rep5params()">
+<sklad:LittleButton name="ok" id="okbut5" onclick="showdocs2()" alt="Вывести документы">
+<td align="right" >скрыть <input type="checkbox" style="border:0;width:15" id="rep5" CHECKED onclick="showhide(this.id)">
+</table>
+<SKLADList:listview width=100% height=200 id="report5" style="display:none" onMethodComplite="this.style.display=''" /><br>
+
+<hr width=80%>
+<table width=100% ><tr><td align=left>Отправка запчастей за период c <input type=text id="rep6dat1" value="" onclick="fnCalendar(this)" class="datar"> по <input type=text id="rep6dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar">  
+Объединять марки <input type="text" id="rep6models"> в название <input type="text" id="rep6group">
+<sklad:LittleButton name="ok" id="okbut6" onclick="showReport6()" alt="Вывести документы">
+<td align="right" >скрыть <input type="checkbox" style="border:0;width:15" id="rep6" CHECKED onclick="showhide(this.id)">
+</table>
+<SKLADList:listview width=100% height=200 id="report6" style="display:none" onMethodComplite="this.style.display=''" /><br>
+
+<hr width=80%>
+<table width=100% ><tr><td align=left>Отправка <span title="Указать запчасти отправку которых необходимо проследить" onmouseout="UnPaint(this)" onclick="GoodsForRep7()" onmouseover="Paint(this)" style="cursor:hand">запчастей</span>  за период c <input type=text id="rep7dat1" value="#($ZD($H,4))#" onmouseout="UnPaint(this)" onmouseover="Paint(this)" onclick="fnCalendar(this)" class="datar"> по <input type=text onmouseout="UnPaint(this)" onmouseover="Paint(this)" id="rep7dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar">  
+Клиенту <span onmouseout="UnPaint(this)" onmouseover="Paint(this)" class=Kontragent onclick="ChooseKonragent(this)" id="Kontr" Tag="" title="Указать клиента, что бы очистить поле нажмите правую кнопку мыши" oncontextmenu="this.innerText='';this.Tag=''"></span>
+<sklad:LittleButton name="ok" id="okbut7" onclick="showReport7()" alt="Вывести отчёт">
+<br>
+<span title="Указать запчасти отправку которых необходимо проследить" Tag="">Запчасти выбранные для ремонта:</span> <span  onclick="GoodsForRep7()" id="Rep7TovarNames"  onmouseout="UnPaint(this)" onmouseover="Paint(this)" style="border:solid 1 black;cursor:hand" Tag="">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+<td align="right" >скрыть <input type="checkbox" style="border:0;width:15" id="rep7" CHECKED onclick="showhide(this.id)">
+</table>
+<SKLADList:listview width=100% height=200 id="report7" style="display:none" onMethodComplite="this.style.display=''" /><br>
+
+<hr width=80%>
+<table width=100% ><tr><td align=left>Список контрагентов которые не заказывали запчасти c <input type=text id="rep8dat1" value="#($ZD($H-30,4))#" onmouseout="UnPaint(this)" onmouseover="Paint(this)" onclick="fnCalendar(this)" class="datar"> по <input type=text onmouseout="UnPaint(this)" onmouseover="Paint(this)" id="rep8dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar">  
+<sklad:LittleButton name="ok" id="okbut8" onclick="showReport8()" alt="Вывести отчёт">
+<br>
+<td align="right" >скрыть <input type="checkbox" style="border:0;width:15" id="rep8" CHECKED onclick="showhide(this.id)">
+</table>
+<SKLADList:listview width=100% height=200 id="report8" style="display:none" onMethodComplite="this.style.display=''" /><br>
+
+<hr width=80%>
+<table width=100%><tr><td align=left>
+Прогноз обнуления остатков <br>
+<span id="Rep9Result"></span>
+<table border=0 class="ta" cellspacing=0 ><tr>
+<td class="td">
+	<select id="Rep9Select" onchange="Rep9SelectFn()"><option value="term">Указать период</option><option value="winter">Зима</option><option value="summer">Лето</option><option value="year">Год</option></select>
+	<span id="Rep9Term"> период c <input type=text id="rep9dat1" value="#($ZD($H-30,4))#" onmouseout="UnPaint(this)" onmouseover="Paint(this)" onclick="fnCalendar(this)" class="datar"> по <input type=text onmouseout="UnPaint(this)" onmouseover="Paint(this)" id="rep9dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"> </span>
+</td>
+<td class="td">
+	Начальные буквы аббревиатуры <input type="text" id="Rep9abbr" style="width:40px">
+</td>
+<td class="td">
+	<sklad:LittleButton name="ok" id="okbut9" onclick="showReport9()" alt="Вывести отчёт">
+</td>
+</tr></table>
+<br>
+<td align="right" >скрыть <input type="checkbox" style="border:0;width:15" id="rep9" CHECKED onclick="showhide(this.id)">
+</table>
+<SKLADList:listview width=100% height=200 id="report9" style="display:none" onMethodComplite="this.style.display=''" /><br>
+
+<hr width=80%>
+<table width=100%><tr><td align=left>
+Контроль сроков обработки заявки <sklad:LittleButton name="help2" id="help10" onclick="window.open('help/index.html?AnalyzSendTermControl.html')" alt="Помощь по отчёту"><br>
+<table class="ta" cellspacing=0>
+<tr>
+	<td class="td">
+		Период c <input type=text id="rep10dat1" value="#($ZD($H-30,4))#" onmouseout="UnPaint(this)" onmouseover="Paint(this)" onclick="fnCalendar(this)" class="datar" title="Начальная дата для выборки заявок"> по <input type=text onmouseout="UnPaint(this)" onmouseover="Paint(this)" id="rep10dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar" title="Конечная дата для выборки заявок"> 
+	</td>
+	<td class="td">
+		Максимальный срок обработки: <input type=text value=5 id="rep10term" style="width:30px" title="Количество дней предусмотренное для отправки заявки."> 
+	</td>
+	<td rowspan=2 class="td">
+		<sklad:LittleButton name="ok" id="okbut10" onclick="showReport10()" alt="Вывести отчёт">
+	</td>
+</tr>
+<tr>
+	<td class="td" title="Если указать какой либо тип оплаты, то иные заявки не попадут в выборку.">
+		Тип оплаты заявки: <select id="Rep10Select">
+			<script language="cache" runat="server">
+ 				w ##class(Docs.Action2).GetClassValuesOptions("","Common.Dictionary7")
+			</script>
+		</select>
+	</td>
+	<td class="td">
+		Выводить все инструкции <input type="checkbox" id="Rep10checkbox" style="width:15px;border:none" title="Выводить все заявки, а не подходящие по сроку подсвечивать.">
+	</td>
+</tr>
+</table>
+<br>
+<td align="right" >скрыть <input type="checkbox" style="border:0;width:15" id="rep10" CHECKED onclick="showhide(this.id)">
+</table>
+<SKLADList:listview width=100% height=200 id="report10" style="display:none" onMethodComplite="this.style.display=''" /><br>
+<span id="Rep10Legend" style="display:none">
+<table>
+<tr><td bgcolor="#ff0000">&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Отправленные с опозданием</td></tr>
+<tr><td bgcolor="#7b0000">&nbsp;&nbsp;&nbsp;&nbsp;</td><td>Не отправленные</td></tr>
+</table>
+</span>
+
+<hr width=80%>
+<table width=100%><tr><td align=left>
+Запчасти которые требовал клиент и которые не были отправлены<br>
+Период c <input type=text id="rep11dat1" value="#($ZD($H-30,4))#" onmouseout="UnPaint(this)" onmouseover="Paint(this)" onclick="fnCalendar(this)" class="datar"> по <input type=text onmouseout="UnPaint(this)" onmouseover="Paint(this)" id="rep11dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"> 
+<sklad:LittleButton name="ok" id="okbut11" onclick="showReport11()" alt="Вывести отчёт">
+<br>
+<td align="right" >скрыть <input type="checkbox" style="border:0;width:15" id="rep11" CHECKED onclick="showhide(this.id)">
+</table>
+<SKLADList:listview width=100% height=200 id="report11" style="display:none" onMethodComplite="this.style.display=''" /><br>
+
+<hr width=80%>
+Суммы отгрузок по брендам (MM,TL,VC)<br>
+<table class="ta" cellspacing=0>
+<tr><td class="td">Период c <input type=text id="rep12dat1" value="#($ZD($H-30,4))#" onmouseout="UnPaint(this)" onmouseover="Paint(this)" onclick="fnCalendar(this)" class="datar"> по <input type=text onmouseout="UnPaint(this)" onmouseover="Paint(this)" id="rep12dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"></td><td class="td" rowspan="3"><sklad:LittleButton name="ok" id="okbut12" onclick="showReport12()" alt="Вывести отчёт"></td></tr>
+<tr><td class="td">Выводить с помощью <select id="rep12select"><option value="application/x-msexcel">Excel</option><option value="text/html">Internet Explorer</option></select></td></tr>
+<!-- <tr><td class="td">Показывать документ и дату продажи <input type="checkbox" id="rep12cb" checked style="width:15;border:none"></td></tr> -->
+</table>
+
+<hr width=80%>
+Количество заявок в системе<br>
+<table class="ta" cellspacing=0>
+<tr><td class="td">Период c <input type=text id="rep13dat1" value="#($ZD($H-30,4))#" onmouseout="UnPaint(this)" onmouseover="Paint(this)" onclick="fnCalendar(this)" class="datar"> по <input type=text onmouseout="UnPaint(this)" onmouseover="Paint(this)" id="rep13dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"></td><td class="td" rowspan="3"><sklad:LittleButton name="ok" id="okbut13" onclick="showReport13()" alt="Вывести отчёт"></td></tr>
+<tr><td class="td">Выводить с помощью <select id="rep13select"><option value="application/x-msexcel">Excel</option><option value="text/html">Internet Explorer</option></select></td></tr>
+<!-- <tr><td class="td">Показывать документ и дату продажи <input type="checkbox" id="rep12cb" checked style="width:15;border:none"></td></tr> -->
+</table>
+
+<hr width=80%>
+Сумма остатка<br>
+<table class="ta" cellspacing=0>
+<tr>
+	<td class="td">Классификатор: <select id="rep14CatalogueSelect">
+<script language="cache" runat="server">
+ w ##class(Docs.Action2).GetClassValuesOptions("","Goods.Catalogue")
+</script>
+</select> Учитывать резерв <input type="checkbox" id="rep14Rezerv" style="border:0;width:15">
+	</td>
+	<td class="td" rowspan="3"><sklad:LittleButton name="ok" id="okbut14" onclick="showReport14()" alt="Вывести отчёт"></td>
+</tr>
+<tr>
+	<td class="td">Выводить с помощью <select id="rep14select"><option value="application/x-msexcel">Excel</option><option value="text/html">Internet Explorer</option></select></td>
+</tr>
+</table>
+
+<hr width=80%>
+Статистика ремонта изделий<br>
+<table class="ta" cellspacing=0>
+<tr>
+	<td class="td">Округ: <select id="rep15Select">
+<script language="cache" runat="server">
+ w ##class(Docs.Action2).GetClassValuesOptions("","Common.Dictionary18")
+</script>
+</select> 
+	с <input type=text onmouseout="UnPaint(this)" onmouseover="Paint(this)" id="rep15dat1" value="#(YearBeginDate)#" onclick="fnCalendar(this)" class="datar">
+	по <input type=text onmouseout="UnPaint(this)" onmouseover="Paint(this)" id="rep15dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar">
+	</td>
+	<td class="td" rowspan="3"><sklad:LittleButton name="ok" id="okbut15" onclick="showReport15()" alt="Вывести отчёт"></td>
+</tr>
+<tr>
+	<td class="td">Выводить с помощью <select id="rep15select"><option value="excel">Excel</option><option value="html">Internet Explorer</option></select></td>
+</tr>
+</table>
+
+<hr width=80%>
+
+<a href="rrr.csp">расход по брендам</a>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Users.Roles">
+<Description>
+Роли</Description>
+<IncludeCode>xmlmacros</IncludeCode>
+<Super>%Persistent</Super>
+<TimeCreated>60382,34466.269813</TimeCreated>
+
+<Property name="NameFunction">
+<Description>
+Имя пользователя</Description>
+<Type>%String</Type>
+<Required>1</Required>
+</Property>
+
+<Property name="Name">
+<Description>
+Имя роли</Description>
+<Type>%String</Type>
+<Required>1</Required>
+</Property>
+
+<Method name="SaveRole">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>role:%String,str:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	
+	f i=1:1 s func(i)=$P(str,"~",i+1) q:func(i)=""  d
+	.s func=func(i)
+	.&sql(insert into Users.Roles (Name,NameFunction) values(:role,:func))
+	q
+]]></Implementation>
+</Method>
+
+<Method name="DeleteRole">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>name:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	
+	&sql(select count(ID) into :count from Users.Roles Where NameFunction=6)
+	if count=1 q "Невозможно удалить данную роль"
+	&sql(delete from Users.Roles Where Name=:name)
+	&sql(delete from Users.Dates Where Rol=:name)
+	q 1
+]]></Implementation>
+</Method>
+
+<Method name="ReadRole">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>name,numbers</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+   &sql(select ID into :ident from Users.Roles where Name=:name)
+	s numbers=ident+numbers-1
+	s j=ident+7
+	f i=ident:1:j d
+	.&sql(select NameFunction into :namefunc from Users.Roles where ID=:i) 
+	.i namefunc'="0" s func(i)=1 
+	.i namefunc="0" s func(i)=0
+	q func(numbers)
+]]></Implementation>
+</Method>
+
+<Method name="RenameRole">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>lastname,newname,str</FormalSpec>
+<Implementation><![CDATA[
+	s $ZT="RenameRoleErr"
+	s nameroleup=""
+	f i=1:1 s func(i)=$P(str,"~",i+1) q:func(i)=""  d
+	i $G(func(6))=6 d ##class(Users.Roles).UpdateRole(lastname,newname,str) q
+	&sql(select Name from Users.Roles where Name=:lastname&NameFunction=6) //ищем есть ли у роли функция настройки
+	i SQLCODE=100 d ##class(Users.Roles).UpdateRole(lastname,newname,str) q //изменяем
+	&sql(select count(ID) into :count from Users.Roles where NameFunction=6) // проверяем сколько ролей с функцией настройки
+	i count>1  d ##class(Users.Roles).UpdateRole(lastname,newname,str) q nameroleup //изменяем
+	q 1
+RenameRoleErr
+ $$$WriteError($ZE)
+ q 0
+]]></Implementation>
+</Method>
+
+<Method name="UpdateRole">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>lastnamerole,newnamerole,str</FormalSpec>
+<Implementation><![CDATA[
+	&sql(delete from Users.Roles Where Name=:lastnamerole)
+	d ##class(Users.Roles).SaveRole(newnamerole,str) 
+	&sql(update  Users.Dates set Rol=:newnamerole where Rol=:lastnamerole)
+	&sql(update  Users.NameRoles set Name=:newnamerole where Name=:lastnamerole)
+	q
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Users.RolesD</DataLocation>
+<DefaultData>RolesDefaultData</DefaultData>
+<IdLocation>^Users.RolesD</IdLocation>
+<IndexLocation>^Users.RolesI</IndexLocation>
+<StreamLocation>^Users.RolesS</StreamLocation>
+<Data name="RolesDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>NameRole</Value>
+</Value>
+<Value name="3">
+<Value>NameUser</Value>
+</Value>
+<Value name="4">
+<Value>Name</Value>
+</Value>
+<Value name="5">
+<Value>NameFunction</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

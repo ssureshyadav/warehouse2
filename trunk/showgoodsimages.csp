@@ -1,0 +1,123 @@
+
+<script language="cache" runat="server">
+//<csp:CLASS SUPER="%CSP.Page,csp.super">
+ s goodsid=%request.Get("GoodsId")
+ //s f=..cspfile()
+ s joiu=$TR($G(f),"\","?")
+ d:%request.ContentType="multipart/form-data"
+ . s obj=$G(%request.MimeData("oFile1",1))
+ . q:'$ISOBJECT(obj)
+ . //s f=$P(f,"\",1,$L(f,"\")-1)_"\GoodsImages\"
+ . s f=$P($ZU(86),"\",1,$L($ZU(86),"\")-1)_"\CSP\sklad2\GoodsImages\"
+ . s filename=goodsid_$P(obj.FileName,"\",$L(obj.FileName,"\"))
+ . s filepath=f_filename
+ . s file=##class(%File).%New(filepath)
+ . Do file.Open("WSN")
+ . d file.CopyFrom(obj)
+ . s ok=file.%Save()
+ . i '+ok d
+ . . Do DecomposeStatus^%apiOBJ(ok,.Err)
+ . . s ^Errors($H,"err")=Err(Err)
+ . e  d
+ . . d ##class(Common.Common).SaveGoodsImage(goodsid,filename)
+ . . s d="window.close();"
+ . . d file.Close()
+ . . s cmd = "c:\progra~1\IrfanView\i_view32.exe "_filepath_" /resize_long=800 /aspectratio /resample /convert="_filename
+ . . if %request.Get("resize") d $ZF(-1,cmd)
+ . . //d $ZF(-1,cmd)
+</script>
+<html>
+<head>
+<title>#($G(%session.Data("systemname")))#</title>
+<script language="Jscript">
+#($G(d))#
+function myOnSubmitEventHandler(){
+ if(document.all.oFile1.value.length<2)return false
+ return true
+}
+
+function prnt(){
+window.print();
+}
+
+function displayMenu(dd) {
+currentimg=dd.src;
+doel.innerText=event.y+"|"+event.screenY+"|"+event.offsetY+"|"+event.clientY+"|"+event.clientTop;
+   whichDiv=event.srcElement;
+   menu1.style.posLeft=event.clientX;
+   menu1.style.posTop=event.offsetY;
+   alert("ntgtm pxelpot")
+   menu1.style.pixelTop=event.y;
+   menu1.style.display="";
+   menu1.setCapture();
+}
+
+function switchMenu() {   
+   el=event.srcElement;
+   if (el.className=="menuItem") {
+      el.className="highlightItem";
+   } else if (el.className=="highlightItem") {
+      el.className="menuItem";
+   }
+}
+
+function clickMenu() {
+   menu1.releaseCapture();
+   menu1.style.display="none";
+   el=event.srcElement;
+   if (el.id=="pri") {
+      prnt();
+   } else if (el.id=="del") {
+		delimg(currentimg);
+   }
+}
+
+function delimg(curimg){
+ok=#server(Goods.GoodsAction.delimg("#(goodsid)#",curimg,"#(joiu)#"))#
+if(isNaN(ok))alert(ok);
+else{window.close();}
+}
+
+function printimg(curimg){
+window.open("PrintImage.csp?ImageSrc=GoodsImages"+curimg);
+}
+</script>
+<STYLE>
+.menuItem {font-family:sans-serif;font-size:10pt;width:100;padding-left:20;
+   background-Color:menu;color:black}
+.highlightItem {font-family:sans-serif;font-size:10pt;width:100;padding-left:20;
+   background-Color:highlight;color:white}
+</STYLE>
+</head>
+<body onclick="menu1.style.display='none'">
+<script language="cache" runat="server">
+ s gid=%request.Get("GoodsId")
+ q:gid=""
+ s gobj=##class(Goods.Goods).%OpenId(gid)
+ s images=gobj.Images
+ w "<center><font size=+2>"_gobj.Name_"</font></center>"
+ &html<
+<form enctype="multipart/form-data" method="post" onsubmit="return(myOnSubmitEventHandler());">
+<input type="hidden" name="GoodsId" value="#(gid)#" >
+Добавить изображение товара<br>
+<input name="oFile1" id="oFile1" size=30 type=file >
+<input type="submit" value="ок"><br>
+Сжимать картинку до размера 800px по широкой стороне <input type="checkbox" name="resize" value="1">
+</form>
+ >
+ d
+ . f i=1:1:$L(images,"\") d
+ . . s currentimg=$P(images,"\",i)
+ . . d:$L(currentimg)>2 
+ . . . w "<img src=""images/del.gif"" style='cursor:hand' onmouseover=""this.src='images/Ondel.gif'"" onmouseout=""this.src='images/del.gif'""  id=""delbut"_i_""" alt=""Удалить"" onclick=""delimg('/"_currentimg_"')"">"
+ . . . w "<img src=""images/print.gif"" style='cursor:hand' onmouseover=""this.src='images/Onprint.gif'"" onmouseout=""this.src='images/print.gif'""  id=""printbut"_i_""" alt=""Печать"" onclick=""printimg('/"_currentimg_"')"">"
+ . . . w "<img src=""GoodsImages/"_currentimg_""" ><hr width=80%>"
+</script>
+<div id=menu1 onclick="clickMenu()" onmouseover="switchMenu()" onmouseout="switchMenu()" style="position:absolute;display:none;width:100;background-Color:menu; border: outset 3px gray">
+<div class="menuItem" id=pri>Печать</div>
+<div class="menuItem" id=del>Удалить</div>
+<div class="menuItem" id=doel></div>
+
+</div>
+</body>
+</html>

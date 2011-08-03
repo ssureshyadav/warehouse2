@@ -1,0 +1,123 @@
+<script language="cache" runat="server">
+ d:%session.NewSession 
+ . s %session.EndSession=1
+ . s ses=%request.Get("sessionid",1)
+ . s %session=%session.GetSession(ses)
+</script>
+<html>
+<head>
+<title>     #($G(%session.Data("systemname")))# </title>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="Jscript" src="common.js"></script>
+<style>
+input{border:0;width:20px}
+.TD { border-right:1 solid black;border-bottom:1 solid black }
+.TABLE { border-left:1 solid black;border-top:1 solid black;width:100% }
+</style>
+<script language="Jscript">
+function startFun(){
+var ItogString="";
+for(var i=0;i<document.forms[0].elements.length; i++){
+     var CurrentElement=document.forms[0].elements[i]
+     var CurrentElementValue=CurrentElement.value;
+     var CurrentElementTag=CurrentElement.Tag;
+     if((CurrentElement.checked)&&(CurrentElementValue!=0))ItogString=ItogString+CurrentElementTag+"="+CurrentElementValue+";"
+}
+if(ItogString==""){alert("Ничего не выбрано для замены.");return}
+if(window.confirm("Заменить указанные товары?")){
+     var ok=#server(Docs.Action.ChangeGoodsInDoc(ItogString))#;
+     if(isNaN(ok)){alert(ok)}
+     else{
+          alert("Товары успешно заменены.");
+          window.returnValue=true;
+          window.close();
+          }
+     }
+}
+</script>
+</head>
+
+<body onkeypress="ManageWindow();">
+<form name="forma" id="forma">
+<script language="cache" runat="server">
+ n ID,GoodsFullName,Quantity,i,GoodsId,DocObj
+ s DocId=%request.Get("DocId")
+ s DocObj=##class(Docs.Rash).%OpenId(DocId)
+ if '$ISOBJECT(DocObj) w "<P align=center style='font-size:14pt'><b>Ошибка</b> Невозможно извлечь информацию о документе "_DocId_"</p>" q
+ s Name=DocObj.Name
+ s KontrName=$S($ISOBJECT(DocObj.Kontr):DocObj.Kontr.Name,1:"")
+ s Dat=$ZD(DocObj.Dat,4)
+ s Tim=$ZT(DocObj.Tim)
+ s DocStat=DocObj.Stat
+ if DocStat=2 w "<P align=center style='font-size:14pt'><b>Внимание!</b> Документ уже закрыт. Замена товара невозможна</p>"
+ &html<
+ <table border=0 class=TABLE style="width:0" cellspacing=0>
+ <tr><td class=TD>Номер<td class=TD>#(Name)#
+ <tr><td class=TD>Контрагент<td class=TD>#(KontrName)#
+ <tr><td class=TD>Дата<td class=TD>#(Dat)#
+ <tr><td class=TD>Время<td class=TD>#(Tim)#
+ </table>
+ <Br>
+ >
+ s glob=$NA(^mtempTempGlob($I))
+ k @glob
+ w "<table width=100% class=TABLE cellspacing=0>"
+ w "<tr><td class=TD>Исходный товар<td class=TD>Требуемое<br>количество<td class=TD>Количество<br>на складе<td class=TD>Замена"
+ &sql(
+      declare dfg cursor for 
+      select ID,Goods->FullName,Quantity,Goods
+      into :ID,:GoodsFullName,:Quantity,:GoodsId
+      from Docs.DocItems 
+      where Doc=:DocId
+      )
+ &sql(open dfg)
+ f  &sql(fetch dfg) q:SQLCODE  d
+ . s count=$I(count)
+ . s @glob@(count,"GoodsFullName")=GoodsFullName
+ . s @glob@(count,"Quantity")=Quantity
+ . s @glob@(count,"ID")=ID
+ . s Store=0
+ . s ok=##class(Store.Action).GetQuantByGoods(ID,.Store)
+ . s @glob@(count,"Store")=Store
+ . s @glob@(count,"GoodsId")=GoodsId
+ &sql(close dfg)
+ 
+ s i="" f  s i=$O(@glob@(i)) q:i=""  d
+ . w "<tr>"
+ . w "<td valign=top class=TD>"_$G(@glob@(i,"GoodsFullName"))     //имя оригинального товара
+ . w "<td valign=top class=TD>"_$G(@glob@(i,"Quantity"))          //заказанное количество
+ . w "<td valign=top class=TD>"_@glob@(i,"Store")                    //имеющееся количество на складе
+ . s GoodsId=@glob@(i,"GoodsId")
+ . s ID=@glob@(i,"ID")
+ . s InputElementName="Goods"_ID
+ . s InputElementId="InputElemId"_ID
+ . w "<td style='padding:5' class=TD>"     //имеющиеся замены
+ . w "<table class=TABLE cellspacing=0><tr style='color:gray'><td width=100% class=TD>Замена<td class=TD>Количество<br>на складе"
+ . w "<tr>"
+ . w "<td class=TD><input type=radio name='"_InputElementName_"' id='"_InputElementId_"' CHECKED value='0'><span style='cursor:hand' onclick='"_InputElementId_".checked=true'>Без замены</span><br>"
+ . w "<td class=TD>&nbsp;"
+ . &sql(declare gok cursor for select ID,Property6625,Property6625->FullName into :ZamenaID,:Property6625,:FullName from Common.Dictionary4 where Name=:GoodsId)
+ . &sql(open gok)
+ . f  &sql(fetch gok) q:SQLCODE  d
+ . . s InputElementId="InputElemId"_ZamenaID_ID
+ . . w "<tr>"
+ . . w "<td class=TD><input type=radio name='"_InputElementName_"' id='"_InputElementId_"' value='"_Property6625_"' Tag='"_ID_"'><span style='cursor:hand' onclick='"_InputElementId_".checked=true'>"_FullName_"</span><br>"
+ . . k Store 
+ . . s ok=##class(Store.Action).GetQuantByGoods(ID,.Store)
+ . . w "<td class=TD>"_+$G(Store)
+ . w "</table>"
+ . &sql(close gok)
+ . w "</tr>",!
+</script>
+</table>
+</form>
+
+<csp:IF CONDITION='DocStat=2'>
+<center><br><sklad:Button onclick="windowclose();" value="Отмена"></center>
+<csp:ELSE>
+<center><br><sklad:Button value="Заменить" onclick="startFun();"><sklad:Button onclick="windowclose();" value="Отмена"></center>
+</csp:IF>
+
+
+</body>
+</html>

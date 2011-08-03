@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.Rash">
+<Description>
+Расходная накладная</Description>
+<Super>Docs.Super</Super>
+<TimeCreated>60364,45410.412161</TimeCreated>
+
+<Property name="opl">
+<Description>
+Оплата</Description>
+<Type>Common.Dictionary7</Type>
+</Property>
+
+<Index name="oplind">
+<Properties>opl</Properties>
+</Index>
+
+<Property name="Platej">
+<Description>
+Платёжный документ</Description>
+<Type>Docs.Platejka</Type>
+<Parameter name="CAPTION" value=",display=readonly"/>
+</Property>
+
+<Index name="PlatejInd">
+<Properties>Platej</Properties>
+</Index>
+
+<Property name="OplatStatus">
+<Description>
+Статус оплаты</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=", ,Ожидает оплаты,Оплачено полностью,Оплачено частично"/>
+<Parameter name="VALUELIST" value=",0,1,2,3"/>
+</Property>
+
+<Index name="OplatStatusInd">
+<Properties>OplatStatus</Properties>
+</Index>
+
+<Property name="OplSumma">
+<Description>
+Оплаченная сумма</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="RubSumma">
+<Description>
+Рублёвая сумма</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="kurs">
+<Description>
+Курс</Description>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>RashDefaultData</DefaultData>
+<Data name="RashDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"Rash"</Subscript>
+<Value name="1">
+<Value>Depot</Value>
+</Value>
+<Value name="2">
+<Value>opl</Value>
+</Value>
+<Value name="3">
+<Value>OplatStatus</Value>
+</Value>
+<Value name="4">
+<Value>OplSumma</Value>
+</Value>
+<Value name="5">
+<Value>Platej</Value>
+</Value>
+<Value name="6">
+<Value>RubSumma</Value>
+</Value>
+<Value name="7">
+<Value>kurs</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

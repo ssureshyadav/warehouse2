@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Operation.Plan">
+<Description>
+План руководителя</Description>
+<Super>Docs.Super</Super>
+<TimeCreated>60762,38407.703272</TimeCreated>
+
+<Property name="PlanDate">
+<Description>
+Начальная дата</Description>
+<Type>%Date</Type>
+<Parameter name="FORMAT" value="4"/>
+</Property>
+
+<Property name="PlanDate2">
+<Description>
+Конечная дата</Description>
+<Type>%Date</Type>
+<Parameter name="FORMAT" value="4"/>
+</Property>
+
+<Property name="DocLanguage">
+<Description>
+Язык</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=",Русский,Английский"/>
+<Parameter name="VALUELIST" value=",1,2"/>
+</Property>
+
+<Index name="DocLanguageInd">
+<Properties>DocLanguage</Properties>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>PlanDefaultData</DefaultData>
+<Data name="PlanDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"Plan"</Subscript>
+<Value name="1">
+<Value>PlanDate</Value>
+</Value>
+<Value name="2">
+<Value>PlanDate2</Value>
+</Value>
+<Value name="3">
+<Value>Language</Value>
+</Value>
+<Value name="4">
+<Value>DocLanguage</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

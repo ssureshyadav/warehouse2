@@ -1,0 +1,38 @@
+<script language="cache" runat="server">
+ s skip=%request.Get("skip")
+ s addrpath=%request.Get("addrpath")
+</script>
+<html XMLNS:SKLAD2>
+<IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc" >
+<head>
+<title>#($G(%session.Data("systemname")))#</title>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="Jscript" src="common.js"></script>
+<script language="JScript">
+var argArr=window.dialogArguments.split(";");
+var ItemID=argArr[0];
+var ClassName=argArr[1];
+
+function startFun(){
+if(!window.confirm("Применить все указанные параметры к #(addrpath)#"))return false;
+xmldoc=PropTable.GetXmlContent();
+ok=SplitSendXml(ItemID,ClassName,xmldoc,"","#(%session.SessionId)#","Store.Action.CellsMultiChange")
+if(isNaN(ok)){alert(ok)}
+else{returnValue=1;window.close();}
+}
+
+function load(){
+PropTable.DownLoadPairs(ClassName,"","#(skip)#");
+}
+
+
+</script>
+</head>
+<body  onload="load();" onkeypress="ManageWindow();" >
+<fieldset style="width:100%;height:200"><legend>Основные свойства</legend>
+<SKLAD2:table id="PropTable" width="100%" />
+</fieldset>
+<center><br><sklad:Button value="Да" onclick="startFun();"><sklad:Button onclick="window.close()" value="Отмена"></center>
+</table>
+</body>
+</html>

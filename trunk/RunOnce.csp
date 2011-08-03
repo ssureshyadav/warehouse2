@@ -1,0 +1,23 @@
+<script language="cache" runat="server">
+s ^UnRequiredFields("Docs.Utiliz","Kontr")=1
+s ^UnRequiredFields("Docs.Utiliz","Komissia")=1
+s ^UnRequiredFields("Docs.Rash","Platej")=1
+s ^UnRequiredFields("Docs.Rash","OplatStatus")=1
+s ^UnRequiredFields("Docs.Rash","OplSumma")=1
+s ^UnRequiredFields("Docs.Platejka","Rash")=1
+</script>
+<html>
+<head>
+
+<!-- Put your page Title here -->
+<title>	Cache Server Page </title>
+
+</head>
+
+<body>
+
+		<!-- Put your page code here -->
+		My page body
+</body>
+</html>
+

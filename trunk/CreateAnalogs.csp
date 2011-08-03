@@ -1,0 +1,170 @@
+<html XMLNS:SKLADz XMLNS:SKLADList XMLNS:SKLAD2>
+<IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
+<IMPORT NAMESPACE="SKLADz" IMPLEMENTATION="htc/treeview.htc">
+<IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc">
+
+<head>
+<title>#($G(%session.Data("systemname")))#</title>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="Jscript" src="common.js"></script>
+<script language="JScript">
+//Arguments=window.dialogArguments.split(InnerSplitter);
+CardId="";
+DetailId="";
+AnalogId="";
+var CurrentProperty;
+var Objvalue;
+var InCard=false;
+var FromTable="";
+var FromTree="";
+var Number=0;
+ExpressType2="";
+var ColCode="";
+var depot="#($G(%session.Data("depot")))#"
+var commongroups="#($G(%session.Data("commongroups")))#"
+
+function startFun(){
+if(DetailId==""){alert("Не установлена заменяемая деталь.");return false;}
+if(AnalogId==""){alert("Не установлен аналог.");return false;}
+var ok=#server(Common.Common.SetDetailAnalogRelation(DetailId,AnalogId))#
+if(isNaN(ok)){alert(ok)}
+else{
+	alert("Пара взаимозаменяемых деталей установлена успешно.")
+	DetailId="";
+	AnalogId="";
+	DetailName.innerText="";
+	AnalogName.innerText="";
+	}
+}
+
+function ReturnSelected(){
+ResultArray=TempGoods.ListViewGetItems("selected");
+returnValue=ResultArray;
+window.close();	
+}
+
+function load(){
+window.dialogWidth=screen.availWidth+"px";
+//alert(screen.availWidth+"X"+screen.availHeight+"\n"+window.dialogWidth+"X"+window.dialogHeight)
+TempGoods.attachEvent("onAddColumns", addcol)
+TempGoods.LoadHeaders("izdelie,Description,Property312,Property675,Property9469,abbr,Composition");
+Catalogues.startDownload(strForGroups(depot,commongroups), putCatalogue);
+}
+
+function addcol(){
+TempGoods.detachEvent("onAddColumns", addcol)
+fields=TempGoods.GetColumns("Goods->");
+//TempGoods.AddColumns("quant~Количество~~~@%String#@#")
+}
+
+function putCatalogue(text){
+addOptions(text,"Catalogues");
+LoadTree();
+}
+
+function LoadTree(){
+GroupsTree.AdditionalID=Catalogues.value;
+GroupsTree.DownLoad('Data.csp?class=Goods.Group&fields=Parent,Code,Name,ID&params="'+depot+'","'+Catalogues.value+'"')	
+}
+
+// добавить товар в таблицу из текущей ветки
+function AddFromGroup(){
+var where="Groups='"+GroupsTree.NodeID+"'"
+TempGoods.loadfrommethod("Goods.GoodsAction.fromgroup",where,fields,0)
+}
+
+// добавить товар в таблицу из всех подветок данной ветки
+function AddFromWholeGroup(){
+var where="Groups->Depot='"+depot+"' and Groups->Catalogue='"+Catalogues.value+"' and Groups->Code %STARTSWITH '"+GroupsTree.NodeCode+"'";
+TempGoods.loadfrommethod("Goods.GoodsAction.fromgroup",where,fields);
+}
+
+function AddFromSelect(){
+if(ThisGroupOnly.checked){var GroupCondition="Groups->Depot='"+depot+"' and Groups->Catalogue='"+Catalogues.value+"' and Groups->Code %STARTSWITH '"+GroupsTree.NodeCode+"'";}
+else{var GroupCondition="";}
+var where=GroupCondition+FromTable;
+TempGoods.loadfrommethod("Goods.GoodsAction.fromgroup",where,fields)
+}
+
+function TableClick(){
+	ExpressType="FromTable";
+	CurrentProperty=PropTable.CurrentRowTag;
+	Pname.innerText=PropTable.CurrentRowName;
+	newObj=PropTable.CurrentRowElement.cloneNode(true);
+	Pvalue.innerHTML="";
+	Pvalue.appendChild(newObj);
+}
+
+//функция нужна для совместимости с table.htc
+function cellaction(oo){
+}
+
+//функция нужна для совместимости с table.htc
+function getDivChange(oo){
+}
+
+//открыть карточку товара
+function OpenCard(){
+GoodsId=SelectedItemProperty(GoodsListView,"Tag");
+GoodsName=SelectedItemProperty(GoodsListView,'Text');
+if(GoodsId=="")return
+ok=window.showModalDialog("GoodsCard.csp?GoodsId="+GoodsId+"&groupspath="+GroupsTree.ParentNames,GoodsId+InnerSplitter+GoodsName,"center:yes;status:no;dialogHeight:600px;dialogWidth:650px;resizable:yes")
+if(ok==1){ShowTovars()}
+}
+
+function GroupsTreeClick(){
+	AddFromGroup();
+}
+
+// Установить текущую позицию Листа как деталь
+function SetAsDetail(){
+var currentSelection=TempGoods.ListViewGetItems("selected");
+DetailId=currentSelection.split(InnerSplitter)[0];
+DetailName.innerText=currentSelection.split(InnerSplitter)[8];
+}
+
+// Установить текущую позицию Листа как аналог выбранной детали
+function SetAsAnalog(){
+var currentSelection=TempGoods.ListViewGetItems("selected");
+var AnalogsArray=currentSelection.split(StringSplitter);
+AnalogId="";
+for(var i=0;i<AnalogsArray.length-1;i++){
+	var CurrentAnalog=AnalogsArray[i];
+	var CurrentAnalogArray=CurrentAnalog.split(InnerSplitter)
+	AnalogId=AnalogId+CurrentAnalogArray[0]+InnerSplitter;
+	AnalogName.innerHTML=AnalogName.innerHTML+"<br>"+CurrentAnalogArray[8];	
+	}
+}
+</script>
+</head>
+<body  onload="load();" onkeypress="ManageWindow();">
+<a href="#" onclick="window.location.href='tuneup.csp'" >Вернуться к настройкам</a>
+<table height=100% width=100% border=0>
+<tr ><td width=50% valign="top">
+<fieldset><legend>Отбор из группы</legend>
+Классификатор:<select id="Catalogues" onchange="LoadTree()" style="behavior:url('#default#download');"></select><br>
+  <SKLADz:treeview id="GroupsTree" width="400" height=170 ImagesPath="#(%session.Data("ImagesPath"))#" zonClick="GroupsTreeClick();" onDownloadCmpl="LoadPropTree()" />
+  <br>
+  <input type="button" id="SelectWholeGroup" value="выбрать всю ветку" onclick="AddFromWholeGroup()">
+ </fieldset>
+</td>
+<td width=50% valign="top">
+Деталь: <b><span id="DetailName"></span></b><br>
+Аналог: <b><span id="AnalogName"></span></b>
+<br><sklad:Button value="Установить связь детали и аналога" onclick="startFun();" style="width=100px">
+
+</td></tr>
+
+<tr><td valign="top"  colspan=2>
+<!--
+<span id="namfld"></span>&nbsp;<input type="text" id="fldval" onkeyup="gg();">
+-->
+<fieldset id="SelectedGoods"><legend>Выбранные товары</legend>
+ 	<SKLADList:listview width=100% height=130 id="TempGoods"  ClassName="Goods.Goods" AddOnClear="false" zonDblClick="ReturnSelected();"  AddHeaders="true"/><br>
+<sklad:Button value="Это нужная деталь" onclick="SetAsDetail();"> 
+<sklad:Button value="Это аналог" onclick="SetAsAnalog();">
+</fieldset>
+</td></tr>
+</table>
+</body>
+</html>

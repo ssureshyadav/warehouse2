@@ -1,0 +1,34 @@
+<script language="cache" runat="server">
+ s sessionid=%request.Get("sessionid",1)
+ 
+ d:%session.NewSession 
+ . s %session.EndSession=1
+ . s %session=%session.GetSession(sessionid)
+ 
+ s super=%request.Get("super")
+ i super'="" 
+ {
+	 s superdoc=##class(Operation.Instructions).%OpenId(super)
+	 s instr=superdoc.innerinstr
+	 i $ISOBJECT(instr)
+	 {
+		 s docid=instr.%Id()
+		 s DocClass=$P(instr,"@",2)
+		 
+		 s %response.ServerSideRedirect="print.csp?id="_docid_"&class="_DocClass_"&sessionid="_sessionid
+	 }
+ }
+
+</script>
+<html>
+<head>
+
+<!-- Put your page Title here -->
+<title>	Cache Server Page </title>
+
+</head>
+
+<body>
+<h2>Инструкция руководителя не имеет привязки к инструкции на складе</h2>
+</body>
+</html>

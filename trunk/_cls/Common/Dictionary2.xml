@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Common.Dictionary2">
+<ClassType>persistent</ClassType>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%Persistent</Super>
+<TimeCreated>60373,43165</TimeCreated>
+
+<Property name="remont1">
+<Description>
+1 заявка</Description>
+<Type>Docs.Remont</Type>
+</Property>
+
+<Property name="remont2">
+<Description>
+2 заявка</Description>
+<Type>Docs.Remont</Type>
+</Property>
+
+<Property name="remont3">
+<Description>
+3 заявка</Description>
+<Type>Docs.Remont</Type>
+</Property>
+
+<Property name="remont1otch">
+<Description>
+1 отчет</Description>
+<Type>Docs.Otchet</Type>
+</Property>
+
+<Property name="remont2otch">
+<Description>
+2 отчет</Description>
+<Type>Docs.Otchet</Type>
+</Property>
+
+<Property name="remont3otch">
+<Description>
+3 отчет</Description>
+<Type>Docs.Otchet</Type>
+</Property>
+
+<Property name="remont4otch">
+<Description>
+4 отчет</Description>
+<Type>Docs.Otchet</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Property name="Act">
+<Description>
+Акт технического осмотра</Description>
+<Type>Docs.Act</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Property name="Utiliz">
+<Description>
+Акт утилизации</Description>
+<Type>Docs.Utiliz</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Property name="Name">
+<Description>
+серийный номер</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Номер"/>
+</Property>
+
+<Index name="garantInd">
+<Data>Name</Data>
+<Properties>Name</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Property name="Property5330">
+<Description>
+Контрагент</Description>
+<Type>Common.Kontragent</Type>
+<Parameter name="CAPTION" value="Контрагент"/>
+</Property>
+
+<Property name="Property8550">
+<Description>
+Дата выдачи</Description>
+<Type>%Date</Type>
+<Parameter name="CAPTION" value="Дата выдачи"/>
+<Parameter name="FORMAT" value="4"/>
+</Property>
+
+<Property name="Property9194">
+<Description>
+Актуальность</Description>
+<Type>%String</Type>
+<InitialExpression>1</InitialExpression>
+<Parameter name="CAPTION" value="Актуальность"/>
+<Parameter name="DISPLAYLIST" value=",Действителен,Не действителен"/>
+<Parameter name="VALUELIST" value=",1,2"/>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+//Index NewIndex1 On Name [ IdKey, Unique ];
+
+]]></Content>
+</UDLText>
+
+<Property name="serial">
+<Description>
+гарантийный номер</Description>
+<Type>%String</Type>
+</Property>
+
+<Index name="serialInd">
+<Data>Name</Data>
+<Properties>serial</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Property name="tovar">
+<Description>
+Модель изделия</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="Dat">
+<Description>
+Дата создания</Description>
+<Type>%Date</Type>
+<InitialExpression>+$H</InitialExpression>
+</Property>
+
+<Index name="Dat">
+<Properties>Dat</Properties>
+</Index>
+
+<Property name="Tim">
+<Description>
+Время создания</Description>
+<Type>%Time</Type>
+<InitialExpression>$P($H,",",2)</InitialExpression>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Index name="Tim">
+<Properties>Tim</Properties>
+</Index>
+
+<Property name="CloseDat">
+<Description>
+Дата недействительного статуса</Description>
+<Type>%Date</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Property name="CloseTime">
+<Description>
+Время недействительного статуса</Description>
+<Type>%Time</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Property name="CloseUser">
+<Description>
+Оператор установивший недействительный статус</Description>
+<Type>Users.Dates</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Property name="Comment">
+<Description>
+Примечание</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="2048"/>
+</Property>
+
+<Property name="CloseReason">
+<Description>
+Причина закрытия</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="SaleDate">
+<Description>
+Дата продажи</Description>
+<Type>%Date</Type>
+</Property>
+
+<Method name="GetPropertyListIndex">
+<ClassMethod>1</ClassMethod>
+<CodeMode>objectgenerator</CodeMode>
+<FormalSpec><![CDATA[PropertyName:%String="",&DataLocation:%String="",&IndexLocation:%String=""]]></FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<Implementation><![CDATA[
+ Do %code.WriteLine(" s DataLocation="""_%compiledclass.Storages.GetAt(1).DataLocation_"""")
+ Do %code.WriteLine(" s IndexLocation="""_%compiledclass.Storages.GetAt(1).IndexLocation_"""")
+ Do %code.WriteLine(" q:PropertyName="""" """"")
+ s number=""
+ s StorageStrategy=%compiledclass.Storages.GetAt(1)
+ f i=1:1:StorageStrategy.Data.Count() d  q:StorageData.Name[%compiledclass.SqlTableName
+ . s StorageData=StorageStrategy.Data.GetAt(i)
+ s data=StorageData.Values.GetNext(.number)
+ while $ISOBJECT(data) {
+ 	s PropertyName=data.Value
+ 	s ListIndex=data.Name
+ 	Do %code.WriteLine(" s Prop( """ _ PropertyName _ """)="_ListIndex)
+ 	s data=StorageData.Values.GetNext(.number)
+ 	} 	
+ Do %code.WriteLine(" Quit $G(Prop(PropertyName))")
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetPropertyValue">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ID:%String="",Property:%String="",PropertyNumber:%String="",DataLocation:%String=""</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ q:ID=""
+ q:Property=""
+ if ('+PropertyNumber)||(DataLocation="") s PropertyNumber=..GetPropertyListIndex(Property,.DataLocation)
+ q:Property=""
+ q $ZSTRIP($LG($G(@DataLocation@(ID)),PropertyNumber),"<W")
+]]></Implementation>
+</Method>
+
+<Method name="%OnBeforeSave">
+<Description><![CDATA[
+This callback method is invoked by the <METHOD>%Save</METHOD> method to 
+provide notification that the object is being saved. It is called before 
+any data is written to disk.
+
+<P><VAR>insert</VAR> will be set to 1 if this object is being saved for the first time.
+
+<P>If this method returns an error then the call to <METHOD>%Save</METHOD> will fail.]]></Description>
+<FormalSpec>insert:%Boolean</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	if ##this.Property9194=2,'+##this.CloseDat
+	{
+		s ##this.CloseDat=+$H
+		s ##this.CloseTime=$P($H,",",2)
+		if $ISOBJECT($G(%session)) 
+		{
+			//d ##this.CloseUserSetObjectId($G(%session.Data("user")))
+		}
+	}
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Common.Dictionary2D</DataLocation>
+<DefaultData>Dictionary2DefaultData</DefaultData>
+<IdLocation>^Common.Dictionary2D</IdLocation>
+<IndexLocation>^Common.Dictionary2I</IndexLocation>
+<StreamLocation>^Common.Dictionary2S</StreamLocation>
+<Data name="Dictionary2DefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Name</Value>
+</Value>
+<Value name="3">
+<Value>Property5330</Value>
+</Value>
+<Value name="4">
+<Value>Property8550</Value>
+</Value>
+<Value name="5">
+<Value>Property9194</Value>
+</Value>
+<Value name="6">
+<Value>Property742</Value>
+</Value>
+<Value name="7">
+<Value>Property1184</Value>
+</Value>
+<Value name="8">
+<Value>Property7407</Value>
+</Value>
+<Value name="9">
+<Value>Property8673</Value>
+</Value>
+<Value name="10">
+<Value>remont1</Value>
+</Value>
+<Value name="11">
+<Value>remont2</Value>
+</Value>
+<Value name="12">
+<Value>remont3</Value>
+</Value>
+<Value name="13">
+<Value>serial</Value>
+</Value>
+<Value name="14">
+<Value>tovar</Value>
+</Value>
+<Value name="15">
+<Value>remont1otch</Value>
+</Value>
+<Value name="16">
+<Value>remont2otch</Value>
+</Value>
+<Value name="17">
+<Value>remont3otch</Value>
+</Value>
+<Value name="18">
+<Value>Dat</Value>
+</Value>
+<Value name="19">
+<Value>Tim</Value>
+</Value>
+<Value name="20">
+<Value>remont4otch</Value>
+</Value>
+<Value name="21">
+<Value>Act</Value>
+</Value>
+<Value name="22">
+<Value>CloseDat</Value>
+</Value>
+<Value name="23">
+<Value>CloseTime</Value>
+</Value>
+<Value name="24">
+<Value>CloseUser</Value>
+</Value>
+<Value name="25">
+<Value>Comment</Value>
+</Value>
+<Value name="26">
+<Value>Utiliz</Value>
+</Value>
+<Value name="27">
+<Value>CloseReason</Value>
+</Value>
+<Value name="28">
+<Value>SaleDate</Value>
+</Value>
+</Data>
+<Property name="Name"/>
+<Property name="Property5330"/>
+<Property name="Property8550"/>
+<Property name="Property9194"/>
+<Property name="remont1"/>
+<Property name="remont1otch"/>
+<Property name="remont2"/>
+<Property name="remont2otch"/>
+<Property name="remont3"/>
+<Property name="remont3otch"/>
+<Property name="serial"/>
+<Property name="tovar"/>
+</Storage>
+</Class>
+</Export>

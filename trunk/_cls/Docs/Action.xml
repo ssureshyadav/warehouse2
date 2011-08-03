@@ -1,0 +1,2234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.Action">
+<IncludeCode>xmlmacros</IncludeCode>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject</Super>
+<TimeCreated>60366,25294.435767</TimeCreated>
+
+<Method name="CreateDoc">
+<Description>
+Создать документ</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DocClass,DocId="",DocValues,DocNames,DocTypes,ItemsValues,ItemsNames,ItemsTypes,StringsId</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="CreateDocErr",ok=1
+ //TSTART
+ 
+ s DocData=$NA(^mtempDoc($I))
+ k @DocData
+ // занесём в DocData данные шапки документа
+ // DocData("head",поле)=зачение
+ // DocData=ID документа
+ s @DocData=DocId
+ f i=1:1:$L(DocNames,"~") d
+ . s onefield=$P(DocNames,"~",i)
+ . q:onefield=""
+ . s @DocData@("head",onefield)=$P(DocValues,"~",i)
+ // занесём в StrData данные строк документа
+ // StrData("body",строка,поле)=значение
+ // StrData("body",строка)=ID строки
+ f i=1:1:$L(ItemsValues,"#@#") d
+ . s Str=$P(ItemsValues,"#@#",i)
+ . q:Str=""
+ . s @DocData@("body",i)=$P($G(StringsId),"~",i)
+ . f z=1:1:$L(Str,"~") d
+ . . s @DocData@("body",i,$P(ItemsNames,"~",z))=$P(Str,"~",z)
+ . . s @DocData@("body",i,"DocType")=DocClass
+ 
+ s ok=##class(Docs.Action).SaveDocObject(DocClass,DocData)
+ q ok
+CreateDocErr
+ $$$WriteError($ZE)
+ q "Ошибка при создании документа"
+]]></Implementation>
+</Method>
+
+<Method name="SaveKontr">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>kontr=1,goods=1</FormalSpec>
+<Implementation><![CDATA[
+	s ^Kontr(1,goods,kontr)=1
+	s ^Kontr(0,kontr,goods)=1
+ 	q 1
+]]></Implementation>
+</Method>
+
+<Method name="GetFromCard">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>CardClass,CardId,p2=""</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="GetGoodsFromInstrErr"
+
+ s xmlstr=##class(%XML.Writer).%New()
+ s xmlstr.Charset="windows-1251"
+ d xmlstr.OutputToDevice()
+ s sc=xmlstr.RootElement("AllObjects")
+ 
+ s sc=xmlstr.Element("OneObject")
+ 
+ f i=1:1:result.GetColumnCount() d
+ . s sc=xmlstr.Element("Item")
+ . $$$WriteElement("text",result.GetData(i))
+ . $$$WriteElement("name",$G(columns(i),"undef"))
+ . $$$WriteElement("type",$G(coltype(i),"undef"))
+ . s sc=xmlstr.EndElement()
+ s sc=xmlstr.EndElement()
+ s sc=xmlstr.EndRootElement()
+ q
+GetGoodsFromInstrErr
+ $$$WriteError($ZE)
+ q
+]]></Implementation>
+</Method>
+
+<Method name="SetSourceDoc">
+<Description>
+Установить что документ принадлежит источнику (инструкции)</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>classname,docid,source</FormalSpec>
+<Implementation><![CDATA[
+	s $ZT="SetSourceDocErr"
+	s err="Ошибка привязки документа к источнику"
+	i classname="" $$$WriteError("не указан класс документа") q err
+	i docid="" $$$WriteError("не указан id документа") q err
+	i source="" $$$WriteError("не указан источник для документа") q err
+
+	s doc=$ZOBJCLASSMETHOD(classname,"%OpenId",docid)
+	if '$ISOBJECT(doc) $$$WriteError("SetSourceDoc Не удалось открыть документ "_docid_" класс: "_classname) q err
+	s instrid=$P(source,"@",1)
+	d doc.SourceSetObjectId(instrid)
+	s ok=doc.%Save()
+	i '+ok $$$WriteObjError(ok) q err
+	//запишем ребёнка инструкции
+	//s classname=$P(source,"@",2)
+	
+	//s doc=$ZOBJCLASSMETHOD(classname,"%OpenId",instrid)
+	//if '$ISOBJECT(doc) $$$WriteError("SetSourceDoc Не удалось открыть документ "_instrid_" класс: "_classname) q err
+	//d doc.childSetObjectId(docid)
+	//s ok=doc.%Save()
+	//i '+ok $$$WriteObjError(ok) q err
+	q 1
+SetSourceDocErr
+  $$$WriteError($ZE)
+  q "Ошибка привязки документа к источнику"
+]]></Implementation>
+</Method>
+
+<Method name="LoadDocsFromInstr">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>InstrId,p1,p2</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="LoadDocsFromInstrErr",ok=1
+ s xmlstr=##class(%XML.Writer).%New()
+ s xmlstr.Charset="windows-1251"
+ d xmlstr.OutputToDevice()
+ s sc=xmlstr.RootElement("RootElement")
+ s instrObj=##class(Operation.Instructions).%OpenId(InstrId)
+ i '$ISOBJECT(instrObj) d
+ . $$$WriteError("LoadDocsFromInstr Не удалось открыть объект "_InstrId_" класса Operation.Instructions")
+ . s sc=xmlstr.EndRootElement()
+ . s ok=0
+ e  d
+ . s Class=..GetClassFromSource(InstrId_"@Operation.Instructions")
+ . s:Class'="" headers=##class(Common.Common).showheaders(Class)
+ i '+ok q 0
+ // Формирование заголовков
+  if $L($G(headers),"#@#")>1 {
+  s sc=xmlstr.Element("AllHeaders")
+   f i=1:1:$L(headers,"#@#") d
+   . s header=$P(headers,"#@#",i)
+   . q:header=""
+   . s sc=xmlstr.Element("OneObject")
+   . s FieldName=$P(header,"~",1)
+   . s FieldNames(FieldName)=1
+   . s FieldNames(FieldName,"type")=$P($P(header,"~",5),"@",2)
+   . $$$WriteElement("text",$P(header,"~",2))
+   . $$$WriteElement("key",FieldName)
+   . s sc=xmlstr.EndElement()
+  s sc=xmlstr.EndElement()
+  }
+ s FieldNames("ID")=1
+ s FieldNames("ID","type")="%String"
+ s glob=$NA(^mtempSklad($I))
+ s ok=..GetChildDocs(InstrId,glob,.FieldNames)
+ // Формирование тела
+  s sc=xmlstr.Element("AllObjects")
+  s i="" f  s i=$O(@glob@(i)) q:i=""  d
+  . s sc=xmlstr.Element("OneObject")
+  . s sc=xmlstr.WriteAttribute("id",$G(@glob@(i,"ID","text")))
+  . s z="" f  s z=$O(@glob@(i,z)) q:z=""  d
+  . . s sc=xmlstr.Element(z)
+  .	.	$$$WriteElement("text",$G(@glob@(i,z,"text")))
+  .	. s sc=xmlstr.EndElement()
+  . s sc=xmlstr.EndElement()
+  s sc=xmlstr.EndElement()
+ 
+ s sc=xmlstr.EndRootElement()
+ q
+LoadDocsFromInstrErr
+  $$$WriteError($ZE)
+  q "Ошибка при попытке вывести документ созданный инструкцией"
+]]></Implementation>
+</Method>
+
+<Method name="LoadGoodsFromInstr">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>instr,p1,p2</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="LoadGoodsFromInstrErr"
+ s err="Извините, ошибка при выводе товаров инструкции"
+ 
+ $$$StartXML
+ 
+ s sc=xmlstr.Element("AllHeaders")
+  $$$WriteHeader("number","№",40)
+  $$$WriteHeader("tovar","Товар",220)
+  $$$WriteHeader("kol","Количество",70)
+ s sc=xmlstr.EndElement()
+
+ s sc=xmlstr.Element("AllObjects")
+ s obj=##class(Operation.Instructions).%OpenId(instr)
+ d:$ISOBJECT(obj)
+ . s i="" f  s i=obj.Items.Next(i) q:i=""  d
+ . . s item=obj.Items.GetAt(i)
+ . . d:$ISOBJECT(item.Goods)
+ . . . s goodsmod=item.Goods.Property3609
+ . . . s goodsabbr=item.Goods.abbr
+ . . . s goodsname=item.Goods.Name
+ . . . s g=goodsabbr_" "_goodsmod_" "_goodsname
+ . . s quant=item.Quantity
+ . . i $I(count)
+ . . s sc=xmlstr.Element("OneObject")
+ . .	$$$WriteElementTwice("number",count)
+ . .	$$$WriteElementTwice("tovar",$G(g))
+ . .	$$$WriteElementTwice("kol",quant)
+ . . s sc=xmlstr.EndElement()
+ s sc=xmlstr.EndElement()
+ 
+ $$$EndXML
+
+ q 1
+LoadGoodsFromInstrErr
+ $$$WriteError($ZE)
+ q 0
+]]></Implementation>
+</Method>
+
+<Method name="GetChildDocs">
+<Description>
+Заполнить глобал glob потомками DocId
+FieldNames("имя нужного поля","тип этого поля")</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DocId,glob,FieldNames</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="GetChildDocsErr"
+ k @glob
+ i DocId="" $$$WriteError("Не указан DocId")
+ &sql(select DocumentClass into :DocumentClass from Docs.Super where ISNULL(Source,'')=:DocId)
+ if SQLCODE=100 q 1
+ s result = ##class(%ResultSet).%New()
+ i '+result $$$WriteObjError(result) q 0
+ 
+ s i="" f  s i=$O(FieldNames(i)) q:i=""  d
+ . s field=i
+ . s:$E($G(FieldNames(i,"type")),1,1)'="%" field=field_"->Name As "_field
+ . s fields=$G(fields)_field_","
+ i $G(fields)'="" s fields=$E(fields,1,$L(fields)-1)
+ e  s fields="*"
+ s sql="SELECT "_fields_" FROM "_DocumentClass_" where Source="_DocId
+ s ok=result.Prepare(sql)
+ i '+ok $$$WriteObjError(ok) q 0
+ s result.RuntimeMode=2
+ s ok=result.Execute()
+ i '+ok $$$WriteObjError(ok) q 0
+ f i=1:1:result.GetColumnCount() d
+ . s columns(i)=result.GetColumnName(i)
+ . s:columns(i)="" columns(i)="undef"
+ While result.Next() {
+ i $Increment(str)
+ f i=1:1:result.GetColumnCount() d
+ . s text=result.GetData(i)
+ . s @glob@(str,columns(i),"text")=text
+ }
+ q 1
+GetChildDocsErr
+ $$$WriteError($ZE)
+ q 0
+]]></Implementation>
+</Method>
+
+<Method name="GetClassFromSource">
+<Description><![CDATA[
+Получить имя класса который требуется создать для данного документа
+<br><var>Source</var> - Документ в формате ID@Class]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Source</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="GetClassFromSourceErr"
+	s SourceClass=$P(Source,"@",2)
+	s SourceId=$P(Source,"@",1)
+	if SourceClass="" s SourceClass=..getClassFromId(SourceId)
+	if SourceClass="Docs.Rash" q "Docs.StorageOut"
+	if (SourceClass="Docs.Prih")||(SourceClass="Docs.DocBrak") q "Docs.StorageIn"
+	if SourceClass="Docs.StorageOut" q "Docs.InnerDiff"
+	s opertype=""
+	if SourceClass="Operation.Instructions" d
+	. &sql(select Oper->cl into :opercl from Operation.Instructions where id=:SourceId)
+	q $P(opercl,",")
+GetClassFromSourceErr
+ $$$WriteError($ZE)
+ q "Docs.Prih"
+]]></Implementation>
+</Method>
+
+<Method name="GetDocNameFromClass">
+<Description><![CDATA[
+Получить экранное имя класса
+<br><var>ClassName</var> - Имя класса]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassName=""</FormalSpec>
+<Implementation><![CDATA[
+	s $ZT="GetDocNameFromClassErr"
+	q:ClassName="" ""
+	s obj=##class(Docs.Docs).%OpenId(ClassName)
+	i $ISOBJECT(obj) q obj.Name
+	q ""
+GetDocNameFromClassErr
+ $$$WriteError($ZE)	
+ q "Ошибка определения имени документа"
+]]></Implementation>
+</Method>
+
+<Method name="SaveDocObject">
+<Description>
+Сохранить документ и связанные строки</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DocClass,DocData,fieldtypes</FormalSpec>
+<Implementation><![CDATA[
+ //n docid,doc,waste,field,val,type,ItemsClass,types,strtypes,ok,
+ //str,strobj
+ q:DocClass=""
+ TSTART
+ s $ZT="SaveDocObjectErr"
+ s docid=$G(@DocData)
+ s doc="",types=1,err=1
+ //i $D(fieldtypes(DocClass))<10 d //можем передать типы полей, а можем искать
+ //. s waste=##class(Common.Common).showheaders(DocClass,"","","","",.types)
+ //. k waste
+ //e  m types=fieldtypes(DocClass)
+ s waste=##class(Common.Common).showheaders(DocClass,"","","","",.types,"","RashOplatType,Tovar")
+
+ //пробежимся по строкам документа который прислал пользователь, соберём там ID строк документа
+ k DocumentStringsCameFromUser
+ s str="" f  s str=$O(@DocData@("body",str)) q:str=""  d
+ . s strobj=$G(@DocData@("body",str))
+ . s:strobj'="" DocumentStringsCameFromUser(strobj)=""	//сохраняем в массиве ID строк документа которые пришли
+
+ if docid'="" d
+ . s doc=$ZOBJCLASSMETHOD(DocClass,"%OpenId",docid)
+ . q:'$D(@DocData@("body"))
+ . q:'$ISOBJECT(doc)  //если удалось открыть объект то удалим его строки
+ . q:'$ISOBJECT(doc.Items)  //у некоторых документов вообще нет строк
+ . s i="" f  s i=doc.Items.Next(i) q:i=""  d  //проходимся по всем строкам документа
+ . . s item=doc.Items.GetAt(i)
+ . . q:$D(DocumentStringsCameFromUser(item.%Id()))	//пропустим строки которые перечислены в документе который пришёл от пользователя
+ . . d item.%DeleteId(item.%Id())  //удаляем строки документа
+ . . d doc.Items.RemoveAt(i)  //удаляем из списка строк документа
+ . . k item  //убиваем сам объект в памяти
+
+ if '$ISOBJECT(doc) s doc=$ZOBJCLASSMETHOD(DocClass,"%New")
+ s field="" f  s field=$O(@DocData@("head",field)) q:(field="")||('+err)  d
+ . s val=@DocData@("head",field)
+ . s necessary=$$unrequired(field,DocClass)
+ . i (val="")&('necessary) s err="Не заполнены все необходимые поля заголовка документа" q
+ . s type=$G(types(field))
+ . i type="" $$$WriteError("для класса "_DocClass_" не нашлось определения свойства "_field_" в CompiledClass") q
+ . i type="%Date" s:val'="" val=$ZDH(val,4)
+ . i type="%Time" s:val'="" val=$ZTH(val,1,"")
+ . i type="%Numeric" s val=+val
+ . i type["%" s $ZOBJPROPERTY(doc,field)=val
+ . e  d $ZOBJMETHOD(doc,field_"SetObjectId",val)
+ q:'+err err
+ s ItemsClass=DocClass_"Items"
+ s strtypes=1
+ i $D(fieldtypes(ItemsClass))<10
+ . s waste=##class(Common.Common).showheaders(ItemsClass,"","","","",.strtypes,"","RashOplatType")
+ . k waste
+ e  m strtypes=fieldtypes(ItemsClass)
+ //здесь начинается цикл по строкам документа содержащегося в глобали 
+ s ok=1
+ s str="" f  s str=$O(@DocData@("body",str)) q:(str="")!('+ok)  d
+ . s strobj=$G(@DocData@("body",str))
+ . s:strobj'="" DocumentStringsCameFromUser(strobj)=""	//сохраняем в массиве ID строк документа которые пришли
+ . if strobj'="" s strobj=$ZOBJCLASSMETHOD(ItemsClass,"%OpenId",strobj)
+ . if '$ISOBJECT(strobj) s strobj=$ZOBJCLASSMETHOD(ItemsClass,"%New")
+ . i '$D(@DocData@("body",str,"DocType")) s @DocData@("body",str,"DocType")=DocClass,strtypes("DocType")="Docs.Docs"
+ . s field="" f  s field=$O(@DocData@("body",str,field)) q:(field="")!('+ok)  d
+ . . s type=$G(strtypes(field))  //тип поля
+ . . i type="" $$$WriteError("для класса "_ItemsClass_" не нашлось определения свойства "_field_" в CompiledClass") q
+ . . s val=$G(@DocData@("body",str,field))  //значение поля
+ . . s necessary=$$unrequired(field,ItemsClass)  //выяснить обязательно ли к заполнению поле
+ . . i (val="")&('necessary) s err="Не заполнены все необходимые поля строк документа" q
+ . . i type="%Date" s:val'="" val=$ZDH(val,4)
+ . . i type="%Time" s:val'="" val=$ZTH(val,1,"")
+ . . i type="%Numeric" s val=+val
+ . . i type["%" s $ZOBJPROPERTY(strobj,field)=val
+ . . i type'["%"  s ok=$ZOBJMETHOD(strobj,field_"SetObjectId",val)
+ . . //s:field="Goods" goods=val
+ . //s:DocClass="Operation.Instructions" $ZOBJPROPERTY(strobj,"Price")=##class(Store.Action).getlastcena($G(goods))
+ . i DocClass="Docs.StorageOut" s strobj.Price=##class(Store.Action).getlastcena(strobj.Goods.%Id())
+ . s ok=doc.Items.Insert(strobj)
+ . i '+ok $$$WriteObjError(ok) q
+ i '+ok q "Ошибка при сохранении строк документа"
+ s ok=doc.%Save()
+ i '+ok $$$WriteObjError(ok) TROLLBACK  q "Ошибка при сохранении документа"
+ s scriptok=..script(DocClass,doc)
+ i ('+scriptok)&((DocClass="Docs.Remont")||(DocClass="Docs.Otchet")) d  q scriptok 
+ . TROLLBACK
+ TCOMMIT
+ q:'+scriptok scriptok
+ if DocClass="Common.Dictionary2" q 1
+ q doc.%Id()
+SaveDocObjectErr
+ $$$WriteError($ZE)
+ q "Извините, при сохранении документа произошла ошибка"
+unrequired(field,class)
+ // здесь лежат поля которые не обязательны для заполнения
+ q:class="Goods.Goods" 1
+ q:class="Common.Dictionary2" 1
+ q:class="Common.Kontragent" 1
+ i field="Comment" q 1
+ i field="CloseDate" q 1
+ i field="CloseTime" q 1
+ i field="CloseUser" q 1
+ q $D(^UnRequiredFields(class,field))
+]]></Implementation>
+</Method>
+
+<Method name="getClassFromId">
+<Description>
+Получить класс документа</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>SourceId</FormalSpec>
+<Implementation><![CDATA[
+ s obj=##class(Docs.Super).%OpenId(SourceId)
+ q:'$ISOBJECT(obj) ""
+ q:'$ISOBJECT(obj.DocumentClass) obj.DocumentClass
+ q obj.DocumentClass.%Id()
+]]></Implementation>
+</Method>
+
+<Method name="GetStrFromDoc">
+<Description>
+Получить строки документа</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>docid="",p1,forclass</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="GetStrFromDocErr"
+ if docid="" $$$WriteError("GetStrFromDoc: не указан ID документа")
+ s docclass=..getClassFromId(+docid)_"Items"
+ i docclass="Items" s docclass=$P(docid,"@",2)
+ s docid=+docid 
+ s headers=##class(Common.Common).showheaders(docclass)
+ s depot=$G(%session.Data("depot"))
+ // Формирование заголовков
+ if $L($G(headers),"#@#")>1 {
+ s fields=""
+ f i=1:1:$L(headers,"#@#") d
+ . s header=$P(headers,"#@#",i)
+ . q:header=""
+ . s FieldName=$P(header,"~",1)
+ . s FieldType=$P($P(header,"~",5),"@",2)
+ . i FieldName="Goods" s fields=fields_"Goods->Size1 As GoodsSize,Goods->Weight As GoodsWeight,Goods->Weight As GoodsWeight,Goods->Property3609 as Property3609,"
+ . //если тип поля не начинается с % то выводим его ссылку и рядом само поле но с другим названием
+ . s:$E(FieldType,1,1)'="%" FieldName=FieldName_"->Name As "_FieldName_","_FieldName_" As "_FieldName_"ObjectId"
+ . s fields=fields_FieldName_","
+ }
+ i $G(fields)'="" s fields="ID,"_$E(fields,1,($L(fields)-1))  //обрежу последнюю запятую и прибавлю id
+ e  s fields="*"
+ 
+ s xmlstr=##class(%XML.Writer).%New()
+ s xmlstr.Charset="windows-1251"
+ d xmlstr.OutputToDevice()
+ s sc=xmlstr.RootElement("RootElement")
+ s sc=xmlstr.Element("AllObjects")
+
+ s result = ##class(%ResultSet).%New()
+ i '+result $$$WriteObjError(result) q 0
+ s sql="SELECT "_fields_" FROM "_docclass_" where Doc="_docid
+ s ok=result.Prepare(sql)
+ i '+ok $$$WriteObjError(ok) q 0
+ //s result.RuntimeMode=2
+ s ok=result.Execute()
+ i '+ok $$$WriteObjError(ok) q 0
+ f i=1:1:result.GetColumnCount() d
+ . s columns(i)=result.GetColumnName(i)
+ . s:columns(i)="" columns(i)="undef"
+ . s columnsName(columns(i))=i
+ . s columntype(i)=result.GetColumnType(i)
+ While result.Next() {
+ CONTINUE:(forclass="Docs.Diff")&($G(result.Data("Kolfact"))=$G(result.Data("Quantity")))
+ s sc=xmlstr.Element("OneObject") 
+ s sc=xmlstr.WriteAttribute("id",result.GetData(columnsName("ID")))
+ 	f i=1:1:result.GetColumnCount() d
+	. q:$G(columns(i))=""
+	. s text=result.GetData(i)
+	. i columns(i)="Quantity" s quant=text
+ 	. i '+p1 s fld=$G(^Substitute("StorageDocs",columns(i)),columns(i))
+ 	. e  s fld=columns(i)
+ 	. s sc=xmlstr.Element(fld)
+ 	. i $E(columntype(i),1,1)'="%" s text=result.GetData(i) d  //если тип поля не начинается с % то выводим в его аттрибуте его id эквивалент
+ 	. . s FieldIdNum=+$G(columnsName(columns(i)_"ObjectId"))
+ 	. . s objid=result.GetData(FieldIdNum)
+ 	. . i fld="Goods" s goods=objid,text=result.Data("Property3609")_" "_text  //если это товар то добавляем модель к наименованию
+ 	. . i FieldIdNum s sc=xmlstr.WriteAttribute("id",objid)
+ 	. . //i (forclass="Docs.Diff")&(fld="Total") s text=$G(result.Data("Kolfact"))
+  	. s:columns(i)="addr" text=##class(Store.Action).AddressPath(result.Data("addrObjectId"),1)
+ 	. //i fld="Price" s text=##class(Goods.GoodsAction).getprice(goods)
+ 	. i columntype(i)=8,text s text=$ZT(+text,1,"")
+	. i columntype(i)=2,text s text=$ZD(+text,4)
+	. $$$WriteElement("text",text)
+ 	. s sc=xmlstr.EndElement()
+ i (docclass="Docs.RashItems")&(forclass="Docs.StorageOut") d
+ . s sc=xmlstr.Element("addr")
+ . s addr=""
+ . s waste=##class(Goods.GoodsAction).getgoodquant($G(goods),"",.addr,quant)  //найдем ячейку где лежит товар с нужным количеством
+ . //s waste=##class(Goods.GoodsAction).getgoodquant($G(goods),depot,.addr,quant)
+ . s sc=xmlstr.WriteAttribute("id",addr)
+ . s text=##class(Store.Action).AddressPath(addr,1)
+ . $$$WriteElement("text",text)
+ . s sc=xmlstr.EndElement()
+ s sc=xmlstr.EndElement()
+ }
+ 
+ s sc=xmlstr.EndElement()
+ s sc=xmlstr.EndRootElement() 
+ 
+ q
+GetStrFromDocErr
+ $$$WriteError($ZE)
+ q
+]]></Implementation>
+</Method>
+
+<Method name="parsexml">
+<Description>
+Парсинг XML</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>xmlstream="",docid="",documentclass,types,DocData,saveadditional=0</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="SaveStorageDocErr",str=0
+ s err="Извините, при сохранении документа произошла ошибка."
+ s:$G(DocData)="" DocData=$NA(^mtempDoc($I))
+ k @DocData
+ s sc=##class(%XML.TextReader).ParseStream(xmlstream,.reader)
+ i '+sc $$$WriteObjError(sc) q err
+ While reader.Read() {
+ i (reader.NodeType="element") {
+     s path=reader.Path
+     s namenode=reader.Name
+     s parentnode=$P(path,"/",$L(path,"/")-1)
+     i $P(path,"/",3)="AllObjects" s class=documentclass_"Items",j="body"
+     e  s class=documentclass,j="head"
+     i (parentnode="AllObjects")&(namenode="OneObject") s str=$I(str)
+     d:(reader.HasAttributes)&(namenode="OneObject")&(+docid)
+     . d reader.MoveToAttributeName("id")
+     . s @DocData@(j,str)=reader.Value
+     i namenode="type" d
+     . d:'reader.IsEmptyElement reader.MoveToContent()
+     . s types(class,parentnode)=reader.Value
+     i (namenode="text")&(j="body") d
+     . d:'reader.IsEmptyElement reader.MoveToContent()
+     . s @DocData@(j,str,parentnode)=reader.Value
+     i (namenode="text")&(j="head") d
+     . d:'reader.IsEmptyElement reader.MoveToContent()
+     . s @DocData@(j,parentnode)=reader.Value
+     i ($L(path,"/")>5)&(namenode'="text")&saveadditional d
+     . d:'reader.IsEmptyElement reader.MoveToContent()
+     . s @DocData@(j,parentnode,namenode)=reader.Value
+     
+ }}
+ s @DocData=$G(docid)
+ q 1
+SaveStorageDocErr
+ $$$WriteError($ZE)
+ q "Извините. При сохранении документа произошла ошибка."
+]]></Implementation>
+</Method>
+
+<Method name="SaveStorageDoc">
+<Description>
+Пропарсить XML передать массив в метод сохранения</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>xmlstream="",docid="",documentclass</FormalSpec>
+<Implementation><![CDATA[
+ s ok=..parsexml(xmlstream,docid,documentclass,.types,.DocData)
+ q:'+ok ok
+ if documentclass="Common.Kontragent" s ok=..SaveListOfObjects(documentclass, DocData) q ok
+ if documentclass="Goods.Goods" s ok=..SaveListOfObjects(documentclass, DocData) q ok
+ s ok=..SaveDocObject(documentclass, DocData, .types)
+ q ok
+]]></Implementation>
+</Method>
+
+<Method name="SaveSingleGood">
+<Description>
+Сохранить товар заполненный на форме</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>xmlstream="",docid="",documentclass</FormalSpec>
+<Implementation><![CDATA[
+ s CurrentLogin=$S($ISOBJECT($G(%session)):$G(%session.Data("user")),1:"")
+ if '##class(Common.Rights).getrights(CurrentLogin,9) q "Нет прав для работы с товаром." 
+ s ok=..parsexml(xmlstream,docid,documentclass,.types,.DocData)
+ q:'+ok ok
+ s ok=..SaveDocObject(documentclass, DocData, .types)
+ q ok
+]]></Implementation>
+</Method>
+
+<Method name="CheckFinal">
+<Description><![CDATA[
+проверить закрыт или не закрыт документ (исполнен/не исполнен)
+<var>doc</var> - id или объект документа]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>doc</FormalSpec>
+<Implementation><![CDATA[
+ i '$ISOBJECT(doc) s doc=##class(Docs.Super).%OpenId(doc)
+ i '$ISOBJECT(doc) $$$WriteError("CheckFinal не смогли открыть объект "_doc_" класса Docs.Super") q 0
+ i doc.Stat=2 q 1
+ q 0
+]]></Implementation>
+</Method>
+
+<Method name="SetFinal">
+<Description>
+Установить документу статус закрытого</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>doc</FormalSpec>
+<Implementation><![CDATA[
+	
+ i '$ISOBJECT(doc) s doc=##class(Docs.Super).%OpenId(doc)
+ s doc.Stat=2
+ s ok=doc.%Save() 
+ i '+ok $$$WriteObjError(ok) q "Ошибка при изменении статуса документа"
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="script">
+<Description><![CDATA[
+действия над документами после их создания (при создании документов от инструкции руководителя)
+<br>class - класс документа
+<br>docobj - объект документа]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>class,docobj</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="scriptErr"
+ s ok=1
+ q:class="Store.Address" 1
+ q:class="Goods.Goods" 1
+ q:class="Common.Kontragent" 1
+ q:class="Common.Dictionary2" 1
+ 
+ q:'$ISOBJECT(docobj) 1
+ i class="" $$$WriteError("script Передали пустой класс") q 1
+
+ //если приходная или расходная запишем контрагента и товар, и закупочную цену для товара
+ i class="Store.Price" d  q ok
+ . q:docobj.typcen.Property4139'=1 //если это не основная продажная то не пишем товару
+ . s docobj.Goods.Price=docobj.Price
+ . s ok=docobj.Goods.%Save()
+ . i '+ok $$$WriteObjError(ok) s ok="Извините, ошибка при записи цены товару."
+
+ i $ISOBJECT(docobj.Kontr) s kontr=docobj.Kontr.%Id()
+ e  s kontr=0
+ Set key = ""
+ Do 
+ {
+  Set itemobj = docobj.Items.GetNext(.key)
+  If $ISOBJECT(itemobj) 
+  {
+     s goods=itemobj.Goods.%Id()
+     s ok=..SaveKontr(kontr,goods)
+     s:class="Docs.Prih" ok=##class(Store.Action).SetPrice(goods,+itemobj.Price,4,docobj.Dat,docobj.Tim)
+  }
+ } While (key '= "") q:'+ok ok
+ q:'+ok ok
+ // Если заявка на ремонт запишем товары
+ if class="Docs.Remont" {
+ //s ok=..MarkGarant(docobj)
+ s docid=docobj.%Id()
+ Do {
+  Set itemobj = docobj.Items.GetNext(.key)
+  If $ISOBJECT(itemobj) {
+     s goods=itemobj.Goods.%Id()
+     d ..addTovarOnKontr(kontr,goods,itemobj.Quantity)
+     //если есть гарантийный талон и если эта связка не фигурировала в этом документе
+     if itemobj.garant'="",'$D(NumbersInThisDoc(" "_itemobj.garant," "_itemobj.serial)) s ok=..setSerialGarant(itemobj.serial,itemobj.garant,itemobj.Goods,docid,class)
+     s NumbersInThisDoc(" "_itemobj.garant," "_itemobj.serial)=""
+  }
+  } While (key '= "") q:'+ok ok
+ }
+ q:'+ok ok
+  if class="Docs.Otchet" {
+ s docid=docobj.%Id()
+
+  Do {
+  s demandserial=$G(%session.Data("demandserial"))
+  Set itemobj = docobj.Items.GetNext(.key)
+  If $ISOBJECT(itemobj) {
+     s:$ISOBJECT(itemobj.Goods) goods=itemobj.Goods.%Id()
+     s:itemobj.goodssource=1 ok=..remTovarOnKontr(kontr,goods,itemobj.Quantity)
+     q:'+ok
+	 i (itemobj.garant'="")&(itemobj.serial="")&(+demandserial) s ok="Не указан серийный номер изделия для гарантийного талона "_garant q
+     if itemobj.garant'="",'$D(NumbersInThisDoc(" "_itemobj.garant," "_itemobj.serial)) s ok=..setSerialGarant(itemobj.serial,itemobj.garant,itemobj.Goods,docid,class)
+     s NumbersInThisDoc(" "_itemobj.garant," "_itemobj.serial)=""
+  }
+  } While (key '= "") q:'+ok ok
+  i $ISOBJECT(docobj.Rem) s docobj.Rem.Otchet=docobj d docobj.Rem.%Save()
+ }
+ q ok
+scriptErr
+ $$$WriteError($ZE)
+ q "Ошибка при исполнении сценария"
+]]></Implementation>
+</Method>
+
+<Method name="LookGarantDate">
+<Description>
+Метод записывает соответствие серийного номера и гарантийного талона</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[garantobj:Common.Dictionary2,&remont,docclass,IgnoreDisabled=0]]></FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="LookGarantDateErr"
+ s garantterm=$S($ISOBJECT($G(%session)):$G(%session.Data("garantterm")),1:7)
+ s writemode=$S($ISOBJECT($G(%session)):$G(%session.Data("writemode")),1:"skip")
+ //s garantterm=7
+ //s writemode="skip"
+ 
+ s remont=""
+ //s garantterm=7
+ //s writemode="skip"
+ i garantobj.Property9194=2,'IgnoreDisabled q "Гарантийный талон "_garantobj.Name_" "_garantobj.Property9194LogicalToDisplay(garantobj.Property9194)
+ s ok=1
+ s remont1=garantobj.remont1
+ s remont1otch=garantobj.remont1otch
+ s remont2=garantobj.remont2
+ s remont2otch=garantobj.remont2otch
+ s remont3=garantobj.remont3
+ s remont3otch=garantobj.remont3otch
+
+ d:docclass="Docs.Otchet"
+ . i remont1'="" d  // есть первая заявка
+ . . i remont1otch'="" d  //есть первый отчет
+ . . . i remont2'="" d  // есть вторая заявка
+ . . . . i remont2otch'="" d  // есть 2 отчет
+ . . . . . i remont3'="" d  // есть третья заявка
+ . . . . . . i remont3otch'="" d  //есть третий отчет
+ . . . . . . . i writemode="perepis" s remont=3 q
+ . . . . . . e  s remont="remont3" q
+ . . . . . e  d
+ . . . . . . i ($H-remont2otch.Dat)>=garantterm s remont="remont3"
+ . . . . . . e  s ok="Гарантийный талон №"_garantobj.Name_" был использован "_$ZD(remont2otch.Dat,4)_" минимальный срок между гарантийными ремонтами "_garantterm_" дн." q
+ . . . . e  s remont="remont2" q
+ . . . e  d
+ . . . . i ($H-remont1otch.Dat)>=garantterm s remont="remont2"  //нет 2 рем и проходит по дате
+ . . . . e  s ok="Гарантийный талон №"_garantobj.Name_" был использован "_$ZD(remont1otch.Dat,4)_" минимальный срок между гарантийными ремонтами "_garantterm_" дн." q
+ . . e  s remont="remont1" q
+ . e  s remont="remont1"
+ 
+ d:docclass="Docs.Remont"
+ . i (remont1'="")||(remont1otch'="") d //есть первый ремонт
+ . . i (remont2'="")||(remont2otch'="") d // есть второй ремонт
+ . . . i (remont3'="")||(remont3otch'="") d // есть третий ремонт
+ . . . . i (writemode="perepis") s remont="remont3"
+ . . . . e  s ok=1 q
+ . . . e  d
+ . . . . s lastremdat=$$data(garantobj,2)
+ . . . . i +$H-lastremdat>=garantterm s remont="remont2" q
+ . . . . e  s ok="Гарантийный талон №"_garantobj.Name_" был использован "_$ZD(lastremdat,4)_" минимальный срок между гарантийными ремонтами "_garantterm_" дн." q
+ . . e  d
+ . . . s lastremdat=$$data(garantobj,1)
+ . . . i +$H-lastremdat>=garantterm s remont="remont3" q
+ . . . e  s ok="Гарантийный талон №"_garantobj.Name_" был использован "_$ZD(lastremdat,4)_" минимальный срок между гарантийными ремонтами "_garantterm_" дн." q
+ . e  s remont="remont1" q
+ q ok
+data(garantobj,numb)
+ s rem=$ZOBJPROPERTY(garantobj,"remont"_numb)
+ s otch=$ZOBJPROPERTY(garantobj,"remont"_numb_"otch")
+ i $ISOBJECT(otch) q otch.Dat
+ i $ISOBJECT(rem) q rem.Dat
+ $$$WriteError("LookGarantDate.date Авария! попытка найти дату несуществующего ремонта ГТ "_garantobj.Name_" ремонт №"_numb)
+ q +$H
+ //проверим дату последнего ремонта
+ d:remont="remont2"
+ . s Dat=$S($ISOBJECT(garantobj.remont1):garantobj.remont1.Dat,$ISOBJECT(garantobj.remont1otch):garantobj.remont1otch.Dat)
+ . i ($H-Dat)<+garantterm d
+ . . s ok="Гарантийный талон №"_garantobj.Name_" был использован "_$ZD(Dat,4)_" минимальный срок между гарантийными ремонтами "_garantterm_" дн." q
+ d:remont="remont3"
+ . s Dat=$S($ISOBJECT(garantobj.remont2):garantobj.remont2.Dat,$ISOBJECT(garantobj.remont2otch):garantobj.remont2otch.Dat)
+ . i ($H-Dat)<+garantterm d
+ . . s ok="Гарантийный талон №"_garantobj.Name_" был использован "_$ZD(Dat,4)_" минимальный срок между гарантийными ремонтами "_garantterm_" дн." q
+ q ok                  
+LookGarantDateErr
+ $$$WriteError($ZE)
+ q "Извините, внутренняя ошибка при проверке даты гарантийного талона"
+]]></Implementation>
+</Method>
+
+<Method name="setSerialGarant">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>serial="",garant="",goodsobj:Goods.Goods,docid,docclass</FormalSpec>
+<Implementation><![CDATA[
+	q:garant="" 1
+	i '$ISOBJECT(goodsobj) $$$WriteError("setSerialGarant не передали объект товара serial = "_serial_", garant ="_garant) q 1
+	i docclass="Docs.Otchet" s addition="otch"  //в гарантийном талоне заявки сохраняются в remont1 а отчеты в remont1otch
+	e  s addition=""
+	s remont=""
+	s ok=1
+	
+	//ID талона найденный по имени
+	s garantID = ##class(Common.Common).GetGarantIdByName(garant)
+	//ID талона найденные по серийному
+	s GarantIDFoundBySerial = ""
+	
+	//проверим уникальность серийного номера
+	if serial'="" s ok = ##class(Common.Common).CheckSerialUnique(serial,.GarantIDFoundBySerial)
+	
+	//если такой серийный уже есть и его гарантийный не равен найде
+	if ('+ok)&(GarantIDFoundBySerial'=garantID)
+	
+	s garantobj=##class(Common.Dictionary2).%OpenId(garantID)
+	i $ISOBJECT(garantobj) d
+	. s oldserial=garantobj.serial
+	. i (docclass="Docs.Otchet")&(oldserial'="")&(oldserial'=serial) d  q
+	. . s ok="Для гарантийного талона "_garant_" уже записан серийный номер "_oldserial
+    . s ok=..LookGarantDate(garantobj,.remont,docclass)
+    . q:'+ok
+	e  d
+	. s garantobj=##class(Common.Dictionary2).%New()
+	. s garantobj.Name=garant
+	. s remont="remont1"
+	
+	d:remont'="" $ZOBJMETHOD(garantobj,remont_addition_"SetObjectId",docid)
+	q:'+ok ok
+	s garantobj.serial=serial
+	i $ISOBJECT(goodsobj.izdelie) s izdelie=goodsobj.izdelie.Name
+	e  s izdelie=""
+	s garantobj.tovar=izdelie_" "_goodsobj.Property3609
+	s ok=garantobj.%Save()
+	i '+ok $$$WriteObjError(ok) q "Извините, внутренняя ошибка при записи информации о гарантийном талоне "_garant
+	q 1
+]]></Implementation>
+</Method>
+
+<Method name="addTovarOnKontr">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>kontr,goods,val</FormalSpec>
+<Implementation><![CDATA[
+ i $ISOBJECT(kontr) s kontr=kontr.%Id()
+ i $ISOBJECT(goods) s goods=goods.%Id()
+ s ^t(kontr,goods)=$G(^t(kontr,goods))+val
+ q
+]]></Implementation>
+</Method>
+
+<Method name="remTovarOnKontr">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>kontr,goods,val</FormalSpec>
+<Implementation><![CDATA[
+ i $ISOBJECT(kontr) s kontr=kontr.%Id()
+ i $ISOBJECT(goods) s goods=goods.%Id()
+ s newkol=$G(^t(kontr,goods))-val
+ i newkol<0 q "Произошла попытка списания товара больше чем числится за мастерской, отчет не создан."
+ i newkol=0 k ^t(kontr,goods)
+ e  s ^t(kontr,goods)=newkol
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="destroy">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+ s $ZT="destroyErr"
+ &sql(delete from Docs.DocItems)
+ q:SQLCODE<0 SQLCODE_" Docs.DocItems"
+ &sql(delete from Docs.Super)
+ q:SQLCODE<0 SQLCODE_" Docs.Super"
+ &sql(delete from Docs.DiffItems)
+ q:SQLCODE<0 SQLCODE_" Docs.DiffItems"
+ &sql(delete from Docs.Diff)
+ q:SQLCODE<0 SQLCODE_" Docs.Diff"
+ &sql(delete from Docs.InnerItems)
+ q:SQLCODE<0 SQLCODE_" Docs.InnerItems"
+ &sql(delete from Docs.Inner)
+ q:SQLCODE<0 SQLCODE_" Docs.Inner"
+ &sql(delete from Docs.InventItems)
+ q:SQLCODE<0 SQLCODE_" Docs.InventItems"
+ &sql(delete from Docs.Invent)
+ q:SQLCODE<0 SQLCODE_" Docs.Invent"
+ &sql(delete from Docs.RemontItems)
+ q:SQLCODE<0 SQLCODE_" Docs.RemontItems"
+ &sql(delete from Docs.Remont)
+ q:SQLCODE<0 SQLCODE_" Docs.Remont"
+ &sql(delete from Docs.OtchetItems)
+ q:SQLCODE<0 SQLCODE_" Docs.Remont"
+ &sql(delete from Docs.Otchet)
+ q:SQLCODE<0 SQLCODE_" Docs.Otchet"
+ &sql(delete from Docs.PrihItems)
+ q:SQLCODE<0 SQLCODE_" Docs.PrihItems"
+ &sql(delete from Docs.Prih)
+ q:SQLCODE<0 SQLCODE_" Docs.Prih"
+ &sql(delete from Docs.RashItems)
+ q:SQLCODE<0 SQLCODE_" Docs.RashItems"
+ &sql(delete from Docs.Rash)
+ q:SQLCODE<0 SQLCODE_" Docs.Rash"
+ &sql(delete from Docs.StorageInItems)
+ q:SQLCODE<0 SQLCODE_" Docs.StorageInItems"
+ &sql(delete from Docs.StorageIn)
+ q:SQLCODE<0 SQLCODE_" Docs.StorageIn"
+ &sql(delete from Docs.StorageOutItems)
+ q:SQLCODE<0 SQLCODE_" Docs.StorageOutItems"
+ &sql(delete from Docs.StorageOut)
+ q:SQLCODE<0 SQLCODE_" Docs.StorageOut"
+ &sql(delete from Docs.UtilizItems)
+ q:SQLCODE<0 SQLCODE_" Docs.UtilizItems"
+ &sql(delete from Docs.Utiliz)
+ q:SQLCODE<0 SQLCODE_" Docs.Utiliz"
+ &sql(delete from Store.Quantity)
+ q:SQLCODE<0 SQLCODE_" Store.Quantity"
+ &sql(delete from Store.Price)
+ q:SQLCODE<0 SQLCODE_" Store.Price"
+ &sql(delete from Operation.OperationHistory)
+ q:SQLCODE<0 SQLCODE_" Operation.OperationHistory"
+ &sql(delete from Operation.Plan)
+ q:SQLCODE<0 SQLCODE_" Operation.Plan"
+ &sql(delete from Operation.InstructionsItems)
+ q:SQLCODE<0 SQLCODE_" Operation.InstructionsItems"
+ &sql(delete from Operation.Instructions)
+ q:SQLCODE<0 SQLCODE_" Operation.Instructions"
+ &sql(delete from Operation.InstructionsHist)
+ q:SQLCODE<0 SQLCODE_" Operation.InstructionsHist"
+ k ^t
+ &sql(update Store.Address set Currentsize=0,Currentweight=0)
+ q:SQLCODE<0 SQLCODE_" Store.Address"
+ k ^Kontr
+ k ^RashNumbers
+ q 1
+destroyErr
+ q $ZE
+]]></Implementation>
+</Method>
+
+<Method name="PrihNeedsDiff">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>doc</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="PrihNeedsDiffErr"
+ s class=..getClassFromId(doc)
+ s docobj=$ZOBJCLASSMETHOD(class,"%OpenId",doc)
+ i '$ISOBJECT(docobj) $$$WriteError("PrihNeedsDiff не открылся объект "_doc_" класса "_class) q "Документ сохранён но возникли ошибки при проверке."
+ s ok=1
+ i class="Docs.Prih" d
+ . f i=1:1:docobj.Items.Count() q:'+ok  d
+ . . s item=docobj.Items.GetAt(i)
+ . . i item.Kolfact'=item.Quantity s ok="yes"
+ i class="Docs.StorageOut" d
+ . f i=1:1:docobj.Items.Count() q:'+ok  d
+ . . s item=docobj.Items.GetAt(i)
+ . . i (item.quantdefault'=item.quantreal)&(item.quantreal'="") s ok="yes"
+ q ok
+PrihNeedsDiffErr
+ $$$WriteError($ZE)
+ q "Документ сохранён но возникли ошибки при проверке."
+]]></Implementation>
+</Method>
+
+<Method name="processdoc">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>doc=""</FormalSpec>
+<Implementation><![CDATA[
+	 //s $ZT="processdocErr"
+	 s ok=1,made=0
+	 s err="Извините. Внутренняя ошибка при обработке документа."
+	 s docid=$P(doc,"@",1)
+	 s docclass=$P(doc,"@",2)
+	 i docid="" $$$WriteError("processdoc docid=""""") q err
+	 i docclass="" $$$WriteError("processdoc docclass=""""") q err
+	 s doc=$ZOBJCLASSMETHOD(docclass,"%OpenId",docid)
+	 i '$ISOBJECT(doc) $$$WriteError("processdoc Не удалось открыть объект "_docid_" класса "_docclass) q err
+	 q:doc.Stat=2 "Документ уже обработан"
+	 i docclass="Docs.Utiliz" s ok=..processutiliz(doc),made=1
+	 i docclass="Docs.Invent" s ok=..processinvent(doc),made=1
+	 i docclass="Docs.Inner" s ok=..processinner(doc),made=1
+	 i docclass="Docs.Platejka" s ok=..processplatej(doc),made=1
+	 i docclass="Docs.Otchet" s ok=..processotchet(doc),made=1
+	 i docclass="Docs.Brakremont" s ok=..processbrakremont(doc),made=1
+	 i docclass="Docs.Act" s ok=..processact(doc),made=1
+	 q:'+ok ok
+	 i 'made q "Данный тип документов не подлежит обработке."
+	 s doc.Stat=2
+	 s ok=doc.%Save()
+	 i '+ok $$$WriteObjError(ok) q err
+	 q 1
+processdocErr
+	 $$$WriteError($ZE)
+	 q "Извините, во время обработки документа произошла ошибка."
+]]></Implementation>
+</Method>
+
+<Method name="processotchet">
+<Description>
+Обработать отчёт</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>doc</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s ok=##class(Kontragent.DocsFilter).CheckOtchet(doc)
+ //если отчёт прошёл и не разрешено автоматическое проведение отчётов
+ if +ok,'$$$TunesVariableGlobal("AllowReportApprovement") q "Программа проверки не нашла ошибок в отчёте, но статус документа остался ""создан"""
+ //юра попросил 29.10.2010 он сам примет а ему только показать ошибки
+ //if ok s ok=##class(Docs.Otchet).SetOthcetStatAccepted(doc)
+ //e  q ok
+ q ok
+]]></Implementation>
+</Method>
+
+<Method name="processact">
+<Description>
+Обработать акт</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>doc</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s login = $$$SessionData("user")
+	if '##class(Common.Rights).getrights(login,12) q "У вас нет достаточных прав для операций с актами."
+	
+	if doc.Items.Count()=0 q "Акт не может быть принят, так как нет ни одной заявки."
+	
+	s serial=doc.Serial
+	s garant=doc.Garant
+	s kontr =doc.Kontr.%Id()
+	
+	if $TR(garant," ","")="" q "Акт не может быть принят, так как не указан гарантийный талон."
+	
+	s GarantObj=##class(Common.Dictionary2).%OpenId(garant)
+	if '$ISOBJECT(GarantObj) d
+	. s GarantObj=##class(Common.Dictionary2).%New()
+	. s GarantObj.Name=garant
+	
+	//если вдруг гарантийный уже недействительный, акт надо отбить
+	if GarantObj.Property9194=2 d
+	. s result="Акт не может быть принят. Гарантийный талон "_garant_" недействительный"
+	. //но если вдруг в гарантийном уже был указан именно этот акт, то всё таки можно принять
+	. if $ISOBJECT(GarantObj.Act),GarantObj.Act.%Id()=doc.%Id() s result=1
+	e  s result=1
+	if '+result q result
+	
+	//проверим наличие инструкций от этого контрагента, в которых есть этот серийный и гарантийный
+	&sql(declare kot cursor for
+		select ID,doc,doc->Name,doc->Dat,Goods
+		into :ID,:docId,:docName,:docDat,:Goods
+		from Operation.InstructionsItems
+		where garant = :garant and sn=:serial and doc->Kontr=:kontr
+		)
+	&sql(open kot)
+	f  &sql(fetch kot) q:SQLCODE  d
+	. i $i(docscount)
+	. s docsstring(docId,"doc")=docId
+	. s docsstring(docId,"Name")=docName
+	. s docsstring(docId,"Dat")=docDat
+	. s docsstring(docId,ID,"Goods")=Goods
+	. s docsstring=$G(docsstring)_docId_","
+	&sql(close kot)
+	
+	//не найдено ни одной заявки на этот серийный номер
+	if $G(docsstring)="" q "Не найдено ни одной заявки для этого акта."
+	//обрезаем последнюю запятую
+	s docsstring=$E(docsstring,1,$L(docsstring)-1)
+	
+	//f i=1:1:$L(docsstring,",") s docsstring($P(docsstring,",",i))=""
+	
+	
+	//ищем в истории инструкции которые были отправлены
+	s SqlString = "select Instr,State from Operation.InstructionsHist where instr in ("_docsstring_")"
+	s rs=##class(%ResultSet).%New()
+	s ok=rs.Prepare(SqlString)
+	s ok=rs.Execute()
+	while rs.Next()
+	{
+		s Instr=rs.Data("instr")
+		s State=rs.Data("State")
+		if $LF($LB(5,6,7,8,8.7,8.9),State)
+		{
+			if '$D(docsstring(Instr,"innerinstr")) s docsstring(Instr,"innerinstr")=##class(Operation.InstrActions).GetInnerInstr(Instr)
+			s InnerInstr=docsstring(Instr,"innerinstr")
+			//проверяем был ли 100% отправлен этот товар, 
+			//если да - удаляем упоминание об этой инструкции
+			if ##class(Operation.InstrActions).GoodsHasBeenSent(InnerInstr,Goods) s docsstring(Instr,"HasBeenSent")=1
+			else  s docsstring(Instr,"HasBeenSent")=0
+		}
+		else  
+		{
+			s docsstring(Instr,"HasBeenSent")=0
+		}
+	}
+	
+	s i="" f  s i=$O(docsstring(i)) q:i=""  d
+	. s HasBeenSent=+$G(docsstring(i,"HasBeenSent"))
+	. if HasBeenSent s HasBeenSentCount=$G(HasBeenSentCount)+1
+	. i $I(InstructionsCount)
+	. s Dat=$G(docsstring(i,"Dat"))
+	. if Dat?5N s Dat=$ZD(Dat,4)
+	. s result=$G(result)_" № "_$G(docsstring(i,"Name"))_" от "_Dat_" "_$S(HasBeenSent:"Отправлена",1:"Не отправлена")
+	s doc.CheckResult=result
+	
+	//если все заявки были отправлены, тогда не примем, иначе примем
+	if InstructionsCount=$G(HasBeenSentCount) d
+	. s ActCheckStatus="fail"
+	. s result="Все заявки к акту были отправлены"
+	e  d
+	. s ActCheckStatus="approve"
+	
+	if $$$TunesVariableGlobal("AllowReportApprovement") 
+	{
+		//зелёной птичке "провести документ" разрешено проводить документы
+		if ActCheckStatus="fail"
+		{
+			d ##class(Docs.Act).SetActStatFailed(doc)
+			s result=result + " Программа проверки нашла ошибоки в акте, но статус документа остался ""создан"""
+		}
+		else
+		{
+			s result = ##class(Docs.Act).SetActStatAccepted(doc)
+			//s result=result + " Программа проверки нашла ошибки в акте, но статус документа остался ""создан"""
+
+			if result
+			{
+				//s GarantObj=##class(Common.Dictionary2).%OpenId(doc.garant)
+				s GarantObj.Act=doc
+				s result=##class(Common.Common).SetGarantDisabled(doc.garant,0,"Акт "_doc.Name_" от "_$ZD(doc.Date,4))
+			}
+		}	
+	}
+	else
+	{
+		//зелёной птичке "провести документ" не разрешено проводить документы
+		if ActCheckStatus="fail" s result="Документ содержит ошибки и должен быть переведён в статус Не принят. "_result
+		else  s result="Документ успешно прошёл проверку и может быть принят."
+	}
+	q result
+]]></Implementation>
+</Method>
+
+<Method name="processbrakremont">
+<Description>
+Обработка документа "Отправка брака в мастерскую"</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>doc</FormalSpec>
+<Implementation><![CDATA[
+ s ok=1
+ TSTART
+ f i=1:1:doc.Items.Count() q:'+ok  d
+ . s item=doc.Items.GetAt(i)
+ . i item.Quantity>item.Brak.Qnt s ok="Списание невозможно, т.к. для товара "_item.Goods.FullName_" указано количество "_item.Quantity_" а в ячейке лишь "_item.Brak.Qnt q
+ . i item.Brak.Qnt=item.Quantity d
+ . . d ##class(Store.Brak).%DeleteId(item.Brak.%Id())
+ . . s item.Brak=""
+ . e  s item.Brak.Qnt=item.Brak.Qnt-item.Quantity
+ i '+ok TROLLBACK
+ e  TCOMMIT
+ q ok
+]]></Implementation>
+</Method>
+
+<Method name="processutiliz">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>doc</FormalSpec>
+<Implementation><![CDATA[
+ s ok=1
+ 
+ if $ISOBJECT(doc.Kontr) s KontragentId = doc.Kontr.%Id()
+ e  s KontragentId = ""
+ 
+ 
+ TSTART
+ f i=1:1:doc.Items.Count() q:'+ok  d
+ . s item=doc.Items.GetAt(i)
+ . d:item.goodsdir=2 //оприходование товара
+ . . s:item.addr'="" ok=##class(Store.Action).savequant(item.Goods,item.addr,item.Quantity)
+ . . d:item.Client'="" ..addTovarOnKontr(item.Client,item.Goods,item.Quantity)
+ . d:item.goodsdir=1 //списание товара
+ . . i item.SourceTbl=2 d
+ . . . //Списываем из брака
+ . . . if '$ISOBJECT(item.Brak) d
+ . . . . s GoodsID=item.Goods.%Id(),AddressID=item.addr.%Id()
+ . . . . &sql(select ID into :BrakID from Store.Brak where Goods=:GoodsID and Address=:AddressID AND ((Kontr=:KontragentId) OR (:KontragentId='') OR (:KontragentId IS NULL)))
+ . . . . if SQLCODE s ok="Списание невозможно, т.к. для некондиционного товара "_item.Goods.FullName_" установлено списание из ячейки "_##class(Store.Action).AddressPath(item.addr)_" но в ней нет этого некондиционного товара. (SQLCODE "_SQLCODE_")" q
+ . . . . s item.Brak=##class(Store.Brak).%OpenId(BrakID)
+ . . . q:'+ok
+ . . . i item.Quantity>item.Brak.Qnt s ok="Списание невозможно, т.к. для товара "_item.Goods.FullName_" указано количество "_item.Quantity_" а в ячейке лишь "_item.Brak.Qnt q
+ . . . i item.Brak.Qnt=item.Quantity d
+ . . . . d ##class(Store.Brak).%DeleteId(item.Brak.%Id())
+ . . . . s item.Brak=""
+ . . . e  s item.Brak.Qnt=item.Brak.Qnt-item.Quantity
+ . . e  d
+ . . . //списываем из общего количества
+ . . . // если указан адрес то списываем остаток с адреса
+ . . . s:item.addr'="" ok=##class(Store.Action).remquant(item.Goods,item.addr,item.Quantity)
+ . . . d:item.Client'="" ..remTovarOnKontr(item.Client,item.Goods,item.Quantity)
+ . . d ##class(Store.GarantAction).SetGarantNotActual(item.garant)
+ i '+ok TROLLBACK
+ e  TCOMMIT
+ q ok
+]]></Implementation>
+</Method>
+
+<Method name="processinvent">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>doc</FormalSpec>
+<Implementation><![CDATA[
+ s AddressId=$S($ISOBJECT(doc.Address):doc.Address.%Id(),1:"")
+ s ok=##class(Store.Action).BlockCells(AddressId,1)
+ i '+ok q ok
+ f i=1:1:doc.Items.Count() q:'+ok  d
+ . s item=doc.Items.GetAt(i)
+ . s ok=##class(Store.Action).savequant(item.Goods,item.addr,item.Quantity,1)  //последний параметр укажет что предыдущее значение ячеек не учитывать
+ q ok
+]]></Implementation>
+</Method>
+
+<Method name="processinner">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>doc</FormalSpec>
+<Implementation><![CDATA[
+ s ok=1
+ f i=1:1:doc.Items.Count() q:'+ok  d
+ . s item=doc.Items.GetAt(i)
+ . s ok=##class(Store.Action).remquant(item.Goods,item.addr2,item.Quantity)
+ . q:'+ok
+ . s ok=##class(Store.Action).savequant(item.Goods,item.addr,item.Quantity)
+ . q:'+ok
+ q ok
+]]></Implementation>
+</Method>
+
+<Method name="print">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>doc=""</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="printErr"
+ s docclass=$P(doc,"@",2)
+ i docclass="" $$$WriteError("Пустой класс документа "_doc) q
+ s page=$G(^docpages(docclass))
+ i page="" $$$WriteError("Нет страницы для класса "_docclass) q
+ 
+ s xmlstr=##class(%XML.Writer).%New() s xmlstr.Charset="windows-1251" d xmlstr.OutputToDevice() 
+ s sc=xmlstr.Write("<?xml-stylesheet type='text/xsl' href='xsl/"_page_"'?>")
+ s sc=xmlstr.RootElement("root")
+	
+ $$$EndXML
+ q
+printErr
+ $$$WriteError($ZE)
+ q
+]]></Implementation>
+</Method>
+
+<Method name="tovsforotchet">
+<Description>
+Товары для отчёта</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>kontr,q1,q2</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="tovsforotchetErr"
+ s glob=$NA(^t(kontr))
+ $$$StartXML
+  s sc=xmlstr.Element("AllObjects")
+  	s i="" f  s i=$O(@glob@(i)) q:i=""  d
+  	. s sc=xmlstr.Element("OneObject")
+	. s sc=xmlstr.Element("Goods")
+ 	. s sc=xmlstr.WriteAttribute("id",i)
+ 	. s tov=##class(Goods.Goods).%OpenId(i)
+ 	. i $ISOBJECT(tov) s name=tov.Name
+ 	. e  s name="товар с кодом "_i
+ 	. $$$WriteElement("text",name)
+ 	. s sc=xmlstr.EndElement()
+	. s sc=xmlstr.Element("Quantity")
+	. s sc=xmlstr.WriteAttribute("id",i)
+	. $$$WriteElement("text",$G(@glob@(i)))
+	. s sc=xmlstr.EndElement()
+	. $$$WriteElementTwice("Price",tov.Price)
+  	. s sc=xmlstr.EndElement()
+  s sc=xmlstr.EndElement()
+ $$$EndXML
+ q
+tovsforotchetErr
+ $$$WriteError($ZE)
+ q
+]]></Implementation>
+</Method>
+
+<Method name="getRashNumb">
+<Description>
+Получить новый уникальный номер документа</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DocType:%String="Docs.Rash"</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="getRashNumbErr"
+ s year=$P($ZD(+$H,4),"/",3)
+ i DocType="Docs.Rash" d
+ . s numb=+$G(^RashNumbers(year))+1
+ . s ^RashNumbers(year)=numb
+ e  d
+ . s numb=+$G(^RashNumbers(DocType,year))+1
+ . s ^RashNumbers(DocType,year)=numb
+ q numb_"-"_year
+getRashNumbErr
+ $$$WriteError($ZE)
+ q "----"
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+/*
+ похоже что метод не используется, чуть позже надо грохнуть
+ClassMethod LoadFreeDocs(dat1, dat2, depot)
+{
+  s $ZT="LoadFreeDocsErr"
+ s dat1=$S(dat1="":"",1:$ZDH(dat1,4))
+ s dat2=$S(dat2="":"",1:$ZDH(dat2,4))
+ 
+ s rs=##class(%ResultSet).%New()
+ s ok=rs.Prepare("select ID,Dat,Tim,DocumentClass->Name as doc,Name from Docs.Super where Dat>="_dat1_" and Dat<="_dat2_" and (DocumentClass='Docs.Prih' or DocumentClass='Docs.Rash' or DocumentClass='Docs.Inner')")
+ i '+ok $$$WriteObjError(ok) q
+ s ok=rs.Execute()
+ i '+ok $$$WriteObjError(ok) q
+ 
+ $$$StartXML
+ 	s sc=xmlstr.Element("AllHeaders")
+		 $$$WriteHeader("number","№",30)
+		 $$$WriteHeader("doc","Документ",140)
+		 $$$WriteHeader("dat","Дата",90)
+		 $$$WriteHeader("name","Номер",90)
+	s sc=xmlstr.EndElement()
+	s sc=xmlstr.Element("AllObjects")
+  While rs.Next() {
+	    i $I(i)
+		s sc=xmlstr.Element("OneObject")
+		s sc=xmlstr.WriteAttribute("id",rs.Data("ID"))
+
+		 $$$WriteElementTwice("number",i)
+		 $$$WriteElementTwice("doc",rs.Data("doc"))
+		 s Dat=$ZD(rs.Data("Dat"),4)
+		 $$$WriteElementTwice("name",rs.Data("Name"))
+		 $$$WriteElementTwice("dat",Dat)
+		s sc=xmlstr.EndElement()
+  }	
+	s sc=xmlstr.EndElement()
+ $$$EndXML
+LoadFreeDocsErr
+ $$$WriteError($ZE)
+ q
+}
+*/
+]]></Content>
+</UDLText>
+
+<Method name="DocFromInstr">
+<Description><![CDATA[
+Создать документы на основании инструкции руководителя
+<br><var>id</var> - ID инструкции руководителя]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="DocFromInstrErr"
+ s err="Извините, внутренняя ошибка при создании документа"
+ s ok=..ChildDocs(id,.Array)
+ i $D(Array)>1 d  q "На основе этой инструкции уже созданы документы: "_$C(10)_$C(13)_Names
+ . s i="" f  s i=$O(Array(i)) q:i=""  s Names=$G(Names)_Array(i,"DocumentClassName")_" № "_Array(i,"Name")_" от "_Array(i,"Dat")_$C(10)_$C(13)
+ TSTART
+ s instr=##class(Operation.Instructions).%OpenId(id)
+ i '$ISOBJECT(instr) $$$WriteError("DocFromInstr не открылся id='"_id_"' класс Operation.Instructions") q err
+ i instr.State=1 q "Инструкция ещё не утверждена"
+ q:'$ISOBJECT(instr.Depot1) "В инструкции не указан склад, дочерние документы не могут быть созданы."
+ i '$ISOBJECT(instr.Oper) s classes=""
+ e  s classes=instr.Oper.cl,InstructionType=instr.Oper.%Id()  //классы документов которые необходимо создать на основании данной инструкции
+ i classes="" $$$WriteError("DocFromInstr для инструкции "_id_" был предложен пустой класс для документа") q err
+ s ok=1,err=1
+ f clnum=1:1:$L(classes,",") q:('+ok)!('+err)  d
+ . s class=$P(classes,",",clnum)
+ . s doc=$ZOBJCLASSMETHOD(class,"%New")
+ . s doc.Name=instr.Name
+ . i class="Docs.Rash" d  //расходная накладная
+ . . s doc.Name=..getRashNumb()
+ . . s:$ISOBJECT(instr.RashOplatType) doc.opl=instr.RashOplatType
+ . s doc.Depot=instr.Depot1.%Id()
+ . s doc.Kontr=instr.Kontr
+ . d doc.SourceSetObjectId(id)
+ . s ok=1
+ . s tot=0
+ . f i=1:1:instr.Items.Count() q:'+ok  d
+ . . s item=instr.Items.GetAt(i)
+ . . s docitem=$ZOBJCLASSMETHOD(class_"Items","%New")
+ . . s docitem.Goods=item.Goods
+ . . s ItemPrice=item.Price
+ . . s ItemQuantity=item.Quantity
+ . . s docitem.Price=ItemPrice
+ . . s docitem.Total=item.Total
+ . . i class="Docs.Rash" d
+ . . . s docitem.serial=item.sn
+ . . . s docitem.comment=item.BrakComment
+ . . . s docitem.Zakaz=item.Quantity
+ . . . s docitem.Quantity=item.Quantity
+ . . . s ItemTotal=$J(ItemPrice*ItemQuantity,".",2)
+ . . . s:InstructionType=10 docitem.Total=ItemTotal  //считаем сумму строки в расходной, если делаем от заявки на поставку запчастей
+ . . e  s docitem.Quantity=ItemQuantity
+ . . s tot=tot+docitem.Total
+ . . d docitem.DocTypeSetObjectId(class)
+ . . d:class="Docs.Invent"  //для инвентаризации
+ . . . s docitem.quantplan=item.quantplan
+ . . . s docitem.addr=item.addr
+ . . d:class="Docs.Utiliz"  //для утилизации
+ . . . s docitem.Client=item.Client
+ . . . s docitem.addr=item.addr
+ . . . s docitem.goodsdir=item.goodsdir
+ . . . s docitem.spravka=item.spravka
+ . . . s docitem.garant=item.garant
+ . . . s docitem.sn=item.sn
+ . . d:class="Docs.Remont"  //для заявки на ремонт
+ . . . s docitem.seller=item.seller
+ . . . s docitem.garant=item.garant
+ . . . s docitem.serial=item.sn
+ . . . s docitem.Name=item.opispolomki
+ . . d:class="Docs.DocBrak"  //для приёма брака
+ . . . s docitem.PlanQuant=item.Quantity
+ . . s ok=doc.Items.Insert(docitem)
+ . . i '+ok $$$WriteObjError(ok) q
+ . q:'+ok
+ . s doc.Summa=tot
+ . s err=..script(class,doc)
+ . q:class="Docs.Remont"&'+err
+ . s ok=doc.%Save()
+ . q:'+ok
+ q:'+err err
+ i '+ok $$$WriteObjError(ok) q err
+ s ok=..script(class,doc)
+ TCOMMIT
+ i '+ok TROLLBACK  q ok
+ //i '+ok q ok
+ q doc.%Id()
+DocFromInstrErr
+ $$$WriteError($ZE)
+ q "Извините, при создании документа произошла ошибка"
+]]></Implementation>
+</Method>
+
+<Method name="GetPageFromInstr">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>inid,what="cspfile"</FormalSpec>
+<Implementation><![CDATA[
+ s in=##class(Operation.Instructions).%OpenId(inid)
+ q:'$ISOBJECT(in) ""
+ q:'$ISOBJECT(in.Oper) ""
+ q $ZOBJPROPERTY(in.Oper,what)
+]]></Implementation>
+</Method>
+
+<Method name="GetPageFromOper">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>oper,what="cspfile"</FormalSpec>
+<Implementation><![CDATA[
+ s in=##class(Operation.OperTemplate).%OpenId(oper)
+ q:'$ISOBJECT(in) ""
+ q $ZOBJPROPERTY(in,what)
+]]></Implementation>
+</Method>
+
+<Method name="MarkGarant">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>docobj</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="MarkGarantErr"
+ s err="Извините, ошибка при записи информации о гарантийном талоне"
+ s ok=1
+ i '$ISOBJECT(docobj) s docobjID=docobj,docobj=##class(Docs.Remont).%OpenId(docobj)
+ e  s docobjID=docobj.%Id()
+ i '$ISOBJECT(docobj) $$$WriteError("MarkGarant не открылся объект ("_docobjID_") класса Docs.Remont") q err
+ Set key = ""
+ Do {
+  Set itemobj = docobj.Items.GetNext(.key)
+  If $ISOBJECT(itemobj) {
+     s garant=itemobj.garant
+     s garants(garant)=1
+  }
+ } While (key '= "")
+ s garant="" f  s garant=$O(garants(garant)) q:(garant="")||('+ok)  d
+ . s garantobj=##class(Common.Dictionary2).%OpenId(garant)
+ . i $ISOBJECT(garantobj)  //гарантийный талон есть в базе
+ .. i garantobj.Property9194=2 s ok="Гарантийный талон №"_garantobj.Name_" недействителен" q
+ .. //вставить проверку дат
+ .. q:'+ok
+ .. i remont'="fukk" d
+ .. . d $ZOBJMETHOD(garantobj,remont,docobj.%Id())
+ .. s:remont="remont3SetObjectId" garantobj.Property9194=2 //Ставя третий ремонт одновременно ставим что талон недействителен
+ .e  d   //гарантийного талона нет (или ошибка)
+ .. s garantobj=##class(Common.Dictionary2).%New()
+ .. s garantobj.Name=garant
+ .. d garantobj.remont1SetObjectId(docobj.%Id())
+ . q:'+ok
+ . s ok=garantobj.%Save()
+ . i '+ok $$$WriteObjError(ok)
+ q:'+ok ok
+ i '+ok $$$WriteObjError($ZE) q err
+ q 1
+MarkGarantErr
+ $$$WriteError($ZE)
+ q "Извините, ошибка при записи информации о гарантийном талоне"
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+//метод сохраняющий xml поток в глобальку
+
+]]></Content>
+</UDLText>
+
+<Method name="checkgarant">
+<Description>
+Проверить гарантийный талон</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>xmlstream="",docid="",documentclass</FormalSpec>
+<Implementation><![CDATA[
+ s user=$G(%session.Data("user"),"undefined")
+ s ok=..parsexml(xmlstream,docid,documentclass,.types,.DocData)
+ k ^mtempCurrentRemDoc(user)
+ m ^mtempCurrentRemDoc(user)=@DocData
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="makealotgarants">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>xmlstream="",docid="",documentclass</FormalSpec>
+<Implementation><![CDATA[
+ s ok=..parsexml(xmlstream,docid,documentclass,.types,.DocData)
+ q:'+ok ok
+ s ok=..makealotgarants2(documentclass, DocData, .types)
+ 
+ q ok
+]]></Implementation>
+</Method>
+
+<Method name="makealotgarants2">
+<Description>
+создать несколько гарантийных талонов</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>documentclass,DocData,types</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="makealotgarantsErr"
+ s kontr=$G(@DocData@("head","Property5330"))
+ s dat=$G(@DocData@("head","Property8550"))
+ s Property9194=$G(@DocData@("head","Property9194"))
+ s tovar=$G(@DocData@("head","tovar"))
+ s kol=$G(@DocData@("head","koli4est"))
+ s serial=$G(@DocData@("head","serial"))
+ s startnumb=+$G(@DocData@("head","startnumb"))
+ s prefix=$G(@DocData@("head","prefix"))
+ s leng=$G(@DocData@("head","leng"))
+ s comment=$G(@DocData@("head","comment"))
+ s SerialAsGarant=$G(@DocData@("head","SerialAsGarant"))
+
+ s ok=1
+ TSTART
+ f i=startnumb:1:(kol-1+startnumb) q:'+ok  d
+ . s garobj=##class(Common.Dictionary2).%New()
+ . d:kontr'="" garobj.Property5330SetObjectId(kontr)
+ . s:dat'="" garobj.Property8550=$ZDH(dat,4)
+ . s:serial'="" garobj.serial=serial
+ . s:Property9194'="" garobj.Property9194=Property9194
+ . s:tovar'="" garobj.tovar=tovar
+ . s:comment'="" garobj.Comment=comment
+ . s garobj.Name=prefix_$TR($J(i,leng)," ",0)
+ . if SerialAsGarant s garobj.serial=garobj.Name
+ . s ok=garobj.%Save()
+ . b	;1
+ i '+ok d  q ok
+ . TROLLBACK 1
+ . $$$WriteObjError(ok) 
+ . s ok="Извините, внутренняя ошибка при генерации списка гарантийных талонов."
+ TCOMMIT
+ q 1
+makealotgarantsErr
+ $$$WriteError($ZE)
+ q "Извините, внутренняя ошибка при создании списка гарантийных номеров"
+]]></Implementation>
+</Method>
+
+<Method name="deletedoc">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>class="",docid="",p1</FormalSpec>
+<Implementation><![CDATA[
+ s ok=1
+ s $ZT="deletedocErr"
+ s err="Извините, ошибка при удалении документа"
+ q:class="" err
+ q:docid="" err
+ s doc=$ZOBJCLASSMETHOD(class,"%OpenId",docid)
+ d:$ISOBJECT(doc)  //если удалось открыть объект то удалим его строки
+ . //получим ссылку на свойство документа содержащее строки
+ . i class="Docs.Platejka" s DocItemsProperty=$ZOBJPROPERTY(doc,"PlatejkaItems")	//строки платёжной накладной содержатся в свойстве PlatejkaItems
+ . e  s DocItemsProperty=$ZOBJPROPERTY(doc,"Items")
+ . s i="" f  s i=$ZOBJMETHOD(DocItemsProperty,"Next",i) q:i=""  d
+ . . s item=$ZOBJMETHOD(DocItemsProperty,"GetAt",i)
+ . . s ok=$ZOBJMETHOD(item,"%DeleteId",item.%Id())
+ . . i '+ok $$$WriteObjError(ok) q
+ . . d $ZOBJMETHOD(DocItemsProperty,"RemoveAt",i)
+ . . k item  //убиваем сам объект в памяти
+ i '+ok q err
+ s ok=$ZOBJCLASSMETHOD(class,"%DeleteId",docid)
+ i '+ok $$$WriteObjError(ok) q err
+ q 1
+deletedocErr
+ b	;err
+ $$$WriteError($ZE)
+ q "Извините, ошибка при удалении документа"
+]]></Implementation>
+</Method>
+
+<Method name="GetSummByPrice">
+<Description>
+показать сумму документа по строкам
+class - класс документа
+id - id документа
+massiv - массив передаваемый по ссылке куда будет ссыпана информация по брендам</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[class="",id,&massiv]]></FormalSpec>
+<Implementation><![CDATA[
+ k massiv
+ s $ZT="GetSummByPriceErr"
+ s rs=##class(%ResultSet).%New()
+ // если класс не указали то и не смотрим на него
+ i class'="" s class=" and DocType='"_class_"'"
+ s sql="select id,Quantity,Goods,Goods->abbr as Goodsabbr from Docs.DocItems where doc='"_id_"'"_class
+ s ok=rs.Prepare(sql)
+ i '+ok $$$WriteObjError(ok) q 0
+ s ok=rs.Execute()
+ i '+ok $$$WriteObjError(ok) q 0
+ While rs.Next() {
+	 s Goodsabbr=$G(rs.Data("Goodsabbr"))
+	 s Quantity=$G(rs.Data("Quantity"))
+	 s Goods=$G(rs.Data("Goods"))
+	 s Price=##class(Goods.GoodsAction).getprice(Goods)
+	 s id=$G(rs.Data("id"))
+	 s massiv=$G(massiv)+(+Price*+Quantity)
+	 i Goodsabbr="" s Goodsabbr="-"
+	 s massiv("code",Goodsabbr)=$G(massiv("code",Goodsabbr))+(+Price*+Quantity)
+	 //s massiv("goods",Goods)=$G(massiv("code",Goods))+Price*Quantity
+ } 
+ q 1
+GetSummByPriceErr
+ $$$WriteError($ZE)
+ q "Извините, ошибка при подсчёте суммы"
+]]></Implementation>
+</Method>
+
+<Method name="CloneDoc">
+<Description><![CDATA[
+Создать копию документа
+<br><var>doc</var> - документ]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>doc</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="CloneDocErr"
+ s err="Ошибка при создании копии документа. Копия не создана."
+ i '$ISOBJECT(doc) s doc=##class(Operation.Instructions).%OpenId(doc)
+ i '$ISOBJECT(doc) $$$WriteError("CloneDoc не опознан как объект "_doc) q err
+ TSTART
+ s newObj=doc.%ConstructClone()  	//делаем клона передаваемого объекта
+ s newObj.Name="Копия "_doc.Name 	//переименовываем новый объект
+ s newObj.Stat=1
+ s newObj.Dat=+$H
+ s newObj.Tim=$P($H,",",2)
+ d newObj.User1SetObjectId($S($ISOBJECT($G(%session)):$G(%session.Data("user")),1:""))
+ s newObj.CloseDate=""
+ s newObj.CloseTime=""
+ s newObj.CloseUser=""
+ if $ISOBJECT(newObj.DocumentClass),newObj.DocumentClass.%Id()="Operation.Instructions" d
+ . s newObj.State=1
+ . s newObj.InstDate=+$H
+ . s newObj.innerinstr=""
+ s ok=newObj.%Save()
+ i '+ok $$$WriteObjError(ok) q err
+ TCOMMIT
+ q 1
+CloneDocErr
+ f i=1:1:$TLEVEL TROLLBACK
+ $$$WriteError($ZE)
+ q "Ошибка при создании копии документа. Копия не создана."
+]]></Implementation>
+</Method>
+
+<Method name="EmailFromDoc">
+<Description><![CDATA[
+Извлечь e-mail адрес контрагента из документа
+<br><var>DocID</var> - ID или объект документа
+<br><var>Class</var> - Класс (по умолчанию Docs.Super)]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DocID,Class="Docs.Super"</FormalSpec>
+<Implementation><![CDATA[
+	s Splitter="#@#"
+	i '$ISOBJECT(DocID) d
+	. s DocID=$ZOBJCLASSMETHOD(Class,"%OpenId",DocID)
+	
+	i $ISOBJECT(DocID) d
+	. d:$ISOBJECT(DocID.Kontr)
+	. . s EmailAddress=DocID.Kontr.EMail
+	. . s KontrName=DocID.Kontr.Name
+	. s DocTypeName=$S($ISOBJECT(DocID.DocumentClass):DocID.DocumentClass.Name,1:"")
+	. s DocName=DocID.Name
+	
+	q $G(EmailAddress)_Splitter_$G(KontrName)_Splitter_$G(DocTypeName)_Splitter_$G(DocName)
+]]></Implementation>
+</Method>
+
+<Method name="DeleteDoc2">
+<Description><![CDATA[
+Удаление документа
+<br><var>Doc</var> - ID или объект документа]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Doc=""</FormalSpec>
+<Implementation><![CDATA[
+ q:Doc="" "Не указан документ для удаления"
+ i '$ISOBJECT(Doc) s Doc=##class(Docs.Super).%OpenId(Doc)
+ q Doc.Delete()
+]]></Implementation>
+</Method>
+
+<Method name="CreateStorageOutOnRash">
+<Description><![CDATA[
+Создать внутреннюю инструкцию по отгрузке на основании расходной накладной
+<br><var>doc</doc> - расходная накладная (id или объект)]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>doc=""</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<Implementation><![CDATA[
+ i '$isobject(doc) s doc=##class(Docs.Rash).%OpenId(doc)
+ i '$ISOBJECT(doc) $$$WriteError("CreateStorageOutOnRash не удалось открыть документ "_doc) q "Извините, при формировании внутренней инструкции произошла ошибка. Невозможно получить информацию о документе."
+ s StoreDoc=##class(Docs.StorageOut).%New()
+ s ok=..CopyDoc(doc,StoreDoc)
+ i '+ok q ok
+ s StoreDoc.Name=doc.Name_"-о"
+ s ok=StoreDoc.%Save()
+ i '+ok $$$WriteObjError(ok) q "Извините, произошла ошибка при создании внутренней инструкции."
+ q StoreDoc.%Id()
+]]></Implementation>
+</Method>
+
+<Method name="CopyDoc">
+<Description><![CDATA[
+Заполнить новый документ данными документа-источника
+<br><var>SourceDoc</var> - Документ источник (ID или объект)
+<br><var>NewDoc</var> - Новый документ (ID или объект)
+<br><var>SourceDocAsParent</var> - пометить документ-источник в качестве источника в новом документе
+<br><var>KillNewDocItems</var> - Не сохранять строки нового документа]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>SourceDoc="",NewDoc="",SourceDocAsParent=1,KillNewDocItems=1</FormalSpec>
+<Implementation><![CDATA[
+ 
+ s $ZT="CopyDocErr",ok=1,err="Ошибка при создании внутренней инструкции от расходной накладной."
+ i '$ISOBJECT(SourceDoc) s SourceDoc=##class(Docs.Super).%OpenId(SourceDoc)
+ i '$ISOBJECT(NewDoc) s NewDoc=##class(Docs.Super).%OpenId(NewDoc)
+ i '$ISOBJECT(SourceDoc) $$$WriteError("Не удалось открыть документ "_SourceDoc) q err
+ i '$ISOBJECT(NewDoc) $$$WriteError("Не удалось открыть документ "_NewDoc) q err
+ i (SourceDoc.%ClassName(1)'="Docs.Rash")&(SourceDoc.%ClassName(1)'="Docs.Prih")&(SourceDoc.%ClassName(1)'="Docs.DocBrak") q "Обрабатываются только Приходные и расходные. Все иные движения товара необходимо оформлять в разделе ДОКУМЕНТЫ."
+ s NewDoc.Kontr=SourceDoc.Kontr
+ s NewDoc.Summa=SourceDoc.Summa
+ s NewDoc.Name=SourceDoc.Name
+ s:SourceDocAsParent NewDoc.Source=SourceDoc
+ s NewDoc.Depot=SourceDoc.Depot
+ s NewDoc.Comment=SourceDoc.Comment
+ if SourceDoc.%ClassName(1)="Docs.DocBrak" s NewDoc.PrihodType=1
+ 
+ i KillNewDocItems s ok=NewDoc.Items.Clear()
+ i 'ok $$$WriteObjError(ok) q "Извините, внутренняя ошибка при клонировании документа."
+ s i="" f  s i=SourceDoc.Items.Next(i) q:(i="")!('+ok)  d
+ . s SourceItem=SourceDoc.Items.GetAt(i)
+ . s NewItem=$ZOBJCLASSMETHOD(NewDoc.%ClassName(1)_"Items","%New")
+ . s NewItem.Goods=SourceItem.Goods
+ . d NewItem.DocTypeSetObjectId(NewDoc.%ClassName(1))
+ . if NewDoc.%ClassName(1)="Docs.StorageOut" d ..SetDataForInnerStorageOutItems(SourceItem,.NewItem,NewDoc)
+ . if NewDoc.%ClassName(1)="Docs.StorageIn" d ..SetDataForInnerStorageInItems(SourceItem,.NewItem,NewDoc)
+ . s:$ISOBJECT(NewItem) ok=NewDoc.Items.SetAt(NewItem,i)
+ . i '+ok $$$WriteObjError(ok) 
+ d ..SetDataForInnerStorageDocs(SourceDoc,NewDoc)
+ q ok
+CopyDocErr
+ $$$WriteError($ZE)
+ q "Извините, внутренняя ошибка при клонировании документа."
+]]></Implementation>
+</Method>
+
+<Method name="ChangeGoodsInDoc">
+<Description><![CDATA[
+Замена товаров в строках документа
+<br><var>Zamena</var> - Строка с указанием что где заменить IdСтрокиДокумента=IdНовогоТовара;IdСтрокиДокумента=IdНовогоТовара;...]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Zamena</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="ChangeGoodsInDocErr",ok=1
+ TSTART
+ s CurrentUserId=$G(%session.Data("user"))
+ f i=1:1:$L(Zamena,";") q:'+ok  d
+ . s CurrentZamena=$P(Zamena,";",i)
+ . q:CurrentZamena=""
+ . s StringId=$P(CurrentZamena,"=",1)
+ . s NewGood=$P(CurrentZamena,"=",2)
+ . s DocStringObj=##class(Docs.RashItems).%OpenId(StringId)
+ . s DocStringObj.ZakazGoods=DocStringObj.Goods
+ . s DocStringObj.ZakazDat=+$H
+ . s DocStringObj.ZakazTim=$P($H,",",2)
+ . d:CurrentUserId'="" DocStringObj.ZakazUser1SetObjectId(CurrentUserId)
+ . d DocStringObj.GoodsSetObjectId(NewGood)
+ . s ok=DocStringObj.%Save()
+ i '+ok d  q "Извините. Ошибка при замене строк документа."
+ . TROLLBACK
+ . $$$WriteObjError(ok)
+ TCOMMIT
+ q 1
+ChangeGoodsInDocErr
+ TROLLBACK
+ $$$WriteError($ZE)
+ q "Извините. Ошибка при замене строк документа."
+]]></Implementation>
+</Method>
+
+<Method name="ChildDocs">
+<Description><![CDATA[
+Получить потомков данного документа
+<br><var>doc</var> - документ родитель (ID или объект)
+<br><var>Array</var> - возвращаемый массив с данными]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[doc="",&Array]]></FormalSpec>
+<Implementation><![CDATA[
+ i $ISOBJECT(doc) s docid=doc.%Id()
+ e  s docid=doc
+ i '+docid q ""
+ &sql(declare gods cursor for 
+ select ID,Name,DocumentClass->Name,Dat
+ into :ID,:Name,:DocumentClassName,:Dat
+ from Docs.Super where Source=:docid)
+ &sql(open gods)
+ f  &sql(fetch gods) q:SQLCODE  d
+ . s Array(ID,"Name")=Name
+ . s Array(ID,"DocumentClassName")=DocumentClassName
+ . s Array(ID,"Dat")=$ZD(Dat,4)
+ &sql(close gods)
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="CreateChildDoc">
+<Description><![CDATA[
+Создать внутреннюю инструкцию на основании документа
+<br><var>DocId</var> - ID документа
+<br><var>ClassName</var> - Класс документа]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DocId,ClassName</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="CreateChildDocErr"
+ s NewDocClass=..GetClassFromSource(DocId_"@"_ClassName)
+ i NewDocClass="" q "Извините. Не удалось определить тип дочернего документа." 
+ i NewDocClass="Docs.StorageOut" q ##class(Docs.Action2).MakeStoreOut(DocId)
+ s NewDocObj=$ZOBJCLASSMETHOD(NewDocClass,"%New")
+ i '$ISOBJECT(NewDocObj) q "Ошибка при формировании дочернего документа. Невозможно сформировать документ "_NewDocClass
+ s ok=..CopyDoc(DocId,NewDocObj)
+ q:'+ok ok
+ s ok=NewDocObj.%Save()
+ i '+ok $$$WriteObjError(ok) q "Ошибка при создании дочернего документа."
+ q ok
+CreateChildDocErr
+ $$$WriteError($ZE)
+ q "Извините. Ошибка при формировании дочернего документа."
+]]></Implementation>
+</Method>
+
+<Method name="SetDataForInnerStorageOutItems">
+<Description><![CDATA[
+Установить данные для строк внутренних инструкций образованных от документа-родителя
+<br><var>SourceItem</var> - Строка документа родителя
+<br><var>NewItem</var> - Строка документа - внутренней инструкции
+<br><var>NewDoc</var> - документ - внутренняя инструкция]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[SourceItem,&NewItem,NewDoc]]></FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<Implementation><![CDATA[
+ s NewItem.quantdefault=SourceItem.Quantity
+ s NewItem.Price=SourceItem.Price
+ //общее количество товара на складе (предприятии)
+ s Quantity=##class(Goods.GoodsAction).getgoodquant(SourceItem.Goods.%Id(),"",.addr)  //найдем ячейки где лежит товар с нужным количеством
+ i $G(addr("value"))<SourceItem.Quantity d  q
+ . //общее кол. товара меньше чем требуется, надо что то делать
+ . s ok=..InsertReplaceMent(NewDoc,SourceItem)
+ . s NewItem=""
+ //если Количество в найденной ячейке больше или равно нужному
+ i Quantity>=SourceItem.Quantity d
+ . d NewItem.addrSetObjectId(addr)
+ . s NewItem.Total=SourceItem.Total
+ e  d
+ . //иначе, т.е. общее кол. в ячейках не меньше чем надо, но надо набирать из ячеек
+ . d ..AddDocStr(.NewDoc,SourceItem,.addr)
+ . //текущую строку сбросим, ибо сделаем новых кучу
+ . s NewItem=""
+ q
+]]></Implementation>
+</Method>
+
+<Method name="SetDataForInnerStorageDocs">
+<Description><![CDATA[
+Установить данные для строк внутренних инструкций образованных от документа-родителя
+<br><var>Source</var> - Документа родителя
+<br><var>New</var> - Документа - внутренней инструкции]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Source,New</FormalSpec>
+<Implementation><![CDATA[
+ s New.Name=New.Name_$S(New.%ClassName(1)="Docs.StorageOut":"-о",New.%ClassName(1)="Docs.StorageIn":"-р")
+ q
+]]></Implementation>
+</Method>
+
+<Method name="AddDocStr">
+<Description><![CDATA[
+Добавить нужное количество строк в документ на основании странного массива addr (описание см. в Goods.GoodsAction.getgoodquant())
+<br><var>NewDoc</var> - документ в который добавлять новые строки
+<br><var>DataArray</var> - массив источник информации - какой товар, сколько надо, какая у него цена
+<br><var>addr</var> - массив с ячейками содержащими требуемый товар (структуру см. Goods.GoodsAction.getgoodquant())
+<br><var>Accumulated</var> - сколько удалось набрать
+<br><var>NeedQuantity</var> - сколько нужно набрать]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[NewDoc,DataArray,&addr,&Accumulated,NeedQuantity=""]]></FormalSpec>
+<Implementation><![CDATA[
+ s Accumulated=0	//количество которое набрали из ячеек
+ s:'+NeedQuantity NeedQuantity=DataArray("NeedQuantity")	//количество которое надо набрать из ячеек
+ s GoodId=DataArray("GoodId")
+ s Price=DataArray("Price")
+ s NewDocClassName=NewDoc.%ClassName(1)
+ s ItemClass=NewDocClassName_"Items"
+ s i="" f  s i=$O(addr("value",i),-1) q:(i="")||(Accumulated>=NeedQuantity)  d
+ . s NeedStill=NeedQuantity-Accumulated	//такое количество ещё надо набрать
+ . i $G(addr("value",i,"val"))>=NeedStill d
+ . . //в текущей ячейке количество товара больше или равно нужному количеству
+ . . //значит забираем столько сколько ещё нужно
+ . . s CurrentQnt=NeedStill
+ . e  d
+ . . //в текущей ячейке меньше чем нам ещё надо
+ . . //значит забираем всю ячейку
+ . . s CurrentQnt=addr("value",i,"val")
+ . s CurrentAddressId=addr("value",i,"addr")
+ . s StoreQntID=addr("value",i,"StoreQntID")	//ID в таблице Store.Quantity
+ . s Accumulated=Accumulated+CurrentQnt	//такое количество уже набрали
+ . s NewItem=$ZOBJCLASSMETHOD(ItemClass,"%New")
+ . d NewItem.GoodsSetObjectId(GoodId)
+ . d NewItem.DocTypeSetObjectId(NewDocClassName)
+ . s NewItem.quantdefault=CurrentQnt
+ . s NewItem.Price=Price
+ . d NewItem.addrSetObjectId(CurrentAddressId)
+ . s NewItem.Total=$J((Price*CurrentQnt),"",2)
+ . d NewItem.StoreQntIDSetObjectId(StoreQntID)
+ . s ok=NewDoc.Items.Insert(NewItem)
+ . i ok do
+ . . //переводим товар из свободного количества в резерв
+ . . &sql(update Store.Quantity Set Value1=(Value1-:CurrentQnt),Value2=(Value2+:CurrentQnt) where ID=:StoreQntID)
+ q
+]]></Implementation>
+</Method>
+
+<Method name="InsertReplaceMent">
+<Description><![CDATA[
+Вставить в документ ИНСТРУКЦИЯ ПО ОТГРУЗКЕ аналог товара указанного в строке SourceItem
+<br><var>NewDoc</var> - документ в который добавлять новые строки
+<br><var>SourceItem</var> - строка источник информации - какой товар, сколько надо, какая у него цена]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[NewDoc,SourceItem,SourceDoc,NeedQuantity="",CreateNewString,&TotalAccumulated]]></FormalSpec>
+<Implementation><![CDATA[
+ s:NeedQuantity="" NeedQuantity=SourceItem.Quantity	//нужное количество товара
+ s TotalAccumulated=0
+ s CurrentUserId=$$$SessionData("user")
+ s GoodsId=SourceItem.Goods.%Id()	//товар для которого нужна замена
+ &sql(declare brokkoli cursor for
+ select Property6625,Property6625->Price into :NewGoodsId,:NewGoodsIdPrice
+ from Common.Dictionary4 where Name=:GoodsId and 
+ 	(select sum(Value1) from Store.Quantity where Goods=Property6625)>=1
+ )
+ &sql(open brokkoli)
+ f  &sql(fetch brokkoli) q:(SQLCODE)||(TotalAccumulated>=NeedQuantity)  d
+ . s Quantity=##class(Goods.GoodsAction).getgoodquant(NewGoodsId,"",.addr)  //найдем ячейки где лежит товар с нужным количеством
+ . s Accumulated=0
+ . s DataArray("GoodId")=NewGoodsId
+ . s DataArray("Price")=NewGoodsIdPrice
+ . s DataArray("NeedQuantity")=NeedQuantity
+ . d ..AddDocStr(.NewDoc,.DataArray,.addr,.Accumulated,(NeedQuantity-TotalAccumulated))
+ . s TotalAccumulated=TotalAccumulated+Accumulated
+ . //фиксируем изменения в строке расходной накладной
+ . i 'CreateNewString d
+ . . d SetRashItem(SourceItem,CurrentUserId,Accumulated,GoodsId,NewGoodsId)
+ . . s CreateNewString=1
+ . e  d
+ . . s SourceItem2=SourceItem.%ConstructClone()
+ . . d SetRashItem(SourceItem2,CurrentUserId,Accumulated,GoodsId,NewGoodsId)
+ . . s SourceItem2.JustCreated=1
+ . . d SourceDoc.Items.Insert(SourceItem2)
+ &sql(close brokkoli)
+ q 1
+SetRashItem(RashItem,CurrentUserId,Accumulated,GoodsId,NewGoodsId)
+ S RashItem.Quantity=Accumulated
+ d RashItem.ZakazGoodsSetObjectId(GoodsId)
+ d RashItem.GoodsSetObjectId(NewGoodsId)
+ s RashItem.ZakazDat=+$H
+ s RashItem.ZakazTim=$P($H,",",2)
+ d:CurrentUserId'="" RashItem.ZakazUser1SetObjectId(CurrentUserId)
+ q
+]]></Implementation>
+</Method>
+
+<Method name="SetDataForInnerStorageInItems">
+<Description>
+Установить данные строки для приходных внутренних инструкций</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[SourceItem,&NewItem,NewDoc]]></FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<Implementation><![CDATA[
+ s GoodsId=SourceItem.Goods.%Id()
+ s NewItem.Price=SourceItem.Price
+ s NewItem.Quantity=SourceItem.Quantity
+ s NewItem.quantdefault=SourceItem.Quantity
+ s NewItem.Total=SourceItem.Total
+ d NewItem.GoodsSetObjectId(GoodsId)
+ i ##class(Goods.GoodsAction).getgoodquant(GoodsId,"",.addr) d  //найдем ячейки где лежит товар с нужным количеством
+ . d NewItem.addrSetObjectId(addr)
+ q
+]]></Implementation>
+</Method>
+
+<Method name="zzz">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DocId</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s RashObj=##class(Docs.Rash).%OpenId(DocId)
+ s StoreObj=##class(Docs.StorageOut).%New()
+ s StoreObj.Name=RashObj.Name_"-о"
+ s StoreObj.Comment=RashObj.Comment
+ s StoreObj.Depot=RashObj.Depot
+ s StoreObj.Source=RashObj
+ s ok=1
+ s i="" f  s i=RashObj.Items.Next(i) q:(i="")!('+ok)  d
+ . s SourceItem=RashObj.Items.GetAt(i)
+ . q:SourceItem.JustCreated
+ . s ItemsQntBefore=StoreObj.Items.Count()
+ . s InitialQuantity=SourceItem.Quantity
+ . s Price=SourceItem.Price
+ . k addr,Accumulated,TotalAccumulated
+ . s GoodsId=SourceItem.Goods.%Id()
+ . s Quantity=##class(Goods.GoodsAction).getgoodquant(GoodsId,"",.addr)  //найдем ячейки где лежит товар с нужным количеством
+ . //если нашли хоть сколько нибудь нужного товара
+ . i $G(addr("value")) d
+ . . s DataArray("GoodId")=GoodsId
+ . . s DataArray("Price")=Price
+ . . s DataArray("NeedQuantity")=InitialQuantity
+ . . d ..AddDocStr(.StoreObj,.DataArray,.addr, .Accumulated)	//заполняем StoreObj строками с товарами
+ . . s SourceItem.Quantity=Accumulated
+ . . s CreateNewString=1
+ . //будем вставлять замену если набрали меньше чем надо, или количество товара вообще не нашли
+ . i (InitialQuantity-$G(Accumulated))||('$G(addr("value"))) d
+ . . s ok=..InsertReplaceMent(StoreObj,SourceItem,RashObj,InitialQuantity-$G(Accumulated),+$G(CreateNewString))
+ . // если количество строк конечного документа не изменилось, то сами добавим пустую строку
+ . i ItemsQntBefore=StoreObj.Items.Count() d
+ . . s NewItem=$ZOBJCLASSMETHOD("Docs.StorageOutItems","%New")
+ . . d NewItem.GoodsSetObjectId(GoodsId)
+ . . d NewItem.DocTypeSetObjectId("Docs.StorageOut")
+ . . s NewItem.quantdefault=InitialQuantity
+ . . s NewItem.Price=Price
+ . . s NewItem.Total=$J((Price*InitialQuantity),"",2)
+ . . s ok=StoreObj.Items.Insert(NewItem)
+ q:'+ok ok
+ s ok=StoreObj.%Save()
+ q:'+ok ok
+ s ok=RashObj.%Save()
+ q:'+ok ok 
+ q ok
+]]></Implementation>
+</Method>
+
+<Method name="processplatej">
+<Description><![CDATA[
+Обработать платёжное поручение
+<br><var>doc</var> - объект документа]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>doc</FormalSpec>
+<Implementation><![CDATA[
+ i '$ISOBJECT(doc.Kontr) q "В платёжном поручении не указан контрагент. Обработка документа невозможна."
+ i '$ISOBJECT(doc.Poluh) q "В платёжном поручении не указан получатель платежа. Обработка документа невозможна."
+ 
+ s CommonSumma=0
+ s next="" f  s next=doc.PlatejkaItems.Next(next) q:next=""  d
+ . s item=doc.PlatejkaItems.GetAt(next)
+ . q:'$ISOBJECT(item)
+ . s RashObj=item.Rash
+ . q:'$ISOBJECT(RashObj)
+ . s Summa=item.Summa
+ . s CommonSumma=CommonSumma+Summa
+ . s RashObj.OplSumma=RashObj.OplSumma+Summa
+ . d RashObj.PlatejSetObjectId(doc.%Id())
+ . i +RashObj.OplSumma=+RashObj.Summa s RashObj.OplatStatus=2
+ . e  s RashObj.OplatStatus=3
+ i 'doc.Kontr.IsWe,CommonSumma>doc.Summa q "Общая сумма оплачиваемых отгрузок больше чем сумма документа. Скорректируйте оплату."
+ s ^mtempArt("processplatej","CommonSumma")=CommonSumma
+ s ^mtempArt("processplatej","doc.Summa")=doc.Summa
+ i 'doc.Kontr.IsWe,CommonSumma<doc.Summa q "Общая сумма оплачиваемых отгрузок меньше чем сумма документа. Скорректируйте оплату."
+ s doc.Kontr.Balance=doc.Kontr.Balance+doc.Summa
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="GetDataForPlatejka">
+<Description><![CDATA[
+Установить оплату расходных накладных по данным с веб морды
+<br>DocId - ID документа платёжки
+<br>res - строка с ID расходных накладных и суммой - сколько надо на неё записать]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DocId,res,p3</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="GetDataForPlatejkaErr"
+
+ //пройдёмся по переданной строке с результатами, сформируем массив
+ f i=1:1:($L(res,";")-1) d
+ . s RashData=$P(res,";",i)
+ . s RashId=$P(RashData,"~",1)
+ . s RashSumma=$P(RashData,"~",2)
+ . s Array(RashId)=RashSumma
+ s PlatejkaObj=##class(Docs.Platejka).%OpenId(DocId)
+ 
+ //пошли по собственным строкам документа
+ s doc=##class(Docs.Platejka).%OpenId(DocId)
+ s next="" f  s next=doc.PlatejkaItems.Next(next) q:next=""  d
+ . s item=doc.PlatejkaItems.GetAt(next)
+ . q:'$ISOBJECT(item)
+ . s RashObj=item.Rash
+ . q:'$ISOBJECT(RashObj)
+ . s RashId=RashObj.%Id()
+ . q:'$D(Array(RashId))			//выходим если расходная в платёжке. не упомянута в пришедшем списке
+ . i Array(RashId)="" d
+ . . //если расходная упомянута и значение оплаты = "" то удалим её вообще из анналов платёжки
+ . . d doc.PlatejkaItems.RemoveAt(next)
+ . . d item.%DeleteId(item.%Id()) 
+ . . k Array(RashId)
+ 
+ //на основании переданных данных - id расходной и суммы которую следует на неё записать, создадим строки в платёжке
+ s i="" f  s i=$O(Array(i)) q:i=""  d
+ . s newitem=##class(Docs.PlatejkaItems).%New()
+ . d newitem.RashSetObjectId(i)
+ . s newitem.Summa=Array(i)
+ . d doc.PlatejkaItems.Insert(newitem)
+ 
+ s ok=doc.%Save()
+ i '+ok $$$WriteObjError(ok)
+
+ q ok
+GetDataForPlatejkaErr
+ $$$WriteError($ZE)
+ q "Ошибка записи данных в платёжное поручение."
+]]></Implementation>
+</Method>
+
+<Method name="ClearPlatejkaItems">
+<Description>
+Очистить строки платёжки</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DocId</FormalSpec>
+<Implementation><![CDATA[
+ &sql(select Stat into :Stat from Docs.Platejka where id=:DocId)
+ if Stat=2 q "Платёжное поручение уже обработано. Внести изменения невозможно."
+ &sql(delete from Docs.PlatejkaItems where Doc=:DocId)
+ i SQLCODE>=0 q 1
+ $$$WriteError("SQLCODE="_SQLCODE)
+ q "Извините. Ошибка при очистке строк платёжного поручения."
+]]></Implementation>
+</Method>
+
+<Method name="CreatePlatejForRash">
+<Description>
+Создать платёжку на основании расходной накладной</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>RashId:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="CreatePlatejForRashErr"
+ s RashObj = ##class(Docs.Rash).%OpenId(RashId)
+ i '$ISOBJECT(RashObj) q "Невозможно получить информацию о расходной накладной "_RashId q
+ s DefaultPoluh=$$$TunesVariableGlobal("DefaultPoluh")
+ s Summa=RashObj.Summa
+ s innerkurs=$$$TunesVariableGlobal("innerkurs")
+ 
+ s PlatejObj=##class(Docs.Platejka).%New()
+ s PlatejObj.Name=..getRashNumb("Docs.Platejka")
+ s PlatejObj.Summa=Summa
+ s PlatejObj.RubSumma=$J(Summa*innerkurs,"",2)
+ s PlatejObj.Kontr=RashObj.Kontr
+ s Item=##class(Docs.PlatejkaItems).%New()
+ s Item.Rash=RashObj
+ s Item.Summa=Summa
+ d PlatejObj.Items.Insert(Item)
+ s ok=PlatejObj.%Save()
+ i '+ok $$$WriteObjError(ok) q "Извините. Ошибка при создании платёжного документа."
+ q PlatejObj.%Id()
+CreatePlatejForRashErr
+ $$$WriteError($ZE)
+ q "Извините. Внутренняя ошибка при попытке создания платёжного документа."
+]]></Implementation>
+</Method>
+
+<Method name="SaveListOfObjects">
+<Description>
+Сохранить список объектов класса documentclass</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>documentclass,DocData</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="SaveListOfObjectsErr"
+ s CurrentLogin=$S($ISOBJECT($G(%session)):$G(%session.Data("user")),1:"")
+ if documentclass="Goods.Goods",'##class(Common.Rights).getrights(CurrentLogin,9) q "Нет прав для работы с товаром." 
+ if documentclass="Common.Kontragent",'##class(Common.Rights).getrights(CurrentLogin,10) q "Нет прав для работы с контрагентами." 
+ TSTART
+ s ok=1
+ s str="" f  s str=$O(@DocData@("body",str)) q:(str="")!('+ok)  d
+ . s strID=$G(@DocData@("body",str))
+ . i strID s Object=$ZOBJCLASSMETHOD(documentclass,"%OpenId",strID)
+ . e  s Object=""
+ . i '$ISOBJECT(Object) s Object=$ZOBJCLASSMETHOD(documentclass,"%New")
+ . s field="" f  s field=$O(@DocData@("body",str,field)) q:(field="")!('+ok)  d
+ . . s type=$ZOBJCLASSMETHOD(documentclass,"GetPropertyType",field)
+ . . i type="" $$$WriteError("для класса "_documentclass_" не нашлось определения свойства "_field_" в CompiledClass") q
+ . . s val=$G(@DocData@("body",str,field))  //значение поля
+ . . i type="%Library.Date" s:val'="" val=$ZDH(val,4)
+ . . i type="%Library.Time" s:val'="" val=$ZTH(val,1,"")
+ . . i type="%Library.Numeric" s val=+val
+ . . i type["%" s $ZOBJPROPERTY(Object,field)=val
+ . . e  s ok=$ZOBJMETHOD(Object,field_"SetObjectId",val)
+ . s ok=Object.%Save()
+ . i '+ok $$$WriteObjError(ok)
+ i '+ok TROLLBACK 1 q "Извините. Во время сохранения списка произошла ошибка. Список не сохранён."
+ TCOMMIT
+ q 1
+SaveListOfObjectsErr
+ $$$WriteError($ZE)
+ TROLLBACK 1
+ q "Извините. Во время сохранения списка произошла ошибка. Список не сохранён."
+]]></Implementation>
+</Method>
+</Class>
+</Export>

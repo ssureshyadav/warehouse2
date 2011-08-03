@@ -1,0 +1,55 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ set %response.ContentType = "application/x-msexcel"
+ do %response.SetHeader("Content-Disposition","attachment;excel.xls")
+ set %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+ Quit 1
+</script>
+
+<!--
+такой метод должен поприсутствовать
+ClassMethod OnPreHTTP() As %Boolean
+{
+            set %response.ContentType = "application/x-msexcel"
+            do %response.SetHeader("Content-Disposition","attachment;excel.xls")
+            set %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+            quit 1
+}
+<csp:class super="csp.excelfile"> 
+-->
+<html>
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1251">
+</head>
+<body>
+<script language="cache" runat="server">
+	Write !
+	s xmlobj=%request.Content
+	w "<table border=1>"
+	s i=0
+	s sess=%request.Get("sessionid")
+	s act=%request.Get("act")
+	s %session=%session.GetSession(sess)
+	s usr=$G(%session.Data("user"),"undef")
+	s glob=$NA(^mtempReport(usr))
+	i act="put" d
+	. s:$ISOBJECT(xmlobj) ok=##class(Docs.Action).parsexml(xmlobj,1,"",.t,glob,1)
+	i act="get" d
+	. s i="" f  s i=$O(@glob@("head",i)) q:i=""  d
+	. . s heads(@glob@("head",i,"number"))=i
+	. w "<tr>"
+	. s i="" f  s i=$O(heads(i)) q:i=""  d
+	. . w "<td bgcolor='#dedede'>"
+	. . w $G(@glob@("head",heads(i)))
+	. . w "</td>"
+	. w "</tr>"
+	. s y="" f  s y=$O(@glob@("body",y)) q:y=""  d
+	. . w "<tr>"
+	. . s i="" f  s i=$O(heads(i)) q:i=""  d
+	. . . w "<td>"
+	. . . w $TR($G(@glob@("body",y,heads(i))),".",",")
+	. . . w "</td>"
+	. . w "</tr>"
+	w "</table>"
+</script>
+</body>
+</html>

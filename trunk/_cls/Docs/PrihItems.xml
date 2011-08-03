@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.PrihItems">
+<Description>
+Строки приходной накладной</Description>
+<Super>Docs.DocItems</Super>
+<TimeCreated>60365,82463.57393</TimeCreated>
+
+<Property name="Kolfact">
+<Description>
+Количество по документу</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>PrihItemsDefaultData</DefaultData>
+<Data name="PrihItemsDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"PrihItems"</Subscript>
+<Value name="1">
+<Value>tt</Value>
+</Value>
+<Value name="2">
+<Value>Kolfact</Value>
+</Value>
+</Data>
+<Property name="Doc"/>
+<Property name="DocType"/>
+<Property name="Goods"/>
+<Property name="Kolfact"/>
+<Property name="Price"/>
+<Property name="Quantity"/>
+<Property name="Total"/>
+</Storage>
+</Class>
+</Export>

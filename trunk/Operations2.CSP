@@ -1,0 +1,134 @@
+<script language="cache" runat="server">
+ s Dat1=%request.Get("Dat1")
+ s Dat2=%request.Get("Dat2")
+ if '+Dat1 s Dat1=$ZD(+$H,4)
+ if '+Dat2 s Dat2=$ZD(+$H,4)
+ s Abbr=%request.Get("abbr")
+ s Property3609=%request.Get("Property3609")
+ s Gname=%request.Get("Gname")
+ s GoodsId=%request.Get("GoodsId")
+ s OperationType=%request.Get("OperationType")
+</script>
+<html>
+<head>
+<title>	Операции </title>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="jscript">
+ sessionid="#(%session.SessionId)#";
+ 
+ function GoodCard(GoodsId){
+	InnerSplitter="~";
+	ok=window.showModalDialog("GoodsCard.csp?GoodsId="+GoodsId+"&groupspath=",GoodsId+InnerSplitter+"","center:yes;status:no;dialogHeight:600px;dialogWidth:650px;resizable:yes")
+ }
+ 
+ function print(docid,docclass){
+ window.open("print.csp?id="+docid+"&class="+docclass+"&sessionid="+sessionid)
+ }
+
+ function StoragePlaceCard(StoreId){
+ ok=window.showModalDialog("StorePlace.csp?StoreId="+StoreId,"","center:yes;status:no;dialogHeight:500px;dialogWidth:740px;resizable:yes")
+ } 
+ 
+ function fnCalendar(cal){
+var newDate=window.showModalDialog("calendar1.htm","","center:yes;status:no;dialogHeight:350px;dialogWidth:310px;resizable:yes;");
+if(ReturnSpace(newDate)!=""){cal.value=newDate;}
+}
+
+function startFun(){
+ var Dat1=dat1z.value;
+ var Dat2=dat2z.value;
+ var abbr=abbrz.value;
+ var Property3609=Property3609z.value;
+ var Gname=gnamez.value;
+ var OperationType=OperationTypez.value;
+ window.location.href="Operations2.csp?Dat1="+Dat1+"&Dat2="+Dat2+"&abbr="+abbr+"&Property3609="+Property3609+"&Gname="+Gname+"&OperationType="+OperationType;
+}
+
+function ReturnSpace(Txt){
+if(Txt==null)return "";
+return Txt;
+}
+</script>
+</head>
+<body>
+<CSP:IF CONDITION='GoodsId=""'>
+
+<sklad:Button value="Назад" onclick="window.location.href='tuneup.csp'"><br>
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<td width=10%><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
+<TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" ><strong>Операции</strong></TD>
+<td width=10% align=right>&nbsp;</td>
+</TABLE>
+<br>
+<fieldset><legend>Параметры отбора</legend>
+<table width="100%">
+<tR><td>
+	<b>Товар</b>&nbsp;&nbsp;аббревиатура: <input type="text" id="abbrz" style="width:40px;" value="#($G(Abbr))#">&nbsp;&nbsp;номер модели: <input type="text" id="Property3609z" style="width:40px;" value="#($G(Property3609))#">&nbsp;&nbsp;наименование: <input type="text" id="gnamez" style="width:200px;" value="#($G(Gname))#"> <br>
+	<b>Период</b> c <input type=text id="dat1z" value="#($G(Dat1,$ZD($H,4)))#" onclick="fnCalendar(this)" class="datar"> по <input type=text id="dat2z" value="#($G(Dat2,$ZD($H,4)))#" onclick="fnCalendar(this)" class="datar"><br>
+	<b>Тип операции</b> 
+		<select id="OperationTypez">
+			<script language="cache" runat="server">
+			w ##class(Docs.Action2).GetDisplaylistOptions($G(OperationType),"Operation.Operation||OperationType")
+			</script>
+		</select><br>
+<sklad:Button value="Выбрать" onclick="startFun();">
+</td>
+<td align="right" valign="top">
+<img src="images/BIGHelp.bmp" onclick="divSelectHelp.style.display='block'" width="20" height="25" id="imgHelp" onmouseout="divSelectHelp.style.display='none';">
+<div id="divSelectHelp" style="background:yellow;display:none;position:absolute;top:40px;left:500px;width:200px;height:70px;" onmouseout="this.style.display='none';"><table cellpadding=5><tr><td>Наименование или аббревиатуру товара не обязательно вводить полностью, достаточно ввести начальные буквы.<br>Тип операции можно не указывать.<br></td></tr></table></div>
+</td>
+</table>
+</fieldset>
+
+</CSP:IF>
+
+<br>
+<table>
+<thead bgcolor="#dedede">
+	<td><b>Тип операции</b></td><td><b>Товар</b></td><td><b>Ячейка</b></td><td><b>Документ</b></td><td><b>Количество</b></td><td><b>Остаток<br>после операции</b></td><td><b>Дата, время</b></td><td><b>Оператор</b></td>
+</thead>
+<script language="cache" runat="server">
+ n ID,GoodsFullName,AddrPath,Goods,Address
+   s select="select ID,Goods->FullName as GoodsFullName,Common.SqlProcs_AddrPath(Address) as AddrPath,Quantity,Ostatok,Goods,Address,Dat,Tim,User1->Name as User1Name,%external(OperationType) as OperationTypeName,DocStr->doc->name as docname,DocStr->doc as doc,DocStr->doc->DocumentClass as DocumentClass"_
+  " from Operation.Operation Where Dat>='"_$ZDH(Dat1,4)_"' and Dat<='"_$ZDH(Dat2,4)_"'"
+  if Abbr'="" s select=select_" and Goods->abbr %STARTSWITH '"_Abbr_"'"
+  if Property3609'="" s select=select_" and Goods->Property3609 %STARTSWITH '"_Property3609_"'"
+  if Gname'="" s select=select_" and Goods->Name %STARTSWITH '"_Gname_"'"
+  if GoodsId'="" s select=select_" and Goods = '"_GoodsId_"'"
+  if +OperationType s select=select_" and OperationType = '"_OperationType_"'"
+  //&sql(declare zzz cursor for select 
+  //ID,Goods->FullName as GoodsFullName,Common.SqlProcs_AddrPath(Address) as AddrPath,Quantity,Ostatok,Goods,Address,Dat,Tim,User1->Name,%external(OperationType),DocStr->doc->name,DocStr->doc,DocStr->doc->DocumentClass
+  //into :ID,:GoodsFullName,:AddrPath,:Quantity,:Ostatok,:Goods,:Address,:Dat,:Tim,:User1,:OperationType,:Document,:DocId,:DocumentClass
+  //from Operation.Operation)
+  //&sql(open zzz)
+  //f  &sql(fetch zzz) q:SQLCODE  d
+  s rs=##class(%ResultSet).%New()
+  s ok=rs.Prepare(select)
+  s ok=rs.Execute()
+  while rs.Next(){
+   f i="ID","GoodsFullName","AddrPath","Quantity","Ostatok","Goods","Address","Dat","Tim","User1Name","DocumentClass","doc","docname","OperationTypeName" d
+   . s @i=rs.Data(i)   
+   s Datetime=$S(+Dat:$ZD(Dat,4),1:"")_" "_$S(+Tim:$ZT(Tim),1:"")
+   w "<tr bgcolor=""#effafa"" id="""_ID_""" onmouseover=""this.style.backgroundColor='#efefee'"" onmouseout=""this.style.backgroundColor='#effafa'"">"
+   w "<td>"_OperationTypeName_"</td>"
+   w "<td><a href=""#"" style=""text-decoration:none;color:black"" title=""Открыть карточку товара"" onclick=""GoodCard('"_Goods_"')"" onmouseover=""this.style.color='blue'"" onmouseout=""this.style.color='black'"">"_GoodsFullName_"</a></td>"
+   w "<td><a href=""#"" style=""text-decoration:none;color:black"" title=""Открыть карточку ячейки"" onclick=""StoragePlaceCard('"_Address_"')"" onmouseover=""this.style.color='blue'"" onmouseout=""this.style.color='black'"">"_AddrPath_"</a></td>"
+   if +doc s DocumentString="<a href=""#"" style=""text-decoration:none;color:black"" title=""Просмотреть документ"" onclick=""print('"_doc_"','"_DocumentClass_"')"" onmouseover=""this.style.color='blue'"" onmouseout=""this.style.color='black'"">"_docname_"</a>"   
+   else  s DocumentString="&nbsp;"
+   w "<td>"_DocumentString_"</td>"
+   w "<td>"_Quantity_"</td>"
+   w "<td>"_Ostatok_"</td>"
+   w "<td>"_Datetime_"</td>"
+   w "<td>"_User1Name_"</td>"
+   w "</tr>",!
+  }
+  //&sql(close zzz)
+</script>
+</table>
+<br><p font-color=gray font-face=Arial>
+Что бы открыть карточку товара необходимо кликнуть на сам товар<br>
+Что бы открыть карточку ячейки необходимо кликнуть на ячейку<br>
+<br></p>
+</body>
+</html>

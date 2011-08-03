@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.screen.chiefplanxml">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62146,58176.387559</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<?xml version=""1.0"" encoding=""windows-1251"" ?>"
+	Write "<root><AllObjects>"
+	s docid=%request.Get("docid")
+	s ok=##class(Reports.ShowTables).MakeGlobForCheifPlan(docid,.tempGlob)
+	i '+ok w "</AllObjects><comment>"_ok_"</comment></root>" q
+	s i="" f  s i=$O(@tempGlob@(i)) q:i=""  d
+	. s Code=i
+	. s TovarName=$G(@tempGlob@(i,"Name"))
+	. w "<OneObject>"
+	. w "<Model>"
+	. w "<Code>"_i_"</Code>"
+	. w "<Name>"_TovarName_"</Name>"
+	. w "</Model>"
+	. w "<Parts>"
+	. s o="" f  s o=$O(@tempGlob@(i,"Name",o)) q:o=""  d
+	. . i $i(count)
+	. . s Quantity=@tempGlob@(i,"Name",o,"Quantity")
+	. . s Name=@tempGlob@(i,"Name",o,"Name")
+	. . s SchemaNumber=@tempGlob@(i,"Name",o,"SchemaNumber")
+	. . w "<Part>"
+	. . w "<Number Text="""_count_""" />"
+	. . w "<Name Text="""_Name_""" />"
+	. . w "<Pos Text="""_SchemaNumber_""" />"
+	. . w "<Quantity Text="""_Quantity_""" />"
+	. . w "</Part>"
+	. w "</Parts>"
+	. w "</OneObject>"
+	k @tempGlob
+	Write "</AllObjects></root>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+  set %response.ContentType = "text/xml"
+  Quit 1
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\screen\ChiefPlanXml.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/screen/ChiefPlanXml.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>61135,55619</Default>
+</Parameter>
+</Class>
+</Export>

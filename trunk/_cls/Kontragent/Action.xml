@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Kontragent.Action">
+<Description>
+Общие действия контрагентов</Description>
+<IncludeCode>xmlmacros</IncludeCode>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject</Super>
+<TimeCreated>60699,52633.014894</TimeCreated>
+
+<Method name="SendMail">
+<Description><![CDATA[
+Послать документ контрагенту по E-mail
+<br><var>DocID</var> - ID или объекта документа
+<br><var>DocClass</var> - Класс документа
+<br><var>MailAddress</var> - Адрес для отправки]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DocID="",DocClass,MailAddress=""</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="SendMailErr"
+ i DocID="" $$$WriteError("Внутренняя ошибка. Не указан документ для отправки.") q
+ i '$ISOBJECT(DocID) s DocID=##class(Docs.Super).%OpenId(DocID)
+ i '$ISOBJECT(DocID) $$$WriteError("Не открылся документ DocID="_DocID)
+ i MailAddress ="" s mail=..KontrMail(DocID.Kontr)
+ e  s mail=MailAddress
+ i mail="" s ok="Не удалось определить e-mail контрагента, укажите, пожалуйста e-mail вручную или заполните соответствующее поле контрагента" Goto LogResult
+ s To=mail
+ ///если не включена автоматическая отправка, то отправляем самим себе
+ s:'+$$$TunesVariableGlobal("AutoSendMails") To=$$$TunesVariable("smtpfrom")
+ //делаем word файл
+ s exitfile=$$$TunesVariable("WordDestinationDir")_"\"_$TR($H,",","")_".doc"
+ s ok=..MakeFile(DocID, DocClass, $$$TunesVariable("AutoTemplate"), .exitfile)
+ i '+ok Goto LogResult
+ //отправляем письмо с аттачем
+ s ok=..SendMailNotification(To,exitfile)
+LogResult
+ S Comment = DocID.Name_" "_DocID.DocumentClass.Name
+ d ..LogResult(To,exitfile,Comment,ok)
+
+ q 
+SendMailErr
+ $$$WriteError($ZE)
+ q
+]]></Implementation>
+</Method>
+
+<Method name="LogResult">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>To="",exitfile="",Comment="",ok="",ID=""</FormalSpec>
+<Implementation><![CDATA[
+ if +ID s log=##class(Kontragent.SendMailLog).%OpenId(ID)
+ if '$ISOBJECT($G(log)) s log=##class(Kontragent.SendMailLog).%New()
+ 
+ s log.Attach=$G(exitfile)
+ i ok=1 s ok="Уведомление успешно отправлено"
+ s log.Result=$G(ok)
+ s log.MessageTo=$G(To)
+ s log.Comment=Comment
+ s ok=log.%Save()
+ i '+ok $$$WriteObjError(ok)
+ s ID = log.%Id()
+ q ok
+]]></Implementation>
+</Method>
+
+<Method name="KontrMail">
+<Description><![CDATA[
+E-mail контрагента
+<br><var>KontrID</var> - ID или объект контрагента]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>KontrID,Code,Name</FormalSpec>
+<Implementation><![CDATA[
+	i $ISOBJECT(KontrID) q KontrID.EMail
+	&sql(select EMail,Code,Name into :EMail,:Code,:Name from Common.Kontragent where ID=:KontrID)
+	i SQLCODE 
+	{
+	 s (EMail,Code,Name)=""
+	}
+	q EMail
+]]></Implementation>
+</Method>
+
+<Method name="MakeFile">
+<Description><![CDATA[
+Сделать и сохранить word файл из документа
+<br><var>Doc</var> - ID или объект документа
+<br><var>WordTemplate</var> - файл - вордовский шаблон]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[Doc,Class,WordTemplate,&exitfile]]></FormalSpec>
+<ProcedureBlock>0</ProcedureBlock>
+<Implementation><![CDATA[
+ s $ZT="MakeFileErr"
+ q:Doc="" "Ошибка"
+ n Variables,DocName,word,TemplateDir,WordDoc,f,t,wrap,filename,i,SearchStr,StartPosition,
+ EndPosition,CurrentRow,MainRowCellsCount,RowNumber,CurrentGoodsStr,StrVariables,CellPos,
+ CurrentCell,var,DestinationDirectory,waste,Values,Properties,replacement
+ s:'$ISOBJECT(Doc) Doc=$ZOBJCLASSMETHOD(Class,"%OpenId",Doc)
+ //извлекаем данные документа в массив Variables
+ d ..FillObjValues(Class,Doc,.Variables)
+ s Variables("DocTypeName")=$S($ISOBJECT(Doc.DocumentClass):Doc.DocumentClass.Name,1:"")
+ //устанавливаем разные переменные
+ s filename=$G(^Tunes(3,"filename","Value"),"<<Dat>> - <<Kontr>> <<Name>>")
+ s TemplateDir=$G(^Tunes(3,"TemplateDir","Value"))
+ s DestinationDirectory=$G(^Tunes(3,"WordDestinationDir","Value"))
+ s DocName=##class(Docs.Action).GetDocNameFromClass(Class) 
+ s f=##class(%Activate.Variant).FALSE()
+ s t=##class(%Activate.Variant).TRUE()
+ s wrap=##class(%Activate.Variant).%New()
+ s wrap.Value="wdFindContinue"
+ s filename=$G(^Tunes(3,"filename","Value"),"<<Dat>> - <<Kontr>> <<Name>>")
+  // инициализируем Word
+ s word=##class(Activate.Word.Application).%New() 
+ s WordDoc=word.Documents.Add(TemplateDir_"\"_WordTemplate_".doc")
+ i 'word.Documents.Count d word.Quit() q "Не удалось открыть шаблон "_TemplateDir_"\"_WordTemplate_".doc"
+ //сразу сохраняем под нужным именем
+ s i="" f  s i=$O(Variables(i)) q:i=""  d
+ . s SearchStr="<<"_i_">>"
+ . s StartPosition=$F(filename,SearchStr)-$L(SearchStr)
+ . s EndPosition=$F(filename,SearchStr)
+ . q:StartPosition<=0
+ . s $E(filename,StartPosition,EndPosition)=$G(Variables(i))
+ f i="\","/",":","*","?",":","<",">","|" d
+ . s filename=$TR(filename,i,"-")
+ s:$G(exitfile)="" exitfile=DestinationDirectory_"\"_filename_".doc"
+ d WordDoc.SaveAs(exitfile)
+ //после сохранения проверяем есть ли такой файл
+ i $ZU(140,4,exitfile) d  q "Не удалось сохранить файл "_exitfile_".doc"
+ . d WordDoc.Close()
+ . d word.Quit()
+ //заменяем "общие" теги документа
+ s i="" f  s i=$O(Variables(i)) q:i=""  d
+ . d WordDoc.Select()
+ . s SearchStr="<<"_i_">>"
+ . d word.Selection.Find.Execute(SearchStr,f,f,f,f,f,t,wrap,f,$G(Variables(i)))
+ //пошли по строкам документа
+ s CurrentRow=WordDoc.Tables.Item(1).Rows.Item(2)
+ s MainRowCellsCount=CurrentRow.Cells.Count
+ f i=1:1:MainRowCellsCount d
+ . s MainRowArray(i)=CurrentRow.Cells.Item(i).Range.Text
+ d:$ISOBJECT(Doc.Items)
+ . s i="" f  s i=Doc.Items.Next(i) q:i=""  d
+ . . i $I(RowNumber)
+ . . s:RowNumber>1 CurrentRow=WordDoc.Tables.Item(1).Rows.Add()
+ . . s CurrentGoodsStr=Doc.Items.GetAt(i)
+ . . //заполняем переменные строки значениями текущей строки документа
+ . . d ..FillObjValues(Class_"Items", CurrentGoodsStr, .StrVariables, .Properties)
+ . . d FillVariableWithData(.StrVariables,CurrentGoodsStr,RowNumber)
+ . . f CellPos=1:1:MainRowCellsCount d  						//цикл по ячейкам строки
+ . . . s CurrentCell=CurrentRow.Cells.Item(CellPos)				//текущая ячейка
+ . . . s CurrentRow.Cells.Item(CellPos).Range.Text=$G(MainRowArray(CellPos))
+ . . . s var="" f  s var=$O(StrVariables(var)) q:var=""  d   	//цикл по переменным содержащим данные текущей строки
+ . . . . s SearchStr="<<"_..NumberOfProperty(var)_">>"
+ . . . . d CurrentCell.Select()
+ . . . . //s replacement=$G(StrVariables(var))
+ . . . . s replacement=$G(StrVariables(var))
+ . . . . d word.Selection.Find.Execute(SearchStr,f,f,f,f,f,t,wrap,f,replacement)
+ d WordDoc.SaveAs(exitfile)
+ d WordDoc.Close()
+ d word.Quit()
+ q 1
+MakeFileErr
+ d:$ISOBJECT($G(WordDoc)) WordDoc.Close()
+ d:$ISOBJECT($G(word)) word.Quit()
+ $$$WriteError($ZE)
+ q "Извините ошибка при создании файла."
+FillVariableWithData(StrVariables,CurrentGoodsStr,RowNumber)
+ //заполняем массив данными строки документа
+ s StrVariables(1)=RowNumber
+ s StrVariables(2)=CurrentGoodsStr.Goods.Name
+ s StrVariables(2.1)=CurrentGoodsStr.Goods.FullName
+ s StrVariables(3)=CurrentGoodsStr.Goods.codedetail
+ s StrVariables(4)=CurrentGoodsStr.Goods.Price
+ s StrVariables(5)=CurrentGoodsStr.Goods.Property3609
+ s StrVariables(6)=CurrentGoodsStr.Goods.abbr
+ s StrVariables(7)=CurrentGoodsStr.Goods.Property5300
+ s StrVariables(8)=CurrentGoodsStr.Goods.Weight
+ s StrVariables(9)=CurrentGoodsStr.Goods.Comment
+ q
+]]></Implementation>
+</Method>
+
+<Method name="FillObjValues">
+<Description><![CDATA[
+Заполнить переданный массив значениями полей объекта
+<br><var>Class</var> - Класс объекта
+<br><var>Object</var> - Объект источник данных
+<br><var>Values</var> - Массив по ссылке заполняемый данными объекта
+<br><var>Properties</var> - Массив по ссылке со свойствами объекта (их типами и названием), необязательный]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[Class,Object,&Values,&Properties]]></FormalSpec>
+<Implementation><![CDATA[
+ k Values
+ q:'$ISOBJECT(Object)
+ s:'$D(Properties) waste=##class(Common.Common).showheaders(Class,,,,,.Properties)
+ s i="" f  s i=$O(Properties(i)) q:i=""  d
+ . s proptype=Properties(i)
+ . s prop=$ZOBJPROPERTY(Object,i)
+ . //если свойство содержит VALUELIST то извлечём его
+ . i $D(Properties(i,"VALUELIST")) s prop=$ZOBJMETHOD(Object,i_"LogicalToDisplay",prop)
+ . //если тип свойства не содержит % значит это объектная ссылка, значит поле Name из связанного объекта
+ . i ($E(proptype,1,1)'="%")&($ISOBJECT(prop)) d
+ . . i prop.%ClassName(1)="Goods.Goods" s prop=prop.FullName
+ . . e  s prop=prop.Name
+ . i proptype="%Date" s prop=$ZD(prop,4)
+ . i proptype="%Time" s prop=$ZT(prop)
+ . s Values(i)=prop
+ q
+]]></Implementation>
+</Method>
+
+<Method name="NumberOfProperty">
+<Description><![CDATA[
+Возвращает номер свойства строки документа согласно перечню свойств в "Правила меток в шаблонах.doc"
+<br><var>PropertyName</var> - наименование свойства]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>PropertyName</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[ q $G(^DocumentProperties(PropertyName),PropertyName)
+]]></Implementation>
+</Method>
+
+<Method name="SendMailNotification">
+<Description><![CDATA[
+Отсылает письмо с указанным файлом по указанному адресу
+<br><var>MailDestination</var> - E-mail получателя письма
+<br><var>attachfile</var> - Полный локальный путь к аттачу]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>MailDestination,attachfile="",MailText:%String=$$$TunesVariableGlobal("NotifyText"),MailSubject:%String=$$$TunesVariableGlobal("NotifySubj")</FormalSpec>
+<Implementation><![CDATA[
+ //соберём настройки отправки из сессии
+ s smtpserver=$$$TunesVariableGlobal("smtpserver")
+ s smtpuser=$$$TunesVariableGlobal("smtpuser")
+ s smtpfrom=$$$TunesVariableGlobal("smtpfrom")
+ s smtppassword=$$$TunesVariableGlobal("smtppassword")
+ s smtpport=$$$TunesVariableGlobal("smtpport")
+ 
+	set s=##class(%Net.SMTP).%New()
+ 	set auth=##class(%Net.Authenticator).%New() ; use default authentication list
+	set auth.UserName=smtpuser
+	set auth.Password=smtppassword
+	set s.authenticator=auth
+ set s.smtpserver=smtpserver
+ set m=##class(%Net.MailMessage).%New()
+ set m.From=smtpfrom
+ s s.port=smtpport
+	// Either address with name or just email address supported.
+	f i=1:1:$L(MailDestination,",") d
+	. do m.To.Insert($P(MailDestination,",",i))
+	do m.Bcc.Insert(smtpfrom)
+
+	set m.Subject=MailSubject
+	set m.Charset="windows-1251"
+	set status=m.TextData.Write(MailText)
+	if '+status d  q "Ошибка отправки письма. "_$ZCVT(Err(Err),"O","HTML")
+	. $$$WriteObjError(status)
+	. Do DecomposeStatus^%apiOBJ(status,.Err) 
+	d:attachfile'="" 
+	. //set nestedm=m.AttachNewMessage()
+	. set status=m.AttachFile($P(attachfile,"\",1,$L(attachfile,"\")-1),$P(attachfile,"\",$L(attachfile,"\")),1,"windows-1251")
+	. q:'+status
+	. s pc=m.Parts.Count()
+ 	. s m.Parts.GetAt(1).IsBase64=1
+	. s m.Parts.GetAt(1).IsBinary=1
+	. s m.Parts.GetAt(1).ContentType="application/x-msword"
+	. s m.Parts.GetAt(1).Charset="windows-1251"
+	. s m.Parts.GetAt(1).MultiPartType=0
+	. s m.Parts.GetAt(1).ContentTransferEncoding="base64"
+	if '+status d  q "Ошибка отправки письма. "_$ZCVT(Err(Err),"O","HTML")
+	. $$$WriteObjError(status)
+	. Do DecomposeStatus^%apiOBJ(status,.Err) 
+	set status=s.Send(m)
+	if '+status d  q "Ошибка отправки письма. "_$ZCVT(Err(Err),"O","HTML")
+	. $$$WriteObjError(status)
+	. Do DecomposeStatus^%apiOBJ(status,.Err) 
+	q 1
+]]></Implementation>
+</Method>
+
+<Method name="GetKontrIdFromCode">
+<Description>
+Получить ID контрагента по его уникальному коду</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Code:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ &sql(select ID into :ID from Common.Kontragent where Code=:Code)
+ q:'SQLCODE ID
+ q ""
+]]></Implementation>
+</Method>
+
+<Method name="AddMeetingResult">
+<Description><![CDATA[
+Добавить результат разговора с контрагентом
+<br><var>Result</var> - текст результата беседы
+<br><var>Dat</var> - дата в формате дд/мм/гггг 
+<br><var>Tim</var> - время в формате чч/мм/сс
+<br><var>KontrId</var> - ID контрагента
+<br><var>MessageType</var> - тип сообщения (0, 2 или 3), см. свойство в классе]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Result:%String="",Dat:%String="",Tim:%String="",KontrId:%String="",MessageType:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="AddMeetingResultErr"
+ s login = $$$SessionData("user")
+ if '##class(Common.Rights).getrights(login,19) q "У вас нет прав на отправку сообщений контрагентам"
+ if Dat'?1.2N1"/"2N1"/"4N q "Неверно указан формат даты. Дата должна быть в формате дд/мм/гггг"
+ if Tim'?2N1":"2N1":"2N q "Неверно указан формат времени. Время должно быть в формате чч:мм:сс"
+ if KontrId="" q "Не указан контрагент."
+ s Obj=##class(Kontragent.Meeting).%New()
+ s Obj.Result=Result
+ s Obj.Dat=$ZDH(Dat,4)
+ s Obj.Tim=$ZTH(Tim)
+ d Obj.KontrSetObjectId(KontrId)
+ s Obj.MessageType=+MessageType
+ s ok=Obj.%Save()
+ if '+ok q "Извините. Ошибка при записи."
+ 
+ if +MessageType
+ {
+	 s KontrEMail = ..KontrMail(KontrId,.Code,.Name)
+	 if KontrEMail'=""
+	 {
+	 	s TextMessage="Здравствуйте"_$C(13,10)_"Вам поступило новое сообщение от сервисной службы Aska Elc."_$C(13,10)_$C(13,10)
+	 	s TextMessage=TextMessage_Result_$C(13,10)_$C(13,10)
+	 	s TextMessage=TextMessage_"Наша с вами переписка доступна по адресу http://91.214.205.78/csp/sklad2/Support.csp?login="_Code_" пароль тот, который вы используете в Менеджере отчётов."_$C(13,10)
+	 	s TextMessage=TextMessage_"C уважением "_$$$TunesVariableGlobal("OurName")
+	 	d ..LogResult(KontrEMail,"","Сообщение контрагенту "_Name ,"Сообщение отправить не удалось",.ID)
+	 	s ok = ..SendMailNotification(KontrEMail,"",TextMessage,"Новое сообщение в программе Менеджер отчётов Aska Elc.")
+	 	s ok = ..LogResult(KontrEMail,"","Сообщение контрагенту "_Name ,ok,ID)
+	 }
+ }
+
+ q ok
+AddMeetingResultErr
+ $$$WriteError($ZE)
+ q "Извините. Ошибка при записи."
+]]></Implementation>
+</Method>
+
+<Method name="SendSpam">
+<Description>
+Разослать контрагентам спам</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Message</FormalSpec>
+<Implementation><![CDATA[
+	s Message="Уважаемые клиенты."_$C(13,10)_$C(13,10)_
+	"Сервер Aska Elc поменял IP, к сожалению, мы не смогли заранее уведомить Вас. Поэтому мы просим Вас указать в менеджере отчётов новый IP адрес. Для этого необходимо сделать следующее:"_$C(13,10)_
+	"Запустить Менеджер отчётов, зайти во вкладку Параметры"_$C(13,10)_
+	"Отметить чекбокс ""Редактировать параметры"". В открывшихся полях необходимо заменить старый ip адрес 89.175.39.6 на новый 91.214.205.78 Сделать это необходимо в двух полях: URL и FTP host."_$C(13,10)_
+	"После замены необходимо сохранить изменения (кнопка Сохранить в верхней части программы)."_$C(13,10)_$C(13,10)_
+	"Ульянов В.Ф."_$c(13,10)_"P.S. Не отвечайте на это письмо."_$c(13,10)
+	s MailSubject="Уведомление о смене IP адреса сервера Aska Elc."
+	s smtpfrom=$$$TunesVariableGlobal("smtpfrom")
+	&sql(declare zzz cursor for 
+	select EMail into :EMail from Common.Kontragent)
+	&sql(open zzz)
+	f  &sql(fetch zzz) q:SQLCODE  d
+	. i $I(count)
+	. q:count<87
+	. s EMail=$TR(EMail," ","")
+	. q:EMail=""
+	. q:EMail'["@"
+	. if $G(MailCounter)<5 d
+	. . s currentMail=$G(currentMail)_EMail_","
+	. . i $i(MailCounter)
+	. else  d
+	. . s currentMail=$E(currentMail,1,$L(currentMail)-1)
+	. . s ok = ..SendMailNotification(currentMail,"",Message,MailSubject) 
+	. . h 301
+	. . s ^mtempArt("sendmail",count)=currentMail_" "_$G(ok)
+	. . s MailCounter=0
+	. . w count," ",currentMail,$C(9),$G(ok)
+	. . s currentMail=""
+	. . if $ISOBJECT($G(%session)) w "<br>"
+	. . else  w !!
+	&sql(close zzz)
+	q
+]]></Implementation>
+</Method>
+</Class>
+</Export>

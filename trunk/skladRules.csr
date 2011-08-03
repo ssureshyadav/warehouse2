@@ -1,0 +1,69 @@
+<csr:RULE name="ListView" match="sklad:ListView" empty>
+<csr:ACTION>
+<script language="cache" runat="compiler">
+ s objid=##this.GetAttribute("id")
+ s style=##this.GetAttribute("style")
+</script>
+<OBJECT id="##($G(objid,"sd"))##" classid=clsid:BDD1F04B-858B-11D1-B16A-00C0F0283628 style="##($G(style))##;behavior:url('#default#download')" codebase="Cab\MSComCtl.CAB">
+<PARAM NAME="View" VALUE="3">
+<PARAM NAME="Appearance" VALUE="1">
+<PARAM NAME="FullRowSelect" VALUE="True">
+<PARAM NAME="MultiSelect" VALUE="True">
+<PARAM NAME="GridLines" VALUE="True">
+<PARAM NAME="LabelEdit" VALUE="1">
+</OBJECT>
+</csr:ACTION>
+</csr:RULE>
+
+<csr:RULE name="SkladButton" match="sklad:Button" empty>
+<csr:ACTION>
+<script language="cache" runat="compiler">
+ s value=##this.GetAttribute("value")
+ s onclick=##this.GetAttribute("onclick")
+ s style=##this.GetAttribute("style")
+ s title=##this.GetAttribute("alt")
+ s ID=##this.GetAttribute("ID")
+</script>
+<span class=ButtonDiv ID="##($G(ID))##" style="cursor:hand;##($G(style))##" onmouseover="this.className='ButtonDivHover'" onmouseout="this.className='ButtonDiv'" onclick="##($G(onclick))##" TITLE="##($G(title))##"><center>##($G(value))##</center></span>
+</csr:ACTION>
+</csr:RULE>
+
+<csr:Rule name="SkladFlexGrid" match="sklad:FlexGrid" empty>
+<csr:ACTION>
+<script language="cache" runat="compiler">
+ s id=##this.GetAttribute("id")
+ s style=##this.GetAttribute("style")
+</script>
+<OBJECT ID="##($G(id,"FlexGrid"))##"   style='##($G(style))##' CLASSID="CLSID:6262D3A0-531B-11CF-91F6-C2863C385E30">
+<PARAM NAME="Appearance" VALUE="0"> 
+<PARAM NAME="AllowUserResizing" VALUE="3"> 
+<PARAM NAME="BorderStyle" VALUE="1">
+<PARAM NAME="ScrollBars" VALUE="3">
+<PARAM NAME="BackColorBkg" VALUE="16777215">
+<PARAM NAME="FixedCols" VALUE="1">
+<PARAM NAME="GridLinesUnpopulated" VALUE="1">
+</OBJECT>
+</csr:ACTION>
+</csr:Rule>
+
+<csr:Rule name="SkladLittleButton" match="sklad:LittleButton" empty>
+<csr:ACTION>
+<script language="cache" runat="compiler">
+ s id=##this.GetAttribute("id")
+ s style=##this.GetAttribute("style")
+ s name=##this.GetAttribute("name")
+ s onclick=##this.GetAttribute("onclick")
+ s alt=##this.GetAttribute("alt")
+</script>
+<img src="images/##($G(name,"brace"))##.gif" onmouseover="##($G(id))##.src='images/On##($G(name,"brace"))##.gif'" onmouseout="##($G(id))##.src='images/##($G(name,"brace"))##.gif'"  id="##($G(id))##" name="##($G(id))##" alt="##($G(alt))##" onclick="##($G(onclick))##" style="##($G(style))##">
+</csr:ACTION>
+</csr:Rule>
+<csr:Rule name="SkladImageList" match="sklad:ImageList" empty>
+<csr:ACTION>
+<script language="cache" runat="compiler">
+ s id=##this.GetAttribute("id")
+</script>
+<OBJECT id="##($G(id,"imgList"))##" classid="clsid:2C247F23-8591-11D1-B16A-00C0F0283628" codebase="Cab\MSComCtl.CAB"><PARAM NAME="ImageWidth" VALUE="16"><PARAM NAME="ImageHeight" VALUE="16"></OBJECT>
+</csr:ACTION>
+</csr:Rule>
+

@@ -1,0 +1,11 @@
+PKZIP(R)  Version 2.50  FAST!  Compression Utility for Windows 95/NT  4-15-1998
+Copyright 1989-1998 PKWARE Inc.  All Rights Reserved. Shareware Version
+PKZIP Reg. U.S. Pat. and Tm. Off.  Patent No. 5,051,745 
+ 
+  Encrypting files
+
+Updating .ZIP: C:/SKLAD/RemCl/195/GoodsGr.zip
+Updating File: GoodsGr.txt  Deflating        (75.5%), Encrypting, done.
+
+Moving 1 files...
+Moved File: C:/SKLAD/RemCl/195/GoodsGr.txt , done.

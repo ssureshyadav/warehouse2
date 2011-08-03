@@ -1,0 +1,923 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Store.Action">
+<IncludeCode>xmlmacros</IncludeCode>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject</Super>
+<TimeCreated>60344,24669.502716</TimeCreated>
+
+<Method name="CreateLevel">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>name,quant,code,sub,Comment,tempstore,sta</FormalSpec>
+<Implementation><![CDATA[
+ s depot=%session.Data("depot")
+ s $ZT="CreateLevelErr",ok=1
+ i (sub=1)&(code'="") d
+ . &sql(select id,Currentsize,Currentweight into :id,:Currentsize,:Currentweight from Store.Address where Code=:code and Depot=:depot)
+ . q:SQLCODE
+ . i Currentsize>0 s ok="Невозможно разбить ячейку с товарами." q
+ . i Currentweight>0 s ok="Невозможно разбить ячейку с товарами." q
+ . &sql(select Value1 into :Value1 from Store.Quantity where Address=:id)
+ . i 'SQLCODE&(+$G(Value1)>0) s ok="Невозможно разбить ячейку с товарами." q
+ q:'+ok ok
+ i sub=1 s ok=..GetLastSubItem(depot,.code)
+ e  s ok=..GetLastItem(depot,.code)
+ q:'+ok ok
+ //s sizze=$S(curval=1:3981.3,curval=2:4516.8,curval=3:21840,1:0)
+ 
+ f i=0+sta:1:quant+sta-1 d
+ . s addr=##class(Store.Address).%New()
+ . d addr.DepotSetObjectId(depot)
+ . s addr.Name=name_$S(quant>1:" "_i,1:"")
+ . //s addr.Name=name_"-"_$S(quant>1:""_i,1:"")
+ . s $P(code,"*",$L(code,"*"))=+$P(code,"*",$L(code,"*"))+1
+ . s addr.Code=code
+ . s addr.Comment=$G(Comment)
+ . //s addr.oldnumb=$G(name)_"-"_i
+ . s addr.tempstore=+$G(tempstore)
+ . //s addr.Size1=sizze
+ . s ok=addr.%Save()
+ . i '+ok $$$WriteObjError(ok) q
+
+ q ok
+CreateLevelErr
+ q $ZE
+]]></Implementation>
+</Method>
+
+<Method name="GetLastItem">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[Depot,&Code]]></FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="GetLastItemErr"
+ s Parent=$Piece(Code,"*",1,$Length(Code,"*")-1)
+ /*
+ if Parent'=""{
+ &sql(select top 1 Code into :Code from Store.Address where Parent=:Parent and Depot=:Depot order by Code desc)}
+ else{
+ &sql(select top 1 Code into :Code from Store.Address where Parent is Null and Depot=:Depot order by Code desc)
+ }
+ */
+ &sql(declare zzd2 cursor for 
+ select Code into :lCode from Store.Address 
+ where NULLIF(Parent,:Parent) is Null and Depot=:Depot)
+ &sql(open zzd2)
+ //s:(SQLCODE=100)&(%ROWCOUNT=0) Code="*0"
+ i SQLCODE<0 $$$WriteError("GetLastSubItem SQLCODE="_SQLCODE) &sql(close zzd2) q "Извините ошибка при формировании адреса ячейки"
+ f  &sql(fetch zzd2) q:SQLCODE  d
+ . s t=$P(lCode,"*",$L(lCode,"*"))
+ . i t>+$G(res) s res=t
+ &sql(close zzd2)
+ //s $P(Code,"*",$L(Code,"*"))=+$P(Code,"*",$L(Code,"*"))+1
+ i $G(res)="" s Code="*"
+ i Code="" s Code="*"
+ s $P(Code,"*",$L(Code,"*"))=+$G(res)
+ q 1
+GetLastItemErr
+ q $ZE
+]]></Implementation>
+</Method>
+
+<Method name="GetLastSubItem">
+<Description><![CDATA[
+Получить последнюю ячейку на данном уровне
+<br><var>Depot</var> - ID склада
+<br><var>Code</var> - Код ячейки]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[Depot,&Code]]></FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="GetLastSubItemErr"
+ //&sql(select top 1 Code into :LasSubCode from Store.Address where Parent=:Code and Depot=:Depot order by Code desc)
+ &sql(declare zzd cursor for 
+ select id,Code into :id,:LasSubCode 
+ from Store.Address 
+ where Parent=:Code and Depot=:Depot)
+ &sql(open zzd)
+ i SQLCODE<0 $$$WriteError("GetLastSubItem SQLCODE="_SQLCODE) &sql(close zzd) q "Извините ошибка при формировании адреса ячейки"
+ f  &sql(fetch zzd) q:SQLCODE  d
+ . s t=$P(LasSubCode,"*",$L(LasSubCode,"*"))
+ . i t>+$G(res) s res=t
+ &sql(close zzd)
+ 
+ //s:(SQLCODE=100)&(%ROWCOUNT=0) LasSubCode=Code_"*0"
+ //s $P(LasSubCode,"*",$L(LasSubCode,"*"))=+$P(LasSubCode,"*",$L(LasSubCode,"*"))+1
+ s Code=Code_"*"_(+$G(res))
+ q 1
+GetLastSubItemErr
+ q $ZE
+]]></Implementation>
+</Method>
+
+<Method name="GetChilds">
+<Description><![CDATA[
+Получить строку с потомками данной ячейки хранения
+<br><var>Code</var> - Код ячейки хранения (например *1*1)
+<br><var>depot</var> - ID склада]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Code="",depot=""</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="GetChildsErr"
+ s:depot="" depot=%session.Data("depot")
+ s sql="select ID,Code,Name,Comment,tempstore,Currentsize,Size1 from Store.Address where depot="_depot_" and ISNULL(Parent,'')='"_Code_"'"
+ s result=##class(%ResultSet).%New()
+ d result.Prepare(sql)
+ s result.RuntimeMode=2
+ s ok=result.Execute()
+ s res=""
+ While result.Next() {
+  s OutString=""
+  s $P(OutString,"~",1)=result.Get("ID")
+  s $P(OutString,"~",2)=result.Get("Code")
+  s $P(OutString,"~",3)=result.Get("Name")
+  s $P(OutString,"~",4)=result.Get("Comment")
+  s $P(OutString,"~",5)=result.Get("tempstore")
+  s percentusage=0
+  s Currentsize=+result.Get("Currentsize")
+  s Size=+result.Get("Size1")
+  i Size>0 s percentusage=$J((Currentsize/Size)*100,".",0)
+  s $P(OutString,"~",6)=percentusage
+  s res=res_OutString_"#@#"
+ }
+ q res
+GetChildsErr
+ q $ZE
+]]></Implementation>
+</Method>
+
+<Method name="SaveQuantFromInstr">
+<Description><![CDATA[
+сохранить количество товара указанное в инструкции
+<var>docid</var> - id инструкции]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>docid</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="SaveQuantFromInstrErr"
+ s err="Извините, при записи остатков произошла ошибка"
+ s doc=##class(Docs.Super).%OpenId(docid)
+ if $ISOBJECT(doc.Kontr) s KontrId = doc.Kontr.%Id()
+ s tempGlob=$NA(^mtempTempGlob("SaveQuantFromInstr",$I)) k @tempGlob
+ q:+##class(Docs.Action).CheckFinal(doc) "Документ уже обработан"
+ i '$ISOBJECT(doc) $$$WriteError("SaveQuantFromInstr Не открылся "_docid_" в Docs.Super") q err
+ s DocumentClass=$S($ISOBJECT(doc.DocumentClass):doc.DocumentClass.%Id(),1:doc.DocumentClass)
+  
+ Set key = "",ok=1
+ TSTART
+ 
+ // если переданный документ это инструкция по размещению
+ if DocumentClass="Docs.StorageIn" {
+ 	s PrihodType=doc.PrihodType
+ 	Do {
+    	i '$ISOBJECT(doc.Items) $$$WriteError("SaveQuantFromInstr документ класса Docs.StorageIn не имеет Items(???)")
+    	Set item = doc.Items.GetNext(.key)
+		q:'$ISOBJECT(item)
+    	s itemGoods=item.Goods
+    	s itemquantreal=item.quantreal
+	    i '$ISOBJECT(item.addr) s ok="Для товара "_item.Goods.FullName_" не указано место на складе. Укажите места для всех товаров и повторите обработку документа." q
+	    i PrihodType s ok=..savequantBrak(itemGoods,item.addr,itemquantreal,,doc.Source) //это приход брака
+    	e  s ok=..savequant(itemGoods,item.addr,itemquantreal)
+    	q:'+ok
+ 	} While (key '= "")
+ }
+ 
+ // если переданный документ это инструкция по отгрузке 
+ if DocumentClass="Docs.StorageOut" {
+ 	s Brak=doc.Brak
+ 	Do {
+	    i $I(iio)
+	    Set item = doc.Items.GetNext(.key)
+	    if $ISOBJECT(item) {
+    		s itemGoods=item.Goods
+    		s itemPrice=item.Price
+    		s itemGoodsId=item.Goods.%Id()
+    		s itemquantreal=item.quantreal
+    		s itemGoodsFullName=item.Goods.FullName
+    		s quantdefault = item.quantdefault
+    		s itemId = item.%Id()
+    		
+    		if (+item.quantreal>0)&&('$ISOBJECT(item.addr)) s ok="Ошибка. Для товара "_itemGoodsFullName_" не указана ячейка на складе." q
+    		if (+item.quantreal>0)&&($ISOBJECT(item.addr)) {
+	    		#; если инструкция по браку, то удаляем из брака, иначе из обычного количества 
+	    		if Brak {
+	    			s ok=..RemQuantBrak(itemGoods,item.addr,$G(KontrId),itemquantreal)
+	    		} else {
+					if ($ISOBJECT(item.StoreQntID)),(item.StoreQntID.Address.%Id()'=item.addr.%Id()) {
+						d ##class(Docs.StorageOutItems).RemoveReserve(item.StoreQntID.%Id(),item.Quantity,itemId)
+						s item.StoreQntID=""
+					}
+	    			s ok=..remquant(itemGoods,item.addr,itemquantreal,item.StoreQntID,quantdefault,itemId)
+	    		}
+    		}
+    		//если был резерв и сняли меньше чем ставили в резерв, то снимем остальное
+	    	if (item.Quantity>item.quantreal)&($ISOBJECT(item.StoreQntID)) d ##class(Docs.StorageOutItems).RemoveReserve(item.StoreQntID.%Id(),item.Quantity-item.quantreal,itemId)
+    		s @tempGlob@(itemGoodsId)=$G(@tempGlob@(itemGoodsId))+itemquantreal
+    		s item.Total=$J(itemquantreal*itemPrice,".",2)
+	    	}
+    	q:'+ok
+ 		} While (key '= "")
+ 		
+ 	q:'+ok ok
+  	// введем в расходную накладную реальное количество
+ 	s ok=..ChangeRashQuant(doc.Source,tempGlob)
+ 	s:$ISOBJECT(doc.Source.Kontr) doc.Source.Kontr.Balance=doc.Source.Kontr.Balance-doc.Source.Summa
+ 	q:'+ok ok
+ 	j ##class(Kontragent.Action).SendMail(doc.Source.%Id(),"Docs.Rash")
+ 	s ok=doc.%Save()
+ 	i '+ok $$$WriteObjError(ok) s ok=err
+ 	s innerkurs=$$$TunesVariableGlobal("innerkurs")
+ 	s doc.Source.RubSumma=$J(doc.Source.Summa*innerkurs,"",2)
+ }
+ 
+ i '+ok TROLLBACK  q ok
+ s ok=##class(Docs.Action).SetFinal(doc)
+ i '+ok TROLLBACK  q ok
+ s ok=##class(Docs.Action).SetFinal(doc.Source)
+ i '+ok TROLLBACK  q ok
+ s ok=##class(Operation.InstrActions).pickasanswer(doc)
+ TCOMMIT
+ k @tempGlob
+ q 1
+SaveQuantFromInstrErr
+ $$$WriteError($ZE)
+ q "Извините, при записи остатков произошла ошибка."
+]]></Implementation>
+</Method>
+
+<Method name="ChangeRashQuant">
+<Description>
+Сохранить количество товара в расходной накладной
+doc - объект или id расходной накладной
+tempGlob - ссылка на глобал где хранятся (товар)=количество</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>doc="",tempGlob</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="ChangeRashQuantErr"
+	i '$ISOBJECT(doc) s doc=##class(Docs.Rash).%OpenId(doc)
+	i '$ISOBJECT(doc) $$$WriteError("ChangeRashQuant - не удалось открыть расходную накладную "_doc) q "Извините, внутренняя ошибка при изменении количества в расходной накладной"
+ s key="",DocSumm=0
+ //посчитаем и запишем сколько строк в расходной накладной приходится на каждый товар
+ s rs=##class(%ResultSet).%New()
+ s sql="select count(id) as GoodsCount,Goods from Docs.RashItems where doc='"_doc.%Id()_"' group by Goods"
+ s ok=rs.Prepare(sql)
+ i '+ok $$$WriteObjError(ok) q "Ошибка при подсчёте количества товаров в расходной накладной "_doc.Name
+ s ok=rs.Execute()
+ i '+ok $$$WriteObjError(ok) q "Ошибка при подсчёте количества товаров в расходной накладной "_doc.Name
+ while rs.Next(){
+ 	s GoodsItemsCount(rs.Data("Goods"))=rs.Data("GoodsCount")
+ }
+ 
+ Do {
+    Set item = doc.Items.GetNext(.key)
+    if $ISOBJECT(item) {
+    	s itemGoodsId=item.Goods.%Id()
+    	i $I(StrGoodsCount(itemGoodsId))	//считаем сколько строк с этим товаром мы уже прошли
+    	s Price=item.Price
+    	s Quantity=+$G(@tempGlob@(itemGoodsId))	//суммарное количество этого товара в документе
+    	s GoodsItemsCount=$G(GoodsItemsCount(itemGoodsId),1)	//количество строк с этим товаром в расходной накладной
+    	s qnt=Quantity\GoodsItemsCount	//количество записываемое в текущую строку расходной накладной
+    	//если проходим последнюю строку в этой расходной с этим товаром, то к количеству товара прибавляем остаток от деления суммарного количества товара в документе на кол. строк с этим товаром
+    	i StrGoodsCount(itemGoodsId)=GoodsItemsCount s qnt=qnt+(Quantity#GoodsItemsCount)
+    	s item.Quantity=qnt
+    	s Total=$J(Price*qnt,".",2)
+    	s item.Total=Total
+    	s DocSumm=$G(DocSumm)+Total
+    }
+ } While (key '= "")
+ s doc.Summa=+$G(DocSumm)
+ s ok=doc.%Save()
+ i '+ok $$$WriteObjError(ok) q "Извините, внутренняя ошибка при сохрании количества в накладной"
+ q 1
+ChangeRashQuantErr
+ $$$WriteError($ZE)
+ q "Извините, внутренняя ошибка при сохрании количества в расходной накладной"
+]]></Implementation>
+</Method>
+
+<Method name="savequantBrak">
+<Description><![CDATA[
+Добавить товар в ячейку в таблицу брака
+<br><var>Goods</var>  - товар (ID или объект)
+<br><var>Address</var> - адрес (ID или объект)
+<br><var>Value</var> - количество
+<br><var>notcompute</var> - если 1 то предыдущее значение не учитывается
+<br><var>SourceDoc</var> - Документ - основание]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Goods,Address,Value=0,notcompute=0,SourceDoc=""</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="savequantErr"
+ 
+ s ok=..validate(Goods,Address,Value)
+ i '+ok q ok
+ i '$ISOBJECT(Goods) d
+ . s GoodsId=Goods
+ . s Goods=##class(Goods.Goods).%OpenId(Goods)
+ e  s GoodsId=Goods.%Id()
+  i '$ISOBJECT(Address) d
+ . s AddressId=Address
+ . s Address=##class(Store.Address).%OpenId(Address)
+ e  s AddressId=Address.%Id()
+
+ if '$ISOBJECT(SourceDoc) q "Для товара "_Goods.FullName_" не указан документ источник брака. Брак не может быть принят."
+ if '$ISOBJECT(SourceDoc.Kontr) q "В документе "_SourceDoc.Name_" от "_$ZD(SourceDoc.Dat,4)_" не указан контрагент. Брак не может быть принят."
+ s KontrId = SourceDoc.Kontr.%Id()
+ 
+ //попробуем найти id у которого уже есть такой товар, ячейка и контрагент
+	 &sql(select ID into :StoreBrakId from Store.Brak where Goods=:GoodsId and Address=:AddressId and Kontr=:KontrId)
+	 if SQLCODE<0 d  q "Извините. Ошибка при попытке занести остатки по браку."
+	 . $$$WriteError("select ID from Store.Brak where Goods="_Goods_" and Address="_Address_" and Kontr="_KontrId_" SQLODE="_SQLCODE)
+	 if SQLCODE s StoreBrakId=""
+ 
+ //создадим или откроем ячейку 
+ 	 if +$G(StoreBrakId) s storeobj=##class(Store.Brak).%OpenId(StoreBrakId)
+	 if '$ISOBJECT($G(storeobj)) s storeobj=##class(Store.Brak).%New()
+	 s storeobj.Goods=Goods
+	 s storeobj.Address=Address
+	 s storeobj.Qnt=Value
+	 d storeobj.KontrSetObjectId(KontrId)
+	 d storeobj.SourceDocSetObjectId(SourceDoc.%Id())
+	 s ok=storeobj.%Save()
+	 k storeobj
+	 i '+ok $$$WriteObjError(ok) q "Извините. При записи остатков произошла ошибка."
+ 
+ //интересно нахрена я обнулял всю ячейку???
+ //i 'notcompute s Address.Currentweight=0,Address.Currentsize=0
+	 s Address.Currentweight=Address.Currentweight+(+Goods.Weight*Value)
+	 s Address.Currentsize=Address.Currentsize+(+Goods.Size1*Value)
+	 s ok=Address.%Save()
+	 i '+ok $$$WriteObjError(ok) q "Извините. При записи остатков произошла ошибка."
+ q 1
+savequantErr
+ $$$WriteError($ZE)
+ q "Извините. При записи остатков произошла ошибка."
+]]></Implementation>
+</Method>
+
+<Method name="savequant">
+<Description><![CDATA[
+Добавить товар в ячейку
+<br><var>Goods</var>  - товар (ID или объект)
+<br><var>Address</var> - адрес (ID или объект)
+<br><var>Value</var> - количество
+<br><var>notcompute</var> - если 1 то предыдущее значение не учитывается]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Goods,Address,Value=0,notcompute=0</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="savequantErr"
+ i 'notcompute s ok=..validate(Goods,Address,Value)
+ i 'notcompute,'+ok q ok
+ i '$ISOBJECT(Goods) d
+ . s GoodsId=Goods
+ . s Goods=##class(Goods.Goods).%OpenId(Goods)
+ e  s GoodsId=Goods.%Id()
+  i '$ISOBJECT(Address) d
+ . s AddressId=Address
+ . s Address=##class(Store.Address).%OpenId(Address)
+ e  s AddressId=Address.%Id()
+ &sql(select ID into :storeid from Store.Quantity where Address=:AddressId and Goods=:GoodsId)
+ if SQLCODE=100 s storeid=""
+ i SQLCODE<0 $$$WriteError("savequant %SQLCODE="_SQLCODE_" Address="_AddressId_" and Goods="_GoodsId) q "Внутренняя ошибка при записи количества в базу. Операция невозможна."
+ i storeid="" d
+ . s storeobj=##class(Store.Quantity).%New()
+ . s storeobj.Goods=Goods
+ . s storeobj.Address=Address
+ . s storeobj.Value1=Value
+ . s storeobj.Value2=0
+ e  d
+ . s storeobj=##class(Store.Quantity).%OpenId(storeid)
+ . i notcompute s storeobj.Value1=0 //если укажут что не учитывать предыдущее значение то предыдущее значение обнулим
+ . s storeobj.Value1=storeobj.Value1+$G(Value)
+ s ok=storeobj.%Save()
+ k storeobj
+ i '+ok $$$WriteObjError(ok) q "Извините, при записи остатков произошла ошибка."
+ i notcompute s Address.Currentweight=0,Address.Currentsize=0
+ s Address.Currentweight=Address.Currentweight+(+Goods.Weight*Value)
+ s Address.Currentsize=Address.Currentsize+(+Goods.Size1*Value)
+ s ok=Address.%Save()
+ i '+ok $$$WriteObjError(ok) q "Извините, при записи остатков произошла ошибка"
+ q 1
+savequantErr
+ $$$WriteError($ZE)
+ q "Извините. При записи остатков произошла ошибка."
+]]></Implementation>
+</Method>
+
+<Method name="remquant">
+<Description><![CDATA[
+Изъять товар из ячейки
+<br><var>Goods</var> - Товар (ID или объект)
+<br><var>Address</var> - Ячейка (ID или объект)
+<br><var>Value</var> - Количество
+<br><var>StoreQntID</var> - ID в таблице Store.Quantity откуда брали количество (где убирать резерв)
+<br><var>quantdefault</var> - сколько просили в накладной
+<br><var>docitemId</var> - id строчки в инструкции]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Goods,Address="",Value=0,StoreQntID,quantdefault,docitemId</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="remquantErr",err="Извините, операция списания остатков вызвала ошибку."
+
+ i Value=0 q 1
+
+ s allright='$$$TunesVariable("allowminus") //если 0 значит не всё в порядке и можно количество выводить в минус
+ 
+ i '$ISOBJECT(Goods) d
+ . s GoodsId=Goods
+ . s Goods=##class(Goods.Goods).%OpenId(Goods)
+ e  s GoodsId=Goods.%Id()
+
+ s GoodsFullName=$S($ISOBJECT(Goods):Goods.FullName,1:"")
+ i Address="" q "Для товара "_$G(GoodsFullName)_" ("_Value_" шт.) не указано место."
+ //i Address="" s Address=1254  //!!! если не указали ячейку, выписываем из "не распределённых" 1 склада
+ 
+ i '$ISOBJECT(Address) d
+ . s AddressId=Address
+ . s Address=##class(Store.Address).%OpenId(Address)
+ e  s AddressId=Address.%Id()
+ i '$ISOBJECT(Goods) q "Не указан товар."
+ i '$ISOBJECT(Address) q "Для товара "_Goods.FullName_" не указана ячейка."
+ s error=1
+ 
+ // если конкретно указали ячейку в Store.Quantity то берём из неё, иначе ищем эту ячейку по адресу и товару
+ if $ISOBJECT($G(StoreQntID)) d
+ .	s storeid=StoreQntID.%Id()
+ .	//если указали ID в Store.Quantity то количество забираем из резерва (а в резерв перегнали когда создавали документ)
+ .	s QuantityProperty="Value2"
+ .	//если вдруг указали другую ячейку, а мы в этой уже резерв поставили
+ else  d
+ .	&sql(select ID into :storeid from Store.Quantity where Address=:AddressId and Goods=:GoodsId)
+ .	if (SQLCODE=100)&(allright) s error="В ячейке "_..AddressPath(Address)_" нет товара "_Goods.FullName
+ .	i SQLCODE<0 $$$WriteError("remquant %SQLCODE="_SQLCODE_" Address="_AddressId_" and Goods="_GoodsId) s error=err
+ .	//если не указан ID в Store.Quantity то количество забираем из Value1
+ .	s QuantityProperty="Value1"
+ q:'+error error
+ 
+ 
+ 
+ s:$G(storeid)'="" storeobj=##class(Store.Quantity).%OpenId(storeid)
+ i '$ISOBJECT($G(storeobj)) d
+ . s storeobj=##class(Store.Quantity).%New()
+ . d storeobj.GoodsSetObjectId(GoodsId)
+ . d storeobj.AddressSetObjectId(AddressId)
+ . s storeobj.Value1=0
+ . s storeobj.Value2=0
+ 
+ if ($ZOBJPROPERTY(storeobj,QuantityProperty)<$G(Value))&(allright) q "Обнаружена попытка забрать товар "_GoodsFullName_" "_$G(Value)_" штук из ячейки в которой "_$ZOBJPROPERTY(storeobj,QuantityProperty)_" штук"
+ 
+ s $ZOBJPROPERTY(storeobj,QuantityProperty)=$ZOBJPROPERTY(storeobj,QuantityProperty)-$G(Value)
+ s ok=storeobj.%Save()
+ i (storeobj.Value1=0)&(storeobj.Value2=0) d storeobj.%DeleteId(storeobj.%Id())
+ k storeobj
+ i '+ok $$$WriteObjError(ok) q "Извините. При записи остатков произошла ошибка."
+ s Address.Currentweight=Address.Currentweight-(+Goods.Weight*Value)
+ s Address.Currentsize=Address.Currentsize-(+Goods.Size1*Value)
+ s ok=Address.%Save()
+ 
+ /*
+ //если был резерв и если сняли меньше чем был резерв
+ if QuantityProperty="Value2",quantdefault>Value d
+ . //сколько лишнего осталось в резерве
+ . s FinallyJustRemoveReserve = quantdefault-Value
+ . d ##class(Docs.StorageOutItems).RemoveReserve(storeid,RemoveReserve,docitemId)
+ */
+ 
+ i '+ok $$$WriteObjError(ok) q "Извините. При записи остатков произошла ошибка."
+ q 1
+remquantErr
+ $$$WriteError($ZE)
+ q "Извините. При записи остатков произошла ошибка."
+]]></Implementation>
+</Method>
+
+<Method name="RemQuantBrak">
+<Description><![CDATA[
+Удалить товар из таблицы брака
+<br>Goods - товар (ID или объект Goods.Goods)
+<br>Address - адрес ячейки (ID или объект Store.Address)
+<br>Kontragent - адрес ячейки (ID или объект Store.Address)
+<br>Value - количество]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Goods,Address,Kontragent,Value=0</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ if Value = 0 q 1
+ s $ZT="RemQuantBrakErr"
+ if $ISOBJECT(Goods) d
+ . s GoodsId=Goods.%Id()
+ else  s GoodsId=Goods
+ 
+ if $ISOBJECT(Address) d
+ . s AddressId=Address.%Id()
+ else  s AddressId=Address
+ 
+ if $ISOBJECT(Address) s Address=Address.%Id()
+ &sql(SELECT ID,Qnt 
+ 	INTO :ID,:Qnt 
+ 	FROM Store.Brak 
+ 	WHERE Address=:AddressId 
+ 	AND Goods=:GoodsId 
+ 	AND (Kontr=:Kontragent OR :Kontragent=''))
+ 
+ if SQLCODE q "Невозможно найти "_$$GoodsFullName(Goods)_" по адресу "_##class(Store.Action).AddressPath(AddressId,0)
+ if Value>Qnt q "Обнаружена попытка забрать некондиционный товар "_$$GoodsFullName(Goods)_" "_Value_" шт. из ячейки "_##class(Store.Action).AddressPath(AddressId,0)_" в которой "_Qnt_" шт."
+ if Value=Qnt &sql(delete From Store.Brak where ID=:ID)
+ else  &sql(update Store.Brak set Qnt=Qnt-:Value where ID=:ID)
+ if SQLCODE<0 d  q "Извините. Ошибка при списании некондиционного товара."
+ . $$$WriteError("SQLCODE="_SQLCODE)
+ q 1
+GoodsFullName(Goods)
+ if '$ISOBJECT(Goods) s Goods=##class(Goods.Goods).%OpenId(GoodsId)
+ if '$ISOBJECT(Goods) s GoodsFullName="Неизвестный товар "_Goods
+ else  set GoodsFullName=Goods.FullName 
+ q GoodsFullName
+RemQuantBrakErr
+ $$$WriteError($ZE)
+ q "Извините. Ошибка при списании некондиционного товара."
+]]></Implementation>
+</Method>
+
+<Method name="GetQuantByGoods">
+<Description><![CDATA[
+Получить количество по ID товара
+<br><var>goods</var> - ID Товара
+<br><var>quant</var> - количество Товара]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[goods,&quant]]></FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="GetQuantByGoodsErr"
+ &sql(declare zzz cursor for select Address->Depot As depot,Value1,Value2 into :depot,:Value,:Value2 from Store.Quantity where Goods=:goods)
+ &sql(open zzz)
+ &sql(FETCH zzz)
+ While (SQLCODE = 0) {
+  s quant=$G(quant)+Value
+  s quant(depot)=$G(quant(depot))+Value
+  s quant(depot,"rezerv")=$G(quant(depot,"rezerv"))+Value2
+  &sql(FETCH zzz)
+ }
+ &sql(close zzz)
+ q 1
+GetQuantByGoodsErr
+ $$$WriteError($ZE)
+ q "Ошибка при подсчёте количества"
+]]></Implementation>
+</Method>
+
+<Method name="getquantaddr">
+<Description><![CDATA[
+Получить количество товара в ячейке
+<br><var>goods</var> - ID Товара
+<br><var>addr</var> - ID ячейки]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>goods,addr</FormalSpec>
+<Implementation><![CDATA[
+	&sql(select Value1 into :Value1 from Store.Quantity where Address=:addr and Goods=:goods)
+	i SQLCODE $$$WriteError("getquantaddr SQLCODE="_SQLCODE) q 0
+	q Value1
+]]></Implementation>
+</Method>
+
+<Method name="validate">
+<Description><![CDATA[
+Подтвердить возможность доложить товар в ячейку
+<br><var>Goods</var> - товар (ID или объект)
+<br><var>Address</var> - адрес (ID или объект)
+<br><var>Value</var> - количество]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Goods,Address,Value</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="validateErr"
+ i $isobject($G(%session)) d
+ . s user=$G(%session.Data("user"),"undef")
+ e  d
+ . s user="undef"
+ s:'$ISOBJECT(Goods) Goods=##class(Goods.Goods).%OpenId(Goods)
+ i '$ISOBJECT(Address) d
+ . s Address=##class(Store.Address).%OpenId(Address)
+ . s savetemp=1 //метод вызван с использованием id ячейки, стало быть со страницы
+ e  s savetemp=0 //метод вызван с использованием объекта ячейки, стало быть из метода сохранения остатков
+ s AddressId=Address.%Id()
+ s goodsize=Goods.Size1
+ s goodweight=Goods.Weight
+ s goodname=Goods.Name
+ s maxsize=Address.Size1
+ s currentsize=Address.Currentsize+$G(^mtempAddress(user,AddressId,"size"))
+ s maxweight=Address.Weight
+ s currentweight=Address.Currentweight+$G(^mtempAddress(user,AddressId,"weight"))
+ s sizevalid=1,weightvalid=1
+ i (goodsize'="")&(maxsize'=""){
+ 	i (goodsize*Value)+currentsize>maxsize s sizevalid="Текущий объём ячейки ("_currentsize_") плюс объём товара "_goodname_" ("_(goodsize*Value)_") превышает максимально возможный объём ячейки ("_maxsize_") с адресом "_..AddressPath(Address)
+ }
+ i (goodweight'="")&(maxweight'=""){
+ 	i (goodweight*Value)+currentweight>maxweight s weightvalid="Текущий вес товара в ячейке ("_currentweight_") плюс вес товара "_goodname_" ("_(goodweight*Value)_") превышает максимально возможный вес для ячейки ("_maxweight_") с адресом "_..AddressPath(Address)
+ }
+ i sizevalid&weightvalid d
+ . s ret=1
+ . s:savetemp ^mtempAddress(user,AddressId,"weight")=(goodweight*Value)+$G(^mtempAddress(user,AddressId,"weight"))
+ . s:savetemp ^mtempAddress(user,AddressId,"size")=(goodsize*Value)+$G(^mtempAddress(user,AddressId,"size"))
+ i ('+sizevalid)&('+weightvalid) q sizevalid_" а также "_weightvalid
+ i '+sizevalid q sizevalid
+ i '+weightvalid q weightvalid
+ q 1
+validateErr
+ $$$WriteError($ZE)
+ q "Извините. При проверке условий записи остатков произошла ошибка."
+]]></Implementation>
+</Method>
+
+<Method name="KillTempAddress">
+<Description>
+Убить временную глобаль</Description>
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+ k ^mtempAddress($G(%session.Data("user"),"undef"))
+ q
+]]></Implementation>
+</Method>
+
+<Method name="AddressPath">
+<Description><![CDATA[
+Вернуть строку состоящую из ячеек-родителей данной ячейки
+<br><var></var> - ячейка (ID или объект)
+<br><var>addtag</var> - добавлять HTML таги к имени]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>AddressId,addtag:%Boolean=0</FormalSpec>
+<Implementation><![CDATA[
+ i $ISOBJECT(AddressId) s addr=AddressId
+ e  s addr=##class(Store.Address).%OpenId(AddressId)
+ i '$ISOBJECT(addr) q ""
+ if $ISOBJECT($G(%session)) d
+ . s delimeter=$G(%session.Data("addressdelim")," - ")
+ e  s delimeter="-"
+ s Depot=addr.Depot.%Id()
+ s Parent=addr.Parent
+ i addtag s str="<b><u>"_addr.Name_"</u></b>"
+ e  s str=addr.Name
+ while (Parent'=""){
+ &sql(select Parent,Name into :Parent,:Name from Store.Address where Code=:Parent and Depot=:Depot)
+ q:SQLCODE
+ i $I(count)
+ s str(count)=Name_delimeter
+ 
+ }
+ s i="" f  s i=$O(str(i)) q:i=""  d
+ . s str=str(i)_str
+ q str
+]]></Implementation>
+</Method>
+
+<Method name="SetPrice">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Goods,Price,typcen,Dat="",Tim=""</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="SetPriceErr"
+ s:Dat="" Dat=+$H
+ s:Tim="" Tim=$P($H,",",2)
+ s prc=##class(Store.Price).%New()
+ s prc.Price=+Price
+ s prc.Tim=+Tim
+ s prc.Dat=+Dat
+ d prc.typcenSetObjectId(typcen)
+ //d prc.StrSetObjectId(TovStr)
+ d prc.GoodsSetObjectId(Goods)
+ //d prc.DepotSetObjectId(Depot)
+ s ok=prc.%Save()
+ i '+ok $$$WriteObjError(ok) q "Извините. При записи цены возникла ошибка."
+ q 1
+SetPriceErr
+ $$$WriteError($ZE)
+ q "Извините. При записи цены возникла ошибка."
+]]></Implementation>
+</Method>
+
+<Method name="getlastcena">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Goods</FormalSpec>
+<Implementation><![CDATA[
+ q:Goods="" 0
+ &sql(select max(Dat) into :Dat from Store.Price where Goods=:Goods)
+ i SQLCODE=100 q $$FindGoodsPrice(Goods)
+ &sql(select max(Tim) into :Tim from Store.Price where Goods=:Goods)
+ i SQLCODE=100 q $$FindGoodsPrice(Goods)
+ &sql(select Price into :Price from Store.Price  where Goods=:Goods and Dat=:Dat and Tim=:Tim)
+ i SQLCODE=100 q $$FindGoodsPrice(Goods)
+ q Price
+FindGoodsPrice(Goods)
+ &sql(select Price into :Price from Goods.Goods where ID=:Goods)
+ i 'SQLCODE q Price
+ e  q 0
+]]></Implementation>
+</Method>
+
+<Method name="CellsMultiChange">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>xmlstream="",docid="",documentclass</FormalSpec>
+<Implementation><![CDATA[
+ s ok=##class(Docs.Action).parsexml(xmlstream,docid,documentclass,.types,.DocData)
+ q:'+ok ok
+ s ok=..savemulticell(documentclass, DocData, .types)
+ q:'+ok ok
+ q ok
+]]></Implementation>
+</Method>
+
+<Method name="savemulticell">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>documentclass,DocData,types</FormalSpec>
+<Implementation><![CDATA[
+ s addr=@DocData
+ i addr="" $$$WriteError("savemulticell Не указана ячейка") q
+ s addrobj=##class(Store.Address).%OpenId(addr)
+ i '$ISOBJECT(addrobj) $$$WriteError("savemulticell не удалось открыть ячейку id="_addr) q
+ s depot=addrobj.Depot.%Id()
+ s code=addrobj.Code
+ k addrobj
+ s i="" f  s i=$O(@DocData@("head",i)) q:i=""  d
+ . s text=$G(@DocData@("head",i))
+ . i text="" q
+ . s str=$G(str)_i_"='"_text_"', "
+ s str=$E(str,1,$L(str)-2)
+ i str="" q
+ s rs=##class(%Library.ResultSet).%New()
+ s sql="UPDATE Store.Address set "_str_" where Depot="_depot_" and Parent %STARTSWITH '"_code_"'"
+ s ok=rs.Prepare(sql)
+ i '+ok $$$WriteObjError(ok) q "Извините, при сохранении параметров вознкла ошибка"
+ s ok=rs.Execute()
+ i '+ok $$$WriteObjError(ok) q "Извините, при сохранении параметров вознкла ошибка"
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="deletecell">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>cid</FormalSpec>
+<Implementation><![CDATA[
+  q:cid="" "Не указан код ячейки"
+  
+  s cell=##class(Store.Address).%OpenId(cid)
+  q:'$ISOBJECT(cell) "Не удалось найти ячейку с указанным кодом"
+  i cell.Currentsize>0 q "Невозможно удалить заполненную ячейку"
+  i cell.Currentweight>0 q "Невозможно удалить заполненную ячейку"
+  s code=cell.Code
+  &sql(select count(ID) into :count from Store.Address where Parent=:code)
+  i count>0 q "Невозможно удалить ячейку содержащую другие ячейки"
+  &sql(select Sum(Value1) into :summa from Store.Quantity where Address=:cid)
+  i (summa>0)&('SQLCODE) q "Невозможно удалить заполненную ячейку"
+  &sql(delete from Store.Quantity where Address=:cid)
+  i SQLCODE<0 $$$WriteError("1 deletecell cid="_cid_" SQLCODE="_SQLCODE) q "Извините, внутренняя ошибка при удалении ячейки"
+  &sql(delete from Store.Address where ID=:cid)
+  i SQLCODE<0 $$$WriteError("1 deletecell cid="_cid_" SQLCODE="_SQLCODE) q "Извините, внутренняя ошибка при удалении ячейки"
+  q 1
+]]></Implementation>
+</Method>
+
+<Method name="changename">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>cid,newname</FormalSpec>
+<Implementation><![CDATA[
+ q:cid=""
+ s cell=##class(Store.Address).%OpenId(cid)
+ q:'$ISOBJECT(cell)
+ s cell.Name=newname
+ d cell.%Save()
+ q
+]]></Implementation>
+</Method>
+
+<Method name="GetAddrByTovar">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>goodsid,q1,q2</FormalSpec>
+<Implementation><![CDATA[
+  $$$StartXML
+ 	s sc=xmlstr.Element("AllHeaders")
+ 		$$$WriteHeader("skl","Склад",80)
+		 $$$WriteHeader("addr","Адрес",150)
+		 $$$WriteHeader("kol","Количество",80)
+ 	s sc=xmlstr.EndElement()
+  	s sc=xmlstr.Element("AllObjects")
+  		s rs=##class(%Library.ResultSet).%New()
+  		s sql="select Address->Depot->Name as depnam,Address,Value1 from Store.Quantity where Goods="_goodsid
+  		s ok=rs.Prepare(sql)
+  		i '+ok $$$WriteObjError(ok) d  q
+  		. s sc=xmlstr.EndElement()
+  		. $$$EndXML
+  		s ok=rs.Execute()
+  		i '+ok $$$WriteObjError(ok) d  q
+  		. s sc=xmlstr.EndElement()
+  		. $$$EndXML
+  		While rs.Next() {
+	  	  s sc=xmlstr.Element("OneObject")
+	  	  s addr=$G(rs.Data("Address"))
+	  	  s addrpath=##class(Store.Action).AddressPath(addr)
+		  $$$WriteElementTwice("skl",$G(rs.Data("depnam")))
+		  $$$WriteElementTwice("addr",addrpath)
+  		  $$$WriteElementTwice("kol",$G(rs.Data("Value1")))
+  		  s sc=xmlstr.EndElement()
+  		}
+ 	s sc=xmlstr.EndElement()
+  $$$EndXML
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="recalcstore">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+ s $ZT="recalcstoreErr"
+ &sql(update Store.Address set Currentsize=0,Currentweight=0)
+  &sql(declare dd cursor for 
+ select Address,Address->Currentsize,Address->Currentweight,Goods,Goods->Size1,Value1,Goods->Weight
+ into :addr,:addrsize,:addrweight,:goods,:goodssize,:value1,:Weight
+ from Store.Quantity)
+ &sql(open dd)
+ f  &sql(fetch dd) q:SQLCODE  d
+ . s address=##class(Store.Address).%OpenId(addr)
+ . s address.Currentsize=addrsize+(goodssize*value1)
+ . s address.Currentweight=addrweight+(Weight*value1)
+ . d address.%Save()
+ . k address
+ &sql(close dd)
+ q 1
+recalcstoreErr
+ $$$WriteError($ZE)
+ q 0
+]]></Implementation>
+</Method>
+
+<Method name="ClearCell">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>cellid,cellcode,depot</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="ClearCellErr"
+ s err="Извините, ошибка программы при очистке ячейки"
+ q:cellid="" err
+ d ClearItSelf(cellid)
+ &sql(declare gf cursor for 
+ select id,code into :cellid,:cd from Store.Address where Parent %STARTSWITH :cellcode and Depot=:depot)
+ &sql(open gf)
+ f  &sql(fetch gf) q:SQLCODE  d
+ . d ClearItSelf(cellid)
+ &sql(close gf)
+ q 1
+ClearCellErr
+ $$$WriteError($ZE)
+ q "Извините, ошибка программы при очистке ячейки"
+ClearItSelf(cell)
+ &sql(delete from Store.Quantity where Address=:cell)
+ s cellobj=##class(Store.Address).%OpenId(cell)
+ d:$ISOBJECT(cellobj)
+ . s cellobj.Currentsize=0
+ . s cellobj.Currentweight=0
+ . d cellobj.%Save()
+ q
+]]></Implementation>
+</Method>
+
+<Method name="BlockCells">
+<Description>
+Блокировать / разблокировать ячейки</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Cell,Block=0</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="BlockCellsErr"
+ i '$ISOBJECT(Cell) s addrobj=##class(Store.Address).%OpenId(Cell)
+ e  s addrobj=Cell
+ i '$ISOBJECT(addrobj) q 1
+ s depot=addrobj.Depot.%Id()
+ s code=addrobj.Code_"*"
+ //блокируем всё подмножество ячеек
+ &sql(update Store.Address Set block=:Block where Code %Startswith :code and Depot=:depot)
+ q 1
+BlockCellsErr
+ $$$WriteError($ZE)
+ q "Ошибка при блокировке ячеек"
+]]></Implementation>
+</Method>
+
+<Method name="FindGoodsPlaces">
+<Description><![CDATA[
+Найти места где расположен товар
+<br>GoodsId - Искомый товар
+<br>Found - массив с найденными ячейками и количествами
+<br>		Found(0,)]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[GoodsId:%String,&Found:%String]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ k Found
+ s Found=0
+ s $ZT="FindGoodsPlacesErr"
+ &sql(declare konga cursor for select ID,Value1,Address into :ID,:Value1,:Address from Store.Quantity where Goods=:GoodsId and Value1>0)
+ &sql(open konga)
+ f  &sql(fetch konga) q:SQLCODE  d
+ . i $I(count)
+ . s Found(0,Address)=Value1
+ . s Found(0,Address,"ID")=ID
+ . s Found(1,Value1)=Address
+ . s Found(1,Value1,"ID")=ID
+ . s Found=Found+Value1
+ &sql(close konga)
+ q 1
+FindGoodsPlacesErr
+ $$$WriteError($ZE)
+ q "Извините. Ошибка при отборе товара"
+]]></Implementation>
+</Method>
+</Class>
+</Export>

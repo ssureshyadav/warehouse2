@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Common.Dictionary5">
+<ClassType>persistent</ClassType>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%Persistent</Super>
+<TimeCreated>60402,63112</TimeCreated>
+
+<Property name="Name">
+<Description>
+ФИО</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="ФИО"/>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Common.Dictionary5D</DataLocation>
+<DefaultData>Dictionary5DefaultData</DefaultData>
+<IdLocation>^Common.Dictionary5D</IdLocation>
+<IndexLocation>^Common.Dictionary5I</IndexLocation>
+<StreamLocation>^Common.Dictionary5S</StreamLocation>
+<Data name="Dictionary5DefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Name</Value>
+</Value>
+<Value name="3">
+<Value>Property3985</Value>
+</Value>
+<Value name="4">
+<Value>Property4215</Value>
+</Value>
+<Value name="5">
+<Value>Property3715</Value>
+</Value>
+<Value name="6">
+<Value>Property5768</Value>
+</Value>
+<Value name="7">
+<Value>Property7689</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.finance">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<IncludeCode>xmlmacros</IncludeCode>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62301,49219.9246</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body onload=""load()"">"
+	Write !,(##class(%CSP.Response).HyperEventBody())
+	Write !,"<TABLE cellSpacing=0 width=""100%"" celpadding=""0"" >",!
+	Write "<TR>",!
+	Write "<td width=10%>"
+	Write "<img alt=""Обновить раздел"" src=""images/refresh.gif"" onclick=""window.location.reload()"" style=""cursor:hand"">"
+	Write "</td>",!
+	Write "<TD width=80% align=center style=""BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid"" colspan=2><strong>Управление финансами</strong></TD>",!
+	Write "<td  width=10% align=right>"
+	Write "<!--<a href=""talk.csp"" ><img src=""images/BIGProp.gif"" width=""20"" height=25 border=0></a>-->"
+	Write "</td>",!
+	Write "</tr>",!
+	Write "</TABLE>",!
+	Write !,"<fieldset><legend>Контрагенты</legend>",!
+	Write "Поиск:",!
+	Write "<span id=""namfld"">"
+	Write "</span>"
+	Write "&nbsp;"
+	Write "<input type=""text"" id=""fldval"" onkeyup=""gg();"">"
+	Write !,!,"<SKLADList:listview width=100% height=150 id=""currentdict"" zClick=""KontrClick()"" zonDblClick=""addrecord(currentdict.ItemID);"" zonColumnClick=""colclick()"" onAddColumns=""showdictionary()"" ClassName=""Common.Kontragent""/><br>",!
+	Write "<table width=100%><tr><td>",!
+	Write "  "
+	Write !,"<img src=""images/edit.gif"" onmouseover=""addrec.src='images/Onedit.gif'"" onmouseout=""addrec.src='images/edit.gif'""  id=""addrec"" name=""addrec"" alt=""Редактировать данные контрагента"" onclick=""addrecord(currentdict.ItemID)"" style="""">"
+	Write !,"  "
+	Write !,"<img src=""images/down.gif"" onmouseover=""showdata.src='images/Ondown.gif'"" onmouseout=""showdata.src='images/down.gif'""  id=""showdata"" name=""showdata"" alt=""Вывести информацию по контрагенту"" onclick=""ShowKontrData()"" style="""">"
+	Write !,"  "
+	Write !,"<img src=""images/price.gif"" onmouseover=""showact.src='images/Onprice.gif'"" onmouseout=""showact.src='images/price.gif'""  id=""showact"" name=""showact"" alt=""Вывести акт сверки"" onclick=""Sverka()"" style="""">"
+	Write !,"  ",!
+	Write "</td><td align=right>",!
+	Write "	Поддерживать таблицу в актуальном состоянии",!
+	Write "	"
+	Write "<input type=checkbox id=""makeShowDict"" checked style=""width:20pt;border:none;"">"
+	Write !,"</td>",!
+	Write "</tr>",!
+	Write "</table>",!
+	Write "</fieldset><br>",!
+	Write !,!,"<span style=""FONT-size: 15px ; font-family: arial; COLOR: rgb(0,0,102);"">"
+	Write "&nbsp;"
+	Write "<span id=""KontrName"">"
+	Write "</span>"
+	Write " "
+	Write "<span style=""font-family: Times"" id=""KontrBalance"" title=""Общий баланс контрагента складывается из суммы отгрузок и оплаченных платёжных поручений"">"
+	Write "</span>"
+	Write "</span>"
+	Write !,"<br><br>",!
+	Write "<table width=100%>",!
+	Write "<tr>",!
+	Write "	<td width=50% valign=top>",!
+	Write "	<fieldset><legend>Платные отгрузки</legend>",!
+	Write "	Период c "
+	Write "<input type=text id=""dat01"" value="""_($ZD($H,4))_""" onclick=""fnCalendar(this)"" class=""datar"">"
+	Write " по "
+	Write "<input type=text id=""dat02"" value="""_($ZD($H,4))_""" onclick=""fnCalendar(this)"" class=""datar"">"
+	Write !,"	 "
+	Write "<!--",!
+	Write "	 <input type=""text"" id=""DocName""> ",!
+	Write "	<select id=""RashTypes"">",!
+	Write "		<option value=0>Все</option>",!
+	Write "		<option value=1>Полностью оплаченные</option>",!
+	Write "		<option value=2>Частично оплаченные</option>",!
+	Write "		<option value=3>Не оплаченные</option>",!
+	Write "	</select>",!
+	Write "	-->"
+	Write !,"	"
+	Write !,"<img src=""images/ok.gif"" onmouseover=""okbut0.src='images/Onok.gif'"" onmouseout=""okbut0.src='images/ok.gif'""  id=""okbut0"" name=""okbut0"" alt=""Показать документы"" onclick=""ShowDocums0()"" style="""">"
+	Write "<br>",!
+	Write "	"
+	Write "<!-- Таблица отгрузок -->"
+	Write !,"	<SKLADList:listview width=100% height=200 id=""docums0"" ClassName=""Docs.Rash"" /><br>",!
+	Write "	"
+	Write !,"<img src=""images/print.gif"" onmouseover=""printbut0.src='images/Onprint.gif'"" onmouseout=""printbut0.src='images/print.gif'""  id=""printbut0"" name=""printbut0"" alt=""Печать документа"" onclick=""prnt(docums0.ItemID,docums0.ClassName,'')"" style="""">"
+	Write !,"	"
+	Write "<!--",!
+	Write "	<sklad:LittleButton name=""edit"" id=""editrash"" onclick=""CreateDocument(docums.ItemID,'Docs.Rash')"" alt=""Редактировать документ"">",!
+	Write "	<sklad:LittleButton name=""card"" id=""PayRashButton"" onclick=""PayRashFn(docums.ItemID)"" alt=""Оплатить расходную накладную"">",!
+	Write "	-->"
+	Write !,"	</fieldset>",!
+	Write "	",!
+	Write "	<td width=50% valign=top>",!
+	Write "	<fieldset><legend>Отчёты</legend>",!
+	Write "	Период c "
+	Write "<input type=text id=""dat1"" value="""_($ZD($H,4))_""" onclick=""fnCalendar(this)"" class=""datar"">"
+	Write " по "
+	Write "<input type=text id=""dat2"" value="""_($ZD($H,4))_""" onclick=""fnCalendar(this)"" class=""datar"">"
+	Write !,"	 "
+	Write "<!--",!
+	Write "	 <input type=""text"" id=""DocName""> ",!
+	Write "	<select id=""RashTypes"">",!
+	Write "		<option value=0>Все</option>",!
+	Write "		<option value=1>Полностью оплаченные</option>",!
+	Write "		<option value=2>Частично оплаченные</option>",!
+	Write "		<option value=3>Не оплаченные</option>",!
+	Write "	</select>",!
+	Write "	-->"
+	Write !,"	"
+	Write !,"<img src=""images/ok.gif"" onmouseover=""okbut.src='images/Onok.gif'"" onmouseout=""okbut.src='images/ok.gif'""  id=""okbut"" name=""okbut"" alt=""Показать документы"" onclick=""ShowDocums()"" style="""">"
+	Write "<br>",!
+	Write "	"
+	Write "<!-- Таблица отгрузок -->"
+	Write !,"	<SKLADList:listview width=100% height=200 id=""docums"" ClassName=""Docs.Otchet"" /><br>",!
+	Write "	"
+	Write !,"<img src=""images/print.gif"" onmouseover=""printbut1.src='images/Onprint.gif'"" onmouseout=""printbut1.src='images/print.gif'""  id=""printbut1"" name=""printbut1"" alt=""Печать документа"" onclick=""prnt(docums.ItemID,docums.ClassName,'')"" style="""">"
+	Write !,"	"
+	Write "<!--",!
+	Write "	<sklad:LittleButton name=""edit"" id=""editrash"" onclick=""CreateDocument(docums.ItemID,'Docs.Rash')"" alt=""Редактировать документ"">",!
+	Write "	<sklad:LittleButton name=""card"" id=""PayRashButton"" onclick=""PayRashFn(docums.ItemID)"" alt=""Оплатить расходную накладную"">",!
+	Write "	-->"
+	Write !,"	</fieldset>",!
+	Write "</td>",!
+	Write "</tr>",!
+	Write "</table>",!
+	Write !,!,"<br><br>",!
+	Write "<table width=100%>",!
+	Write "<tr>",!
+	Write "<td width=50% valign=top>",!
+	Write "	<fieldset><legend>Платежи нам</legend>",!
+	Write "	Период c "
+	Write "<input type=text id=""dat11"" value="""_($ZD($H,4))_""" onclick=""fnCalendar(this)"" class=""datar"">"
+	Write " по "
+	Write "<input type=text id=""dat22"" value="""_($ZD($H,4))_""" onclick=""fnCalendar(this)"" class=""datar"">"
+	Write !,"	 "
+	Write "<!--",!
+	Write "	 <input type=""text"" id=""DocName2""> ",!
+	Write "	<select id=""PlatejTypes"">",!
+	Write "		<option value=0>Все</option>",!
+	Write "		<option value=1>Зачисленные</option>",!
+	Write "		<option value=2>Не зачисленные</option>",!
+	Write "	</select>",!
+	Write "	-->"
+	Write !,"	"
+	Write !,"<img src=""images/ok.gif"" onmouseover=""okbut2.src='images/Onok.gif'"" onmouseout=""okbut2.src='images/ok.gif'""  id=""okbut2"" name=""okbut2"" alt=""Показать документы"" onclick=""ShowInPays()"" style="""">"
+	Write "<br>",!
+	Write "	"
+	Write "<!-- Таблица платежей -->"
+	Write !,"	<SKLADList:listview width=100% height=200 id=""docums2"" ClassName=""Docs.Platejka"" /><br>",!
+	Write "	"
+	Write !,"<img src=""images/new.gif"" onmouseover=""newbut1.src='images/Onnew.gif'"" onmouseout=""newbut1.src='images/new.gif'""  id=""newbut1"" name=""newbut1"" alt=""Внести платёж"" onclick=""CreateDocument('','Docs.Platejka')"" style="""">"
+	Write !,"	"
+	Write !,"<img src=""images/edit.gif"" onmouseover=""editbutDocums2.src='images/Onedit.gif'"" onmouseout=""editbutDocums2.src='images/edit.gif'""  id=""editbutDocums2"" name=""editbutDocums2"" alt=""Редактировать документ"" onclick=""CreateDocument(docums2.ItemID,'Docs.Platejka')"" style="""">"
+	Write !,"	"
+	Write !,"<img src=""images/print.gif"" onmouseover=""printbut2.src='images/Onprint.gif'"" onmouseout=""printbut2.src='images/print.gif'""  id=""printbut2"" name=""printbut2"" alt=""Печать документа"" onclick=""prnt(docums2.ItemID,docums2.ClassName,'')"" style="""">"
+	Write !,"	"
+	Write !,"<img src=""images/price.gif"" onmouseover=""pricebut.src='images/Onprice.gif'"" onmouseout=""pricebut.src='images/price.gif'""  id=""pricebut"" name=""pricebut"" alt=""Разнести платёжный документ по расходным накладным"" onclick=""OpenPlatejWindow(docums2.ItemID)"" style="""">"
+	Write !,"	"
+	Write !,"<img src=""images/ok.gif"" onmouseover=""okbutDocums2.src='images/Onok.gif'"" onmouseout=""okbutDocums2.src='images/ok.gif'""  id=""okbutDocums2"" name=""okbutDocums2"" alt=""Обработать документ"" onclick=""processdoc(docums2.ItemID)"" style="""">"
+	Write !,"	</fieldset>",!
+	Write "</td>",!
+	Write "<td width=50% valign=top>",!
+	Write "	<fieldset><legend>Платежи контрагенту</legend>",!
+	Write "	Период c "
+	Write "<input type=text id=""dat31"" value="""_($ZD($H,4))_""" onclick=""fnCalendar(this)"" class=""datar"">"
+	Write " по "
+	Write "<input type=text id=""dat32"" value="""_($ZD($H,4))_""" onclick=""fnCalendar(this)"" class=""datar"">"
+	Write !,"	"
+	Write "<!--",!
+	Write "	 <input type=""text"" id=""DocName2""> ",!
+	Write "	<select id=""PlatejTypes"">",!
+	Write "		<option value=0>Все</option>",!
+	Write "		<option value=1>Зачисленные</option>",!
+	Write "		<option value=2>Не зачисленные</option>",!
+	Write "	</select>",!
+	Write "	-->"
+	Write !,"	"
+	Write !,"<img src=""images/ok.gif"" onmouseover=""okbut3.src='images/Onok.gif'"" onmouseout=""okbut3.src='images/ok.gif'""  id=""okbut3"" name=""okbut3"" alt=""Показать документы"" onclick=""ShowOutPays()"" style="""">"
+	Write "<br>",!
+	Write "	"
+	Write "<!-- Таблица платежей -->"
+	Write !,"	<SKLADList:listview width=100% height=200 id=""docums3"" ClassName=""Docs.Platejka"" /><br>",!
+	Write "	"
+	Write !,"<img src=""images/new.gif"" onmouseover=""newbut2.src='images/Onnew.gif'"" onmouseout=""newbut2.src='images/new.gif'""  id=""newbut2"" name=""newbut2"" alt=""Внести платёж"" onclick=""CreateDocument('','Docs.Platejka')"" style="""">"
+	Write !,"	"
+	Write !,"<img src=""images/edit.gif"" onmouseover=""editbutDocums3.src='images/Onedit.gif'"" onmouseout=""editbutDocums3.src='images/edit.gif'""  id=""editbutDocums3"" name=""editbutDocums3"" alt=""Редактировать документ"" onclick=""CreateDocument(docums3.ItemID,'Docs.Platejka')"" style="""">"
+	Write !,"	"
+	Write !,"<img src=""images/print.gif"" onmouseover=""printbut3.src='images/Onprint.gif'"" onmouseout=""printbut3.src='images/print.gif'""  id=""printbut3"" name=""printbut3"" alt=""Печать документа"" onclick=""prnt(docums3.ItemID,docums3.ClassName,'')"" style="""">"
+	Write !,"	"
+	Write !,"<img src=""images/ok.gif"" onmouseover=""okbutDocums3.src='images/Onok.gif'"" onmouseout=""okbutDocums3.src='images/ok.gif'""  id=""okbutDocums3"" name=""okbutDocums3"" alt=""Обработать документ"" onclick=""processdoc(docums3.ItemID)"" style="""">"
+	Write !,"	"
+	Write "<!--",!
+	Write "	<sklad:LittleButton name=""new"" id=""newbut"" onclick=""CreateDocument('','Docs.Platejka')"" alt=""Внести платёж"">",!
+	Write "	<sklad:LittleButton name=""edit"" id=""editplatej"" onclick=""CreateDocument(docums2.ItemID,'Docs.Platejka')"" alt=""Редактировать документ"">",!
+	Write "	<sklad:LittleButton name=""del+"" id=""delplatejkaitems"" onclick=""ClearPlatejkaItems()"" alt=""Очистить оплачиваемые расходные накладные"">",!
+	Write "	<sklad:LittleButton name=""price"" id=""pricebut"" onclick=""OpenPlatejWindow(docums2.ItemID)"" alt=""Разнести платёжный документ по расходным накладным"">",!
+	Write "	<sklad:LittleButton name=""ok"" id=""okbut22"" onclick=""processdoc(docums2.ItemID)"" alt=""Обработать документ"">",!
+	Write "	-->"
+	Write !,"	</fieldset>",!
+	Write "</td>",!
+	Write !,!,"</tr>",!
+	Write "</table>",!
+	Write !,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !,!,!
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"<script language=""jscript"" src=""common.js"">"
+	Write "</script>"
+	Write !,"<script language=""Jscript"">"
+	Write !,"var ColCode="""";",!
+	Write "sessionid="""_(%session.SessionId)_""";",!
+	Write "var where ="""";",!
+	Write !,"function load(){",!
+	Write "currentdict.LoadHeaders();",!
+	Write "//dfdf.attachEvent(""onAddColumns"", showgoods)",!
+	Write "//dfdf.LoadHeaders(""izdelie"");",!
+	Write "docums0.LoadHeaders();",!
+	Write "docums.LoadHeaders();",!
+	Write "docums2.LoadHeaders();",!
+	Write "docums3.LoadHeaders();",!
+	Write "}",!
+	Write !,"function showdictionary(where){",!
+	Write "parent.statusFR.WriteStatus(""Идёт вывод списка контрагентов..."")",!
+	Write "var where=ReturnSpace(where);",!
+	Write "var made=false;",!
+	Write "currentdict.DownLoad(where);",!
+	Write "parent.statusFR.WriteStatus("""")",!
+	Write "}",!
+	Write !,"function gg(){",!
+	Write "if(ColCode=="""")return false;",!
+	Write "where = ColCode+"" %STARTSWITH '""+fldval.value+""'"";",!
+	Write "if(fldval.value=="""")where="""";",!
+	Write "showdictionary(where);",!
+	Write "}",!
+	Write !,"function colclick(){",!
+	Write "	if(currentdict.ColType==""%Date""){alert(""Поля с датами не обрабатываются"");return false;}",!
+	Write "	namfld.innerText=currentdict.ColName;",!
+	Write "	ColCode=currentdict.ColCode;",!
+	Write "}",!
+	Write !,"function KontrClick(){",!
+	Write "KontrName.innerText=currentdict.ItemName",!
+	Write "KontrBalance.innerText=currentdict.item(""Balance"")",!
+	Write "}",!
+	Write !,"function addrecord(currentrecord){",!
+	Write "var currentrecord=ReturnSpace(currentrecord)",!
+	Write "ok=window.showModalDialog(""kontragent.csp?KontrId=""+currentrecord,"""",""center:yes;status:no;dialogHeight:708px;dialogWidth:800px;resizable:yes;"")",!
+	Write "if((ok!=null)&&(makeShowDict.checked)){showdictionary(where)}",!
+	Write "}",!
+	Write !,"function CreateDocument(ItemID,CurrentDocementClass){",!
+	Write "var doccsp=""document.csp"";",!
+	Write "if(CurrentDocementClass==""Docs.Platejka"")doccsp=""docplatej.csp?DocId=""+ReturnSpace(ItemID)",!
+	Write "WinResult=window.showModalDialog(doccsp,CurrentDocementClass+InnerSplitter+ItemID+InnerSplitter+"""",""center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;"")",!
+	Write "}",!
+	Write !,"// показать отгрузки и все платежи",!
+	Write "function ShowKontrData()",!
+	Write "{",!
+	Write "	ShowDocums();",!
+	Write "	ShowInPays();",!
+	Write "	ShowOutPays()",!
+	Write "}",!
+	Write !,"// показать отгрузки",!
+	Write "function ShowDocums0()",!
+	Write "{",!
+	Write "	var currentKontragent=currentdict.ItemID;",!
+	Write "	if(currentKontragent=="""")return",!
+	Write "	var Date1=ConvertDateSql(dat01.value);",!
+	Write "	var Date2=ConvertDateSql(dat02.value);",!
+	Write "	var request=""Dat>=CAST('""+Date1+""' AS DATE) and Dat<=CAST('""+Date2+""' AS DATE) and Kontr=""+currentKontragent+"" and opl=2"";",!
+	Write "	docums0.DownLoad(request);	",!
+	Write "}",!
+	Write !,"// показать отчеты",!
+	Write "function ShowDocums()",!
+	Write "{",!
+	Write "	var currentKontragent=currentdict.ItemID;",!
+	Write "	if(currentKontragent=="""")return",!
+	Write "	var Date1=ConvertDateSql(dat1.value);",!
+	Write "	var Date2=ConvertDateSql(dat2.value);",!
+	Write "	var request=""Dat>=CAST('""+Date1+""' AS DATE) and Dat<=CAST('""+Date2+""' AS DATE) and Kontr=""+currentKontragent;",!
+	Write "	docums.DownLoad(request);	",!
+	Write "}",!
+	Write !,"// показать платежи нам",!
+	Write "function ShowInPays()",!
+	Write "{",!
+	Write "	var currentKontragent=currentdict.ItemID;",!
+	Write "	if(currentKontragent=="""")return",!
+	Write "	var Date1=ConvertDateSql(dat11.value);",!
+	Write "	var Date2=ConvertDateSql(dat22.value);",!
+	Write "	var request=""Dat>=CAST('""+Date1+""' AS DATE) and Dat<=CAST('""+Date2+""' AS DATE) and Kontr=""+currentKontragent;",!
+	Write "	docums2.DownLoad(request);		",!
+	Write "}",!
+	Write !,"// показать платежи нам",!
+	Write "function ShowOutPays()",!
+	Write "{",!
+	Write "	var currentKontragent=currentdict.ItemID;",!
+	Write "	if(currentKontragent=="""")return",!
+	Write "	var Date1=ConvertDateSql(dat31.value);",!
+	Write "	var Date2=ConvertDateSql(dat32.value);",!
+	Write "	var request=""Dat>=CAST('""+Date1+""' AS DATE) and Dat<=CAST('""+Date2+""' AS DATE) and Poluh=""+currentKontragent;",!
+	Write "	docums3.DownLoad(request);	",!
+	Write "}",!
+	Write !,"// распечатать акт сверки",!
+	Write "function Sverka()",!
+	Write "{",!
+	Write "	var currentKontragent=currentdict.ItemID;",!
+	Write "	if(currentKontragent=="""")return",!
+	Write !,"	var WinResult=window.showModalDialog(""SverkaParams.csp"","""",""center:yes;status:no;dialogHeight:200px;dialogWidth:400px;resizable:yes;"")",!
+	Write "	if(WinResult==null){return;}",!
+	Write !,"	var kontr1id=WinResult.split(""@"")[2];",!
+	Write "	var kontr2id=currentKontragent;",!
+	Write "	",!
+	Write "	var dat1=WinResult.split(""@"")[0];",!
+	Write "	var dat2=WinResult.split(""@"")[1];",!
+	Write "	",!
+	Write "	window.open(""screen/Sverka.csp?Kontr1Id=""+kontr1id+""&Kontr2Id=""+kontr2id+""&dat1=""+dat1+""&dat2=""+dat2);",!
+	Write "}",!
+	Write !,"//распечатать документ",!
+	Write "function prnt(docid,docclass){",!
+	Write "var url=""print.csp?id=""+docid+""&class=""+docclass+""&sessionid=""+sessionid;",!
+	Write "window.open(url);",!
+	Write "}",!
+	Write !,"//обработать документ",!
+	Write "function processdoc(docid){",!
+	Write "	if(docid=="""")return",!
+	Write "	if(!window.confirm(""Обработать платёжный документ ?""))return",!
+	Write "	var doc=docid+""@Docs.Platejka"";",!
+	Write "	var ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Docs.Action.processdoc:csp.finance"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',doc)",!
+	Write "	if(isNaN(ok))",!
+	Write "	{",!
+	Write "		alert(ok)",!
+	Write "	}",!
+	Write "	else",!
+	Write "	{",!
+	Write "		ShowInPays();",!
+	Write "		ShowOutPays();",!
+	Write "		alert(""Документ успешно обработан"");",!
+	Write "	}",!
+	Write "}",!
+	Write !,"//открыть окно для разноски платёжки по расходным накладным",!
+	Write "function OpenPlatejWindow(ItemID){",!
+	Write "if(ReturnSpace(ItemID)=="""")return",!
+	Write "WinResult=window.showModalDialog(""PlatejRash.csp?DocId=""+ItemID,"""",""center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;"")",!
+	Write "}",!
+	Write "</script>"
+	Write !,(..HyperEventHead())
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html XMLNS:SKLADList>"
+	Write !,"<IMPORT NAMESPACE=""SKLADList"" IMPLEMENTATION=""htc/listview2.htc"">",!
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+  s login=$G(%session.Data("user"))
+  i '+login s %response.ServerSideRedirect="norights.csp" 
+  i '##class(Common.Rights).getrights(login,14) s %response.ServerSideRedirect="norights.csp" 
+  q 1
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\finance.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/finance.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>62167,65484</Default>
+</Parameter>
+</Class>
+</Export>

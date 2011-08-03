@@ -1,0 +1,124 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ i %session.NewSession d
+ . s %session.EndSession=1
+ . s sessionid=%request.Get("sessionid",1)
+ . s %session=%session.GetSession(sessionid)
+ e  s sessionid=%session.SessionId
+ s login=$G(%session.Data("user"),0)
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+
+Quit 1
+</script>
+<html XMLNS:SKLADz XMLNS:SKLAD2 XMLNS:SKLADList>
+<IMPORT NAMESPACE="SKLADz" IMPLEMENTATION="htc/treeview.htc">
+<IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc">
+<IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
+<head>
+<title>#($G(%session.Data("systemname")))#</title>
+<link href="style.css" type=text/css rel=stylesheet>
+<style>
+.sved.TD{border-left : 1 solid grey;border-top : 1 solid grey;}
+.sved{border-right : 1 solid grey;border-bottom : 1 solid grey;}
+</style>
+<script language="Jscript" src="common.js"></script>
+<script language="JScript">
+var NodeData = new Array();
+sessionid="#(%session.SessionId)#";
+
+Arguments=window.dialogArguments.split(InnerSplitter);
+GoodsId=ReturnSpace(Arguments[0]);
+GoodsName=ReturnSpace(Arguments[1]);
+function startFun(){
+window.close();
+}
+
+function load(){
+TovName.innerText=GoodsName;
+Movement.AddColumns("docdata~Дата~~~@%String#@#doctype~Тип документа~~~@%String#@#Kontr~Контрагент~~~@%String#@#doc~Документ~~~@%String#@#prih~Приход~~~@%String#@#rash~Расход~~~@%String#@#kol~Количество~~~@%String#@#cena~Цена~~~@%String#@#");
+kontra.LoadHeaders();
+PropTable.DownLoadPairs('',GoodsId);
+GetDocsByTovar();
+tovaddress.loadfrommethod("Store.Action.GetAddrByTovar",GoodsId,1,1)
+}
+
+function LoadFromCard(){
+kontra.GetFromCard("","",GoodsId)
+}
+
+function GetDocsByTovar(){
+if(selkont.value==1)var kont="";
+if(selkont.value==2)var kont=kontra.ItemID;
+Movement.loadfrommethod("Common.Common.GetDocsByTovar",GoodsId,dat1.value+"~"+dat2.value,kont)
+}
+
+function RemoveFromGroup(Groups,Goods){
+	if(!window.confirm("Удалить товар из группы?"))return
+	var ok=#server(Goods.GoodsAction.RemoveFromGroup(Goods,Groups))#
+	if(isNaN(ok)){alert(ok);}
+	else{document.getElementById("li"+Groups).style.display="none";}
+}
+</script>
+</head>
+<body  onload="load();" onkeypress="ManageWindow();">
+<table cellpadding=0 cellspacing=0 width=100% height=100% border=0>
+<tr><td colspan=2 ><center><font size=+1><b><span id="TovName" style="color:#002044"></span></b></font></center>
+<script language="cache" runat="server">
+ s GoodsId=%request.Get("GoodsId")
+ s groupspath=%request.Get("groupspath")
+ w "<fieldset><legend>Группы в которые входит товар</legend>"
+ w "<ul>"
+ &sql(declare rt cursor for select Groups,Groups->Name,Common.SqlProcs_GroupFullName(Groups) into Groups,GroupsName,GroupFullName from Goods.GoodsGroup where Goods=:GoodsId)
+ &sql(open rt)
+ f  &sql(fetch rt) q:SQLCODE  d
+ . w "<li id=""li"_Groups_"""> <img src=""images/del+.gif"" onclick=""RemoveFromGroup('"_Groups_"','"_GoodsId_"')"" onmouseover=""del"_Groups_".src='images/Ondel+.gif'"" onmouseout=""del"_Groups_".src='images/del+.gif'""  id=""del"_Groups_""" name=""del"_Groups_""" alt=""Убрать из группы""> "_GroupFullName
+ &sql(close rt)
+ w "</ul></fieldset>"
+ 
+ //f i=1:1:$L(groupspath,"~") d
+ //. s res=$G(res)_$P(groupspath,"~",i)_" -> "
+ //w $E(res,1,$L(res)-4)
+ 
+ &html<
+<hr width=70%></td></tr>
+<tr><td valign=top>
+<table class="sved" cellspacing=0 ><tr bgcolor="#eeffff"><td class="TD">&nbsp;<td class="TD">Количество<td class="TD">Продажная цена<td>
+>
+ s depots=##class(Common.Common).showdata("Store.Depot","ID,Name","","","",1)
+ s ok=##class(Store.Action).GetQuantByGoods(GoodsId,.store)
+ f i=1:1:$L(depots,"#@#")-1 d
+ . s depot=$P($P(depots,"#@#",i),"~",1)
+ . s g=##class(Goods.Goods).%OpenId(GoodsId)
+ . s price=g.Price
+ . w "<tr><td class=""TD"">"_$P($P(depots,"#@#",i),"~",2)_"<td class=""td"">"_+$G(store(depot))_"<td class=""td"">"_$J(price,".",2)
+</script>
+</table><br>
+<SKLADList:listview width=100% height=100 id="tovaddress" />
+<br>
+<input type="button" value="Изображения товара" onclick="showtovar('#(GoodsId)#')">
+</td><td>
+<fieldset><legend>Сведения о товаре</legend>
+<SKLAD2:table id="PropTable" width=250 />
+</fieldset>
+</td></tr>
+
+<tr><td width=100% align=center colspan=2 valign=top>
+<fieldset><legend>Движение товара c <input type=text id="dat1" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"> по <input type=text id="dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar">
+<select id="selkont"><option value=1>Все контрагенты</option><option value=2>Выбранный контрагент</option></select>
+<sklad:LittleButton name="ok" id="okbut" onclick="GetDocsByTovar()" alt="Показать документы"><br>
+</legend>
+	<SKLADList:listview width=100% height=100 id="Movement" />
+</fieldset>
+</td></tr>
+<tr height=100%><td valign="top" colspan=2>
+<fieldset><legend>Контрагенты товара</legend>
+ <SKLADList:listview width=100% height=100 id="kontra" ClassName="Common.Kontragent" onAddColumns="LoadFromCard()" /><br>
+<!--
+Поставщики: <input type="checkbox" style="border:none;width:15px"><br>
+Покупатели: <input type="checkbox" style="border:none;width:15px"><br>
+-->
+</fieldset>
+</td></tr>
+<tr><td align=center valign=bottom colspan=3><sklad:Button value="Да" onclick="startFun()">&nbsp;&nbsp;&nbsp;<sklad:Button value="Отмена" onclick="window.close()"></td></tr>
+</table>
+</body>
+</html>

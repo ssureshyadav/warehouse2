@@ -1,0 +1,88 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ s login=$G(%session.Data("user"))
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ q 1
+</script>
+<html XMLNS:Userlist>
+<IMPORT NAMESPACE="Userlist" IMPLEMENTATION="htc/listview2.htc">
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<title>Пользователи</title>
+<script language="JScript" src="common.js"></script>
+<script language="Jscript">
+    var identif="";
+    var rolidentif="";rolename="";
+function ULoad(){
+	Dictionary.LoadHeaders("Password");
+	RoleDictionary.LoadHeaders("GoodsRole,DocRole,DictsRole,SotreRole,OpersRole,ChiefRole,TunesRole,EmployeeRole");
+	}
+function unload(){
+	identif=""}
+function load(id){
+ 	identif=Dictionary.ItemID;
+ 		}
+function loadrole(id){
+	rolidentif=RoleDictionary.ItemID;
+	rolename=RoleDictionary.ItemName;
+	}						
+function  loading(){
+	identif="";
+	var ok=window.showModalDialog("Users.csp","","cener:yes;status:no;dialogHeight:300px;dialogWidth:500px;resizable:yes;");
+	if(ok==1)Show();
+	}
+function deleting(){
+	if (Dictionary.ItemID==""){alert("выберите пользователя"); return false}
+	if(!window.confirm("Удалить "+Dictionary.ItemName))return false;
+	ok=#server(Users.Dates.DeleteUser(Dictionary.ItemID))#;
+	if (ok!="") {alert(ok)};
+	Dictionary.DownLoad();
+	}	
+function input(){
+    if (identif==""){alert("выберите пользователя"); return false}
+    var ok=window.showModalDialog("RenameUser.csp?nameID="+Dictionary.ItemID,"displayWindow","width=500,height=300,toolbar=no,scrollbars=no");
+    if(ok==1)Show();    }	 
+function Show(){
+	Dictionary.DownLoad();
+ 	}
+function Roleshow(){
+	 RoleDictionary.DownLoad()
+	}
+function  createrole(){
+		rolidentif="";
+		 var ok=window.showModalDialog("createrole.csp","displayWindow","width=500,height=300,toolbar=no,scrollbars=no");
+	if(ok==1)Show();
+	}
+function deleterole(){
+	if (rolidentif==""){alert("выберите роль"); return false}
+	if(!window.confirm("Удалить"+"  "+RoleDictionary.ItemName+"?"+"И всех пользователей с этой ролью"))return false; 
+	ok=#server(Users.Roles.DeleteRole(rolename))#;
+	if (ok==1) {#server(Users.NameRoles.DeleteRoles(rolidentif))#}
+	else {alert(ok)};
+	RoleDictionary.DownLoad();
+	Dictionary.DownLoad();
+	identif="";
+	}
+function renamerole(){
+	if (rolidentif==""){alert("выберите роль"); return false}
+	 var ok=window.showModalDialog("renamerole.csp?rolename="+RoleDictionary.ItemName,"displayWindow","width=500,height=300,toolbar=no,scrollbars=no");
+	window.location.reload()
+}			 
+</script>
+</head>
+<body onload="ULoad()"> 
+<sklad:Button value="Назад" onclick="window.location.href='tuneup.csp'"><br>
+<fieldset><legend>Пользователи: </legend>
+<Userlist:listview width=100% height=140 id="Dictionary" onAddColumns="Show()" ClassName="Users.Dates" zClick="load()"/>
+<sklad:LittleButton name="new" id="newes" alt="Новый пользователь" onclick="loading()">
+<sklad:LittleButton name="edit" id="edite" alt="Изменить пользователя" onclick="input()">
+<sklad:LittleButton name="del" id="newe" alt="Удалить пользователя" onclick="deleting(identif)">
+</fieldset>
+
+<fieldset><legend>Роли: </legend>
+<Userlist:listview width=100% height=140 id="RoleDictionary" onAddColumns="Roleshow()" ClassName="Users.NameRoles" zClick="loadrole()"/>
+<sklad:LittleButton name="new" id="newrole" alt="Новая роль" onclick="createrole()">
+<sklad:LittleButton name="edit" id="editerole" alt="Просмотреть роль/Изменить" onclick="renamerole()">
+<sklad:LittleButton name="del" id="newrol" alt="Удалить роль" onclick="deleterole(rolidentif,rolename)">
+</fieldset>
+</body>
+</html>

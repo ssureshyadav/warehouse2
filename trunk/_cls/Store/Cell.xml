@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Store.Cell">
+<Super>%Persistent</Super>
+<TimeCreated>60319,65466.449598</TimeCreated>
+
+<Property name="Address">
+<Description>
+Адрес ячейки</Description>
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Адрес ячейки"/>
+</Property>
+
+<Index name="AddressIndex">
+<Properties>Address</Properties>
+</Index>
+
+<Property name="Paramater">
+<Description>
+Параметр хранения</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Параметр хранения"/>
+</Property>
+
+<Property name="Value">
+<Description>
+Значение</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Значение"/>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Store.CellD</DataLocation>
+<DefaultData>CellDefaultData</DefaultData>
+<IdLocation>^Store.CellD</IdLocation>
+<IndexLocation>^Store.CellI</IndexLocation>
+<StreamLocation>^Store.CellS</StreamLocation>
+<Data name="CellDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Address</Value>
+</Value>
+<Value name="3">
+<Value>Paramater</Value>
+</Value>
+<Value name="4">
+<Value>Value</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

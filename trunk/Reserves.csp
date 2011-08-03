@@ -1,0 +1,63 @@
+<html XMLNS:SKLADList>
+<IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="jscript" src="common.js"></script>
+<title>	Cache Server Page </title>
+<Script language="Jscript">
+sessionid="#(%session.SessionId)#";
+var ColCode="";
+function gg(){
+if(ColCode=="")return false;
+var SearchProperty = ColCode;
+var SearchValue = fldval.value;
+if(SearchValue=="")SearchProperty="";
+load(SearchProperty,SearchValue);
+}
+
+function colclick(){
+	if(currentdict.ColType=="%Date"){alert("Поля с датами не обрабатываются");return false;}
+	namfld.innerText=currentdict.ColName;
+	ColCode=currentdict.ColCode;
+}
+
+
+function load(SearchProperty,SearchValue){
+currentdict.loadfrommethod("Reports.ShowTables.ShowReserves",SearchProperty,SearchValue,"");
+}
+
+function prnt(docid,docclass){
+var docid=currentdict.ItemID;
+var docid=docid.split("@")[1];
+if(docid=="")return
+window.open("print.csp?id="+docid+"&class=Docs.StorageOut"+"&sessionid="+sessionid)
+}
+
+//Открыть карточку товара
+function OpenCard(){
+var GoodsId=currentdict.ItemID;
+var GoodsId=GoodsId.split("@")[0];
+if(GoodsId=="")return
+ok=window.showModalDialog("GoodsCard.csp?GoodsId="+GoodsId+"&groupspath=",GoodsId+InnerSplitter+"","center:yes;status:no;dialogHeight:600px;dialogWidth:650px;resizable:yes")
+}
+
+</script>
+</head>
+
+<body onload="load('','')">
+<sklad:Button value="Назад" onclick="window.location.href='goods.csp'"><br>
+
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<TD align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=3><strong>Резервы</strong></TD></tr>
+<tr>
+</table>
+<br>
+<sklad:Button value="Обновить" onclick="window.location.reload()">
+<br>
+<span id="namfld"></span>&nbsp;<input type="text" id="fldval" onkeyup="gg();">
+<SKLADList:listview width=100% height=150 id="currentdict" zonColumnClick="colclick()" /><br>
+<sklad:LittleButton name="card" id="cardtov" onclick="OpenCard()" alt="Карточка товара">
+<sklad:LittleButton name="print" id="okbwut2" onclick="prnt()" alt="Печать документа">
+</body>
+</html>

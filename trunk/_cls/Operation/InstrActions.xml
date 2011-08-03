@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Operation.InstrActions">
+<Description>
+Действия с инструкциями</Description>
+<IncludeCode>xmlmacros</IncludeCode>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject</Super>
+<TimeCreated>60368,10170.107302</TimeCreated>
+
+<Method name="changestat">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>instrid,newstat,HasBeenSent:%String=""</FormalSpec>
+<Implementation><![CDATA[
+ //1Создана
+ //2Утверждена
+ //3Принята
+ //4Укомплектовано
+ //5Отправлено в офис
+ //6Отправлено со склада
+ //7Отправлено из офиса
+ //8Отправлено экспресс-почтой
+ //9Завершено
+ s $ZT="changestatErr"
+ s instr=##class(Operation.Instructions).%OpenId(instrid)
+ i '$ISOBJECT(instr) $$$WriteError("changestat Не удалось открыть инструкцию ("_instrid_") класс Operation.Instructions") q "Невозможно извлечь информацию об указанном документе в базе данных."
+ s oldstat=instr.State
+ i newstat=2 d
+ . i (oldstat'=1)&(oldstat'=9) s err="Инструкция уже утверждена" q
+ . i '$ISOBJECT(instr.Kontr) s err="В инструкции не указан контрагент" q
+ if $G(err)'="" q err
+ i newstat=9 s instr.Stat=2	//если "завершена" то закрываем документ (для записи времени и оператора)
+ s instr.State=newstat
+ 
+ //запись истории 
+ s hc=##class(Operation.InstructionsHist).%New()
+ s hc.StateChangeD=+$H
+ s hc.StateChangeT=$P($H,",",2)
+ s hc.State=newstat
+ Do instr.ChangesChain.Insert(hc)
+ s instr.HasBeenSent=HasBeenSent
+ s ok=instr.%Save()
+ 
+ s NewStateName=instr.StateLogicalToDisplay(newstat)
+ 
+ i 'ok $$$WriteObjError(ok) q "Ошибка при изменении статуса"
+ q 1_"@"_NewStateName
+changestatErr
+ $$$WriteError($ZE)
+ q "Извините при изменении статуса произошла ошибка"
+]]></Implementation>
+</Method>
+
+<Method name="startoper">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>instobj</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="startoperErr"
+ i '$ISOBJECT(instobj) $$$WriteError("Не удалось открыть инструкцию ("_instrid_") класс Operation.Instructions") q "Статус изменён но возникла ошибка при создании операции."
+ s newoper=##class(Operation.OperationHistory).%New()
+ s newoper.Start=+$H
+ s newoper.StartTime=$P($H,",",2)
+ s newoper.Name="Операция инструкции "_instobj.Name
+ s newoper.OperTemplate=instobj.Oper
+ s newoper.Depot=instobj.Depot
+ s newoper.instruction=instobj
+ s ok=newoper.%Save()
+ i '+ok $$$WriteObjError(ok) q "Статус изменён, но возникла ошибка при создании операции."
+ q newoper.%Id()
+startoperErr
+ $$$WriteError($ZE)
+ q "Статус изменён, но возникла ошибка при создании операции."
+]]></Implementation>
+</Method>
+
+<Method name="endoper">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>instobj</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="startoperErr"
+ 
+ i '$ISOBJECT(instobj) $$$WriteError("Не удалось открыть инструкцию ("_instrid_") класс Operation.Instructions") q "Статус изменён но возникла ошибка при завершении операции."
+ s newoper=instobj.Operation
+ i '$ISOBJECT(newoper) $$$WriteError("Не удалось открыть операцию ("_instobj.Operation_") класс Operation.OperationHistory") q "Статус изменён но возникла ошибка при завершении операции."
+ s newoper.EndDate=+$H
+ s newoper.EndTime=$P($H,",",2)
+ s ok=newoper.%Save()
+ i '+ok $$$WriteObjError(ok) q "Статус изменён, но возникла ошибка при создании операции."
+ q 1
+startoperErr
+ $$$WriteError($ZE)
+ q "Статус изменён, но возникла ошибка при создании операции."
+]]></Implementation>
+</Method>
+
+<Method name="create">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassName,ItemID,NamesStr,RowDataStr,TypesStr</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="createErr"
+ s doc=##class(Common.Common).SaveItem(ClassName,ItemID,NamesStr,RowDataStr,TypesStr)
+ i '+doc $$$WriteObjError(doc) q doc
+ q doc
+createErr
+ $$$WriteError($ZE)
+ q "Извините. При сохранении инструкции возникла ошибка."
+]]></Implementation>
+</Method>
+
+<Method name="pickasanswer">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>docid</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="pickasanswerErr",err="Извините. При привязке внутренней инструкции к инструкции руководителя возникла ошибка."
+ i '$ISOBJECT(docid) s innerinstr=##class(Docs.Super).%OpenId(docid)
+ e  s innerinstr=docid
+ i '$ISOBJECT(innerinstr.Source) $$$WriteError("Внутренняя инструкция id="_docid_" не содержит ссылку на накладную") q err
+ i '$ISOBJECT(innerinstr.Source.Source) $$$WriteError("Накладная внутренней инструкции id="_docid_" не содержит ссылку на инструкцию руководителя") q err
+ s instr=innerinstr.Source.Source
+ i '$ISOBJECT(docid) d instr.innerinstrSetObjectId(docid)
+ e  s instr.innerinstr=docid
+ s ok=instr.%Save()
+ i '+ok $$$WriteObjError(ok) q "Извините. При привязке внутренней инструкции к инструкции руководителя возникла ошибка."
+ q 1 
+pickasanswerErr
+ $$$WriteError($ZE)
+ q "Извините. При привязке внутренней инструкции к инструкции руководителя возникла ошибка."
+]]></Implementation>
+</Method>
+
+<Method name="InstructHist">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>instrid,l,l2</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="InstructHistErr"
+ s instr=##class(Operation.Instructions).%OpenId(instrid)
+ 
+ $$$StartXML
+ 
+ s sc=xmlstr.Element("AllHeaders")
+ 	 s sc=xmlstr.Element("OneObject")
+ 		 $$$WriteElement("text","Состояние")
+ 		 $$$WriteElement("key","State")
+	 s sc=xmlstr.EndElement()
+	 s sc=xmlstr.Element("OneObject")
+ 		 $$$WriteElement("text","Дата")
+ 		 $$$WriteElement("key","StateChangeD")
+	 s sc=xmlstr.EndElement()
+ 	 s sc=xmlstr.Element("OneObject")
+ 		 $$$WriteElement("text","Время")
+ 		 $$$WriteElement("key","StateChangeT")
+	 s sc=xmlstr.EndElement()
+ 	 s sc=xmlstr.Element("OneObject")
+ 		 $$$WriteElement("text","Пользователь")
+ 		 $$$WriteElement("key","User1")
+	 s sc=xmlstr.EndElement()
+ s sc=xmlstr.EndElement()
+ //конец заголовков
+ 
+ s f=##class(Operation.Instructions).%OpenId(instrid)
+ i '$ISOBJECT(f) $$$WriteError("InstructHist. Не удалось открыть инструкцию ("_instrid_") класс Operation.Instructions") $$$EndXML q
+
+ s sc=xmlstr.Element("AllObjects")
+ Set key = ""
+
+ Do {
+	q:'$ISOBJECT(f.ChangesChain)
+ 	Set chain = f.ChangesChain.GetNext(.key)
+ 	q:'$ISOBJECT(chain)
+ 	s time="",date="",name=""
+ s sc=xmlstr.Element("OneObject")
+ 	
+ 	s sc=xmlstr.Element("State")
+ 	s st=##class(Operation.Instructions).StateLogicalToDisplay(chain.State)
+    $$$WriteElement("text",st)
+	s sc=xmlstr.EndElement() 
+	
+ 	s sc=xmlstr.Element("StateChangeD")
+    i chain.StateChangeD'="" s date=$ZD(chain.StateChangeD)
+    $$$WriteElement("text",date)
+ 	s sc=xmlstr.EndElement()   
+ 	
+ 	s sc=xmlstr.Element("StateChangeT")
+ 	i chain.StateChangeT'="" s time=$ZT(chain.StateChangeT)
+    $$$WriteElement("text",time)
+ 	s sc=xmlstr.EndElement()   
+ 	
+ 	s sc=xmlstr.Element("User1")
+ 	i $ISOBJECT(chain.User1) s name=chain.User1.Name
+    $$$WriteElement("text",name)
+ 	s sc=xmlstr.EndElement()   
+ 	 	
+ s sc=xmlstr.EndElement()
+ 	  
+ } While (key '= "")
+
+ 
+ s sc=xmlstr.EndElement()
+
+
+ $$$EndXML
+
+ q 1
+InstructHistErr
+ $$$WriteError($ZE)
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="SetInstrDepot">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>instrid,depot</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="SetInstrDepotErr"
+ s instrobj=##class(Operation.Instructions).%OpenId(instrid)
+ i '$ISOBJECT(instrobj) $$$WriteError("SetInstrDepot Не удалось открыть объект "_instrid_" класса Operation.Instructions") q ""
+ d instrobj.Depot1SetObjectId(depot)
+ s ok=instrobj.%Save()
+ i '+ok $$$WriteObjError(ok) q "Извините, ошибка при назначении склада инструкции"
+ q 1
+SetInstrDepotErr
+ $$$WriteError($ZE)
+ q "Извините, ошибка при назначении склада инструкции"
+]]></Implementation>
+</Method>
+
+<Method name="InstrFromPlan">
+<Description><![CDATA[
+Создать инструкцию на основе плана
+<br><var>Plan</var> - ID или объект плана (Operation.Plan)]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Plan="",CreateAnyWay=0</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="InstrFromPlanErr"
+ i Plan="" q "Ошибка. Не указан план руководителя. Инструкция не может быть создана."
+ i '$ISOBJECT(Plan) s Plan=##class(Operation.Plan).%OpenId(Plan)
+ i ('CreateAnyWay)&(Plan.Stat=2) q "PlanIsClosed"
+ s Instr=##class(Operation.Instructions).%New()
+ s Instr.Name=Plan.Name
+ s Instr.Kontr=Plan.Kontr
+ s Instr.Comment=Plan.Comment
+ d Instr.SourceSetObjectId(Plan.%Id())
+ 
+ // параметры которые возможно надо вынести в настройки
+ s CurrentDepot=$S($ISOBJECT($G(%session)):$G(%session.Data("depot")),1:"")
+ d Instr.Depot1SetObjectId(CurrentDepot)	//склад на который отправится инструкция
+ d Instr.OperSetObjectId(1)		//тип операции (приём товара)
+ s Instr.InstDate=+$H			//дата инструкции
+ 
+ s ok=1
+ //пошли по строкам плана
+ s i="" f  s i=Plan.Items.Next(i) q:(i="")!('+ok)  d
+ . s PlanItem=Plan.Items.GetAt(i)
+ . s InstrItem=##class(Operation.InstructionsItems).%New()
+ . s InstrItem.Goods=PlanItem.Goods
+ . s InstrItem.Price=PlanItem.Price
+ . s InstrItem.Quantity=PlanItem.Quantity
+ . s InstrItem.Total=PlanItem.Total
+ . d InstrItem.DocTypeSetObjectId("Operation.Instructions")
+ . 
+ . s ok=Instr.Items.Insert(InstrItem)
+ i '+ok $$$WriteObjError(ok) q "Извините. Ошибка при создании инструкции. План не может быть создан."
+ s ok=Instr.%Save()
+ i '+ok $$$WriteObjError(ok) q "Извините. Ошибка при создании инструкции. План не может быть создан."
+ s Plan.Stat=2	//ставим плану статус "закрыт"
+ s ok=Plan.%Save()
+ i '+ok $$$WriteObjError(ok) q "Извините. Ошибка при закрытии плана. Инструкция создана, но план не закрыт."
+ q Instr.%Id()
+InstrFromPlanErr
+ $$$WriteError($ZE)
+ q "Извините. Ошибка при создании инструкции на основе плана."
+]]></Implementation>
+</Method>
+
+<Method name="DeleteInstrChildren">
+<Description><![CDATA[
+Удалить всех потомков инструкции руководителя
+<br>InstrId - ID инструкции руководителя]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>InstrId:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ TSTART
+ s ok=1
+ &sql(declare InstrChildren cursor for 
+ select id,DocumentClass,DocumentClass->Name,Stat,Name
+ into :ChildId,:DocumentClass,:DocumentClassName,:Stat,:Name
+ from Docs.Super 
+ where Source=:InstrId)
+ &sql(open InstrChildren)
+ //в цикле идём по всем потомкам инструкции
+ f  &sql(fetch InstrChildren) q:(SQLCODE)!('+ok)  d
+ . if Stat=2 s ok=DocumentClassName_" № "_Name_" находится в состоянии ""обработан"", поэтому удаление документов инструкции руководителя невозможно. Операция отменена." q
+ . //удаляем строки текущего потомка инструкции
+ . &sql(delete from Docs.DocItems where Doc=:ChildId)
+ . if SQLCODE<0 s ok="Ошибка при удалении "_DocumentClassName_" № "_Name q
+ . //если текущий потомок расходная - то удалим её потомка (то есть внутреннюю инструкцию)
+ . if DocumentClass="Docs.Rash" s ok=$$KillRashChild(ChildId)
+ &sql(close InstrChildren)
+ if '+ok TROLLBACK  q ok
+ //теперь удалим непосредственно потомков инструкции
+ &sql(delete from Docs.Super where Source=:InstrId)
+ if SQLCODE<0 s ok="Ошибка при удалении документов инструкции руководителя."
+ if '+ok TROLLBACK  q ok
+ TCOMMIT
+ q 1
+KillRashChild(ChildId)
+ &sql(select id,DocumentClass,DocumentClass->Name,Stat,Name 
+ 	into :RashChildId,:DocumentClass,:DocumentClassName,:Stat,:Name
+ 	from Docs.Super where Source=:ChildId)
+ if Stat=2 q DocumentClassName_" № "_Name_" находится в состоянии ""обработан"", поэтому удаление документов инструкции руководителя невозможно. Операция отменена."
+ 
+ &sql(delete from Docs.StorageOutItems where Doc=:RashChildId)
+ if SQLCODE<0 q "Ошибка при удалении "_DocumentClassName_" № "_Name
+ 
+ &sql(delete from Docs.DocItems where Doc=:RashChildId)
+ if SQLCODE<0 q "Ошибка при удалении "_DocumentClassName_" № "_Name
+ &sql(delete from Docs.Super where Source=:RashChildId)
+ if SQLCODE<0 q "Ошибка при удалении строк "_DocumentClassName_" № "_Name
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="GetInstrType">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>InstrId:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	&sql(select Oper into :Oper from Operation.Instructions where ID=:InstrId)
+	if SQLCODE $$$WriteError("Ошибка SQLCODE. GetInstrType InstrId="_InstrId_" SQLCODE="_SQLCODE) q ""
+	q Oper
+]]></Implementation>
+</Method>
+
+<Method name="GoodsHasBeenSent">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>InnerInstr,Goods</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	&sql(select sum(quantdefault),sum(quantreal)
+		into :quantdefault,:quantreal
+		from Docs.StorageOutItems
+		where doc=:InnerInstr
+			and Goods=:Goods)
+	if SQLCODE q 0	//если не нашли инструкцию и товар. значит не отправили
+	if quantdefault>quantreal q 0	//если заказывали больше чем отправили, значит не отправили
+	q 1	//во всех иных случаях считаем что отправили
+]]></Implementation>
+</Method>
+
+<Method name="GetInnerInstr">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Instr:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	&sql(select innerinstr into :innerinstr from Operation.Instructions where ID=:Instr)
+	if SQLCODE q 0
+	q innerinstr
+]]></Implementation>
+</Method>
+
+<Method name="GetInstrReminderText">
+<Description>
+Получить </Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ShowOnlyCount=0</FormalSpec>
+<Implementation><![CDATA[
+	s $ZT = "GetInstrReminderTextErr"
+	s str="<table border=1>"
+	s DaysCount = $$$TunesVariableGlobal("ShowInstrReminder")
+	&sql(declare ReminderCr cursor for
+		select ID,dat,Name,Kontr->Name,%external(State)
+		into :ID,:dat,:Name,:KontrName,:StateName
+		from Operation.Instructions 
+		where ({fn CURDATE()}-dat>=:DaysCount) 
+			AND (not State in (4,9))
+		)
+	&sql(open ReminderCr)
+	f  &sql(fetch ReminderCr) q:SQLCODE  d
+	. s CurrentInstr = "<tr><td>"_$I(counter)
+	. s CurrentInstr = CurrentInstr_"<td>"_Name
+	. s CurrentInstr = CurrentInstr_"<td> от "_$ZD(dat,4)
+	. s CurrentInstr = CurrentInstr_"<td>"_StateName
+	. s CurrentInstr = CurrentInstr_"<td>"_KontrName
+	. s CurrentInstr = CurrentInstr_"<td><a href=""javascript:PrintInstr('"_ID_"')""><img src=""images/print.gif"" alt=""распечатать""></a>"
+	. s CurrentInstr = CurrentInstr_"<a href=""javascript:ItemInstr('"_ID_"')""><img src=""images/edit.gif"" alt=""редактировать""></a>"
+	. s str=str_CurrentInstr
+	&sql(close ReminderCr)
+	s str=str_"</table>"
+	if ShowOnlyCount q +$G(counter)
+	q str
+GetInstrReminderTextErr
+ $$$WriteError($ZE)
+ q "Извините. Ошибка при формировании списка пропущенных заявок."
+]]></Implementation>
+</Method>
+</Class>
+</Export>

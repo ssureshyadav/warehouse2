@@ -1,0 +1,42 @@
+<html XMLNS:SKLAD2>
+<IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc" >
+<head>
+<title>#($G(%session.Data("systemname")))#</title>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="Jscript" src="common.js"></script>
+<script language="JScript">
+var argArr=window.dialogArguments.split(";");
+var ItemID=argArr[0];
+var ClassName=argArr[1];
+function startFun(){
+if(ReturnSpace(ItemID)==""){question="Создать запись?"}
+else{question="Изменить запись?"}
+if(!window.confirm(question))return false;
+NamesStr=PropTable.names;
+RowDataStr=PropTable.ColumnData(1);
+TypesStr=PropTable.ColumnTypes(1);
+ok=#server(Common.Common.SaveItem(ClassName,ItemID,NamesStr,RowDataStr,TypesStr))#
+if(!isNaN(ok.substr(0, 1))){returnValue=1;window.close();}
+else{alert(ok);}
+}
+
+function load(){
+PropTable.DownLoadPairs(ClassName,ItemID);
+}
+
+function lookstore(){
+	mok=window.showModalDialog("storemodal.csp","","cener:yes;status:no;dialogHeight:500px;dialogWidth:600px;resizable:yes;");
+	if(mok==null)return
+	PropTable.setCellValue("Depot",mok.split(InnerSplitter)[1],mok.split(InnerSplitter)[0])
+}
+</script>
+</head>
+<body  onload="load();" onkeypress="ManageWindow();" >
+<fieldset style="width:100%;height:200"><legend>Основные свойства</legend>
+<SKLAD2:table id="PropTable" width="100%" />
+</fieldset>
+  <sklad:LittleButton name="new" id="newtov" onclick="lookstore()" alt="Просмотреть склады">
+<center><br><sklad:Button value="Да" onclick="startFun();"><sklad:Button onclick="window.close()" value="Отмена"></center>
+</table>
+</body>
+</html>

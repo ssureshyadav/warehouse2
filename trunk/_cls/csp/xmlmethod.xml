@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.xmlmethod">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62292,54571.390926</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	s ses=%request.Get("sessionid",1)
+	s %session=%session.GetSession(ses)
+	s classmethod=%request.Get("classmethod",1)
+	s id=%request.Get("id",1)
+	s documentclass=%request.Get("documentclass",1)
+	s class=$P(classmethod,".",1,$L(classmethod,".")-1)
+	s method=$P(classmethod,".",$L(classmethod,"."))
+	s xmlobj=%request.Content
+	i $ISOBJECT(xmlobj) d
+	. s ok=$ZOBJCLASSMETHOD(class,method,xmlobj,id,documentclass)
+	w $G(ok,"xmlmethod.csp\nОшибка. Запрос не может быть обработан.")
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\xmlmethod.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/xmlmethod.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>60556,48944</Default>
+</Parameter>
+</Class>
+</Export>

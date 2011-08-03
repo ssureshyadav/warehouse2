@@ -1,0 +1,60 @@
+<script language="cache" runat="server">
+ s skip=%request.Get("skip")
+</script>
+<html XMLNS:SKLAD2>
+<IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc" >
+<head>
+<title>#($G(%session.Data("systemname")))#</title>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="Jscript" src="common.js"></script>
+<script language="JScript">
+var argArr=window.dialogArguments.split(";");
+var ItemID=argArr[0];
+var ClassName=argArr[1];
+
+function startFun()
+{
+	if(ReturnSpace(ItemID)==""){question="Создать запись?"}
+	else{question="Изменить запись?"}
+	if(!window.confirm(question))return false;
+	var xmldoc=PropTable.GetXmlContent();
+	xmldoc=addnode(xmldoc,"startnumb",startnumb.value)
+	xmldoc=addnode(xmldoc,"koli4est",koli4est.value)
+	xmldoc=addnode(xmldoc,"prefix",prefix.value)
+	xmldoc=addnode(xmldoc,"leng",leng.value)
+	xmldoc=addnode(xmldoc,"comment",comment.value)
+	if (SerialAsGarant.checked){ var SerialAsGarantValue = "1"; }
+	else{ var SerialAsGarantValue = "0"; }
+	xmldoc=addnode(xmldoc,"SerialAsGarant",SerialAsGarantValue)
+	
+	//var xmldoc2=docstr.GetXmlContent();
+	var ok=SplitSendXml("",ClassName,xmldoc,"","#(%session.SessionId)#","Docs.Action.makealotgarants");
+
+	//alert("первый"+isNaN(ok.substr(0, 1)) )
+	if(!isNaN(ok.substr(0, 1))){returnValue=1;window.close();}
+	else{alert(ok);}
+}
+
+function load()
+{
+	PropTable.DownLoadPairs(ClassName,ItemID,"remont1,remont2,remont3,remont1otch,remont2otch,remont3otch,Name,Dat,Comment");
+}
+
+</script>
+</head>
+<body  onload="load();" onkeypress="ManageWindow();" >
+<p style="font-face:Arial" align=center>Множественный ввод номеров гарантийных талонов
+<fieldset ><legend>Основные свойства</legend>
+<SKLAD2:table id="PropTable" width="100%" />
+</fieldset>
+<table>
+<tr><td colspan=2>Примечание к гарантийному талону:<br> <textarea id="comment" rows=4 cols=50></textarea><br><br>
+<tr><td>Префикс номера гарантийного талона <td><input id="prefix" type=text>
+<tr><td>Начальная цифра <td><input id="startnumb" type=text> количество разрядов номера <input type=text id="leng" style="width:40">
+<tr><td colspan=2>Серийный и гарантийный номера идентичны <input type="checkbox" value="1" id="SerialAsGarant" style="border:none;width:15">
+<tr><td>Количество гарантийных талонов <td><input id="koli4est" type=text value=1>
+</table>
+<center><br><sklad:Button value="Да" onclick="startFun();"><sklad:Button onclick="window.close()" value="Отмена"></center>
+</table>
+</body>
+</html>

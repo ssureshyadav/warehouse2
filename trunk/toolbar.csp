@@ -1,0 +1,72 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ s login=$G(%session.Data("user"))
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ q 1
+</script>
+<html>
+<head>
+<SCRIPT Language="jscript">
+gobo = Image('');
+function ChangePage(BtnKey){
+RowsStr="37px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,*,20px"
+if(BtnKey=="goods"){RowsStr="37px,*,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,20px"}
+if(BtnKey=="docs"){RowsStr="37px,0px,*,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,20px"}
+if(BtnKey=="dicts"){RowsStr="37px,0px,0px,*,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,20px"}
+if(BtnKey=="store"){RowsStr="37px,0px,0px,0px,*,0px,0px,0px,0px,0px,0px,0px,0px,0px,20px"}
+if(BtnKey=="tunes"){RowsStr="37px,0px,0px,0px,0px,*,0px,0px,0px,0px,0px,0px,0px,0px,20px"}
+if(BtnKey=="chief"){RowsStr="37px,0px,0px,0px,0px,0px,*,0px,0px,0px,0px,0px,0px,0px,20px"}
+if(BtnKey=="employee"){RowsStr="37px,0px,0px,0px,0px,0px,0px,*,0px,0px,0px,0px,0px,0px,20px"}
+if(BtnKey=="analyzis"){RowsStr="37px,0px,0px,0px,0px,0px,0px,0px,*,0px,0px,0px,0px,0px,20px"}
+if(BtnKey=="kontr"){RowsStr="37px,0px,0px,0px,0px,0px,0px,0px,0px,*,0px,0px,0px,0px,20px"}
+if(BtnKey=="finance"){RowsStr="37px,0px,0px,0px,0px,0px,0px,0px,0px,0px,*,0px,0px,0px,20px"}
+if(BtnKey=="director"){RowsStr="37px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,*,0px,0px,20px"}
+if(BtnKey=="login"){RowsStr="37px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,*,0px,20px"}
+if(BtnKey=="exit"){
+	if(window.confirm("Выйти из программы?")){
+		var xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+		try{
+			xmlhttp.open("POST","CloseSession.csp",false)
+			xmlhttp.send()
+			}
+		catch(e){
+			}
+		window.parent.close()
+	}
+}
+
+frameElement.document.all.MainFrameSet.rows = RowsStr
+}
+</SCRIPT>
+
+</head>
+
+<body bgcolor="ButtonFace" leftmargin=5 rightmargin=5 topmargin=1 bottommargin=5 >
+<Table width=100%><tr><td>
+<script language="cache" runat="server">
+ s login=$G(%session.Data("user"))
+ s:##class(Common.Rights).getrights(login,1) i($i(i))="goods",i(i,"alt")="Товары"
+ s:##class(Common.Rights).getrights(login,3) i($i(i))="docs",i(i,"alt")="Документы"
+ s:##class(Common.Rights).getrights(login,4) i($i(i))="dicts",i(i,"alt")="Справочники"
+ s:##class(Common.Rights).getrights(login,15) i($i(i))="store",i(i,"alt")="Места хранения"
+ s:##class(Common.Rights).getrights(login,16) i($i(i))="tunes",i(i,"alt")="Настройки"
+ s:##class(Common.Rights).getrights(login,2) i($i(i))="chief",i(i,"alt")="Рабочее место сервис менеджера"
+ s:##class(Common.Rights).getrights(login,5) i($i(i))="employee",i(i,"alt")="Рабочее место на складе"
+ s:##class(Common.Rights).getrights(login,17) i($i(i))="analyzis",i(i,"alt")="Аналитика"
+ s:##class(Common.Rights).getrights(login,18) i($i(i))="kontr",i(i,"alt")="Учёт отгрузок и платежей"
+ s:##class(Common.Rights).getrights(login,14) i($i(i))="finance",i(i,"alt")="Финансы"
+ s:##class(Common.Rights).getrights(login,13) i($i(i))="director",i(i,"alt")="Рабочее место директора"
+ s i($i(i))="login",i(i,"alt")="Вход в систему"
+ 
+ s i="" f  s i=$O(i(i)) q:i=""  d
+ . w "<img src=""images/big/on"_i(i)_".gif"" width=1 height=1 style=""display:none"">"
+ . w "<img src=""images/big/"_i(i)_".gif"" alt="""_i(i,"alt")_"""onmouseover=""this.src='images/big/on"_i(i)_".gif'"" onmouseout=""this.src='images/big/"_i(i)_".gif'"" onclick=""ChangePage('"_i(i)_"');"" style=""cursor:hand"" width=30 height=30>&nbsp;",!
+</script>
+</td><td align=right>
+<img src="images/big/onexit.gif" width=1 height=1 style="display:none">&nbsp;
+<img src="images/big/exit.gif" onmouseover="this.src='images/big/onexit.gif'" onmouseout="this.src='images/big/exit.gif'" onclick="ChangePage('exit');" style="cursor:hand" width=30 height=30>&nbsp;
+<img src="images/big/onhelp.gif" width=1 height=1 style="display:none">&nbsp;
+<img src="images/big/help.gif" onmouseover="this.src='images/big/onhelp.gif'" onmouseout="this.src='images/big/help.gif'" onclick="window.open('help/index.html');" style="cursor:hand" width=30 height=30>&nbsp;
+</td></tr></table>
+</body>
+
+</html>

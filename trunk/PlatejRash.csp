@@ -1,0 +1,93 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ s login=$G(%session.Data("user"))
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ s DocId=%request.Get("DocId")
+ q 1
+</script>
+<html>
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<title>	Занесение платежа на расходные накладные </title>
+<script language="jscript"> 
+var DocId="#(DocId)#";
+function WindowClose(){
+if(window.confirm("Закрыть окно? (Все несохранённые данные будут утеряны)"))window.close();
+}
+
+function SubmitForm(){
+var res="";
+for(var i=0;i<forma.elements.length;i++){
+	var id=forma.elements[i].id;
+	if(id.split("|")[0]=="RashID")
+		{
+		var value=forma.elements[i].value;
+		if(value!=0)
+			{
+			var RashId=id.split("|")[1];
+			var res=res+RashId+"~"+value+";";
+			}
+		}
+	}
+var ok=#server(Docs.Action.GetDataForPlatejka(DocId,res))#
+if(isNaN(ok)){alert(ok)}
+else{alert("Данные успешно зафиксированы. Документ необходимо обработать.");window.close();}
+}
+</script>
+</head>
+
+<body>
+<font face="Arial" size=3>
+<script language="cache" runat="server">
+ s DocId=%request.Get("DocId")
+ s glob=$NA(^mtempOplata($J))
+ k @glob
+ s PlatejkaObj=##class(Docs.Platejka).%OpenId(DocId)
+ i $ISOBJECT(PlatejkaObj) d
+ . w "<center>Платёжное поручение</center>"
+ . w "№ "_$ZD(PlatejkaObj.Dat,4)_" "_$ZT(PlatejkaObj.Dat)
+ . w "<br>"
+ . w "Контрагент "_PlatejkaObj.Kontr.Name
+ . w "<br>"
+ . w "Общая сумма: "_PlatejkaObj.Summa
+ . s FreeSumma=PlatejkaObj.GetFreeSumma()
+ . w "  Свободная сумма: "_FreeSumma
+ . w "<br>"
+ . s next="" f  s next=PlatejkaObj.PlatejkaItems.Next(next) q:next=""  d
+ . . s item=PlatejkaObj.PlatejkaItems.GetAt(next)
+ . . q:'$ISOBJECT(item)
+ . . s RashObj=item.Rash
+ . . q:'$ISOBJECT(RashObj)
+ . . s ID=RashObj.%Id()
+ . . s Summa=item.Summa
+ . . s @glob@(ID,"Name")=RashObj.Name
+ . . s @glob@(ID,"Summa")=RashObj.Summa
+ . . s @glob@(ID,"Dat")=RashObj.Dat
+ . . s @glob@(ID,"OplSumma")=RashObj.OplSumma
+ . s KontrId=$S($ISOBJECT(PlatejkaObj.Kontr):PlatejkaObj.Kontr.%Id(),1:"")
+ . &sql(declare jok cursor for select ID,Name,Summa,Dat into :ID,:Name,:Summa,:Dat from Docs.Rash where (OplatStatus<>2 or OplSumma is null) and Kontr=:KontrId)
+ . &sql(open jok)
+ . f  &sql(fetch jok) q:SQLCODE  d
+ . . s @glob@(ID,"Name")=Name
+ . . s @glob@(ID,"Summa")=Summa
+ . . s @glob@(ID,"Dat")=Dat
+ . . s OplSumma=0
+ . . if FreeSumma-Summa>0 s OplSumma=Summa,FreeSumma=FreeSumma-Summa
+ . . s @glob@(ID,"OplSumma")=OplSumma
+ . &sql(close jok)
+ . w "<form method=""POST"" id=""forma"">"
+ . w "<table border=1><tr><td>Наименование<td>Дата<td>Сумма<td>Оплачено"
+ . s i="" f  s i=$O(@glob@(i)) q:i=""  d
+ . . s dat=@glob@(i,"Dat")
+ . . w "<tr>"
+ . . w "<td>"_@glob@(i,"Name")
+ . . w "<td>"_$S(+dat:$ZD(dat),1:"")
+ . . w "<td>"_@glob@(i,"Summa")
+ . . w "<td><input type=""text"" value="""_+$G(@glob@(i,"OplSumma"))_""" id=""RashID|"_i_""">"
+ . w "</table>"
+ . w "<input type=""button"" value=""Записать"" onclick=""SubmitForm()""><input type=""button"" value=""Отмена"" onclick=""WindowClose()"">"
+ . w "</form>"
+ k @glob
+</script>
+</font>
+</body>
+</html>

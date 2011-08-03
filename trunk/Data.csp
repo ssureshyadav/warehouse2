@@ -1,0 +1,16 @@
+<Script language="cache" runat="server">
+ s class=%request.Get("class") 
+ s fields=%request.Get("fields")
+ s params=%request.Get("params")
+ s where=%request.Get("where")
+ s param("order")=%request.Get("order")
+ s xml=%request.Get("xml")
+ s param("kolbasaddr")=+%request.Get("kolbasaddr")
+ s param("currentpage")=+%request.Get("currentpage")
+ s param("stroknastr")=+%request.Get("stroknastr")
+  i $P(class,".",1)="User" s $P(class,".",1)="SQLUser"
+
+ w ##class(Common.Common).showdata(class,fields,params,where,xml,"",.param)
+ </script>
+ 
+ 

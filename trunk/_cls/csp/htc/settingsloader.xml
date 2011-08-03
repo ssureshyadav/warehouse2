@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.htc.settingsloader">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62301,49232.764094</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<main>",!
+	Write "<data>",!
+	set ref = %request.CgiEnvs("HTTP_REFERER")
+	set type = %request.Get("type")
+	set data = %request.Get("data")
+	if $G(%session.Data("login"))=""
+	{
+	set user = %request.Get("login")
+	if user = "" set user = "undefined"
+	}
+	else
+	{
+	set user = %session.Data("login")
+	}
+	set cols = %request.Get("cols")
+	set component = %request.Get("component")
+	if ref = "" quit
+	if cols = "" quit
+	if ref '= "" s ref = $P($P(ref,"?",1),"/",$L($P(ref,"?",1),"/"))
+	if type = "save" {
+	if data = "" quit
+	set ^HTC("listview", "settings", user, component, cols, ref) = data
+	}
+	if type = "load" {
+	write $G(^HTC("listview", "settings", user, component, cols, ref))
+	}
+	Write !,"</data>",!
+	Write "</main>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\htc\settingsLoader.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/htc/settingsLoader.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>62161,67821</Default>
+</Parameter>
+</Class>
+</Export>

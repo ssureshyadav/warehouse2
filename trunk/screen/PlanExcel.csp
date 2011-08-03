@@ -1,0 +1,293 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ set %response.ContentType = "application/x-msexcel"
+ do %response.SetHeader("Content-Disposition","attachment;excel.xls")
+ set %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+
+if %request.Get("word")="on"
+{
+ set %response.ContentType = "application/msword"
+ do %response.SetHeader("Content-Disposition","attachment;word.doc")
+ set %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+}
+ q 1
+
+</script>
+<html>
+
+<head>
+<style id="th3-06_24542_Styles">
+<!--table
+	{mso-displayed-decimal-separator:"\.";
+	mso-displayed-thousand-separator:" ";}
+.xl1524542
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:10.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:general;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl2424542
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:14.0pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:"\@";
+	text-align:general;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl2524542
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:12.0pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial CYR", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:"\@";
+	text-align:general;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl2624542
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:12.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:general;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl2724542
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:12.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:general;
+	vertical-align:bottom;
+	border:.5pt solid windowtext;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl2824542
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:10.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:center;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl2924542
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:14.0pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:"\@";
+	text-align:center;
+	vertical-align:bottom;
+	border:.5pt solid windowtext;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl3024542
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:14.0pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:center;
+	vertical-align:middle;
+	border:.5pt solid windowtext;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl3124542
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:12.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:center;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl3224542
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:12.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:center;
+	vertical-align:bottom;
+	border:.5pt solid windowtext;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl3324542
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:10.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr", sans-serif;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:center;
+	vertical-align:bottom;
+	border:.5pt solid windowtext;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+.xl3424542
+	{padding-top:1px;
+	padding-right:1px;
+	padding-left:1px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:12.0pt;
+	font-weight:700;
+	font-style:normal;
+	text-decoration:none;
+	font-family:"Arial Cyr";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	mso-number-format:General;
+	text-align:general;
+	vertical-align:bottom;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	white-space:nowrap;}
+-->
+</style>
+</head>
+
+<body>
+<table x:str border=0 cellpadding=0 cellspacing=0 width=848 style='border-collapse:
+ collapse;table-layout:fixed;width:636pt'>
+ <col class=xl2824542 width=64 style='width:48pt'>
+ <col width=255 style='mso-width-source:userset;mso-width-alt:9325;width:191pt'>
+ <col width=161 style='mso-width-source:userset;mso-width-alt:5888;width:121pt'>
+ <col class=xl2824542 width=112 style='mso-width-source:userset;mso-width-alt:
+ 4096;width:84pt'>
+ <col width=64 span=4 style='width:48pt'>
+ <script language="cache" runat="server">
+ n tempGlob,docid,docobj,DocLanguage,i,Quantity,DocString,count,abbr,digits,Name,TovarName,
+ EnglishTovarName,o
+ s docid=%request.Get("docid")
+ s:docid ok=##class(Reports.ShowTables).MakeGlobForCheifPlan(docid,.tempGlob)
+ s i="" f  s i=$O(@tempGlob@(i)) q:i=""  d
+ . s TovarName=@tempGlob@(i,"Name")
+ . w "<tr height=24 style='height:18.0pt'><td></td></tr>"
+ . w "<tr height=24 style='height:18.0pt'><td height=24 class=xl2824542 width=64 style='height:18.0pt;width:48pt'></td><td class=xl2424542 colspan=3 width=528 style='width:396pt'>Spare parts order for "_i_" "_TovarName_"</td><td class=xl2624542 width=64 style='width:48pt'></td><td class=xl2624542 width=64 style='width:48pt'></td><td class=xl2624542 width=64 style='width:48pt'></td><td class=xl2624542 width=64 style='width:48pt'></td></tr>"
+ . w "<tr height=24 style='height:18.0pt'><td height=24 class=xl2924542 style='height:18.0pt'>No</td><td class=xl3024542 style='border-left:none'>PART NAME</td><td class=xl3024542 style='border-left:none'>¹ pos.</td><td class=xl3024542 style='border-left:none'>QUANTITY</td><td class=xl2624542></td><td class=xl3424542></td><td class=xl2624542></td><td class=xl2624542></td></tr>"
+ . s count=0
+ . s o="" f  s o=$O(@tempGlob@(i,"Name",o)) q:o=""  d
+ . . i $i(count)
+ . . s Quantity=@tempGlob@(i,"Name",o,"Quantity")
+ . . s Name=@tempGlob@(i,"Name",o,"Name")
+ . . s SchemaNumber=@tempGlob@(i,"Name",o,"SchemaNumber")
+ . . w "<tr height=20 style='height:15.0pt'>"
+ . . w "<td height=20 class=xl3324542 style='height:15.0pt;border-top:none' x:num>"_count_"</td>"
+ . . w "<td class=xl2724542 style='border-top:none;border-left:none'>"_Name_"</td>"
+ . . w "<td class=xl3224542 style='border-top:none;border-left:none' x:num>"_SchemaNumber_"</td>"
+ . . w "<td class=xl3224542 style='border-top:none;border-left:none' x:num>"_Quantity_"</td>"
+ . . w "<td class=xl2624542></td>"
+ . . w "<td class=xl2624542></td>"
+ . . w "<td class=xl2624542></td>"
+ . . w "<td class=xl2624542></td>"
+ . . w "</tr>"
+ k @tempGlob
+</script>
+</table>
+
+</body>
+
+</html>

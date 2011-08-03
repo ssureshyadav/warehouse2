@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.Otchet">
+<Super>Docs.Super</Super>
+<TimeCreated>60393,39985.442538</TimeCreated>
+
+<Property name="Stat">
+<Description>
+Статус</Description>
+<Type>%String</Type>
+<InitialExpression>"1"</InitialExpression>
+<Parameter name="DISPLAYLIST" value=",Создан,Обработан и принят,Отчёт не принят"/>
+<Parameter name="VALUELIST" value=",1,2,3"/>
+</Property>
+
+<Index name="StatInd2">
+<Properties>Stat</Properties>
+</Index>
+
+<Property name="ErrorDescription">
+<Description>
+Ответ контрагенту</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="2000"/>
+</Property>
+
+<Property name="SummaCurrency">
+<Description>
+Сумма в валюте</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="NameSorted">
+<Description>
+Номер пригодный для сортировки</Description>
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {*}=$P({Name},"\",2)_$TR($J($P({Name},"\",1),2)," ",0)</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+<Parameter name="CAPTION" value="display:none,"/>
+</Property>
+
+<Property name="Kurs">
+<Description>
+Курс валюты</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="display:none,"/>
+</Property>
+
+<Property name="Rem">
+<Description>
+Заявка</Description>
+<Type>Docs.Remont</Type>
+</Property>
+
+<Property name="Errors">
+<Description>
+Ошибки отчёта</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="32000"/>
+</Property>
+
+<Property name="GotPaperProve">
+<Description>
+Получено подтверждение на бумаге</Description>
+<Type>%String</Type>
+<InitialExpression>0</InitialExpression>
+<Parameter name="DISPLAYLIST" value=",Нет,Да"/>
+<Parameter name="VALUELIST" value=",0,1"/>
+</Property>
+
+<Method name="GetOtchetDat">
+<Description>
+Вернуть дату отчёта</Description>
+<Implementation><![CDATA[ q %this.Dat
+]]></Implementation>
+</Method>
+
+<Method name="SetOthcetStatFailed">
+<Description>
+Поставить отчёту статус "Отчёт не принят"</Description>
+<FormalSpec>Description:%String=""</FormalSpec>
+<Implementation><![CDATA[
+ s %this.Stat=3
+ if Description'="" s ..ErrorDescription=Description
+ q
+]]></Implementation>
+</Method>
+
+<Method name="SetOthcetStatFailed2">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ID:%String="",Description:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s obj=..%OpenId(ID)
+ q:'$ISOBJECT(obj) "Невозможно изменить статус отчёта, так как не указан отчёт."
+ d obj.SetOthcetStatFailed(Description)
+ s ok=obj.%Save()
+ if '+ok $$$WriteObjError(ok) q "Извините, ошибка при сохранении отчёта."
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="SetOthcetStatAccepted">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ID:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ q:ID="" "Невозможно изменить статус отчёта, так как не указан ID отчёта."
+ if $ISOBJECT(ID) s obj=ID
+ e  s obj=..%OpenId(ID)
+ q:'$ISOBJECT(obj) "Невозможно изменить статус отчёта, так как невозможно найти информацию по отчёту."
+ s obj.Stat=2
+ s DocId=obj.%Id()
+ s KontrId=obj.Kontr.%Id()
+ s DocName=obj.Name
+ &sql(delete from Docs.OtchetItems where doc->Kontr=:KontrId and doc->Name=:DocName and doc<>:DocId)
+ if SQLCODE<0 q "Ошибка при удалении строк предыдущих отчётов этого клиента за этот период."
+ &sql(delete from Docs.Otchet where Kontr=:KontrId and Name=:DocName and ID<>:DocId)
+ if SQLCODE<0 q "Ошибка при удалении предыдущих отчётов этого клиента за этот период."
+ s ok=##class(Docs.Action).SetFinal(obj)
+ q ok
+]]></Implementation>
+</Method>
+
+<Method name="SetParerProve">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DocId:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s $ZT="SetParerProveErr"
+	if '+DocId q "Не указан ID отчёта"
+	&sql(update Docs.Otchet set GotPaperProve=1 where ID=:DocId)
+	if SQLCODE q "Извините. Ошибка. SQLCODE="_SQLCODE
+	q 1
+SetParerProveErr
+ $$$WriteError($ZE)
+ q "Извините. Произошла внутренняя ошибка."
+]]></Implementation>
+</Method>
+
+<Method name="CreatePaperOthet">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>KontrId,Name,Summa,Comment,SummaCurrency</FormalSpec>
+<Implementation><![CDATA[
+	s $ZT="CreatePaperOthetErr"
+	if '+KontrId q "Не указан контрагент."
+	if '+Summa,'+SummaCurrency q "Укажите рублёвую сумму или сумму в валюте."
+	if '+Summa,SummaCurrency s Summa=$J(SummaCurrency*##class(Goods.GoodsAction).kurs(),"",2)
+	if Name'?1.2N1"\"4N q "Дата отчёта должна быть в формате ММ\ГГГГ"
+	s Doc=##class(Docs.Otchet).%New()
+	s Doc.Summa=$TR(Summa,",",".")
+	do Doc.KontrSetObjectId(KontrId)
+	s Doc.Name=Name
+	s Doc.Stat=1
+	s Doc.SummaCurrency=$TR(SummaCurrency,",",".")
+	s Doc.Comment=$G(Comment)
+	//s Doc.GotPaperProve=1
+	//d ##class(Docs.Action).SetFinal(Doc)
+	s ok=Doc.%Save()
+	if '+ok $$$WriteObjError(ok) q "Извините. Ошибка при сохранении отчёта."
+	q 1
+CreatePaperOthetErr
+ $$$WriteError($ZE)
+ q "Извините. Ошибка при сохранении отчёта."
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>OtchetDefaultData</DefaultData>
+<Data name="OtchetDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"Otchet"</Subscript>
+<Value name="1">
+<Value>Rem</Value>
+</Value>
+<Value name="2">
+<Value>Errors</Value>
+</Value>
+<Value name="3">
+<Value>ErrorDescription</Value>
+</Value>
+<Value name="4">
+<Value>GotPaperProve</Value>
+</Value>
+<Value name="5">
+<Value>SummaCurrency</Value>
+</Value>
+<Value name="6">
+<Value>Kurs</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

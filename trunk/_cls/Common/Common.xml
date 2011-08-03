@@ -1,0 +1,1189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Common.Common">
+<IncludeCode>xmlmacros</IncludeCode>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject</Super>
+<TimeCreated>60347,55264.066044</TimeCreated>
+
+<Method name="GetGarantIdByName">
+<Description>
+получить ID гарантийного талона по его имени</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>GarantName:%String</FormalSpec>
+<Implementation><![CDATA[
+	q:'$D(^Common.Dictionary2I("garantInd"," "_GarantName)) ""
+	q $O(^Common.Dictionary2I("garantInd"," "_GarantName,""))
+]]></Implementation>
+</Method>
+
+<Method name="CheckSerialUnique">
+<Description>
+проверить уникальность серийного номера</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>serial:%String,GarantID</FormalSpec>
+<Implementation><![CDATA[
+	q:'$D(^Common.Dictionary2I("serialInd"," "_serial)) 1
+	s GarantID = $O(^Common.Dictionary2I("serialInd"," "_serial,""))
+	if GarantID="" q "Удивительная ошибка. Серийный номер "_serial_" есть в индексе, но нет записи о гарантийном номере."
+	q "Серийный номер "_serial_" уже существует, но принадлежит гарантийному талону "_$LG($G(^Common.Dictionary2I("serialInd"," "_serial,GarantID)),2)
+	//q $O(^Common.Dictionary2I("garantInd"," "_GarantName,""))
+]]></Implementation>
+</Method>
+
+<Method name="SaveItem">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassName,ItemId="",ItemNames,ItemValues,ItemTypes,newtype=0</FormalSpec>
+<Implementation><![CDATA[
+ q:$G(ClassName)="" "Не указано имя класса"
+ q:$G(ItemNames)="" "Список имён сохраняемых полей пуст"
+ q:$G(ItemValues)="" "Список сохраняемых значений пуст"
+ q:$G(ItemTypes)="" "Список типов сохраняемых значений пуст"
+ s $ZT="SaveItemErr"
+ s err=1
+ i ItemId'="" d
+ . s Item=$ZOBJCLASSMETHOD(ClassName,"%OpenId",ItemId)
+ . i '$ISOBJECT(Item) s Item=$ZOBJCLASSMETHOD(ClassName,"%New")
+ e  s Item=$ZOBJCLASSMETHOD(ClassName,"%New")
+ f i=1:1:$L(ItemNames,"~")-1 q:'+err  d
+ . s CurrentName=$P(ItemNames,"~",i)
+ . s CurrentValue=$P(ItemValues,"~",i)
+ . s CurValueType=$P($P(ItemTypes,"~",i),"@",2)
+ . s CurValueDB=$P($P(ItemTypes,"~",i),"@",1)
+ . s necessary=$$unrequired(ClassName,CurrentName)
+ . i (CurrentValue="")&('necessary) s err="Не заполнены все необходимые поля документа" q
+ . i newtype s CurValueDB=CurrentValue
+ . i (CurValueType'="")&(CurValueType'["%") d //Тоесть тип указан и он не содержит процент - наверное это объектная ссылка
+ . . d $ZOBJMETHOD(Item,CurrentName_"SetObjectId",CurValueDB)
+ . e  d
+ . . d:CurValueType="%Date" 
+ . . . i CurrentValue'="" s CurrentValue=$ZDH(CurrentValue,4)
+ . . . e  s CurrentValue=+$H
+ . . s $ZOBJPROPERTY(Item,CurrentName)=CurrentValue
+ q:'+err err
+ s ok=Item.%Save()
+ i '+ok $$$WriteObjError(ok) q "Ошибка при сохранении"
+ //i ClassName="Common.Dictionary2" q 1  //потому что этот класс имеет собственные ID символьные и вообще любые
+ q Item.%Id()
+SaveItemErr
+ $$$WriteError($ZE)
+ q "Ошибка при сохранении"
+unrequired(class,field)
+ q:field="Comment" 1
+ q:class="Common.Kontragent" 1
+ q:class="Common.Dictionary2" 1
+ 
+ q $D(^UnRequiredFields(class,field))
+]]></Implementation>
+</Method>
+
+<Method name="DeleteItem">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassName,ItemID</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="DeleteItemErr"
+ q:$G(ClassName)="" "Не указано имя класса"
+ q:$G(ItemID)="" "Не указан код удаляемого объекта"
+ s ok=$ZOBJCLASSMETHOD(ClassName,"%DeleteId",ItemID)
+ i '+ok $$$WriteObjError(ok) q "Не удалось удалить объект"
+ q 1
+DeleteItemErr
+ $$$WriteError($ZE)
+ q "Не удалось удалить объект"
+]]></Implementation>
+</Method>
+
+<Method name="CreateClass">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassName,ItemId="",ItemNames,ItemValues,ItemTypes</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="CreateClassErr"
+ 
+ f i=1:1:$L(ItemNames,"~")-1 d
+ . s common($P(ItemNames,"~",i))=$P(ItemValues,"~",i)
+ &sql(select max(number) into :maxnumber from Common.Dicts)
+ s maxnumber=+$G(maxnumber)+1
+ s found=1
+ s common("Code")="Common.Dictionary"_maxnumber
+
+ while found {
+	s common("Code")="Common.Dictionary"_maxnumber
+ 	&sql(select id from %Dictionary.ClassDefinition where id=:common("Code"))
+ 	i SQLCODE s found=0
+ 	e  s found=1,maxnumber=+$G(maxnumber)+1
+ }
+ 
+ s common("Code")="Common.Dictionary"_maxnumber 
+ s ItemNames=ItemNames_"Code~"_"number~"
+ s ItemValues=ItemValues_"~"_common("Code")_"~"_maxnumber
+ //TSTART
+ Set cdef = ##class(%Dictionary.ClassDefinition).%New(common("Code"))
+ 
+ If '$ISOBJECT(cdef)  {
+     Do DecomposeStatus^%apiOBJ(%objlasterror,.Err)
+     //TROLLBACK
+     q Err(Err)
+ }
+ Set cdef.ClassType = "persistent"
+ Set cdef.Super = "%Persistent"
+ s ok=cdef.%Save()
+ If '+ok  {
+     Do DecomposeStatus^%apiOBJ(%objlasterror,.Err)
+     //TROLLBACK
+     q Err(Err)
+ }
+ s err=$$Comple(common("Code"))
+ //i '+err TROLLBACK  q err
+ i '+err q err
+
+ s err=..SaveItem(ClassName, ItemId, ItemNames, ItemValues, ItemTypes)
+ //TCOMMIT
+ q err
+Comple(clname)
+ s glob=$NA(^mtempSklad($I,"Compile"))
+ k @glob
+ j Compile^cmpl(clname,glob)
+ while $G(@glob)="" {
+ h .1
+ }
+ q:@glob@("err")>0 @glob@("err",@glob@("err"))
+ q 1
+CreateClassErr
+ $$$WriteError($ZE)
+ q "Извините, ошибка при создании справочника"
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+//Показать данные хранимого класса
+
+]]></Content>
+</UDLText>
+
+<Method name="showdata">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>class="",fields="",params="",where="",xml="",returndata=0,param=""</FormalSpec>
+<ProcedureBlock>0</ProcedureBlock>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="showdataErr"
+ s currentpage=$G(param("currentpage"))
+ s stroknastr=$G(param("stroknastr"))
+
+ s from=(currentpage*stroknastr)-stroknastr+1
+ s to=currentpage*stroknastr
+
+ i class="" q "Error=Не указан класс"
+ i fields="" q "Error=Не указаны поля"
+ s order=$G(param("order"))
+ s kolbasaddr=$G(param("kolbasaddr"))
+ if params'="" 
+ {
+	 Set result = ##class(%ResultSet).%New(class_":Common")
+	 If $$$ISERR(result) $$$WriteObjError(result) q
+	 s str="s ok=result.Execute("_params_")"
+	 x str
+	 i '+ok $$$WriteObjError(ok) q
+ }
+ else 
+ {
+	 s result = ##class(%ResultSet).%New()
+	 i $$$ISERR(result) d ..showerror(result,"Data.csp, %ResultSet 2") q
+	 i kolbasaddr d
+	 . f i=1:1:$L(fields,",") d
+	 . . i $P(fields,",",i)="addr->Name" s $P(fields,",",i)="addr"
+	 . . i $P(fields,",",i)="addr2->Name" s $P(fields,",",i)="addr2"
+	 i class="Docs.Utiliz" s fields=fields_",%external(Stat) As Stat"
+	 s sql="SELECT "_fields_" FROM "_class
+	 s sqlcount="SELECT count(*) as strcount from "_class
+	 if where'="" s sql=sql_" where "_where
+	 if order'="" s sql=sql_" order by "_order
+	 s ^mtempArt("sql")=sql
+	 //s ^lastsql($I(^lastsql))=sql
+	 i $ISOBJECT($G(%session)) s user=$G(%session.Data("user"),"not found")
+	
+	 s ok=result.Prepare(sql)
+	 i '+ok $$$WriteObjError(ok) q "Ошибка при формировании запроса"
+	 //s result.RuntimeMode=1
+	 s ok=result.Execute()
+	 i '+ok $$$WriteObjError(ok) q
+	 
+	 //посчитаем количество записей соответствующих текущему запросу с помощью запроса sqlcount
+	 s strcount=..Count(class,where)
+ }
+ s:xml xmlstr=##class(%XML.Writer).%New()
+ s:xml xmlstr.Charset="windows-1251"
+ d:xml xmlstr.OutputToDevice()
+ s:xml sc=xmlstr.RootElement("AllObjects")
+ 
+ //соберём все названия колонок в одну переменную
+ f i=1:1:result.GetColumnCount() d
+ . s columns(i)=result.GetColumnName(i)
+ . s columnstypes(i)=result.GetColumnType(i)
+ . s columns(i,"type")=result.GetColumnType(i)
+ . q:(class="Store.Address")&(columns(i)="block")
+ . s columns(i,"enum")=##class(%Dictionary.CompiledMethod).%ExistsId(class_"||"_columns(i)_"LogicalToDisplay")
+
+ d:+currentpage
+ . i (returndata)&('xml) s out2=$G(out2)_$G(strcount)_"#@#"
+ . e  w:'xml $G(strcount)_"#@#"
+ 
+ While result.Next() 
+ {
+	 i $I(strig)
+	 continue:(strig<from)&(+currentpage)
+	 q:(strig>to)&(+currentpage)
+	 s:xml sc=xmlstr.Element("OneObject")
+	 f i=1:1:result.GetColumnCount() d
+	 . s text=result.GetData(i)
+	 . i $G(columns(i,"enum")) s text=$ZOBJCLASSMETHOD(class,columns(i)_"LogicalToDisplay",text)
+	 . i (columns(i)="addr")&(kolbasaddr) s text=##class(Store.Action).AddressPath(text)
+	 . i (columns(i)="addr2")&(kolbasaddr) s text=##class(Store.Action).AddressPath(text)
+	 . //i (class="Operation.Instructions")&(columns(i)="State") s text=##class(Operation.Instructions).StateLogicalToDisplay(text)
+	 . s $P(OutString,"~",i)=text
+	 . s:xml sc=xmlstr.Element(columns(i))
+	 . d:xml xmlstr.Write(text)
+	 . s:xml sc=xmlstr.EndElement()
+	 i (returndata)&('xml) s out2=$G(out2)_OutString_"#@#"
+	 e  w:'xml OutString_"#@#"
+	 s:xml sc=xmlstr.EndElement()
+ }
+ i xml $$$WriteElementTwice("strcount",strcount)
+
+ s:xml sc=xmlstr.EndRootElement()
+ q:returndata $G(out2)
+ q 1
+showdataErr
+ $$$WriteError($ZE)
+ q $ZE
+]]></Implementation>
+</Method>
+
+<Method name="showerror">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>error,descr="ошибка"</FormalSpec>
+<Implementation><![CDATA[
+ Do DecomposeStatus^%apiOBJ(error,.Err)
+ s ^Errors($H,descr)=Err(Err)
+ q
+]]></Implementation>
+</Method>
+
+<Method name="saveerror">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>error,descr</FormalSpec>
+<Implementation><![CDATA[
+ s ^Errors($H,descr)=error
+ q
+]]></Implementation>
+</Method>
+
+<Method name="CheckPattern">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClassName="",Property="",PropertyValue=""</FormalSpec>
+<ProcedureBlock>0</ProcedureBlock>
+<Implementation><![CDATA[
+ s $ZT="CheckPatternErr"
+ s output=1
+ i (ClassName="")!(Property="") s ^Errors($H,"Common.Common.CheckPattern")="не указан класс или свойство" q output
+ s pattern=$G(^Property(ClassName,Property,"Pattern"))
+ s prohibited=$G(^Property(ClassName,Property,"Prohibited"))
+ q:(pattern="")&(prohibited="") output
+ i pattern'="" d
+ . x "s ok="""_PropertyValue_""""_pattern
+ . q:ok
+ . s PropertyName=$$GetPropertyName(ClassName,Property)
+ . s output="Свойство "_PropertyName_" не соответствует своему шаблону ("_pattern_")"
+ e  d
+ . f i=1:1:$L(prohibited) q:'output  d
+ . . s SingleChar=$E(prohibited,i,i)
+ . . d:PropertyValue[SingleChar 
+ . . . s PropertyName=$$GetPropertyName(ClassName,Property)
+ . . . s output="Свойство "_PropertyName_" содержит символ "_SingleChar_", что недопустимо."
+ q output
+CheckPatternErr
+ s ^Errors($H,"$ZE")=$ZE
+ q $ZE
+GetPropertyName(ClassName,Property)
+ s f=##class(%Dictionary.PropertyDefinition).%OpenId(ClassName_"||"_Property)
+ q f.Description
+]]></Implementation>
+</Method>
+
+<Method name="GetDocsByTovar">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>idtov,dates,kontr</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="GetDocsByTovarErr"
+ s xmlstr=##class(%XML.Writer).%New()
+ s xmlstr.Charset="windows-1251"
+ d xmlstr.OutputToDevice()
+ s sc=xmlstr.RootElement("AllObjects")
+ s dat1=$P(dates,"~",1)
+ s dat2=$P(dates,"~",2)
+ s dat1=$S(dat1="":"",1:$ZDH(dat1,4))
+ s dat2=$S(dat2="":"",1:$ZDH(dat2,4))
+ if kontr'="" s kontr="and b.Kontr="_kontr
+ s result = ##class(%ResultSet).%New()
+ i $$$ISERR(result) $$$WriteObjError(result)
+ s sql="SELECT b.Dat As DocDat,Kontr->Name As Kontrn,b.Name as DocName,a.DocType as DocType,a.DocType->Name as DocTypeName,a.Quantity as Quantity,a.Total as Total,a.Price as Price FROM Docs.DocItems a, Docs.Super b where a.Doc=b.ID and a.Goods="_idtov_" and b.Dat>="_dat1_" and b.Dat<="_dat2_" "_kontr_" order by DocDat"
+ 
+ s ok=result.Prepare(sql)
+ i '+ok $$$WriteObjError(ok) q "Ошибка при формировании запроса"
+ 
+ s ok=result.Execute()
+ i '+ok $$$WriteObjError(ok) q
+  
+ //соберём все названия колонок в одну переменную
+ f i=1:1:result.GetColumnCount() d
+ . s columns(i)=result.GetColumnName(i)
+
+ While result.Next() {
+ s sc=xmlstr.Element("OneObject")
+ d WriteOneItem("docdata",$ZD($g(result.Data("DocDat")),4))
+ d WriteOneItem("Kontr",$g(result.Data("Kontrn")))
+ d WriteOneItem("doctype",$g(result.Data("DocTypeName")))
+ d WriteOneItem("doc",$g(result.Data("DocName")))
+ if $g(result.Data("DocType"))="Docs.Prih" d
+ . d WriteOneItem("prih",$g(result.Data("Total")))
+ if $g(result.Data("DocType"))="Docs.Rash" d
+ . d WriteOneItem("rash",$g(result.Data("Total")))
+ d WriteOneItem("kol",$g(result.Data("Quantity")))
+ d WriteOneItem("cena",$g(result.Data("Price")))
+ s sc=xmlstr.EndElement()
+ }
+
+ s sc=xmlstr.EndRootElement()
+ q
+GetDocsByTovarErr
+ $$$WriteError($ZE)
+ q
+WriteOneItem(namedelement,text)
+ s sc=xmlstr.Element(namedelement)
+ $$$WriteElement("text",text)
+ s sc=xmlstr.EndElement()
+ q
+]]></Implementation>
+</Method>
+
+<Method name="ClassHaveProperty">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>class,method</FormalSpec>
+<Implementation><![CDATA[ q ##class(%Dictionary.PropertyDefinition).%ExistsId(class_"||"_method)
+]]></Implementation>
+</Method>
+
+<Method name="showheaders">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Class,ID="",skip="",AddArrow="",xml="",massiv,source="",show=""</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="showheadersErr"
+ d:skip'=""
+ . f i=1:1:$L(skip,",") d
+ . . s skipField=$P(skip,",",i)
+ . . s:skipField'="" SkipGlob(skipField)=1
+ 
+ d:show'=""
+ . f i=1:1:$L(show,",") d
+ . . s showField=$P(show,",",i)
+ . . s:showField'="" ShowGlob(showField)=1
+
+ s glob=$NA(^GoodsPropOrder(Class))  //здесь лежит порядок отображения свойств
+ s ExistTov=0
+ d:ID]""
+ . s tov=$ZOBJCLASSMETHOD(Class,"%OpenId",ID)
+ . s ExistTov=1
+ 
+ i source'="" d
+ . s sourceclass=$P(source,"@",2)
+ . i (sourceclass'="")&(+source>0) s sourcedoc=$ZOBJCLASSMETHOD(sourceclass,"%OpenId",+source)
+
+ //класс от которого создается документ это инструкция 
+ //по отбору, то выдадим инструкцию за товар и оттуда
+ //возьмем все данные
+ d:$G(sourceclass)="Docs.StorageOut"  
+ . s tov=sourcedoc,ExistTov=1
+
+ s cl=##class(%Dictionary.CompiledClass).%OpenId(Class)
+ i '$ISOBJECT(cl) $$$WriteError("showheaders не удалось открыть объект "_Class_" класса %Dictionary.CompiledClass") q "Извините, внутренняя ошибка в программе"
+ s count=cl.Properties.Count()
+ f i=1:1:count d
+ . q:cl.Properties.GetAt(i).Relationship
+ . s Name=cl.Properties.GetAt(i).Name,oldName=Name
+ . q:Name="%Concurrency"
+ . s Type=cl.Properties.GetAt(i).Type
+ . i $P(Type,".")="%Library" s Type="%"_$P(Type,".",2)  //После подмены ClassDefinition на CompiledClass то что было %String стало %Library.String, возвращаем всё к %String
+ . q:$D(SkipGlob(Name))
+ . s CAPTION=cl.Properties.GetAt(i).Parameters.GetAt("CAPTION")
+ . //сформируем массив из ручных свойств
+ . k pairs
+ . f fi=2:1:$L(CAPTION,",") d
+ . . s pair=$P(CAPTION,",",fi)
+ . . q:$P(pair,"=")=""
+ . . s pairs($P(pair,"="))=$P(pair,"=",2)
+ . q:($G(pairs("display"))="none")&('$D(ShowGlob(Name)))
+ . s massiv(Name)=Type
+ . if (Name="Goods")&&(AddArrow)&&(Class'="Common.Dictionary8") s Name=Name_"->FullName"
+ . else  s:(Type'["%")&('ExistTov)&(AddArrow) Name=Name_"->Name"
+ . s xmlstr="<key>"_Name_"</key>"
+ . s descr=cl.Properties.GetAt(i).Description
+ . s str=Name_"~"_descr
+ . s massiv(Name,"descr")=descr
+ . s xmlstr=xmlstr_"<text>"_descr_"</text>"
+ . s DISPLAYLIST=cl.Properties.GetAt(i).Parameters.GetAt("DISPLAYLIST")
+ . s VALUELIST=cl.Properties.GetAt(i).Parameters.GetAt("VALUELIST")
+ . s str=str_"~"
+ . i (DISPLAYLIST'="")&(VALUELIST'="") d
+ . . s str=str_"DISPLAYLIST="_DISPLAYLIST_";VALUELIST="_VALUELIST
+ . . s xmlstr=xmlstr_"<Displaylist>"_DISPLAYLIST_"</Displaylist>"
+ . . s xmlstr=xmlstr_"<Valuelist>"_VALUELIST_"</Valuelist>"
+ . . s massiv(oldName,"VALUELIST")=VALUELIST
+ . . s massiv(oldName,"DISPLAYLIST")=DISPLAYLIST
+ . q:+$G(massiv)
+ . s str=str_"~"
+ . s ObjID=""
+ . d:(source'="")&(Name="Kontr")
+ . . i ($ISOBJECT(sourcedoc))&((sourceclass="Operation.Instructions")||(sourceclass="Operation.Plan")||(sourceclass="Docs.Prih")) d
+ . . . s ValueObj=$ZOBJPROPERTY(sourcedoc,Name)
+ . . . i $ISOBJECT(ValueObj) d
+ . . . . s Value=$ZOBJPROPERTY(ValueObj,"Name")
+ . . . . s ObjID=ValueObj.%Id()
+ . . . s str=str_Value
+ . d:(source'="")&(Name="Name")
+ . . i ($ISOBJECT(sourcedoc))&((sourceclass="Operation.Plan")) d
+ . . . s Value=$ZOBJPROPERTY(sourcedoc,"Name")
+ . . . s str=str_Value
+ . d:ExistTov
+ . . s Value=$ZOBJPROPERTY(tov,Name)
+ . . s:(Type="%Date")&(Value]"") Value=$ZD(Value,4)
+ . . s:(Type="%Time")&(Value]"") Value=$ZT(Value)
+ . . d:(Type'["%")&(Value'="")
+ . . . s ObjID=Value.%Id()
+ . . . i Type="Store.Address" s Value=##class(Store.Action).AddressPath(Value)   //если это адрес то формируем полную строку адреса
+ . . . e  s Value=$ZOBJPROPERTY(Value,"Name")  //Если свойство объектная ссылка то извлекаем поле Name у ссылки
+ . . s str=str_Value
+ . s readonly=$D(pairs("readonly"))
+ . s str=str_"~"_ObjID_"@"_Type_"@"_readonly
+ . s xmlstr=xmlstr_"<type>"_Type_"</type>"
+ . s xmlstr=xmlstr_"<readonly>"_readonly_"</readonly>"
+ . //единицы измерения соответствующие данному полю
+ . d ..getPropAlong(Name,.display,.values)
+ . i display'="" s str=str_"~"_display,xmlstr=xmlstr_"<dispalong>"_display_"</dispalong>"
+ . i values'="" s str=str_"~"_values,xmlstr=xmlstr_"<valuealong>"_values_"</valuealong>"
+ . s str=str_"#@#"
+ . s order=$G(@glob@(Name),$P(str,"~",1))
+ . s:order="Name" order=0
+ . s Props(order)=str
+ . s XmlProps(order)=xmlstr
+
+ s answer=""
+ 
+ i xml d
+ . s answer="<?xml version=""1.0"" encoding=""windows-1251"" ?><AllHeaders>"
+ . s i="" f  s i=$O(XmlProps(i)) q:i=""  d
+ . . s answer=answer_"<OneObject>"
+ . . s answer=answer_XmlProps(i)
+ . . s answer=answer_"</OneObject>"
+ . s answer=answer_"</AllHeaders>"
+ e  d
+ . s i="" f  s i=$O(Props(i)) q:i=""  d
+ . . s answer=answer_Props(i)
+ 
+ //s ^mtempArt($I(^mtempArt),"answer")=answer
+ //s ^mtempArt("")=
+ 
+ q answer
+showheadersErr
+ $$$WriteError($ZE)
+ q "Извините, ошибка при выводе заголовков"
+]]></Implementation>
+</Method>
+
+<Method name="getPropAlong">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pname,disp,val</FormalSpec>
+<Implementation><![CDATA[
+ q:pname=""
+ s val="",disp=""
+ &sql(declare z cursor for select ID,Name,Factor into :ID,:Name,:Factor from Store.Measures where Type=:pname)
+ &sql(open z)
+ f  &sql(fetch z) q:SQLCODE  d
+ . s disp=disp_"~"_Name
+ . s val=val_"~"_ID_"|"_Factor
+ &sql(close z)
+ q
+]]></Implementation>
+</Method>
+
+<Method name="SaveGoodsImage">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>gid="",fname=""</FormalSpec>
+<Implementation><![CDATA[
+ q:fname=""
+ q:gid=""
+ s gobj=##class(Goods.Goods).%OpenId(gid)
+ q:'$ISOBJECT(gobj)
+ s currentimages=gobj.Images
+ i currentimages'="" s delim="\"
+ e  s delim=""
+ s gobj.Images=currentimages_delim_fname
+ s ok2=gobj.%Save()
+ i '+ok2 $$$WriteObjError(ok2)
+ q
+]]></Implementation>
+</Method>
+
+<Method name="Count">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>From="",Where=""</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="CountErr",err="Извините, ошибка при подсчёте количества строк в запросе.",ok=1
+ s rss=##class(%Library.ResultSet).%New()
+ s sqlcount="select count(*) as strcount from "_From
+ if Where'="" s sqlcount=sqlcount_" where "_Where
+ s ok=rss.Prepare(sqlcount)
+ 
+ i '+ok $$$WriteObjError(ok) q err
+ s ok=rss.Execute()
+ i '+ok $$$WriteObjError(ok) q err 
+ while rss.Next(){
+ s strcount=$G(rss.Data("strcount"))
+ }
+ q +$G(strcount)
+CountErr
+ $$$WriteError($ZE)
+ q "Извините, ошибка при подсчёте количества строк в запросе."
+]]></Implementation>
+</Method>
+
+<Method name="SetDetailAnalogRelation">
+<Description>
+Установить связь деталь-аналог</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DetailId:%String="",AnalogId:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="SetDetailAnalogRelationErr"
+ i '+DetailId q "Не указана заменяемая деталь"
+ i '+AnalogId q "Не указан аналог"
+ s answer=1
+ f i=1:1:$L(AnalogId,"~")-1 q:'+answer  d  
+ . s NewRelation=##class(Common.Dictionary4).%New()
+ . d NewRelation.NameSetObjectId(DetailId)
+ . d NewRelation.Property6625SetObjectId($P(AnalogId,"~",i))
+ . s ok=NewRelation.%Save()
+ . i $$$ISERR(ok) d
+ . . Do DecomposeStatus^%apiOBJ(ok,.Err)
+ . . s answer="Ошибка при сохранении связки деталь-аналог."
+ . . i (Err(1,"code")=5808)&&(Err(1,"param",1)="Uniq") s answer=1
+ q answer
+SetDetailAnalogRelationErr
+ q $ZE
+]]></Implementation>
+</Method>
+
+<Method name="SaveGoodsDictionary">
+<Description><![CDATA[
+Выгрузить справочник товаров
+<br>ClientFolder - номер клиента, то есть свойство Property2506 класса Common.Dictionary
+<br>RptVersion - версия клиента Менеджер отчётов]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClientFolder="1",RptVersion=""</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="SaveGoodsDictionaryErr"
+ d ..PrepareFolder(ClientFolder)
+ s ClientUniqueCode=ClientFolder
+ s KontrID=..GetKontrgentIdByCode(ClientUniqueCode)
+ s ClientProperty2506=##class(Common.Kontragent).GetPropertyValue(KontrID,"Property2506")
+ &sql(SELECT Property126->ActPriceInstrument,Property126->DiagPriceInstrument,Property127->ActPriceTechnic,Property127->DiagPriceTechnic,Property2506,Currency 
+ 	INTO :ActPriceInstrument,:DiagPriceInstrument,:ActPriceTechnic,:DiagPriceTechnic,:Property2506,:Currency
+ 	FROM Common.Kontragent 
+ 	WHERE ID=:KontrID)
+ i SQLCODE s (ActPriceInstrument,DiagPriceInstrument,ActPriceTechnic,DiagPriceTechnic)=""
+ s ClientFolder="C:\SKLAD\RemCl\"_ClientFolder_"\"
+ s Delimeter="^"
+ s glob=$NA(^Goods.GoodsD)
+ s FullFileName=ClientFolder_"Goods.txt"
+ s abbrListIndex=##class(Goods.Goods).GetPropertyListIndex("abbr")
+ s Property3609ListIndex=##class(Goods.Goods).GetPropertyListIndex("Property3609")
+ s NameListIndex=##class(Goods.Goods).GetPropertyListIndex("Name")
+ s PriceListIndex=##class(Goods.Goods).GetPropertyListIndex("Price")
+ s codedetailListIndex=##class(Goods.Goods).GetPropertyListIndex("codedetail")
+ s izdelieListIndex=##class(Goods.Goods).GetPropertyListIndex("izdelie")
+ s Property5300ListIndex=##class(Goods.Goods).GetPropertyListIndex("Property5300")
+ s ok=1
+	Set file=##class(%File).%New(FullFileName)
+	s ok=file.Open("WSN")
+	i '+ok $$$WriteObjError(ok) q "Ошибка при открытии файла "_FullFileName
+	s CurrentGoodsVersion=..GetCurrentDictVersion("Goods.Goods")	//текущая версия справочника товаров
+	if Property2506'[2 s (ActPriceInstrument,DiagPriceInstrument)=""
+	if Property2506'[3 s (ActPriceTechnic,DiagPriceTechnic)=""
+	s FirstStringInFile=CurrentGoodsVersion_"^"_ActPriceTechnic_"^"_DiagPriceTechnic_"^"_ActPriceInstrument_"^"_DiagPriceInstrument_"^"_Currency
+	Do file.WriteLine(FirstStringInFile)
+ s i="" f  s i=$O(@glob@(i)) q:(i="")||('+ok)  d
+ . s LBLine=@glob@(i)
+ . s Name=$LG(LBLine,NameListIndex)
+ . s abbr=$LG(LBLine,abbrListIndex)
+ . s Property3609=$LG(LBLine,Property3609ListIndex)
+ . s Price=$LG(LBLine,PriceListIndex)
+ . s codedetail=$LG(LBLine,codedetailListIndex)
+ . s Property5300=$LG(LBLine,Property5300ListIndex)
+ . s (ShowPrice,ShowClients)=1
+ . s Groups=$$Groups(i,.ShowPrice,.ShowClients)
+ . //пропускаем товары которые низя показывать клиентам
+ . if (ShowClients'=0)&(ClientProperty2506'[ShowClients) q
+ . i 'ShowPrice s Price="" 	//обнуляем цены которые низя показывать клиентам
+ . s RemontPrice=..GetRemontPrice(ClientUniqueCode,$LG(LBLine,izdelieListIndex))
+ . s Line=i_Delimeter_abbr_Delimeter_Property3609_Delimeter_Name_Delimeter_codedetail_Delimeter_Price_Delimeter_Groups_Delimeter_RemontPrice_Delimeter_Property5300
+ . s ok=file.WriteLine(Line)
+ i '+ok $$$WriteObjError(ok) q "Ошибка при открытии файла."
+ Do file.Close()
+ q ..ArjFile(FullFileName,..GetPasswordFromCode(ClientUniqueCode))
+Groups(GoodsID,ShowPrice,ShowClients)
+ s return=""
+ s IndexGlob=$NA(^Goods.GoodsGroupI("GoodsIndex",GoodsID))
+ s z="" f  s z=$O(@IndexGlob@(z)) q:z=""  d
+ . s GroupID=$LG(^Goods.GoodsGroupD(z),6)
+ . s CatalogueID=$LG(^Goods.GroupD(GroupID),##class(Goods.Group).GetPropertyListIndex("Catalogue"))
+ . //показывать цену клиентам
+ . s ShowPrice=$LG(^Goods.CatalogueD(CatalogueID),##class(Goods.Catalogue).GetPropertyListIndex("ShowPrice"))
+ . //показывать клиентам вообще
+ . s ShowClients=$LG(^Goods.CatalogueD(CatalogueID),##class(Goods.Catalogue).GetPropertyListIndex("ShowClients"))
+ . s return=return_GroupID_"~"
+ q $E(return,1,$L(return)-1)
+SaveGoodsDictionaryErr
+ $$$WriteError($ZE)
+ q "Извините. Ошибка при выгрузке справочника товаров."
+]]></Implementation>
+</Method>
+
+<Method name="GetRemontPrice">
+<Description>
+Получить цену ремонта</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClientCode="",IzdelieID=""</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="GetRemontPriceErr"
+ q:ClientCode="" 0
+ q:IzdelieID="" 0
+ //найдём ID контрагента опираясь на его уникальный код
+ s KontrID=$O(^Common.KontragentI("CodeInd"," "_ClientCode, ""))
+ i KontrID="" q 0
+ 
+ //Проверим есть ли вообще такая ценовая группа
+ q:'##class(Common.Dictionary12).%ExistsId(IzdelieID) 0
+ 
+ //определим к какому типу относится эта ценовая группа товара
+ //бытовка (1) или электроинструмент (2)
+ s ThisGroupTypeIs=##class(Common.Dictionary12).GetPropertyValue(IzdelieID, "Razdel")
+ s KontrCurrencyCode = ##class(Common.Kontragent).GetPropertyValue(KontrID, "Currency")
+ if KontrCurrencyCode<=0 s KontrCurrencyCode=1
+ 
+ //определим из какого поля контрагента вытаскивать его ценовую категорию
+ //если группа принадлежит бытовой технике, тогда из поля Property127, иначе из Property126
+ s KontragentCenaKateg = "Property126"
+ if ThisGroupTypeIs = 1 s KontragentCenaKateg = "Property127"
+ 
+ //узнаем к какой ремонтно-ценовой категории относится этот контрагент (это ссылка на спр. Common.Dictionary9)
+ s PropertyCenaKategIndex=##class(Common.Kontragent).GetPropertyListIndex(KontragentCenaKateg,.DataLocation)
+ s PriceTypeID=$LG(@DataLocation@(KontrID),PropertyCenaKategIndex)
+ i PriceTypeID="" q 0
+ 
+ //вытащим сначала ID записи из справочника, ЦЕНЫ ЗА РЕМОНТ
+ s ID=$O(^Common.Dictionary8I("NewIndex1",PriceTypeID,IzdelieID,""))
+ i ID="" q 0
+ 
+ //KontrCurrencyCode - код валюты в которой работает контрагент, 1 - рубли, 2 - уе 
+ //а потом значение, во втором индексе значение цены в рублях, в третьем - цена в долларах
+ q +$LG(^Common.Dictionary8I("NewIndex1",PriceTypeID,IzdelieID,ID),KontrCurrencyCode+1)
+GetRemontPriceErr
+ $$$WriteError($ZE)
+ q 0
+]]></Implementation>
+</Method>
+
+<Method name="SaveGroupsDictionary">
+<Description><![CDATA[
+Выгрузить каталог и группу
+<br>ClientFolder - номер клиента, то есть свойство Property2506 класса Common.Dictionary
+<br>RptVersion - версия клиента Менеджер отчётов]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClientFolder="1",RptVersion=""</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<Implementation><![CDATA[
+ s $ZT="SaveGroupsDictionaryErr"
+ s err="Ошибка при выгрузке групп"
+ d ..PrepareFolder(ClientFolder)
+ s ClientUniqueCode=ClientFolder
+ s ClientFolder="C:\SKLAD\RemCl\"_ClientFolder_"\"
+ s FullFileName=ClientFolder_"GoodsGr.txt"
+ s Delimeter="^"
+ 	Set file=##class(%File).%New(FullFileName)
+	s ok=file.Open("WSN")
+	i '+ok $$$WriteObjError(ok) q "Ошибка при открытии файла "__FullFileName
+	Do file.WriteLine(..GetCurrentDictVersion("Goods.Group"))
+ 
+ s rs=##class(%ResultSet).%New()
+ s ClientID=..GetKontrgentIdByCode(ClientUniqueCode)
+ s ClientProperty2506=##class(Common.Kontragent).GetPropertyValue(ClientID,"Property2506")
+ s SqlQuery="select ID,Catalogue->Name as CatalogueName,Name,Code from Goods.Group where depot=1 and (Catalogue->ShowClients=0 OR '"_ClientProperty2506_"' LIKE STRING('%',Catalogue->ShowClients,'%')) order by Catalogue,Code"
+ s ok=rs.Prepare(SqlQuery)
+ i '+ok $$$WriteObjError(ok) q err
+ s ok=rs.Execute()
+ i '+ok $$$WriteObjError(ok) q err
+ while rs.Next() {
+ 	s ID=rs.Data("ID")
+ 	s CatalogueName=rs.Data("CatalogueName")
+ 	s Name=rs.Data("Name")
+ 	s Code=rs.Data("Code")
+ 	s Line=ID_Delimeter_CatalogueName_Delimeter_Name_Delimeter_Code
+ 	Do file.WriteLine(Line)
+ }
+ Do file.Close()
+ q ..ArjFile(FullFileName,..GetPasswordFromCode(ClientUniqueCode))
+SaveGroupsDictionaryErr
+ $$$WriteError($ZE)
+ q "Извините. Ошибка при выгрузке справочника товарных групп."
+]]></Implementation>
+</Method>
+
+<Method name="GetCurrentDictVersion">
+<Description><![CDATA[
+Вернуть текущую версию справочника
+<br><var>Dict</var> - справочник]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Dict:%String=1</FormalSpec>
+<Implementation><![CDATA[  q +$G(^Dictionaries(Dict))
+]]></Implementation>
+</Method>
+
+<Method name="IncreaseCurrentDictVersion">
+<Description><![CDATA[
+Увеличить текущую версию справочника
+<br><var>Dict</var> - справочник]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Dict:%String=1</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s ^Dictionaries(Dict)=$G(^Dictionaries(Dict))+1
+ q
+]]></Implementation>
+</Method>
+
+<Method name="PrepareFolder">
+<Description>
+Проверить существование подпапки и создать (если че)</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClientFolder=""</FormalSpec>
+<Implementation><![CDATA[
+ q:ClientFolder=""
+ i '##class(%File).Exists("C:\SKLAD\RemCl\"_ClientFolder) d
+ . d ##class(%File).CreateDirectory("c:\sklad\RemCl\"_ClientFolder)
+ q
+]]></Implementation>
+</Method>
+
+<Method name="ArjFile">
+<Description>
+упаковать файл с паролем</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>file:%String="",password:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="ArjFileErr"
+ s FileWithoutExt=$P(file,".",1,$L(file,".")-1)
+ i '##class(%File).Exists("c:\pkzip25.exe") q "Ошибка. Отсутствует c:\pkzip25.exe"
+ //i '##class(%File).Exists("c:\7z.exe") q "Ошибка. Отсутствует c:\7z.exe"
+ //s CommandString="c:\7z.exe a -t7z -p"_password_" "_FileWithoutExt_".zip "_file_" >c:\cachesys\csp\sklad2\1.txt"
+ s CommandString="c:\pkzip25.exe -add -NoFix -move -pass="_password_" "_FileWithoutExt_".zip "_file_" >c:\cachesys\csp\sklad2\1.txt"
+ //тут такое дело - старая версия Менеджера отчётов, не присылала версию и одновременно работала 
+ //и одновременно работала с ARJ поэтому такой финт ногами, смотрим в %request версию и определяем чем паковать
+ s CurrentVersion=$S($ISOBJECT($G(%request)):%request.Get("CurrentVersion"),1:"нет %request")
+ if CurrentVersion="" s CommandString="c:\arj.exe a -d -y -g:"_password_" "_FileWithoutExt_".arj "_file_" >c:\cachesys\csp\sklad2\1.txt"
+ //i '##class(%File).Exists("c:\arj.exe") q "Ошибка. Отсутствует c:\arj.exe"
+ d $ZF(-1,CommandString)
+ q 1
+ArjFileErr
+ $$$WriteError($ZE)
+ q "Ошибка при архивировании файла."
+]]></Implementation>
+</Method>
+
+<Method name="GetPasswordFromCode">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[ClientCode:%String="",&ClientID:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s ClientID=..GetKontrgentIdByCode(ClientCode)
+ q:ClientID="" ""
+ q $LG($G(^Common.KontragentD(ClientID)),38)
+]]></Implementation>
+</Method>
+
+<Method name="GetKontrgentIdByCode">
+<Description>
+Получить ID контрагента по его уникальному коду</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ClientCode=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ q:ClientCode="" ""
+ q $O(^Common.KontragentI("CodeInd"," "_ClientCode,""))
+]]></Implementation>
+</Method>
+
+<Method name="PlugArchiveBase">
+<Description>
+Получить запрос CSP странички, запустить метод в отдельном JOB</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ArchivePath:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="PlugArchiveBaseErr"
+ if ArchivePath="" q ^ArchivePath
+ if $E($G(^ArchivePath,"stop"),1,4)'="stop" q ^ArchivePath
+ j ##class(Common.Common).CopyAndMountArchive(ArchivePath)
+ q ^ArchivePath
+PlugArchiveBaseErr
+ s ^Errors($H,$ZNAME)=$ZE
+ s ^ArchivePath="stopИзвините. Ошибка при подключении архивной базы"
+ q
+]]></Implementation>
+</Method>
+
+<Method name="CopyAndMountArchive">
+<Description>
+Размонтировать, разархивировать и смонтировать область SKLAD</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ArchivePath:%String=""</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="CopyAndMountArchiveErr"
+ if ArchivePath="" s ^ArchivePath="stopОшибка. Не указана архивная база данных." q
+ s ^ArchivePath="Запуск "_$ZDT($H,4)
+ 
+ //проверяем наличие архива с базой
+ s source=ArchivePath_"\"_"Sklad_cache.rar"
+ if '##class(%File).Exists(source) s ^ArchivePath="stopНе найден файл с архивом базы "_source q
+ s destination=$P($zu(86),"\",1,2)_"\mgr\SKLAD\"
+ 
+ //размонтируем SKLAD
+ s ^ArchivePath="Подготавливается архивная база для приёма архивных данных."
+ s ok=$ZU(3,destination)
+ if '+ok s ^ArchivePath="stopНевозможно подготовить архивную базу для приёма архивных данных." q
+  
+ //разархивируем архивную базу прям в mgr\sklad
+ s ^ArchivePath="Идёт процесс разархивации данных. Пожалуйста ждите. "_$ZT($P($H,",",2))
+ //разархивировать с ключами: заменять существующие файлы, не выводить сообщения об ошибках
+ d $ZF(-1,"c:\progra~1\winrar\winrar e -o+ -inul "_source_" "_destination)	//копируем source в destination
+ 
+ //монтируем SKLAD
+ s ^ArchivePath="Данные разархивированы, подготавливается архивная база."
+ s ok=$zu(17,destination,0,0)
+ if '+ok s ^ArchivePath="stopНевозможно подготовить к работе архивную базу после приёма архивных данных." q
+ 
+ s ^ArchivePath="stopАрхивная база "_ArchivePath_" успешно подключена"
+ q
+CopyAndMountArchiveErr
+ s ^Errors($H,$ZNAME)=$ZE
+ s ^ArchivePath="stopИзвините. Ошибка при подключении архивной базы."
+ q
+]]></Implementation>
+</Method>
+
+<Method name="GetRequestStatus">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>RequestIDs,KontrId</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="GetRequestStatusErr"
+ f i=1:1:$L(RequestIDs,",") d
+ . s Request = $TR($P(RequestIDs,",",i),"'","")
+ . s ReqsAgain=$G(ReqsAgain)_+Request_","
+ . s ReqId = +Request
+ . s ReqNumber = $P(Request,"#",2)
+ . if $G(st,"undefined")'="undefined" w ","
+ . s (st,HasBeenSent,cnt)=""
+ . //w i_" "_"ReqId="_ReqId_$C(9)_"ReqNumber="_ReqNumber,!
+ . if +ReqId d
+ . . //w $C(9)_"ID"
+ . . &sql(select %External(State),%External(HasBeenSent) into :st,:HasBeenSent from Operation.Instructions where ID=:ReqId and Kontr=:KontrId)
+ . else  if +ReqNumber d
+ . . &sql(select %External(State),%External(HasBeenSent),count(id) into :st,:HasBeenSent,:cnt from Operation.Instructions where Kontr=:KontrId and Name=:ReqNumber)
+ . . //w $C(9)_"Name"_$C(9)_"cnt="_cnt
+ . . if cnt>1 s st="Ошибка проверки."
+ . if $G(SQLCODE) s (st,HasBeenSent,cnt)=""
+ . w st
+ . w:HasBeenSent'="" ". ("_HasBeenSent_")"
+ q
+ // $G(answer)
+ 
+ s ReqsAgain=$E(ReqsAgain,1,$L(ReqsAgain)-1)
+ 
+ s sql="select id,%External(State) as st,%External(HasBeenSent) as HasBeenSent from Operation.Instructions where id in ("_$G(ReqsAgain)_")"
+ s rs=##class(%ResultSet).%New()
+ s ok=rs.Prepare(sql)
+ if '+ok $$$WriteObjError(ok) q "Извините. Ошибка при извлечении статуса заявок."
+ s ok=rs.Execute()
+ if '+ok $$$WriteObjError(ok) q "Извините. Ошибка при извлечении статуса заявок."
+ while rs.Next() 
+ {
+	s HasBeenSent = rs.Data("HasBeenSent")
+ 	s answer=$G(answer)_rs.Data("st")
+ 	s:HasBeenSent'="" answer=$G(answer)_". ("_HasBeenSent_")"
+ 	s answer=$G(answer)_","
+ }
+ q $G(answer)
+GetRequestStatusErr
+ $$$WriteError($ZE)
+ q "Извините. Ошибка при извлечении статуса заявок."
+]]></Implementation>
+</Method>
+
+<Method name="GeneratePassword">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+ f i=1:1:8 d
+ . if $R(2) s char=$C($R(26)+65)
+ . else  s char=$R(9)+1
+ . s str=$G(str)_char
+ q str
+]]></Implementation>
+</Method>
+
+<Method name="GetOtchetStatus">
+<Description>
+Вывести состояние одного найденного отчёта</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DocName:%String="",KontragentId:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ &sql(SELECT Stat,ErrorDescription into :Stat,:ErrorDescription 
+ 	FROM Docs.Otchet 
+ 	WHERE Name=:DocName and Kontr=:KontragentId
+ 	ORDER BY ID DESC)
+ if SQLCODE q "Невозможно найти отчёт "_DocName_". Состояние отчёта неизвестно."
+ q "Ok"_Stat_$C(9)_ErrorDescription
+]]></Implementation>
+</Method>
+
+<Method name="GetGoodRemontPriceForKontr">
+<Description>
+Получить цену за ремонт данног товара для данного контрагента</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>GoodsId=0,KontrId=0</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ if GoodsId = 0 q "Не указан товар"
+ if KontrId = 0 q "Не указан контрагент"
+ &sql(select izdelie into :izdelie from Goods.Goods where ID = :GoodsId)
+ if SQLCODE q "Ошибка при поиске товара "_GoodsId
+ &sql(select Code into :Code from Common.Kontragent where ID = :KontrId)
+ if SQLCODE q "Ошибка при поиске контрагента "_KontrId
+ q ..GetRemontPrice(Code,izdelie)
+]]></Implementation>
+</Method>
+
+<Method name="ExportImages">
+<Description><![CDATA[
+запуск ExportImages
+Экспортировать изображения товаров в указанную директорию
+<br> Root - папка куда лягут картинки
+<br> ExportForMO - флажок указывающий на то, что экспортировать надо в одну папку, причём без названий товаров]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Root,ExportForMO</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+  s glob=$Na(^mtempReport($J))	
+  k @glob
+  j ##class(Common.Common).ExportImages2(Root, ExportForMO, glob)
+  q $J
+]]></Implementation>
+</Method>
+
+<Method name="ExportImages2">
+<Description><![CDATA[
+Экспортировать изображения товаров в указанную директорию
+<br> Root - папка куда лягут картинки
+<br> ExportForMO - флажок указывающий на то, что экспортировать надо в одну папку, причём без названий товаров
+<br> glob - глобал в который будут записаны результаты]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Root,ExportForMO,glob</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ //n GoodsId,Images,FullName,ok,Delimeter,i,Root,DestinationDir,FilesDir,
+ //CurrentImageFile,LineTerminator,Rest
+  s $ZT="ExportImagesErr"
+  s Root=$G(Root,"c:\Goods\")
+  if $E(Root,$L(Root))'="\" s Root=Root_"\"
+  s Rest="Прочее"
+  s FilesDir="C:\CacheSys\CSP\sklad2\GoodsImages\"
+  s Error=""
+  s LineTerminator=$C(13,10)
+  &sql(declare zz cursor for
+  select ID,Images,FullName,Name
+  into :GoodsId,:Images,:FullName,:Name
+  from Goods.Goods where Images<>'')
+  &sql(open zz)
+  f  &sql(fetch zz) q:SQLCODE  d
+  . if ExportForMO d
+  . . s DestinationDir=Root
+  . else  d
+  . . s GroupFullName=..GetGroupFullName(GoodsId)
+  . . s DestinationDir=Root_GroupFullName_"\"
+  . . s ok=##class(%File).CreateDirectoryChain(DestinationDir)
+  . . if '+ok d 
+  . . . s DestinationDir=Root_Rest
+  . . . s ok=##class(%File).CreateDirectoryChain(DestinationDir)
+  . . . if '+ok s Error=Error_"Ошибка подготовки каталога "_DestinationDir_" для : "_FullName_LineTerminator q
+  . f i=1:1:$L(Images,"\") d
+  . . s CurrentImageFile=$P(Images,"\",i)
+  . . s NewFileExtention = $P(CurrentImageFile,".",$L(CurrentImageFile,"."))
+  . . //если для МО то название по простому
+  . . if ExportForMO s NewFileName=GoodsId_"_"_i
+  . . else  d
+  . . . s NewFileName=GoodsId_"^"_Name
+  . . . if $L(Images,"\")>1 s NewFileName=NewFileName_" ("_i_")"
+  . . s NewFileName=$TR(NewFileName,"\/:*?:<>|","")
+  . . s ok = ##class(%File).CopyFile(FilesDir_CurrentImageFile,DestinationDir_NewFileName_"."_NewFileExtention)
+  . . if 'ok d
+  . . . s Error=Error_"Ошибка копирования "_CurrentImageFile_" из "_FilesDir_" в "_DestinationDir_LineTerminator
+  . . . //s ^mtempArt($i(^mtempArt))=FilesDir_CurrentImageFile_","_DestinationDir_NewFileName_"."_NewFileExtention
+  &sql(close zz)
+  if $L(Error)>2000 s Error=$E(Error,1,2000)_"..."
+  s @glob=Error
+  if Error="" s @glob="Все изображения были экспортированы." q 1
+  q Error
+ExportImagesErr
+ $$$WriteError($ZE)
+ s @glob = "Извините, ошибка при экспорте изображений."
+ q
+]]></Implementation>
+</Method>
+
+<Method name="GetGroupFullName">
+<Description>
+Получить имя директории для изображения товара</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>GoodsId:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ if GoodsId="" q ""
+ //n Delimeter,GroupFullName,i
+ s Delimeter=$C(9)
+ &sql(select Groups,Common.SqlProcs_GroupFullName(Groups,:Delimeter) into :Groups,:GroupFullName from Goods.GoodsGroup where Goods=:GoodsId)
+ //w FullName_" = "_$TR(GroupFullName,$C(9),"/"),!
+ //удалим 
+ f i="\","/",":","*","?",":","<",">","|" d
+ . s GroupFullName=$TR(GroupFullName,i,"_")
+ s GroupFullName=$TR(GroupFullName,$C(9),"\")
+ q GroupFullName
+]]></Implementation>
+</Method>
+
+<Method name="SetGarantDisabled">
+<Description>
+установить гарантийному талону статус "Недействителен"</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Garant="",SetClosingUser=1</FormalSpec>
+<Implementation><![CDATA[
+	s $ZT="SetGarantDisabledErr"
+	if $ISOBJECT(Garant) s GarantObj=Garant,GarantId=Garant.%Id()
+	else  s GarantId=Garant,GarantObj=##class(Common.Dictionary2).%OpenId(Garant)
+	
+	if '$ISOBJECT(GarantObj) q "Невозможно найти гарантийный талон "_Garant
+	
+	s GarantObj.Property9194=2
+	s GarantObj.CloseDat=+$H
+	s GarantObj.CloseTime=$p($H,",",2)
+	s:SetClosingUser GarantObj.CloseUser=$S($ISOBJECT($G(%session)):$G(%session.Data("user")),1:"")
+	
+	s ok=GarantObj.%Save()
+	i '+ok $$$WriteObjError(ok) q "Ошибка при сохранении гарантийного талона "_GarantId
+	q 1
+SetGarantDisabledErr
+ $$$WriteError($ZE)
+ q "Извините, ошибка при установке статуса ""Недействительный"" гарантийному талону"
+]]></Implementation>
+</Method>
+
+<Method name="AddGoodsToKontr">
+<Description>
+Добавить товары на баланс контрагента</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>KontrId="",GoodsString="",quant=0</FormalSpec>
+<Implementation><![CDATA[
+	s $ZT="AddGoodsToKontrErr"
+	if '+KontrId q "Невозможно зачислить запчасти на баланс, так как не указан контрагент."
+	if '+GoodsString q "Невозможно зачислить запчасти на баланс, так как они не указаны."
+	s user = $S($ISOBJECT($G(%session)):$G(%session.Data("user")),1:"")
+	for i=1:1:$L(GoodsString,"#@#")
+	{
+		s GoodsId = +$P(GoodsString,"#@#",i)
+		CONTINUE:'+GoodsId
+		if $D(^t(KontrId,GoodsId)) CONTINUE
+		s ^t(KontrId,GoodsId)=quant
+		s count=$i(^t(KontrId,GoodsId,"count"))
+		s ^t(KontrId,GoodsId,count,"user")=user
+		s ^t(KontrId,GoodsId,count,"datetime")=$H
+	}
+	q 1
+AddGoodsToKontrErr
+ $$$WriteError($ZE)
+ q "Извините, ошибка при попытке зачислить товары на баланс."
+]]></Implementation>
+</Method>
+
+<Method name="RemoveGoodsFromKontr">
+<Description>
+Снять товары с баланса контрагента</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>KontrId="",GoodsString="",quant=0</FormalSpec>
+<ProcedureBlock>0</ProcedureBlock>
+<Implementation><![CDATA[
+	n user,GoodsId,i,count
+	
+	s $ZT="RemoveGoodsFromKontrErr"
+	if '+KontrId q "Невозможно зачислить запчасти на баланс, так как не указан контрагент."
+	if '+GoodsString q "Невозможно зачислить запчасти на баланс, так как они не указаны."
+	if '$D(^t(KontrId)) q "Данный контрагент не имеет запчастей на балансе"
+	s user = $S($ISOBJECT($G(%session)):$G(%session.Data("user")),1:"")
+	for i=1:1:$L(GoodsString,"#@#")
+	{
+		s GoodsId = $P(GoodsString,"#@#",i)
+		CONTINUE:'+GoodsId
+		CONTINUE:'+$D(^t(KontrId,GoodsId))
+		//if $D(^t(KontrId,GoodsId)) CONTINUE
+		
+		
+		//счётчик истории изменений
+		s count=$i(^tHistory(KontrId,GoodsId,"count"))
+		
+		// копируем в историю
+		m ^tHistory(KontrId,GoodsId,count,"history")=^t(KontrId,GoodsId)
+		s ^tHistory(KontrId,GoodsId,count,"user")=user
+		s ^tHistory(KontrId,GoodsId,count,"datetime")=$H
+				
+		//если указали больше одной строки
+		//то снимаемое количество это текущее количество на балансе
+		if $L(GoodsString,"#@#")>2 s quant=$G(^t(KontrId,GoodsId))
+		
+		//снимаем нужное количество с баланса
+		s ^t(KontrId,GoodsId)=^t(KontrId,GoodsId)-quant
+		
+		//если остался ноль, то удаляем строчку
+		k:'+^t(KontrId,GoodsId) ^t(KontrId,GoodsId)
+	}
+	q 1
+RemoveGoodsFromKontrErr
+ $$$WriteError($ZE)
+ q "Извините, ошибка при попытке снять товары с баланса контрагента."
+]]></Implementation>
+</Method>
+</Class>
+</Export>

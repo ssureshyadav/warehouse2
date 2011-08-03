@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.ActItems">
+<Description>
+Заявки, запчасти на основании которых был выписан акт</Description>
+<Super>Docs.DocItems</Super>
+<TimeCreated>61508,51385.800655</TimeCreated>
+
+<Property name="Request">
+<Description>
+Заявка</Description>
+<Type>Operation.Instructions</Type>
+</Property>
+
+<Property name="RequestItem">
+<Description>
+Заявка</Description>
+<Type>Operation.InstructionsItems</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>ActItemsDefaultData</DefaultData>
+<Data name="ActItemsDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"ActItems"</Subscript>
+<Value name="1">
+<Value>Request</Value>
+</Value>
+<Value name="2">
+<Value>RequestItems</Value>
+</Value>
+<Value name="3">
+<Value>RequestItem</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

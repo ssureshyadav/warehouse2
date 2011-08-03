@@ -1,0 +1,114 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ d:%session.NewSession 
+ . s %session.EndSession=1
+ . s ses=%request.Get("sessionid",1)
+ . s %session=%session.GetSession(ses)
+ 
+ s ContentType=%request.Get("ContentType")
+ set %response.ContentType = ContentType
+ if ContentType="application/x-msexcel" do %response.SetHeader("Content-Disposition","attachment;excel.xls")
+ set %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+ 
+ s login=$G(%session.Data("user"))
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ i '##class(Common.Rights).getrights(login,17) s %response.ServerSideRedirect="norights.csp" 
+ 
+ Quit 1
+</script>
+
+<html>
+<head>
+<meta http-equiv="Content-Type" content="charset=windows-1251">
+<title>	Отчёт по сумме остатка </title>
+
+</head>
+
+<body>
+<center><h3>Сумма остатка</h3></center>
+<script language="cache" runat="server">
+
+s kurs=##class(Goods.GoodsAction).kurs()
+w "<p>курс у.е. = "_kurs_"</p>"
+s Rezerv=%request.Get("Rezerv")
+s RezervIncluded=$S(Rezerv="true":"(включая резерв)",1:"(не включая резерв)")
+s glob=$NA(^mtempReport14($J))
+s CatalogueID=%request.Get("Catalogue")
+k @glob
+s DotSymbol=","
+
+&html<
+<table border=1><tr>
+	<td>Запчасть (товар)
+	<td>Количество <br>#(RezervIncluded)#
+	<td>Цена за штуку (у.е.)
+	<td>Сумма (у.е.)
+	<td>Цена за штуку (руб.)
+	<td>Сумма (руб.)
+ >
+ 
+ &sql(declare zCursor cursor for 
+ 	select Qnt.Goods as GoodsID,Qnt.Goods->FullName,Qnt.Goods->Price,Qnt.value1,Qnt.value2,gr.Name as GroupName,Cat.Name as CatalogueName,Cat.ID as CatalogueID,gr.ID as groupID
+ 	into :GoodsID,:GoodsFullName,:GoodsPrice,:Value1,:Value2,:GroupName,:CatalogueName,:CatalogueID,:groupID
+	from Store.Quantity Qnt, Goods.Catalogue Cat, Goods.Group gr, Goods.GoodsGroup as GoodsGr
+	where Qnt.Goods=GoodsGr.Goods and gr.Catalogue=Cat.ID and GoodsGr.Groups=gr.ID and Cat.ID=:CatalogueID
+	)
+	
+ &sql(open zCursor)
+ f  &sql(fetch zCursor) q:SQLCODE  d
+ . if Rezerv="true" s Qnt=Value1+Value2
+ . e  s Qnt=Value1
+ . s QntGoodsPrice = $J(GoodsPrice*Qnt,"",2) //общая сумма товара в уе
+ . s QntGoodsPriceRub = $J(GoodsPrice*kurs*Qnt,"",2)	//общая сумма товара в уе
+ . s @glob@(CatalogueID)=CatalogueName
+ . s @glob@(CatalogueID,"groups",groupID)=GroupName
+ . s @glob@(CatalogueID,"groups",groupID,"goods",GoodsID)=GoodsFullName
+ . s @glob@(CatalogueID,"groups",groupID,"goods",GoodsID,"GoodsPrice")=GoodsPrice
+ . s @glob@(CatalogueID,"groups",groupID,"goods",GoodsID,"GoodsPriceRub")=$J(GoodsPrice*kurs,"",2)
+ . s @glob@(CatalogueID,"groups",groupID,"goods",GoodsID,"Qnt")=$G(@glob@(CatalogueID,"groups",groupID,"goods",GoodsID,"Qnt"))+Qnt
+ . s @glob@(CatalogueID,"groups",groupID,"goods",GoodsID,"QntGoodsPrice")=$G(@glob@(CatalogueID,"groups",groupID,"goods",GoodsID,"QntGoodsPrice"))+QntGoodsPrice
+ . s @glob@(CatalogueID,"groups",groupID,"goods",GoodsID,"QntGoodsPriceRub")=$G(@glob@(CatalogueID,"groups",groupID,"goods",GoodsID,"QntGoodsPriceRub"))+QntGoodsPriceRub
+ . //
+ . //суммируем количество и цены в целом по каталогу
+ . s @glob@(CatalogueID,"data","Qnt")=$G(@glob@(CatalogueID,"data","Qnt"))+Qnt
+ . s @glob@(CatalogueID,"data","QntGoodsPriceRub")=$G(@glob@(CatalogueID,"data","QntGoodsPriceRub"))+QntGoodsPriceRub
+ . s @glob@(CatalogueID,"data","QntGoodsPrice")=$G(@glob@(CatalogueID,"data","QntGoodsPrice"))+QntGoodsPrice
+ . //
+ . //суммируем количество и цены в целом по группе
+ . s @glob@(CatalogueID,"data",groupID,"data","Qnt")=$G(@glob@(CatalogueID,"data",groupID,"data","Qnt"))+Qnt
+ . s @glob@(CatalogueID,"data",groupID,"data","QntGoodsPriceRub")=$G(@glob@(CatalogueID,"data",groupID,"data","QntGoodsPriceRub"))+QntGoodsPriceRub
+ . s @glob@(CatalogueID,"data",groupID,"data","QntGoodsPrice")=$G(@glob@(CatalogueID,"data",groupID,"data","QntGoodsPrice"))+QntGoodsPrice
+ &sql(close zCursor)
+
+ //теперь просто идём по глобальке и выводим
+ //цикл по классификаторам (буде таковых возымеет место быть более одного)
+ s CatalogueID="" f  s CatalogueID=$O(@glob@(CatalogueID)) q:CatalogueID=""  d
+ . w "<tr>"
+ . w "<td ><br><font size=+1><b>"_$G(@glob@(CatalogueID))_"</b></font>"
+ . w "<td>"_$TR($G(@glob@(CatalogueID,"data","Qnt")),".",DotSymbol)
+ . w "<td>"_$TR($G(@glob@(CatalogueID,"data","GoodsPrice")),".",DotSymbol)
+ . w "<td>"_$TR($G(@glob@(CatalogueID,"data","QntGoodsPrice")),".",DotSymbol)
+ . w "<td>"_$TR($G(@glob@(CatalogueID,"data","GoodsPriceRub")),".",DotSymbol)
+ . w "<td>"_$TR($G(@glob@(CatalogueID,"data","QntGoodsPriceRub")),".",DotSymbol)
+ . //цикл по группам внутри классификатора
+ . s groupID="" f  s groupID=$O(@glob@(CatalogueID,"groups",groupID)) q:groupID=""  d
+ . . w "<tr>"
+ . . w "<td><br>&nbsp;&nbsp;&nbsp;<b>"_$G(@glob@(CatalogueID,"groups",groupID))_"</b>"
+ . . w "<td><br>"_$TR($G(@glob@(CatalogueID,"data",groupID,"data","Qnt")),".",DotSymbol)
+ . . w "<td><br>"_$TR($G(@glob@(CatalogueID,"data",groupID,"data","GoodsPrice")),".",DotSymbol)
+ . . w "<td><br>"_$TR($G(@glob@(CatalogueID,"data",groupID,"data","QntGoodsPrice")),".",DotSymbol)
+ . . w "<td><br>"_$TR($G(@glob@(CatalogueID,"data",groupID,"data","GoodsPriceRub")),".",DotSymbol)
+ . . w "<td><br>"_$TR($G(@glob@(CatalogueID,"data",groupID,"data","QntGoodsPriceRub")),".",DotSymbol)
+ . . s GoodsID="" f  s GoodsID=$O(@glob@(CatalogueID,"groups",groupID,"goods",GoodsID)) q:GoodsID=""  d
+ . . . w "<tr>"
+ . . . w "<td>"_$G(@glob@(CatalogueID,"groups",groupID,"goods",GoodsID))
+ . . . w "<td>"_$TR($G(@glob@(CatalogueID,"groups",groupID,"goods",GoodsID,"Qnt")),".",DotSymbol)
+ . . . w "<td>"_$TR($G(@glob@(CatalogueID,"groups",groupID,"goods",GoodsID,"GoodsPrice")),".",DotSymbol)
+ . . . w "<td>"_$TR($G(@glob@(CatalogueID,"groups",groupID,"goods",GoodsID,"QntGoodsPrice")),".",DotSymbol)
+ . . . w "<td>"_$TR($G(@glob@(CatalogueID,"groups",groupID,"goods",GoodsID,"GoodsPriceRub")),".",DotSymbol)
+ . . . w "<td>"_$TR($G(@glob@(CatalogueID,"groups",groupID,"goods",GoodsID,"QntGoodsPriceRub")),".",DotSymbol)
+ 
+k @glob
+</script>
+
+</body>
+</html>

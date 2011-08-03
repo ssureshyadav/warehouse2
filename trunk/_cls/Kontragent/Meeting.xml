@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Kontragent.Meeting">
+<Description>
+Общение с контрагентами</Description>
+<Super>%Persistent</Super>
+<TimeCreated>61056,2079.284813</TimeCreated>
+
+<Property name="Kontr">
+<Description>
+Контрагент</Description>
+<Type>Common.Kontragent</Type>
+<Required>1</Required>
+</Property>
+
+<Index name="KontrInd">
+<Properties>Kontr</Properties>
+</Index>
+
+<Property name="Dat">
+<Description>
+Дата</Description>
+<Type>%Date</Type>
+<Parameter name="FORMAT" value="4"/>
+</Property>
+
+<Index name="DatInd">
+<Properties>Dat</Properties>
+</Index>
+
+<Property name="Tim">
+<Description>
+Время</Description>
+<Type>%Time</Type>
+</Property>
+
+<Index name="TimInd">
+<Properties>Tim</Properties>
+</Index>
+
+<Property name="Result">
+<Description>
+Результат разговора</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="4048"/>
+</Property>
+
+<Property name="User1">
+<Description>
+Оператор</Description>
+<Type>Users.Dates</Type>
+<InitialExpression>$S($ISOBJECT($G(%session)):$G(%session.Data("user")),1:"")</InitialExpression>
+</Property>
+
+<Index name="User1Ind">
+<Properties>User1</Properties>
+</Index>
+
+<Property name="MessageType">
+<Description>
+Тип сообщения</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=",Закрытое (для себя),От клиента,Клиенту"/>
+<Parameter name="VALUELIST" value=",0,2,3"/>
+</Property>
+
+<Index name="MessageTypeInd">
+<Properties>MessageType</Properties>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Kontragent.MeetingD</DataLocation>
+<DefaultData>MeetingDefaultData</DefaultData>
+<IdLocation>^Kontragent.MeetingD</IdLocation>
+<IndexLocation>^Kontragent.MeetingI</IndexLocation>
+<StreamLocation>^Kontragent.MeetingS</StreamLocation>
+<Data name="MeetingDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Dat</Value>
+</Value>
+<Value name="3">
+<Value>Kontr</Value>
+</Value>
+<Value name="4">
+<Value>Result</Value>
+</Value>
+<Value name="5">
+<Value>Tim</Value>
+</Value>
+<Value name="6">
+<Value>User1</Value>
+</Value>
+<Value name="7">
+<Value>MessageType</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

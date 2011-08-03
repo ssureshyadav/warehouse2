@@ -1,0 +1,47 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ d:%session.NewSession 
+ . s %session.EndSession=1
+ . s ses=%request.Get("sessionid",1)
+ . s %session=%session.GetSession(ses)
+ 
+ s class=%request.Get("class")
+ s kontr=%request.Get("kontr")
+ s kontr2=%request.Get("kontr2")
+ s kontr3=%request.Get("kontr3")
+ s kontr4=%request.Get("kontr4")
+ s DocDate=%request.Get("DocDate")
+ s id=%request.Get("id")
+ s nomnaklad=%request.Get("nomernakl")
+ s ^mtempArt("Zzz") = %request.Get("AllColumns")
+ 
+ Set:class="Docs.Remont" %response.ServerSideRedirect="screen/zayavka.csp?id="_id
+ Set:class="Docs.Utiliz" %response.ServerSideRedirect="screen/actutil.csp?id="_id
+ Set:class="Docs.Rash" %response.ServerSideRedirect="screen/rash.csp?id="_id
+ Set:class="Docs.Prih" %response.ServerSideRedirect="screen/prih.csp?id="_id
+ Set:class="factura" %response.ServerSideRedirect="screen/factura.csp?id="_id_"&kontr="_kontr2_"&kontr2="_kontr
+ Set:class="Docs.Chet" %response.ServerSideRedirect="screen/chet.csp?id="_id_"&kontr="_kontr_"&kontr2="_kontr2
+ Set:class="Docs.Inner" %response.ServerSideRedirect="screen/inner.csp?id="_id
+ Set:class="Docs.Otchet" %response.ServerSideRedirect="screen/otchet2.csp?id="_id
+ Set:class="Docs.PrihKassOrder" %response.ServerSideRedirect="screen/prihorder.csp?id="_id
+ Set:class="Docs.StorageOut" %response.ServerSideRedirect="screen/instrotbor.csp?id="_id_"&class="_class
+ Set:class="Docs.StorageIn" %response.ServerSideRedirect="screen/instrotbor.csp?id="_id_"&class="_class
+ Set:class="tovnakladn" %response.ServerSideRedirect="screen/tovnakl.csp?id="_id_"&kontr="_kontr_"&kontr2="_kontr2_"&kontr3="_kontr3_"&kontr4="_kontr4_"&nomernakladnoy="_nomnaklad
+ Set:class="Docs.InnerDiff" %response.ServerSideRedirect="screen/InnerDiff.csp"
+ Set:class="Docs.Invent" %response.ServerSideRedirect="screen/invent.csp"
+ Set:class="Docs.Act" %response.ServerSideRedirect="screen/Act.csp"
+ Set:class="Docs.ActNote" %response.ServerSideRedirect="screen/actnote.csp"
+ Set:class="Docs.Brakremont" %response.ServerSideRedirect="screen/Brakremont.csp"
+Quit 1
+</script>
+<html>
+<head>
+
+<!-- Put your page Title here -->
+<title>#($G(%session.Data("systemname")))#</title>
+
+</head>
+
+<body>
+<center><h1>Извините, для данного документа нет шаблона, поэтому он не может быть распечатан</h1></center>
+</body>
+</html>

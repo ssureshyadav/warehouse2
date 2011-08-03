@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csr.csp.SkladButton">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Rule</Super>
+<TimeCreated>62198,52781.831281</TimeCreated>
+
+<Method name="CompilerMethod1">
+<CodeMode>code</CodeMode>
+<Language>cache</Language>
+<ReturnType/>
+<Implementation><![CDATA[
+	 s value=##this.GetAttribute("value")
+	 s onclick=##this.GetAttribute("onclick")
+	 s style=##this.GetAttribute("style")
+	 s title=##this.GetAttribute("alt")
+	 s ID=##this.GetAttribute("ID")
+]]></Implementation>
+</Method>
+
+<Method name="RenderStartTag">
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	New element Set element=##this
+	Set %statuscode=$$$OK Do ..CompilerMethod1()
+	Quit:$$$ISERR(%statuscode) %statuscode
+	Do ..WriteCSPText("",1)
+	Do ..WriteCSPText("<span class=ButtonDiv ID=""##($G(ID))##"" style=""cursor:hand;##($G(style))##"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""##($G(onclick))##"" TITLE=""##($G(title))##""><center>##($G(value))##</center></span>",0)
+	Quit $$$SKIPCHILDREN
+]]></Implementation>
+</Method>
+
+<Parameter name="CSRURL">
+<Default>/csp/sklad2/skladRules.csr</Default>
+</Parameter>
+</Class>
+</Export>

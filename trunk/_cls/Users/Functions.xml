@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Users.Functions">
+<Description>
+Функции</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60407,58581.772904</TimeCreated>
+
+<Property name="Name">
+<Description>
+Название функции</Description>
+<Type>%String</Type>
+<Required>1</Required>
+</Property>
+
+<Property name="Description">
+<Description>
+Описание функции</Description>
+<Type>%String</Type>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Users.FunctionsD</DataLocation>
+<DefaultData>FunctionsDefaultData</DefaultData>
+<IdLocation>^Users.FunctionsD</IdLocation>
+<IndexLocation>^Users.FunctionsI</IndexLocation>
+<StreamLocation>^Users.FunctionsS</StreamLocation>
+<Data name="FunctionsDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Name</Value>
+</Value>
+<Value name="3">
+<Value>Description</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

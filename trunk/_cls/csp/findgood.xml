@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.findgood">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62174,36181.547798</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body>"
+	Write !,"<br>",!
+	Write "<TABLE cellSpacing=0 width=""100%"" celpadding=""0"" >",!
+	Write "<TR>",!
+	Write "<td width=10%>&nbsp;</td>",!
+	Write "<TD width=80% align=center style=""BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid"" ><strong>Поиск товаров</strong></TD>",!
+	Write "<td width=10%>&nbsp;</td>",!
+	Write "</TABLE>",!
+	Write !,"<table>",!
+	Write "<tr><td>Аббревиатура</td><td>"
+	Write "<input type=""text"" id=""abbr"" title=""Первые буквы полного наименование модели, например MAG или VC"">"
+	Write "</td><td rowspan=3>"
+	Write "<input type=""button"" value=""Найти"" onclick=""fnFindGood();"" title=""Начать поиск по заданным аттрибутам"">"
+	Write "</td></tr>",!
+	Write "<tr><td>Модель</td><td>"
+	Write "<input type=""text"" id=""Property3609"" title=""Номер модели, например 1101 или 9907"">"
+	Write "</td></tr>",!
+	Write "<tr><td>Наименование</td><td>"
+	Write "<input type=""text"" id=""Name"" title=""Начало названия например шестерня, или корпус. Полностью название указывать необязательно."">"
+	Write "</td></tr>",!
+	Write "</table>",!
+	Write "<SKLADList:listview width=100% height=300 id=""goods"" /><br>",!
+	Write !,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,!,"<title>	Поиск товаров </title>",!
+	Write "<script language=""javascript"">"
+	Write !,"sessionid="""_(%session.SessionId)_""";",!
+	Write !,"function fnFindGood(){",!
+	Write "var varabbr=abbr.value;",!
+	Write "var varProperty3609 = Property3609.value;",!
+	Write "var varName = Name.value;",!
+	Write "if((varabbr=="""")&&(varProperty3609=="""")&&(varName=="""")){alert(""Необходимо указать хотя бы один признак по которому следует искать товары."");return}",!
+	Write "goods.loadfrommethod(""Reports.ShowTables.FindGoods"",varabbr,varProperty3609,varName)",!
+	Write "}",!
+	Write !,"</script>"
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html XMLNS:SKLADList>"
+	Write !,"<IMPORT NAMESPACE=""SKLADList"" IMPLEMENTATION=""htc/listview2.htc"">",!
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\FindGood.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/FindGood.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>62164,41600</Default>
+</Parameter>
+</Class>
+</Export>

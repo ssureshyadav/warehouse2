@@ -1,0 +1,38 @@
+<html>
+<head>
+
+<!-- Put your page Title here -->
+<title>	Cache Server Page </title>
+
+</head>
+
+<body>
+пройдемся по Docs.Super курсором и так<br>
+<script language="cache" runat="server">
+w $I_"<BR>"
+k ^mtempUmaKura
+s max=^Docs.SuperD
+// идем курсором по Docs.Super
+&sql(declare alldocs cursor for 
+select id,DocumentClass into :id,:DocumentClass from Docs.Super)
+&sql(open alldocs)
+s count=0
+f  &sql(fetch alldocs) q:SQLCODE  d
+ . i $I(count)
+ . i DocumentClass="" w "пустой DocumentClass "_id_"<br>" q
+ . s ^mtempUmaKura("without",id)=DocumentClass
+&sql(close alldocs)
+ w "<br>count="_count
+ s count=0
+ w "<br>// просто пошли по Docs.Super<br>"
+ s i="" f  s i=$O(^Docs.SuperD(i)) q:i=""  d
+ . i $I(count)
+ . w "<b>"_i_"</b><br>"
+ . q:$D(^mtempUmaKura("without",i))
+ . s cl=$G(^Docs.SuperD(i))
+ . s kk=$S(cl'="":$LIST(cl,7),1:"")
+ . w i_" "_kk_"<br>"
+ w "<br>count="_count
+</script>
+</body>
+</html>

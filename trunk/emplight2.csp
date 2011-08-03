@@ -1,0 +1,340 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ s login=$G(%session.Data("user"))
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ i '##class(Common.Rights).getrights(login,5) s %response.ServerSideRedirect="norights.csp" 
+ q 1
+</script><script language="cache" runat="server" method="wDocuments" arguments="depot:%String,order:%String,dir:%String">
+ n sql s sql="select Oper->cl as mustbe,ID as DocId,Name,Kontr as KontrID,Kontr->Name as Kontr,User1->Name as User1,InstDate as InstDateHorolog"
+ s sql=sql_",%external(State) as State,dostavka->Name as dostavka,showcolor as showcolor,Oper as oper,Oper->Name as opername,postnumber,postdata,State as StateNumb,RashOplatType->Name as RashOplatTypeName"
+ s sql=sql_" from Operation.Instructions where (State Between 2 and 8) and (Depot1=?) "
+ s order=$g(order), dir=$g(dir)
+ /*if order'="" {
+	s sql=sql_" Order By "_order_$S(dir=-1:" DESC",1:"")	 
+ }*/
+ 
+ 
+ s kontr1=$P(kontr,"~") if (kontr1'="all")&(kontr1'="") s sql=sql_" and Kontr="_kontr1
+ s instrtype1=$P(instrtype,"~")	i (instrtype1'="all")&(instrtype1'="") s sql=sql_" and Oper="_instrtype1
+ w "SQL:",sql
+ n rs s rs=##class(%ResultSet).%New()
+ s ok=rs.Prepare(sql) i '+ok q "Ошибка при формировании списка инструкций"
+ s ok=rs.Execute(depot) i '+ok q "Ошибка при формировании списка инструкций"
+ while rs.Next(){
+	 
+ 	f i="mustbe","DocId","Name","KontrID","Kontr","User1","InstDateHorolog","State","dostavka","showcolor","oper","opername","postnumber","postdata","StateNumb","RashOplatTypeName" d
+	. s @i=$G(rs.Data(i)) s:@i="" @i="&nbsp;"
+	
+	w "<tr><td colspan='7'>",DocId,":",mustbe,"</td></tr>"
+	 
+	s InstDate=$ZD(InstDateHorolog,4)
+ 	s innerbutton=""
+ 	s mustbe=$P($G(mustbe),",",1),NameRash=""
+ 	s (innerdoc,DocumentClass)=""
+ 	
+ 	#; найдем документы созданные от текущей инструкции
+ 	s ok=..wChildrenDocs(mustbe,DocId,.innerbutton) if 'ok continue
+	
+ 	s:StateNumb=8 innerbutton=innerbutton_"<img src=""images/post.gif"" onmouseover=""this.src='images/Onpost.gif'"" onmouseout=""this.src='images/post.gif'""  onclick=""post('"_DocId_"')"" alt=""Указать реквизиты почтового документа"" >"
+ 	s style="" s:showcolor'="" style="style=""color:"_showcolor_""""
+ 	w "<tr ",style,">"
+ 	w "<td>",Name," (",NameRash,") ",RashOplatTypeName,"</td>"
+ 	w "<td>",InstDate,"</td>"
+ 	w "<td style='cursor:hand' onclick=""ShowKontr('",KontrID,"')"">",Kontr,"</td>"
+ 	w "<td>",User1,"</td>"
+ 	w "<td id=""Instr",DocId,"Stat"">",State
+ 	s:oper'=10 dostavka=opername
+ 	w "<td>",dostavka,"</td>"
+ 	w "<td><nobr>"
+ 		,"<img src=""images/ok.gif"" onmouseover=""this.src='images/Onok.gif'"" onmouseout=""this.src='images/ok.gif'"" "
+ 		," onclick=""chstat(this.Tag,'",innerdoc,"')"" alt=""Изменить статус"" Tag=""",DocId,"""> "
+ 		,"<img src=""images/print.gif"" onmouseover=""this.src='images/Onprint.gif'"" onmouseout=""this.src='images/print.gif'"" "
+ 		," onclick=""prnt('",$G(childdoc),"@",$G(mustbe),"')"" alt=""Распечатать накладную"" Tag="""">"
+ 		,innerbutton
+ 		,"</nobr></td>"
+ 	w "</tr>"	
+ }
+ d rs.Close(), rs.%Close() k rs
+</script><script language="cache" method="wChildrenDocs" arguments="mustbe:%String,DocId:%String,&innerbutton:%String" returntype="%Status">
+	n AdditionalFields s AdditionalFields="" s:mustbe="Docs.Rash" AdditionalFields=",opl->Name as RashOplatTypeName"
+    n sqlDocsRash s sqlDocsRash="select id as childdoc,Name as NameRash"_AdditionalFields_" from "_mustbe_" where Source=?"
+ 	n rs s rs=##class(%ResultSet).%New()
+ 	w "<tr><td colspan='7'>SQL:",sqlDocsRash,"</td></tr>"
+ 	n ok s ok=rs.Prepare(sqlDocsRash) if '+ok w "<tr><td colspan=7>Ошибка при формировании списка инструкций</td>" Q ok
+ 	s ok=rs.Execute(DocId) if '+ok w "<tr><td colspan=7>Ошибка при формировании списка инструкций</td>" Q ok
+	n RashOplatTypeName
+	while rs.Next() {
+		s childdoc=$G(rs.Data("childdoc")), NameRash=$G(rs.Data("NameRash")), RashOplatTypeName=$G(rs.Data("RashOplatTypeName"))
+ 		// есть документы  от инструкции, посмотрим есть ли внутренние инструкции от этих потомков
+ 		&sql(select id,DocumentClass,Name,stat into :innerdoc,:DocumentClass,:NameInner,:stat 
+ 			 From Docs.Super where Source=:childdoc
+ 		)
+ 		if SQLCODE {
+ 			s innerbutton="<img src=""images/new.gif"" onmouseover=""this.src='images/Onnew.gif'"" onmouseout=""this.src='images/new.gif'""  onclick=""create('"_mustbe_"','"_childdoc_"')"" alt=""Создать внутреннюю инструкцию"" >"
+ 		} else {
+ 			s innerbutton="<img src=""images/edit.gif"" onmouseover=""this.src='images/Onedit.gif'"" onmouseout=""this.src='images/edit.gif'""  onclick=""lookinnerinstr('"_innerdoc_"@"_DocumentClass_"')"" alt=""Редактировать внутреннюю инструкцию"" >"
+ 			s innerbutton=innerbutton_"<img src=""images/print.gif"" onmouseover=""this.src='images/Onprint.gif'"" onmouseout=""this.src='images/print.gif'""  onclick=""prnt('"_innerdoc_"@"_DocumentClass_"')"" alt=""Распечатать внутреннюю инструкцию"" >"
+ 			i stat=1 s innerbutton=innerbutton_"<img src=""images/ok.gif"" onmouseover=""this.src='images/Onok.gif'"" onmouseout=""this.src='images/ok.gif'""  onclick=""savestore(this.Tag,'"_NameInner_"')"" alt=""Обработать документ"" Tag="""_innerdoc_""">"
+ 			e  s innerbutton=innerbutton_"<img src=""images/Disabledok.gif"" alt=""Документ уже обработан"" style='cursor:no-drop'>"
+ 		}
+	}
+	d rs.Close(), rs.%Close() k rs
+	Q $$$OK
+</script><script language="cache" runat="server">
+ s kontr=%request.Get("kontr")
+ s instrtype=%request.Get("instrtype")
+</script>
+<html>
+<head>
+<title>Рабочее место кладовщика</title>
+<style>
+img{cursor:hand}
+a:visited {color:#002277;text-decoration:none;}
+a:link {color:#002277;text-decoration:none;} 
+a:hover {color:#0044cc;text-decoration:underline;} 
+a:active {color:#CC3300;text-decoration:none;}
+.hover {background-color:#99bbdd}
+#tblInstructions {
+	border-collapse:collapse;
+	border:solid 1px silver;
+}
+#tblInstructions td, #tblInstructions th {
+	border-collapse:collapse;
+	border:solid 1px silver;
+	padding: 0px 2px;
+}
+</STYLE>
+<script type='text/javascript' src='js/m.js'></script>
+<script language="javascript">
+var sessionid="#(%session.SessionId)#";
+
+var InnerSplitter="~";
+var kontr='#($G(kontr))#';
+var instrtype='#($G(instrtype))#';
+var d1=new Date();
+
+</script>
+<link href="style.css" type=text/css rel=stylesheet>
+</head>
+<body onload="load()">
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<td width=10%><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
+<TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=2><strong>Рабочее место на складе</strong></TD>
+<td  width=10% align=right><!--<a href="talk.csp" ><img src="images/BIGProp.gif" width="20" height=25 border=0></a>--></td>
+</tr>
+</TABLE>
+<sklad:Button style="width:200px" value="Списание брака" onclick="window.location.href='BrakUtiliz.csp'">
+<table width=100%><tr>
+<Td align="left">
+	<fieldset><legend>Тип инструкции</legend>
+	
+	<select id="ChooseInstrType" onchange="ReloadWithParams()">
+	<option value="all">Все</option>
+	<script language="cache" runat="server">
+	w ##class(Docs.Action2).GetClassValuesOptions(,"Operation.OperTemplate",,,0)
+	//
+	//<option value="choose">Выбрать тип инструкции...</option>
+	</script>
+	</select>
+	
+	</fieldset>
+<Td align="left">
+	<fieldset><legend>Контрагент</legend>
+	<select id="ChooseKontragent" onchange="ChooseKontragentFunc()">
+	<option value="all">Все</option>
+	<option value="choose">Выбрать контрагента...</option>
+	</select>
+	</fieldset>
+<td align="right" width=100%>
+</table>
+<fieldset><legend>Инструкции</legend>
+
+<table border=1 id="tblInstructions">
+<script language="cache" runat="Server">
+s SignCode(-1)="&#9650;"
+s SignCode(1)="&#9660;"
+
+s NumberOrder=1
+s NumberSign=""
+s DateOrder=1
+s DateSign=""
+s KontrOrder=1
+s OperOrder=1
+s StateOrder=1
+s TaskOrder=1
+s KontrSign=""
+s OperSign=""
+s StateSign=""
+s TaskSign=""
+
+s order=$g(%request.Data("order")) s:order="" order="NameRash"
+s dir=$g(%request.Data("dir")) s:dir="" dir=1
+
+i (order="NameRash") s NumberOrder=dir*-1,NumberSign=SignCode(dir)
+i order="InstDateHorolog" s DateOrder=dir*-1,DateSign=SignCode(dir)
+i order="Kontr" s KontrOrder=dir*-1,KontrSign=SignCode(dir)
+i order="opername" s OperOrder=dir*-1,OperSign=SignCode(dir)
+i order="State" s StateOrder=dir*-1,StateSign=SignCode(dir)
+i order="dostavka" s TaskOrder=dir*-1,TaskSign=SignCode(dir)
+
+w "<thead><tr>"
+w "<th><a href=""emplight.csp?order=NameRash&dir=",NumberOrder,""">Номер ",NumberSign,"</a></th>"
+w "<th><a href=""emplight.csp?order=InstDateHorolog&dir=",DateOrder,""">Дата ",DateSign,"</a></th>"
+w "<th><a href=""emplight.csp?order=Kontr&dir=",KontrOrder,""">Контрагент ",KontrSign,"</a></th>"
+w "<th><a href=""emplight.csp?order=opername&dir=",OperOrder,""">Оператор ",OperSign,"</a></th>"
+w "<th><a href=""emplight.csp?order=State&dir=",StateOrder,""">Состояние ",StateSign,"</a></th>"
+w "<th><a href=""emplight.csp?order=dostavka&dir=",TaskOrder,""">Задача<br>(Способ<br>отправки) ",TaskSign,"</a></th>"
+w "<th style='font-weight:normal;font-size:12px;font-family:Arial'>Действия</th>"
+w "</thead></tbody>"
+ s sess=%request.Get("sessionid")
+ s depot=$G(%session.Data("depot"))
+ s userid=$G(%session.Data("user"))
+ s instr=%request.Get("instr")
+ s newstat=%request.Get("newstat")
+ 
+ i newstat'="" d
+ . s ok=##class(Operation.InstrActions).changestat(instr,newstat)
+ . i '+ok d
+ . . w "<script language=""javascript"">alert('",ok,"')</script",">"
+ 
+ d ..wDocuments(depot,order,dir)
+ 
+  
+ 
+</script>
+</tbody>
+</table>
+</fieldset>
+<!--
+<fieldset><legend>Протокол формирования страницы</legend>
+</b>
+<span id="joi"></span>
+</fieldset>
+-->
+<div id="debug"></div>
+<script type="text/javascript">
+
+// функция вызываемся автоматически послезагрузки документа
+function load(){
+var kontrArray=kontr.split("~");
+var instrtypeArray=instrtype.split("~");
+if((kontrArray[0]!="all")&(kontrArray[0]!="")){SetSelectData("ChooseKontragent",kontr)}
+if((instrtypeArray[0]!="all")&(instrtypeArray[0]!="")){SetSelectData("ChooseInstrType",instrtype)}
+var d2=new Date();
+
+}
+
+// печать документа созданного инструкцией
+function prnt(idclass){
+var docid=idclass.split("@")[0]
+var docclass=idclass.split("@")[1]
+window.open("print.csp?id="+docid+"&class="+docclass+"&sessionid="+sessionid)
+ }
+ 
+//изменить состояние инструкции
+function chstat(docid,innerdoc){
+ var newstat=window.showModalDialog("instrstates.csp","","center:yes;status:no;dialogHeight:300px;dialogWidth:300px;resizable:yes;")
+ if(newstat!=null){
+	 var ok=#server(Operation.InstrActions.changestat(docid,newstat))#
+	 if(ok.split("@")[0]!=1){alert(ok)}
+	 else{
+		 document.getElementById("Instr"+docid+"Stat").innerText=ok.split("@")[1];
+		 }
+	 //location.href="emplight.csp?instr="+docid+"&newstat="+newstat;
+	 }
+ }
+ 
+ //открыть внутреннюю инструкцию
+function lookinnerinstr(idclass){
+var docclass=idclass.split("@")[1]
+var docid=idclass.split("@")[0]
+var ok=window.showModalDialog("InnerInstructNew.csp?DocId="+docid+"&ClassName="+docclass+"&sessionid="+sessionid,"","center:yes;status:no;dialogHeight:600px;dialogWidth:600px;resizable:yes;");
+#server(Store.Action.KillTempAddress())#
+}
+
+// создать внутреннюю инструкцию
+function create(cl,docid){
+	//создать дочерний документ основываясь на текущем
+	var ok=#server(Docs.Action.CreateChildDoc(docid,cl))#
+	if(!isNaN(ok)){window.location.reload();}
+	else{alert(ok)}
+}
+
+// указать реквизиты почтового документа
+function post(docid){
+var ok=window.showModalDialog("DictItem.csp?skip=InstDate,Name,Comment,Depot1,State,Oper,Operation,innerinstr,dostavka,imp,showcolor,Kontr,Dat,Tim,User1,Summa,Stat,Source,CloseDate,CloseTime,CloseUser&show=postnumber,postdata",docid+";Operation.Instructions","cener:yes;status:no;dialogHeight:350px;dialogWidth:400px;resizable:yes;")
+}
+
+// обработать внутреннюю инструкцию
+function savestore(InstrID,NameInner){
+if(window.confirm("Занести данные документа "+NameInner+" в остатки?")){
+ok=#server(Store.Action.SaveQuantFromInstr(InstrID))#
+if(isNaN(ok)){alert(ok)}
+else{alert("Запись об остатках товаров успешно занесена в базу.");}
+}
+}
+
+function ShowKontr(KontrID){
+	ok=window.showModalDialog("kontragent.csp?KontrId="+KontrID,"","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+}
+
+function SetSelectData(SelectObjID,newData){
+	if($g(SelectObjID).options.length==2){
+		$g(SelectObjID).options.length=3
+	}
+	$g(SelectObjID).options(2).value=newData.split("~")[0];
+	$g(SelectObjID).options(2).text=newData.split("~")[1];
+	$g(SelectObjID).selectedIndex=2;
+}
+
+// Выбрать контрагента
+function ChooseKontragentFunc(){
+var UsersSelection=ChooseKontragent.options(ChooseKontragent.selectedIndex).value;
+if(UsersSelection=="choose"){
+	var newKontragent=window.showModalDialog("Dictionary.csp","Common.Kontragent","center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");
+	if(newKontragent==null){
+		ChooseKontragent.selectedIndex=0;
+		return false;}
+	SetSelectData("ChooseKontragent",newKontragent);
+	ReloadWithParams();
+}
+if(UsersSelection=="all"){
+	ReloadWithParams();
+}
+}
+
+function ReloadWithParams(){
+	var AdditionalParams="";
+	var AdditionalParams=AdditionalParams+"kontr="+ChooseKontragent.options(ChooseKontragent.selectedIndex).value+"~"+ChooseKontragent.options(ChooseKontragent.selectedIndex).text
+	var AdditionalParams=AdditionalParams+"&instrtype="+ChooseInstrType.options(ChooseInstrType.selectedIndex).value+"~"+ChooseInstrType.options(ChooseInstrType.selectedIndex).text
+	window.location.href="emplight.csp?"+AdditionalParams;
+}
+
+function ChangeFn(DocId){
+if(DocId=="")return
+var answer=window.showModalDialog("ChangeGoods.csp?DocId="+DocId,"","center:yes;status:no;dialogHeight:550px;dialogWidth:800px;resizable:yes;");
+}
+
+
+
+
+	$bind(window,"load",function(){
+		var fr=function(o){ //ищем строку Find Row
+			var tr=null;
+			for (;o.tagName!=="TABLE";o=o.parentElement){
+				if (o.parentElement.tagName==="THEAD") break;
+				if (o.tagName==="TR"){ tr=o; break; }
+			}
+			return tr;
+		}
+		$bind($g("tblInstructions"),"mouseover",function(e){
+			if (!e) e=window.event; var tr=fr(e.srcElement); if (tr) tr.className="hover";
+		});
+		$bind($g("tblInstructions"),"mouseout",function(e){
+			if (!e) e=window.event; var tr=fr(e.srcElement); if (tr) tr.className="";
+		});
+	});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.utilizationdoc">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62082,42252.188212</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body onload=""Load();"">"
+	Write !,"<br>",!
+	Write "<center><h2>Утилизация</h2></center>",!
+	Write "<br>",!
+	Write "<table>",!
+	Write "	<tr><td>Номер</td><td>"
+	Write "<input type=""text"" id=""Name"" value="""_($G(Name))_""">"
+	Write "</td>",!
+	Write "		<td>Откуда утилизировать<td>",!
+	s (QuantitySelected,BrakSelected,KontragentSelected)=""
+	s DisplayKontragent="none"
+	if $ISOBJECT(DocObject) d
+	. if DocObject.SourceTbl=1 s QuantitySelected="SELECTED"
+	. if DocObject.SourceTbl=2 s BrakSelected="SELECTED",DisplayKontragent="block"
+	. if DocObject.SourceTbl=3 s KontragentSelected="SELECTED",DisplayKontragent="block"
+	w "<select id=""Source"" onchange=""FnSourceChange()"">"_
+	"<option value=""Quantity"" "_QuantitySelected_">Из общего количества</option>"_
+	"<option value=""Brak"" "_BrakSelected_">Из брака</option>"_
+	"<option value=""Kontragent"" "_KontragentSelected_">От контрагента</option>"_
+	"</select>"
+	w "<span id=""KontrSpan"" style='display:"_DisplayKontragent_"'>Контрагент <input type='text' id='Kontragent' onmouseover=""this.style.backgroundColor='#eeffff'"" onmouseout=""this.style.backgroundColor='transparent'"" onclick=""ChooseKonragent(this)"" Tag='"_$G(KontrId)_"' value='"_$G(KontrName)_"'></span>"
+	Write !,"	</tr>",!
+	Write "	<tr>",!
+	Write "		<td>Комиссия",!
+	Write "		<td colspan=""3"">"
+	Write "<input type=""text"" id=""Komissia"" style=""width:500px"" value="""_($G(Komissia))_""">"
+	Write !,"	</tr>",!
+	Write "	<tr>",!
+	Write "		<td>Комментарий",!
+	Write "		<td colspan=""3"">"
+	Write "<input type=""text"" id=""Comment"" style=""width:500px"" value="""_($G(Comment))_""">"
+	Write !,"	</tr>",!
+	Write "</table>",!
+	Write "<hr width=""70%"">",!
+	Write "<br>",!
+	Write "<table id=""MainTable"" border=2 style=""border-collapse:collapse;"" cellspacing=0 cellpadding=5>",!
+	Write "<tr bgcolor=""#deeeef"">",!
+	Write "	<td>&nbsp;<td>Товар<td>Серийный номер<td>Гарантийный талон<td>Место",!
+	if DocId
+	{
+	&sql(declare zz cursor for
+	select ID,Goods,Goods->FullName,sn,garant,addr,Common.SqlProcs_AddrPath(Addr)
+	into :ID,:Goods,:GoodsFullName,:sn,:garant,:addr,:AddressPath
+	from Docs.UtilizItems
+	where doc = :DocId and goodsdir=1
+	)
+	&sql(open zz) 
+	f  
+	{
+	&sql(fetch zz) 
+	q:SQLCODE
+	w "<tr Tag="""_ID_""" id="""_Goods_""">"
+	w "<td><input type=""checkbox"" onclick=""CheckGood(this)"" id="""_Goods_""" class=""checkbox"">"
+	w "<td>"_GoodsFullName
+	w "<td><input type=""text"" value="""_sn_""">"
+	w "<td><input type=""text"" value="""_garant_""">"
+	w "<td><input type=""button"" value=""..."" style='width:23px' onclick='SelectStorePlace(this)' id='"_addr_"'><span>"_AddressPath_"</span>"
+	w "</tr>",!
+	}
+	&sql(close zz)
+	}	
+	Write "	",!
+	Write "</table>",!
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;width:150px"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""AddTovar();"" TITLE=""""><center>Добавить товар</center></span>"
+	Write !,!,"<span class=ButtonDiv ID="""" style=""cursor:hand;width:150px"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""RemoveTovars();"" TITLE=""""><center>Убрать товар</center></span>"
+	Write !,"<br>",!
+	Write "<table width=""100%"">",!
+	Write "<tr>",!
+	Write "<td width=""48%"" valign=""top"">",!
+	Write "	<fieldset><legend>Запчасти указанной модели</legend>",!
+	Write "	"
+	Write "<iframe id=""DetailsFromModel"" style=""width:100%;height:470px;"" FRAMEBORDER=0>"
+	Write !,"	",!
+	Write "	</iframe>",!
+	Write "	</fieldset>",!
+	Write "<td width=""5%"" align=""center"">",!
+	Write "	"
+	Write "<input type=""button"" value=""&gt;&gt;"" title=""Пометить все запчасти для оприходования"" style=""width:30px"" onclick=""InsertIntoDoc(true)"">"
+	Write !,"	<br><br>",!
+	Write "	"
+	Write "<input type=""button"" value=""&gt;"" title=""Пометить выбранные запчасти для оприходования"" style=""width:30px"" onclick=""InsertIntoDoc(false)"">"
+	Write !,"<td width=""47%"" valign=""top"">",!
+	Write "	<fieldset style=""height:490px;overflow-y:auto;""><legend>Запчасти подлежащие оприходованию</legend>",!
+	Write "	<table id=""DetailsTable"" border=1 style=""border-collapse:collapse;margin-top:17px;margin-left:5px"">",!
+	Write "		<tr bgcolor=""#deeeef""><td>Наименование запчасти<td>Номер по схеме<td>Код<td>Количество<td>Место",!
+	if DocId 
+	{
+	&sql(declare zz2 cursor for
+	select ID,Goods,Goods->FullName,addr,Common.SqlProcs_AddrPath(Addr),Goods->Property5300,Goods->codedetail,Quantity
+	into :ID,:Goods,:GoodsFullName,:addr,:AddressPath,:Property5300,:codedetail,:Quantity
+	from Docs.UtilizItems
+	where doc = :DocId and goodsdir=2)
+	&sql(open zz2)
+	f
+	{
+	&sql(fetch zz2)
+	q:SQLCODE
+	w "<tr Tag="""_ID_""" id="""_Goods_""">"
+	w "<td>"_GoodsFullName
+	w "<td>"_Property5300
+	w "<td>"_codedetail
+	w "<td><input type=""text"" style=""width:30px"" value="""_Quantity_""">"
+	w "<td><input type=""button"" value=""..."" style='width:23px' onclick='SelectStorePlace(this)' id='"_addr_"'><span>"_AddressPath_"</span>"
+	w "</tr>",!
+	s DetailsToSkip = $G(DetailsToSkip)_Goods_","
+	}
+	&sql(close zz2)
+	}
+	w "<script language=""javascript"">"
+	&JS<
+	var DetailsToSkip="#($G(DetailsToSkip))#";
+	>
+	w "</"_"script>"
+	Write !,"		",!
+	Write "	</table>",!
+	Write "	</fieldset>	",!
+	Write "</table>",!
+	Write "<br>",!
+	Write "<center>"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""startFun()"" TITLE=""Сохранить документ""><center>Сохранить</center></span>"
+	Write "&nbsp;&nbsp;&nbsp;"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""windowclose()"" TITLE=""Закрыть окно, отменить все изменения""><center>Отмена</center></span>"
+	Write "</center>",!
+	Write "</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !
+	s DocId=%request.Get("DocId")
+	if DocId d
+	. s DocObject=##class(Docs.Utiliz).%OpenId(DocId)
+	. q:'$ISOBJECT(DocObject)
+	. s Name=DocObject.Name
+	. s Comment=DocObject.Comment
+	. s Komissia=DocObject.Komissia
+	. if $ISOBJECT(DocObject.Kontr)
+	. . s KontrId = DocObject.Kontr.%Id()
+	. . s KontrName = DocObject.Kontr.Name
+	else  d
+	. s DocObject=""
+	. s Name=##class(Docs.Action).getRashNumb("Docs.Utiliz")
+	w "<title>	Документ утилизации "
+	if $ISOBJECT(DocObject) w "№ "_DocObject.Name
+	w "</title>"
+	Write !,!,"<style>"
+	Write !,".LeftTop{border-left : 1 solid black;border-top : 1 solid black;}",!
+	Write ".RightBottom{font-family:Arial;font-size:14px;border-right : 1 solid black;border-bottom : 1 solid black;}",!
+	Write ".checkbox{border:none;width:23px}",!
+	Write "</style>"
+	Write !,"<script language=""jscript"" src=""common.js"">"
+	Write "</script>"
+	Write !,"<script language=""javascript"">"
+	Write !,"var DetailsToSkip = """";	//строка с ID деталей",!
+	Write "var DocId="""_(DocId)_""";",!
+	Write "var sessionid="""_(%session.SessionId)_""";",!
+	Write "var xmlDoc = new ActiveXObject(""Msxml2.DOMDocument.3.0"");",!
+	Write "//window.dialogWidth=screen.availWidth;",!
+	Write "//window.dialogHeight=screen.availHeight;",!
+	Write !,"//Добавить товар",!
+	Write "function AddTovar()",!
+	Write "{",!
+	Write "	WinResult=window.showModalDialog(""selectgoods2.csp"","""",""center:yes;status:no;dialogHeight:700px;dialogWidth:800px;resizable:yes;"")",!
+	Write "	if(WinResult==null)return",!
+	Write "	var StringsArray = WinResult.split(StringSplitter);",!
+	Write "	var TableObj = document.getElementById(""MainTable"");",!
+	Write "	for(var i=0;i<StringsArray.length-1;i++)",!
+	Write "		{",!
+	Write "			var WinResultArray=StringsArray[i].split(InnerSplitter);",!
+	Write "			var ID = WinResultArray[0];",!
+	Write "			var FullName = WinResultArray[9];",!
+	Write "			var trObject = TableObj.insertRow();",!
+	Write "			trObject.id = ID",!
+	Write "		",!
+	Write "			cellObject = trObject.insertCell();",!
+	Write "			cellObject.innerHTML = ""<input type=\""checkbox\"" onclick=\""CheckGood(this)\"" id=\""""+ID+""\""' class=\""checkbox\"">"";",!
+	Write "		",!
+	Write "			cellObject = trObject.insertCell();",!
+	Write "			cellObject.innerText  = FullName;",!
+	Write "		",!
+	Write "			cellObject = trObject.insertCell();",!
+	Write "			cellObject.innerHTML = ""<input type=\""text\"">"";",!
+	Write "		",!
+	Write "			cellObject = trObject.insertCell();",!
+	Write "			cellObject.innerHTML = ""<input type=\""text\"">"";",!
+	Write "		",!
+	Write "			cellObject = trObject.insertCell();",!
+	Write "			cellObject.innerHTML = ""<input type=\""button\"" value=\""...\"" style='width:23px' onclick='SelectStorePlace(this)'><span></span>"";",!
+	Write "		}",!
+	Write "}",!
+	Write !,"function CheckGood(obj)",!
+	Write "{",!
+	Write "var TableObj = document.getElementById(""MainTable"");",!
+	Write "var IDs = """";",!
+	Write "for(var i=1;i<TableObj.rows.length;i++)",!
+	Write "	{",!
+	Write "	var RowObject = TableObj.rows(i);",!
+	Write "	if(RowObject.cells(0).firstChild.checked){var IDs = IDs + RowObject.id + "","";}",!
+	Write "	}",!
+	Write "document.all.DetailsFromModel.src=""UtilizationDocHelper.csp?ModelsId=""+IDs+""&DetailsToSkip=""+DetailsToSkip;",!
+	Write "}",!
+	Write !,"// убрать отмеченные товары",!
+	Write "function RemoveTovars()",!
+	Write "{",!
+	Write "if(!window.confirm(""Убрать отмеченные товары из документа?""))return",!
+	Write "var TableObj = document.getElementById(""MainTable"");",!
+	Write "var TableLength = TableObj.rows.length;",!
+	Write "for(var i=1;i<TableLength;i++)",!
+	Write "{",!
+	Write "	var RowObject = TableObj.rows(i);",!
+	Write "	if(RowObject.cells(0).firstChild.checked)",!
+	Write "	{",!
+	Write "		TableObj.deleteRow(i);",!
+	Write "		TableLength--;",!
+	Write "		i--;",!
+	Write "	}",!
+	Write !,"}",!
+	Write "}",!
+	Write !,"//перенести отмеченные запчасти в список запчастей на приход",!
+	Write "function InsertIntoDoc(InsertAll)",!
+	Write "{",!
+	Write "var DonorTableObj = window.frames[0].DetailsTable;",!
+	Write "var RecepientTableObj= document.getElementById(""DetailsTable"");",!
+	Write "var DonorTableLength = DonorTableObj.rows.length;",!
+	Write "for(var i=1;i<DonorTableLength;i++)",!
+	Write "	{",!
+	Write "		var RowObject = DonorTableObj.rows(i);",!
+	Write "		if((RowObject.cells(0).firstChild.checked)||(InsertAll))",!
+	Write "		{",!
+	Write "			var CurrentGoodsId = RowObject.id;	//ID товара в текущей ячейке",!
+	Write "			DetailsToSkip = DetailsToSkip + CurrentGoodsId + "","";",!
+	Write "			NewRowObject = RecepientTableObj.insertRow();",!
+	Write "			NewRowObject.id = CurrentGoodsId;",!
+	Write "			for(var z=1;z<RowObject.cells.length;z++)",!
+	Write "			{",!
+	Write "				NewRowObject.insertCell().innerText = RowObject.cells(z).innerText;",!
+	Write "			}",!
+	Write "			",!
+	Write "			cellObject = NewRowObject.insertCell();",!
+	Write "			cellObject.innerHTML = ""<input type=\""text\""  style=\""width:30px\"" value=\""1\"">"";",!
+	Write !,"			cellObject = NewRowObject.insertCell();",!
+	Write "			cellObject.innerHTML = ""<input type=\""button\"" value=\""...\"" style='width:23px' onclick='SelectStorePlace(this)'><span></span>"";",!
+	Write "	",!
+	Write "			DonorTableObj.deleteRow(i);",!
+	Write "			DonorTableLength--;",!
+	Write "			i--;",!
+	Write "		}",!
+	Write "	}",!
+	Write "}",!
+	Write !,"// выбрать место хранения",!
+	Write "function SelectStorePlace(buttonObj)",!
+	Write "{",!
+	Write "	var CellObject = buttonObj.parentElement;	//ячейка таблицы в которой лежит данная кнопка",!
+	Write "	var goods = CellObject.parentElement.id;	//id товара в данной строке",!
+	Write "	newItem=window.showModalDialog(""storemodal2.csp?goods=""+goods+""&depot="","""",""center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;"");",!
+	Write "	if(newItem==null)return",!
+	Write "	buttonObj.id = newItem.split(""~"")[0];",!
+	Write "	var SpanObject=buttonObj.nextSibling;	//<span> справа от текущей кнопки",!
+	Write "	SpanObject.innerText = newItem.split(""~"")[1]",!
+	Write "}",!
+	Write !,"// выбор источника брака",!
+	Write "function FnSourceChange()",!
+	Write "{",!
+	Write "	if((Source.value==""Kontragent"")||(Source.value==""Brak"")){KontrSpan.style.display=""inline"";}",!
+	Write "	else{KontrSpan.style.display=""none"";}",!
+	Write "}",!
+	Write !,"//функция выбора контрагента (подставит выбранного в innerText переданного объекта",!
+	Write "function ChooseKonragent(Obj){",!
+	Write "newItem=window.showModalDialog(""Dictionary.csp"",""Common.Kontragent"",""center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;"");",!
+	Write "if(newItem==null){return false;}",!
+	Write "var newArr=newItem.split(InnerSplitter);",!
+	Write "Obj.innerText=newArr[1];",!
+	Write "Obj.Tag=newArr[0];",!
+	Write "}",!
+	Write !,"//сохранить",!
+	Write "function startFun(){",!
+	Write "	var RootElement = xmlDoc.createElement(""RootElement"");",!
+	Write "	xmlDoc.documentElement=RootElement;",!
+	Write "	var AllObjects = xmlDoc.createElement(""AllObjects"");",!
+	Write "	",!
+	Write "	//Собираем строки документа",!
+	Write "	var TableObj = document.getElementById(""MainTable"");",!
+	Write "	for(var i=1;i<TableObj.rows.length;i++)",!
+	Write "	{",!
+	Write "		var RowObject = TableObj.rows(i);",!
+	Write "		var OneObject = xmlDoc.createElement(""OneObject"");",!
+	Write "		var namedNodeMap = OneObject.attributes;",!
+	Write "		var newAtt = xmlDoc.createAttribute(""id"");",!
+	Write "		newAtt.text=RowObject.Tag;",!
+	Write "		namedNodeMap.setNamedItem(newAtt);",!
+	Write "		//добавляем в строку информацию о товаре",!
+	Write "		OneObject.appendChild(InsertFieldDataIntoXml(""Goods"",RowObject.id,""Goods.Goods""));",!
+	Write "		//добавляем инфу о серийном номере",!
+	Write "		OneObject.appendChild(InsertFieldDataIntoXml(""sn"",RowObject.cells(2).firstChild.value,""%String""));",!
+	Write "		//добавляем инфу о гарантийном талоне",!
+	Write "		OneObject.appendChild(InsertFieldDataIntoXml(""garant"",RowObject.cells(3).firstChild.value,""%String""));",!
+	Write "		//указываем что это именно утилизация",!
+	Write "		OneObject.appendChild(InsertFieldDataIntoXml(""goodsdir"",1,""%String""));",!
+	Write "		",!
+	Write "		//добавляем инфу об источнике утилизации (общее кол., брак, контрагент)",!
+	Write "		if(Source.value==""Brak""){",!
+	Write "			OneObject.appendChild(InsertFieldDataIntoXml(""SourceTbl"",2,""%String""));",!
+	Write "			OneObject.appendChild(InsertFieldDataIntoXml(""addr"",RowObject.cells(4).firstChild.id,""Store.Address""));",!
+	Write "			}",!
+	Write "		if(Source.value==""Quantity"")",!
+	Write "			{",!
+	Write "			OneObject.appendChild(InsertFieldDataIntoXml(""SourceTbl"",1,""%String""));",!
+	Write "			OneObject.appendChild(InsertFieldDataIntoXml(""addr"",RowObject.cells(4).firstChild.id,""Store.Address""));",!
+	Write "			}",!
+	Write "		if(Source.value==""Kontragent"")",!
+	Write "			{",!
+	Write "			OneObject.appendChild(InsertFieldDataIntoXml(""Client"",Kontragent.Tag,""Common.Kontragent""));",!
+	Write "			}",!
+	Write "		//ставим количество 1",!
+	Write "		OneObject.appendChild(InsertFieldDataIntoXml(""Quantity"",1,""%Numeric""));",!
+	Write "		",!
+	Write "		AllObjects.appendChild(OneObject);",!
+	Write "		",!
+	Write "	}",!
+	Write "	",!
+	Write "	//теперь собираем строки запчастей, то что будем приходовать",!
+	Write "	var TableObj = document.getElementById(""DetailsTable"");",!
+	Write "	for(var i=1;i<TableObj.rows.length;i++)",!
+	Write "	{",!
+	Write "		var RowObject = TableObj.rows(i);",!
+	Write "		var Quantity = RowObject.cells(3).firstChild.value;",!
+	Write "		var Addr = RowObject.cells(4).firstChild.id;",!
+	Write "		var OneObject = xmlDoc.createElement(""OneObject"");",!
+	Write "		var namedNodeMap = OneObject.attributes;",!
+	Write "		var newAtt = xmlDoc.createAttribute(""id"");",!
+	Write "		newAtt.text=RowObject.Tag;",!
+	Write "		namedNodeMap.setNamedItem(newAtt);",!
+	Write "			//добавляем в строку информацию о товаре",!
+	Write "		OneObject.appendChild(InsertFieldDataIntoXml(""Goods"",RowObject.id,""Goods.Goods""));",!
+	Write "			//указываем что это именно оприходование",!
+	Write "		OneObject.appendChild(InsertFieldDataIntoXml(""goodsdir"",2,""%String""));",!
+	Write "			//указываем место",!
+	Write "		OneObject.appendChild(InsertFieldDataIntoXml(""addr"",Addr,""Store.Address""));",!
+	Write "			//указываем количество",!
+	Write "		OneObject.appendChild(InsertFieldDataIntoXml(""Quantity"",Quantity,""%Numeric""));",!
+	Write "		",!
+	Write "		AllObjects.appendChild(OneObject);",!
+	Write "	}",!
+	Write !,"	RootElement.appendChild(AllObjects);	",!
+	Write "	",!
+	Write "	//Собираем заголовки документа",!
+	Write "	InsertXmlHeader(xmlDoc,""Name"",Name.value,""%String"")",!
+	Write "	InsertXmlHeader(xmlDoc,""Komissia"",Komissia.value,""%String"")",!
+	Write "	InsertXmlHeader(xmlDoc,""Comment"",Comment.value,""%String"")",!
+	Write "	InsertXmlHeader(xmlDoc,""SourceTbl"",Source.selectedIndex+1,""%String"")",!
+	Write "	if(Source.selectedIndex=2)InsertXmlHeader(xmlDoc,""Kontr"",Kontragent.Tag,""%String"")",!
+	Write !,"	var DocID=SendXml(DocId,""Docs.Utiliz"",xmlDoc,sessionid);",!
+	Write "	if(isNaN(DocID)){alert(DocID);}",!
+	Write "	else{returnValue=1;window.close();}",!
+	Write "}",!
+	Write !,"// добавить в xml данные одного поля таблицы",!
+	Write "function InsertFieldDataIntoXml(FieldName,FieldText,FieldType)",!
+	Write "{",!
+	Write "	var FieldElement = xmlDoc.createElement(FieldName);",!
+	Write "	var Fieldtext = xmlDoc.createElement(""text"");",!
+	Write "	Fieldtext.text=FieldText;",!
+	Write "	FieldElement.appendChild(Fieldtext);",!
+	Write "	var Fieldtype = xmlDoc.createElement(""type"");",!
+	Write "	Fieldtype.text=FieldType;",!
+	Write "	FieldElement.appendChild(Fieldtype);",!
+	Write "	return FieldElement;",!
+	Write "}",!
+	Write !,"function Load(){",!
+	Write "window.dialogWidth=screen.availWidth;",!
+	Write "window.dialogHeight=screen.availHeight;",!
+	Write "//alert(""screenTop = "" + window.screenTop + ""\ndialogTop = "" + window.dialogTop);",!
+	Write "}",!
+	Write "</script>"
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\UtilizationDoc.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/UtilizationDoc.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>62034,44389</Default>
+</Parameter>
+</Class>
+</Export>

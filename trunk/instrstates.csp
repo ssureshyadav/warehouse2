@@ -1,0 +1,23 @@
+<html>
+<head>
+
+<!-- Put your page Title here -->
+<title>	Система складского учёта </title>
+
+</head>
+<body>
+<table width=100% height=100%><tr><td width=100% height=100% align="center" valign="middle">
+<Script language="cache" runat="server">
+
+ s cl=##class(%Dictionary.PropertyDefinition).%OpenId("Operation.Instructions||State")
+ s DISPLAYLIST=cl.Parameters.GetAt("DISPLAYLIST")
+ s VALUELIST=cl.Parameters.GetAt("VALUELIST")
+ f i=4:1:$L(DISPLAYLIST,",")-1 d
+ . w "<input style=""border:solid 1;width=250"" type=button value="""_$P(DISPLAYLIST,",",i)_""" Tag="""_$P(VALUELIST,",",i)_""" onclick=""returnValue=this.Tag;window.close();""><br>"
+
+</script>
+</td></tr></table>
+</body>
+</html>
+
+

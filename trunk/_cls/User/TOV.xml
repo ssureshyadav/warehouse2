@@ -1,0 +1,808 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="User.TOV">
+<Description>
+</Description>
+<ClassType>persistent</ClassType>
+<DdlAllowed>1</DdlAllowed>
+<Owner>_SYSTEM</Owner>
+<ProcedureBlock>0</ProcedureBlock>
+<SqlRowIdPrivate>1</SqlRowIdPrivate>
+<SqlTableName>TOV</SqlTableName>
+<StorageStrategy/>
+<Super>%Persistent</Super>
+<TimeCreated>60506,58007.616752</TimeCreated>
+
+<Property name="ABLACK">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>34</SqlColumnNumber>
+<SqlFieldName>A_BLACK</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="ACCID">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>9</SqlColumnNumber>
+<SqlFieldName>ACC_ID</SqlFieldName>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="AIBAL">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>45</SqlColumnNumber>
+<SqlFieldName>A_IBAL</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="AICONS">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>41</SqlColumnNumber>
+<SqlFieldName>A_ICONS</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="AIFIN">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>44</SqlColumnNumber>
+<SqlFieldName>A_IFIN</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="AIMAIN">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>42</SqlColumnNumber>
+<SqlFieldName>A_IMAIN</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="AINAKL">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>43</SqlColumnNumber>
+<SqlFieldName>A_INAKL</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="AMINREM">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>35</SqlColumnNumber>
+<SqlFieldName>A_MINREM</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="ANUM">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>32</SqlColumnNumber>
+<SqlFieldName>A_NUM</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="ANUMBOX">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>33</SqlColumnNumber>
+<SqlFieldName>A_NUMBOX</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="AOBAL">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>40</SqlColumnNumber>
+<SqlFieldName>A_OBAL</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="AOCONS">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>36</SqlColumnNumber>
+<SqlFieldName>A_OCONS</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="AOFIN">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>39</SqlColumnNumber>
+<SqlFieldName>A_OFIN</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="AOMAIN">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>37</SqlColumnNumber>
+<SqlFieldName>A_OMAIN</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="AONAKL">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>38</SqlColumnNumber>
+<SqlFieldName>A_ONAKL</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="ARTICLE">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>20</SqlColumnNumber>
+<Parameter name="MAXLEN" value="20"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="BBLACK">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>29</SqlColumnNumber>
+<SqlFieldName>B_BLACK</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="BICONS">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>31</SqlColumnNumber>
+<SqlFieldName>B_ICONS</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="BNUM">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>28</SqlColumnNumber>
+<SqlFieldName>B_NUM</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="BOCONS">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>30</SqlColumnNumber>
+<SqlFieldName>B_OCONS</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="CLASSID">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>7</SqlColumnNumber>
+<SqlFieldName>CLASS_ID</SqlFieldName>
+<Parameter name="MAXLEN" value="21"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="CODE">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>6</SqlColumnNumber>
+<Parameter name="MAXLEN" value="20"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="CODE1">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>21</SqlColumnNumber>
+<Parameter name="MAXLEN" value="20"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="COUNTRY">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>62</SqlColumnNumber>
+<Parameter name="MAXLEN" value="30"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="DCOST">
+<Type>%Library.TimeStamp</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>14</SqlColumnNumber>
+<SqlFieldName>D_COST</SqlFieldName>
+</Property>
+
+<Property name="DPRICE">
+<Type>%Library.TimeStamp</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>13</SqlColumnNumber>
+<SqlFieldName>D_PRICE</SqlFieldName>
+</Property>
+
+<Property name="DTOV">
+<Type>%Library.TimeStamp</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>12</SqlColumnNumber>
+<SqlFieldName>D_TOV</SqlFieldName>
+</Property>
+
+<Property name="DUPDATE">
+<Type>%Library.TimeStamp</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>11</SqlColumnNumber>
+<SqlFieldName>D_UPDATE</SqlFieldName>
+</Property>
+
+<Property name="GTD">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>63</SqlColumnNumber>
+<Parameter name="MAXLEN" value="26"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="ID">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>2</SqlColumnNumber>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="LABEL">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>5</SqlColumnNumber>
+<Parameter name="MAXLEN" value="20"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="LBOX">
+<Type>%Library.Boolean</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>19</SqlColumnNumber>
+<SqlFieldName>L_BOX</SqlFieldName>
+</Property>
+
+<Property name="LCOSTNDS">
+<Type>%Library.Boolean</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>17</SqlColumnNumber>
+<SqlFieldName>L_COSTNDS</SqlFieldName>
+</Property>
+
+<Property name="LDEL">
+<Type>%Library.Boolean</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>60</SqlColumnNumber>
+<SqlFieldName>L_DEL</SqlFieldName>
+</Property>
+
+<Property name="LPRICE">
+<Type>%Library.Boolean</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>15</SqlColumnNumber>
+<SqlFieldName>L_PRICE</SqlFieldName>
+</Property>
+
+<Property name="LPRICENDS">
+<Type>%Library.Boolean</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>18</SqlColumnNumber>
+<SqlFieldName>L_PRICENDS</SqlFieldName>
+</Property>
+
+<Property name="LSHORT">
+<Type>%Library.Boolean</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>16</SqlColumnNumber>
+<SqlFieldName>L_SHORT</SqlFieldName>
+</Property>
+
+<Property name="MINBOX">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>23</SqlColumnNumber>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="NAME">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>3</SqlColumnNumber>
+<Parameter name="MAXLEN" value="100"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="NNETTO">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>46</SqlColumnNumber>
+<SqlFieldName>N_NETTO</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="ONENAME">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>22</SqlColumnNumber>
+<SqlFieldName>ONE_NAME</SqlFieldName>
+<Parameter name="MAXLEN" value="8"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PNDS">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>24</SqlColumnNumber>
+<SqlFieldName>P_NDS</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PSALENAL">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>26</SqlColumnNumber>
+<SqlFieldName>P_SALENAL</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PSPEC">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>25</SqlColumnNumber>
+<SqlFieldName>P_SPEC</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PTORG">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>27</SqlColumnNumber>
+<SqlFieldName>P_TORG</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="RCOST">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>47</SqlColumnNumber>
+<SqlFieldName>R_COST</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="RPRCDO">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>49</SqlColumnNumber>
+<SqlFieldName>R_PRCDO</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="RPRCUP">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>50</SqlColumnNumber>
+<SqlFieldName>R_PRCUP</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="RPRICE">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>48</SqlColumnNumber>
+<SqlFieldName>R_PRICE</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="TSEND">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>61</SqlColumnNumber>
+<SqlFieldName>T_SEND</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="TYPE">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>4</SqlColumnNumber>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="VALID">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>8</SqlColumnNumber>
+<SqlFieldName>VAL_ID</SqlFieldName>
+<Parameter name="MAXLEN" value="6"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="VCOST">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>51</SqlColumnNumber>
+<SqlFieldName>V_COST</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="VPRCDO">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>58</SqlColumnNumber>
+<SqlFieldName>V_PRCDO</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="VPRCUP">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>59</SqlColumnNumber>
+<SqlFieldName>V_PRCUP</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="VPRICE">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>52</SqlColumnNumber>
+<SqlFieldName>V_PRICE</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="VPRICE1">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>53</SqlColumnNumber>
+<SqlFieldName>V_PRICE1</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="VPRICE2">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>54</SqlColumnNumber>
+<SqlFieldName>V_PRICE2</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="VPRICE3">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>55</SqlColumnNumber>
+<SqlFieldName>V_PRICE3</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="VPRICE4">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>56</SqlColumnNumber>
+<SqlFieldName>V_PRICE4</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="VPRICE5">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>57</SqlColumnNumber>
+<SqlFieldName>V_PRICE5</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="WORKID">
+<Type>%Library.String</Type>
+<Collection/>
+<Required>0</Required>
+<SqlColumnNumber>10</SqlColumnNumber>
+<SqlFieldName>WORK_ID</SqlFieldName>
+<Parameter name="MAXLEN" value="4"/>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^User.TOVD</DataLocation>
+<DefaultData>TOVDefaultData</DefaultData>
+<IdLocation>^User.TOVD</IdLocation>
+<IndexLocation>^User.TOVI</IndexLocation>
+<StreamLocation>^User.TOVS</StreamLocation>
+<Data name="TOVDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>ABLACK</Value>
+</Value>
+<Value name="3">
+<Value>ACCID</Value>
+</Value>
+<Value name="4">
+<Value>AIBAL</Value>
+</Value>
+<Value name="5">
+<Value>AICONS</Value>
+</Value>
+<Value name="6">
+<Value>AIFIN</Value>
+</Value>
+<Value name="7">
+<Value>AIMAIN</Value>
+</Value>
+<Value name="8">
+<Value>AINAKL</Value>
+</Value>
+<Value name="9">
+<Value>AMINREM</Value>
+</Value>
+<Value name="10">
+<Value>ANUM</Value>
+</Value>
+<Value name="11">
+<Value>ANUMBOX</Value>
+</Value>
+<Value name="12">
+<Value>AOBAL</Value>
+</Value>
+<Value name="13">
+<Value>AOCONS</Value>
+</Value>
+<Value name="14">
+<Value>AOFIN</Value>
+</Value>
+<Value name="15">
+<Value>AOMAIN</Value>
+</Value>
+<Value name="16">
+<Value>AONAKL</Value>
+</Value>
+<Value name="17">
+<Value>ARTICLE</Value>
+</Value>
+<Value name="18">
+<Value>BBLACK</Value>
+</Value>
+<Value name="19">
+<Value>BICONS</Value>
+</Value>
+<Value name="20">
+<Value>BNUM</Value>
+</Value>
+<Value name="21">
+<Value>BOCONS</Value>
+</Value>
+<Value name="22">
+<Value>CLASSID</Value>
+</Value>
+<Value name="23">
+<Value>CODE</Value>
+</Value>
+<Value name="24">
+<Value>CODE1</Value>
+</Value>
+<Value name="25">
+<Value>COUNTRY</Value>
+</Value>
+<Value name="26">
+<Value>DCOST</Value>
+</Value>
+<Value name="27">
+<Value>DPRICE</Value>
+</Value>
+<Value name="28">
+<Value>DTOV</Value>
+</Value>
+<Value name="29">
+<Value>DUPDATE</Value>
+</Value>
+<Value name="30">
+<Value>GTD</Value>
+</Value>
+<Value name="31">
+<Value>ID</Value>
+</Value>
+<Value name="32">
+<Value>LABEL</Value>
+</Value>
+<Value name="33">
+<Value>LBOX</Value>
+</Value>
+<Value name="34">
+<Value>LCOSTNDS</Value>
+</Value>
+<Value name="35">
+<Value>LDEL</Value>
+</Value>
+<Value name="36">
+<Value>LPRICE</Value>
+</Value>
+<Value name="37">
+<Value>LPRICENDS</Value>
+</Value>
+<Value name="38">
+<Value>LSHORT</Value>
+</Value>
+<Value name="39">
+<Value>MINBOX</Value>
+</Value>
+<Value name="40">
+<Value>NAME</Value>
+</Value>
+<Value name="41">
+<Value>NNETTO</Value>
+</Value>
+<Value name="42">
+<Value>ONENAME</Value>
+</Value>
+<Value name="43">
+<Value>PNDS</Value>
+</Value>
+<Value name="44">
+<Value>PSALENAL</Value>
+</Value>
+<Value name="45">
+<Value>PSPEC</Value>
+</Value>
+<Value name="46">
+<Value>PTORG</Value>
+</Value>
+<Value name="47">
+<Value>RCOST</Value>
+</Value>
+<Value name="48">
+<Value>RPRCDO</Value>
+</Value>
+<Value name="49">
+<Value>RPRCUP</Value>
+</Value>
+<Value name="50">
+<Value>RPRICE</Value>
+</Value>
+<Value name="51">
+<Value>TSEND</Value>
+</Value>
+<Value name="52">
+<Value>TYPE</Value>
+</Value>
+<Value name="53">
+<Value>VALID</Value>
+</Value>
+<Value name="54">
+<Value>VCOST</Value>
+</Value>
+<Value name="55">
+<Value>VPRCDO</Value>
+</Value>
+<Value name="56">
+<Value>VPRCUP</Value>
+</Value>
+<Value name="57">
+<Value>VPRICE</Value>
+</Value>
+<Value name="58">
+<Value>VPRICE1</Value>
+</Value>
+<Value name="59">
+<Value>VPRICE2</Value>
+</Value>
+<Value name="60">
+<Value>VPRICE3</Value>
+</Value>
+<Value name="61">
+<Value>VPRICE4</Value>
+</Value>
+<Value name="62">
+<Value>VPRICE5</Value>
+</Value>
+<Value name="63">
+<Value>WORKID</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

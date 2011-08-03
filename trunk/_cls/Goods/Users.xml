@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Goods.Users">
+<Description>
+Пользователи</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60325,65020.197167</TimeCreated>
+
+<Property name="User">
+<Description>
+Пользователь</Description>
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Пользователь"/>
+</Property>
+
+<Index name="UserIndex">
+<Properties>User</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Property name="FIO">
+<Description>
+Ф.И.О.</Description>
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Ф.И.О."/>
+</Property>
+
+<Property name="Password">
+<Description>
+Пароль</Description>
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Пароль"/>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Goods.UsersD</DataLocation>
+<DefaultData>UsersDefaultData</DefaultData>
+<IdLocation>^Goods.UsersD</IdLocation>
+<IndexLocation>^Goods.UsersI</IndexLocation>
+<StreamLocation>^Goods.UsersS</StreamLocation>
+<Data name="UsersDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>FIO</Value>
+</Value>
+<Value name="3">
+<Value>Password</Value>
+</Value>
+<Value name="4">
+<Value>User</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

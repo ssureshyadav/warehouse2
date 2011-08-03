@@ -1,0 +1,37 @@
+<html XMLNS:SKLADList>
+<IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
+<head>
+
+<title>	Поиск товаров </title>
+<script language="javascript">
+sessionid="#(%session.SessionId)#";
+
+function fnFindGood(){
+var varabbr=abbr.value;
+var varProperty3609 = Property3609.value;
+var varName = Name.value;
+if((varabbr=="")&&(varProperty3609=="")&&(varName=="")){alert("Необходимо указать хотя бы один признак по которому следует искать товары.");return}
+goods.loadfrommethod("Reports.ShowTables.FindGoods",varabbr,varProperty3609,varName)
+}
+
+</script>
+</head>
+
+<body>
+<br>
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<td width=10%>&nbsp;</td>
+<TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" ><strong>Поиск товаров</strong></TD>
+<td width=10%>&nbsp;</td>
+</TABLE>
+
+<table>
+<tr><td>Аббревиатура</td><td><input type="text" id="abbr" title="Первые буквы полного наименование модели, например MAG или VC"></td><td rowspan=3><input type="button" value="Найти" onclick="fnFindGood();" title="Начать поиск по заданным аттрибутам"></td></tr>
+<tr><td>Модель</td><td><input type="text" id="Property3609" title="Номер модели, например 1101 или 9907"></td></tr>
+<tr><td>Наименование</td><td><input type="text" id="Name" title="Начало названия например шестерня, или корпус. Полностью название указывать необязательно."></td></tr>
+</table>
+<SKLADList:listview width=100% height=300 id="goods" /><br>
+
+</body>
+</html>

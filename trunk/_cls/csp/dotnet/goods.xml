@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.dotnet.goods">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62186,43315.863052</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	s Group = +%request.Get("Group")
+	s rs=##class(%ResultSet).%New()
+	s sql="SELECT ID,Goods->FullName as FullName,Goods->Property5300 as Property5300,"
+	_"Goods->codedetail as codedetail"
+	_" FROM Goods.GoodsGroup" 
+	_" WHERE Groups="_Group
+	s ^mtempArt(12,"sql")=sql
+	s ok=rs.Prepare(sql)
+	s ok=rs.Execute()
+	while rs.Next()
+	{
+	s ID=rs.Data("ID")
+	s FullName=rs.Data("FullName")
+	s Property5300=rs.Data("Property5300")	//номер по схеме
+	s codedetail=rs.Data("codedetail")
+	s g=$NA(data($I(data)))
+	s @g=$LB(ID,FullName,Property5300,codedetail)	 
+	}
+	/*
+	&sql(DECLARE zz CURSOR FOR
+	SELECT ID,Goods->FullName,
+	INTO :ID,:Name,:Code
+	FROM Goods.GoodsGroup 
+	WHERE Groups=:Group
+	)
+	&sql(OPEN zz)
+	f  &sql(fetch zz) q:SQLCODE  d
+	. s g=$NA(data($I(data)))
+	. s @g=$LB(ID,Name,Code)
+	&sql(CLOSE zz)
+	*/
+	s xmlstr=##class(%XML.Writer).%New() s xmlstr.Charset="windows-1251" d xmlstr.OutputToDevice() s sc=xmlstr.RootElement("root")
+	s node = $NA(data(""))
+	f  s node=$query(@node) q:node=""  d
+	. f i=1:1:+$G(CurrentNodeDepth)-$QLENGTH(node) d
+	. . s sc=xmlstr.EndElement()
+	. s CurrentNodeDepth=$QLENGTH(node)
+	. s str=$G(@node)
+	. s ID=$LG(str,1)
+	. s FullName=$ZCVT($LG(str,2),"O","HTML")
+	. s Property5300=$LG(str,3)
+	. s codedetail=$LG(str,4)
+	. s sc=xmlstr.Element("good")
+	. for variable="ID","FullName","Property5300","codedetail" d
+	. . s sc=xmlstr.WriteAttribute(variable,@variable)
+	. //эта нода не имеет дочерних
+	. if $D(@node)=1 s sc=xmlstr.EndElement() 
+	f i=1:1:+$G(CurrentNodeDepth)-1 d
+	. s sc=xmlstr.EndElement()
+	s sc=xmlstr.EndRootElement()
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+  set %response.ContentType = "text/xml"
+  Quit 1
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\dotnet\goods.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/dotnet/goods.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>62186,43316</Default>
+</Parameter>
+</Class>
+</Export>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.Remont">
+<Description>
+Ремонт</Description>
+<Super>Docs.Super</Super>
+<TimeCreated>60386,52074.329565</TimeCreated>
+
+<Property name="Otchet">
+<Description>
+Отчёт</Description>
+<Type>Docs.Otchet</Type>
+</Property>
+
+<Property name="Oplacheno">
+<Description>
+Оплачено</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=",Оплачено,Не оплачено"/>
+<Parameter name="VALUELIST" value=",1,2"/>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>RemontDefaultData</DefaultData>
+<Data name="RemontDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"Remont"</Subscript>
+<Value name="1">
+<Value>Oplacheno</Value>
+</Value>
+<Value name="2">
+<Value>Oplata</Value>
+</Value>
+<Value name="3">
+<Value>Otchet</Value>
+</Value>
+<Value name="4">
+<Value>Client</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

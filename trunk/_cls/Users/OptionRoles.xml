@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Users.OptionRoles">
+<Description>
+Свойства ролей</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60383,61596.621277</TimeCreated>
+
+<Property name="Name">
+<Description>
+Имя роли </Description>
+<Type>%String</Type>
+<Required>1</Required>
+</Property>
+
+<Method name="SaveRole">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>role:%String,func1:%String,func2:%String,func3:%String,func4:%String,func5:%String,func6:%String,func7:%String,func8:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	//&sql(insert into Users.OptionRoles (NameRole,GoodsRole,DocRole,DictsRole,SotreRole,OpersRole,ChiefRole,TunesRole,EmployeeRole)
+	//values(:role,:func1,:func2,:func3,:func4,:func5,:func6,:func7,:func8))
+	q
+]]></Implementation>
+</Method>
+
+<Method name="DeleteRoles">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>iden:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	//&sql(delete from Users.OptionRoles Where ID=:iden)
+	q
+]]></Implementation>
+</Method>
+
+<Method name="ReadRole">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>roleident,num</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+   s ^qwer=1
+ /*
+	&sql(select GoodsRole,DocRole,DictsRole,SotreRole,OpersRole,ChiefRole,TunesRole,EmployeeRole
+	into :func1,:func2,:func3,:func4,:func5,:func6,:func7,:func8
+	from Users.OptionRoles
+	where ID=:roleident
+	)
+ */
+	i num=1 s per=func1
+	i num=2 s per=func2
+	i num=3 s per=func3
+	i num=4 s per=func4
+	i num=5 s per=func5
+	i num=6 s per=func6
+	i num=7 s per=func7
+	i num=8 s per=func8
+	q per
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Users.OptionRolesD</DataLocation>
+<DefaultData>OptionRolesDefaultData</DefaultData>
+<IdLocation>^Users.OptionRolesD</IdLocation>
+<IndexLocation>^Users.OptionRolesI</IndexLocation>
+<StreamLocation>^Users.OptionRolesS</StreamLocation>
+<Data name="OptionRolesDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>ChiefRole</Value>
+</Value>
+<Value name="3">
+<Value>DictsRole</Value>
+</Value>
+<Value name="4">
+<Value>DocRole</Value>
+</Value>
+<Value name="5">
+<Value>EmployeeRole</Value>
+</Value>
+<Value name="6">
+<Value>GoodsRole</Value>
+</Value>
+<Value name="7">
+<Value>NameRole</Value>
+</Value>
+<Value name="8">
+<Value>OpersRole</Value>
+</Value>
+<Value name="9">
+<Value>SotreRole</Value>
+</Value>
+<Value name="10">
+<Value>TunesRole</Value>
+</Value>
+<Value name="11">
+<Value>Name</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

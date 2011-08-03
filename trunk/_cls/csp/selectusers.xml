@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.selectusers">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62193,54605.127617</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body onload=""ULoad()"">"
+	Write !,(##class(%CSP.Response).HyperEventBody())
+	Write " ",!
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""window.location.href='tuneup.csp'"" TITLE=""""><center>Назад</center></span>"
+	Write "<br>",!
+	Write "<fieldset><legend>Пользователи: </legend>",!
+	Write "<Userlist:listview width=100% height=140 id=""Dictionary"" onAddColumns=""Show()"" ClassName=""Users.Dates"" zClick=""load()""/>",!
+	Write !,"<img src=""images/new.gif"" onmouseover=""newes.src='images/Onnew.gif'"" onmouseout=""newes.src='images/new.gif'""  id=""newes"" name=""newes"" alt=""Новый пользователь"" onclick=""loading()"" style="""">"
+	Write !,!,"<img src=""images/edit.gif"" onmouseover=""edite.src='images/Onedit.gif'"" onmouseout=""edite.src='images/edit.gif'""  id=""edite"" name=""edite"" alt=""Изменить пользователя"" onclick=""input()"" style="""">"
+	Write !,!,"<img src=""images/del.gif"" onmouseover=""newe.src='images/Ondel.gif'"" onmouseout=""newe.src='images/del.gif'""  id=""newe"" name=""newe"" alt=""Удалить пользователя"" onclick=""deleting(identif)"" style="""">"
+	Write !,"</fieldset>",!
+	Write !,"<fieldset><legend>Роли: </legend>",!
+	Write "<Userlist:listview width=100% height=140 id=""RoleDictionary"" onAddColumns=""Roleshow()"" ClassName=""Users.NameRoles"" zClick=""loadrole()""/>",!
+	Write !,"<img src=""images/new.gif"" onmouseover=""newrole.src='images/Onnew.gif'"" onmouseout=""newrole.src='images/new.gif'""  id=""newrole"" name=""newrole"" alt=""Новая роль"" onclick=""createrole()"" style="""">"
+	Write !,!,"<img src=""images/edit.gif"" onmouseover=""editerole.src='images/Onedit.gif'"" onmouseout=""editerole.src='images/edit.gif'""  id=""editerole"" name=""editerole"" alt=""Просмотреть роль/Изменить"" onclick=""renamerole()"" style="""">"
+	Write !,!,"<img src=""images/del.gif"" onmouseover=""newrol.src='images/Ondel.gif'"" onmouseout=""newrol.src='images/del.gif'""  id=""newrol"" name=""newrol"" alt=""Удалить роль"" onclick=""deleterole(rolidentif,rolename)"" style="""">"
+	Write !,"</fieldset>",!
+	Write "</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"<title>Пользователи</title>",!
+	Write "<script language=""JScript"" src=""common.js"">"
+	Write "</script>"
+	Write !,"<script language=""Jscript"">"
+	Write !,"    var identif="""";",!
+	Write "    var rolidentif="""";rolename="""";",!
+	Write "function ULoad(){",!
+	Write "	Dictionary.LoadHeaders(""Password"");",!
+	Write "	RoleDictionary.LoadHeaders(""GoodsRole,DocRole,DictsRole,SotreRole,OpersRole,ChiefRole,TunesRole,EmployeeRole"");",!
+	Write "	}",!
+	Write "function unload(){",!
+	Write "	identif=""""}",!
+	Write "function load(id){",!
+	Write " 	identif=Dictionary.ItemID;",!
+	Write " 		}",!
+	Write "function loadrole(id){",!
+	Write "	rolidentif=RoleDictionary.ItemID;",!
+	Write "	rolename=RoleDictionary.ItemName;",!
+	Write "	}						",!
+	Write "function  loading(){",!
+	Write "	identif="""";",!
+	Write "	var ok=window.showModalDialog(""Users.csp"","""",""cener:yes;status:no;dialogHeight:300px;dialogWidth:500px;resizable:yes;"");",!
+	Write "	if(ok==1)Show();",!
+	Write "	}",!
+	Write "function deleting(){",!
+	Write "	if (Dictionary.ItemID==""""){alert(""выберите пользователя""); return false}",!
+	Write "	if(!window.confirm(""Удалить ""+Dictionary.ItemName))return false;",!
+	Write "	ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Users.Dates.DeleteUser:csp.selectusers"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',Dictionary.ItemID);",!
+	Write "	if (ok!="""") {alert(ok)};",!
+	Write "	Dictionary.DownLoad();",!
+	Write "	}	",!
+	Write "function input(){",!
+	Write "    if (identif==""""){alert(""выберите пользователя""); return false}",!
+	Write "    var ok=window.showModalDialog(""RenameUser.csp?nameID=""+Dictionary.ItemID,""displayWindow"",""width=500,height=300,toolbar=no,scrollbars=no"");",!
+	Write "    if(ok==1)Show();    }	 ",!
+	Write "function Show(){",!
+	Write "	Dictionary.DownLoad();",!
+	Write " 	}",!
+	Write "function Roleshow(){",!
+	Write "	 RoleDictionary.DownLoad()",!
+	Write "	}",!
+	Write "function  createrole(){",!
+	Write "		rolidentif="""";",!
+	Write "		 var ok=window.showModalDialog(""createrole.csp"",""displayWindow"",""width=500,height=300,toolbar=no,scrollbars=no"");",!
+	Write "	if(ok==1)Show();",!
+	Write "	}",!
+	Write "function deleterole(){",!
+	Write "	if (rolidentif==""""){alert(""выберите роль""); return false}",!
+	Write "	if(!window.confirm(""Удалить""+""  ""+RoleDictionary.ItemName+""?""+""И всех пользователей с этой ролью""))return false; ",!
+	Write "	ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Users.Roles.DeleteRole:csp.selectusers"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',rolename);",!
+	Write "	if (ok==1) {"_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Users.NameRoles.DeleteRoles:csp.selectusers"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',rolidentif)}",!
+	Write "	else {alert(ok)};",!
+	Write "	RoleDictionary.DownLoad();",!
+	Write "	Dictionary.DownLoad();",!
+	Write "	identif="""";",!
+	Write "	}",!
+	Write "function renamerole(){",!
+	Write "	if (rolidentif==""""){alert(""выберите роль""); return false}",!
+	Write "	 var ok=window.showModalDialog(""renamerole.csp?rolename=""+RoleDictionary.ItemName,""displayWindow"",""width=500,height=300,toolbar=no,scrollbars=no"");",!
+	Write "	window.location.reload()",!
+	Write "}			 ",!
+	Write "</script>"
+	Write !,(..HyperEventHead())
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html XMLNS:Userlist>"
+	Write !,"<IMPORT NAMESPACE=""Userlist"" IMPLEMENTATION=""htc/listview2.htc"">",!
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+  s login=$G(%session.Data("user"))
+  i '+login s %response.ServerSideRedirect="norights.csp" 
+  q 1
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\selectUsers.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/selectUsers.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>62164,45292</Default>
+</Parameter>
+</Class>
+</Export>

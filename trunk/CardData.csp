@@ -1,0 +1,25 @@
+<Script language="cache" runat="server">
+ s fields=%request.Get("fields")
+ s ClassName=%request.Get("ClassName")
+ s CardID=%request.Get("CardID")
+ s XML=%request.Get("XML")
+ s loadfrom=%request.Get("loadfrom")
+ s zamena=%request.Get("zamena")
+ s tovar=%request.Get("tovar")
+ s kontr=%request.Get("kontr")
+ 
+ i CardID="" d
+  . s:+kontr IDS=##class(Goods.CardAction).GetGoods(kontr)
+  . s:+tovar IDS=##class(Goods.CardAction).GetKontr(tovar)
+  . s:loadfrom'="" IDS=@loadfrom
+ e  d
+  . s IDS=##class(Goods.CardAction).GetCard(CardID,ClassName)
+ f i=1:1:$L(IDS,"~") d
+ . s id=$P(IDS,"~",i)
+ . q:id=""
+ . s Objects(id)=1
+
+ d ##class(Goods.GoodsAction).ShowObjects(ClassName,fields,.Objects,+XML,zamena)
+ </script>
+ 
+ 

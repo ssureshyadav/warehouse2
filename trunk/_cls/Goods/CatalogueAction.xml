@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Goods.CatalogueAction">
+<Description>
+Действия с каталогами</Description>
+<Abstract>1</Abstract>
+<ProcedureBlock>1</ProcedureBlock>
+<TimeCreated>60328,1340.321205</TimeCreated>
+
+<Method name="IsMain">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Catalogue</FormalSpec>
+<Implementation><![CDATA[
+	q:'##class(Goods.Catalogue).%ExistsId(Catalogue) 0
+	s ok=##class(Goods.Catalogue).%OpenId(Catalogue)
+	q +ok.Main
+]]></Implementation>
+</Method>
+</Class>
+</Export>

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Operation.StepHistory">
+<Description>
+История шагов операций</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60320,47850.929341</TimeCreated>
+
+<Property name="Resource">
+<Description>
+Ресурсы</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Ресурсы"/>
+</Property>
+
+<Property name="Place">
+<Description>
+Место</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Место"/>
+</Property>
+
+<Index name="PlaceIndex">
+<Properties>Place</Properties>
+</Index>
+
+<Property name="Name">
+<Description>
+Имя</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Имя"/>
+</Property>
+
+<Property name="Comment">
+<Description>
+Справочная информация</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Справочная информация"/>
+</Property>
+
+<Property name="Start">
+<Description>
+Начало</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Начало"/>
+</Property>
+
+<Property name="End">
+<Description>
+Конец</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Конец"/>
+</Property>
+
+<UDLText name="T">
+<Content><![CDATA[
+//Relationship OperationHistory As Operation.OperationHistory [ Cardinality = one, Inverse = StepHistory ];
+
+]]></Content>
+</UDLText>
+
+<UDLText name="T">
+<Content><![CDATA[
+//Index OperationHistoryIndex On OperationHistory;
+
+]]></Content>
+</UDLText>
+
+<Property name="Depot">
+<Description>
+Склад</Description>
+<Type>Store.Depot</Type>
+<Parameter name="CAPTION" value="Склад"/>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Operation.StepHistoryD</DataLocation>
+<DefaultData>StepHistoryDefaultData</DefaultData>
+<IdLocation>^Operation.StepHistoryD</IdLocation>
+<IndexLocation>^Operation.StepHistoryI</IndexLocation>
+<StreamLocation>^Operation.StepHistoryS</StreamLocation>
+<Data name="StepHistoryDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Comment</Value>
+</Value>
+<Value name="3">
+<Value>End</Value>
+</Value>
+<Value name="4">
+<Value>Name</Value>
+</Value>
+<Value name="5">
+<Value>OperationHistory</Value>
+</Value>
+<Value name="6">
+<Value>Place</Value>
+</Value>
+<Value name="7">
+<Value>Resource</Value>
+</Value>
+<Value name="8">
+<Value>Start</Value>
+</Value>
+<Value name="9">
+<Value>Depot</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

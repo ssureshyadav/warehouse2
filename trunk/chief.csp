@@ -1,0 +1,490 @@
+<csp:class includes="xmlmacros">
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ s DaysCount = $$$TunesVariableGlobal("ShowInstrReminder")
+ s login=$G(%session.Data("user"))
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ i '##class(Common.Rights).getrights(login,2) s %response.ServerSideRedirect="norights.csp" 
+ q 1
+</script>
+<script language="Cache" method="WriteInstrField" arguments="ID:%String,Answer:%String,Field" returntype="%String">
+ if ID="" q "Не указана инструкция."
+ s obj = ##class(Operation.Instructions).%OpenId(ID)
+ if '$ISOBJECT(obj) q "Невозможно найти инструкцию "_ID
+ if (Field="BrakCommentAnswer")
+ {
+	 s obj.BrakCommentAnswer = Answer
+	 d:+$G(%session.Data("user")) obj.BrakCommentAnswerUserSetObjectId(%session.Data("user"))
+	 s obj.BrakCommentAnswerDat = +$H
+ }
+ if (Field="RefuseReason")
+ {
+	 s obj.RefuseReason = Answer
+	 d:+$G(%session.Data("user")) obj.RefuseReasonUserSetObjectId(%session.Data("user"))
+	 s obj.RefuseReasonDat = +$H
+ }
+ s ok=obj.%Save()
+ if ok q 1
+ else  q "Извините. Ошибка при сохранении ответа."
+</script>
+<html XMLNS:SKLADList XMLNS:SKLADiGrid>
+<IMPORT NAMESPACE="SKLADiGrid" IMPLEMENTATION="htc/iGridV7.htc">
+<IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<style>
+input{border:none;width:15px}
+</style>
+<script language="jscript" src="common.js"></script>
+<script language="Jscript">
+var CardId=""; //условие для отбора товаров
+sessionid="#(%session.SessionId)#";
+var j = new Array();
+
+//при загрузке страницы
+function load()
+{
+	hideplan.checked=ReturnBoolean(GetCookie("hideplanchecked"));
+	hideGoods.checked=ReturnBoolean(GetCookie("hideGoodschecked"));
+		plan.LoadHeaders("Parent,Comment");
+		instr.LoadHeaders("Doc,DocType,Tim,Dat,Summa,Stat,Operation");
+	//docstr.LoadHeadersXML("Doc,DocType,quantplan,addr,addr2,spravka,Client,goodsdir,garant,sn,seller");
+	
+	var Captions = new Array(4);
+	var Keys = new Array(4);
+	var Tags = new Array(4);
+	
+	Captions[0]="Товар";
+	Captions[1]="Количество";
+	Captions[2]="Цена";
+	Captions[3]="Сумма";
+	
+	Tags[0]="Goods.Goods";
+	Tags[1]="%Numeric";
+	Tags[2]="%Numeric";
+	Tags[3]="%Numeric";
+	
+	Keys[0]="Goods";
+	Keys[1]="Quantity";
+	Keys[2]="Price";
+	Keys[3]="Total";
+	docstr.DrawHeaders(Captions,Keys,Tags);
+	
+	hideplanFn();
+	hideGoodsFn();
+	FillInstrReminder();	//проверить пропущенные инструкции
+}
+
+function ItemPlan(PlanID){
+PlanID=ReturnSpace(PlanID)
+WinResult=window.showModalDialog("PlanIgrid.csp?source="+PlanID,"","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+if(WinResult==1)ShowPlan();
+}
+
+function ShowPlan(){
+var Data1=ConvertDateSql(dat1.value);
+var Data2=ConvertDateSql(dat2.value);
+plan.DownLoad("PlanDate2>=CAST('"+Data1+"' AS DATE) AND PlanDate<=CAST('"+Data2+"' AS DATE)");
+}
+
+function DelItem(){
+	if(!window.confirm("Вы хотите удалить выбранный пункт?")){return false;}
+	ok=#server(Docs.Action.deletedoc(plan.ClassName,plan.ItemID))#
+	if(ok==1){ShowPlan();}
+	else{alert(ok)}
+}
+
+function ShowInstr()
+{
+	var Data1=ConvertDateSql(dat11.value);
+	var Data2=ConvertDateSql(dat21.value);
+	var InstrCommentVar="";
+	if(qwer.value!="")
+	{
+		var stat="and State="+qwer.value;
+		if(qwer.value=="all")var stat="";
+	}
+	else
+	{
+		var stat="and State<9";
+	}
+	if(InstrComment.value!=""){var InstrCommentVar=" and Name %STARTSWITH '"+InstrComment.value+"'"}
+	var variable="InstDate>=CAST('"+Data1+"' AS DATE) and InstDate<=CAST('"+Data2+"' AS DATE) "+stat+InstrCommentVar
+	
+	var currentKontragent=ChooseKontragent.value;
+	if(currentKontragent!="all"){var variable=variable+" and Kontr="+currentKontragent}
+	
+	instr.DownLoad(variable);
+}
+
+function ItemInstr(item,source){
+	item=ReturnSpace(item)
+	//source=ReturnSpace(source)
+	//var CspFile="createinstruct.csp";
+	//if(OpenIGrid.checked){}
+	var CspFile="createinstructIgrid.csp";var source=item;
+	mok=window.showModalDialog(CspFile+"?source="+source,item+";"+instr.ClassName,"center:yes;status:no;dialogHeight:600px;dialogWidth:720px;resizable:yes;")
+	if(mok==1){ShowInstr()}
+}
+
+// удалить инструкцию
+function DelItemInstr(){
+	if(!window.confirm("Вы хотите удалить инструкцию '"+instr.ItemName+"'?")){return false;}
+	DelInstrDocs();
+	ok=#server(Docs.Action.deletedoc(instr.ClassName,instr.ItemID))#
+	if(ok==1){ShowInstr();}
+	else{alert(ok)}
+}
+
+//удалить документы инструкции 
+function DelInstrDocs(){
+	if(!window.confirm("Вы хотите удалить все документы инструкции руководителя "+instr.ItemName+"?")){return false;}
+	var ok=#server(Operation.InstrActions.DeleteInstrChildren(instr.ItemID))#
+	if(ok==1){alert("Все документы инструкции руководителя "+instr.ItemName+" успешно удалены.");}
+	else{alert(ok)}
+}
+
+function showtovsins(){
+CardId=instr.ItemID+"@"+instr.ClassName;
+//tovars.LoadHeaders();
+docstr.Clear()
+loadgoods(instr.ItemID);
+}
+
+function LoadGoodsFromCard(){
+	tovars.GetFromCard(CardId);
+}
+
+//вывести на печать внутреннюю инструкцию
+function lookinnerinstr(ItemID)
+{
+	window.open("PrintInnerFromChief.csp?super="+ItemID+"&sessionid="+sessionid)
+}
+
+function changestat(newstat){
+	var HasBeenSent="";
+	if(newstat==9)
+	{
+		var InstrType=#server(Operation.InstrActions.GetInstrType(instr.ItemID))#	
+		if((InstrType==4)||(InstrType==10)||(InstrType==11))
+		{
+			var answer=window.confirm("Поставить инструкции "+instr.ItemName+" статус 'Отправлена'?")
+			if(answer){var HasBeenSent=1;}
+			else{var HasBeenSent=0;}
+			
+		}
+	}
+	ok=#server(Operation.InstrActions.changestat(instr.ItemID,newstat,HasBeenSent))#
+	if(ok.split("@")[0]!=1){alert(ok)}
+	else
+	{
+		//если требовали завершить и все успешно
+		if(newstat==9)
+		{
+			instr.DelItems()
+		}	
+		
+		if(newstat==2)
+		{
+			instr.ChangeCell("State",ok.split("@")[1])
+			alert("Инструкция руководителя утверждена");
+		}
+		
+		//отклонение заявки
+		if(newstat==8.6)
+		{
+			SetInstrField(instr.ItemID,'RefuseReason','Пояснения контрагенту о причинах отклонения заявки','Причины отклонения сохранены');
+		}
+	}
+}
+
+function lookhist(instrItemID){
+window.showModalDialog("instrhistory.csp?instr="+instrItemID,"","center:yes;status:no;dialogHeight:300px;dialogWidth:600px;resizable:yes;")
+}
+
+function loadgoods(DocID){
+if(!hideGoods.checked){
+	docstr.loadfrommethod("Docs.Action2.ChiefInstructStr",DocID);
+	}
+}
+
+// создание дочерних документов от инструкции
+function doc(){
+ok=#server(Docs.Action.DocFromInstr(instr.ItemID))#
+if(isNaN(ok)){alert(ok)}
+else{alert("Документ успешно создан")}
+}
+
+// при закрытии окна
+function unload(){
+	//plan.saveColunmsSettings();
+	//instr.saveColunmsSettings();
+}
+
+//Клонировать инструкцию
+function CopyInstr(instrItemID){
+if(ReturnSpace(instrItemID)==""){return }
+var ok=#server(Docs.Action.CloneDoc(instrItemID))#
+if(isNaN(ok)){alert(ok)}
+else{ShowInstr()}
+}
+
+//Создать инструкцию на основе плана
+function InstrFromPlan(){
+//'',plan.ItemID+'@'+plan.ClassName
+if(!window.confirm("Создать инструкцию на основе плана?"))return;
+var InstrId=#server(Operation.InstrActions.InstrFromPlan(plan.ItemID))#
+if(InstrId=="PlanIsClosed")
+	{
+	if(window.confirm("На основе плана уже была создана инструкция, вы хотите создать ещё одну?"))
+		{
+		var InstrId=#server(Operation.InstrActions.InstrFromPlan(plan.ItemID,1))#
+		}
+	else
+		{
+		return
+		}
+	}
+if(isNaN(InstrId)){alert(InstrId);}
+else{ItemInstr(InstrId);ShowPlan();}
+}
+
+//скрыть показать план руководителя
+function hideplanFn(){
+if(hideplan.checked){planfield.style.display="none";}
+else{planfield.style.display="inline";}
+SetCookie("hideplanchecked",hideplan.checked);
+}
+
+//скрыть показать товары инструкций
+function hideGoodsFn(){
+if(hideGoods.checked){GoodsField.style.display="none";}
+else{GoodsField.style.display="inline";}
+SetCookie("hideGoodschecked",hideGoods.checked);
+}
+
+function PrintPlanFn(){
+if(ReturnSpace(plan.ItemID)=="")return
+window.open("screen/ChiefPlanHtml.csp?docid="+plan.ItemID)
+}
+
+function PrintInstr(ItemID){
+if(ReturnSpace(ItemID)=="")return
+window.open("screen/ChiefInstr.csp?docid="+ItemID);
+}
+
+// Выбрать контрагента
+function ChooseKontragentFunc()
+{
+	var UsersSelection=ChooseKontragent.options(ChooseKontragent.selectedIndex).value;
+	if(UsersSelection=="choose")
+	{
+		var newKontragent=window.showModalDialog("Dictionary.csp","Common.Kontragent","center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");
+		if(newKontragent==null){
+			ChooseKontragent.selectedIndex=0;
+			return false;}
+		var ChooseKontragentLength = ChooseKontragent.options.length;
+		ChooseKontragent.options.length= ChooseKontragentLength + 1;
+		ChooseKontragent.options(ChooseKontragentLength).value=newKontragent.split("~")[0];
+		ChooseKontragent.options(ChooseKontragentLength).text=newKontragent.split("~")[1];
+		ChooseKontragent.selectedIndex=ChooseKontragentLength;
+	}
+}
+
+function FillInstrReminder()
+{
+	var count = #server(Operation.InstrActions.GetInstrReminderText(1))#;
+	if (count==0)return;
+	var str = #server(Operation.InstrActions.GetInstrReminderText())#;
+	if (str != "")
+	{
+		InstrReminder.innerHTML = "<p style='color:#de1111'>Внимание! Некоторые инструкции не укомплектованы или не завершены более #($G(DaysCount))# дней:</p>"
+		+	str 
+		+ "<br><input type='button' style='width:300px' value='проверить пропущенные заявки' onclick='FillInstrReminder();'>";
+	}
+}
+
+//сервис менеджер отвечает на негативный отзыв контрагента
+function SetInstrField(DocId,Field,Description,SuccessMessage)
+{
+	var Answer = window.prompt(Description,"");	
+	if (Answer==null) return;
+	ok = #server(..WriteInstrField(DocId,Answer,Field))#
+	if (isNaN(ok)){alert(ok);}
+	else{alert(SuccessMessage);}
+}
+
+//указанное поле документа в отдельном окне
+function ShowFieldFn(DocId,Class,PropertyName)
+{
+	window.showModalDialog("Info.csp?docid="+DocId+"&class="+Class+"&property="+PropertyName,"","center:yes;status:no;dialogHeight:450px;dialogWidth:600px;resizable:yes;");
+}
+
+function RefuseInstr(InstrId)
+{
+	if(!window.confirm("Отклонить заявку " + instr.ItemName + " ?"))return;
+	changestat('8.6');
+}
+</script>
+<script language="VBScript">
+Sub OpenExcel(docid)
+if docid="" then Exit Sub
+dim objXML,objExcel
+set objXML = CreateObject("Msxml2.DOMDocument.3.0")
+objXML.async = false
+objXML.validateOnParse = false
+If objXML.parseError.errorCode <> 0 Then msgbox("Ошибка анализа XML" & vbCr & objXML.parseError.reason)
+res=objXML.load("screen/ChiefPlanXml.csp?docid="&docid)
+If objXML.parseError.errorCode <> 0 Then
+	msgbox("Ошибка XML" & vbCr & objXML.parseError.reason)
+	Exit Sub
+End If
+'if(xmlobj.selectSingleNode("root/comment")!=null){
+'	var xmlcomment=xmlobj.selectSingleNode("root/comment").text;
+'	if(xmlcomment!="")alert(xmlcomment)}
+
+Set objExcel = CreateObject("Excel.Application")
+objExcel.Visible = True
+Set objWorkbook = objExcel.Workbooks.Add
+'SheetsCount=objWorkbook.Sheets.Count
+
+set oNodeList = objXML.selectNodes("//AllObjects/*")
+For i=0 To (oNodeList.length-1)
+	CurrentSheetNumber = (i+1)
+	if i>(objWorkbook.Sheets.Count-1) Then 
+		objWorkbook.Sheets.Add
+		CurrentSheetNumber = 3
+	end if
+	Set objWorksheet = objWorkbook.Worksheets(CurrentSheetNumber)
+	set currentobj=oNodeList.item(i)
+	ModelName = currentobj.selectSingleNode("Model/Name").text
+	ModelCode = currentobj.selectSingleNode("Model/Code").text
+	objWorksheet.Name = ModelCode
+	objExcel.Workbooks(1).Sheets(CurrentSheetNumber).Select
+	objWorksheet.Cells(1, 2).Value = ModelCode & " " & ModelName
+	set Parts = currentobj.selectNodes("Parts/*")
+	For z=0 To (Parts.length-1)
+		set currentpart = Parts.item(z)
+		objWorksheet.Cells((z+3), 1).Value = currentpart.selectSingleNode("Number").getAttribute("Text")
+		objWorksheet.Cells((z+3), 2).Value = currentpart.selectSingleNode("Name").getAttribute("Text")
+		objWorksheet.Cells((z+3), 3).Value = currentpart.selectSingleNode("Pos").getAttribute("Text")
+		objWorksheet.Cells((z+3), 4).Value = currentpart.selectSingleNode("Quantity").getAttribute("Text")
+	Next
+	objWorksheet.Columns("A:A").ColumnWidth = 8.43
+	objWorksheet.Columns("B:B").ColumnWidth = 35.71
+	objWorksheet.Columns("C:C").ColumnWidth = 22.29
+	objWorksheet.Columns("D:D").ColumnWidth = 15.29
+	zRange="A2:D"&(z+2)
+	objWorksheet.Range(zRange).Select
+	for z=7 To 12
+		objExcel.Selection.Borders(z).Weight = 2
+	Next
+	objWorksheet.Cells(2, 1).Value = "No"
+	objWorksheet.Cells(2, 2).Value = "Part name"
+	objWorksheet.Cells(2, 3).Value = "№"
+	objWorksheet.Cells(2, 4).Value = "Quantity"
+	objWorksheet.Range("A1:D2").Select
+	objExcel.Selection.Font.Size=14
+	objExcel.Selection.Font.Bold = True
+Next
+End Sub
+</script>
+</head>
+<body onload="load()" onunload="unload()">
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<td width=10%><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
+<TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=2><strong>Рабочее место сервис менеджера</strong></TD>
+<td  width=10% align=right><!--<a href="talk.csp" ><img src="images/BIGProp.gif" width="20" height=25 border=0></a>--></td>
+</tr>
+</TABLE>
+<br>
+
+
+<!--  Таблица с планами   -->
+<input type="checkbox" id="hideplan" onclick="hideplanFn()"> Скрыть план руководителя
+<fieldset id="planfield"><legend>План</legend>
+Период c <input type=text id="dat1" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"> по <input type=text id="dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar">
+<sklad:LittleButton name="ok" id="okbut1" onclick="ShowPlan()" alt="Показать записи"><br>
+ <SKLADList:listview width=100% height=100 id="plan" onAddColumns="ShowPlan()" ClassName="Operation.Plan" zonDblClick="ItemPlan(plan.ItemID)" /><br>
+  <table width=100% ><tr><td width=100%>
+  <sklad:LittleButton name="new" id="newtov1" onclick="ItemPlan()" alt="Создать запись">
+  <sklad:LittleButton name="edit" id="edititem" onclick="ItemPlan(plan.ItemID)" alt="Редактировать запись">
+  <sklad:LittleButton name="down" id="deltov78" onclick="InstrFromPlan()" alt="Создать инструкцию">
+  <sklad:LittleButton name="print" id="printpan" onclick="PrintPlanFn()" alt="Распечатать план">
+  <sklad:LittleButton name="excel" id="btnOpenExcel" onclick="OpenExcel(plan.ItemID)" alt="Открыть в Excel">
+  </td>
+  <td>
+  <sklad:LittleButton name="del" id="deltov1" onclick="DelItem()" alt="Удалить запись">
+  </td>
+  </tr>
+  </table>
+</fieldset>
+<br>
+
+<!--  Таблица с инструкциями   -->
+<fieldset ><legend>Инструкции</legend>
+<table>
+<tr>
+	<td><b>Период</b>
+	<td><b>Статус</b>
+	<td><b>Контрагент</b>
+	<td><b>Номер</b>
+	<td>&nbsp;
+</tr>
+<tr>
+	<td>c <input type=text id="dat11" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"> по <input type=text id="dat21" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar">
+	<td>
+		<script language="cache" runat="server">
+		w "<select id=""qwer"">"
+		w ##class(Docs.Action2).GetDisplaylistOptions("","Operation.Instructions||State")
+		w "<option value=""all"">Все включая завершённые</option>"
+		w "</select>"
+		</script>
+	<td>
+		<select id="ChooseKontragent" onchange="ChooseKontragentFunc()">
+			<option value="all">Все</option>
+			<option value="choose">Выбрать контрагента...</option>
+		</select>
+	<td><input type=text id="InstrComment" name="InstrComment" style="border:solid 1 black;width:50px" title="Для поиска можно вводить лишь первые символы номера">
+	<td><sklad:LittleButton name="ok" id="okbut11" onclick="ShowInstr()" alt="Показать записи">
+</tr>
+</table>
+<SKLADList:listview width=100% height=100 id="instr" onAddColumns="ShowInstr()" ClassName="Operation.Instructions" zonDblClick="ItemInstr(instr.ItemID)" zClick="showtovsins()" Skip="Source->Name,child->Name"/>
+  <table width=100%><tr><td width=80%>
+  <sklad:LittleButton name="new" id="newtov" onclick="ItemInstr()" alt="Создать запись">
+  <sklad:LittleButton name="edit" id="edittov" onclick="ItemInstr(instr.ItemID)" alt="Редактировать запись">
+  <sklad:LittleButton name="ok2" id="approve" onclick="changestat('2')" alt="Утвердить">
+  <sklad:LittleButton name="calendar" id="eltov" onclick="lookinnerinstr(instr.ItemID)" alt="Просмотр внутренней инструкции">
+  <sklad:LittleButton name="history" id="lookhistory" onclick="lookhist(instr.ItemID)" alt="История инструкции">
+  <sklad:LittleButton name="ok" id="fin" onclick="changestat('9')" alt="Завершить">
+  <sklad:LittleButton name="txt" id="tx" onclick="doc()" alt="Создать документ на основании инструкции">
+  <sklad:LittleButton name="copy" id="copyInstr" onclick="CopyInstr(instr.ItemID)" alt="Копировать инстукцию">
+  <sklad:LittleButton name="print" id="printInstr" onclick="PrintInstr(instr.ItemID)" alt="Печать инстукции">
+  <img src="images/VertDelimeter.gif">
+  	<sklad:LittleButton name="txt" id="btnLookBrakComment" onclick="ShowFieldFn(instr.ItemID,'Operation.Instructions','BrakComment')" alt="Показать негативный отзыв контрагента">
+	<sklad:LittleButton name="txt" id="btnSetBrakAnswer" onclick="SetInstrField(instr.ItemID,'SetBrakAnswer','Ответ на негативный отзыв','Ответ на негативный отзыв сохранён')" alt="Ответить на негативный отзыв">
+	<sklad:LittleButton name="txt" id="btnLookBrakCommentAnsw" onclick="ShowFieldFn(instr.ItemID,'Operation.Instructions','BrakCommentAnswer')" alt="Показать ответ на негативный отзыв контрагента">
+  <img src="images/VertDelimeter.gif">
+  	<sklad:LittleButton name="stop" id="btnStop" onclick="RefuseInstr(instr.ItemID)" alt="Отклонить заявку">
+  </td><td width=20% align=right>
+  <sklad:LittleButton name="del" id="deltov" onclick="DelItemInstr()" alt="Удалить запись">
+  <sklad:LittleButton name="del+" id="deltov2" onclick="DelInstrDocs()" alt="Удалить все документы инструкции руководителя">
+  </td></tr></table>
+  <!--
+  <sklad:LittleButton name="ok" id="acceptinstr" onclick="changestat()" alt="Подтвердить завершение"><br>  
+  -->
+</fieldset>
+
+
+<!--  Таблица с товарами   -->
+<input type="checkbox" id="hideGoods" onclick="hideGoodsFn()"> Не выводить товары
+<fieldset id="GoodsField"><legend>Товары <span id="whostovar"></span></legend>
+<!--
+<SKLADList:listview width=100% height=100 id="tovars" onAddColumns="LoadGoodsFromCard()" ClassName="Goods.Goods"/><br>
+<SKLAD2:table id="docstr" width=100% height=100 ClassName="Operation.InstructionsItems" />
+-->
+<SKLADiGrid:iGrid id="docstr" width="100%" height="200" Enabled="true"/>
+</fieldset>
+<span id="InstrReminder"></span>
+</body>
+</html>

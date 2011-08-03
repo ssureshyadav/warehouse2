@@ -1,0 +1,49 @@
+<html>
+<head>
+
+<!-- Put your page Title here -->
+<title>	Товары дублирующиеся в группах </title>
+<script language="JScript">
+function RemoveFromGroup(Groups,Goods,UniqueID){
+	if(!window.confirm("Удалить товар из группы?"))return
+	var ok=#server(Goods.GoodsAction.RemoveFromGroup(Goods,Groups))#
+	if(isNaN(ok)){alert(ok);}
+	else{document.getElementById("li"+UniqueID).style.display="none";}
+}
+</script>
+<link href="style.css" type=text/css rel=stylesheet>
+
+</head>
+
+<body>
+<sklad:Button value="Назад" onclick="window.location.href='tuneup.csp'"><br>
+<script language="cache" runat="server">
+ //s GoodsId=19542
+ s glob=$NA(^mtempArt($I))  
+ k @glob
+ &sql(declare hu cursor for select Goods,Goods->FullName,count(Goods) into GoodsId,GoodsName,GoodsCount from Goods.GoodsGroup where Goods->aspektid is null group by Goods)
+ &sql(open hu)
+ f  &sql(fetch hu) q:SQLCODE  d
+ . q:GoodsCount=1
+ . s @glob@(GoodsId)=GoodsCount
+ . s @glob@(GoodsId,"GoodsName")=GoodsName
+ &sql(close hu)
+
+ s i="" f  s i=$O(@glob@(i)) q:i=""  d
+ . s OldGroup=""
+ . i $i(count)
+ . w "<table><tr><td>"_count_"<td><h4>"_@glob@(i,"GoodsName")_"</h4></tr><table>"
+ . &sql(declare rt cursor for select Groups,Groups->Name,Common.SqlProcs_GroupFullName(Groups) into Groups,GroupsName,GroupFullName from Goods.GoodsGroup where Goods=:i)
+ . &sql(open rt)
+ . f  &sql(fetch rt) q:SQLCODE  d
+ . . q:Groups=OldGroup
+ . . s UniqueID=i_"l"_Groups
+ . . w "<li id=""li"_UniqueID_"""> <img src=""images/del+.gif"" onclick=""RemoveFromGroup('"_Groups_"','"_i_"','"_UniqueID_"')"" onmouseover=""del"_UniqueID_".src='images/Ondel+.gif'"" onmouseout=""del"_UniqueID_".src='images/del+.gif'""  id=""del"_UniqueID_""" name=""del"_UniqueID_""" alt=""Убрать из группы""> "_GroupFullName,!
+ . . s OldGroup=Groups
+ . &sql(close rt)
+ . w "<hr width=80%>"
+ 
+ 
+</script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<Script language="cache" runat="server">
+ s class=%request.Get("class") 
+ i class="" w "Error=Íå óêàçàí êëàññ" q
+ s fields=%request.Get("fields")
+ i fields="" w "Error=Íå óêàçàíû ïîëÿ" q
+ s Goods=%request.Get("Goods")
+ s where=%request.Get("where")
+ s Groups=%request.Get("Groups")
+ s Catalogue=%request.Get("Catalogue")
+ 
+ //Ðàçëîæèì êîä ãðóïïû íà êîäû ðîäèòåëåé
+ if Groups'="" d
+ . f i=2:1:$L(Groups,"*") d
+ . . s parents=$G(parents)_" or Groups='"_$P(Groups,"*",1,i)_"'"
+ 
+  s result = ##class(%ResultSet).%New()
+  s sql="SELECT "_fields_" FROM "_class_" where (Groups is null "_$G(parents)_") and Catalogue='"_Catalogue_"' "
+ if where'="" s sql=sql_where
+ s sql=sql_" order by Code"
+ d result.Prepare(sql)
+ //s result.RuntimeMode=2
+ s ok=result.Execute()
+ q:'+ok ok
+ &html<<html><head><TITLE>untitled</TITLE><META HTTP-EQUIV="Content-Type" CONTENT="text/html; CHARSET=iso-8859-1"></head><body>>
+ While result.Next() {
+ s somethg=1
+ f i=1:1:$L(fields,",") d
+ . s field=$P(fields,",",i)
+ . s val=$G(result.Data(field))
+ . //s $P(OutString,"~",i)=val
+ . w "<span id="""_field_""">"_val_"</span>"
+ s value=""
+ i (Goods'="") {
+	s ParamId=$G(result.Data("ID"))
+ 	&sql(select Gvalue into :value from Goods.GoodsParams where goods=:Goods and Param=:ParamId)
+ 	s:('%ROWCOUNT)&(SQLCODE) value=""
+ }
+ //Ïîñëåäíèì â ñòðîêå ïîéä¸ò çíà÷åíèå ñâîéñòâà äëÿ äàííîãî òîâàðà
+ w "<span id=""Gvalue"">"_value_"</span>"
+  }
+ &html<</body></html>>
+ </script>
+ 
+ 

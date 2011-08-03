@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Common.Rights">
+<Description>
+Права пользователей</Description>
+<IncludeCode>xmlmacros</IncludeCode>
+<Super>%RegisteredObject</Super>
+<TimeCreated>60321,85494.351366</TimeCreated>
+
+<Method name="login">
+<Description><![CDATA[
+Логин пользователя
+<br><var>user</var> - Пользователь ID
+<br><var>password</var> - Пароль пользователя
+<br><var>depot</var> - Выбранный склад
+<br><var>SysDisk</var> - Системный диск
+<br><var>UserIP</var> - IP c которого пришёл пользователь]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>user,password,depot,SysDisk,UserIP=""</FormalSpec>
+<Implementation><![CDATA[
+ s id=##class(Users.Dates).check(user,password)
+ q:'+id id
+ s userobj=##class(Users.Dates).%OpenId(id)
+ s %session.Data("user")=id
+ s %session.Data("login")=userobj.Login
+ s %session.Data("depot")=depot
+ s %session.Data("passworders")=password 
+ s %session.Data("userName")=userobj.Name
+ d ##class(Users.FunctionUser).ReadRole(id,userobj.Rol)  //создать глобал и записать в него все функции пользователя
+ s %session.Data("depotName")=##class(Store.Depot).NameGetStored(depot)
+ s %session.Data("ImagesPath")=SysDisk_"\SKLAD\"
+ s %session.Data("systemname")= $$$TunesVariableGlobal("systemname")
+ 
+ s Tunes=$NA(^Tunes)
+ s o="" s o="" f  s o=$O(@Tunes@(o)) q:o=""  d
+ . q:'+o
+ . s i="" f  s i=$O(@Tunes@(o,i)) q:i=""  d
+ . . s %session.Data(i)=$G(@Tunes@(o,i,"Value"),"undefinwed")
+ s JournalObj=##class(Users.Journal).%New()
+ s JournalObj.UserIP=UserIP
+ s JournalObj.SessionID=$S($ISOBJECT($G(%session)):%session.SessionId,1:"")
+ d JournalObj.%Save()
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="getrights">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>login,func</FormalSpec>
+<Implementation><![CDATA[ q $D(^func(login,func))
+]]></Implementation>
+</Method>
+
+<Method name="LogoutMethod">
+<Description>
+Записать в таблицу выход пользователя из системы</Description>
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+ q:'$ISOBJECT(%session)
+ q:$G(%session.Data("user"))=""
+ n CurrentDat,CurrentTim,UserID,SessionID
+ s UserID=%session.Data("user")
+ s SessionID=$S($ISOBJECT($G(%session)):%session.SessionId,1:"")
+ s CurrentDat=+$H
+ s CurrentTim=$P($H,",",2)
+ &sql(update Users.Journal Set LogOutType=1,DatOut=:CurrentDat,TimOut=:CurrentTim where User1=:UserID and SessionID=:SessionID)
+ q
+]]></Implementation>
+</Method>
+
+<Method name="CloseDeadLogins">
+<Description>
+Пометить закрытыми записи в журнале логина которые не имеют соответствующей сессии</Description>
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+ //n SQLCODE,ID,SessionID,rs,CurrentDat,CurrentTim,sql,ok
+ &sql(declare sess cursor for select ID,SessionID into :ID,:SessionID from Users.Journal where DatOut is null)
+ &sql(open sess)
+ f  &sql(fetch sess) q:SQLCODE  d
+ . i '##class(%CSP.Session).%ExistsId(SessionID) s SessionsToBeClosed=$G(SessionsToBeClosed)_"'"_ID_"',"
+ &sql(close sess)
+ s SessionsToBeClosed=$E($g(SessionsToBeClosed),1,$L($G(SessionsToBeClosed))-1)
+ d:$G(SessionsToBeClosed)'=""
+ . s rs=##class(%ResultSet).%New()
+ . s CurrentDat=+$H
+ . s CurrentTim=$P($H,",",2)
+ . s sql="update Users.Journal set LogOutType=2,DatOut="_CurrentDat_",TimOut="_CurrentTim_" where ID in ("_SessionsToBeClosed_")"
+ . s ok=rs.Prepare(sql)
+ . s ok=rs.Execute()
+ q
+]]></Implementation>
+</Method>
+
+<Method name="CheckKontragentLoginPassword">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Code:%String="",Password:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ &sql(select id into :ID from Common.Kontragent where Code=:Code and Password=:Password)
+ if SQLCODE q ""
+ q +$G(ID)
+]]></Implementation>
+</Method>
+</Class>
+</Export>

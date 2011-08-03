@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.DocBrak">
+<Super>Docs.Super</Super>
+<TimeCreated>60520,61871.881598</TimeCreated>
+
+<Property name="datpriem">
+<Description>
+Дата приема</Description>
+<Type>%Date</Type>
+<Parameter name="FORMAT" value="4"/>
+</Property>
+
+<Index name="datpriemInd">
+<Properties>datpriem</Properties>
+</Index>
+
+<Property name="datend">
+<Description>
+Дата завершения</Description>
+<Type>%Date</Type>
+<Parameter name="FORMAT" value="4"/>
+</Property>
+
+<Index name="datendInd">
+<Properties>datend</Properties>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>DocBrakDefaultData</DefaultData>
+<Data name="DocBrakDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"DocBrak"</Subscript>
+<Value name="1">
+<Value>datend</Value>
+</Value>
+<Value name="2">
+<Value>datpriem</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

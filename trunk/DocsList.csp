@@ -1,0 +1,36 @@
+<html>
+<head>
+
+<!-- Put your page Title here -->
+<title>	Список документов </title>
+<link href="style.css" type=text/css rel=stylesheet>
+</head>
+
+
+<body leftmargin="20px" topmargin="20px" rightmargin="20px" bottommargin="20px">
+<table border=1>
+	<tr>
+		<th>Документ
+		<th>Номер
+		<th>Дата
+		<th>Контрагент
+	</tr>
+<script language="cache" runat="server">
+ s docs=%request.Get("docs")
+ f i=1:1:$L(docs,";")
+ {
+	 s docId = $P(docs,";",i)
+	 CONTINUE:docId=""
+	 s DocObj = ##class(Docs.Super).%OpenId(docId)
+	 CONTINUE:'$ISOBJECT(DocObj)
+	 w "<tr>"
+	 w "<td>"_DocObj.DocumentClass.Name
+	 w "<td>"_DocObj.Name
+	 w "<td>"_$ZD(DocObj.Dat,4)
+	 w "<td>"_DocObj.Kontr.Name
+	 w "<td><a href=""print.csp?id="_docId_"&class="_DocObj.DocumentClass.%Id()_"&sessionid="_%session.SessionId_""">"_"<img src=""images/print.gif"">"_"</a>"
+ }
+</script>
+</table>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ s login=$G(%session.Data("user"))
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ q 1
+</script>
+<script language="Cache" method="ReservDocs" arguments="DocsArray,StoreQntID" returntype="%Boolean">
+ ; инструкции по отгрузке
+ 
+ s DocsFilter = %request.Get("DocsFilter")
+ 
+ s DocStat(1)="Создан"
+ s DocStat(2)="Закрыт"
+ k DocsArray
+ n k,SQLCODE,ID,CloseDate,CloseTime,docname,doc,docdat,doctim,quant
+ &sql(declare gobo2 cursor for 
+ 	select ID,doc->CloseDate as CloseDate,doc->CloseTime as CloseTime,doc->name as docname,doc,doc->dat,doc->tim,Common.SqlProcs_DocQuant(ID,doc->DocumentClass),doc->stat
+ 	into :ID,:CloseDate,:CloseTime,:docname,:doc,:docdat,:doctim,:quant,:docstat
+ 	from Docs.StorageOutItems 
+ 	where StoreQntId=:StoreQntID
+ 	and ((Doc->stat<>:DocsFilter) OR (:DocsFilter=''))
+ 	order by doc->dat,doc->tim )
+ &sql(open gobo2)
+ f  &sql(fetch gobo2) q:SQLCODE  d
+ . s docclose=$S(+CloseDate:$ZD(CloseDate,4),1:"")_" "_$S(+CloseTime:$ZT(CloseTime),1:"")
+ . s doccreate=$S(+docdat:$ZD(docdat,4),1:"")_" "_$S(+doctim:$ZT(doctim),1:"")
+ . s DocsArray(ID,"docclose")=docclose
+ . s DocsArray(ID,"quant")=quant
+ . //w ##class(Docs.Action2).GetDisplaylistOptions("","Operation.Instructions||State") 
+ . s DocsArray(ID,"docname")=docname
+ . s DocsArray(ID,"docstat")=$G(DocStat(docstat))
+ . s DocsArray(ID,"doc")=doc
+ . s DocsArray(ID,"docdat")=doccreate
+ . s DocsArray(ID,"DocumentClassName")="Инструкция по отгрузке"
+ . s DocsArray(ID,"DocumentClass")="Docs.StorageOut"
+ &sql(close gobo2)
+ q 
+</script>
+<script language="Cache" method="ReserveToZero" arguments="StoreQntID,Value1,Value2" returntype="%String">
+n SQLCODE,Value1new,Value2new
+&sql(select Value1,Value2,Goods,Address into :Value1new,:Value2new,:Goods,:Address from Store.Quantity where id=:StoreQntID)
+if (SQLCODE)||(+Value1new'=+Value1)||(+Value2new'=+Value2) q "За время работы с резервами, содержимое ячейки успело измениться. Требуется обновление таблицы резервов."
+&sql(update Store.Quantity set Value2=0 where ID=:StoreQntID)
+if SQLCODE q "Системная ошибка при обнулении резерва SQLCODE="_SQLCODE
+&sql(insert into Operation.Operation (Goods,Address,OperationType,Quantity,Ostatok) VALUES (:Goods,:Address,2,:Value2,:Value1))
+q 1
+</script>
+<script language="Cache" method="ReserveToQuant" arguments="StoreQntID,Value1,Value2" returntype="%String">
+n SQLCODE,Value1new,Value2new
+&sql(select Value1,Value2,Goods,Address into :Value1new,:Value2new,:Goods,:Address from Store.Quantity where id=:StoreQntID)
+if (SQLCODE)||(+Value1new'=+Value1)||(+Value2new'=+Value2) q "За время работы с резервами, содержимое ячейки успело измениться. Требуется обновление таблицы резервов."
+&sql(update Store.Quantity set Value2=0,Value1=(Value1+:Value2) where ID=:StoreQntID)
+if SQLCODE q "Системная ошибка при обнулении резерва SQLCODE="_SQLCODE
+&sql(insert into Operation.Operation (Goods,Address,OperationType,Quantity,Ostatok) VALUES (:Goods,:Address,2,:Value2,(:Value1+:Value2)))
+q 1
+</script>
+<html>
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<title>	Резервы </title>
+<script language="jscript">
+ sessionid="#(%session.SessionId)#";
+ var CurrentDate = "#($ZD(+$H,4))#";
+
+function ReserveToZero(ID,Value1,Value2){
+if(!window.confirm("Вы действительно хотите уничтожить резерв? (свободное количество товара при этом не изменится)"))return
+var ok=#server(..ReserveToZero(ID,Value1,Value2))#
+if(isNaN(ok)){alert(ok);}
+else{
+	alert("Резерв успешно аннулирован");
+	document.getElementById(ID).style.display="None";
+	}
+}
+
+function ReserveToQuant(ID,Value1,Value2){
+if(!window.confirm("Вы действительно уменьшить количество резерва и увеличить количество свободного товара?"))return
+var ok=#server(..ReserveToQuant(ID,Value1,Value2))#
+if(isNaN(ok)){alert(ok);}
+else{
+	alert("Резерв успешно переведён в общее количество");
+	document.getElementById(ID).style.display="None";
+	}
+}
+
+ function ShowHide(ID){
+	if(window.event.srcElement.tagName!="TD")return
+  obj=document.getElementById(ID+"docs");
+  if(obj.style.display=="none"){obj.style.display="block";}
+  else{obj.style.display="none";}
+ }
+ 
+ function GoodCard(GoodsId){
+	InnerSplitter="~";
+	ok=window.showModalDialog("GoodsCard.csp?GoodsId="+GoodsId+"&groupspath=",GoodsId+InnerSplitter+"","center:yes;status:no;dialogHeight:600px;dialogWidth:650px;resizable:yes")
+ }
+ 
+ function print(docid,docclass){
+ window.open("print.csp?id="+docid+"&class="+docclass+"&sessionid="+sessionid)
+ }
+ 
+ function LogOfCreation(docid){
+ window.open("LogOfCreation.csp?doc="+docid);
+ }
+ 
+ function StoragePlaceCard(StoreId){
+ ok=window.showModalDialog("StorePlace.csp?StoreId="+StoreId,"","center:yes;status:no;dialogHeight:500px;dialogWidth:740px;resizable:yes")
+ } 
+
+// открыть окно с операциями по этой запчасти
+function OpenOperations(GoodsId)
+{
+	window.showModelessDialog("Operations2.csp?Dat1=01/01/2007&Dat2="+CurrentDate+"&GoodsId="+GoodsId,"","dialogWidth:800px")
+	
+}
+</script>
+</head>
+
+<body>
+<sklad:Button value="Назад" onclick="window.location.href='goods.csp'"><br>
+
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<TD align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=3><strong>Резервы</strong></TD></tr>
+<tr>
+</table>
+<br>
+<sklad:Button value="Обновить" onclick="window.location.href='?'">
+<sklad:Button value="Без закрытых документов" onclick="window.location.href='?DocsFilter=2'">
+<br>
+<table>
+<!-- <center>временно выключено</center> -->
+<thead bgcolor="#dedede">
+	<td><b>Товар</b></td>
+	<td><b>Ячейка</b></td>
+	<td><b>Количество</b></td>
+	<td><b>Резерв</b></td>
+	<td>&nbsp;</td>
+	<td>&nbsp;</td>
+	<td>&nbsp;</td>
+</thead>
+<script language="cache" runat="server"> 
+ n SQLCODE,ID,Goods,GoodsFullName,AddrPath,Address,Value1,Value2,i
+ &sql(declare gobo cursor for
+	select ID,Goods,Goods->FullName,Common.SqlProcs_AddrPath(Address),Address,Value1,Value2,Address->Depot->Name
+	into :ID,:Goods,:GoodsFullName,:AddrPath,:Address,:Value1,:Value2,:DepotName
+ 	from Store.Quantity
+ 	where Value2<>0)
+ &sql(open gobo)
+ f  &sql(fetch gobo) q:SQLCODE  d
+ . w "<tr bgcolor=""#effafa"" title=""открыть/скрыть список документов c данным резервом"" onclick=""ShowHide('"_ID_"')"" id="""_ID_""" style=""cursor:hand"" onmouseover=""this.style.backgroundColor='#efefee'"" onmouseout=""this.style.backgroundColor='#effafa'"">"
+ . w "<td><span style=""text-decoration:none;color:black;style:hand"" title=""Открыть карточку товара"" onclick=""GoodCard('"_Goods_"')"" onmouseover=""this.style.color='blue'"" onmouseout=""this.style.color='black'"">"_GoodsFullName_"</span></td>"
+ . w "<td><span style=""text-decoration:none;color:black"" title=""Открыть карточку ячейки"" onclick=""StoragePlaceCard('"_Address_"')"" onmouseover=""this.style.color='blue'"" onmouseout=""this.style.color='black'"">"_DepotName_" "_AddrPath_"</span></td>"
+ . w "<td>"_Value1_"</td>"
+ . w "<td>"_Value2_"</td>"
+ . w "<td><img src=""images/Tozero.gif"" onmouseover=""this.src='images/OnTozero.gif'"" onmouseout=""this.src='images/Tozero.gif'"" alt=""Обнулить резерв"" onclick=""ReserveToZero('"_ID_"','"_Value1_"','"_Value2_"')""></td>"
+ . w "<td><img src=""images/Reverse.gif"" onmouseover=""this.src='images/Onreverse.gif'"" onmouseout=""this.src='images/Reverse.gif'"" alt=""Перевести резерв в свободное количество"" onclick=""ReserveToQuant('"_ID_"','"_Value1_"','"_Value2_"')""></td>"
+ . w "<td><img src=""images/fclose.bmp"" onmouseover=""this.src='images/fopen.bmp'"" onmouseout=""this.src='images/fclose.bmp'"" alt=""Открыть окно с операциями резервирования данного товара"" onclick=""OpenOperations('"_Goods_"')""></td>"
+ . w "</tr>",!
+ . w "<tr id="""_ID_"docs"" style=""display:none""><td colspan=4>",!
+ . w "<table width=100% cellpaddind=3 cellspacing=4><tr bgcolor=""#efeeef""><td bgcolor='white'>&nbsp;</td><td>Документ</td><td>Статус</td><td>Дата создания</td><td>Дата закрытия</td><td>Кол-во</td><td>&nbsp;</td></tr>",!
+ . d ..ReservDocs(.DocsArray,ID)
+ . if $D(DocsArray)<=1 d  q
+ . . w "<td colspan=5 align=center>нет документов</td>"
+ . . w "</table></td></tr>",!
+ . s i="" f  s i=$O(DocsArray(i)) d  q:i=""
+ . . if i="" q
+ . . w "<tr bgcolor=""#efeeef"" onmouseover=""this.style.backgroundColor='#dddddd'"" onmouseout=""this.style.backgroundColor='#efeeef'""><td bgcolor='white'><img src=""images/brace.gif"" width=""10""></td>"
+ . . w "<td>"_$G(DocsArray(i,"docname"))_" ("_DocsArray(i,"DocumentClassName")_")</td>"
+ . . w "<td>"_$G(DocsArray(i,"docstat"))_"</td>"
+ . . w "<td>"_$G(DocsArray(i,"docdat"))_"</td>"
+ . . w "<td>"_$G(DocsArray(i,"docclose"))_"</td>"
+ . . w "<td>"_$G(DocsArray(i,"quant"))_"</td>",!
+ . . w "<td><img src=""images/print.gif"" onmouseover=""this.src='images/Onprint.gif'"" onmouseout=""this.src='images/print.gif'"" alt=""Распечатать инструкцию по отгрузке"" onclick=""print('"_$G(DocsArray(i,"doc"))_"','"_DocsArray(i,"DocumentClass")_"')"">"
+ . . w:$G(DocsArray(i,"DocumentClass"))="Docs.StorageOut" "<img src=""images/goinside.gif"" onmouseover=""this.src='images/Ongoinside.gif'"" onmouseout=""this.src='images/goinside.gif'"" alt=""Журнал формирования инструкции"" onclick=""LogOfCreation('"_$G(DocsArray(i,"doc"))_"')""></td></tr>",!
+ . w "</table></td></tr>",!
+ . w "</tr>",!
+ &sql(close gobo)
+</script>
+</table>
+<br>
+Данный функционал позволяет убирать резервы или переводить их в свободное количество (зависит от реального количества в конкретной ячейке)<br>
+Клик на строке с резервом откроет или закроет таблицу с документами которые относятся к этому резерву<br>
+Для того что бы открыть <b>карточку товара</b> необходимо нажать на название товара<br>
+Для того что бы открыть <b>карточку ячейки</b> необходимо нажать на ячейку<br>
+</body>
+</html>
+

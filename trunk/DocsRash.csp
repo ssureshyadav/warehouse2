@@ -1,0 +1,197 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ i %session.NewSession d
+ . s %session.EndSession=1
+ . s sessionid=%request.Get("sessionid",1)
+ . s %session=%session.GetSession(sessionid)
+ .  s login=$G(%session.Data("user"))
+ . i '+login s %response.ServerSideRedirect="norights.csp" 
+ e  s sessionid=%session.SessionId
+Quit 1
+</script>
+<html XMLNS:SKLADiGrid>
+<IMPORT NAMESPACE="SKLADiGrid" IMPLEMENTATION="htc/iGridV7.htc">
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<style>
+.LeftTop{border-left : 1 solid black;border-top : 1 solid black;}
+.RightBottom{font-family:Arial;font-size:14px;border-right : 1 solid black;border-bottom : 1 solid black;}
+SELECT{width:170px}
+.Kontragent{width:170px;cursor:hand;}
+.ZakazInstr{display:inline;}
+</style>
+<script language="jscript" src="common.js"></script>
+<title>Расходная накладная</title>
+
+<script language="Jscript">
+var DocId='#(%request.Get("source"))#';
+var sessionid="#(sessionid)#";
+
+function load(){
+FillDocStr();
+}
+
+function FillDocStr(){
+var Captions = new Array(6);
+var Keys = new Array(6);
+var Tags = new Array(6);
+var Widths = new Array(6);
+
+Captions[0]="Товар";
+Captions[1]="Цена";
+Captions[2]="Кол-во";
+Captions[3]="Сумма";
+Captions[4]="Заказанный товар";
+Captions[5]="Заказ (кол-во)";
+//Captions[6]="Дата замены";
+//Captions[7]="Время замены";
+//Captions[8]="Оператор";
+
+Tags[0]="Goods.Goods";
+Tags[1]="%Numeric";
+Tags[2]="%Numeric";
+Tags[3]="%Numeric";
+Tags[4]="Goods.Goods";
+Tags[5]="%String";
+//Tags[6]="%Date";
+//Tags[7]="%Time";
+//Tags[8]="Users.Dates";
+
+Keys[0]="Goods";
+Keys[1]="Price";
+Keys[2]="Quantity";
+Keys[3]="Total";
+Keys[4]="ZakazGoods";
+Keys[5]="Zakaz";
+//Keys[6]="ZakazDat";
+//Keys[7]="ZakazTim";
+//Keys[8]="ZakazUser1";
+
+Widths[0]=200;
+Widths[1]=60;
+Widths[2]=60;
+Widths[3]=60;
+Widths[4]=200;
+Widths[5]=80;
+//Widths[6]=80;
+//Widths[7]=80;
+//Widths[8]=110;
+docstr.DrawHeaders(Captions,Keys,Tags, Widths);
+if(DocId!="")
+	{
+	docstr.loadfrommethod("Docs.Action2.RashStr",DocId);
+	}
+}
+
+// сохранить
+function startFun(){
+xmlDoc=docstr.GetXmlContentByRows();
+InsertXmlHeader(xmlDoc,"Summa",docstr.GetTableSumma(),"%String");
+InsertXmlHeader(xmlDoc,"Name",Name.value,"%String");
+InsertXmlHeader(xmlDoc,"Comment",Comment.value,"%String");
+InsertXmlHeader(xmlDoc,"Kontr",Kontr.Tag,"Common.Kontragent");
+InsertXmlHeader(xmlDoc,"opl",opl.value,"Common.Dictionary7");
+InsertXmlHeader(xmlDoc,"OplatStatus",OplatStatus.value,"%String");
+InsertXmlHeader(xmlDoc,"OplSumma",OplSumma.value,"%String");
+InsertXmlHeader(xmlDoc,"Platej",Platej.Tag,"Docs.Platejka");
+InsertXmlHeader(xmlDoc,"RubSumma",RubSumma.value,"%String");
+var DocID=SendXml(DocId,"Docs.Rash",xmlDoc,sessionid);
+if(isNaN(DocID)){alert(DocID)}
+else{returnValue=1;window.close();}
+}
+
+//Добавить товар
+function AddGood(){
+WinResult=window.showModalDialog("selectgoods2.csp","","center:yes;status:no;dialogHeight:700px;dialogWidth:800px;resizable:yes;")
+if(WinResult==null)return
+WinResult=WinResult.split(StringSplitter)
+docstr.AddRowsInstruct(WinResult)
+}
+
+// удалить строку
+function RemoveRow(){
+docstr.RemoveSelectedRows()
+}
+
+// Очистить список
+function ClearGrid(){
+if(window.confirm("Удалить все товарные строки?"))docstr.Clear()	
+}
+
+function ChooseKonragent(Obj){
+var newItem=window.showModalDialog("Dictionary.csp","Common.Kontragent","center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");
+if(newItem==null){return false;}
+var newArr=newItem.split(InnerSplitter);
+Obj.innerText=newArr[1];
+Obj.Tag=newArr[0];
+}
+
+function ChoosePlatej(Obj){
+var newItem=window.showModalDialog("Dictionary.csp","Docs.Platejka","center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");
+if(newItem==null){return false;}
+var newArr=newItem.split(InnerSplitter);
+Obj.innerText=newArr[1];
+Obj.Tag=newArr[0];
+}
+</script>
+</head>
+
+<body onload="load()" onkeypress="ManageWindow();">
+<table width=100%><tr><td>
+<table class="LeftTop" cellspacing=0 width=100%>
+<script language="cache" runat="server">
+ s DocId=%request.Get("source")
+ i DocId {
+ 	&sql(select Name,Comment,CloseDate,CloseTime,CloseUser->Name,Stat,Summa,Kontr,Kontr->Name,opl,OplatStatus,OplSumma,Platej,Platej->Name,RubSumma into 
+ 	:Name,:Comment,:CloseDate,:CloseTime,:CloseUserName,:Stat,:Summa,:Kontr,:KontrName,:opl,:OplatStatus,:OplSumma,:Platej,:PlatejName,:RubSumma
+ 	from Docs.Rash where ID=:DocId)
+ 	i SQLCODE w "<tr><td colspan=4>Ошибка при выводе накладной "_DocId_"<br>SQLCODE="_SQLCODE_"</td></tr>"
+ 	i Stat=2 d
+ 	. s ClosedString=CloseUserName_" "_$S(CloseDate:$ZD(CloseDate,4),1:"")_" "_$S(CloseTime:$ZT(CloseTime),1:"")
+ 	. s SaveButtonStyle="display:none"
+ }
+
+w "<tr>"
+	w "<td class=RightBottom>Номер<td class=RightBottom><input type=text id=Name MAXLENGTH=50 value='"_$G(Name)_"'>"
+	w "<td class=RightBottom>Комментарий<td class=RightBottom><input type=text id=Comment MAXLENGTH=1000 Value='"_$G(Comment)_"'>"
+w "</tr>"
+
+w "<tr>"
+	w "<td class=RightBottom>Контрагент<td class=RightBottom><span onmouseout=""UnPaint(this)"" onmouseover=""Paint(this)"" class=Kontragent onclick=""ChooseKonragent(this)"" oncontextmenu=""this.innerText='';this.Tag=''"" id=""Kontr"" Tag='"_$G(Kontr)_"'>"_$G(KontrName)_"</span>"
+	w "<td class=RightBottom>Сумма"
+	w "<td class=RightBottom><input type=""text"" id=""Summa"" Value="""_$G(Summa)_""">"
+w "</tr>"
+
+w "<tr>"
+	w "<td class=RightBottom>Оплата"
+	w "<td class=RightBottom><select id=""opl"">"
+		w ##class(Docs.Action2).GetClassValuesOptions($G(opl),"Common.Dictionary7")_"</select>"
+	w "<td class=RightBottom>Статус оплаты"
+	w "<td class=RightBottom><select id=""OplatStatus"">"
+		w ##class(Docs.Action2).GetDisplaylistOptions($G(OplatStatus),"Docs.Rash||OplatStatus")_"</select>"
+w "</tr>"
+
+w "<tr>"
+	w "<td class=RightBottom>Оплаченная сумма<td class=RightBottom><input type=""text"" id=""OplSumma"" Value="""_$G(OplSumma)_""">"
+	w "<td class=RightBottom>Платёжный документ"
+	w "<td class=RightBottom><span onmouseout=""UnPaint(this)"" onmouseover=""Paint(this)"" class=Kontragent onclick=""ChoosePlatej(this)"" oncontextmenu=""this.innerText='';this.Tag=''"" id=""Platej"" Tag='"_$G(Platej)_"'>"_$G(PlatejName)_"</span>"
+w "</tr>"
+
+w "<tr>"
+	w "<td class=RightBottom>Рублёвая сумма<td class=RightBottom><input type=""text"" id=""RubSumma"" Value="""_$G(RubSumma)_""">"
+	w "<td class=RightBottom colspan=2>&nbsp;"
+w "</tr>"
+
+w:$G(ClosedString)'="" "<tr><td colspan=4 class=RightBottom>Накладная закрыта <i>"_ClosedString_"</i>"
+</script>
+</table>
+<tr height=100%><td>
+<SKLADiGrid:iGrid id="docstr" width="100%" height="300" Enabled="true"  /><br>
+<sklad:Button value="Добавить товар" onclick="AddGood();" style="width:150px">
+<sklad:Button value="Удалить строку" onclick="RemoveRow();" style="width:150px">
+<sklad:Button value="Очистить строки" onclick="ClearGrid();" style="width:150px">
+<tr><td>
+<center><br><sklad:Button value="Сохранить" onclick="startFun();" style="#($G(SaveButtonStyle))#"><sklad:Button onclick="windowclose();" value="Отмена"></center>
+</table>
+
+</body>
+</html>

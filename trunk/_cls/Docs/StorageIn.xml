@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.StorageIn">
+<Description>
+Инструкция по размещению</Description>
+<Super>Docs.Super</Super>
+<TimeCreated>60373,30563.898212</TimeCreated>
+
+<Property name="storeman">
+<Description>
+Грузчик</Description>
+<Type>Common.Dictionary5</Type>
+</Property>
+
+<Property name="PrihodType">
+<Description>
+Тип приёма</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=",Обычный товар,Брак"/>
+<Parameter name="VALUELIST" value=",0,1"/>
+</Property>
+
+<Index name="PrihodTypeInd">
+<Properties>PrihodType</Properties>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>StorageInDefaultData</DefaultData>
+<Data name="StorageInDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"StorageIn"</Subscript>
+<Value name="1">
+<Value>storeman</Value>
+</Value>
+<Value name="2">
+<Value>PrihodType</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

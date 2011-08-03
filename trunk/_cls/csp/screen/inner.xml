@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.screen.inner">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>61612,41904.366701</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body lang=RU style='tab-interval:35.4pt'>"
+	Write !,!,"<div class=Section1>"
+	Write !,!,"<p class=MsoNormal align=center style='text-align:center'>"
+	Write "<span lang=EN-US style='font-size:16.0pt;mso-bidi-font-size:12.0pt;mso-ansi-language:EN-US'>"
+	Write ($G(docname2))_"<o:p></o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<p class=MsoNormal>"
+	Write "<span lang=EN-US style='mso-ansi-language:EN-US'>"
+	Write "<![if !supportEmptyParas]>"
+	Write "&nbsp;"
+	Write "<![endif]>"
+	Write "<o:p></o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<table border=0 cellspacing=0 cellpadding=0 style='border-collapse:collapse;",!
+	Write " mso-padding-alt:0cm 5.4pt 0cm 5.4pt'>",!
+	Write " <tr>",!
+	Write "  <td width=144 valign=top style='width:108.0pt;padding:0cm 5.4pt 0cm 5.4pt'>",!
+	Write "  <p class=MsoNormal>Номер</p>",!
+	Write "  </td>",!
+	Write "  <td width=513 valign=top style='width:384.7pt;border:none;border-bottom:solid windowtext .5pt;",!
+	Write "  padding:0cm 5.4pt 0cm 5.4pt'>",!
+	Write "  <p class=MsoNormal>"
+	Write "<span lang=EN-US style='mso-ansi-language:EN-US'>"
+	Write ($G(numb))_"<o:p></o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write "  </td>",!
+	Write " </tr>",!
+	Write " <tr>",!
+	Write "  <td width=144 valign=top style='width:108.0pt;padding:0cm 5.4pt 0cm 5.4pt'>",!
+	Write "  <p class=MsoNormal>Дата</p>",!
+	Write "  </td>",!
+	Write "  <td width=513 valign=top style='width:384.7pt;border:none;border-bottom:solid windowtext .5pt;",!
+	Write "  mso-border-top-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>",!
+	Write "  <p class=MsoNormal>"
+	Write "<span lang=EN-US style='mso-ansi-language:EN-US'>"
+	Write ($G(dat))_"<o:p></o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write "  </td>",!
+	Write " </tr>",!
+	Write " <tr>",!
+	Write "  <td width=144 valign=top style='width:108.0pt;padding:0cm 5.4pt 0cm 5.4pt'>",!
+	Write "  <p class=MsoNormal>Время</p>",!
+	Write "  </td>",!
+	Write "  <td width=513 valign=top style='width:384.7pt;border:none;border-bottom:solid windowtext .5pt;",!
+	Write "  mso-border-top-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>",!
+	Write "  <p class=MsoNormal>"
+	Write "<span lang=EN-US style='mso-ansi-language:EN-US'>"
+	Write ($G(tim))_"<o:p></o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write "  </td>",!
+	Write " </tr>",!
+	Write " <tr>",!
+	Write "  <td width=144 valign=top style='width:108.0pt;padding:0cm 5.4pt 0cm 5.4pt'>",!
+	Write "  <p class=MsoNormal>Должностное лицо</p>",!
+	Write "  </td>",!
+	Write "  <td width=513 valign=top style='width:384.7pt;border:none;border-bottom:solid windowtext .5pt;",!
+	Write "  mso-border-top-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>",!
+	Write "  <p class=MsoNormal>"
+	Write "<span lang=EN-US style='mso-ansi-language:EN-US'>"
+	Write ($G(usr1))_"<o:p></o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write "  </td>",!
+	Write " </tr>",!
+	Write "</table>",!
+	Write !,"<p class=MsoNormal>"
+	Write "<![if !supportEmptyParas]>"
+	Write "&nbsp;"
+	Write "<![endif]>"
+	Write "<o:p></o:p></p>",!
+	Write !,"<p class=MsoNormal>"
+	Write "<span lang=EN-US style='mso-ansi-language:EN-US'>"
+	Write "<![if !supportEmptyParas]>"
+	Write "&nbsp;"
+	Write "<![endif]>"
+	Write "<o:p></o:p>"
+	Write "</span>"
+	Write "</p>",!
+	Write !,"<table border=1 cellspacing=0 cellpadding=0 style='border-collapse:collapse;",!
+	Write " border:none;mso-border-alt:solid windowtext .5pt;mso-padding-alt:0cm 5.4pt 0cm 5.4pt'>",!
+	Write " <tr>",!
+	Write "  <td width=186 valign=top style='width:139.55pt;border:solid windowtext .5pt;",!
+	Write "  padding:0cm 5.4pt 0cm 5.4pt'>",!
+	Write "  <p class=MsoNormal>Товар</p>",!
+	Write "  </td>",!
+	Write "  <td width=186 valign=top style='width:139.55pt;border:solid windowtext .5pt;",!
+	Write "  border-left:none;mso-border-left-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>",!
+	Write "  <p class=MsoNormal>Текущее место</p>",!
+	Write "  </td>",!
+	Write "  <td width=186 valign=top style='width:139.55pt;border:solid windowtext .5pt;",!
+	Write "  border-left:none;mso-border-left-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>",!
+	Write "  <p class=MsoNormal>Место назначения</p>",!
+	Write "  </td>",!
+	Write "  <td width=99 valign=top style='width:74.05pt;border:solid windowtext .5pt;",!
+	Write "  border-left:none;mso-border-left-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>",!
+	Write "  <p class=MsoNormal>Количество</p>",!
+	Write "  </td>",!
+	Write " </tr>",!
+	Write " "
+	d:$ISOBJECT(obj.Items)
+	. s tot=0,totquant=0
+	. s i="" f  s i=obj.Items.Next(i) q:i=""  d
+	.. i $I(count)
+	.. s item=obj.Items.GetAt(i)
+	.. s:$ISOBJECT(item.addr) addr=##class(Store.Action).AddressPath(item.addr.%Id())
+	.. s:$ISOBJECT(item.addr2) addr2=##class(Store.Action).AddressPath(item.addr2.%Id())
+	.. s Quantity=item.Quantity
+	.. s:$ISOBJECT(item.Goods) Goods=item.Goods.FullName
+	.. w "<tr>"
+	.. w "<td width=186 valign=top style='width:139.55pt;border:solid windowtext .5pt;border-top:none;mso-border-top-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>"
+	.. w "<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>"_$G(Goods)_"<o:p></o:p></span></p>"
+	.. w "</td>"
+	.. w "<td width=186 valign=top style='width:139.55pt;border-top:none;border-left:none;border-bottom:solid windowtext .5pt;border-right:solid windowtext .5pt;mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>"
+	.. w "<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>"_$G(addr2)_"<o:p></o:p></span></p>"
+	.. w "</td>"
+	.. w "<td width=186 valign=top style='width:139.55pt;border-top:none;border-left:none;border-bottom:solid windowtext .5pt;border-right:solid windowtext .5pt;mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>"
+	.. w "<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>"_$G(addr)_"<o:p></o:p></span></p>"
+	.. w "</td>"
+	.. w "<td width=99 valign=top style='width:74.05pt;border-top:none;border-left:none;border-bottom:solid windowtext .5pt;border-right:solid windowtext .5pt;mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>"
+	.. w "<p class=MsoNormal><span lang=EN-US style='mso-ansi-language:EN-US'>"_$G(Quantity)_"<o:p></o:p></span></p>"
+	.. w "</td>"
+	.. w "</tr>"
+	Write !,"</table>",!
+	Write !,"</div>"
+	Write !,!,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !
+	s id=%request.Get("id")
+	s obj=##class(Docs.Inner).%OpenId(id)
+	d:$ISOBJECT(obj)
+	. s mn(1)="января",mn(2)="февраля",mn(3)="марта",mn(4)="апреля",mn(5)="мая",mn(6)="июня",mn(7)="июля",mn(8)="августа",mn(9)="сентября",mn(10)="октября",mn(11)="ноября",mn(12)="декабря"
+	. s numb=obj.Name
+	. s:$ISOBJECT(obj.User1) usr1=obj.User1.Name
+	. s day=$P($ZD(obj.Dat,4),"/",1)
+	. s month=mn(+$P($ZD(obj.Dat,4),"/",2))
+	. s year=$P($ZD(obj.Dat,4),"/",3)
+	. s dat=day_" "_month_" "_year_" г."
+	. s:obj.Tim'="" tim=$ZT(obj.Tim)
+	. 
+	s docname2=##class(Docs.Action).GetDocNameFromClass("Docs.Inner")
+	Write !,!
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<meta http-equiv=Content-Type content=""text/html; charset=windows-1251"">"
+	Write !,"<meta name=ProgId content=Word.Document>"
+	Write !,"<meta name=Generator content=""Microsoft Word 9"">"
+	Write !,"<meta name=Originator content=""Microsoft Word 9"">"
+	Write !,"<link rel=File-List href=""./Inner.files/filelist.xml"">"
+	Write !,"<title>"_(docname2)_"</title>",!
+	Write "<!--[if gte mso 9]><xml>",!
+	Write " <o:DocumentProperties>",!
+	Write "  <o:Author>artem</o:Author>",!
+	Write "  <o:LastAuthor>artem</o:LastAuthor>",!
+	Write "  <o:Revision>2</o:Revision>",!
+	Write "  <o:TotalTime>53</o:TotalTime>",!
+	Write "  <o:Created>2006-06-18T08:21:00Z</o:Created>",!
+	Write "  <o:LastSaved>2006-06-18T08:21:00Z</o:LastSaved>",!
+	Write "  <o:Pages>1</o:Pages>",!
+	Write "  <o:Company> аава</o:Company>",!
+	Write "  <o:Lines>1</o:Lines>",!
+	Write "  <o:Paragraphs>1</o:Paragraphs>",!
+	Write "  <o:Version>9.3821</o:Version>",!
+	Write " </o:DocumentProperties>",!
+	Write "</xml><![endif]-->"
+	Write "<!--[if gte mso 9]><xml>",!
+	Write " <w:WordDocument>",!
+	Write "  <w:DrawingGridHorizontalSpacing>2,85 пт</w:DrawingGridHorizontalSpacing>",!
+	Write "  <w:DisplayVerticalDrawingGridEvery>2</w:DisplayVerticalDrawingGridEvery>",!
+	Write " </w:WordDocument>",!
+	Write "</xml><![endif]-->"
+	Write !,"<style>"
+	Write !,"<!--",!
+	Write " /* Style Definitions */",!
+	Write "p.MsoNormal, li.MsoNormal, div.MsoNormal",!
+	Write "	{mso-style-parent:"""";",!
+	Write "	margin:0cm;",!
+	Write "	margin-bottom:.0001pt;",!
+	Write "	mso-pagination:widow-orphan;",!
+	Write "	font-size:12.0pt;",!
+	Write "	font-family:""Times New Roman"";",!
+	Write "	mso-fareast-font-family:""Times New Roman"";}",!
+	Write "@page Section1",!
+	Write "	{size:595.3pt 841.9pt;",!
+	Write "	margin:2.0cm 2.0cm 2.0cm 2.0cm;",!
+	Write "	mso-header-margin:35.45pt;",!
+	Write "	mso-footer-margin:35.45pt;",!
+	Write "	mso-paper-source:0;}",!
+	Write "div.Section1",!
+	Write "	{page:Section1;}",!
+	Write "-->"
+	Write !,"</style>"
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html xmlns:o=""urn:schemas-microsoft-com:office:office"" xmlns:w=""urn:schemas-microsoft-com:office:word"" xmlns=""http://www.w3.org/TR/REC-html40"">"
+	Write !,!
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,!,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ if %request.Get("word")="on"
+ {
+  set %response.ContentType = "application/msword"
+  do %response.SetHeader("Content-Disposition","attachment;word.doc")
+  set %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+ }
+  q 1
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CHARSET">
+<Default>windows-1251</Default>
+</Parameter>
+
+<Parameter name="CONTENTTYPE">
+<Default>text/html</Default>
+</Parameter>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\screen\inner.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/screen/inner.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>61612,41904</Default>
+</Parameter>
+</Class>
+</Export>

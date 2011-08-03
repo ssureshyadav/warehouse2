@@ -1,0 +1,376 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.store">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62301,49214.644824</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body onload=""load();"" onmoveend=""fnHandleMove();"">"
+	Write !,(##class(%CSP.Response).HyperEventBody())
+	Write !
+	w "<script language=""Jscript"">"
+	f var="ids","percent","code","name","comment","tempstore","parents" d
+	. w "var "_var_"=new Array();",!
+	s depot=%session.Data("depot")
+	s sql="select ID,Code,Name,Comment,tempstore,Currentsize,Size1,Parent from Store.Address where depot="_depot_" order by Name"
+	s result=##class(%ResultSet).%New()
+	d result.Prepare(sql)
+	s result.RuntimeMode=2
+	s ok=result.Execute()
+	s res=""
+	While result.Next() {
+	s OutString=""
+	s id=result.Get("ID")
+	s code=result.Get("Code")
+	s name=result.Get("Name")
+	s comment=result.Get("Comment")
+	s tempstore=result.Get("tempstore")
+	s percent=0
+	s Currentsize=+result.Get("Currentsize")
+	s Maxsize=+result.Get("Size1")
+	s str2(code)=id
+	s parent=result.Get("Parent")
+	i parent'="" s str(parent)=$G(str(parent))_id_"~"
+	e  s str=$G(str)_id_"~"
+	i Maxsize>0 s percent=$J((Currentsize/Maxsize)*100,".",0)
+	f var="percent","code","name","comment","tempstore" d
+	. w var_"["_id_"]="""_@var_""";"
+	w "ids["""_code_"""]="_id_";"
+	}
+	s i=""
+	w "",!
+	f  s i=$O(str(i)) q:i=""  d
+	. q:str2(i)=""
+	. w "parents["""_i_"""]="""_$G(str(i))_""";"
+	w "sparents="""_$G(str)_""";"
+	w "</script"_">"
+	Write !,!,"<TABLE cellSpacing=0 width=""100%"" celpadding=""0"" >",!
+	Write "<TR>",!
+	Write "<td width=10%>"
+	Write "<img alt=""Обновить раздел"" src=""images/refresh.gif"" onclick=""window.location.reload()"">"
+	Write "</td>",!
+	Write "<TD width=80% align=center style=""BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid"" colspan=2><strong>Структура хранения</strong></TD>",!
+	Write "<td width=10% align=right>"
+	Write "<a href=""help/store.htm"">"
+	Write "<img src=""images/BIGHelp.bmp"" width=""20"" height=25 border=0>"
+	Write "</a>"
+	Write "</td>",!
+	Write "</TABLE>",!
+	Write !,!,"<!--",!
+	Write "<sklad:LittleButton name=""new"" id=""newgrup"" onclick=""Create()"" alt=""Новый элемент"">",!
+	Write "<sklad:LittleButton name=""edit"" id=""save"" onclick=""Save()"" alt=""Сохранить"">",!
+	Write "<sklad:LittleButton name=""del"" id=""clear"" onclick=""Clear()"" alt=""Очистить""><br>",!
+	Write "-->"
+	Write !,!,"<br>",!
+	Write "<a href=""javascript:TreeClick('')"">"
+	Write (%session.Data("depotName"))
+	Write "</a>"
+	Write " > "
+	Write "<span id=""addresspath"">"
+	Write "</span>"
+	Write !,"<table cellspacing=0 cellpadding=0 width=100% height=100% border=0 id=""TableMoveField""><tr>",!
+	Write "<td valign=top><SKLADz:treeview id=""AddressTree"" width=150 height=200 ShowImages=1 ImagesPath="""_(%session.Data("ImagesPath"))_""" condition=""Types[node]==0""/>",!
+	Write "<table><tr><td width=100%>"
+	Write !,"<img src=""images/new.gif"" onmouseover=""newsub.src='images/Onnew.gif'"" onmouseout=""newsub.src='images/new.gif'""  id=""newsub"" name=""newsub"" alt=""Новый элемент"" onclick=""CreateSub(0)"" style="""">"
+	Write !,!,"<img src=""images/new+.gif"" onmouseover=""newsub1.src='images/Onnew+.gif'"" onmouseout=""newsub1.src='images/new+.gif'""  id=""newsub1"" name=""newsub1"" alt=""Новый подэлемент"" onclick=""CreateSub(1)"" style="""">"
+	Write !,!,"<img src=""images/history.gif"" onmouseover=""multed.src='images/Onhistory.gif'"" onmouseout=""multed.src='images/history.gif'""  id=""multed"" name=""multed"" alt=""Множественное редактирование"" onclick=""multiedit()"" style="""">"
+	Write !,!,"<img src=""images/edit.gif"" onmouseover=""smulted.src='images/Onedit.gif'"" onmouseout=""smulted.src='images/edit.gif'""  id=""smulted"" name=""smulted"" alt=""Изменить наименование"" onclick=""editname()"" style="""">"
+	Write !,!,"<img src=""images/del+.gif"" onmouseover=""shmulted.src='images/Ondel+.gif'"" onmouseout=""shmulted.src='images/del+.gif'""  id=""shmulted"" name=""shmulted"" alt=""Очистить"" onclick=""clearcell()"" style="""">"
+	Write "</td>",!
+	Write !,"<td>"
+	Write !,"<img src=""images/del.gif"" onmouseover=""deletesub1.src='images/Ondel.gif'"" onmouseout=""deletesub1.src='images/del.gif'""  id=""deletesub1"" name=""deletesub1"" alt=""Удалить элемент"" onclick=""DelSub()"" style="""">"
+	Write "</td>",!
+	Write "</tr></table>",!
+	Write "<br><br>"
+	Write "<span id=""Comment"" style=""color:darkgrey"">"
+	Write "</span>"
+	Write !,"</td>",!
+	Write "<td width=100% style=""border-left:1 solid black;border-top:1 solid black"" valign=top id=""MoveField2"">",!
+	Write "<div id=""MoveField"" CONTENTEDITABLE='false'>"
+	Write !,"</div>"
+	Write !,"<div id=""tablefield"">"
+	Write !,"<SKLAD2:table id=""PropTable"" width=""400"" ClassName=""Store.Address"" Silent=""Currentsize,Currentweight""/>",!
+	Write " <SKLADList:listview width=100% height=150 id=""goods"" zonDblClick=""OpenCard()""/><br>",!
+	Write "<br>",!
+	Write "<center>"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""startFun();"" TITLE=""""><center>Да</center></span>"
+	Write "</center>",!
+	Write "</div>"
+	Write "</td>",!
+	Write "<!--",!
+	Write "при включенном CONTENTEDITABLE срабатывает событие oncontrolselect",!
+	Write "-->"
+	Write !,"</table>",!
+	Write "</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !
+	s Tunes=$NA(^Tunes(2))
+	s i="" f  s i=$O(@Tunes@(i)) q:i=""  d
+	. s CommonVars=$G(CommonVars)_"var "_i_"="""_$G(@Tunes@(i,"Value"),"undefined")_""";"
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"<script language=""jscript"" src=""common.js"">"
+	Write "</script>"
+	Write !,"<script language=""Jscript"">"
+	Write !,"var Trick=0;",!
+	Write "sessionid="""_(%session.SessionId)_""";",!
+	Write !,"var ItemsPercents = new Array();",!
+	Write "depot='"_(%session.Data("depot"))_"'",!
+	Write (CommonVars),!
+	Write "var CurrentElement="""";",!
+	Write "function load(){",!
+	Write "//document.execCommand(""2D-position"",false,true);",!
+	Write "LoadAddress();",!
+	Write "AddressTree.onClick=""TreeClick()"";",!
+	Write "TreeClick();",!
+	Write "}",!
+	Write !,"function TreeClick(NodeCode){",!
+	Write "if(NodeCode==""""){Trick=1;}",!
+	Write "else{Trick=0;}",!
+	Write "CreateAddressLine();",!
+	Write "Clear();",!
+	Write "if(NodeCode==null)NodeCode=AddressTree.NodeCode;",!
+	Write "var childs=""""",!
+	Write "if(NodeCode==""""){var childs=sparents}",!
+	Write "else{var childs=ReturnSpace(parents[NodeCode])}",!
+	Write "//ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Store.Action.GetChilds:csp.store"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',NodeCode)",!
+	Write "//if(ok!=""""){",!
+	Write "if(childs!=""""){",!
+	Write "tablefield.style.display=""none"";",!
+	Write "//var strings = ok.split(StringSplitter);",!
+	Write "var strings = childs.split(InnerSplitter);",!
+	Write "if (strings.length!=1){",!
+	Write "	for (var i = 0; i < strings.length-1; i++){",!
+	Write "	var id1=strings[i]",!
+	Write "	ElemId=id1",!
+	Write "	ElemCode=code[id1]",!
+	Write "	ElemName=name[id1]",!
+	Write "	ElemComment=comment[id1]",!
+	Write "	elemtempstore=tempstore[id1]",!
+	Write "	elempercent=percent[id1]",!
+	Write "	ElementStr=""<div ondblclick='HandleClick(this)' onmouseover=\""Comment.innerText='""+ElemComment+""'\"" onmouseout=\""Comment.innerText=''\"" style='margin:6;height:""+BlockHeight+"";width:""+BlockWidth+"";border:1 solid;display:inline' id='""+ElemId+""'></div>"";",!
+	Write "	aElement=document.createElement(ElementStr);",!
+	Write "	if(elemtempstore==""1""){aElement.style.backgroundColor=""#efefef""}",!
+	Write "	var littlecols=CreateChQuant(ReturnSpace(parents[ElemCode]))",!
+	Write "	aElement.innerHTML=""<center>""+ElemName+""<font color=gray> (""+elempercent+""%) </font>""+littlecols+""</center>"";",!
+	Write "	aElement.tag=ElemCode;",!
+	Write "	MoveField.appendChild(aElement);",!
+	Write "	}",!
+	Write "}",!
+	Write "else{alert(ok);}",!
+	Write "}",!
+	Write "else{",!
+	Write "	var currentid=AddressTree.NodeID;",!
+	Write "	var currentpercent=ItemsPercents[currentid];",!
+	Write "	tablefield.style.display=""block"";",!
+	Write "	PropTable.ClearRows();",!
+	Write "	PropTable.DownLoadPairs("""",currentid,""Depot,Code,Parent"");",!
+	Write "	goods.loadfrommethod(""Goods.GoodsAction.goodsfromstore"",currentid,2,3)",!
+	Write "	}",!
+	Write "}",!
+	Write !,"function CreateChQuant(str){",!
+	Write "var res=""""",!
+	Write "var string=str.split(InnerSplitter);",!
+	Write "if(string.length>1)res=""<br>""",!
+	Write "for(z=0;z<string.length-1;z++){",!
+	Write "var curid=string[z];",!
+	Write "var procent=percent[curid]",!
+	Write "var heightz=(ColumnHeight-Math.ceil(ColumnHeight*(procent/100)))-2",!
+	Write "var res=res+""<div style='margin:1;padding:0;border:1 solid;background-color:#898989;height:""+ColumnHeight+"";display:inline' ><img src='images/WhitePixel.gif' width=4 height=""+heightz+"" style='cursor:auto' ></div>""",!
+	Write "}",!
+	Write "return res",!
+	Write "}",!
+	Write !,"function Create(){",!
+	Write "number=MoveField.childNodes.length",!
+	Write "ElementStr=""<button oncontrolselect='HandleClick(this.id)' style='position:absolute;height:28;width:40' id='but""+number+""'></button>"";",!
+	Write "aElement=document.createElement(ElementStr);",!
+	Write "MoveField.appendChild(aElement);",!
+	Write "}",!
+	Write !,"function Save(){",!
+	Write "res="""";",!
+	Write "for (i = 0; i <MoveField.childNodes.length; i++){",!
+	Write "res=res+MoveField.childNodes(i).id+InnerSplitter;",!
+	Write "res=res+MoveField.childNodes(i).offsetLeft+InnerSplitter;",!
+	Write "res=res+MoveField.childNodes(i).offsetTop+InnerSplitter;",!
+	Write "res=res+MoveField.childNodes(i).style.pixelWidth+InnerSplitter;",!
+	Write "res=res+MoveField.childNodes(i).style.pixelHeight+InnerSplitter;",!
+	Write "val=ReturnSpace(MoveField.childNodes(i).value);",!
+	Write "if(val==""""){alert(""Элементы без подписи недопустимы"");return false;}",!
+	Write "res=res+val;",!
+	Write "res=res+StringSplitter;",!
+	Write "}",!
+	Write "ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Store.Action.SaveButs:csp.store"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',AddressTree.NodeCode,res)",!
+	Write "if(ok!=1){alert(ok)}",!
+	Write "else{alert(""Сохранено"")}",!
+	Write "}",!
+	Write !,"function HandleClick(Obj){",!
+	Write "AddressLine(Obj.tag)",!
+	Write "}",!
+	Write !,"function CreateSub(sublevel){",!
+	Write "code=ReturnSpace(AddressTree.NodeCode);",!
+	Write "if((sublevel==1)&(code=="""")){return false;}",!
+	Write "ok=window.showModalDialog(""addZone.csp"",code+"";""+sublevel,""center:yes;status:no;dialogHeight:250px;dialogWidth:600px;resizable:yes"")",!
+	Write "if(ok==null)return false;",!
+	Write "if(ok==1){",!
+	Write "	//load()",!
+	Write "	window.location.reload();",!
+	Write "	}",!
+	Write "else{alert(ok)}",!
+	Write "}",!
+	Write !,"function DelSub(){",!
+	Write "if(!window.confirm(""Вы уверены?""))return false;",!
+	Write "ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Store.Action.deletecell:csp.store"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',AddressTree.NodeID)",!
+	Write "if(isNaN(ok)){alert(ok)}",!
+	Write "else{window.location.reload();}",!
+	Write "}",!
+	Write !,"function LoadAddress(){",!
+	Write "AddressTree.DownLoad(""Data.csp?class=Store.Address&fields=Parent,Code,Name,ID,block&where=depot=""+depot+""&order=Code"")",!
+	Write "}",!
+	Write !,"function Clear(){",!
+	Write "MoveField.innerHTML="""";",!
+	Write "}",!
+	Write "function AddressLine(code){",!
+	Write "AddressTree.SelectedItem=code;",!
+	Write "TreeClick();",!
+	Write "}",!
+	Write !,"function CreateAddressLine(){",!
+	Write "if (Trick==1){addresspath.innerHTML="""";return false;}",!
+	Write "ParentNames=AddressTree.ParentNames;",!
+	Write "ParentCodes=AddressTree.ParentCodes;",!
+	Write "if(ParentNames=="""")return false",!
+	Write "addresspath.innerHTML="""";",!
+	Write "NamesArr=ParentNames.split(""~"");",!
+	Write "CodesArr=ParentCodes.split(""~"");",!
+	Write "for(i=0;i<NamesArr.length;i++){",!
+	Write "	aElement=CreateLink(NamesArr[i],CodesArr[i]);",!
+	Write "	addresspath.appendChild(aElement);",!
+	Write "	addresspath.innerHTML=addresspath.innerHTML+"" > "";",!
+	Write "}",!
+	Write "}",!
+	Write !,"function CreateLink(name,hrefz){",!
+	Write "ElementStr=""<a ></a>"";",!
+	Write "aElement=document.createElement(ElementStr);",!
+	Write "hrefz=""javascript:AddressLine('""+hrefz+""')"";",!
+	Write "aElement.href=hrefz;",!
+	Write "//javascript:TreeClick('""+hrefz+""')",!
+	Write "aElement.innerText=name;",!
+	Write "return aElement;",!
+	Write "}",!
+	Write !,"function startFun(){",!
+	Write "var CurrentCellCode=AddressTree.SelectedItem;",!
+	Write "xmldoc=PropTable.GetXmlContent();",!
+	Write "ok=SplitSendXml(AddressTree.NodeID,PropTable.ClassName,xmldoc,"""","""_(%session.SessionId)_""")",!
+	Write "if(isNaN(ok)){alert(ok)}",!
+	Write "else{TreeClick(CurrentCellCode)}",!
+	Write "}",!
+	Write !,"//Открыть карточку товара",!
+	Write "function OpenCard(){",!
+	Write "var gid=goods.ItemID",!
+	Write "if(gid=="""")return",!
+	Write "var gname=goods.item(""tov"")",!
+	Write "ok=window.showModalDialog(""GoodsCard.csp?GoodsId=""+gid+""&groupspath="",gid+InnerSplitter+gname,""center:yes;status:no;dialogHeight:600px;dialogWidth:650px;resizable:yes"")",!
+	Write "if(ok==1){ShowTovars()}",!
+	Write "}",!
+	Write !,"function multiedit(){",!
+	Write "ok=window.showModalDialog(""multichange.csp?skip=Code,Parent,Currentsize,Currentweight,Depot,Name,oldnumb&addrpath=""+addresspath.innerText,AddressTree.NodeID+"";Store.Address"",""center:yes;status:no;dialogHeight:380px;dialogWidth:400px;resizable:yes;"")",!
+	Write "}",!
+	Write !,"function editname(){",!
+	Write "var Name=window.prompt(""Новое наименование"",AddressTree.NodeCaption)",!
+	Write "if(Name==null)return false;",!
+	Write ($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Store.Action.changename:csp.store"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',AddressTree.NodeID,Name)",!
+	Write "window.location.reload()",!
+	Write "}",!
+	Write !,"function clearcell(){",!
+	Write "var cellid=AddressTree.NodeID;",!
+	Write "var cellcode=AddressTree.NodeCode;",!
+	Write "if(cellid=="""")return false;",!
+	Write "if(!window.confirm(""Очистить ""+AddressTree.NodeCaption+""?""))return false;",!
+	Write "ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Store.Action.ClearCell:csp.store"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',cellid,cellcode,depot)",!
+	Write "if(isNaN(ok)){alert(ok);}",!
+	Write "else{TreeClick(cellcode)}",!
+	Write "}",!
+	Write "</script>"
+	Write !,(..HyperEventHead())
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html XMLNS:SKLADz XMLNS:SKLAD2 XMLNS:SKLADList>"
+	Write !,"<IMPORT NAMESPACE=""SKLADList"" IMPLEMENTATION=""htc/listview2.htc"">",!
+	Write "<IMPORT NAMESPACE=""SKLADz"" IMPLEMENTATION=""htc/treeview.htc"">",!
+	Write "<IMPORT NAMESPACE=""SKLAD2"" IMPLEMENTATION=""htc/table.htc"">",!
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+  s login=$G(%session.Data("user"))
+  i '+login s %response.ServerSideRedirect="norights.csp" 
+  q 1
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\store.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/store.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>62164,44880</Default>
+</Parameter>
+</Class>
+</Export>

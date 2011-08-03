@@ -1,0 +1,56 @@
+<html>
+<head>
+
+<title></title>
+<link href="style.css" type=text/css rel=stylesheet>
+<style>
+.LeftTop{border-left : 1 solid black;border-top : 1 solid black;}
+.RightBottom{font-family:Arial;font-size:14px;border-right : 1 solid black;border-bottom : 1 solid black;}
+SELECT{width:170px}
+.Kontragent{width:170px;cursor:hand;border:solid 1 black}
+</style>
+<script language="jscript" src="common.js"></script>
+<script language="javascript" >
+
+function ChooseKonragent(Obj){
+newItem=window.showModalDialog("Dictionary.csp","Common.Kontragent","center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");
+if(newItem==null){return false;}
+var newArr=newItem.split(InnerSplitter);
+Obj.innerText=newArr[1];
+Obj.Tag=newArr[0];
+}
+
+// сохранить
+function startFun(){
+	if(!window.confirm("Сохранить отчёт?"))return;
+	var KontrId=Kontr.Tag;
+	var NameField=edtName.value;
+	var SummaField=edtSumma.value;
+	var SummaCurrencyField=edtSummaCurrency.value;
+	var CommentField=edtComment.value;
+	var ok=#server(Docs.Otchet.CreatePaperOthet(KontrId,NameField,SummaField,CommentField,SummaCurrencyField))#
+	if(isNaN(ok)){alert(ok);}
+	else
+	{
+		returnValue=1;
+		window.close();
+	}
+}
+</script>
+</head>
+
+<body>
+<center>Быстрое создание электронной копии отчёта который пришёл в бумажном варианте</center>
+<br>
+<table class="LeftTop" cellspacing=0 width=100%>
+<script language="cache" runat="server">
+ w "<tr><td class=RightBottom>Дата (ММ\ГГГГ)<td class=RightBottom><input type=""text"" id=""edtName"" value="""">",!
+ w "<tr><td class=RightBottom>Сумма руб.<td class=RightBottom><input type=""text"" id=""edtSumma"" value="""">",!
+ w "<tr><td class=RightBottom>Сумма $<td class=RightBottom><input type=""text"" id=""edtSummaCurrency"" value="""">",!
+ w "<tr><td class=RightBottom>Контрагент <td class=RightBottom><span onmouseout=""UnPaint(this)"" onmouseover=""Paint(this)"" class=Kontragent onclick=""ChooseKonragent(this)"" oncontextmenu=""this.innerText='';this.Tag=''"" id=""Kontr"" Tag='"_$G(Kontr)_"'>"_$G(KontrName)_"</span>"
+ w "<tr><td class=RightBottom>Комментарий <td class=RightBottom><input type=""text"" id=""edtComment"" value="""">",!
+</script>
+<tr><td colspan=2><center><br><sklad:Button value="Сохранить" onclick="startFun();" style="#($G(SaveButtonStyle))#"><sklad:Button onclick="windowclose();" value="Отмена"></center>
+</table>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.gps">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>61908,64621.748446</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body>"
+	Write !
+	s lat= +%request.Get("latitude")
+	s long = +%request.Get("longitude")
+	s timeClient = %request.Get("timeClient")
+	s Device = %request.Get("Device")
+	if (lat>0) && (long>0)
+	{
+	s last=+$O(^GpsGlobal(""),-1)+1
+	//s last=0
+	s ^GpsGlobal(last,"latitude")=lat
+	s ^GpsGlobal(last,"longitude")=long
+	s ^GpsGlobal(last,"timeServer")=$ZDT($H)
+	s ^GpsGlobal(last,"timeClient")=timeClient
+	s ^GpsGlobal(last,"Device")=Device
+	w "OK</body></html>"
+	q
+	}
+	s last=+$O(^GpsGlobal(""),-1)
+	//s last=0
+	s lat= +$G(^GpsGlobal(last,"latitude"))
+	s long = +$G(^GpsGlobal(last,"longitude"))
+	s timeServer = $G(^GpsGlobal(last,"timeServer"))
+	s timeClient = $G(^GpsGlobal(last,"timeClient"))
+	s Device = $G(^GpsGlobal(last,"Device"))
+	if (lat>0) && (long>0) && ('+%request.Get("latitude"))
+	{
+	s (i,addPT)=""
+	f 
+	{
+	s i = $O(^GpsGlobal(i))
+	q:i=""
+	q:i=last
+	s latI = +$G(^GpsGlobal(i,"latitude"))
+	s longI = +$G(^GpsGlobal(i,"longitude"))		 
+	s addPT=addPT_"~"_longI_","_latI_",pmwts"_(+i+1)
+	i $I(zamerCount)
+	}
+	w "<table border=0><tr><td valign=top>"
+	w "Всего замеров "_+$G(zamerCount)_"<br>",!
+	s l=%request.Get("l")
+	if l="" s l="map"
+	s z=%request.Get("z")
+	if z="" s z=15
+	s newzMinus=z-1
+	s newzPlus=z+1
+	if newzPlus>17 s newzPlus=17
+	if newzMinus<0 s newzMinus=0
+	if (l="sat")
+	{
+	s newl="map"
+	s lName="карта"
+	}
+	else
+	{
+	s newl="sat"
+	s lName="спутник"
+	}
+	s url = "http://static-maps.yandex.ru/1.x/?ll="_long_","_lat_
+	"&pt="_long_","_lat_",pmgrm"_addPT_
+	"&size=640,450"_
+	"&z="_z_
+	"&l="_l_
+	"&key=AIYoGkwBAAAAPEg8BgMAsOCw8UxY2pohmNWaAsI4RrFmMesAAAAAAAAAAADKhm4DSmfL3ExhkpR7d2Xfes0A_A=="
+	w "<table><tr>",!
+	w "<td>"_
+	"<input type=""button"" value="" - "" onclick=""window.location.href='?z="_newzMinus_"&l="_l_"'""> "_
+	"<input type=""button"" value="" + "" onclick=""window.location.href='?z="_newzPlus_"&l="_l_"'"">"
+	w "<td align=""right""><a href=""?l="_newl_"&z="_z_""">"_lName_"</a>"
+	w "<tr><td colspan=2><img src="""_url_""">",!
+	w "</table>",!
+	w "</td><td width=100% valign=top>"
+	w "<table border=1>"
+	s (i,addPT)=""
+	f 
+	{
+	s i = $O(^GpsGlobal(i))
+	q:i=""
+	s latI = +$G(^GpsGlobal(i,"latitude"))
+	s longI = +$G(^GpsGlobal(i,"longitude"))		 
+	s DeviceI = $G(^GpsGlobal(i,"Device"))
+	s timeClientI = $G(^GpsGlobal(i,"timeClient"))
+	s timeServerI = $G(^GpsGlobal(i,"timeServer"))
+	w "<tr><td valign=top><b>"_(i+1)_"</b></td><td>"
+	w "Устройство "_DeviceI_"<br>",!
+	w "Долгота "_longI_"<br>",!
+	w "Широта "_latI_"<br>",!
+	w "Время замера "_timeClientI_"<br>",!
+	w "Время фиксации "_timeServerI_"<br>",!
+	}
+	w "</table>"
+	w "</td></tr></table>"
+	}
+	else
+	{
+	w "Ни одной координаты ещё не зафиксировано"
+	}
+	Write !,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,!,"<title>	 </title>",!
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\Gps.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/Gps.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>61907,40608</Default>
+</Parameter>
+</Class>
+</Export>

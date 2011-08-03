@@ -1,0 +1,13 @@
+<script language="cache" runat="server">
+ s ses=%request.Get("sessionid",1)
+ s %session=%session.GetSession(ses)
+ s classmethod=%request.Get("classmethod",1)
+ s id=%request.Get("id",1)
+ s documentclass=%request.Get("documentclass",1)
+ s class=$P(classmethod,".",1,$L(classmethod,".")-1)
+ s method=$P(classmethod,".",$L(classmethod,"."))
+ s xmlobj=%request.Content
+ i $ISOBJECT(xmlobj) d
+ . s ok=$ZOBJCLASSMETHOD(class,method,xmlobj,id,documentclass)
+ w $G(ok,"xmlmethod.csp\nОшибка. Запрос не может быть обработан.")
+</script>

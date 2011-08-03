@@ -1,0 +1,56 @@
+<script language="cache" runat="server">
+ s ID=%request.Get("ID")
+ s Class=%request.Get("Class")
+ s skip=%request.Get("skip")
+
+ s AddArrow=+%request.Get("AddArrow")
+ if Class="" s Class="Goods.Goods"
+ //разобьём строку skip на глобал
+ d:skip'=""
+ . f i=1:1:$L(skip,",") d
+ . . s skipField=$P(skip,",",i)
+ . . s:skipField'="" SkipGlob(skipField)=1
+ s glob=$NA(^GoodsPropOrder(Class))  //здесь лежит порядок отображения свойств
+ s ExistTov=0
+ d:ID]""
+ . s tov=$ZOBJCLASSMETHOD(Class,"%OpenId",ID)
+ . s ExistTov=1
+ s cl=##class(%Dictionary.ClassDefinition).%OpenId(Class)
+ s output="<?xml version=""1.0"" ?>"
+ s output=output_"<AllObjects>"
+ s count=cl.Properties.Count()
+ f i=1:1:count d
+ . q:cl.Properties.GetAt(i).Relationship
+ . s output=output_"<OneObject>"
+ . s Type=cl.Properties.GetAt(i).Type
+ . s Name=cl.Properties.GetAt(i).Name
+ . q:$D(SkipGlob(Name))
+ . s:(Type'["%")&('ExistTov)&(AddArrow) Name=Name_"->Name"
+ . s str=Name_"~"_cl.Properties.GetAt(i).Description
+ . s DISPLAYLIST=cl.Properties.GetAt(i).Parameters.GetAt("DISPLAYLIST")
+ . s VALUELIST=cl.Properties.GetAt(i).Parameters.GetAt("VALUELIST")
+ . s str=str_"~"
+ . i (DISPLAYLIST'="")&(VALUELIST'="") d
+ . . s str=str_"DISPLAYLIST="_DISPLAYLIST_";VALUELIST="_VALUELIST
+ . s str=str_"~"
+ . s ObjID=""
+ . d:ExistTov
+ . . s Value=$ZOBJPROPERTY(tov,Name)
+ . . //s:(Type="%Date")&(Value]"") Value=$ZD(Value,4)
+ . . s:(Type'["%")&(Value'="") ObjID=Value.%Id(),Value=$ZOBJPROPERTY(Value,"Name")  //Если свойство объектная ссылка то извлекаем поле Name у ссылки
+ . . s str=str_Value
+ . . s output=output_"<"_Name_" Type="""_Type_""">"_Value_"</"_Name_">"
+ . s str=str_"~"_ObjID_"@"_Type
+ . s str=str_"#@#"
+ . s order=$G(@glob@(Name),$P(str,"~",1))
+ . s output=output_"</OneObject>"
+ . //s:order="Name" order=0
+ . //s Props(order)=str
+ s output=output_"</AllObjects>"
+
+ w output
+ //s i="" f  s i=$O(Props(i)) q:i=""  d
+ //. w Props(i)
+ q 1
+
+</script>

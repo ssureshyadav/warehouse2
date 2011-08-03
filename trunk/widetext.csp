@@ -1,0 +1,47 @@
+<html>
+<head>
+<title>Система складского учёта</title>
+<link href="style.css" type=text/css rel=stylesheet>
+<style>
+TD{font-family:'Arial';font-size:13pt;}
+</style>
+<script language="javascript">
+function startFun(){
+window.returnValue=maintext.value;
+window.close();
+}
+
+function windowclose(){
+if(window.confirm("Закрыть окно без сохранения изменений?")){
+window.close()	
+}
+}
+
+function load(){
+if(window.dialogArguments!=""){
+	maintext.value=window.dialogArguments;
+}
+}
+</script>
+</head>
+<body onload="load()" style="border:solid 1 black">
+<table cellpadding=5 height=100% width=100% border=1><tr ><td valign=top >
+<textarea id="maintext" style="width:100%;height:100%">
+<script language="cache" runat="server">
+ s docid=%request.Get("docid")
+ s class=%request.Get("class")
+ s property=%request.Get("property")
+ if docid,class'="",property'="" d
+ . s obj=$ZOBJCLASSMETHOD(class,"%OpenId",docid)
+ . d:$ISOBJECT(obj) 
+ . . w $ZOBJPROPERTY(obj,property)
+</script>
+</textarea>
+</td></tr>
+<tr height="20px"><td valign=bottom>
+<center><br><sklad:Button value="Да" onclick="startFun();"><sklad:Button onclick="windowclose()" value="Отмена"></center>
+</td></tr>
+</table>
+
+</body>
+</html>

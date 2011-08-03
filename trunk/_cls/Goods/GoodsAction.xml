@@ -1,0 +1,1215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Goods.GoodsAction">
+<Description>
+Действия с товарами</Description>
+<IncludeCode>xmlmacros</IncludeCode>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject</Super>
+<TimeCreated>60324,81785.661493</TimeCreated>
+
+<Method name="CreateProp">
+<Description><![CDATA[
+Создать свойство товара
+<br><var>Catalogue</var> - ID каталога
+<br><var>Group</var> - Код группы товарного классификатора которой (возможно) будет принадлежать новое свойство
+<br><var>PropName</var> - Наименование свойства
+<br><var>PropCode</var> - Код доп товарного свойства на котором стоял курсор (для создания на следующем уровне иерархии)
+<br><var>Sub</var> - если 1 то доп свойство создавать на следующем уровне иерархии]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Catalogue="",Group="",PropName="",PropCode="",Sub=""</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="CreatePropERR",err=1
+ q:PropName="" "Не указано имя свойства"
+ q:Catalogue="" "Не указан каталог"
+ q:(Sub=1)&(PropCode="") "Не указан код свойства"
+    
+    i Sub=1 s ok=..GetLastSubItem(.PropCode)
+    e  s ok=..GetLastItem(.PropCode)
+ q:'ok ok
+ 
+ s prop=##class(Goods.Params).%New()
+   s prop.Name=PropName
+   s prop.Code=PropCode
+   s prop.Groups=Group
+   d prop.CatalogueSetObjectId(Catalogue)
+ s ok=prop.%Save()
+ i '+ok $$$WriteObjError(ok) q "Извините, ошибка при сохранении дополнительного свойства товара"
+ q 1
+CreatePropERR
+ $$$WriteError($ZE)
+ q "Извините, ошибка при сохранении дополнительного свойства товара"
+]]></Implementation>
+</Method>
+
+<Method name="GetLastItem">
+<Description><![CDATA[
+получить последний элемент списка дополнительных свойств товара на данном уровне
+<br><var>Code</var> - код элемента на уровне которого требуется найти последний элемент]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Code=""</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="GetLastItemErr"
+ s Parent=$Piece(Code,"*",1,$Length(Code,"*")-1)
+ if Parent'=""{
+ &sql(select top 1 Code into :Code from Goods.Params where Parent=:Parent order by Code desc)}
+ else{
+ &sql(select top 1 Code into :Code from Goods.Params where Parent is Null order by Code desc)}
+ 
+ q:SQLCODE<0 err="Goods.GoodsAction.GetLastItem() SQLCODE="_SQLCODE
+ s:(SQLCODE=100)&(%ROWCOUNT=0) Code="*0"
+ s $P(Code,"*",$L(Code,"*"))=+$P(Code,"*",$L(Code,"*"))+1
+ q 1
+GetLastItemErr
+ $$$WriteError($ZE)
+ q "Извините, внутренняя ошибка системы, попробуйте создать с другими параметрами."
+]]></Implementation>
+</Method>
+
+<Method name="GetLastSubItem">
+<Description><![CDATA[
+Получить последний элемент списка дополнительных свойств товара на низлежащем уровне
+<br><var>Code</var> - Код элемента для которого требуется найти последний элемент на низлежащем уровне]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Code=""</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="GetLastSItemErr"
+ &sql(select top 1 Code into :LasSubCode from Goods.Params where Parent=:Code order by Code desc)
+ q:SQLCODE<0 err="Goods.GoodsAction.GetLastItem() SQLCODE="_SQLCODE
+ s:(SQLCODE=100)&(%ROWCOUNT=0) LasSubCode=Code_"*0"
+ s $P(LasSubCode,"*",$L(LasSubCode,"*"))=+$P(LasSubCode,"*",$L(LasSubCode,"*"))+1
+ s Code=LasSubCode
+ q 1
+GetLastSItemErr
+ $$$WriteError($ZE)
+ q "Извините, внутренняя ошибка системы, попробуйте создать с другими параметрами."
+]]></Implementation>
+</Method>
+
+<Method name="addClassProperty">
+<Description><![CDATA[
+Создать свойство класса
+<br><var>Description</var> - описание свойства
+<br><var>Displaylist</var> - список значений Displaylist (через ~)
+<br><var>FieldType</var> - Тип поля (%String,%Date,enumerated)
+<br><var>ClassName</var> - Имя класса для этого поля
+<br><var>KeyProp</var> - если 1 - это основное поле и имя его должно быть Name
+<br><var>PatternType</var> - попытка реализовать проверку паттерна для поля (не работает)
+<br><var>PatternStr</var> - попытка реализовать проверку паттерна для поля (не работает)]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Description,Displaylist="",FieldType,ClassName="",KeyProp="",PatternType,PatternStr</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="addClassPropertyErr",err=1
+ q:Description="" "Не указано наименование свойства"
+ TSTART
+ s err=1
+ s ErrorDescription = "Извините, ошибка при создании поля справочника, попробуйте создать поле с другими параметрами."
+ 
+ s GoodsPropOrder=$NA(^GoodsPropOrder("Goods.Goods"))  //здесь лежат все свойсва Goods.Goods по номерам
+ //строим список Valuelist, все значения Displaylist пронумерованы с 1
+ d:FieldType="enumerated"
+ . f i=1:1:$L(Displaylist,"~") d
+ . . s Valuelist=$G(Valuelist)_","_i
+ //создаём новое свойство
+ s:ClassName="" ClassName="Goods.Goods"
+ if (ClassName'="")&(KeyProp=1) d  q:+exist "Только одно свойство справочника может быть основным"
+ . s exist=##class(%Dictionary.PropertyDefinition).%ExistsId(ClassName_"||Name")
+ Set pdef = ##class(%Dictionary.PropertyDefinition).%New()
+ i '$ISOBJECT(pdef) d  q ErrorDescription_1
+ . $$$WriteError("addClassProperty не смогли создать определение нового свойства") 
+ . TROLLBACK 1
+ 
+ s pdef.Description=Description
+ s pdef.Type=FieldType
+ d:FieldType="%Date" pdef.Parameters.SetAt(4,"FORMAT")
+ d pdef.Parameters.SetAt(Description,"CAPTION")
+ 
+ d:(Displaylist'="")&(FieldType="enumerated")
+ . d pdef.Parameters.SetAt($TR(Valuelist,"~",","),"VALUELIST")
+ . d pdef.Parameters.SetAt(","_$TR(Displaylist,"~",","),"DISPLAYLIST")
+ . s pdef.Type="%String"
+ 
+ S cdef = ##class(%Dictionary.ClassDefinition).%OpenId(ClassName)
+ i '$ISOBJECT(cdef) d  q ErrorDescription_2
+ . $$$WriteError("addClassProperty не смогли открыть класс "_ClassName_" в %Dictionary.ClassDefinition")
+ . TROLLBACK 1
+ 
+ // придумаем имя свойству тока если свойство не основное
+ if '((ClassName'="")&(KeyProp=1)) d
+ s PropName="Property"_$RANDOM(10000)
+ while ##class(%Dictionary.PropertyDefinition).%ExistsId(ClassName_"||"_PropName)
+  {
+  	s PropName="Property"_$RANDOM(10000)	  
+  }
+ e  s PropName="Name"
+ s pdef.Name=PropName
+ 
+ //Запишем какие шаблоны может принимать свойство (см. стр. AddGoodsProp2.CSP)
+ s:PatternType="prohibited" ^Property(ClassName,PropName,"Prohibited")=PatternStr
+ s:PatternType="%Numeric" ^Property(ClassName,PropName,"Pattern")="?1(.N1""."".N,.N)"
+ s:PatternType="%String" ^Property(ClassName,PropName,"Pattern")="?.(.A,.P)"
+ s:PatternType="cachepattern" ^Property(ClassName,PropName,"Pattern")="?"_PatternStr
+
+ s ok = cdef.Properties.Insert(pdef)
+ i '+ok d  q ErrorDescription_3
+ . $$$WriteObjError(ok)
+ . TROLLBACK 1
+
+ 
+ //Установим индекс для данного поля
+ s IndexObject = ##class(%Dictionary.IndexDefinition).%New()
+ s IndexObject.Name=PropName_"Ind"
+ s IndexObject.Properties=PropName
+ s ok=cdef.Properties.Insert(IndexObject)
+ i '+ok d  q ErrorDescription_4
+ . $$$WriteObjError(ok)
+ . TROLLBACK 1
+ s ok=cdef.%Save()
+ i '+ok d  q ErrorDescription_5
+ . $$$WriteObjError(ok)
+ . TROLLBACK 1
+ 
+ k cdef
+ k pdef
+ k IndexObject
+ 
+ d:ClassName="Goods.Goods" AddPropToOrder(GoodsPropOrder,PropName)  //Запишем свойство в список свойств
+ 
+ //компилируем
+ s err=$$Comple()
+ //если компиляция с ошибками убираем свойство, сохраняем и перекомпилируем
+ i '+err d  q ErrorDescription_6
+ . $$$WriteError(err)
+ . TROLLBACK 1
+
+ /*
+ .  Do cdef.Properties.Remove(pdef)
+ .  s ok=cdef.%Save()
+ .  i '+ok d  q
+ .  .  Do DecomposeStatus^%apiOBJ(%objlasterror,.err2) 
+ .  .  s err=err_$CHAR(13)_"Попытка отката привела к ошибке "_err2(err2)
+ .  d:ClassName="Goods.Goods" DelPropFromOrder(GoodsPropOrder,PropName)  //Удалим свойство из списка свойств после успешного отката
+ .  s err2=$$Comple()
+ .  s err=err_$CHAR(13)_$S('err2:"Откат произведён успешно.",1:"Попытка отката привела к ошибке,  сохраните эту запись и обратитесь к системному администратору."_$CHAR(13)_err2)
+ */
+ TCOMMIT
+ q 1
+addClassPropertyErr
+ TROLLBACK
+ q $ZE
+Comple()
+ s glob=$NA(^mtempSklad($I,"Compile"))
+ k @glob
+ j Compile^cmpl(ClassName,glob)
+ while $G(@glob)="" {
+ h .1
+ }
+ q:@glob@("err")>0 @glob@("err",@glob@("err"))
+ q 1
+AddPropToOrder(GoodsPropOrder,PropName)
+ s number=$G(@GoodsPropOrder)+1
+ s @GoodsPropOrder@(PropName)=number
+ s @GoodsPropOrder=number
+ q
+DelPropFromOrder(GoodsPropOrder,PropName)
+ s number=$G(@GoodsPropOrder)
+ k @GoodsPropOrder@(PropName)
+ s @GoodsPropOrder=number-1
+ q
+]]></Implementation>
+</Method>
+
+<Method name="DeleteProperty">
+<Description><![CDATA[
+Удаление свойства класса Goods.Goods
+<br><var>name</var> - имя удаляемого свойства]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>name=""</FormalSpec>
+<Implementation><![CDATA[
+	q:name="" "Не указан код свойства"
+	s ClassName="Goods.Goods"
+	s ErrorDescription="Извините, ошибка при удалении свойства."
+
+	s cdef=##class(%Dictionary.ClassDefinition).%OpenId(ClassName)
+	i '$ISOBJECT(cdef) $$$WriteError("DeleteProperty не открыли класс "_ClassName_" в %Dictionary.ClassDefinition") q ErrorDescription
+	
+	s key=cdef.Properties.FindObjectId(ClassName_"||"_name)
+	q:key="" "Goods.GoodsAction.DeleteProperty. Невозможно найти указанное свойство."
+	s oid=cdef.Properties.RemoveAt(key)
+	s ok=cdef.%Save()
+	i '+ok $$$WriteObjError(ok) q ErrorDescription
+
+	s glob=$NA(^mtempSklad($I,"Compile"))
+ 	k @glob
+ 	j Compile^cmpl(ClassName,glob)
+ 	while $G(@glob)="" {
+ 	h .05
+ 	}
+ 	q:@glob@("err")>0 @glob@("err",@glob@("err"))
+ 	k ^GoodsPropOrder(ClassName,name)
+ 	k ^Property(ClassName,name)
+ 	
+ 	q 1
+]]></Implementation>
+</Method>
+
+<Method name="SaveGoods">
+<Description>
+Сохранение товара</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Group,Names,Values,TypesStr,Names2,Values2,GoodsId=""</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="SaveGoodsErr",err=1
+ s CurrentLogin=$S($ISOBJECT($G(%session)):$G(%session.Data("user")),1:"")
+ if '##class(Common.Rights).getrights(CurrentLogin,9) q "Нет прав для работы с товаром."
+ s ErrorDescription="Извините, ошибка при сохранении товара, попробуйте сохранить с другими параметрами."
+ //Соберём все свойства в массив
+ f i=1:1:$L(Names2,"~")-1 d
+ . s Params($P(Names2,"~",i))=$P(Values2,"~",i)
+  TSTART
+ //Если предоставили ID товара попытаемся открыть
+ //иначе делаем новый
+ i GoodsId'="" d
+ . s tov=##class(Goods.Goods).%OpenId(GoodsId),new=0
+ . i '$ISOBJECT(tov) s tov=##class(Goods.Goods).%New(),new=1
+ e  s tov=##class(Goods.Goods).%New(),new=1
+ s check=1
+ //Присвоим товару все его свойства
+ f i=1:1:$L(Names,"~")-1 q:'+check  d 
+ . s PropType=$P(TypesStr,"~",i)
+ . s PropName=$P(Names,"~",i)
+ . //тип свойства может быть 27@Package.Class или @%String или @%Date
+ . i $E($P(PropType,"@",2),1,1)'="%" d  //тип свойства
+ . . d $ZOBJMETHOD(tov,PropName_"SetObjectId",$P(PropType,"@",1))
+ . e  d
+ . . s value=$P(Values,"~",i)
+ . . s check=##class(Common.Common).CheckPattern("Goods.Goods",PropName,value)
+ . . q:'+check
+ . . d:PropType="@%Date" 
+ . . . i value'="" s value=$ZDH(value,4)
+ . . . e  s value=+$H
+ . . set $ZOBJPROPERTY(tov, PropName) = value
+ 
+ q:'+check check
+ //Теперь если новый то надо создать Params и присвоить их,
+ //а если старый апдейтить старые и присвоить новые парамс
+ i new d
+ . s i="" f  s i=$O(Params(i)) q:i=""  d
+ . . d:$G(Params(i))'=""
+ . . . s param=##class(Goods.GoodsParams).%New()
+ . . . s param.Gvalue=Params(i)
+ . . . d param.ParamSetObjectId(i)
+ . . . d tov.Params.Insert(param)
+ e  d
+ . f i=1:1:tov.Params.Count() d
+ . . s ParamID=tov.Params.GetAt(i).Param.%Id()
+ . . s tov.Params.GetAt(i).Gvalue=$G(Params(ParamID))
+ . . k Params(ParamID)
+ . s i="" f  s i=$O(Params(i)) q:i=""  d
+ . . d:$G(Params(i))'=""
+ . . . s param=##class(Goods.GoodsParams).%New()
+ . . . s param.Gvalue=Params(i)
+ . . . d param.ParamSetObjectId(i)
+ . . . d tov.Params.Insert(param)
+
+ //Сохраняем товар
+ s err=tov.%Save()
+ i '+err $$$WriteObjError(err) q ErrorDescription
+ s tov=tov.%Id()
+
+ //Запишем товар в соответствующую группу
+ d:new
+ . s GoodsGroup=##class(Goods.GoodsGroup).%New()
+ . d GoodsGroup.GoodsSetObjectId(tov)
+ . d GoodsGroup.GroupsSetObjectId(Group)
+ . s err=GoodsGroup.%Save()
+ i '+err $$$WriteObjError(err) q ErrorDescription
+ TCOMMIT
+ q err
+SaveGoodsErr
+ $$$WriteError($ZE)
+ q "Извините, ошибка при сохранении товара, попробуйте с другими параметрами."
+]]></Implementation>
+</Method>
+
+<Method name="DeleteGoods">
+<Description><![CDATA[
+Удаление товара
+<br><var>id</var> - id товара]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id=""</FormalSpec>
+<Implementation><![CDATA[
+ n countid
+ q:id="" 1
+ s countid=0
+ &sql(select count(id) into :countid from Docs.DocItems where Goods=:id)
+ q:countid "Товар уже был использован в документах, удаление невозможно."
+ TSTART
+ &sql(delete from Goods.GoodsParams where Goods=:id)
+ if SQLCODE<0 $$$WriteError("DeleteGoods 1 SQLCODE="_SQLCODE) q "Извините, внутренняя ошибка при удалении товара."
+ s ok=##class(Goods.Goods).%DeleteId(id)
+ i '+ok $$$WriteObjError(ok) q "Извините, внутренняя ошибка при удалении товара."
+ &sql(delete from Goods.GoodsGroup where Goods=:id)
+ if SQLCODE<0 $$$WriteError("DeleteGoods 2 SQLCODE="_SQLCODE) q "Извините, внутренняя ошибка при удалении товара."
+ TCOMMIT
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="SaveGoodsParams">
+<Description>
+Сохранить дополнительное свойство товара</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Goods,Value,Param</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="SaveGoodsParamsErr"
+ q:$G(Goods)="" "Не указан товар"
+ q:$G(Value)="" "Не указано значение"
+ q:$G(Param)="" "Не указано свойство"
+  
+ &sql(select id into :id from Goods.GoodsParams where Param=:Param and Goods=:Goods)
+ //Если не нашли то Свойство и Товар сами заполним
+ if ('%ROWCOUNT)&(SQLCODE) d
+ . s idObj=##class(Goods.GoodsParams).%New()
+ . d idObj.ParamSetObjectId(Param)
+ . d idObj.GoodsSetObjectId(Goods)
+ e  s idObj=##class(Goods.GoodsParams).%OpenId(id)
+ s idObj.Gvalue=Value
+ s ok=idObj.%Save()
+ i '+ok $$$WriteObjError(ok) q "Извините, ошибка при сохранении свойства товара"
+ q ok
+SaveGoodsParamsErr
+ $$$WriteError($ZE)
+ q "Извините, ошибка при сохранении свойства товара"
+]]></Implementation>
+</Method>
+
+<Method name="DeleteGoodsParam">
+<Description><![CDATA[
+Удалить описание дополнительного свойства товара
+<br><var>ParamID</var> - id дополнительного свойства]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ParamID</FormalSpec>
+<Implementation><![CDATA[
+	q:ParamID="" "Не найден код параметра"
+	s $ZT="DeleteGoodsParamErr"
+	s ok=##class(Goods.Params).%DeleteId(ParamID)
+	//удаляем без оглядки на Склад, ибо уникален ParamID внутри всей программы
+	&sql(delete from Goods.GoodsParams where Param=:ParamID)
+	i SQLCODE<0 $$$WriteError("Goods.GoodsAction.DeleteGoodsParam SQLCODE="_SQLCODE) q "Извините, ошибка при удалении дополнительного свойства товара."
+	q 1
+DeleteGoodsParamErr
+ $$$WriteError($ZE)
+ q "Извините, ошибка при удалении дополнительного свойства товара."
+]]></Implementation>
+</Method>
+
+<Method name="GetGoodsFromParams">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>fields,where</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="GetGoodsFromParamsErr"
+ s field=$P(where,"~",1)
+ s equal=$P(where,"~",2)
+ s value=$P(where,"~",3)
+ d:(equal[">")!(equal["<") MoreLess(field,equal,value,.result)
+ d:(equal="=") Equal(field,equal,value,.result)
+ d:(equal="<>") NotEqual(field,equal,value,.result)
+ d ..ShowObjects("Goods.Goods",fields,.result)
+ q
+Equal(field,equal,value,result)
+ s $ZT="GetGoodsFromParamsErr"
+ m result=^GoodsPar(field,value)
+ q
+NotEqual(field,equal,value,result)
+ s $ZT="GetGoodsFromParamsErr"
+ s i="" f  s i=$O(^GoodsPar(field,i)) q:i=""  d
+ . q:i=value
+ . m result=^GoodsPar(field,i)
+ q
+MoreLess(field,equal,value,result)
+ s $ZT="GetGoodsFromParamsErr"
+ d:(equal[">")!(equal["<")
+ . i equal[">" s direction="1"
+ . i equal["<" s direction="-1"
+ . i equal["=" m result=^GoodsPar(field,value)
+ . s i=value
+ . f  s i=$O(^GoodsPar(field,i),direction) q:i=""  d
+ . . s go="" f  s go=$O(^GoodsPar(field,i,go)) q:go=""  d
+ . . . s result(go)=1
+ q
+GetGoodsFromParamsErr
+ s ^Errors($H,"$ZE")=$ZE
+ q
+]]></Implementation>
+</Method>
+
+<Method name="ShowObjects">
+<Description>
+Показать объекты указанного класса
+Класс выводимых объектов, поля которые необходимо вывести, надо ли показывать в xml, замена</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[ClassName,fields,&Objects,xml=0,zamena=""]]></FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="ShowObjectsErr"
+ s depot=$G(%session.Data("depot"))
+ w:'+xml "#@#"
+ W:xml "<?xml version=""1.0"" encoding=""windows-1251"" ?>"
+ W:xml "<root>"
+ W:xml "<AllObjects>"
+ s i="" f  s i=$O(Objects(i)) q:i=""  d
+ . W:xml "<OneObject>"
+ . s object=$ZOBJCLASSMETHOD(ClassName,"%OpenId",i)
+ . i '$ISOBJECT(object) W:xml "</OneObject>" d ##class(Common.Common).saveerror("Не открылся объект "_i_" класса "_ClassName,"Goods.GoodsAction.ShowObjects")
+ . q:'$ISOBJECT(object)
+ . s $P(OutString,"~",1)=i
+ . d:ClassName="Goods.Goods"
+ . . s addr=""
+ . . s quant=##class(Goods.GoodsAction).getgoodquant(i,depot,.addr)
+ . . s price=##class(Goods.GoodsAction).getprice(i)
+ . f z=1:1:$L(fields,",") d
+ . . s field=$P($P(fields,",",z),"->")
+ . . s shownfield=field
+ . . i zamena'="" s shownfield=$G(^Substitute(zamena,field),field)
+ . . w:xml "<"_shownfield_" id="""_i_""">"
+ . . s value=$ZOBJPROPERTY(object,field)
+ . . i shownfield="Goods" s tovname=value
+ . . d:value'=""
+ . . . i $ISOBJECT(value) d
+ . . . . w:xml "<ObjectValue>"_value_"</ObjectValue>"
+ . . . . s value=$ZOBJPROPERTY(value,"Name")
+ . . . e  s value=$ZOBJMETHOD(object,field_"LogicalToDisplay",value)
+ . . s $P(OutString,"~",z+1)=value
+ . . i shownfield="Price" s value=+$G(price)
+ . . w:xml "<text>"_value_"</text>"
+ . . w:xml "</"_shownfield_">"
+ . d:ClassName="Goods.Goods"
+ . . W:(xml)&('quant) "<comment>Внимание! Товар "_tovname_" отсутствует на складе "_$G(%session.Data("depotName"))_" замените товар.</comment>"
+ . W:xml "</OneObject>"
+ . w:'+xml OutString_"#@#"
+ W:xml "</AllObjects>"
+ W:xml "<comment>"
+ W:xml ""
+ W:xml "</comment>"
+ W:xml "</root>"
+ q
+ShowObjectsErr
+ $$$WriteError($ZE)
+ q
+]]></Implementation>
+</Method>
+
+<Method name="getgoodquant">
+<Description><![CDATA[
+получить максимальное количество товара на складе и массив всех его ячеек
+<br><var>goods</var> - товар (ID)
+<br><var>depot</var> - склад ID на котором искать (можно не указывать)
+<br><var>addr</var> - массив (по ссылке) в который запишем ячейки товара 
+<li>addr=ID_ячейки (с максимальным количеством)
+<li>addr("value",Количество_"."_Счётчик,"addr")=ID_ячейки
+<br><var>quant</var> - минимальное количество которое требуется в ячейке которая будет в переменной addr]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[goods="",depot="",&addr,quant=0]]></FormalSpec>
+<ReturnType>%Numeric</ReturnType>
+<Implementation><![CDATA[
+ q:goods=""
+ k addr
+ i $ISOBJECT(goods) s goods=goods.%Id()
+ i $ISOBJECT(depot) s depot=depot.%Id()
+ i depot'="" s DepotCondition="and Address->Depot="_depot
+ s sqlquery="select ID,(Value1-Value2) as val,Address as addr from Store.Quantity where Goods="_goods_" and (Value1-Value2)>="_quant_" and Address->block=1 "_$G(DepotCondition)
+ s rs=##class(%Library.ResultSet).%New() 
+ s ok=rs.Prepare(sqlquery)
+ i $$$ISERR(ok) $$$WriteObjError(ok) q "Извините. Внутренняя ошибка при поиске товара."
+ s ok=rs.Execute()
+ i $$$ISERR(ok) $$$WriteObjError(ok) q "Извините. Внутренняя ошибка при поиске товара."
+ while rs.Next() {
+ 	i $i(count)
+ 	s val=rs.Data("val")
+ 	s addr=rs.Data("addr")
+ 	s StoreQntID=rs.Data("ID")
+ 	//count - шоп не затирались строки, если вдруг одинаковое количество в разных ячейках
+ 	s addr("value",+(val_"."_count),"addr")=addr
+ 	s addr("value",+(val_"."_count),"val")=+val
+ 	s addr("value",+(val_"."_count),"StoreQntID")=StoreQntID
+ 	s addr("addr",addr)=val
+ 	s addr("value")=$G(addr("value"))+val	//накапливаем общее количество 
+ }
+ //если общее количество меньше требуемого, то выходим с нулём
+ i '+$G(addr("value"))<quant q 0
+ s last=$O(addr("value",""),-1)
+ d:+last 
+ . s addr=$G(addr("value",last,"addr"))
+ . s val=$P(last,".")
+ q +$G(val)
+]]></Implementation>
+</Method>
+
+<Method name="goodsfromstore">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>addr,q1,q2</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="selgoodsfromstoreErr"
+ $$$StartXML
+ s sc=xmlstr.Element("AllHeaders")
+  $$$WriteHeader("number","№",40)
+  $$$WriteHeader("FullName","Полное наименование",240)
+  $$$WriteHeader("Property5300","Номер по схеме",140)
+  $$$WriteHeader("kol","Количество",80)
+  $$$WriteHeader("rezerv","Резерв",80)
+  $$$WriteHeader("brak","Брак",80)
+  $$$WriteHeader("brakDoc","Документ брака",80)
+  $$$WriteHeader("brakDocDate","Дата документа брака",80)
+  $$$WriteHeader("brakKontr","Контрагент брака",80)
+  
+ s sc=xmlstr.EndElement()
+ 	//основное количество
+  	&sql(declare zz cursor for 
+  	select Goods->FullName,Goods->Property5300,Goods,Value1,Value2
+  	into :FullName,:Property5300,:GoodsId,:Value1,:Value2
+  	from Store.Quantity where Address=:addr)
+  	&sql(open zz)
+  	f  &sql(fetch zz) q:SQLCODE  d
+  	. s Goods(GoodsId,"FullName")=FullName
+  	. s Goods(GoodsId,"Property5300")=Property5300
+  	. s Goods(GoodsId,"number")=$I(i)
+  	. s Goods(GoodsId,"kol")=Value1
+  	. s Goods(GoodsId,"rezerv")=Value2
+  	&sql(close zz)
+ 	
+ 	
+ 	//Брак
+   	&sql(declare zz2 cursor for 
+  	select Goods->FullName,Goods->Property5300,Goods,Qnt,SourceDoc->Name,SourceDoc->Kontr->Name,SourceDoc->Dat
+  	into :FullName,:Property5300,:GoodsId,:Qnt,:SourceDocName,:KontrName,:SourceDocDate
+  	from Store.Brak where Address=:addr)
+  	&sql(open zz2)
+  	f  &sql(fetch zz2) q:SQLCODE  d
+  	. s Goods(GoodsId,"FullName")=FullName
+  	. s Goods(GoodsId,"Property5300")=Property5300
+  	. s Goods(GoodsId,"number")=$I(i)
+  	. s Goods(GoodsId,"brak")=Qnt
+   	. s Goods(GoodsId,"brakDoc")=SourceDocName
+   	. s Goods(GoodsId,"brakKontr")=KontrName
+   	. s Goods(GoodsId,"brakDocDate")=SourceDocDate
+  	&sql(close zz2)
+
+ 
+ s sc=xmlstr.Element("AllObjects")
+  	s GoodsId="" f  s GoodsId=$O(Goods(GoodsId)) q:GoodsId=""  d
+  	. s sc=xmlstr.Element("OneObject")
+  	. s sc=xmlstr.WriteAttribute("id",GoodsId)
+  	. $$$WriteElementTwice("FullName",$G(Goods(GoodsId,"FullName")))
+  	. $$$WriteElementTwice("Property5300",$G(Goods(GoodsId,"Property5300")))
+  	. $$$WriteElementTwice("number",$G(Goods(GoodsId,"number")))
+  	. $$$WriteElementTwice("kol",+$G(Goods(GoodsId,"kol")))
+  	. $$$WriteElementTwice("rezerv",+$G(Goods(GoodsId,"rezerv")))
+  	. $$$WriteElementTwice("brak",+$G(Goods(GoodsId,"brak")))
+  	. $$$WriteElementTwice("brakDoc",$G(Goods(GoodsId,"brakDoc")))
+  	. $$$WriteElementTwice("brakKontr",$G(Goods(GoodsId,"brakKontr")))
+  	. s brakDocDate=$G(Goods(GoodsId,"brakDocDate"))
+  	. s:brakDocDate?5N brakDocDate=$ZD(brakDocDate,4)
+  	. $$$WriteElementTwice("brakDocDate",brakDocDate)
+  	. s sc=xmlstr.EndElement()
+ 
+ s sc=xmlstr.EndElement()
+ $$$EndXML
+ q
+selgoodsfromstoreErr
+ $$$WriteError($ZE)
+ q
+]]></Implementation>
+</Method>
+
+<Method name="delimg">
+<Description><![CDATA[
+Удалить изображение товара
+<br><var>gid</var> - ID товара
+<br><var>img</var> - имя файла изображения
+<br><var>curcsp</var> - url текущей страницы]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>gid,img,curcsp</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="delimgErr"
+ s file=$P(img,"/",$L(img,"/"))
+ s path=$P(curcsp,"?",1,$L(curcsp,"?")-1)
+ s filefordel=$P($ZU(86),"\",1,$L($ZU(86),"\")-1)_$TR(path,"?","\")_"\csp\sklad2\GoodsImages\"_file
+ q:gid="" "Не указан код товара"
+ q:img="" "Не указан файл для удаления"
+ s ok=##class(%Library.File).Delete(filefordel)
+ i '+ok $$$WriteObjError(ok) q "Извините, внутренняя ошибка при удалении файла"
+ s obj=##class(Goods.Goods).%OpenId(gid)
+ i '$ISOBJECT(obj) q "Не удалось найти запись о товаре"
+ s images=obj.Images
+ f i=1:1:$L(images,"\") d
+ . s cf=$P(images,"\",i)
+ . q:cf=file
+ . s ss=$G(ss)_cf_"\"
+ s ss=$E($G(ss),1,$L($G(ss))-1)
+ s obj.Images=ss
+ s ok=obj.%Save()
+ i '+ok $$$WriteObjError(ok) q "Извините, внутренняя ошибка при удалении файла"
+ q 1
+delimgErr
+ $$$WriteError($ZE)
+ q "Извините, внутренняя ошибка при удалении файла"
+]]></Implementation>
+</Method>
+
+<Method name="FromCardInGroup">
+<Description><![CDATA[
+скопировать содержимое буфера обмена в текущую группу
+<br><var>cardid</var> - id карточки товара (в данном случае буфер обмена)
+<br><var>destination</var> - ID группы - куда вставить товары]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>cardid,destination</FormalSpec>
+<Implementation><![CDATA[
+ s $zt="FromCardInGroupErr"
+ i destination="" $$$WriteError("destination=""""") q "Извините. Внутренняя ошибка при записи товаров в группу."
+ s goods=##class(Goods.CardAction).GetCard(cardid, "Goods.Goods")
+ //определеим принадлежность группы-назначения к каталогу и складу
+ &sql(select Depot,Catalogue into :GroupsDepot,:GroupsCatalogue from Goods.Group where ID=:destination)
+ i SQLCODE $$$WriteError("SQLCODE=100") q "Извините. Не найдено описание группы - назначения для копирования"
+ f i=1:1:$L(goods,"~") d
+ . s currentgood=$P(goods,"~",i)
+ . q:currentgood=""
+ . //удаляем этот товар в каталоге данной группы
+ . &sql(delete from Goods.GoodsGroup where Goods=:currentgood and Groups->Catalogue=:GroupsCatalogue and Groups->Depot=:GroupsDepot)
+ . s o=##class(Goods.GoodsGroup).%New()
+ . d o.GoodsSetObjectId(currentgood)
+ . d o.GroupsSetObjectId(destination)
+ . d o.%Save()
+ . k o
+ d ##class(Goods.CardAction).DelCard(cardid, "Goods.Goods")
+ q 1
+FromCardInGroupErr
+ $$$WriteError($ZE)
+ q "Извините. Внутренняя ошибка при записи товаров в группу."
+]]></Implementation>
+</Method>
+
+<Method name="prices">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>goodsid,allprices,q2</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="pricesErr"
+ $$$StartXML
+ 
+  &sql(select max(Dat) as d,max(Tim) as t into :d,:t from Store.Price where Goods=:goodsid)
+  i (d="")||(t="") $$$EndXML q
+  
+  s rs=##class(%ResultSet).%New()
+  s sql="select Price,Dat,Tim,typcen,typcen->Name as typcenname,User1->Name as username from Store.Price where Goods="_goodsid
+  s:allprices="true" sql=sql_" order by Dat,Tim DESC"
+  s ok=rs.Prepare(sql)
+  i '+ok $$$WriteObjError(ok) $$$EndXML q 0
+  s ok=rs.Execute()
+  i '+ok $$$WriteObjError(ok) $$$EndXML q 0
+ s glob=$NA(^mtempCena(%session.Data("user")))
+ k @glob
+ While rs.Next() {
+ i $I(i) 
+ s Dat=$G(rs.Data("Dat"))
+ s Tim=$G(rs.Data("Tim"))
+ s @glob@("whole",i,"Dat")=Dat
+ s @glob@("whole",i,"Tim")=Tim
+ s @glob@("whole",i,"Price")=$G(rs.Data("Price"))
+ s @glob@("whole",i,"typcen")=$G(rs.Data("typcen"))
+ s @glob@("whole",i,"username")=$G(rs.Data("username"))
+ s @glob@("whole",i,"typcenname")=$G(rs.Data("typcenname"))
+ 
+ s @glob@("typcen",$G(rs.Data("typcen"),"undef"),Dat,Tim,"Price")=$G(rs.Data("Price"))
+ s @glob@("typcen",$G(rs.Data("typcen"),"undef"),Dat,Tim,"username")=$G(rs.Data("username"))
+ s cennames($G(rs.Data("typcen"),"undef"))=$G(rs.Data("typcenname"))
+  }
+
+  s sc=xmlstr.Element("AllHeaders")
+	 $$$WriteHeader("typcen"," ",150)
+	 $$$WriteHeader("price","Цена",80)
+	 $$$WriteHeader("dat","Дата",100)
+	 $$$WriteHeader("tim","Время",100)
+	 $$$WriteHeader("user","Отв. лицо",200)
+  s sc=xmlstr.EndElement()
+
+ s sc=xmlstr.Element("AllObjects")
+ //i $Increment(str)
+ //вывести только актуальные цены
+  d:allprices="false"
+  . s i="" f  s i=$O(@glob@("typcen",i)) q:i=""  d
+  . .s Dat=$O(@glob@("typcen",i,""),-1)
+  . .s Tim=+$O(@glob@("typcen",i,Dat,""),-1)
+  . .s price=$G(@glob@("typcen",i,Dat,Tim,"Price"))
+  . .s usr=$G(@glob@("typcen",i,Dat,Tim,"username"))
+  . .s typcen=$G(cennames(i)," ")
+  . .s sc=xmlstr.Element("OneObject")
+  . .$$$WriteElementTwice("typcen",typcen)
+  . .$$$WriteElementTwice("dat",$ZD(Dat,4))
+  . .$$$WriteElementTwice("tim",$ZT(Tim))
+  . .$$$WriteElementTwice("price",price)
+  . .$$$WriteElementTwice("user",usr)
+  . .s sc=xmlstr.EndElement()
+
+  //вывести все цены
+  d:allprices="true"
+  . s i="" f  s i=$O(@glob@("whole",i)) q:i=""  d
+  . .s Dat=$G(@glob@("whole",i,"Dat"))
+  . .s Tim=$G(@glob@("whole",i,"Tim"))
+  . .s price=$G(@glob@("whole",i,"Price"))
+  . .s usr=$G(@glob@("whole",i,"username"))
+  . .s typcen=$G(@glob@("whole",i,"typcenname"))
+  . .s sc=xmlstr.Element("OneObject")
+  . .$$$WriteElementTwice("typcen",typcen)
+  . .$$$WriteElementTwice("dat",$ZD(Dat,4))
+  . .$$$WriteElementTwice("tim",$ZT(Tim))
+  . .$$$WriteElementTwice("price",price)
+  . .$$$WriteElementTwice("user",usr)
+  . .s sc=xmlstr.EndElement()
+
+  s sc=xmlstr.EndElement()
+ $$$EndXML
+ 
+ q 1
+pricesErr
+ $$$WriteError($ZE)
+ q
+]]></Implementation>
+</Method>
+
+<Method name="getprice">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>goodsid</FormalSpec>
+<Implementation><![CDATA[
+ s tovobj=##class(Goods.Goods).%OpenId(goodsid)
+ q:'$ISOBJECT(tovobj) 0.00
+ q $J(tovobj.Price,".",2)
+]]></Implementation>
+</Method>
+
+<Method name="goodsbykontr">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>dates,kontr,p1</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="goodsbykontrErr"
+ s dat1=$P(dates,"@",1)
+ s dat2=$P(dates,"@",2)
+ s dat1=$S(dat1="":"",1:$ZDH(dat1,4))
+ s dat2=$S(dat2="":"",1:$ZDH(dat2,4))
+
+ $$$StartXML
+   s sc=xmlstr.Element("AllHeaders")
+	 $$$WriteHeader("number","№",40)
+	 $$$WriteHeader("doctype","Документ",80)
+	 $$$WriteHeader("docdat","Дата",80)
+	 $$$WriteHeader("doctim","Время",80)
+	 $$$WriteHeader("goodsnam","Товар",80)
+	 $$$WriteHeader("price","Цена",80)
+	 $$$WriteHeader("quant","Количество",80)
+	 $$$WriteHeader("summ","Сумма",80)
+  s sc=xmlstr.EndElement()
+  s rs=##class(%ResultSet).%New()
+  s sql="select doc as docid,doc->DocumentClass->Name as doctype,doc->Dat as docdat,doc->Tim as doctim,goods->Name as goodsnam,Price as price,Quantity as quant from Docs.DocItems where doc->Dat>="_dat2_" and doc->Dat<="_dat2_" and doc->Kontr="_kontr
+  s ok=rs.Prepare(sql)
+  i '+ok $$$WriteObjError(ok) $$$EndXML q 
+  s ok=rs.Execute()
+  i '+ok $$$WriteObjError(ok) $$$EndXML q 
+  
+  s sc=xmlstr.Element("AllObjects")
+  while rs.Next(){
+	i $i(i)
+  	s sc=xmlstr.Element("OneObject")
+  	$$$WriteElementTwice("number",i)
+  	$$$WriteElementTwice("doctype",$G(rs.Data("doctype")))
+  	s docdat=$G(rs.Data("docdat"))
+  	i docdat'="" s docdat=$ZD(docdat,4)
+  	$$$WriteElementTwice("docdat",docdat)
+  	s doctim=$G(rs.Data("doctim"))
+  	i doctim'="" s doctim=$ZT(doctim)
+  	$$$WriteElementTwice("doctim",doctim)
+  	$$$WriteElementTwice("goodsnam",$G(rs.Data("goodsnam")))
+  	s price=$G(rs.Data("price"))
+  	$$$WriteElementTwice("price",$J(price,".",2))
+  	s quant=$G(rs.Data("quant"))
+  	$$$WriteElementTwice("quant",quant)
+  	$$$WriteElementTwice("summ",$J(quant*price,".",2))
+  	s sc=xmlstr.EndElement()
+  }
+  s sc=xmlstr.EndElement()
+ $$$EndXML
+ q 1
+goodsbykontrErr
+ $$$WriteError($ZE)
+ q 0
+]]></Implementation>
+</Method>
+
+<Method name="fromgroup">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>where,fields,CalculateQuantity=1</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="fromgroupErr"
+ $$$StartXML
+ s sc=xmlstr.Element("AllHeaders")
+ s sc=xmlstr.WriteAttribute("addcols","true")
+ Set result = ##class(%ResultSet).%New("Store.Depot:Common")
+ s ok=result.Execute()
+ s i=0
+ while result.Next(){
+	i $I(i)
+	s depid=$G(result.Data("ID"),"undef")
+	s depots(depid)=$G(result.Data("Name"),"undef")
+	$$$WriteHeader("depot"_depid,depots(depid)_" свободно",100)
+ }
+ s sc=xmlstr.EndElement()
+ 
+ s sc=xmlstr.Element("AllObjects")
+ s rs=##class(%ResultSet).%New()
+ s sql="select Goods,"_fields_" from Goods.GoodsGroup where "_where
+ s ^mtempArt("Goods.GoodsAction.fromgroup_fields")=sql
+ s ^mtempArt("Goods.GoodsAction.fromgroup_sql")=sql
+ s ok=rs.Prepare(sql)
+ i '+ok $$$WriteObjError(ok) q
+ s ok=rs.Execute()
+ f i=1:1:rs.GetColumnCount() d 
+ . s columns(i)=rs.GetColumnName(i)
+ . s columns(i,"enum")=##class(%Dictionary.CompiledMethod).%ExistsId("Goods.Goods||"_columns(i)_"LogicalToDisplay")
+
+ while rs.Next(){
+  	s sc=xmlstr.Element("OneObject")
+  	s goods=$G(rs.Data("Goods"))
+	s sc=xmlstr.WriteAttribute("id",goods)
+  	s i="" f  s i=$O(columns(i)) q:i=""  d
+  	. s txt=rs.Data(columns(i))
+  	. //для отбора товаров для плана руководителя, нужны закупочные цены товаров
+  	. //запрос на закупочные цены идёт третьим параметром "ХХХ@1", то есть $P()
+  	. if columns(i)="Price",$P(CalculateQuantity,"@",2) s txt=..GetPriceType(goods,4)
+  	. i columns(i,"enum") s txt=$ZOBJCLASSMETHOD("Goods.Goods",columns(i)_"LogicalToDisplay",txt)
+  	. $$$WriteElementTwice(columns(i),txt)
+  	k quant
+  	s:CalculateQuantity ok=##class(Store.Action).GetQuantByGoods(goods,.quant)
+  	s i="" f  s i=$O(quant(i)) q:i=""  d
+  	. i CalculateQuantity s Quantity=+$G(quant(i))	//-$G(quant(i,"rezerv"))
+  	. e  s Quantity=""
+  	. $$$WriteElementTwice("depot"_i,Quantity)
+  	s sc=xmlstr.EndElement()
+ }
+  	s sc=xmlstr.EndElement()
+
+ $$$EndXML
+ q 1
+fromgroupErr
+ $$$WriteError($ZE)
+ q 0
+]]></Implementation>
+</Method>
+
+<Method name="kurs">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>other,Dat=0</FormalSpec>
+<Implementation><![CDATA[
+ s i="" f  s i=$O(^Tunes(3,i)) q:i=""  d
+ . s other(i)=$G(^Tunes(3,i,"Value"))
+ if Dat d
+ . &sql(select Name into :Name from Common.Dictionary16 where Dat=:Dat)
+ . if SQLCODE s Name=0
+ if $G(Name) q Name	//если передали дату и на эту дату есть запись в истории курсов
+ q $$$TunesVariableGlobal("innerkurs")
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+//метод очищает содержимое товарной группы
+
+]]></Content>
+</UDLText>
+
+<Method name="cleargrup">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>grupid</FormalSpec>
+<Implementation><![CDATA[
+ &sql(delete from Goods.GoodsGroup where Groups=:grupid)
+ q 1
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+// вставляет в указанную группу все товары не привязанные к какой либо группе
+
+]]></Content>
+</UDLText>
+
+<Method name="fillgrup">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>grupid</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="fillgrupErr"
+ s ok=1,err="Извините, ошибка при выполнении операции"
+ i $ISOBJECT(%session) s user=$G(%session.Data("user"),"lostuser")
+ e  s user="undef"
+ s glob=$NA(^mtempGlob("goodsingr",user))
+ k @glob
+ &sql(declare goodsingr cursor for select goods into :goods from Goods.GoodsGroup)
+ &sql(open goodsingr)
+ f  &sql(fetch goodsingr) q:SQLCODE  d
+ . s @glob@(goods)=1
+ &sql(close goodsingr)
+ 
+ s allgoods=$NA(^Goods.GoodsD)
+ s i="" f  s i=$O(@allgoods@(i)) q:(i="")!('+ok)  d
+ . i $I(ii)
+ . i '$D(@glob@(i)) d
+ . . s gr=##class(Goods.GoodsGroup).%New()
+ . . d gr.GoodsSetObjectId(i)
+ . . d gr.GroupsSetObjectId(grupid)
+ . . s ok=gr.%Save()
+
+ i '+ok $$$WriteObjError($ZE) q err
+ q 1
+fillgrupErr
+ $$$WriteError($ZE)
+ q "Извините, внутренняя ошибка в программе"
+]]></Implementation>
+</Method>
+
+<Method name="RemoveFromGroup">
+<Description><![CDATA[
+Убрать товар из группы
+<br><var>GoodsId</var> - ID или объект товара
+<br><var>GroupId</var> - ID или объект товарной группы]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>GoodsId="",GroupId=""</FormalSpec>
+<Implementation><![CDATA[
+	i $ISOBJECT(GoodsId) s GoodsObject=GoodsId,GoodsId=GoodsId.%Id()
+	i $ISOBJECT(GroupId) s GroupObject=GroupId,GroupId=GroupId.%Id()
+	&sql(delete from Goods.GoodsGroup where Groups=:GroupId and Goods=:GoodsId)
+	i %ROWCOUNT>0 q %ROWCOUNT
+	i SQLCODE<0 $$$WriteError("RemoveFromGroup SQLCODE="_SQLCODE)
+	q "Извините. Ошибка при удалении товара из группы"
+]]></Implementation>
+</Method>
+
+<Method name="AddPriceGroup">
+<Description>
+Создать новую ценовую группу</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Name:%String="",Razdel="",p2</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s GrObj=##class(Common.Dictionary12).%New()
+ s GrObj.Name=Name
+ s GrObj.Razdel=Razdel
+ s ok=GrObj.%Save()
+ i '+ok $$$WriteObjError(ok) q "Извините. Внутренняя ошибка при создании ценовой группы."
+ q GrObj.%Id()
+]]></Implementation>
+</Method>
+
+<Method name="MovePriceGroup">
+<Description>
+Переместить ценовую группу в другой раздел</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>GroupId,Razdel</FormalSpec>
+<Implementation><![CDATA[
+ s $ZT="MovePriceGroupErr"
+ q:GroupId="" "Не указана ценовая группа"
+ q:Razdel="" "Не указан новый раздел для ценовой группы."
+ &sql(update Common.Dictionary12 set Razdel=:Razdel where ID=:GroupId)
+ i SQLCODE $$$WriteError("MovePriceGroup SQLCODE="_SQLCODE) q "Извините. Ошибка при перемещении ценовой группы."
+ q 1
+MovePriceGroupErr
+ $$$WriteError($ZE)
+ q "Извините. Ошибка при перемещении ценовой группы."
+]]></Implementation>
+</Method>
+
+<Method name="SetNamePriceGroup">
+<Description>
+Изменить имя ценовой группы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ID:%String="",NewName:%String="",p1</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ q:ID="" "Ошибка. Не указана ценовая группа."
+ s GrObj=##class(Common.Dictionary12).%OpenId(ID)
+ i '$ISOBJECT(GrObj) q "Ошибка. Не найдена ценовая группа которой требуется изменить наименование."
+ s GrObj.Name=NewName
+ s ok=GrObj.%Save()
+ i '+ok $$$WriteObjError(ok) q "Извините. Внутренняя ошибка при изменении наименования ценовой группы."
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="DeletePriceGroup">
+<Description>
+Удалить ценовую группу</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ID:%String="",par1,par2</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ q:ID="" "Ошибка. Не указана ценовая группа."
+ q:$D(^Goods.GoodsI("izdelieInd",ID)) "Невозможно удалить ценовую группу содержащую товары"
+ q ##class(Common.Common).DeleteItem("Common.Dictionary12",ID)
+]]></Implementation>
+</Method>
+
+<Method name="GoodsPriceGroup">
+<Description><![CDATA[
+Добавить/Убрать товары из ценовой группы
+<br><var>SelectedGoodsIDs</var> - список ID товаров через ~
+<br><var>ID</var> - ID товарной группы]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>SelectedGoodsIDs:%String="",ID:%String="",p2</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="GoodsPriceGroupErr"
+ s SelectedGoodsIDs=$TR(SelectedGoodsIDs,"~",",")
+ s rs=##class(%ResultSet).%New()
+ s SqlQuery="update Goods.Goods set izdelie = "_ID_" where id in ("_SelectedGoodsIDs_")"
+ s ok=rs.Prepare(SqlQuery)
+ i '+ok $$$WriteObjError(ok) q "Извините. Ошибка при удалении товара из ценовой группы."
+ s ok=rs.Execute()
+ i '+ok $$$WriteObjError(ok) q "Извините. Ошибка при удалении товара из ценовой группы."
+ q 1
+GoodsPriceGroupErr
+ $$$WriteError($ZE)
+ q "Ошибка работе с товарами и ценовой группой."
+]]></Implementation>
+</Method>
+
+<Method name="GoodsList">
+<Description><![CDATA[
+Вывести список товаров (для GoodsListEdit)
+<br><var>Where</var> - where для SQL запроса]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Where:%String="",p1,p2</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="GoodsListErr"
+
+ s Fields("abbr","ValueField")="Goods->abbr"
+ s Fields("abbr","ValueAlias")="abbr"
+ 
+ s Fields("Property3609","ValueField")="Goods->Property3609"
+ s Fields("Property3609","ValueAlias")="Property3609"
+ 
+ s Fields("Name","ValueField")="Goods->Name"
+ s Fields("Name","ValueAlias")="Name"
+ 
+ s Fields("EnglishName","ValueField")="Goods->EnglishName"
+ s Fields("EnglishName","ValueAlias")="EnglishName"
+ 
+ s Fields("Weight","ValueField")="Goods->Weight"
+ s Fields("Weight","ValueAlias")="Weight"
+ 
+ s Fields("Size1","ValueField")="Goods->Size1"
+ s Fields("Size1","ValueAlias")="Size1"
+ 
+ s Fields("codedetail","ValueField")="Goods->codedetail"
+ s Fields("codedetail","ValueAlias")="codedetail"
+ 
+ s Fields("Property5300","ValueField")="Goods->Property5300"
+ s Fields("Property5300","ValueAlias")="Property5300"
+ 
+ q ##class(Docs.Action2).SqlQuery(.Fields,"Goods.GoodsGroup",Where,"Goods->ID")
+GoodsListErr
+ $$$WriteError($ZE)
+ q "Ошибка формирования списка товаров"
+]]></Implementation>
+</Method>
+
+<Method name="GetPriceType">
+<Description><![CDATA[
+Получить цену указанного типа
+<br> GoodsId - ID товара (Goods.Goods)
+<br> TypeId - ID типа цены (Common.Dictionary6)]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>GoodsId=0,TypeId=0</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s storeprice = $NA(^Store.PriceI("main",GoodsId,TypeId))
+ q:'$D(@storeprice) 0
+ s Dat=$O(@storeprice@(""),-1)
+ q:Dat="" 0
+ s Tim=$O(@storeprice@(Dat,""),-1)
+ q:Tim="" 0
+ s ID=$O(@storeprice@(Dat,Tim,""),-1)
+ s Data=@storeprice@(Dat,Tim,ID)
+ q $LG(Data,2)
+]]></Implementation>
+</Method>
+
+<Method name="AddGoodToGroup">
+<Description>
+Добавить товар в указанную группу</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>GoodsId:%String="",GroupId:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="AddGoodToGroupErr"
+ s count=$I(^Art)
+ s ^Art(count,"GoodsId")=GoodsId
+ s ^Art(count,"GroupId")=GroupId
+ s GoodsGroupObj=##class(Goods.GoodsGroup).%New()
+ d GoodsGroupObj.GoodsSetObjectId(GoodsId)
+ d GoodsGroupObj.GroupsSetObjectId(GroupId)
+ s ok=GoodsGroupObj.%Save()
+ if '+ok $$$WriteObjError(ok) q "Извините, ошибка при попытке привязать товар к группе."
+ q 1
+AddGoodToGroupErr
+ $$$WriteError($ZE)
+ q "Извините, ошибка при попытке привязать товар к группе"
+]]></Implementation>
+</Method>
+
+<Method name="GetGoodsPriceCateg">
+<Description>
+Получить ценовые группы, которым принадлежит товар
+GoodsId - ID товара</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>GoodsId:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s $ZT="GetGoodsPriceCategErr"
+	s izdelie = ##class(Goods.Goods).GetPropertyValue(GoodsId,"izdelie")
+	q:izdelie="" ""
+	s GroupName = ##class(Common.Dictionary12).GetPropertyValue(izdelie,"Name")
+	s GroupRazdel = ##class(Common.Dictionary12).GetPropertyValue(izdelie,"Razdel")
+	q GroupName_"("_GroupRazdel_")"
+GetGoodsPriceCategErr
+ $$$WriteError($ZE)
+ q "Извините. Ошибка при поиске группы товара"
+]]></Implementation>
+</Method>
+
+<Method name="SetTovarFieldForGoods">
+<Description>
+Поставить указанное значение в поле Tovar для указанных товаров</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>IDs:%String="",Value:%String="null"</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT = "DetachZapchastFromModelErr"
+ s IDs = $$Replace(IDs,"#@#",",")
+ if $E(IDs,$L(IDs))="," s IDs = $E(IDs,1,$L(IDs)-1)
+ if Value '="null" s Value = "'"_Value_"'"
+ s SqlString = "update Goods.Goods set Tovar = "_Value_" where ID in ("_IDs_")"
+ s rs=##class(%ResultSet).%New()
+ s ok=rs.Prepare(SqlString)
+ if '+ ok $$$WriteObjError(ok) q "Извините. Ошибка при изменении списка запчастей."
+ s ok=rs.Execute()
+ if '+ ok $$$WriteObjError(ok) q "Извините. Ошибка при изменении списка запчастей"
+ q 1
+DetachZapchastFromModelErr
+ $$$WriteError($ZE)
+ q "Извините. Ошибка при изменении списка запчастей."
+Replace(String,SearchStr,Replacment)
+ s Return = ""
+ f i=1:1:$L(String,SearchStr) d
+ . s Return = Return_$P(String,SearchStr,i)_Replacment
+ if $E(Return,$L(Return)+1-$L(Replacment),$L(Return))=Replacment s Return = $E(Return,1,$L(Return)-$L(Replacment))
+ q Return
+]]></Implementation>
+</Method>
+</Class>
+</Export>

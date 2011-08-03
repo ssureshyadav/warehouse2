@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.brak">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62104,59448.685004</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body onload=""load('','')"">"
+	Write !,(##class(%CSP.Response).HyperEventBody())
+	Write !,!,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""window.location.href='goods.csp'"" TITLE=""""><center>Товары</center></span>"
+	Write "<br>",!
+	Write !,"<TABLE cellSpacing=0 width=""100%"" celpadding=""0"" >",!
+	Write "<TR>",!
+	Write "<td width=10%>"
+	Write "<img alt=""Обновить раздел"" src=""images/refresh.gif"" onclick=""window.location.reload()"">"
+	Write "</td>",!
+	Write "<TD width=80% align=center style=""BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid"" colspan=2><strong>Некондиционные товары</strong></TD>",!
+	Write "<td  width=10% align=right>"
+	Write "<!--<a href=""talk.csp"" ><img src=""images/BIGProp.gif"" width=""20"" height=25 border=0></a>-->"
+	Write "</td>",!
+	Write "</tr>",!
+	Write "</TABLE>",!
+	Write "Период c "
+	Write "<input type=text id=""dat1"" onclick=""fnCalendar(this)"" class=""datar"">"
+	Write " по "
+	Write "<input type=text id=""dat2"" value="""_($ZD($H,4))_""" onclick=""fnCalendar(this)"" class=""datar"">"
+	Write !,!,"<img src=""images/ok.gif"" onmouseover=""okbut.src='images/Onok.gif'"" onmouseout=""okbut.src='images/ok.gif'""  id=""okbut"" name=""okbut"" alt=""Показать документы"" onclick=""okbutFunc()"" style="""">"
+	Write "<br>",!
+	Write "<br>",!
+	Write "<span id=""namfld"">"
+	Write "</span>"
+	Write "&nbsp;"
+	Write "<input type=""text"" id=""fldval"" onkeyup=""gg();"">"
+	Write !,"<SKLADList:listview width=100% height=150 id=""currentdict"" zonColumnClick=""colclick()"" /><br>",!
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;width:150px"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""fnUtiliz()"" TITLE=""Создать документ 'Утилизация'""><center>Утилизировать</center></span>"
+	Write !,!,"<span class=ButtonDiv ID="""" style=""cursor:hand;width:150px"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""fnSendToRemont()"" TITLE=""Создать документ 'Передача брака в ремонт'""><center>Отправить в ремонт</center></span>"
+	Write !,!,"<span class=ButtonDiv ID="""" style=""cursor:hand;width:160px"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""fnSendToNormal()"" TITLE=""Создать инструкцию руководителя по отправке некондиционного товара""><center>Инструкция 'Некондиция'</center></span>"
+	Write "<br>",!
+	Write "</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"<script language=""jscript"" src=""common.js"">"
+	Write "</script>"
+	Write !,"<title>	Cache Server Page </title>",!
+	Write "<Script language=""Jscript"">"
+	Write !,"var ColCode="""";",!
+	Write "sessionid="""_(%session.SessionId)_""";",!
+	Write !,"function gg(){",!
+	Write "if(ColCode=="""")return false;",!
+	Write "var SearchProperty = ColCode;",!
+	Write "var SearchValue = fldval.value;",!
+	Write "if(SearchValue=="""")SearchProperty="""";",!
+	Write "load(SearchProperty,SearchValue);",!
+	Write "}",!
+	Write !,"function colclick(){",!
+	Write "	if(currentdict.ColType==""%Date""){alert(""Поля с датами не обрабатываются"");return false;}",!
+	Write "	namfld.innerText=currentdict.ColName;",!
+	Write "	ColCode=currentdict.ColCode;",!
+	Write "}",!
+	Write !,!,"function load(SearchProperty,SearchValue){",!
+	Write "currentdict.loadfrommethod(""Reports.ShowTables.ShowBrak"",SearchProperty,SearchValue,dat1.value+""@""+dat2.value);",!
+	Write "}",!
+	Write !,"function fnUtiliz(){",!
+	Write "var StoreBrakIDs=currentdict.ListViewGetItems(""selected"",1);",!
+	Write "var UtilizID="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Docs.Action2.CreateUtiliz:csp.brak"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',StoreBrakIDs)",!
+	Write "if(isNaN(UtilizID)){alert(UtilizID);return}",!
+	Write !,"WinResult=window.showModalDialog(""docutiliz.csp"",""Docs.Utiliz""+InnerSplitter+UtilizID+InnerSplitter+""Утилизация"",""center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;"")",!
+	Write "if(WinResult!=null)",!
+	Write "	{",!
+	Write "		if(window.confirm(""Обработать документ? (Нажмите 'отмена', если хотите внести изменения перед обработкой документа)"")){processdoc(UtilizID+""@Docs.Utiliz"")}",!
+	Write "		else{alert(""Документ успешно создан. Зайдите в раздел Документы, проверьте его и укажите системе обработать."")}",!
+	Write "		load("""","""")",!
+	Write "	}",!
+	Write "}",!
+	Write !,"function processdoc(doc)",!
+	Write "{",!
+	Write "	var ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Docs.Action.processdoc:csp.brak"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',doc)",!
+	Write "	if(isNaN(ok)){alert(ok)}",!
+	Write "	else{alert(""Документ успешно обработан"");}",!
+	Write "}",!
+	Write !,!,"function fnSendToRemont(){",!
+	Write "var StoreBrakIDs=currentdict.ListViewGetItems(""selected"",1);",!
+	Write "var BrakremontID="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Docs.Action2.CreateBrakremont:csp.brak"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',StoreBrakIDs)",!
+	Write "if(isNaN(BrakremontID)){alert(BrakremontID);return}",!
+	Write "if(window.confirm(""Документ успешно создан. Открыть форму документа?"")){",!
+	Write "	WinResult=window.showModalDialog(""document.csp"",""Docs.Brakremont""+InnerSplitter+BrakremontID+InnerSplitter+""Передача документа в ремонт"",""center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;"");",!
+	Write "	}",!
+	Write "if(window.confirm(""Обработать документ? (Нажмите 'отмена', если хотите внести изменения перед обработкой документа)""))",!
+	Write "	{",!
+	Write "	processdoc(BrakremontID+""@Docs.Brakremont"")",!
+	Write "	load("""","""")",!
+	Write "	}",!
+	Write "else{alert(""Документ успешно создан. Зайдите в раздел Документы, проверьте его и укажите системе обработать."")}",!
+	Write "}",!
+	Write !,"//переместить ",!
+	Write "function fnSendToNormal(){",!
+	Write "var StoreBrakIDs=currentdict.ListViewGetItems(""selected"",1);",!
+	Write "var InstrId="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Docs.Action2.MakeBrakInstruction:csp.brak"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',StoreBrakIDs)",!
+	Write "if(isNaN(InstrId)){alert(InstrId);}",!
+	Write "else{",!
+	Write "	window.showModalDialog(""createinstructIgrid.csp?source=""+InstrId,"""",""center:yes;status:no;dialogHeight:600px;dialogWidth:720px;resizable:yes;"")",!
+	Write "	}",!
+	Write "}",!
+	Write !,"//нажали зелёную галочку справа от дат",!
+	Write "function okbutFunc()",!
+	Write "{",!
+	Write "	var SearchValue = """";",!
+	Write "	var SearchProperty = """";",!
+	Write "	",!
+	Write "	if((ColCode!="""")&&(fldval.value!=""""))",!
+	Write "	{",!
+	Write "		var SearchProperty = ColCode;",!
+	Write "		var SearchValue = fldval.value;",!
+	Write "	}",!
+	Write "	load(SearchProperty,SearchValue);",!
+	Write "}",!
+	Write "</Script>"
+	Write !,(..HyperEventHead())
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html XMLNS:SKLADList>"
+	Write !,"<IMPORT NAMESPACE=""SKLADList"" IMPLEMENTATION=""htc/listview.htc"">",!
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+  s login=$G(%session.Data("user"))
+  i '+login s %response.ServerSideRedirect="norights.csp" 
+  q 1
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\Brak.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/Brak.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>61774,42308</Default>
+</Parameter>
+</Class>
+</Export>

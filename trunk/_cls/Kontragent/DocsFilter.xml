@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Kontragent.DocsFilter">
+<Description>
+Алгоритмы для фильтрации отчётов и заявок</Description>
+<IncludeCode>xmlmacros</IncludeCode>
+<Super>%RegisteredObject</Super>
+<TimeCreated>61233,56924.869915</TimeCreated>
+
+<Method name="CheckOtchetItem">
+<Description>
+проверка одной строки отчёта</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>item:Docs.OtchetItems=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ if '$ISOBJECT(item) q "Ошибка. Не указана строка отчёта для проверки."
+ s RemontDat=item.Dat
+ s StringType=item.StringType
+ s KontragentId=item.Doc.Kontr.%Id()
+ s GoodsId=$S($ISOBJECT(item.Goods):item.Goods.%Id(),1:"")
+ s RemTovarId=$S($ISOBJECT(item.RemTovar):item.RemTovar.%Id(),1:"")
+ s remcost=item.remcost
+ s Garant=item.garant
+ s Serial=item.serial
+ s Price=item.Price
+ s Quantity=item.Quantity
+ s RemType=item.RemType
+ if '$ISOBJECT(item.RemTovar)&&'$ISOBJECT(item.Goods) q "В строке не указан ни товар, ни деталь. Проверка невозможна."
+ s ErrText=$S($ISOBJECT(item.RemTovar):" Товар <span onclick=""wopen('GoodCard.csp?GoodId="_item.RemTovar.%Id()_"')"" >"_item.RemTovar.FullName_"</span>",1:" Деталь <span onclick=""wopen('GoodCard.csp?GoodId="_item.Goods.%Id()_"')"">"_item.Goods.FullName_"</span>")
+ s ItemHasError=0
+ if StringType=1 d
+ . //строка - отчёт за деталь
+ . //если цена детали в отчёте - 0, значит проверяем что отправляли и снимаем с клиента эту деталь
+ . //иначе, сверяем с нашей ценой
+ . if '+Price s ok=..DetailHasBeenSent(KontragentId, GoodsId, Quantity)
+ . else  s ok=..CheckDetailCostForKontr(GoodsId,Price,KontragentId)
+ . if '+ok s ErrText=ErrText_" "_ok,ItemHasError=1
+ if StringType=0 d
+ . //строка - отчёт за ремонт товара
+ . s ok=..CheckRemontCost(KontragentId,RemTovarId,RemType,remcost)
+ . if '+ok s ErrText=ErrText_" "_ok,ItemHasError=1
+ . s ok=..CheckGarantTalon(Garant,Serial,KontragentId,RemontDat,item.Doc)
+ . if '+ok s ErrText=ErrText_" "_ok,ItemHasError=1
+ if ItemHasError q ErrText
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="CheckOtchet">
+<Description>
+Проверка отчёта </Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>doc:Docs.Otchet=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="CheckOtchetErr"
+ if '$ISOBJECT(doc) q "Ошибка. Не указан отчёт. Проверка не может быть выполнена."
+ if '$ISOBJECT(doc.Kontr) q "В отчёте не указан контрагент. Проверка невозможна."
+ if '+doc.Items.Count() q "Отчёт не содержит строк. Проверка невозможна."
+ s innerkurs=##class(Goods.GoodsAction).kurs(.w,doc.Dat)	//найдём курс на дату отчёта
+ 
+ TSTART
+ s doc.Errors=""
+ s i="" f  s i=doc.Items.Next(i) q:i=""  d
+ . s item=doc.Items.GetAt(i)
+ . s ok=..CheckOtchetItem(item)
+ . if '+ok s doc.Errors=doc.Errors_ok_$C(13,10)_$C(13,10)
+ . s CurrentRowPrice = $J(item.Total,"",2)
+ . //если это деталь 
+ . if item.StringType=1 s CurrentRowPrice = item.CalculatedStringRubSumma()
+ . s ItogPrice=$G(ItogPrice)+CurrentRowPrice
+ . if +CurrentRowPrice'=+item.Total,'item.StringType s doc.Errors=doc.Errors_"Сумма в строке отчёта = "_item.Total_" посчитанная сумма = "_CurrentRowPrice_$C(13,10)_$C(13,10)
+ if $J(ItogPrice,"",2)'=$J(doc.Summa,"",2) s doc.Errors=doc.Errors_"Сумма отчёта ("_$J(doc.Summa,"",2)_") не равна сумме строк отчёта ("_$J(ItogPrice,"",2)_"). Курс валюты на момент расчёта суммы отчёта = "_innerkurs_$C(13,10)_$C(13,10)
+ 
+ if doc.Errors'="" d  q "При проверке отчёта были обнаружены ошибки."
+ . TROLLBACK 1
+ . //если в настройках отключили автоматическую проверку, то и статус "не принят" тоже не ставим
+ . d:$$$TunesVariableGlobal("AllowReportApprovement") doc.SetOthcetStatFailed()
+ . d doc.%Save()
+ TCOMMIT
+ q 1
+CheckOtchetErr
+ $$$WriteError($ZE)
+ q "Извините. Ошибки при проверке отчёта"
+]]></Implementation>
+</Method>
+
+<Method name="DetailHasBeenSent">
+<Description>
+Проверить отправлялась ли такая деталь контрагенту</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Kontragent:%String="",Detail:%String="",Quantity:%Numeric=0</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ if Kontragent="" q "Ошибка при проверке отправленной <span onclick=""wopen('GoodCard.csp?GoodId="_Detail_"')"">детали</span>. Не указан контрагент."	//если не указан контрагент
+ if Detail="" q "Ошибка при проверке отправленной детали. Не указан товар."		//если не указана деталь
+ if '$D(^t(Kontragent,Detail)) q "<span onclick=""wopen('GoodCard.csp?GoodId="_Detail_"')"">Деталь</span> не отправлялась контрагенту"			//если нет в списке деталей контрагента
+ if +$G(^t(Kontragent,Detail))<Quantity q "Такая <span onclick=""wopen('GoodCard.csp?GoodId="_Detail_"')"">деталь</span> отправлялась но в количестве "_+$G(^t(Kontragent,Detail))_" тогда как в отчёте указано "_Quantity		//если количество на балансе меньше чем отчитываются
+ //на этом этапе выяснили, что деталь мы поставляли и что поставляли не больше чем нам показывают
+ //если на балансе клиента числится больше чем он отчитывается, то уменьшаем баланс
+ //иначе, вообще эту ветку баланса убираем
+ if +$G(^t(Kontragent,Detail))>Quantity s ^t(Kontragent,Detail)=^t(Kontragent,Detail)-Quantity
+ else  k ^t(Kontragent,Detail)
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="CheckRemontCost">
+<Description>
+Проверить стоимость ремонта для контрагента </Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>KontragentId:%String="",RemTovarId:%String="",RemType:%String,remcost:%Numeric=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="CheckRemontCostErr"
+ q:KontragentId="" "Не указан контрагент, невозможно проверить цену ремонта."
+ 
+ //Property126 - категория цен контрагента (Common.Dictionary9)
+ &sql(select Code,Property126,Property127 into :Code,:Property126,:Property127 from Common.Kontragent where ID=:KontragentId)
+ if SQLCODE $$$WriteError("CheckRemontCost SQLCODE="_SQLCODE_" KontragentId="_KontragentId) q "системная ошибка при проверке стоимости ремонта. Проверка невозможна."
+ 
+ //Если тип ремонта не указан - значит простой ремонт изделия
+ //иначе это может быть акт или диагностика (бытовка или инструмент) - 
+ //цена за акт или диагностику определена в Common.Dictionary9 (связь с контрагентом через поле Property126 в Common.Kontragent)
+ s error=1
+ &sql(select izdelie,FullName into :izdelie,:RemTovarFullName from Goods.Goods where ID=:RemTovarId)
+ if SQLCODE=100 s izdelie=0
+ 
+ if izdelie="" q "Ошибка. Для товара "_RemTovarFullName_" не указана ценовая группа товара."
+ if '+RemType s OurRemontPrice=##class(Common.Common).GetRemontPrice(Code,izdelie)
+ else  d
+ . s ThisGroupTypeIs=##class(Common.Dictionary12).GetPropertyValue(izdelie, "Razdel")
+ . if ThisGroupTypeIs = 1 s KontragentCenaKateg = Property127
+ . else  s KontragentCenaKateg = Property126
+ . if KontragentCenaKateg="" s error="Для <span onclick=""wopen('kontragent.csp?KontrId="_KontragentId_"')"">контрагента</span> не определена категория цены. Проверка стоимости ремонта невозможна" q
+ . //если определён тип ремонта, значит это акт или диагностика
+ . //значит извлекаем из Common.Dictionary9, Категории цен для контрагентов
+ . s PropertyToExtract=$Select(RemType=1:"ActPriceInstrument",RemType=2:"DiagPriceInstrument",RemType=3:"ActPriceTechnic",RemType=4:"DiagPriceTechnic",1:"")
+ . if PropertyToExtract="" $$$WriteError("CheckRemontCost RemType="_RemType) s error="Указан неопознанный тип ремонта (тип "_RemType_"). Проверка стоимости ремонта невозможна." q
+ . s KontragentCenaKategObj=##class(Common.Dictionary9).%OpenId(KontragentCenaKateg)
+ . if '$ISOBJECT(KontragentCenaKategObj) s error="Невозможно получить информацию о категории цены "_KontragentCenaKateg_" для контрагентов. Проверка стоимости ремонта невозможна." q
+ . s OurRemontPrice=$ZOBJPROPERTY(KontragentCenaKategObj,PropertyToExtract)
+ . if OurRemontPrice="<remont>" s OurRemontPrice=##class(Common.Common).GetRemontPrice(Code,izdelie)
+ if '+error q error
+ if OurRemontPrice<remcost q "указанная в отчёте цена за ремонт "_remcost_" выше чем цена для данной категории цен контрагентов "_$J(+OurRemontPrice,"",2)
+ //if OurRemontPrice<remcost q "Указанная в отчёте цена за ремонт "_remcost_" выше чем цена для данной категории цен контрагентов "_"OurRemontPrice"
+ q 1
+CheckRemontCostErr
+ $$$WriteError($ZE)
+ q "Извините. Ошибка при проверке стоимости ремонта."
+]]></Implementation>
+</Method>
+
+<Method name="CheckGarantTalon">
+<Description>
+Проверить гарантийный талон в системе</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>GarantNumber:%String="",Serial:%String="",KontragentId:%String="",RemontDat:%Date="",doc:Docs.Otchet=""</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	if $TR(GarantNumber," ","")="б/н" q 1
+ s garantterm=$$$TunesVariableGlobal("garantterm")
+ 
+ s GarantId = ##class(Common.Common).GetGarantIdByName(GarantNumber)
+ s GarantObj=##class(Common.Dictionary2).%OpenId(GarantId)
+ if '$ISOBJECT(GarantObj) d
+ . s GarantObj=##class(Common.Dictionary2).%New()
+ . s GarantObj.Name=GarantNumber
+ . s GarantObj.serial=Serial
+ . d GarantObj.Property5330SetObjectId(KontragentId)
+ //проверить актуальность
+ if GarantObj.Property9194=2 q "Гарантийный талон <span onclick=""wopen('garant.csp?GarantName="_GarantNumber_"')"">"_GarantNumber_"</span> недействительный."
+ //Проверить соответствие гарантийного контрагенту
+ if $ISOBJECT(GarantObj.Property5330),GarantObj.Property5330.%Id()'=KontragentId q "Для гарантийного талона <span onclick=""wopen('garant.csp?GarantName="_GarantNumber_"')"">"_GarantNumber_"</span> установлен контрагент <span onclick=""wopen('kontragent.csp?KontrId="_GarantObj.Property5330.%Id()_"')"">"_GarantObj.Property5330.Name_"</span>"
+ //проверить соответствие серийному номеру
+ if ($$$TunesVariableGlobal("demandserial"))&&(Serial="") q "Не указан серийный номер."
+ if Serial'="",GarantObj.serial'=Serial q "Для гарантийного талона <span onclick=""wopen('garant.csp?GarantName="_GarantNumber_"')"">"_GarantNumber_"</span> уже записан товар "_GarantObj.tovar_" с серийным номером "_GarantObj.serial_" хотя в отчёте указан "_Serial
+ //проверить по дате последнего ремонта
+ if $ISOBJECT(GarantObj.remont3otch) q "Для гарантийного талона <span onclick=""wopen('garant.csp?GarantName="_GarantNumber_"')"">"_GarantNumber_"</span> уже указаны три ремонта. Это значит что талон недействителен."
+ s LastRemontDat=0
+ if $ISOBJECT(GarantObj.remont1otch) s LastRemontDat=GarantObj.remont1otch.GetRemontDat()
+ if $ISOBJECT(GarantObj.remont2otch) s LastRemontDat=GarantObj.remont2otch.GetRemontDat()
+ if +LastRemontDat,RemontDat-LastRemontDat<garantterm q "Для гарантийного номера <span onclick=""wopen('garant.csp?GarantName="_GarantNumber_"')"">"_GarantNumber_"</span> установлена последняя дата ремонта "_$ZD(LastRemontDat,4)_" тогда как дата текущего ремонта "_$ZD(RemontDat,4)_" промежуток между ремонтами меньше положенного "_garantterm_" дн."
+ //запишем текущий отчёт в первую попавшуюся дырку гарантийного талона
+ if '$ISOBJECT(GarantObj.remont1otch) s GarantObj.remont1otch=doc q 1
+ if '$ISOBJECT(GarantObj.remont2otch) s GarantObj.remont2otch=doc q 1
+ if '$ISOBJECT(GarantObj.remont3otch) s GarantObj.remont3otch=doc q 1
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="CheckDetailCostForKontr">
+<Description>
+Проверить стоимость детали для данного контрагента</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>GoodsId:%String="",remcost,KontragentId</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ if +$G(^t(KontragentId,GoodsId)) q "Деталь указана как платная, однако такие детали числятся на балансе контрагента: "_^t(KontragentId,GoodsId)_" шт."
+ &sql(select Price into :Price from Goods.Goods where ID=:GoodsId)
+ if SQLCODE=100 q "Невозможно найти товар "_GoodsId_" проверка цены невозможна."
+ if SQLCODE<0 $$$WriteError("CheckRemontCost SQLCODE="_SQLCODE) q "Системная ошибка при проверке цены товара"
+ if $J(Price,"",2)<$J(remcost,"",2) q "Цена в отчёте "_remcost_", тогда как в базе установлена цена "_Price
+ q 1
+]]></Implementation>
+</Method>
+</Class>
+</Export>

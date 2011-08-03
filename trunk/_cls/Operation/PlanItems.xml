@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Operation.PlanItems">
+<Description>
+Строки плана руководителя</Description>
+<Super>Docs.DocItems</Super>
+<TimeCreated>60762,39022.264863</TimeCreated>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+</Storage>
+</Class>
+</Export>

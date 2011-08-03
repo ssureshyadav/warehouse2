@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.status">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62301,49211.401271</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body topmargin=0 bottommargin=0 leftmargin=0 rightmargin=0 bgcolor=""ButtonFace"">"
+	Write !,"<object classid=clsid:8E3867A3-8586-11D1-B16A-00C0F0283628 id=""stbar"" style=""width:100%;height:16pt;position:relative;top:0px;left:0px"">",!
+	Write "<PARAM NAME=""Align"" VALUE=""2"">",!
+	Write "<PARAM NAME=""Style"" VALUE=""0"">",!
+	Write "</object>",!
+	Write "</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"<SCRIPT Language=""VBScript"">"
+	Write !,"Sub Window_onLoad()",!
+	Write "//stbar.Font.Name=""Arial""",!
+	Write "//stbar.Font.Size=""10""",!
+	Write "Set s=stbar.Panels.Add()",!
+	Write "Set s=stbar.Panels.Add()",!
+	Write !,"stbar.Panels.Item(1).AutoSize=""2""",!
+	Write "stbar.Panels.Item(1).Text=""Пользователь: "_($G(%session.Data("userName")))_"""",!
+	Write "stbar.Panels.Item(1).ToolTipText =""Текущий пользователь""",!
+	Write !,"stbar.Panels.Item(2).AutoSize=""2""",!
+	Write "stbar.Panels.Item(2).Text="""_(%session.Data("depotName"))_"""",!
+	Write "stbar.Panels.Item(2).ToolTipText =""Текущий склад""",!
+	Write !,"stbar.Panels.Item(3).ToolTipText =""Системные сообщения""",!
+	Write "stbar.Panels.Item(3).AutoSize=""2""",!
+	Write !,"End Sub",!
+	Write !,"Sub WriteStatus(Txt)",!
+	Write "stbar.Panels.Item(3).Text=Txt",!
+	Write "End Sub",!
+	Write "</SCRIPT>"
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\status.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/status.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>60955,27670</Default>
+</Parameter>
+</Class>
+</Export>

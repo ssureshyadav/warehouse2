@@ -1,0 +1,2125 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+if %request.Get("word")="on"
+{
+ set %response.ContentType = "application/msword"
+ do %response.SetHeader("Content-Disposition","attachment;word.doc")
+ set %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+}
+ q 1
+</script>
+<script language="cache" runat="server">
+ s id=%request.Get("id")
+ s obj=##class(Docs.PrihKassOrder).%OpenId(id)
+ d:$ISOBJECT(obj)
+ . s mn(1)="января",mn(2)="февраля",mn(3)="марта",mn(4)="апреля",mn(5)="мая",mn(6)="июня",mn(7)="июля",mn(8)="августа",mn(9)="сентября",mn(10)="октября",mn(11)="ноября",mn(12)="декабря"
+ . s:$ISOBJECT(obj.User1) usr=obj.User1.Name
+ . s numb=obj.Name
+ . s day=$P($ZD(obj.Dat,4),"/",1)
+ . s month=$G(mn(+$P($ZD(obj.Dat,4),"/",2)))
+ . s year=$P($ZD(obj.Dat,4),"/",3)
+ . s dat=$ZD(obj.Dat,4)
+ . s poluh=obj.Poluh
+ . s plat=obj.Plat
+ . i $ISOBJECT(poluh) d
+ . . s poluhName=poluh.Name
+ . i $ISOBJECT(Kontr) d
+ . . s Kontr=Kontr.Name
+ . s reason=obj.Reason
+ . d:$ISOBJECT(obj.bank)
+ . . //s okpo=
+ //s ^mtempArt=platName
+</script>
+<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:x="urn:schemas-microsoft-com:office:excel"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<link href="prihorder.css" type=text/css rel=stylesheet>
+<link href="screen/prihorder.css" type=text/css rel=stylesheet>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1251">
+
+</head>
+
+<body>
+
+<div id="Прихкассор_3614" align=center x:publishsource="Excel">
+
+<table x:str border=0 cellpadding=0 cellspacing=0 width=967 class=xl233614
+ style='border-collapse:collapse;table-layout:fixed;width:695pt'>
+ <col class=xl233614 width=7 span=87 style='mso-width-source:userset;
+ mso-width-alt:224;width:5pt'>
+ <col class=xl233614 width=19 style='mso-width-source:userset;mso-width-alt:
+ 608;width:14pt'>
+ <col class=xl233614 width=8 style='mso-width-source:userset;mso-width-alt:
+ 256;width:6pt'>
+ <col class=xl233614 width=3 style='mso-width-source:userset;mso-width-alt:
+ 96;width:2pt'>
+ <col class=xl233614 width=7 span=32 style='mso-width-source:userset;
+ mso-width-alt:224;width:5pt'>
+ <col class=xl233614 width=5 style='mso-width-source:userset;mso-width-alt:
+ 160;width:4pt'>
+ <col class=xl233614 width=7 span=4 style='mso-width-source:userset;mso-width-alt:
+ 224;width:5pt'>
+ <col class=xl233614 width=5 style='mso-width-source:userset;mso-width-alt:
+ 160;width:4pt'>
+ <col class=xl233614 width=9 span=2 style='mso-width-source:userset;mso-width-alt:
+ 288;width:7pt'>
+ <col class=xl233614 width=7 style='mso-width-source:userset;mso-width-alt:
+ 224;width:5pt'>
+ <col class=xl233614 width=5 style='mso-width-source:userset;mso-width-alt:
+ 160;width:4pt'>
+ <col class=xl233614 width=9 style='mso-width-source:userset;mso-width-alt:
+ 288;width:7pt'>
+ <col class=xl233614 width=7 style='mso-width-source:userset;mso-width-alt:
+ 224;width:5pt'>
+ <col class=xl233614 width=12 style='mso-width-source:userset;mso-width-alt:
+ 384;width:9pt'>
+ <col class=xl233614 width=8 style='mso-width-source:userset;mso-width-alt:
+ 256;width:6pt'>
+ <tr height=14 style='mso-height-source:userset;height:11.1pt'>
+  <td height=14 class=xl233614 width=7 style='height:11.1pt;width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl283614 colspan=25 width=175 style='width:125pt'>Унифицированная
+  форма № КО-1</td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl253614 width=19 style='width:14pt'>&nbsp;</td>
+  <td class=xl233614 width=8 style='width:6pt'></td>
+  <td class=xl243614 width=3 style='width:2pt'>&nbsp;</td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=5 style='width:4pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=5 style='width:4pt'></td>
+  <td class=xl233614 width=9 style='width:7pt'></td>
+  <td class=xl233614 width=9 style='width:7pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=5 style='width:4pt'></td>
+  <td class=xl233614 width=9 style='width:7pt'></td>
+  <td class=xl233614 width=7 style='width:5pt'></td>
+  <td class=xl233614 width=12 style='width:9pt'></td>
+  <td class=xl233614 width=8 style='width:6pt'></td>
+ </tr>
+ <tr height=14 style='mso-height-source:userset;height:11.1pt'>
+  <td height=14 class=xl233614 style='height:11.1pt'></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl283614 colspan=30>Утверждена постановлением Госкомстата</td>
+  <td class=xl253614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+ </tr>
+ <tr height=17 style='mso-height-source:userset;height:12.95pt'>
+  <td height=17 class=xl233614 style='height:12.95pt'></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl443614 colspan=20>России от 18.08.98 г. № 88</td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl253614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td colspan=45 class=xl693614>&nbsp;</td>
+ </tr>
+ <tr height=15 style='mso-height-source:userset;height:11.25pt'>
+  <td height=15 class=xl233614 style='height:11.25pt'></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl353614 style='border-left:none'>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td colspan=45 class=xl563614>(организация)</td>
+ </tr>
+ <tr height=25 style='mso-height-source:userset;height:18.75pt'>
+  <td height=25 class=xl233614 style='height:18.75pt'></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td colspan=16 class=xl943614>Код</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl353614 style='border-left:none'>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+ </tr>
+ <tr height=25 style='mso-height-source:userset;height:18.75pt'>
+  <td height=25 class=xl233614 style='height:18.75pt'></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl333614 colspan=15>Форма по ОКУД</td>
+  <td class=xl233614></td>
+  <td colspan=16 class=xl913614 style='border-right:1.0pt solid black'>0310001</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl353614 style='border-left:none'>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td colspan=45 class=xl1023614>КВИТАНЦИЯ</td>
+ </tr>
+ <tr height=25 style='mso-height-source:userset;height:18.75pt'>
+  <td colspan=58 height=25 class=xl523614 style='height:18.75pt'>#($G(poluhName))#</td>
+  <td class=xl233614></td>
+  <td class=xl333614 colspan=9>по ОКПО</td>
+  <td class=xl233614></td>
+  <td colspan=16 class=xl883614 style='border-right:1.0pt solid black'>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl253614>&nbsp;</td>
+  <td class=xl263614 style='border-left:none'>&nbsp;</td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+ </tr>
+ <tr height=11 style='mso-height-source:userset;height:8.45pt'>
+  <td height=11 class=xl323614 style='height:8.45pt'></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl433614 colspan=9>(организация)</td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl293614></td>
+  <td class=xl233614></td>
+  <td colspan=16 rowspan=2 class=xl953614 style='border-right:1.0pt solid black;
+  border-bottom:1.0pt solid black'>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl253614>&nbsp;</td>
+  <td class=xl263614 style='border-left:none'>&nbsp;</td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+ </tr>
+ <tr height=17 style='mso-height-source:userset;height:12.95pt'>
+  <td colspan=69 height=17 class=xl533614 style='border-right:1.0pt solid black;
+  height:12.95pt'>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl253614>&nbsp;</td>
+  <td class=xl263614 style='border-left:none'>&nbsp;</td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl323614 colspan=32>к приходному кассовому ордеру № </td>
+  <td colspan=13 class=xl693614>&nbsp;#($g(numb))#</td>
+ </tr>
+ <tr height=16 style='mso-height-source:userset;height:12.0pt'>
+  <td height=16 class=xl233614 style='height:12.0pt'></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl303614 colspan=18>(структурное подразделение)</td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td rowspan=19 class=xl1033614>Л<br>и<br>н<br>и<br>я<br><br><br>о<br>т<br>р<br>е<br>з<br>а</td>
+  <td class=xl263614 style='border-left:none'>&nbsp;</td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl323614 colspan=3 >от </td>
+  <td class=xl333614>«</td>
+  <td colspan=3 class=xl693614>#($G(day))#</td>
+  <td class=xl403614 colspan=2>»</td>
+  <td colspan=13 class=xl693614>#($G(month))#</td>
+  <td class=xl393614></td>
+  <td colspan=7 class=xl693614>#($G(year))#</td>
+  <td class=xl393614 colspan=3>г.</td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+ </tr>
+ <tr height=39 style='mso-height-source:userset;height:29.25pt'>
+  <td height=39 class=xl233614 style='height:29.25pt'></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td colspan=13 class=xl873614 width=91 style='width:65pt'>Номер документа</td>
+  <td colspan=13 class=xl873614 width=91 style='border-left:none;width:65pt'>Дата
+  составления</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl263614 style='border-left:none'>&nbsp;</td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl323614 colspan=10>Принято от</td>
+  <td class=xl323614></td>
+  <td colspan=34 class=xl503614>#($G(Kontr))#</td>
+ </tr>
+ <tr height=24 style='mso-height-source:userset;height:18.0pt'>
+  <td height=24 class=xl233614 style='height:18.0pt'></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl383614 colspan=34>ПРИХОДНЫЙ КАССОВЫЙ ОРДЕР</td>
+  <td class=xl233614></td>
+  <td colspan=13 class=xl843614>#($G(numb))#</td>
+  <td colspan=13 class=xl853614 style='border-right:1.0pt solid black;border-left:none'>#($G(dat))#</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl263614 style='border-left:none'>&nbsp;</td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td colspan=45 class=xl503614>&nbsp;</td>
+ </tr>
+ <tr height=20 style='mso-height-source:userset;height:15.0pt'>
+  <td height=20 class=xl233614 style='height:15.0pt'></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl263614 style='border-left:none'>&nbsp;</td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl393614 colspan=11>Основание:</td>
+  <td colspan=34 class=xl503614>#($G(reason))#</td>
+ </tr>
+ <tr height=20 style='mso-height-source:userset;height:15.0pt'>
+  <td colspan=7 rowspan=4 height=80 class=xl463614 style='height:60.0pt'>Дебет</td>
+  <td colspan=41 class=xl573614 style='border-left:none'>Кредит</td>
+  <td colspan=18 rowspan=4 class=xl703614 width=126 style='width:90pt'>Сумма,
+  руб. коп.</td>
+  <td colspan=13 rowspan=4 class=xl703614 width=91 style='width:65pt'>Код
+  целевого назначения</td>
+  <td colspan=6 rowspan=4 class=xl593614 width=42 style='border-right:.5pt solid black;
+  border-bottom:.5pt solid black;width:30pt'>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl263614 style='border-left:none'>&nbsp;</td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td colspan=45 class=xl503614>&nbsp;</td>
+ </tr>
+ <tr height=20 style='mso-height-source:userset;height:15.0pt'>
+  <td colspan=5 rowspan=3 height=60 class=xl593614 width=35 style='border-right:
+  .5pt solid black;border-bottom:.5pt solid black;height:45.0pt;width:25pt'>&nbsp;</td>
+  <td colspan=13 rowspan=3 class=xl483614 width=91 style='width:65pt'>код
+  структур- ного подраз- деления</td>
+  <td colspan=12 rowspan=3 class=xl483614 width=84 style='width:60pt'>корреспон-
+  дирующий счет, субсчет</td>
+  <td colspan=11 rowspan=3 class=xl483614 width=77 style='width:55pt'>код
+  аналити- ческого учета</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl263614 style='border-left:none'>&nbsp;</td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td colspan=45 class=xl513614>&nbsp;</td>
+ </tr>
+ <tr height=20 style='mso-height-source:userset;height:15.0pt'>
+  <td height=20 class=xl233614 style='height:15.0pt'></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl263614 style='border-left:none'>&nbsp;</td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td colspan=45 class=xl513614>&nbsp;</td>
+ </tr>
+ <tr height=20 style='mso-height-source:userset;height:15.0pt'>
+  <td height=20 class=xl233614 style='height:15.0pt'></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl263614 style='border-left:none'>&nbsp;</td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+ </tr>
+ <tr height=16 style='mso-height-source:userset;height:12.0pt'>
+  <td colspan=7 rowspan=2 height=37 class=xl463614 style='height:27.75pt'>&nbsp;</td>
+  <td colspan=5 rowspan=2 class=xl463614>&nbsp;</td>
+  <td colspan=13 rowspan=2 class=xl453614 width=91 style='width:65pt'>&nbsp;</td>
+  <td colspan=12 rowspan=2 class=xl483614 width=84 style='width:60pt'>&nbsp;</td>
+  <td colspan=11 rowspan=2 class=xl453614 width=77 style='width:55pt'>&nbsp;</td>
+  <td colspan=18 rowspan=2 class=xl723614 style='border-right:.5pt solid black;
+  border-bottom:.5pt solid black'>&nbsp;</td>
+  <td colspan=13 rowspan=2 class=xl783614 style='border-right:.5pt solid black;
+  border-bottom:.5pt solid black'>&nbsp;</td>
+  <td colspan=6 rowspan=2 class=xl463614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl263614 style='border-left:none'>&nbsp;</td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+ </tr>
+ <tr height=21 style='mso-height-source:userset;height:15.75pt'>
+  <td height=21 class=xl233614 style='height:15.75pt'></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl263614 style='border-left:none'>&nbsp;</td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl323614 colspan=7>Сумма</td>
+  <td colspan=24 class=xl683614>&nbsp;</td>
+  <td class=xl323614></td>
+  <td class=xl323614 colspan=5>руб.</td>
+  <td colspan=3 class=xl693614>&nbsp;</td>
+  <td class=xl323614></td>
+  <td class=xl323614 colspan=4>коп.</td>
+ </tr>
+ <tr height=20 style='mso-height-source:userset;height:15.0pt'>
+  <td height=20 class=xl233614 style='height:15.0pt'></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl263614 style='border-left:none'>&nbsp;</td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td colspan=25 class=xl553614>(цифрами)</td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+ </tr>
+ <tr height=20 style='mso-height-source:userset;height:15.0pt'>
+  <td height=20 class=xl323614 colspan=10 style='height:15.0pt'>Принято от</td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td colspan=73 class=xl473614>#($G(Kontr))#</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl263614 style='border-left:none'>&nbsp;</td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td colspan=45 class=xl473614>&nbsp;</td>
+ </tr>
+ <tr height=12 style='mso-height-source:userset;height:9.0pt'>
+  <td height=12 class=xl223614 style='height:9.0pt'></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl263614 style='border-left:none'>&nbsp;</td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td colspan=45 class=xl1013614>(прописью)</td>
+ </tr>
+ <tr height=17 style='mso-height-source:userset;height:12.75pt'>
+  <td height=17 class=xl323614 colspan=11 style='height:12.75pt'>Основание: #($G(reason))#</td>
+
+  <td class=xl233614></td>
+  <td colspan=73 class=xl473614>#($G(reason))#</td>
+  
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl263614 style='border-left:none'>&nbsp;</td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td colspan=45 class=xl473614>&nbsp;</td>
+ </tr>
+ <tr height=27 style='mso-height-source:userset;height:20.25pt'>
+  <td colspan=85 height=27 class=xl503614 style='height:20.25pt'>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl263614 style='border-left:none'>&nbsp;</td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td colspan=31 class=xl513614>&nbsp;</td>
+  <td class=xl373614 style='border-top:none'>&nbsp;</td>
+  <td class=xl323614 colspan=4>руб.</td>
+  <td class=xl373614 style='border-top:none'>&nbsp;</td>
+  <td colspan=3 class=xl1043614>&nbsp;</td>
+  <td class=xl373614 style='border-top:none'>&nbsp;</td>
+  <td class=xl323614 colspan=4>коп.</td>
+ </tr>
+ <tr height=27 style='mso-height-source:userset;height:20.25pt'>
+  <td height=27 class=xl323614 colspan=7 style='height:20.25pt'>Сумма</td>
+  <td colspan=78 class=xl513614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl263614 style='border-left:none'>&nbsp;</td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl323614 colspan=11>В том числе</td>
+  <td colspan=34 class=xl503614>&nbsp;</td>
+ </tr>
+ <tr height=12 style='mso-height-source:userset;height:9.0pt'>
+  <td height=12 class=xl223614 style='height:9.0pt'></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td colspan=78 class=xl1013614>(прописью)</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+ </tr>
+ <tr height=16 style='mso-height-source:userset;height:12.0pt'>
+  <td colspan=61 height=16 class=xl503614 style='height:12.0pt'>&nbsp;</td>
+  <td class=xl323614></td>
+  <td class=xl323614 colspan=5>руб.</td>
+  <td colspan=11 class=xl693614>&nbsp;</td>
+  <td class=xl323614></td>
+  <td class=xl323614 colspan=5>коп.</td>
+  <td class=xl323614></td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl333614>«</td>
+  <td colspan=3 class=xl693614>&nbsp;</td>
+  <td class=xl403614 colspan=2>»</td>
+  <td colspan=13 class=xl693614>&nbsp;</td>
+  <td class=xl393614></td>
+  <td colspan=7 class=xl693614>&nbsp;</td>
+  <td class=xl393614 colspan=3><span style='mso-spacerun:yes'> </span>г.</td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+ </tr>
+ <tr height=26 style='mso-height-source:userset;height:19.5pt'>
+  <td height=26 class=xl323614 colspan=11 style='height:19.5pt'>В том числе</td>
+  <td class=xl233614></td>
+  <td colspan=73 class=xl503614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl233614></td>
+  <td class=xl343614></td>
+  <td class=xl343614></td>
+  <td class=xl343614></td>
+  <td class=xl343614></td>
+  <td class=xl343614></td>
+  <td class=xl343614></td>
+  <td class=xl343614></td>
+  <td class=xl343614></td>
+  <td class=xl343614></td>
+  <td class=xl343614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+ </tr>
+ <tr height=27 style='mso-height-source:userset;height:20.25pt'>
+  <td height=27 class=xl323614 colspan=12 style='height:20.25pt'>Приложение</td>
+  <td colspan=73 class=xl513614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl353614 style='border-left:none'>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl363614 colspan=14>М.П. (штампа)</td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+ </tr>
+ <tr height=9 style='mso-height-source:userset;height:6.75pt'>
+  <td height=9 class=xl223614 style='height:6.75pt'></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl353614 style='border-left:none'>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+ </tr>
+ <tr height=20 style='mso-height-source:userset;height:15.0pt'>
+  <td height=20 class=xl323614 colspan=17 style='height:15.0pt'>Главный
+  бухгалтер</td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td colspan=18 class=xl693614>&nbsp;</td>
+  <td class=xl413614></td>
+  <td class=xl413614></td>
+  <td class=xl413614></td>
+  <td colspan=27 class=xl693614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl353614 style='border-left:none'>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl323614 colspan=17>Главный бухгалтер</td>
+  <td colspan=12 class=xl693614>&nbsp;</td>
+  <td class=xl323614></td>
+  <td colspan=15 class=xl693614>&nbsp;</td>
+ </tr>
+ <tr height=12 style='mso-height-source:userset;height:9.0pt'>
+  <td height=12 class=xl223614 style='height:9.0pt'></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td colspan=18 class=xl1013614>(подпись)</td>
+  <td class=xl313614></td>
+  <td class=xl313614></td>
+  <td class=xl313614></td>
+  <td colspan=27 class=xl1013614>(расшифровка подписи)</td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl353614 style='border-left:none'>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl223614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td colspan=12 class=xl1013614>(подпись)</td>
+  <td class=xl323614></td>
+  <td colspan=15 class=xl1013614>(расшифровка подписи)</td>
+ </tr>
+ <tr height=18 style='height:13.5pt'>
+  <td height=18 class=xl323614 colspan=15 style='height:13.5pt'>Получил кассир</td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td colspan=18 class=xl693614>&nbsp;</td>
+  <td class=xl413614></td>
+  <td class=xl413614></td>
+  <td class=xl413614></td>
+  <td colspan=27 class=xl693614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl353614 style='border-left:none'>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl323614 colspan=7>Кассир</td>
+  <td class=xl323614></td>
+  <td colspan=12 class=xl693614>&nbsp;</td>
+  <td class=xl323614></td>
+  <td colspan=20 class=xl693614>&nbsp;</td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+ </tr>
+ <tr height=12 style='mso-height-source:userset;height:9.0pt'>
+  <td height=12 class=xl223614 style='height:9.0pt'></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td colspan=18 class=xl1013614>(подпись)</td>
+  <td class=xl313614></td>
+  <td class=xl313614></td>
+  <td class=xl313614></td>
+  <td colspan=27 class=xl1013614>(расшифровка подписи)</td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl353614 style='border-left:none'>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl243614>&nbsp;</td>
+  <td class=xl233614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td colspan=12 class=xl1013614>(подпись)</td>
+  <td class=xl323614></td>
+  <td colspan=20 class=xl1013614>(расшифровка подписи)</td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+  <td class=xl323614></td>
+ </tr>
+</table>
+
+</div>
+
+</body>
+
+</html>

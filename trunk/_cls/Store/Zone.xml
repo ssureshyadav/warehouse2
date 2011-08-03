@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Store.Zone">
+<Description>
+Зоны складов</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60319,63086.724572</TimeCreated>
+
+<Property name="Depot">
+<Description>
+Склад которому принадлежит зона</Description>
+<Type>Depot</Type>
+<Parameter name="CAPTION" value="Склад"/>
+</Property>
+
+<Property name="Name">
+<Description>
+Наименование зоны</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Наименование зоны"/>
+</Property>
+
+<Property name="Comment">
+<Description>
+Справочная информация</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Справочная информация"/>
+</Property>
+
+<Property name="Type">
+<Description>
+Тип</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Тип"/>
+</Property>
+
+<Index name="DepotIndex">
+<Properties>Depot</Properties>
+</Index>
+
+<Index name="TypeIndex">
+<Properties>Type</Properties>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Store.ZoneD</DataLocation>
+<DefaultData>ZoneDefaultData</DefaultData>
+<IdLocation>^Store.ZoneD</IdLocation>
+<IndexLocation>^Store.ZoneI</IndexLocation>
+<StreamLocation>^Store.ZoneS</StreamLocation>
+<Data name="ZoneDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Depot</Value>
+</Value>
+<Value name="3">
+<Value>Name</Value>
+</Value>
+<Value name="4">
+<Value>Comment</Value>
+</Value>
+<Value name="5">
+<Value>Type</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

@@ -1,0 +1,169 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ 
+ i %session.NewSession d
+ . s %session.EndSession=1
+ . s sessionid=%request.Get("sessionid",1)
+ . s %session=%session.GetSession(sessionid)
+ e  s sessionid=%session.SessionId
+ 
+ s login=$G(%session.Data("user"),0)
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ s Access9func=##class(Common.Rights).getrights($G(login,0),9)
+ if 'Access9func s Func9Refuse="return;"
+ 
+Quit 1
+</script>
+<script language="cache" runat="server">
+ s GoodId=%request.Get("GoodId")
+</script>
+<html>
+<head>
+
+<title>Товар</title>
+
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="jscript" src="common.js"></script>
+<script language="jscript">
+var GoodId="#(GoodId)#";
+var GroupId="#(%request.Get("GroupId"))#";
+if((GoodId=="")&&(GroupId==""))
+	{
+	alert("Создаётся новый товар, однако не указана товарная группа. Создание товара невозможно.");
+	window.close()
+	}
+var sessionid="#($G(sessionid))#";
+
+function ChooseTovar(Obj){
+WinResult=window.showModalDialog("selectgoods2.csp","","center:yes;status:no;dialogHeight:700px;dialogWidth:800px;resizable:yes;")
+if(WinResult==null)return
+var newArr=WinResult.split(InnerSplitter)
+Obj.innerText=newArr[8];
+Obj.Tag=newArr[0];
+}
+
+function startFun(){
+#($G(Func9Refuse))#
+var xmlDoc = new ActiveXObject("Msxml2.DOMDocument.3.0");
+var RootElement = xmlDoc.createElement("RootElement");
+xmlDoc.documentElement=RootElement;
+var Properties= new Array("Name","Property5300","abbr","Property3609","EnglishName","codedetail","Size1","Weight","Property9469","Comment","Composition","Description","MaterialEng","CodeOKVED");
+for(var i=0;i<Properties.length;i++){
+	var elementValue=document.getElementById(Properties[i]).value;
+	InsertXmlHeader(xmlDoc,Properties[i],elementValue,"%String");
+}
+InsertXmlHeader(xmlDoc,"Tovar",Tovar.Tag,"Goods.Goods")
+var DocID=SendXml(GoodId,"Goods.Goods",xmlDoc,sessionid,"Docs.Action.SaveSingleGood");
+if(isNaN(DocID)){alert(DocID)}
+else{
+	if(GoodId=="")
+		{
+		#server(Goods.GoodsAction.AddGoodToGroup(DocID,GroupId))#
+		}
+	returnValue=1;
+	window.close();
+	}
+}
+</script>
+<style>
+.LeftTop{border-left : 1 solid black;border-top : 1 solid black;}
+.RightBottom{font-family:Arial;font-size:14px;border-right : 1 solid black;border-bottom : 1 solid black;}
+SELECT{width:170px}
+.Kontragent{width:100%;cursor:hand;}
+</style>
+
+</head>
+
+<body onkeypress="ManageWindow();">
+<Table width=100% height=100%><tr valign=top><td>
+<table width=100% class="LeftTop" cellspacing=0>
+<script language="cache" runat="server">
+ d:GoodId
+ . s GoodObj=##class(Goods.Goods).%OpenId(GoodId)
+ . q:'$ISOBJECT(GoodObj)
+ . f i="Name","Property5300","abbr","Property3609","EnglishName","codedetail","Size1","Weight","Property9469","Comment","ChangeDate","ChangeTime","Composition","Description","MaterialEng","CodeOKVED" d
+ . . s @i=$ZOBJPROPERTY(GoodObj,i)
+ . d:$ISOBJECT(GoodObj.Tovar)
+ . . s Tovar=GoodObj.Tovar.%Id()
+ . . s TovarName=GoodObj.Tovar.FullName
+ . if $ISOBJECT(GoodObj.ChangeUser) s ChangeUser=GoodObj.ChangeUser.Name
+ . if ChangeDate s ChangeDate=$ZD(ChangeDate,4)
+ . if ChangeTime s ChangeTime=$ZT(ChangeTime)
+&html<
+<tr>
+	<td class=RightBottom>Наименование</td>
+	<td class=RightBottom><input type=text id=Name MAXLENGTH=200 value="#($G(Name))#"></td>
+	<td class=RightBottom>Номер по схеме</td>
+	<td class=RightBottom><input type=text id=Property5300 MAXLENGTH=50 value="#($G(Property5300))#"></td>
+	
+</tr>
+
+<tr>
+	<td class=RightBottom>Аббревиатура модели</td>
+	<td class=RightBottom><input type=text id=abbr MAXLENGTH=50 value="#($G(abbr))#"></td>
+	<td class=RightBottom>Номер модели</td>
+	<td class=RightBottom><input type=text id=Property3609 MAXLENGTH=50 value="#($G(Property3609))#"></td>
+</tr>
+
+<tr>
+	<td class=RightBottom>Английское наименование</td>
+	<td class=RightBottom><input type=text id=EnglishName MAXLENGTH=50 value="#($G(EnglishName))#"></td>
+	<td class=RightBottom>Код детали</td>
+	<td class=RightBottom><input type=text id=codedetail MAXLENGTH=50 value="#($G(codedetail))#"></td>
+</tr>
+
+<tr>
+	<td class=RightBottom>Объем</td>
+	<td class=RightBottom><input type=text id=Size1 MAXLENGTH=50 value="#($G(Size1))#"></td>
+	<td class=RightBottom>Вес</td>
+	<td class=RightBottom><input type=text id=Weight MAXLENGTH=50 value="#($G(Weight))#"></td>
+</tr>
+
+<tr>
+	<td class=RightBottom>Категория</td>
+	<td class=RightBottom><select name="Property9469" id=Property9469>
+>
+w ##class(Docs.Action2).GetDisplaylistOptions($G(Property9469),"Goods.Goods||Property9469")
+&html<
+	</select></td>
+	<td class=RightBottom>Код ТНВЭД</td>
+	<td class=RightBottom><input type=text id="CodeOKVED" MAXLENGTH=50 value="#($G(CodeOKVED))#"></td>
+</tr>
+<tr>
+	<td class=RightBottom>Товар которому принадлежит запчасть</td>
+	<td class=RightBottom><span onmouseout="UnPaint(this)" onmouseover="Paint(this)" class=Kontragent onclick="ChooseTovar(this)" oncontextmenu="this.innerText='';this.Tag=''" id="Tovar" Tag="#($G(Tovar))#">#($G(TovarName))#</span></td>
+	<td class=RightBottom>Материал (англ.)</td>
+	<td class=RightBottom><input type=text id="MaterialEng" MAXLENGTH=50 value="#($G(MaterialEng))#"></td>
+</tr>
+
+<tr>
+	<td class=RightBottom>Комментарий</td>
+	<td class=RightBottom colspan=3>
+		<textarea name=Comment id=Comment style="width:100%">#($G(Comment))#</textarea>
+	</td>
+</tr>
+<tr>
+	<td class=RightBottom>Состав</td>
+	<td class=RightBottom colspan=3>
+		<textarea name="Composition" id="Composition" style="width:100%">#($G(Composition))#</textarea>
+	</td>
+</tr>
+<tr>
+	<td class=RightBottom>Подробное описание</td>
+	<td class=RightBottom colspan=3>
+		<textarea name="Description" id="Description" style="width:100%">#($G(Description))#</textarea>
+	</td>
+</tr>
+>
+w:GoodId "<tr><td colspan=4 class=RightBottom>Последнее сохранение: <i>"_$G(ChangeUser)_" "_$G(ChangeDate)_" "_$G(ChangeTime)_"</i></td></tr>"
+</script>
+</table>
+</td></tr>
+<tr valign=bottom><td align=center>
+<CSP:IF CONDITION="Access9func=1">
+	<sklad:Button value="Сохранить" onclick="startFun();" style="#($G(SaveButtonStyle))#">
+</CSP:IF>
+<sklad:Button onclick="windowclose();" value="Отмена">
+</td></tr>
+</table>
+</body>
+</html>

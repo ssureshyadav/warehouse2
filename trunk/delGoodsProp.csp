@@ -1,0 +1,30 @@
+<html XMLNS:SKLADz XMLNS:SKLAD2>
+<IMPORT NAMESPACE="SKLADz" IMPLEMENTATION="htc/treeview.htc">
+<IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc">
+<head>
+<title>#($G(%session.Data("systemname")))#</title>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="Jscript" src="common.js"></script>
+<script language="JScript">
+function startFun(){
+if(!window.confirm("Внимание!\nУдаление свойства приведёт к потере данных хранящихся в этом свойстве у ВСЕХ товаров. На ВСЕХ складах.\nВы хотите удалить?"))return false;
+ok=#server(Goods.GoodsAction.DeleteProperty(PropTable.CurrentRowTag))#
+if(ok==1){returnValue=1;window.close();}
+else{alert(ok);}
+}
+
+function load(){
+PropTable.DownLoadPairs('','',"Weight,Size1,Name");
+}
+
+</script>
+</head>
+<body  onload="load();" onkeypress="ManageWindow();" >
+<center>
+<fieldset style="width:250px"><legend>Основные свойства</legend>
+<SKLAD2:table id="PropTable" width=220 height=200 DisplaySecondCol="none"  />
+</fieldset><br><bR>
+<sklad:Button value="Да" onclick="startFun()">&nbsp;&nbsp;&nbsp;<sklad:Button value="Отмена" onclick="window.close()">
+</center>
+</body>
+</html>

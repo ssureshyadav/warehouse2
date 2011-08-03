@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.emplight">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62301,49216.991312</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body onload=""load()"">"
+	Write !,(##class(%CSP.Response).HyperEventBody())
+	Write !,"<TABLE cellSpacing=0 width=""100%"" celpadding=""0"" >",!
+	Write "<TR>",!
+	Write "<td width=10%>"
+	Write "<img alt=""Обновить раздел"" src=""images/refresh.gif"" onclick=""window.location.reload()"">"
+	Write "</td>",!
+	Write "<TD width=80% align=center style=""BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid"" colspan=2><strong>Рабочее место на складе</strong></TD>",!
+	Write "<td  width=10% align=right>"
+	Write "<!--<a href=""talk.csp"" ><img src=""images/BIGProp.gif"" width=""20"" height=25 border=0></a>-->"
+	Write "</td>",!
+	Write "</tr>",!
+	Write "</TABLE>",!
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;width:200px"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""window.location.href='BrakUtiliz.csp'"" TITLE=""""><center>Списание брака</center></span>"
+	Write !,"<table width=100%><tr>",!
+	Write "<Td align=""left"">",!
+	Write "	<fieldset><legend>Тип инструкции</legend>",!
+	Write "	",!
+	Write "	"
+	Write "<select id=""ChooseInstrType"" onchange=""ReloadWithParams()"">"
+	Write !,"	"
+	Write "<option value=""all"">"
+	Write "Все</option>",!
+	Write "	"
+	w ##class(Docs.Action2).GetClassValuesOptions(,"Operation.OperTemplate",,,0)
+	//
+	//<option value="choose">Выбрать тип инструкции...</option>
+	Write !,"	"
+	Write "</select>"
+	Write !,"	",!
+	Write "	</fieldset>",!
+	Write "<Td align=""left"">",!
+	Write "	<fieldset><legend>Контрагент</legend>",!
+	Write "	"
+	Write "<select id=""ChooseKontragent"" onchange=""ChooseKontragentFunc()"">"
+	Write !,"	"
+	Write "<option value=""all"">"
+	Write "Все</option>",!
+	Write "	"
+	Write "<option value=""choose"">"
+	Write "Выбрать контрагента...</option>",!
+	Write "	"
+	Write "</select>"
+	Write !,"	</fieldset>",!
+	Write "<td align=""right"" width=100%>",!
+	Write "</table>",!
+	Write "<fieldset><legend>Инструкции</legend>",!
+	Write !,"<table border=1 id=""tblInstructions"">",!
+	s SignCode(-1)="&#9650;"
+	s SignCode(1)="&#9660;"
+	s NumberOrder=1
+	s NumberSign=""
+	s DateOrder=1
+	s DateSign=""
+	s KontrOrder=1
+	s OperOrder=1
+	s StateOrder=1
+	s TaskOrder=1
+	s KontrSign=""
+	s OperSign=""
+	s StateSign=""
+	s TaskSign=""
+	s dir=%request.Get("dir")
+	i dir="" s dir=1
+	s order=%request.Get("order")
+	i order="" s order="NameRash"
+	i (order="NameRash") s NumberOrder=dir*-1,NumberSign=SignCode(dir)
+	i order="InstDateHorolog" s DateOrder=dir*-1,DateSign=SignCode(dir)
+	i order="Kontr" s KontrOrder=dir*-1,KontrSign=SignCode(dir)
+	i order="opername" s OperOrder=dir*-1,OperSign=SignCode(dir)
+	i order="State" s StateOrder=dir*-1,StateSign=SignCode(dir)
+	i order="dostavka" s TaskOrder=dir*-1,TaskSign=SignCode(dir)
+	w "<thead><tr>"
+	w "<th><a href=""emplight.csp?order=NameRash&dir=",NumberOrder,""">Номер ",NumberSign,"</a></th>"
+	w "<th><a href=""emplight.csp?order=InstDateHorolog&dir=",DateOrder,""">Дата ",DateSign,"</a></th>"
+	w "<th><a href=""emplight.csp?order=Kontr&dir=",KontrOrder,""">Контрагент ",KontrSign,"</a></th>"
+	w "<th><a href=""emplight.csp?order=opername&dir=",OperOrder,""">Оператор ",OperSign,"</a></th>"
+	w "<th><a href=""emplight.csp?order=State&dir=",StateOrder,""">Состояние ",StateSign,"</a></th>"
+	w "<th><a href=""emplight.csp?order=dostavka&dir=",TaskOrder,""">Задача<br>(Способ<br>отправки) ",TaskSign,"</a></th>"
+	w "<th style='font-weight:normal;font-size:12px;font-family:Arial'>Действия</th>"
+	w "</thead></tbody>"
+	s sess=%request.Get("sessionid")
+	s depot=$G(%session.Data("depot"))
+	s userid=$G(%session.Data("user"))
+	s instr=%request.Get("instr")
+	s newstat=%request.Get("newstat")
+	i newstat'="" d
+	. s ok=##class(Operation.InstrActions).changestat(instr,newstat)
+	. i '+ok d
+	. . w "<script language=""javascript"">alert('",ok,"')</script",">"
+	d ..wDocuments(depot)
+	Write !,"</tbody>",!
+	Write "</table>",!
+	Write "</fieldset>",!
+	Write "<!--",!
+	Write "<fieldset><legend>Протокол формирования страницы</legend>",!
+	Write "</b>",!
+	Write "<span id=""joi""></span>",!
+	Write "</fieldset>",!
+	Write "-->"
+	Write !,"<div id=""debug"">"
+	Write "</div>"
+	Write !,"<script type=""text/javascript"">"
+	Write !,"	$bind(window,""load"",function(){",!
+	Write "		var fr=function(o){ //ищем строку",!
+	Write "			var tr=null;",!
+	Write "			for (;o.tagName!==""TABLE"";o=o.parentElement){",!
+	Write "				if (o.parentElement.tagName===""THEAD"") break;",!
+	Write "				if (o.tagName===""TR""){ tr=o; break; }",!
+	Write "			}",!
+	Write "			return tr;",!
+	Write "		}",!
+	Write "		$bind($g(""tblInstructions""),""mouseover"",function(e){",!
+	Write "			if (!e) e=window.event; var tr=fr(e.srcElement); if (tr) tr.className=""hover"";",!
+	Write "		});",!
+	Write "		$bind($g(""tblInstructions""),""mouseout"",function(e){",!
+	Write "			if (!e) e=window.event; var tr=fr(e.srcElement); if (tr) tr.className="""";",!
+	Write "		});",!
+	Write "	});",!
+	Write "</script>"
+	Write !,!,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	s kontr=%request.Get("kontr")
+	s instrtype=%request.Get("instrtype")
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<title>Рабочее место кладовщика</title>",!
+	Write "<style>"
+	Write !,"img{cursor:hand}",!
+	Write "a:visited {color:#002277;text-decoration:none;}",!
+	Write "a:link {color:#002277;text-decoration:none;} ",!
+	Write "a:hover {color:#0044cc;text-decoration:underline;} ",!
+	Write "a:active {color:#CC3300;text-decoration:none;}",!
+	Write ".hover {background-color:#99bbdd}",!
+	Write "#tblInstructions {",!
+	Write "	border-collapse:collapse;",!
+	Write "	border:solid 1px silver;",!
+	Write "}",!
+	Write "#tblInstructions td, #tblInstructions th {",!
+	Write "	border-collapse:collapse;",!
+	Write "	border:solid 1px silver;",!
+	Write "	padding: 0px 2px;",!
+	Write "}",!
+	Write "</style>"
+	Write !,"<script type='text/javascript' src='js/m.js'>"
+	Write "</script>"
+	Write !,"<script language=""javascript"">"
+	Write !,"var sessionid="""_(%session.SessionId)_""";",!
+	Write !,"var InnerSplitter=""~"";",!
+	Write "var kontr='"_($G(kontr))_"';",!
+	Write "var instrtype='"_($G(instrtype))_"';",!
+	Write "var d1=new Date();",!
+	Write "// функция вызываемся автоматически послезагрузки документа",!
+	Write "function load(){",!
+	Write "var kontrArray=kontr.split(""~"");",!
+	Write "var instrtypeArray=instrtype.split(""~"");",!
+	Write "if((kontrArray[0]!=""all"")&(kontrArray[0]!="""")){SetSelectData(""ChooseKontragent"",kontr)}",!
+	Write "if((instrtypeArray[0]!=""all"")&(instrtypeArray[0]!="""")){SetSelectData(""ChooseInstrType"",instrtype)}",!
+	Write "var d2=new Date();",!
+	Write !,"}",!
+	Write !,"// печать документа созданного инструкцией",!
+	Write "function prnt(idclass){",!
+	Write "var docid=idclass.split(""@"")[0]",!
+	Write "var docclass=idclass.split(""@"")[1]",!
+	Write "window.open(""print.csp?id=""+docid+""&class=""+docclass+""&sessionid=""+sessionid)",!
+	Write " }",!
+	Write " ",!
+	Write "//изменить состояние инструкции",!
+	Write "function chstat(docid,innerdoc){",!
+	Write " var newstat=window.showModalDialog(""instrstates.csp"","""",""center:yes;status:no;dialogHeight:300px;dialogWidth:300px;resizable:yes;"")",!
+	Write " if(newstat!=null){",!
+	Write "	 var ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Operation.InstrActions.changestat:csp.emplight"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',docid,newstat)",!
+	Write "	 if(ok.split(""@"")[0]!=1){alert(ok)}",!
+	Write "	 else{",!
+	Write "		 document.getElementById(""Instr""+docid+""Stat"").innerText=ok.split(""@"")[1];",!
+	Write "		 }",!
+	Write "	 //location.href=""emplight.csp?instr=""+docid+""&newstat=""+newstat;",!
+	Write "	 }",!
+	Write " }",!
+	Write " ",!
+	Write " //открыть внутреннюю инструкцию",!
+	Write "function lookinnerinstr(idclass){",!
+	Write "var docclass=idclass.split(""@"")[1]",!
+	Write "var docid=idclass.split(""@"")[0]",!
+	Write "var ok=window.showModalDialog(""InnerInstructNew.csp?DocId=""+docid+""&ClassName=""+docclass+""&sessionid=""+sessionid,"""",""center:yes;status:no;dialogHeight:600px;dialogWidth:600px;resizable:yes;"");",!
+	Write ($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Store.Action.KillTempAddress:csp.emplight"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"')",!
+	Write "}",!
+	Write !,"// создать внутреннюю инструкцию",!
+	Write "function create(cl,docid){",!
+	Write "	//создать дочерний документ основываясь на текущем",!
+	Write "	var ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Docs.Action.CreateChildDoc:csp.emplight"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',docid,cl)",!
+	Write "	if(!isNaN(ok)){window.location.reload();}",!
+	Write "	else{alert(ok)}",!
+	Write "}",!
+	Write !,"// указать реквизиты почтового документа",!
+	Write "function post(docid){",!
+	Write "var ok=window.showModalDialog(""DictItem.csp?skip=InstDate,Name,Comment,Depot1,State,Oper,Operation,innerinstr,dostavka,imp,showcolor,Kontr,Dat,Tim,User1,Summa,Stat,Source,CloseDate,CloseTime,CloseUser&show=postnumber,postdata"",docid+"";Operation.Instructions"",""cener:yes;status:no;dialogHeight:350px;dialogWidth:400px;resizable:yes;"")",!
+	Write "}",!
+	Write !,"// обработать внутреннюю инструкцию",!
+	Write "function savestore(InstrID,NameInner){",!
+	Write "if(window.confirm(""Занести данные документа ""+NameInner+"" в остатки?"")){",!
+	Write "ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Store.Action.SaveQuantFromInstr:csp.emplight"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',InstrID)",!
+	Write "if(isNaN(ok)){alert(ok)}",!
+	Write "else{alert(""Запись об остатках товаров успешно занесена в базу."");}",!
+	Write "}",!
+	Write "}",!
+	Write !,"function ShowKontr(KontrID){",!
+	Write "	ok=window.showModalDialog(""kontragent.csp?KontrId=""+KontrID,"""",""center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;"")",!
+	Write "}",!
+	Write !,"function SetSelectData(SelectObjID,newData){",!
+	Write "	if($g(SelectObjID).options.length==2){",!
+	Write "		$g(SelectObjID).options.length=3",!
+	Write "	}",!
+	Write "	$g(SelectObjID).options(2).value=newData.split(""~"")[0];",!
+	Write "	$g(SelectObjID).options(2).text=newData.split(""~"")[1];",!
+	Write "	$g(SelectObjID).selectedIndex=2;",!
+	Write "}",!
+	Write !,"// Выбрать контрагента",!
+	Write "function ChooseKontragentFunc(){",!
+	Write "var UsersSelection=ChooseKontragent.options(ChooseKontragent.selectedIndex).value;",!
+	Write "if(UsersSelection==""choose""){",!
+	Write "	var newKontragent=window.showModalDialog(""Dictionary.csp"",""Common.Kontragent"",""center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;"");",!
+	Write "	if(newKontragent==null){",!
+	Write "		ChooseKontragent.selectedIndex=0;",!
+	Write "		return false;}",!
+	Write "	SetSelectData(""ChooseKontragent"",newKontragent);",!
+	Write "	ReloadWithParams();",!
+	Write "}",!
+	Write "if(UsersSelection==""all""){",!
+	Write "	ReloadWithParams();",!
+	Write "}",!
+	Write "}",!
+	Write !,"function ReloadWithParams(){",!
+	Write "	var AdditionalParams="""";",!
+	Write "	var AdditionalParams=AdditionalParams+""kontr=""+ChooseKontragent.options(ChooseKontragent.selectedIndex).value+""~""+ChooseKontragent.options(ChooseKontragent.selectedIndex).text",!
+	Write "	var AdditionalParams=AdditionalParams+""&instrtype=""+ChooseInstrType.options(ChooseInstrType.selectedIndex).value+""~""+ChooseInstrType.options(ChooseInstrType.selectedIndex).text",!
+	Write "	window.location.href=""emplight.csp?""+AdditionalParams;",!
+	Write "}",!
+	Write !,"function ChangeFn(DocId){",!
+	Write "if(DocId=="""")return",!
+	Write "var answer=window.showModalDialog(""ChangeGoods.csp?DocId=""+DocId,"""",""center:yes;status:no;dialogHeight:550px;dialogWidth:800px;resizable:yes;"");",!
+	Write "}",!
+	Write "</script>"
+	Write !,"<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,(..HyperEventHead())
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+  s login=$G(%session.Data("user"))
+  i '+login s %response.ServerSideRedirect="norights.csp" 
+  i '##class(Common.Rights).getrights(login,5) s %response.ServerSideRedirect="norights.csp" 
+  q 1
+ 
+]]></Implementation>
+</Method>
+
+<Method name="wChildrenDocs">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec><![CDATA[mustbe:%String,DocId:%String,&innerbutton:%String]]></FormalSpec>
+<Language>cache</Language>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ 	n AdditionalFields s AdditionalFields="" s:mustbe="Docs.Rash" AdditionalFields=",opl->Name as RashOplatTypeName"
+     n sqlDocsRash s sqlDocsRash="select id as childdoc,Name as NameRash"_AdditionalFields_" from "_mustbe_" where Source=?"
+  	n rs s rs=##class(%ResultSet).%New()
+  	n ok s ok=rs.Prepare(sqlDocsRash) if '+ok w "<tr><td colspan=7>Ошибка при формировании списка инструкций</td>" Q ok
+  	s ok=rs.Execute(DocId) if '+ok w "<tr><td colspan=7>Ошибка при формировании списка инструкций</td>" Q ok
+ 	n RashOplatTypeName
+ 	while rs.Next() {
+ 		s childdoc=$G(rs.Data("childdoc")), NameRash=$G(rs.Data("NameRash")), RashOplatTypeName=$G(rs.Data("RashOplatTypeName"))
+  		// есть документы  от инструкции, посмотрим есть ли внутренние инструкции от этих потомков
+  		&sql(select id,DocumentClass,Name,stat into :innerdoc,:DocumentClass,:NameInner,:stat 
+  			 From Docs.Super where Source=:childdoc
+  		)
+  		if SQLCODE {
+  			s innerbutton="<img src=""images/new.gif"" onmouseover=""this.src='images/Onnew.gif'"" onmouseout=""this.src='images/new.gif'""  onclick=""create('"_mustbe_"','"_childdoc_"')"" alt=""Создать внутреннюю инструкцию"" >"
+  		} else {
+  			s innerbutton="<img src=""images/edit.gif"" onmouseover=""this.src='images/Onedit.gif'"" onmouseout=""this.src='images/edit.gif'""  onclick=""lookinnerinstr('"_innerdoc_"@"_DocumentClass_"')"" alt=""Редактировать внутреннюю инструкцию"" >"
+  			s innerbutton=innerbutton_"<img src=""images/print.gif"" onmouseover=""this.src='images/Onprint.gif'"" onmouseout=""this.src='images/print.gif'""  onclick=""prnt('"_innerdoc_"@"_DocumentClass_"')"" alt=""Распечатать внутреннюю инструкцию"" >"
+  			i stat=1 s innerbutton=innerbutton_"<img src=""images/ok.gif"" onmouseover=""this.src='images/Onok.gif'"" onmouseout=""this.src='images/ok.gif'""  onclick=""savestore(this.Tag,'"_NameInner_"')"" alt=""Обработать документ"" Tag="""_innerdoc_""">"
+  			e  s innerbutton=innerbutton_"<img src=""images/Disabledok.gif"" alt=""Документ уже обработан"" style='cursor:no-drop'>"
+  		}
+ 	}
+ 	d rs.Close(), rs.%Close() k rs
+ 	Q $$$OK
+ 
+]]></Implementation>
+</Method>
+
+<Method name="wDocuments">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>depot:%String</FormalSpec>
+<Language>cache</Language>
+<Implementation><![CDATA[
+  n sql s sql="select Oper->cl as mustbe,ID as DocId,Name,Kontr as KontrID,Kontr->Name as Kontr,User1->Name as User1,InstDate as InstDateHorolog"
+  s sql=sql_",%external(State) as State,dostavka->Name as dostavka,showcolor as showcolor,Oper as oper,Oper->Name as opername,postnumber,postdata,State as StateNumb,RashOplatType->Name as RashOplatTypeName"
+  s sql=sql_" from Operation.Instructions where (State Between 2 and 8) and (Depot1=?) "
+  s kontr1=$P(kontr,"~") if (kontr1'="all")&(kontr1'="") s sql=sql_" and Kontr="_kontr1
+  s instrtype1=$P(instrtype,"~")	i (instrtype1'="all")&(instrtype1'="") s sql=sql_" and Oper="_instrtype1
+  
+  n rs s rs=##class(%ResultSet).%New()
+  s ok=rs.Prepare(sql) i '+ok q "Ошибка при формировании списка инструкций"
+  s ok=rs.Execute(depot) i '+ok q "Ошибка при формировании списка инструкций"
+  while rs.Next(){
+ 	 
+  	f i="mustbe","DocId","Name","KontrID","Kontr","User1","InstDateHorolog","State","dostavka","showcolor","oper","opername","postnumber","postdata","StateNumb","RashOplatTypeName" d
+ 	. s @i=$G(rs.Data(i)) s:@i="" @i="&nbsp;"
+ 	 
+ 	s InstDate=$ZD(InstDateHorolog,4)
+  	s innerbutton=""
+  	s mustbe=$P($G(mustbe),",",1),NameRash=""
+  	s (innerdoc,DocumentClass)=""
+  	
+  	#; найдем документы созданные от текущей инструкции
+  	s ok=..wChildrenDocs(mustbe,DocId,.innerbutton) if 'ok continue
+ 	
+  	s:StateNumb=8 innerbutton=innerbutton_"<img src=""images/post.gif"" onmouseover=""this.src='images/Onpost.gif'"" onmouseout=""this.src='images/post.gif'""  onclick=""post('"_DocId_"')"" alt=""Указать реквизиты почтового документа"" >"
+  	s style="" s:showcolor'="" style="style=""color:"_showcolor_""""
+  	w "<tr ",style,">"
+  	w "<td>",Name," (",NameRash,") ",RashOplatTypeName,"</td>"
+  	w "<td>",InstDate,"</td>"
+  	w "<td style='cursor:hand' onclick=""ShowKontr('",KontrID,"')"">",Kontr,"</td>"
+  	w "<td>",User1,"</td>"
+  	w "<td id=""Instr",DocId,"Stat"">",State
+  	s:oper'=10 dostavka=opername
+  	w "<td>",dostavka,"</td>"
+  	w "<td><nobr>"
+  		,"<img src=""images/ok.gif"" onmouseover=""this.src='images/Onok.gif'"" onmouseout=""this.src='images/ok.gif'"" "
+  		," onclick=""chstat(this.Tag,'",innerdoc,"')"" alt=""Изменить статус"" Tag=""",DocId,"""> "
+  		,"<img src=""images/print.gif"" onmouseover=""this.src='images/Onprint.gif'"" onmouseout=""this.src='images/print.gif'"" "
+  		," onclick=""prnt('",$G(childdoc),"@",$G(mustbe),"')"" alt=""Распечатать накладную"" Tag="""">"
+  		,innerbutton
+  		,"</nobr></td>"
+  	w "</tr>"	
+  }
+  d rs.Close(), rs.%Close() k rs
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\emplight.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/emplight.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>62298,63495</Default>
+</Parameter>
+</Class>
+</Export>

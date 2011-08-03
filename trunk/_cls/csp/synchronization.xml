@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.synchronization">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62157,82231.894843</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body>"
+	Write !,(##class(%CSP.Response).HyperEventBody())
+	Write !,!,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""window.location.href='tuneup.csp'"" TITLE=""""><center>Назад</center></span>"
+	Write "<br>",!
+	Write "<TABLE cellSpacing=0 width=""100%"" celpadding=""0"" >",!
+	Write "<TR>",!
+	Write "<TD align=center style=""BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid"" colspan=3><strong>Синхронизация</strong></TD></tr>",!
+	Write "<tr>",!
+	Write "</table>",!
+	Write !,"<!--",!
+	Write "<sklad:Button value=""Синхронизировать"" onclick=""startFun()"">&nbsp;&nbsp;&nbsp;<sklad:Button value=""Итоги"" onclick=""ShowResult()"">",!
+	Write !,"<sklad:Button value=""Выгрузка данных"" onclick=""Export()""> <span id=""ExportedFile""></span><br>",!
+	Write "<hr width=80%>",!
+	Write "<input name=""oFile1"" id=""oFile1"" size=30 type=file style=""width:450px""><br>",!
+	Write "<sklad:Button value=""Загрузка данных"" onclick=""Import()"">",!
+	Write "<!--",!
+	Write "<fieldset><legend id=""SyncLabel"">Данные синхронизации</legend>",!
+	Write "<span id=""CurrentProgress"">",!
+	Write "</span>",!
+	Write "</fieldset>",!
+	Write "-->"
+	Write !,!,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""startFun()"" TITLE=""""><center>Синхронизировать</center></span>"
+	Write "&nbsp;&nbsp;&nbsp;"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""ReloadPage()"" TITLE=""""><center>Обновить</center></span>"
+	Write "<br>",!
+	Write "Период c "
+	Write "<input type=text id=""dat1"" value="""_(%request.Get("dt1",$ZD($H,4)))_""" onclick=""fnCalendar(this)"" class=""datar"">"
+	Write " по "
+	Write "<input type=text id=""dat2"" value="""_(%request.Get("dt2",$ZD($H,4)))_""" onclick=""fnCalendar(this)"" class=""datar"">"
+	Write !,"<table><tr><td>Дата, время<td>Результат",!
+	s dt1=%request.Get("dt1")
+	s dt2=%request.Get("dt2")
+	i dt1?1.2N1"/"2N1"/"4N s dt1=$ZDH(dt1,4)
+	e  s dt1=+$H
+	i dt2?1.2N1"/"2N1"/"4N s dt2=$ZDH(dt2,4)
+	e  s dt2=+$H
+	s date=dt1-1
+	f  s date=$O(^Sync(date)) q:(date="")||(date>dt2)  d
+	. s time="" f  s time=$O(^Sync(date,time)) q:time=""  d
+	. . w "<tr><td>"_$ZD(date,4)_" "_$ZT(time)_"<td>"_$G(^Sync(date,time))
+	Write !,!,"</table>",!
+	Write "</body>"
+	Write !,(..HyperEventFrame(0))
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"<script language=""jscript"" src=""common.js"">"
+	Write "</script>"
+	Write !,"<title>	Cache Server Page </title>",!
+	Write "<script language=""javascript"">"
+	Write !,"var Progress="""_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Common.Sync.Progress:csp.synchronization"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"')"";",!
+	Write "function startFun(){",!
+	Write "	cspCallServerMethod('"_(..Encrypt($listbuild("Common.Sync.Synchronization2:csp.synchronization"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:"")_"&WCHARSET="_%response.CharSet)_"');",!
+	Write "	alert(""Процесс синхронизации запущен в фоновом режиме.\nРезультаты будут доступны через минуту или несколько. Необходимо будет обновить страницу."")",!
+	Write "	window.location.reload();",!
+	Write "}",!
+	Write !,"function lookup(){",!
+	Write "Progress="""_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Common.Sync.Progress:csp.synchronization"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"')"";",!
+	Write "load();",!
+	Write "if(!ReturnBoolean(Progress))",!
+	Write "	{",!
+	Write "	ShowResult();",!
+	Write "	window.clearInterval(timerID);",!
+	Write "	}",!
+	Write "}",!
+	Write !,"function ShowResult(){",!
+	Write "CurrentProgress.innerHTML="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Common.Sync.ShowResult:csp.synchronization"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"');",!
+	Write "}",!
+	Write !,"function load(){",!
+	Write "	return",!
+	Write "if(ReturnBoolean(Progress))",!
+	Write "	{",!
+	Write "	SyncLabel.innerText='..Идёт синхронизация';",!
+	Write "	ShowResult();",!
+	Write "	}",!
+	Write "else{SyncLabel.innerText='Данные синхронизации';}",!
+	Write "}",!
+	Write !,"function Export(){",!
+	Write "var result="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Common.Sync.ExportSyncFile:csp.synchronization"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"')",!
+	Write "if(result.split(""@"")[0]==1){ExportedFile.innerText=""Экспортировано в файл: ""+result.split(""@"")[1];}",!
+	Write "else{alert(""Ошибка\n""+result)}",!
+	Write "}",!
+	Write !,"function Import(){",!
+	Write "var file=oFile1.value",!
+	Write "var result="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Common.Sync.ImportSyncFile:csp.synchronization"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',file)",!
+	Write "if(result==1){alert(""Данные успешно загружены."")}",!
+	Write "else{alert(result)}",!
+	Write "}",!
+	Write !,"function ReloadPage(){",!
+	Write "window.location.href=""synchronization.csp?dt1=""+dat1.value+""&dt2=""+dat2.value",!
+	Write "}",!
+	Write "</script>"
+	Write !,(..HyperEventHead())
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\synchronization.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/synchronization.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>60954,14619</Default>
+</Parameter>
+</Class>
+</Export>

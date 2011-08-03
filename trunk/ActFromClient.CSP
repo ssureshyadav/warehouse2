@@ -1,0 +1,156 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ i %session.NewSession d
+ . s %session.EndSession=1
+ . s sessionid=%request.Get("sessionid",1)
+ . s %session=%session.GetSession(sessionid)
+ .  s login=$G(%session.Data("user"))
+ . i '+login s %response.ServerSideRedirect="norights.csp" 
+ e  s sessionid=%session.SessionId
+ 
+Quit 1
+</script>
+<html XMLNS:SKLADiGrid>
+<IMPORT NAMESPACE="SKLADiGrid" IMPLEMENTATION="htc/iGridV7.htc">
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<style>
+.LeftTop{border-left : 1 solid black;border-top : 1 solid black;}
+.RightBottom{font-family:Arial;font-size:14px;border-right : 1 solid black;border-bottom : 1 solid black;}
+.Kontragent{width:170px;cursor:hand;border:1 solid black}
+</style>
+<script language="jscript" src="common.js"></script>
+<script language="Jscript" type="text/javascript">
+var sessionid="#(sessionid)#";
+
+//функция выбора контрагента (подставит выбранного в innerText переданного объекта
+function ChooseKonragent(Obj){
+newItem=window.showModalDialog("Dictionary.csp","Common.Kontragent","center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");
+if(newItem==null){return false;}
+var newArr=newItem.split(InnerSplitter);
+Obj.innerText=newArr[1];
+Obj.Tag=newArr[0];
+}
+
+//функция выбора товара
+function ChooseTovar(Obj){
+newItem=window.showModalDialog("selectgoods2.csp","","center:yes;status:no;dialogHeight:700px;dialogWidth:800px;resizable:yes;")
+if(newItem==null)return
+Goods=newItem.split(StringSplitter)
+GoodsAttributes=newItem.split(InnerSplitter);
+Obj.innerText=GoodsAttributes[9];
+Obj.Tag=GoodsAttributes[0];
+}
+
+function startFun()
+{
+	alert("ещё не реализовано");
+}
+</script>
+
+<title>	Ручное создание акта технического осмотра от клиента</title>
+
+</head>
+
+<body>
+
+<script language="cache" runat="server">
+s DocId=+%request.Get("docid")
+s Kontr=325
+s KontrName="Проверочный пользователь"
+s Tovar = 15549  
+s TovarName="MAG-1117 выключатель"
+</script>
+<br><br>
+<fieldset><legend>Общие данные документа</legend>
+<table class="LeftTop" cellspacing=0 width=100%>
+<tr>
+	<td class=RightBottom>Дата<td class=RightBottom><input type=text id="InstDate" value="#($ZD($G(InstDate,$H),4))#" onclick="fnCalendar(this)" class="datar" onmouseout="UnPaint(this)" onmouseover="Paint(this)">
+	<td class=RightBottom>Контрагент<td class=RightBottom><span onmouseout="UnPaint(this)" onmouseover="Paint(this)" class="Kontragent" onclick="ChooseKonragent(this)" oncontextmenu="this.innerText='';this.Tag=''" id="Kontr" Tag="#($G(Kontr))#">#($G(KontrName))#</span>
+</tr>
+<tR>
+	<td class=RightBottom>Товар оставлен на ответственное хранение<td class=RightBottom><input type="checkbox" value="1">
+	<td class=RightBottom>Дата составления акта<td class=RightBottom><input type=text id="InstDate" value="#($ZD($G(InstDate,$H),4))#" onclick="fnCalendar(this)" class="datar" onmouseout="UnPaint(this)" onmouseover="Paint(this)">
+</tr>
+</table>
+</fieldset>
+
+<br><br>
+
+<fieldset><legend>Товар</legend>
+<table class="LeftTop" cellspacing=0 width=100%>
+<tr>
+	<td class=RightBottom>Товар<td class=RightBottom><span onmouseout="UnPaint(this)" onmouseover="Paint(this)" class="Kontragent" onclick="ChooseTovar(this)" oncontextmenu="this.innerText='';this.Tag=''" id="Tovar" Tag="#($G(Tovar))#">#($G(TovarName))#</span>
+	<td colspan=2 class=RightBottom>&nbsp;
+</tr>
+<tr>
+	<td class=RightBottom>Серийный номер<td class=RightBottom><input type=text id="Serial" MAXLENGTH=50 value="#($G(Serial))#">
+	<td class=RightBottom>Гарантийный номер<td class=RightBottom><input type=text id="Garant" MAXLENGTH=50 Value="#($G(Garant))#">
+</tr>
+</table>
+</fieldset><br><br>
+
+<fieldset><legend>Продавец</legend>
+<!-- поправить имена контролов -->
+<table class="LeftTop" cellspacing=0 width=100%>
+<tR>
+	<td class=RightBottom>Наименование продавца<td class=RightBottom><input type=text id="SellerName" MAXLENGTH=50 value="#($G(SellerName))#">
+	<td class=RightBottom>Адрес продавца<td class=RightBottom><input type=text id="SellerAddress" MAXLENGTH=50 value="#($G(SellerAddress))#">
+</tr>
+<tR>
+	<td class=RightBottom>Телефон продавца<td class=RightBottom><input type=text id="SellerPhone" MAXLENGTH=50 value="#($G(SellerPhone))#">
+	<td class=RightBottom>Дата продажи<td class=RightBottom><input type=text id="SellerDate" value="#($ZD($G(SellerDate,$H),4))#" onclick="fnCalendar(this)" class="datar" onmouseout="UnPaint(this)" onmouseover="Paint(this)">
+</tr>
+</table>
+</fieldset><br><br>
+
+<fieldset><legend>Сервисный центр</legend>
+<!-- поправить имена контролов -->
+<table class="LeftTop" cellspacing=0 width=100%>
+<tR>
+	<td class=RightBottom>Дата осмотра<td class=RightBottom><input type=text id="ExpertDate" value="#($ZD($G(ExpertDate,$H),4))#" onclick="fnCalendar(this)" class="datar" onmouseout="UnPaint(this)" onmouseover="Paint(this)">
+	<td class=RightBottom>Дата поступления в ремонт<td class=RightBottom><input type=text id="RemontDate" value="#($ZD($G(RemontDate,$H),4))#" onclick="fnCalendar(this)" class="datar" onmouseout="UnPaint(this)" onmouseover="Paint(this)">
+</tr>
+
+<tR>
+	<td class=RightBottom>Количество ремонтов<td class=RightBottom><input type=text id="RepairsQnt" MAXLENGTH=50 value="#($G(RepairsQnt))#">
+	<td class=RightBottom>Классификация дефекта<td class=RightBottom>
+		<select id="DefectClass">
+			<script language="cache" runat="server">
+			w ##class(Docs.Action2).GetDisplaylistOptions($G(DefectClass),"Docs.Act||DefectClass")
+			</script>
+		</select>
+</tr>
+<tR>
+	<td class=RightBottom>Описание неисправности<td class=RightBottom><input type=text id="Serial" MAXLENGTH=50 value="#($G(Serial))#">
+	<td class=RightBottom>Предполагаемая причина<td class=RightBottom><input type=text id="Serial" MAXLENGTH=50 value="#($G(Serial))#">
+</tr>
+<tR>
+	<td class=RightBottom>Причина отказа в ремонте<td class=RightBottom><input type=text id="Serial" MAXLENGTH=50 value="#($G(Serial))#">
+	<td class=RightBottom>Заявка по которой не поступили запчасти<td class=RightBottom>
+</tr>
+</table>
+</fieldset><br><br>
+
+<fieldset><legend>Потребитель</legend>
+<!-- поправить имена контролов -->
+<table class="LeftTop" cellspacing=0 width=100%>
+<tR>
+	<td class=RightBottom>ФИО потребителя<td class=RightBottom><input type=text id="Serial" MAXLENGTH=50 value="#($G(Serial))#">
+	<td class=RightBottom>Паспортные данные<td class=RightBottom><input type=text id="Serial" MAXLENGTH=50 value="#($G(Serial))#">
+</tr>
+<tR>
+	<td class=RightBottom>Телефон потребителя<td class=RightBottom><input type=text id="Serial" MAXLENGTH=50 value="#($G(Serial))#">
+	<td class=RightBottom>Контактные данные<td class=RightBottom><input type=text id="Serial" MAXLENGTH=50 value="#($G(Serial))#">
+</tr>
+</table>
+</fieldset>
+
+<center><br>
+
+<CSP:IF condition="DocId=0">
+	<sklad:Button value="Сохранить" onclick="startFun();" style="#($G(SaveButtonStyle))#">
+</CSP:IF>
+
+<sklad:Button onclick="windowclose();" value="Отмена"></center>
+</body>
+</html>

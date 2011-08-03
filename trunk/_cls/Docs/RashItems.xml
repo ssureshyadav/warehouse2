@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.RashItems">
+<Description>
+Строки расходной накладной</Description>
+<Super>Docs.DocItems</Super>
+<TimeCreated>60365,82534.486859</TimeCreated>
+
+<Property name="Zakaz">
+<Description>
+Заказ</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="ZakazGoods">
+<Description>
+Заказанный товар</Description>
+<Type>Goods.Goods</Type>
+<Parameter name="CAPTION" value=",readonly"/>
+</Property>
+
+<Index name="ZakazGoodsInd">
+<Properties>ZakazGoods</Properties>
+</Index>
+
+<Property name="ZakazTim">
+<Description>
+Время замены</Description>
+<Type>%Time</Type>
+<Parameter name="CAPTION" value=",readonly"/>
+</Property>
+
+<Index name="ZakazTimInd">
+<Properties>ZakazTim</Properties>
+</Index>
+
+<Property name="ZakazDat">
+<Description>
+Дата замены</Description>
+<Type>%Date</Type>
+<Parameter name="CAPTION" value=",readonly"/>
+<Parameter name="FORMAT" value="4"/>
+</Property>
+
+<Index name="ZakazDatInd">
+<Properties>ZakazDat</Properties>
+</Index>
+
+<Property name="ZakazUser1">
+<Description>
+Оператор</Description>
+<Type>Users.Dates</Type>
+<Parameter name="CAPTION" value=",readonly"/>
+</Property>
+
+<Index name="ZakazUser1Ind">
+<Properties>ZakazUser1</Properties>
+</Index>
+
+<Property name="JustCreated">
+<Type>%String</Type>
+<Transient>1</Transient>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Property name="serial">
+<Type>%String</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Property name="comment">
+<Type>%String</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>RashItemsDefaultData</DefaultData>
+<Data name="RashItemsDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"RashItems"</Subscript>
+<Value name="1">
+<Value>Zakaz</Value>
+</Value>
+<Value name="2">
+<Value>ZakazGoods</Value>
+</Value>
+<Value name="3">
+<Value>Dat</Value>
+</Value>
+<Value name="4">
+<Value>Tim</Value>
+</Value>
+<Value name="5">
+<Value>User1</Value>
+</Value>
+<Value name="6">
+<Value>ZakazDat</Value>
+</Value>
+<Value name="7">
+<Value>ZakazTim</Value>
+</Value>
+<Value name="8">
+<Value>ZakazUser1</Value>
+</Value>
+<Value name="9">
+<Value>comment</Value>
+</Value>
+<Value name="10">
+<Value>serial</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Users.NameRoles">
+<Description>
+Названия ролей</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60397,76051.877616</TimeCreated>
+
+<Property name="Name">
+<Description>
+Название роли</Description>
+<Type>%String</Type>
+<Required>1</Required>
+</Property>
+
+<Method name="SaveRole">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>role:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	&sql(insert into Users.NameRoles (Name)
+	values(:role))
+]]></Implementation>
+</Method>
+
+<Method name="DeleteRoles">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>iden:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	&sql(delete from Users.NameRoles Where ID=:iden)
+	q
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Users.NameRolesD</DataLocation>
+<DefaultData>NameRolesDefaultData</DefaultData>
+<IdLocation>^Users.NameRolesD</IdLocation>
+<IndexLocation>^Users.NameRolesI</IndexLocation>
+<StreamLocation>^Users.NameRolesS</StreamLocation>
+<Data name="NameRolesDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Name</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

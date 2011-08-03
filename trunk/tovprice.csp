@@ -1,0 +1,77 @@
+<Script language="cache" runat="server">
+ s goodsid=$G(%request.Data("goodsid",1))
+ s login=$G(%session.Data("user"))
+ s allow=##class(Common.Rights).getrights(login,8)
+</script>
+<html XMLNS:SKLAD2 XMLNS:SKLADList>
+<IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
+<IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc">
+<head>
+<title>#($G(%session.Data("systemname")))#</title>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="Jscript" src="common.js"></script>
+<script language="JScript">
+sessionid="#(%session.SessionId)#";
+
+var NodeData = new Array();
+GoodsId= "#(goodsid)#";
+
+function startFun(){
+xmldoc=newpr.GetXmlContent();
+addnode(xmldoc,"Goods",GoodsId+"@Goods.Goods")
+ok=SplitSendXml("","Store.Price",xmldoc,"","#(%session.SessionId)#")
+if(isNaN(ok)){
+	alert(ok);}
+else{
+	alert("Новая цена успешно сохранена");
+	loadprices();}
+
+}
+
+function LoadList(){
+PropTable.DownLoadPairs('Goods.Goods',GoodsId);
+newpr.DownLoadPairs('Store.Price','',"Tim,Depot,Goods");
+}
+
+function load(){
+LoadList();
+loadprices();
+}
+
+function loadprices(){
+tp.loadfrommethod("Goods.GoodsAction.prices",GoodsId,allpr.checked);
+}
+
+function setfornewpr(){
+newpr.setCellValue("Dat","#($ZD($H,4))#");
+}
+
+</script>
+</head>
+<body  onload="load();" onkeypress="ManageWindow();">
+<table cellpadding=0 cellspacing=0 width=100% border=0><tr>
+<td valign=top>
+<fieldset><legend>Основные свойства</legend>
+<SKLAD2:table id="PropTable" width=360 height=200 />
+</fieldset>
+</td>
+<td>
+<fieldset><legend>Новая цена</legend>
+<SKLAD2:table id="newpr" width=300 height=200 onLoadComplete="setfornewpr()" />
+</fieldset>
+</td>
+</tr>
+<tr><td colspan=2>
+<fieldset><legend>История цен</legend>
+<input type="checkbox" id="allpr" style="width:15px;border:0" onclick="loadprices()"> Все цены
+ <SKLADList:listview width=100% height=135 id="tp" />
+</fieldset>
+</td></tr>
+<tr><td colspan=2 align=center>
+<CSP:IF CONDITION='allow'>
+<sklad:Button value="Да" onclick="startFun()">
+</csp:IF>
+&nbsp;&nbsp;&nbsp;<sklad:Button value="Отмена" onclick="window.close()"></td></tr>
+</table>
+</body>
+</html>

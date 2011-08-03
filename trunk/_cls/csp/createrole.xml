@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.createrole">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>61948,37502.695719</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body>"
+	Write !,(##class(%CSP.Response).HyperEventBody())
+	Write !,"<table><tr><td>",!
+	Write "<form name=""myform"">"
+	Write !,..InsertHiddenFields(""),!
+	Write !,"Введите название роли:</td><td>",!
+	Write "<input type=""text"" name=""rolename"" width=100 value="""">"
+	Write "</td></tr>",!
+	Write "<tr><td>Функции роли:</td><td>",!
+	f j=1:1:i w "<INPUT TYPE=checkbox NAME=""comp"_j,""" VALUE=""",j,""">",func(j),"</td></tr><tr><td></td><td>",!
+	Write !,"<input type=""button"" value=""Сохранить"" onclick=""Saveroles()"">"
+	Write "</td></tr>",!
+	Write "</form>"
+	Write !,"</table>",!
+	Write "</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !,!
+	s sbor=""
+	&sql(declare perscur Cursor for
+	select ID,Name into IDname,Funcname 
+	from Users.Functions)
+	&sql(open perscur)
+	f  &sql(fetch perscur) q:SQLCODE  d
+	.i $I(i)
+	.s iden(i)=IDname
+	.s func(i)=Funcname
+	&sql(close perscur)
+	s rolename=$G(%request.Data("rolename",1))
+	s zrolename=%request.Get("rolename")
+	f k=1:1:i d
+	.s sbor=sbor_"if (myform.comp"_k_".checked==true){(func["_k_"]="_iden(k)_")};                                                           "
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<script language=""JScript"">"
+	Write !,"	var func=new Array();",!
+	Write "	function Saveroles(){",!
+	Write "	qwe="_(i)_";",!
+	Write "	for(l=1;l<=qwe;l++){",!
+	Write "	 func[l]=0;}",!
+	Write "	role=document.myform.rolename.value;",!
+	Write "	"_(sbor),!
+	Write "	var str = func.join(""~""); ",!
+	Write "	if (role==""""){alert(""ведите название роли""); document.my.rolename.focus(); return false};",!
+	Write "	if(!window.confirm(""Создать роль""+"" ""+role))return false; ",!
+	Write "	"_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Users.NameRoles.SaveRole:csp.createrole"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',role);",!
+	Write "	"_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Users.Roles.SaveRole:csp.createrole"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',role,str);	",!
+	Write "    window.close();",!
+	Write "	}",!
+	Write "</script>"
+	Write !,"<title>	Пользователи </title>",!
+	Write !,(..HyperEventHead())
+	Write "</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+  s login=$G(%session.Data("user"))
+  i '+login s %response.ServerSideRedirect="norights.csp" 
+  q 1
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\createrole.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/createrole.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>61711,3239</Default>
+</Parameter>
+</Class>
+</Export>

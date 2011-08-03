@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.docplatej">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<IncludeCode>xmlmacros</IncludeCode>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62189,50196.007839</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body onload=""load()"" onkeypress=""ManageWindow();"">"
+	Write !,(##class(%CSP.Response).HyperEventBody())
+	Write !,"<table width=100%><tr><td>",!
+	Write "<table class=""LeftTop"" cellspacing=0 width=100%>",!
+	s DocId=%request.Get("DocId")
+	i DocId {
+	//&sql(select Name,Comment,CloseDate,CloseTime,CloseUser->Name,Stat,Summa,Address,Common.SqlProcs_AddrPath(Address) into 
+	//:Name,:Comment,:CloseDate,:CloseTime,:CloseUserName,:Stat,:Summa,:Address,:AddressPath
+	//from Docs.Platejka where ID=:DocId)
+	s doc=##class(Docs.Platejka).%OpenId(DocId)
+	if $ISOBJECT(doc) {
+	f i="Name","Comment","CloseDate","CloseTime","Stat","Summa","RubSumma","Typeplatej","ViconteSummRub","ViconteSummCurr","MastermaxSummRub","MastermaxSummCurr","TullSummRub","TullSummCurr","PlatejDate"
+	{
+	s @i=$ZOBJPROPERTY(doc,i)
+	}
+	s CloseUserName=doc.ChangeUser.Name
+	i '$ISOBJECT(doc) w "<tr><td colspan=4>Ошибка при выводе платёжного поручения "_DocId_"</td></tr>"
+	i Stat=2 
+	{
+	s ClosedString=CloseUserName_" "_$S(CloseDate:$ZD(CloseDate,4),1:"")_" "_$S(CloseTime:$ZT(CloseTime),1:"")
+	s SaveButtonStyle="display:none"
+	}
+	s Typeplatej=$S($ISOBJECT(doc.Typeplatej):doc.Typeplatej.%Id(),1:"")
+	s Poluh=$S($ISOBJECT(doc.Poluh):doc.Poluh.%Id(),1:"")
+	s PoluhName=$S($ISOBJECT(doc.Poluh):doc.Poluh.Name,1:"")
+	s Kontr=$S($ISOBJECT(doc.Kontr):doc.Kontr.%Id(),1:"")
+	s KontrName=$S($ISOBJECT(doc.Kontr):doc.Kontr.Name,1:"")
+	}
+	}
+	else {
+	//создаём новый документ
+	s doc=##class(Docs.Platejka).%New()
+	s Typeplatej=$S($ISOBJECT(doc.Typeplatej):doc.Typeplatej.%Id(),1:"")
+	s Poluh=$S($ISOBJECT(doc.Poluh):doc.Poluh.%Id(),1:"")
+	s PoluhName=$S($ISOBJECT(doc.Poluh):doc.Poluh.Name,1:"")
+	k doc
+	}
+	w "<tr>"
+	w "<td class=RightBottom>Номер<td class=RightBottom><input type=text id=Name MAXLENGTH=50 value='"_$G(Name)_"'>"
+	w "<td class=RightBottom>Комментарий<td class=RightBottom><input type=text id=Comment MAXLENGTH=1000 Value='"_$G(Comment)_"'>"
+	w "</tr>"
+	w "<tr>"
+	w "<td class=RightBottom>Рублёвая сумма"_"<td class=RightBottom><input type=text id=RubSumma MAXLENGTH=50 value='"_$G(RubSumma)_"' onkeyup=""CalcCurrency(this.value,'Summa')"">"
+	//w "<br><input type=""button"" onclick=""CalcCurrency()"" value=""Пересчитать валюту"">"
+	w "<td class=RightBottom>Сумма"_"<td class=RightBottom><input type=text id=Summa MAXLENGTH=50 value='"_$G(Summa)_"' onkeyup=""CalcRub(this.value,'RubSumma')"">"
+	//w "<br><input type=""button"" onclick=""CalcRub()"" value=""Пересчитать рубли"">"
+	w "</tr>"
+	w "<tr>"
+	w "<td class=RightBottom>Контрагент<td class=RightBottom><span onmouseout=""UnPaint(this)"" onmouseover=""Paint(this)"" class=Kontragent onclick=""ChooseKonragent(this)"" oncontextmenu=""this.innerText='';this.Tag=''"" id=""Kontr"" Tag='"_$G(Kontr)_"'>"_$G(KontrName)_"</span>"
+	w "<td class=RightBottom>Получатель платежа<td class=RightBottom><span onmouseout=""UnPaint(this)"" onmouseover=""Paint(this)"" class=Kontragent onclick=""ChooseKonragent(this)"" oncontextmenu=""this.innerText='';this.Tag=''"" id=""Poluh"" Tag='"_$G(Poluh)_"'>"_$G(PoluhName)_"</span>"
+	w "</tr>"
+	w "<tr>"
+	w "<td class=RightBottom>Курс у.е.<td class=RightBottom><input type=""text"" id=""Kurs"" value="""_innerkurs_""" onkeyup=""innerkurs=Number(this.value)"">"
+	w "<td class=RightBottom>Тип платежа<td class=RightBottom>"
+	w "<select id='Typeplatej'>"
+	w ##class(Docs.Action2).GetClassValuesOptions($G(Typeplatej),"Common.Dictionary13")
+	w "</select></span>&nbsp;"
+	w "</tr>"
+	w "<tr>"
+	w "<td class=RightBottom>Дата платёжного поручения"
+	w "<td class=RightBottom><input type=text id=""PlatejDate"" value='"_$S(+$G(PlatejDate):$ZD(PlatejDate,4),1:"")_"' onclick=""fnCalendar(this)"" class=""datar"" onmouseout=""UnPaint(this)"" onmouseover=""Paint(this)"">"
+	w "<td class=RightBottom colspan=2>&nbsp;"
+	w "</tr>"
+	w "<tr><td class=RightBottom colspan=4><br>Суммы по брендам"
+	f i="Viconte","Tull","Mastermax" d
+	. w "<tr>"
+	. w "<td class=RightBottom colspan=2>"_i_"</td>"
+	. s RubName=i_"SummRub"
+	. s CurrName=i_"SummCurr"
+	. w "<td class=RightBottom><input type=""text"" id="""_RubName_""" value="""_$G(@RubName)_""" onkeyup=""CalcCurrency(this.value,'"_CurrName_"')""> руб.</td>"
+	. w "<td class=RightBottom><input type=""text"" id="""_CurrName_""" value="""_$G(@CurrName)_""" onkeyup=""CalcRub(this.value,'"_RubName_"')""> у.е.</td>"
+	. w "</tr>",!
+	w:$G(ClosedString)'="" "<tr><td colspan=4 class=RightBottom>Документ закрыт <i>"_ClosedString_"</i>"
+	Write !,"</table>",!
+	Write "<br><br>Расходные накладные, которые оплачены данным платёжным поручением.",!
+	Write "<br>"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;width:200px;"_($G(SaveButtonStyle))_""" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""ItemsClear();"" TITLE=""""><center>Очистить таблицу</center></span>"
+	Write "<br>",!
+	Write "<table border=0 class=""LeftTop"" cellspacing=0 id=""Items""><tr>",!
+	Write "	<td class=RightBottom>Расходная накладная",!
+	Write "	<td class=RightBottom>Оплаченная сумма",!
+	d:$ISOBJECT($G(doc))
+	. s next="" f  s next=doc.PlatejkaItems.Next(next) q:next=""  d
+	. . s item=doc.PlatejkaItems.GetAt(next)
+	. . q:'$ISOBJECT(item)
+	. . s RashObj=item.Rash
+	. . q:'$ISOBJECT(RashObj)
+	. . s Summa=item.Summa
+	. . s Name=RashObj.Name
+	. . w "<tr><td class=RightBottom>"_Name_"<td class=RightBottom>"_Summa
+	Write !,"</table>",!
+	Write "<tr><td>",!
+	Write "<center><br>"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"_($G(SaveButtonStyle))_""" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""startFun();"" TITLE=""""><center>Сохранить</center></span>"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""windowclose();"" TITLE=""""><center>Отмена</center></span>"
+	Write "</center>",!
+	Write "</table>",!
+	Write !,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !,!
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"<style>"
+	Write !,".LeftTop{border-left : 1 solid black;border-top : 1 solid black;}",!
+	Write ".RightBottom{font-family:Arial;font-size:14px;border-right : 1 solid black;border-bottom : 1 solid black;}",!
+	Write "SELECT{width:170px}",!
+	Write ".Kontragent{width:170px;cursor:hand;}",!
+	Write ".ZakazInstr{display:inline;}",!
+	Write "</style>"
+	Write !,"<script language=""jscript"" src=""common.js"">"
+	Write "</script>"
+	Write !,"<title>Платёжное поручение</title>",!
+	Write !,"<script language=""Jscript"">"
+	Write !,"var login='"_(%session.Data("user"))_"';",!
+	Write "var DocId='"_(%request.Get("DocId"))_"';",!
+	Write "var sessionid="""_(sessionid)_""";",!
+	Write "var innerkurs=Number("""_(innerkurs)_""");",!
+	Write !,"function load(){",!
+	Write !,"}",!
+	Write !,"// сохранить",!
+	Write "function startFun(){",!
+	Write "if(!HiddenCurrencyReculc())return;",!
+	Write "var xmlDoc = new ActiveXObject(""Msxml2.DOMDocument.3.0"");",!
+	Write "var RootElement = xmlDoc.createElement(""RootElement"");",!
+	Write "xmlDoc.documentElement=RootElement;",!
+	Write "InsertXmlHeader(xmlDoc,""Summa"",Summa.value,""%String"")",!
+	Write "InsertXmlHeader(xmlDoc,""Name"",Name.value,""%String"")",!
+	Write "InsertXmlHeader(xmlDoc,""Kurs"",Number(innerkurs),""%Numeric"")",!
+	Write "InsertXmlHeader(xmlDoc,""Comment"",Comment.value,""%String"")",!
+	Write "InsertXmlHeader(xmlDoc,""RubSumma"",RubSumma.value,""%String"")",!
+	Write "InsertXmlHeader(xmlDoc,""Poluh"",Poluh.Tag,""Store.Address"")",!
+	Write "InsertXmlHeader(xmlDoc,""Kontr"",Kontr.Tag,""Store.Address"")",!
+	Write "InsertXmlHeader(xmlDoc,""Typeplatej"",Typeplatej.value,""Store.Address"")",!
+	Write "InsertXmlHeader(xmlDoc,""PlatejDate"",PlatejDate.value,""%Date"")",!
+	Write "//Cумма по брендам",!
+	Write "InsertXmlHeader(xmlDoc,""ViconteSummRub"",ViconteSummRub.value,""%Numeric"")",!
+	Write "InsertXmlHeader(xmlDoc,""ViconteSummCurr"",ViconteSummCurr.value,""%Numeric"")",!
+	Write "InsertXmlHeader(xmlDoc,""MastermaxSummRub"",MastermaxSummRub.value,""%Numeric"")",!
+	Write "InsertXmlHeader(xmlDoc,""MastermaxSummCurr"",MastermaxSummCurr.value,""%Numeric"")",!
+	Write "InsertXmlHeader(xmlDoc,""TullSummRub"",TullSummRub.value,""%Numeric"")",!
+	Write "InsertXmlHeader(xmlDoc,""TullSummCurr"",TullSummCurr.value,""%Numeric"")",!
+	Write "//alert(xmlDoc.xml)",!
+	Write "//",!
+	Write "var DocID=SendXml(DocId,""Docs.Platejka"",xmlDoc,sessionid);",!
+	Write "if(isNaN(DocID)){alert(DocID)}",!
+	Write "else{returnValue=1;window.close();}",!
+	Write "}",!
+	Write !,"//функция выбора контрагента (подставит выбранного в innerText переданного объекта",!
+	Write "function ChooseKonragent(Obj){",!
+	Write "newItem=window.showModalDialog(""Dictionary.csp"",""Common.Kontragent"",""center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;"");",!
+	Write "if(newItem==null){return false;}",!
+	Write "var newArr=newItem.split(InnerSplitter);",!
+	Write "Obj.innerText=newArr[1];",!
+	Write "Obj.Tag=newArr[0];",!
+	Write "}",!
+	Write !,"// Пересчитать рубли",!
+	Write "function CalcRub(Summa,DestinationObjId)",!
+	Write "{",!
+	Write "	DestinationObj = document.getElementById(DestinationObjId);",!
+	Write "	DestinationObj.value=RubValue(Summa);",!
+	Write "}",!
+	Write !,"function RubValue(SummVar)",!
+	Write "{",!
+	Write "	//var SummVar=Number(Summa.value);",!
+	Write "	var result=innerkurs*SummVar;",!
+	Write "	return result.toFixed(2);",!
+	Write "}",!
+	Write !,"// Пересчитать валюту",!
+	Write "function CalcCurrency(Summa,DestinationObjId)",!
+	Write "{",!
+	Write "	DestinationObj = document.getElementById(DestinationObjId);",!
+	Write "	DestinationObj.value=CurrencyValue(Summa);",!
+	Write "}",!
+	Write !,"function CurrencyValue(SummVar)",!
+	Write "{",!
+	Write "	//var SummVar=Number(RubSumma.value);",!
+	Write "	var result=SummVar/innerkurs;",!
+	Write "	return result.toFixed(2);",!
+	Write "}",!
+	Write !,"function HiddenCurrencyReculc(){",!
+	Write "return true;",!
+	Write "var RubSummaFieldValue=Number(RubSumma.value);",!
+	Write !,"if(RubValue()!=RubSummaFieldValue.toFixed(2))",!
+	Write "	{",!
+	Write "	var ok=window.confirm(""Поле рублёвой суммы не соответствует сумме в валюте. Пересчитать?"");",!
+	Write "	if(ok)CalcRub();",!
+	Write "	return ok;",!
+	Write "	}",!
+	Write !,"var SummaFieldValue=Number(Summa.value);",!
+	Write "if(CurrencyValue()!=SummaFieldValue.toFixed(2))",!
+	Write "	{",!
+	Write "	var ok=window.confirm(""Поле суммы не соответствует рублёвой сумме. Пересчитать?"");",!
+	Write "	if(ok)CalcCurrency();",!
+	Write "	return ok;",!
+	Write "	}",!
+	Write "return true;",!
+	Write "}",!
+	Write !,"function ItemsClear(){",!
+	Write "if(DocId=="""")return",!
+	Write "if(!window.confirm(""Очистить таблицу платежей?""))return;",!
+	Write "var ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Docs.Action.ClearPlatejkaItems:csp.docplatej"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',DocId);",!
+	Write "Items.style.display=""none"";",!
+	Write "}",!
+	Write "</script>"
+	Write !,(..HyperEventHead())
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html XMLNS:SKLADiGrid>"
+	Write !,"<IMPORT NAMESPACE=""SKLADiGrid"" IMPLEMENTATION=""htc/iGridV7.htc"">",!
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+  i %session.NewSession d
+  . s %session.EndSession=1
+  . s sessionid=%request.Get("sessionid",1)
+  . s %session=%session.GetSession(sessionid)
+  .  s login=$G(%session.Data("user"))
+  . i '+login s %response.ServerSideRedirect="norights.csp" 
+  e  s sessionid=%session.SessionId
+  s innerkurs=$$$TunesVariableGlobal("innerkurs")
+ Quit 1
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\docplatej.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/docplatej.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>62024,3610</Default>
+</Parameter>
+</Class>
+</Export>

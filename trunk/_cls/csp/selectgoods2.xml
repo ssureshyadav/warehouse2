@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.selectgoods2">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62293,58245.412751</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body onload=""load();"" onkeypress=""ManageWindow();"">"
+	Write !,"<table height=100% width=100% border=0>",!
+	Write "<tr ><td width=50% valign=""top"">",!
+	Write "<fieldset><legend>Отбор из группы</legend>",!
+	Write "Классификатор:"
+	Write "<select id=""Catalogues"" onchange=""LoadTree()"">"
+	Write !
+	w ##class(Docs.Action2).GetClassValuesOptions(,"Goods.Catalogue",,,0)
+	Write !,"</select>"
+	Write "<br>",!
+	Write "  <SKLADz:treeview id=""GroupsTree"" width=""200"" height=170 ImagesPath="""_(%session.Data("ImagesPath"))_""" zonClick=""GroupsTreeClick();"" onDownloadCmpl=""LoadPropTree()"" />",!
+	Write "  <br>",!
+	Write "  "
+	Write "<input type=""button"" id=""SelectWholeGroup"" value=""выбрать всю ветку"" onclick=""AddFromWholeGroup()"">"
+	Write !," </fieldset>",!
+	Write "</td>",!
+	Write "<td width=50% valign=""top"">",!
+	Write !,"<fieldset><legend>Отбор по параметрам</legend>",!
+	Write "<table><tr><td valign=top>",!
+	Write "<SKLAD2:table id=""PropTable"" width=220 height=200 zonTableClick=""TableClick()"" DisplaySecondCol=""none"" />",!
+	Write "</td>",!
+	Write "<td valign=top>",!
+	Write "  <SKLADz:treeview id=""PropsTree"" width=200 height=130 ShowImages=0 ImagesPath="""_(%session.Data("ImagesPath"))_""" zonClick=""PropsTreeClick()"" />",!
+	Write "</td></tr>",!
+	Write "<tr><td width=100% colspan=2 align=center>",!
+	Write "	"
+	Write "<span id=""Pname"">"
+	Write "</span>"
+	Write "&nbsp;&nbsp;",!
+	Write "	"
+	Write "<select id=""Pequal"">"
+	Write !,"		"
+	Write "<option value=""="">"
+	Write "=</option>",!
+	Write "		"
+	Write "<option value=""<>"">"
+	Write "&#8800;</option>",!
+	Write "		"
+	Write "<option value=""<"">"
+	Write "&lt;</option>",!
+	Write "		"
+	Write "<option value=""<="">"
+	Write "&lt;=</option>",!
+	Write "		"
+	Write "<option value="">"">"
+	Write "&gt;</option>",!
+	Write "		"
+	Write "<option value="">="">"
+	Write "&gt;=</option>",!
+	Write "	"
+	Write "</select>"
+	Write "&nbsp;&nbsp;",!
+	Write "	"
+	Write "<span id=""Pvalue"" style=""background:#ddffff;width:150px;border:dotted 1 gray"">"
+	Write "&nbsp;&nbsp;&nbsp;"
+	Write "</span>"
+	Write "</td>",!
+	Write "</tr>",!
+	Write "<tr><td colspan=2>",!
+	Write "	<center>",!
+	Write "	"
+	Write "<input type=""button"" value=""И"" id=""Pand"" onclick=""dork('AND')"" style=""width:50px"">"
+	Write !,"	"
+	Write "<input type=""button"" value=""ИЛИ"" id=""Por"" onclick=""dork('OR')"" style=""width:50px"">"
+	Write !,"<img src=""images/del.gif"" onmouseover=""Clear.src='images/Ondel.gif'"" onmouseout=""Clear.src='images/del.gif'""  id=""Clear"" name=""Clear"" alt=""Очистить поле 'Параметры'"" onclick=""ClearSelect();"" style="""">"
+	Write "</center>",!
+	Write "<fieldset><legend>Параметры отбора</legend>",!
+	Write "&nbsp;"
+	Write "<span id=""Express"" style=""font:Arial 13;color:#000033"">"
+	Write "</span>"
+	Write !,"</fieldset>",!
+	Write "</td></tr>",!
+	Write "<tr><td colspan=2 align=""center"">",!
+	Write "		"
+	Write "<input type=""button"" onclick=""AddFromSelect()"" value=""Выбрать товары"">"
+	Write !,"		"
+	Write "<input type=""checkbox"" id=""ThisGroupOnly"" style=""border:0;width:20px"">"
+	Write " только в группе "
+	Write "<span id=""CurrentGroupName"">"
+	Write "</span>"
+	Write !,"	</td>",!
+	Write "	</tr>",!
+	Write "</table>",!
+	Write "</fieldset>",!
+	Write "</td>",!
+	Write "</tr>",!
+	Write "<tr><td valign=""top""  colspan=2>",!
+	Write "<fieldset id=""SelectedGoods""><legend>Выбранные товары</legend>",!
+	Write "<span title=""Вывод остатков слегка тормозит работу. Отключив вывод можно добиться некоторого повышения скорости работы."">"
+	Write "<input type=""checkbox"" id=""cbShowQuantity"" style=""width:15px;border:none"" checked>"
+	Write " Показывать остатки на складах"
+	Write "</span>"
+	Write !," 	<SKLADList:listview width=100% height=130 id=""TempGoods""  ClassName=""Goods.Goods"" AddOnClear=""false"" zonDblClick=""ReturnSelected();""  AddHeaders=""true""/><br>",!
+	Write !,"<img src=""images/del.gif"" onmouseover=""addrtrr.src='images/Ondel.gif'"" onmouseout=""addrtrr.src='images/del.gif'""  id=""addrtrr"" name=""addrtrr"" alt=""Убрать выделенные товары из списка"" onclick=""TempGoods.DelItems()"" style="""">"
+	Write !,!,"<img src=""images/down.gif"" onmouseover=""CopyGoodsAnotherTable_Btn.src='images/Ondown.gif'"" onmouseout=""CopyGoodsAnotherTable_Btn.src='images/down.gif'""  id=""CopyGoodsAnotherTable_Btn"" name=""CopyGoodsAnotherTable_Btn"" alt=""Отобрать товары для документа"" onclick=""CopyGoodsAnotherTable_Fn()"" style=""display:none"">"
+	Write !,"<br>",!
+	Write "<span title=""Включив промежуточную таблицу, можно набирать в неё товары из нескольких источников а затем все вместе передать в документ."">"
+	Write "<input type=""checkbox"" id=""TurnOnGoodsForDoc_checkbox"" onclick=""TurnOnGoodsForDoc()"" style=""width:15;border:none"">"
+	Write " Включить промежуточную таблицу для выбранных товаров"
+	Write "</span>"
+	Write !,"</fieldset>",!
+	Write "</td></tr>",!
+	Write "<tr id=""GoodsForDoc_TR"" style=""display:none"">",!
+	Write "	<td colspan=2><SKLADList:listview width=100% height=130 id=""GoodsForDoc""  ClassName=""Goods.Goods"" AddOnClear=""false"" zonDblClick=""ReturnSelected();""  AddHeaders=""true""/><br>",!
+	Write !,"<img src=""images/del.gif"" onmouseover=""RemoveGoodsForDoc_Button.src='images/Ondel.gif'"" onmouseout=""RemoveGoodsForDoc_Button.src='images/del.gif'""  id=""RemoveGoodsForDoc_Button"" name=""RemoveGoodsForDoc_Button"" alt=""Убрать выделенные товары из списка"" onclick=""GoodsForDoc.DelItems()"" style="""">"
+	Write !,"</tr>",!
+	Write "<tr><td valign=bottom  colspan=2>",!
+	Write "<center>"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""startFun();"" TITLE=""""><center>Да</center></span>"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""window.close()"" TITLE=""""><center>Отмена</center></span>"
+	Write "</center>",!
+	Write "</td></tr>",!
+	Write "</table>",!
+	Write "</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<title>"_($G(%session.Data("systemname")))_"</title>",!
+	Write "<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"<script language=""Jscript"" src=""common.js"">"
+	Write "</script>"
+	Write !,"<script language=""JScript"">"
+	Write !,"Arguments=window.dialogArguments.split(InnerSplitter);",!
+	Write "CardId=Arguments[0];",!
+	Write "var CurrentProperty;",!
+	Write "var Objvalue;",!
+	Write "var InCard=false;",!
+	Write "var FromTable="""";",!
+	Write "var FromTree="""";",!
+	Write "var Number=0;",!
+	Write "ExpressType2="""";",!
+	Write "var ColCode="""";",!
+	Write "//если указано ""@1"" то в качестве цены будет указана закупочная цена",!
+	Write "//см. Goods.GoodsAction.fromgroup()",!
+	Write "var ShowBuyPrices="""_(%request.Get("ShowBuyPrices"))_""";",!
+	Write "var depot="""_($G(%session.Data("depot")))_"""",!
+	Write "var commongroups="""_($G(%session.Data("commongroups")))_"""",!
+	Write "var OnlyID="""_(%request.Get("OnlyID"))_""";",!
+	Write !,"function startFun()",!
+	Write "{",!
+	Write "	if(!TurnOnGoodsForDoc_checkbox.checked)",!
+	Write "	{",!
+	Write "		ResultArray=TempGoods.ListViewGetItems(""selected"",OnlyID);",!
+	Write "	}",!
+	Write "	else",!
+	Write "	{",!
+	Write "		ResultArray=GoodsForDoc.ListViewGetItems("""",OnlyID);",!
+	Write "	}",!
+	Write "	returnValue=ResultArray;",!
+	Write "	window.close();",!
+	Write "}",!
+	Write !,"function ReturnSelected(){",!
+	Write "ResultArray=TempGoods.ListViewGetItems(""selected"");",!
+	Write "returnValue=ResultArray;",!
+	Write "window.close();	",!
+	Write "}",!
+	Write !,"function load(){",!
+	Write "window.dialogWidth=screen.availWidth+""px"";",!
+	Write "//alert(screen.availWidth+""X""+screen.availHeight+""\n""+window.dialogWidth+""X""+window.dialogHeight)",!
+	Write "TempGoods.attachEvent(""onAddColumns"", addcol)",!
+	Write "TempGoods.LoadHeaders(""izdelie,Description,Composition"");",!
+	Write "GoodsForDoc.LoadHeaders(""izdelie,Description,Composition"");",!
+	Write "//alert(""depot\n""+depot+""commongroups\n""+commongroups);",!
+	Write "//Catalogues.startDownload(strForGroups(depot,commongroups), putCatalogue);",!
+	Write "LoadTree()",!
+	Write "PropTable.DownLoadPairs("""","""");",!
+	Write "LoadPropTree();",!
+	Write "}",!
+	Write !,"function addcol(){",!
+	Write "TempGoods.detachEvent(""onAddColumns"", addcol)",!
+	Write "fields=TempGoods.GetColumns(""Goods->"");",!
+	Write "//TempGoods.AddColumns(""quant~Количество~~~@%String#@#"")",!
+	Write "}",!
+	Write !,"function putCatalogue(text){",!
+	Write "addOptions(text,""Catalogues"");",!
+	Write "LoadTree();",!
+	Write "}",!
+	Write !,"function LoadTree(){",!
+	Write "GroupsTree.AdditionalID=Catalogues.value;",!
+	Write "//alert('Data.csp?class=Goods.Group&fields=Parent,Code,Name,ID&params=""'+depot+'"",""'+Catalogues.value+'""')",!
+	Write "GroupsTree.DownLoad('Data.csp?class=Goods.Group&fields=Parent,Code,Name,ID&params=""'+depot+'"",""'+Catalogues.value+'""')	",!
+	Write "}",!
+	Write !,"function LoadPropTree(){",!
+	Write "Group=ReturnSpace(GroupsTree.NodeCode);",!
+	Write "LoadPropTree2(""PropsTree"","""",Group,Catalogues.value)",!
+	Write "}",!
+	Write !,"// добавить товар в таблицу из текущей ветки",!
+	Write "function AddFromGroup(){",!
+	Write "var where=""Groups='""+GroupsTree.NodeID+""'""",!
+	Write "if(cbShowQuantity.checked){ShowQuantityVar=1;}",!
+	Write "else{ShowQuantityVar=0;}",!
+	Write "TempGoods.loadfrommethod(""Goods.GoodsAction.fromgroup"",where,fields,ShowQuantityVar+ShowBuyPrices)",!
+	Write "}",!
+	Write !,"// добавить товар в таблицу из всех подветок данной ветки",!
+	Write "function AddFromWholeGroup(){",!
+	Write "var where=""Groups->Depot='""+depot+""' and Groups->Catalogue='""+Catalogues.value+""' and Groups->Code %STARTSWITH '""+GroupsTree.NodeCode+""'"";",!
+	Write "TempGoods.loadfrommethod(""Goods.GoodsAction.fromgroup"",where,fields);",!
+	Write "}",!
+	Write !,"function AddFromSelect(){",!
+	Write "if(ThisGroupOnly.checked){var GroupCondition=""Groups->Depot='""+depot+""' and Groups->Catalogue='""+Catalogues.value+""' and Groups->Code %STARTSWITH '""+GroupsTree.NodeCode+""'"";}",!
+	Write "else{var GroupCondition="""";}",!
+	Write "var where=GroupCondition+FromTable;",!
+	Write "if(cbShowQuantity.checked){ShowQuantityVar=1;}",!
+	Write "else{ShowQuantityVar=0;}",!
+	Write "TempGoods.loadfrommethod(""Goods.GoodsAction.fromgroup"",where,fields,ShowQuantityVar+ShowBuyPrices)",!
+	Write "}",!
+	Write !,"function TableClick(){",!
+	Write "	ExpressType=""FromTable"";",!
+	Write "	CurrentProperty=PropTable.CurrentRowTag;",!
+	Write "	Pname.innerText=PropTable.CurrentRowName;",!
+	Write "	newObj=PropTable.CurrentRowElement.cloneNode(true);",!
+	Write "	Pvalue.innerHTML="""";",!
+	Write "	Pvalue.appendChild(newObj);",!
+	Write "}",!
+	Write !,"function AddExpress(){",!
+	Write "	tagNamez=Pvalue.firstChild.tagName;",!
+	Write "	if(tagNamez==""DIV""){",!
+	Write "		Objvalue=Pvalue.firstChild.Tag;",!
+	Write "		if(Objvalue.split(""@"")[0]==""""){Objvalue=Pvalue.firstChild.innerText+Objvalue;}",!
+	Write "		}",!
+	Write "	if(tagNamez==""SELECT""){Objvalue=Pvalue.firstChild.options(Objec.selectedIndex).text+""@%String"";}",!
+	Write "	return Objvalue;",!
+	Write "}",!
+	Write !,"function TakeValue(){",!
+	Write "FrstPart=AddExpress().split(""@"")[0]",!
+	Write "ScndPart=AddExpress().split(""@"")[1]",!
+	Write "//if(ScndPart!=""%Date"")return FrstPart",!
+	Write "if(ScndPart!=""%Date"")return ""'""+FrstPart+""'""",!
+	Write "else {",!
+	Write "	dateArr=FrstPart.split(""/"")",!
+	Write "	Data=dateArr[2]+""-""+dateArr[1]+""-""+dateArr[0]",!
+	Write "	return ""CAST('""+Data+""' AS DATE)""",!
+	Write "}",!
+	Write "}",!
+	Write !,"function dork(concatenation){",!
+	Write "if(Pname.innerText=="""")return false",!
+	Write "if(ExpressType2!=ExpressType){",!
+	Write "	Express.innerHTML="""";",!
+	Write "	ExpressType2=ExpressType;",!
+	Write "	}",!
+	Write "newCaption=Pname.innerText;",!
+	Write "newEqual=Pequal.options(Pequal.selectedIndex).text;",!
+	Write "newValue=TakeVisibleValue();",!
+	Write "newExpression=newCaption+newEqual+newValue;",!
+	Write "value=TakeValue();",!
+	Write "if(ExpressType==""FromTree""){",!
+	Write "	//exp=(CurrentProperty+InnerSplitter+Pequal.value+InnerSplitter+value);",!
+	Write "	if(FromTree==""""){FromTreeconcatenation="""";}",!
+	Write "	else{FromTreeconcatenation=concatenation}",!
+	Write "	Number++;",!
+	Write "	field=""t""+Number+"".Gvalue""",!
+	Write "	if((Pequal.value!=""="")&(Pequal.value!=""<>"")){field=""CAST(t""+Number+"".Gvalue AS INTEGER)""}",!
+	Write "	exp="" (t""+Number+"".Param=""+CurrentProperty+"" and ""+field+Pequal.value+value+"") """,!
+	Write "	FromTree=FromTree+FromTreeconcatenation+ exp;",!
+	Write "	}",!
+	Write "if(ExpressType==""FromTable""){",!
+	Write "	if(FromTable==""""){FromTableconcatenation="""";}",!
+	Write "	else{FromTableconcatenation=concatenation}",!
+	Write "	exp="" Goods->""+CurrentProperty+Pequal.value+value+"" """,!
+	Write "	FromTable=FromTable+FromTableconcatenation + exp;",!
+	Write "	}",!
+	Write "if(Express.innerHTML=="""")concatenation="""";",!
+	Write "if(concatenation==""AND""){concatenation=""И""}",!
+	Write "if(concatenation==""OR""){concatenation=""ИЛИ""}",!
+	Write "newString=Express.innerHTML+""<b> ""+concatenation+"" (</b>""+newExpression+""<b>)</b>""",!
+	Write "Express.innerHTML=newString;",!
+	Write "}",!
+	Write !,"function TakeVisibleValue(){",!
+	Write "	Objec=Pvalue.firstChild;",!
+	Write "	if(Objec.tagName==""SELECT"")return Objec.options(Objec.selectedIndex).text",!
+	Write "	else{return Objec.innerText;}",!
+	Write "}",!
+	Write !,"function PropsTreeClick(){",!
+	Write "	ExpressType=""FromTree"";",!
+	Write "	CurrentProperty=PropsTree.NodeID;",!
+	Write "	Pname.innerText=PropsTree.NodeCaption;",!
+	Write "	newObj=CreateDiv("""",""dsd"");",!
+	Write "	Pvalue.innerHTML="""";",!
+	Write "	Pvalue.appendChild(newObj);",!
+	Write "}",!
+	Write !,"function DelItems(element){",!
+	Write "document.getElementById(element).DelItems();",!
+	Write "}",!
+	Write !,"function ClearSelect(){",!
+	Write "Express.innerText='';",!
+	Write "FromTree="""";",!
+	Write "FromTable="""";",!
+	Write "Number=0;",!
+	Write "}",!
+	Write !,"function showdictionary(where){",!
+	Write "TempGoods.AddOnClear=true;",!
+	Write "TempGoods.DownLoad(where);",!
+	Write "TempGoods.AddOnClear=""false"";",!
+	Write "}",!
+	Write !,"//функция нужна для совместимости с table.htc",!
+	Write "function cellaction(oo){",!
+	Write "}",!
+	Write !,"//функция нужна для совместимости с table.htc",!
+	Write "function getDivChange(oo){",!
+	Write "}",!
+	Write !,"//открыть карточку товара",!
+	Write "function OpenCard(){",!
+	Write "GoodsId=SelectedItemProperty(GoodsListView,""Tag"");",!
+	Write "GoodsName=SelectedItemProperty(GoodsListView,'Text');",!
+	Write "if(GoodsId=="""")return",!
+	Write "ok=window.showModalDialog(""GoodsCard.csp?GoodsId=""+GoodsId+""&groupspath=""+GroupsTree.ParentNames,GoodsId+InnerSplitter+GoodsName,""center:yes;status:no;dialogHeight:600px;dialogWidth:650px;resizable:yes"")",!
+	Write "if(ok==1){ShowTovars()}",!
+	Write "}",!
+	Write !,"function GroupsTreeClick(){",!
+	Write "	CurrentGroupName.innerText=GroupsTree.NodeCaption;",!
+	Write "	LoadPropTree();",!
+	Write "	AddFromGroup();",!
+	Write "}",!
+	Write !,"// показать/убрать промежуточную таблицу для выбора документов",!
+	Write "function TurnOnGoodsForDoc(){",!
+	Write "	if(TurnOnGoodsForDoc_checkbox.checked){",!
+	Write "		GoodsForDoc_TR.style.display=""inline"";",!
+	Write "		CopyGoodsAnotherTable_Btn.style.display=""inline"";",!
+	Write "		}",!
+	Write "	else{",!
+	Write "		GoodsForDoc_TR.style.display=""none"";",!
+	Write "		CopyGoodsAnotherTable_Btn.style.display=""none"";",!
+	Write "		}",!
+	Write "}",!
+	Write !,"//Переместить",!
+	Write "function CopyGoodsAnotherTable_Fn(){",!
+	Write "var Strings=TempGoods.ListViewGetItems(""selected"").split(StringSplitter)",!
+	Write "for(var i=0; i<Strings.length-1; i++)",!
+	Write "	{",!
+	Write "		var StringArray = Strings[i].split(InnerSplitter);",!
+	Write "		GoodsForDoc.addrow(StringArray[0],StringArray)",!
+	Write "	}",!
+	Write "}",!
+	Write "</script>"
+	Write !,"	"
+	w "<SCRIPT LANGUAGE=""XML"" id=""mySrc1"">"
+	w "<offerings>"
+	w " <class><materials>This should render.</materials><time>1.5hr</time></class>"
+	w "</offerings>"
+	w "</"_"script>"
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html XMLNS:SKLADz XMLNS:SKLADList XMLNS:SKLAD2>"
+	Write !,"<IMPORT NAMESPACE=""SKLADList"" IMPLEMENTATION=""htc/listview2.htc"">",!
+	Write "<IMPORT NAMESPACE=""SKLADz"" IMPLEMENTATION=""htc/treeview.htc"">",!
+	Write "<IMPORT NAMESPACE=""SKLAD2"" IMPLEMENTATION=""htc/table.htc"">",!
+	Write !
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\selectgoods2.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/selectgoods2.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>62164,45292</Default>
+</Parameter>
+</Class>
+</Export>

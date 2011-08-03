@@ -1,0 +1,141 @@
+<script language="cache" runat="server">
+ s docclass=%request.Get("docclass")
+</script>
+<html XMLNS:SKLADz XMLNS:SKLADList XMLNS:SKLAD2>
+<IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
+<IMPORT NAMESPACE="SKLADz" IMPLEMENTATION="htc/treeview.htc">
+<IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc">
+
+<head>
+<title>#($G(%session.Data("systemname")))#</title>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="Jscript" src="common.js"></script>
+<script language="JScript">
+Arguments=window.dialogArguments.split(InnerSplitter);
+sessionid="#(%session.SessionId)#";
+var depot="#($G(%session.Data("depot")))#"
+var docclass="#($G(docclass))#";
+CardId=Arguments[0];
+var CurrentProperty;
+var Objvalue;
+var InCard=false;
+var FromTable="";
+var FromTree="";
+var Number=0;
+ExpressType2=""
+var ColCode="";
+
+//последняя функция, выполняется по клику на Enter
+function startFun(){
+returnValue=FromTable;
+window.close();
+}
+
+function load(){
+PropTable.DownLoadPairs(docclass,"");
+}
+
+function TableClick()
+{
+	ExpressType="FromTable";
+	CurrentProperty=PropTable.CurrentRowTag;
+	Pname.innerText=PropTable.CurrentRowName;
+	newObj=PropTable.CurrentRowElement.cloneNode(true);
+	Pvalue.innerHTML="";
+	Pvalue.appendChild(newObj);
+}
+
+function AddExpress()
+{
+	tagNamez=Pvalue.firstChild.tagName;
+	if(tagNamez=="DIV"){
+		Objvalue=Pvalue.firstChild.Tag;
+		if(Objvalue.split("@")[0]==""){Objvalue=Pvalue.firstChild.innerText+Objvalue;}
+		}
+	if(tagNamez=="SELECT"){Objvalue=Pvalue.firstChild.options(Objec.selectedIndex).text+"@%String";}
+	return Objvalue;
+}
+
+function TakeValue(){
+FrstPart=AddExpress().split("@")[0]
+ScndPart=AddExpress().split("@")[1]
+//if(ScndPart!="%Date")return FrstPart
+if(ScndPart!="%Date")return "'"+FrstPart+"'"
+else {
+	dateArr=FrstPart.split("/")
+	Data=dateArr[2]+"-"+dateArr[1]+"-"+dateArr[0]
+	return "CAST('"+Data+"' AS DATE)"
+}
+}
+
+function dork(concatenation){
+if(Pname.innerText=="")return false
+if(ExpressType2!=ExpressType){
+	Express.innerHTML="";
+	ExpressType2=ExpressType;
+	}
+newCaption=Pname.innerText;
+newEqual=Pequal.options(Pequal.selectedIndex).text;
+newValue=TakeVisibleValue();
+newExpression=newCaption+newEqual+newValue;
+value=TakeValue();
+if(ExpressType=="FromTable"){
+	if(FromTable==""){FromTableconcatenation="";}
+	else{FromTableconcatenation=concatenation}
+	exp=" "+CurrentProperty+Pequal.value+value+" "
+	FromTable=FromTable+FromTableconcatenation + exp;
+	}
+if(Express.innerHTML=="")concatenation="";
+if(concatenation=="AND"){concatenation="И"}
+if(concatenation=="OR"){concatenation="ИЛИ"}
+newString=Express.innerHTML+"<b> "+concatenation+" (</b>"+newExpression+"<b>)</b>"
+Express.innerHTML=newString;
+}
+
+function TakeVisibleValue(){
+	Objec=Pvalue.firstChild;
+	if(Objec.tagName=="SELECT")return Objec.options(Objec.selectedIndex).text
+	else{return Objec.innerText;}
+}
+
+function DelItems(element){
+document.getElementById(element).DelItems();
+}
+
+function ClearSelect(){
+Express.innerText='';
+FromTree="";
+FromTable="";
+Number=0;
+}
+
+function cellaction(oo){
+}
+
+function getDivChange(oo){
+}
+</script>
+</head>
+<body  onload="load();" onkeypress="ManageWindow();">
+<SKLAD2:table id="PropTable" width=220 height=200 zonTableClick="TableClick()" DisplaySecondCol="none" />
+<center><span id="Pname"></span>&nbsp;&nbsp;
+	<select id="Pequal" >
+		<option value="=">=</option>
+		<option value="<>">&#8800;</option>
+		<option value="<">&lt;</option>
+		<option value="<=">&lt;=</option>
+		<option value=">">&gt;</option>
+		<option value=">=">&gt;=</option>
+	</select>&nbsp;&nbsp;
+	<span id="Pvalue" style="background:#ddffff;width:150px;border:dotted 1 gray">&nbsp;&nbsp;&nbsp;</span>
+</center>
+
+	<center>
+	<input type="button" value="И" id="Pand" onclick="dork('AND')" style="width:50px">
+	<input type="button" value="ИЛИ" id="Por" onclick="dork('OR')" style="width:50px"><sklad:LittleButton name="del" id="Clear" onclick="ClearSelect();" alt="Очистить поле 'Параметры'"></center>
+<fieldset><legend>Параметры отбора</legend>
+&nbsp;<span id="Express" style="font:Arial 13;color:#000033"></span>
+</fieldset>
+<center><sklad:Button value="Да" onclick="startFun();"><sklad:Button onclick="window.close()" value="Отмена"></center>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<script language="cache" runat="server">
+ s ID=$G(%request.Data("ID",1))
+ s Class=$G(%request.Data("Class",1))
+ s skip=$G(%request.Data("skip",1))
+ s show=$G(%request.Data("show",1))
+ s AddArrow=+$G(%request.Data("AddArrow",1))
+ s xml=$G(%request.Data("xml",1))
+ s zse=$G(%request.Data("zse",1))
+ if Class="" s Class="Goods.Goods"
+ s str=##class(Common.Common).showheaders(Class,ID,skip,AddArrow,xml,.j,zse,show)
+ w str
+ q
+
+</script>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.BrakremontItems">
+<Description>
+Строки документа передачи брака в ремонт</Description>
+<Super>Docs.DocItems</Super>
+<TimeCreated>60963,5427.352001</TimeCreated>
+
+<Property name="Brak">
+<Description>
+ID в хранилище брака</Description>
+<Type>Store.Brak</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Index name="BrakInd">
+<Properties>Brak</Properties>
+</Index>
+
+<Property name="addr">
+<Description>
+Место</Description>
+<Type>Store.Address</Type>
+</Property>
+
+<Index name="addrInd">
+<Properties>addr</Properties>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>BrakremontItemsDefaultData</DefaultData>
+<Data name="BrakremontItemsDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"BrakremontItems"</Subscript>
+<Value name="1">
+<Value>StoreBrak</Value>
+</Value>
+<Value name="2">
+<Value>addr</Value>
+</Value>
+<Value name="3">
+<Value>Brak</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

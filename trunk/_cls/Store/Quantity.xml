@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Store.Quantity">
+<Description>
+Количество товара в данной ячейке</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60320,38564.55821</TimeCreated>
+
+<Property name="Address">
+<Description>
+Адрес</Description>
+<Type>Store.Address</Type>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Адрес"/>
+</Property>
+
+<Index name="AddressIndex">
+<Properties>Address</Properties>
+</Index>
+
+<Property name="Goods">
+<Description>
+Товар</Description>
+<Type>Goods.Goods</Type>
+<Parameter name="CAPTION" value="Товар"/>
+</Property>
+
+<Index name="GoodsIndex">
+<Properties>Goods</Properties>
+</Index>
+
+<Index name="GoodAddrUnique">
+<Description>
+Уникальность товара и адреса</Description>
+<Properties>Goods,Address</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Property name="Value1">
+<Description>
+Количество товара</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Количество"/>
+</Property>
+
+<Property name="Value2">
+<Description>
+Зарезервировано</Description>
+<Type>%String</Type>
+<InitialExpression>0</InitialExpression>
+<Parameter name="CAPTION" value="Зарезервировано"/>
+</Property>
+
+<Method name="%OnBeforeSave">
+<Description><![CDATA[
+This callback method is invoked by the <METHOD>%Save</METHOD> method to 
+provide notification that the object is being saved. It is called before 
+any data is written to disk.
+
+<P><VAR>insert</VAR> will be set to 1 if this object is being saved for the first time.
+
+<P>If this method returns an error then the call to <METHOD>%Save</METHOD> will fail.]]></Description>
+<FormalSpec>insert:%Boolean</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	if %this.Value1<0 q '$$$OK
+	if %this.Value2<0 q '$$$OK
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Store.QuantityD</DataLocation>
+<DefaultData>QuantityDefaultData</DefaultData>
+<IdLocation>^Store.QuantityD</IdLocation>
+<IndexLocation>^Store.QuantityI</IndexLocation>
+<StreamLocation>^Store.QuantityS</StreamLocation>
+<Data name="QuantityDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Address</Value>
+</Value>
+<Value name="3">
+<Value>Goods</Value>
+</Value>
+<Value name="4">
+<Value>Value</Value>
+</Value>
+<Value name="5">
+<Value>UpakValue</Value>
+</Value>
+<Value name="6">
+<Value>Value1</Value>
+</Value>
+<Value name="7">
+<Value>Value2</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

@@ -1,0 +1,114 @@
+<script language="cache" runat="server">
+ s docid=%request.Get("docid")
+ s class=%request.Get("class")
+ s doc=##class(Docs.Rash).%OpenId(docid)
+ d:$ISOBJECT(doc)
+ . s docname=doc.Name
+ . s DocDate=$ZD(doc.Dat,4)
+ . s KontrID=doc.Kontr.%Id()
+ . s KontrName=$ZCVT(doc.Kontr.Name,"O","JS")
+
+ // Грузоотправитель
+ s GruzootpravitelID=%request.GetCookie("GruzootpravitelID")
+ d:GruzootpravitelID'=""
+ . s GruzootpravitelObj=##class(Common.Kontragent).%OpenId(GruzootpravitelID)
+ . q:'$ISOBJECT(GruzootpravitelObj)
+ . s GruzootpravitelName=$ZCVT(GruzootpravitelObj.Name,"O","JS")
+
+ // Грузоотправитель
+ s PostavchikID=%request.GetCookie("PostavchikID")
+ d:PostavchikID'=""
+ . s PostavchikObj=##class(Common.Kontragent).%OpenId(PostavchikID)
+ . q:'$ISOBJECT(PostavchikObj)
+ . s PostavchikName=$ZCVT(PostavchikObj.Name,"O","JS")
+</script>
+<html XMLNS:SKLAD2>
+<IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc" >
+<head>
+<title>#($G(%session.Data("systemname")))#</title>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="Jscript" src="common.js"></script>
+<script language="JScript">
+var sessionid="#(%session.SessionId)#";
+var docid="#($G(docid))#";
+var clas="#($G(class))#";
+var KontrID="#($G(KontrID))#";
+var KontrName="#($G(KontrName))#";
+var DocDate="#($G(DocDate))#";
+var GruzootpravitelID="#($G(GruzootpravitelID))#";
+var GruzootpravitelName="#($G(GruzootpravitelName))#";
+var PostavchikID="#($G(PostavchikID))#";
+var PostavchikName="#($G(PostavchikName))#";
+
+window.dialogHeight='350px';
+
+function startFun(){
+var k1=PropTable1.item("Kontr")
+var k2=PropTable2.item("Kontr")
+var k3=PropTable3.item("Kontr")
+var k4=PropTable4.item("Kontr")
+SetCookie("GruzootpravitelID",k1);
+SetCookie("PostavchikID",k3);
+var nomnakl=document.myform.nomnakl.value
+if(k1==""){alert("Не заполнено поле Грузоотправитель");return}
+if(k2==""){alert("Не заполнено поле Грузополучатель");return}
+if(k3==""){alert("Не заполнено поле Поставщик");return}
+if(k4==""){alert("Не заполнено поле Плательщик");return}
+if(nomnakl==""){alert("Не заполнен номер товарной накладной");return}
+window.open("print.csp?id="+docid+"&class="+clas+"&kontr="+k1+"&kontr2="+k2+"&kontr3="+k3+"&kontr4="+k4+"&nomernakl="+nomnakl+"&NDSinside="+document.all.NDSinside.checked+"&DocDate="+Dat.innerText+"&sessionid="+sessionid)
+}
+
+function load(){
+Dat.innerText=DocDate;
+PropTable1.DownLoadPairs("","","Dat,Tim,Summa,Name,DocumentClass,Stat,Source,User1,Depot,Comment,CloseDate,CloseTime,CloseUser");
+PropTable2.DownLoadPairs("","","Dat,Tim,Summa,Name,DocumentClass,Stat,Source,User1,Depot,Comment,CloseDate,CloseTime,CloseUser");
+PropTable3.DownLoadPairs("","","Dat,Tim,Summa,Name,DocumentClass,Stat,Source,User1,Depot,Comment,CloseDate,CloseTime,CloseUser");
+PropTable4.DownLoadPairs("","","Dat,Tim,Summa,Name,DocumentClass,Stat,Source,User1,Depot,Comment,CloseDate,CloseTime,CloseUser");
+document.myform.nomnakl.value='#(docname)#'
+}
+
+function OpenCalendar(InputObj){
+var newDate=window.showModalDialog("calendar.csp","","center:yes;status:no;dialogHeight:350px;dialogWidth:310px;resizable:yes;");
+if(ReturnSpace(newDate)!=""){InputObj.innerText=newDate;}
+}
+
+function LoadProp24Complite(){
+	PropTable2.setCellValue("Kontr",KontrName,KontrID);
+	PropTable4.setCellValue("Kontr",KontrName,KontrID);
+
+}
+
+function LoadProp1Complite(){
+	if(GruzootpravitelID!="")
+	{
+	PropTable1.setCellValue("Kontr",GruzootpravitelName,GruzootpravitelID);
+	}
+}
+
+function LoadProp3Complite(){
+	if(PostavchikID!="")
+	{
+	PropTable3.setCellValue("Kontr",PostavchikName,PostavchikID);
+	}
+}
+</script>
+</head>
+<body onload="load();" onkeypress="ManageWindow();" >
+<form name="myform" id="myform">
+<b><center>Формирование товарной накладной</center></b>
+<table>
+<tr><td>Номер товарной накладной</td><td><input type="text" name="nomnakl" id="nomnakl"></td></tr>
+<tr><td>Дата документа</td><td><div onclick="OpenCalendar(this)" name="Dat" id="Dat" style="border:solid 1 grey;width:150px;cursor:hand"></div></td></tr>
+<tr><td>Грузоотправитель</td><td><SKLAD2:table id="PropTable1" width=260 ClassName="Docs.Super" onLoadComplete="LoadProp1Complite()"/></td></tr>
+<tr><td>Грузополучатель</td><td><SKLAD2:table id="PropTable2" width=260 ClassName="Docs.Super" onLoadComplete="LoadProp24Complite()"/></td></tr>
+<tr><td>Поставщик</td><td><SKLAD2:table id="PropTable3" width=260 ClassName="Docs.Super" onLoadComplete="LoadProp3Complite()"/></td></tr>
+<tr><td>Плательщик</td><td><SKLAD2:table id="PropTable4" width=260 ClassName="Docs.Super" onLoadComplete="LoadProp24Complite()"/></td></tr>
+<tr>
+	<td>НДС включён в цену товара</td><td> <input type="checkbox" name="NDSinside" id="NDSinside" CHECKED ></td>
+</tr>
+<!-- <tr><td>Рассчитывать рублёвую сумму на дату документа</td><td> <input type="checkbox" name="KursFromDoc" id="KursFromDoc" CHECKED ></td></tr> -->
+</table>
+<center><br><sklad:Button value="Да" onclick="startFun();"><sklad:Button onclick="window.close()" value="Отмена"></center>
+</form>
+</body>
+</html>

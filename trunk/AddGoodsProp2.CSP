@@ -1,0 +1,156 @@
+<script language="cache" runat="server">
+ s ClassName=%request.Get("ItemID")
+ s havename="false"
+ i ClassName'="" d
+ . s havename=##class(Common.Common).ClassHaveProperty($G(ClassName),"Name")
+ . s havename=$S(havename:"false",1:"true")
+ . s ClassObj=##class(Common.Dicts).%OpenId(ClassName)
+ . i ' $ISOBJECT(ClassObj) q
+ . s ClassDisplayName=ClassObj.Name
+ . k ClassObj
+</script>
+
+<html XMLNS:SKLAD2>
+<IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc">
+<head><title>#($G(%session.Data("systemname")))#</title>
+<link href="style.css" type=text/css rel=stylesheet>
+<style>
+body{font-face: arial; font-size: 12}
+</style>
+
+<script language="Jscript" src="common.js"></script>
+<script language="jscript">
+var FieldType="%String";
+var Res="";
+var argArr=window.dialogArguments.split(";");
+var ClassName=ReturnSpace(argArr[0]);
+var PatternType;
+var PatternValue;
+
+function startFun(){
+Proper=PropDesc.value;
+if(Proper==""){alert("Не заполнено Наименование свойства");return false;}
+if(window.confirm("Создасть свойство "+Proper+"?")==false)return false;
+if(FieldType=="enumerated"){Res=jhu.ColumnData(0);}
+if(!Pattern.checked)PatternFun();
+wind=window.open("wait.csp",null,"height=100,width=200,toolbar=no,menubar=no,location=no,titlebar=no")
+ok=#server(Goods.GoodsAction.addClassProperty(Proper,Res,FieldType,ClassName,KeyProp.checked,PatternType,PatternValue))#
+wind.close();
+if(ok==1){returnValue=1;window.close();}
+else{alert(ok)}
+}
+
+function showflex(){
+if (chbx.checked){
+	window.dialogHeight="400px";
+	document.all.flex.style.display="block";
+	FieldType="enumerated";
+	}
+else{
+	document.all.flex.style.display="none";
+	window.dialogHeight="300px";
+	}
+}
+
+function delStr(){
+itemz=flexgrid.Row;
+if(flexgrid.Rows==1){alert("Невозможно удалить единственную строку");return false;}
+flexgrid.RemoveItem(itemz);
+}
+
+function DateField(){
+	FieldType="%Date";
+	showflex();
+	showDicts();
+}
+
+function DictField(){
+	showflex();
+	showDicts();
+	
+}
+function showDicts(){
+	if (DictFld.checked){
+		document.all.dict.style.display="block";
+		newItem=window.showModalDialog("Dictionary.csp","Common.Dicts","cener:yes;status:no;dialogHeight:350px;dialogWidth:600px;resizable:yes;");
+		if(newItem==null){return false;}
+		newArr=newItem.split(InnerSplitter);
+		DictName.innerText=newArr[1];
+		FieldType=newArr[0];
+		Res=newArr[0];
+	}
+	else{
+		document.all.dict.style.display="none";
+	}
+}
+
+function load(){
+	if(ClassName!=""){
+		KeyProp.checked=#(havename)#;
+		osnprop.style.display="";
+		}
+}
+
+function PatternClick(show){
+if(show){PatternDescr.style.display="inline";window.dialogHeight="420px";}
+else{PatternDescr.style.display="none";window.dialogHeight="300px";}
+}
+
+function PatternFun(){
+if(PatternType2[0].checked){
+	PatternType="prohibited";
+	PatternValue=CharsProhibit.value;}
+if(PatternType2[1].checked){
+	PatternType="%Numeric";
+	PatternValue="";}
+if(PatternType2[2].checked){
+	PatternType="%String";
+	PatternValue="";}
+if(PatternType2[3].checked){
+	PatternType="cachepattern";
+	PatternValue=CachePattern.value;}
+}
+</script>
+
+</head>
+<body onkeypress="ManageWindow()" onload="load()">
+<center><font size=+2>Справочник <b>#($G(ClassDisplayName))#</b></font></center>
+<table width=100% cellspacing=10>
+<tr><td>Наименование поля: </td><td> <input type="text" name="PropDesc" onkeypress="ManageWindow()"><br></td></tr>
+<tr><td>Поле является ссылкой на справочник</td><td> <input type="checkbox" id="DictFld" onclick="DateFld.checked=false;chbx.checked=false;DictField();" style="border:none;width:15px"></td></tr>
+<tr id="dict" style="display:none"><td colspan=2 align=center id="DictName"></td></tr>
+<tr><td>В поле будет записана дата</td><td> <input type="checkbox" id="DateFld" onclick="chbx.checked=false;DictFld.checked=false;DateField();" style="border:none;width:15px"></td></tr>
+<tr><td>Значения поля ограничены списком</td><td> <input type="checkbox" id="chbx" onclick="DateFld.checked=false;DictFld.checked=false;showflex();" style="border:none;width:15px"></td></tr>
+<tr id="flex" style="display:none"><td colspan=2 align=center>
+<SKLAD2:table id="jhu" width=220 height=100 rows=1 cols=1 />
+<sklad:LittleButton id="but21" name="ok" alt="Вставить строку" onclick="jhu.Insrow('')">
+<sklad:LittleButton id="but1" name="del" alt="Удалить строку" onclick="jhu.Delrow()"></td></tr>
+
+<tr style="display:none"><td>Тип свойства: смешанный (любые символы)</td><td><input type="checkbox" id="Pattern" style="border:none;width:15px" onclick="PatternClick(!this.checked)" checked></td></tr>
+<tr id="PatternDescr" style="display:none"><td colspan=2>
+<table>
+<tr>
+	<td width=15>&nbsp;</td><td><input type="radio" name="PatternType2" style="border:none;width:15px" CHECKED>
+	Запрещены к использованию следующие символы:</td><td><input type="text" id="CharsProhibit"></td>
+</tr>
+<tr>
+	<td width=15>&nbsp;</td><td><input type="radio" name="PatternType2" style="border:none;width:15px">
+	Используются только цифры:</td><td></td>
+</tr>
+<tr>
+	<td width=15>&nbsp;</td><td><input type="radio" name="PatternType2" style="border:none;width:15px">
+	Используются только символы:</td><td></td>
+</tr>
+<tr style="display:none">
+	<td width=15>&nbsp;</td><td><input type="radio" name="PatternType2" style="border:none;width:15px">
+	Используется шаблон:</td><td><input type="text" id="CachePattern"></td>
+</tr>
+</table>
+</td></tr>
+
+<tr id="osnprop" style="display:none"><td>Это поле является главным</td><td> <input type="checkbox" id="KeyProp" style="border:none;width:15px"></td></tr>
+<tr><td colspan=2 align="center"><br><sklad:Button value="Да" onclick="startFun();"><sklad:Button onclick="window.close()" value="Отмена"></td></tr>
+</table>
+
+</body>
+</html>

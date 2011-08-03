@@ -1,0 +1,168 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ i %session.NewSession d
+ . s %session.EndSession=1
+ . s sessionid=%request.Get("sessionid",1)
+ . s %session=%session.GetSession(sessionid)
+ .  s login=$G(%session.Data("user"))
+ . i '+login s %response.ServerSideRedirect="norights.csp" 
+ e  s sessionid=%session.SessionId
+ 
+Quit 1
+</script>
+<html XMLNS:SKLADiGrid>
+<IMPORT NAMESPACE="SKLADiGrid" IMPLEMENTATION="htc/iGridV9.htc">
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<style>
+.LeftTop{border-left : 1 solid black;border-top : 1 solid black;}
+.RightBottom{font-family:Arial;font-size:14px;border-right : 1 solid black;border-bottom : 1 solid black;}
+SELECT{width:170px}
+.Kontragent{width:170px;cursor:hand;}
+.ZakazInstr{display:inline;}
+</style>
+<script language="jscript" src="common.js"></script>
+<title>План</title>
+
+<script language="Jscript">
+var DocId='#(%request.Get("source"))#';
+var OriginalInstructionId=DocId;
+var sessionid="#(sessionid)#";
+
+//функция выбора контрагента (подставит выбранного в innerText переданного объекта
+function ChooseKonragent(Obj){
+newItem=window.showModalDialog("Dictionary.csp","Common.Kontragent","center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");
+if(newItem==null){return false;}
+var newArr=newItem.split(InnerSplitter);
+Obj.innerText=newArr[1];
+Obj.Tag=newArr[0];
+}
+
+function load(){
+FillDocStr();
+}
+
+function FillDocStr(){
+var Captions = new Array(4);
+var Keys = new Array(4);
+var Tags = new Array(4);
+var Widths = new Array(4);
+
+Captions[0]="Товар";
+Captions[1]="Количество";
+Captions[2]="Цена";
+Captions[3]="Сумма";
+
+Tags[0]="Goods.Goods";
+Tags[1]="%Numeric";
+Tags[2]="%Numeric";
+Tags[3]="%Numeric";
+
+Keys[0]="Goods";
+Keys[1]="Quantity";
+Keys[2]="Price";
+Keys[3]="Total";
+
+Widths[0]=400;
+Widths[1]=80;
+Widths[2]=80;
+Widths[3]=80;
+docstr.DrawHeaders(Captions,Keys,Tags, Widths);
+if(DocId!="")
+	{
+	docstr.loadfrommethod("Docs.Action2.ChiefInstructStr",DocId,"Operation.PlanItems");
+	}
+}
+
+// сохранить
+function startFun(){
+xmlDoc=docstr.GetXmlContentByRows();
+InsertXmlHeader(xmlDoc,"Name",Name.value,"%String")
+InsertXmlHeader(xmlDoc,"Comment",Comment.value,"%String")
+InsertXmlHeader(xmlDoc,"PlanDate",PlanDate.value,"%Date")
+InsertXmlHeader(xmlDoc,"PlanDate2",PlanDate2.value,"%Date")
+InsertXmlHeader(xmlDoc,"DocLanguage",DocLanguage.value,"%String")
+InsertXmlHeader(xmlDoc,"Summa",Summa.value,"%Numeric")
+InsertXmlHeader(xmlDoc,"Kontr",Kontr.Tag,"Common.Kontragent")
+var DocID=SendXml(DocId,"Operation.Plan",xmlDoc,sessionid);
+if(isNaN(DocID)){alert(DocID)}
+else{returnValue=1;window.close();}
+}
+
+// Добавить товар
+function AddGood(){
+//вызываем окно выбора товаров с ключом "выводить закупочные цены", см. Goods.GoodsAction.fromgroup()
+WinResult=window.showModalDialog("selectgoods2.csp?ShowBuyPrices=@1","","center:yes;status:no;dialogHeight:700px;dialogWidth:800px;resizable:yes;")
+if(WinResult==null)return
+WinResult=WinResult.split(StringSplitter)
+docstr.AddRowsInstruct(WinResult)
+Summa.value=docstr.GetTableSumma();
+}
+
+// удалить строку
+function RemoveRow(){
+docstr.RemoveSelectedRows();
+Summa.value=docstr.GetTableSumma();
+}
+
+// Очистить список
+function ClearGrid(){
+if(window.confirm("Удалить все товарные строки?"))
+	{
+	docstr.Clear();
+	Summa.value=0;
+	}
+}
+
+</script>
+</head>
+
+<body onload="load()" onkeypress="ManageWindow();">
+<table width=100%><tr><td>
+<table class="LeftTop" cellspacing=0 width=100%>
+<script language="cache" runat="server">
+ s PlanID=%request.Get("source")
+ i PlanID {
+ 	&sql(select Name,Comment,PlanDate,PlanDate2,Kontr,Kontr->Name,CloseDate,CloseTime,CloseUser->Name,Stat,DocLanguage,Summa 
+ 	into :Name,:Comment,:PlanDate,:PlanDate2,:Kontr,:KontrName,:CloseDate,:CloseTime,:CloseUserName,:Stat,:DocLanguage,:Summa
+ 	from Operation.Plan where ID=:PlanID)
+ 	i SQLCODE w "<tr><td colspan=4>Ошибка при выводе плана "_InstrID_"<br>SQLCODE="_SQLCODE_"</td></tr>"
+ 	i Stat=2 d
+ 	. s ClosedString=CloseUserName_" "_$S(CloseDate:$ZD(CloseDate,4),1:"")_" "_$S(CloseTime:$ZT(CloseTime),1:"")
+ 	. s SaveButtonStyle="display:none"
+ }
+
+w "<tr>"
+	w "<td class=RightBottom>Номер<td class=RightBottom><input type=text id=Name MAXLENGTH=50 value='"_$G(Name)_"'>"
+	w "<td class=RightBottom>Комментарий<td class=RightBottom><input type=text id=Comment MAXLENGTH=1000 Value='"_$G(Comment)_"'>"
+w "</tr>"
+
+w "<tr>"
+	w "<td class=RightBottom>Язык документа<td class=RightBottom><select id=""DocLanguage"">"_##class(Docs.Action2).GetDisplaylistOptions($G(DocLanguage),"Operation.Plan||DocLanguage")_"</select>"
+	w "<td class=RightBottom>Контрагент<td class=RightBottom><span onmouseout=""UnPaint(this)"" onmouseover=""Paint(this)"" class=Kontragent onclick=""ChooseKonragent(this)"" oncontextmenu=""this.innerText='';this.Tag=''"" id=""Kontr"" Tag='"_$G(Kontr)_"'>"_$G(KontrName)_"</span>"
+w "</tr>"
+
+w "<tr>"
+	w "<td class=RightBottom>Начальная дата<td class=RightBottom><input type=text id=""PlanDate"" value='"_$ZD($G(PlanDate,$H),4)_"' onclick=""fnCalendar(this)"" class=""datar"" onmouseout=""UnPaint(this)"" onmouseover=""Paint(this)"">"
+	w "<td class=RightBottom>Конечная дата<td class=RightBottom><input type=text id=""PlanDate2"" value='"_$ZD($G(PlanDate2,$H),4)_"' onclick=""fnCalendar(this)"" class=""datar"" onmouseout=""UnPaint(this)"" onmouseover=""Paint(this)"">"
+w "</tr>"
+
+w "<tr>"
+	w "<td class=RightBottom>Сумма<td class=RightBottom><input type=text id=""Summa"" value='"_$G(Summa)_"' >"
+	w "<td class=RightBottom>&nbsp;<td class=RightBottom>&nbsp;"
+w "</tr>"
+
+w:$G(ClosedString)'="" "<tr><td colspan=4 class=RightBottom>Создана инструкция на приём <i>"_ClosedString_"</i></tr>"
+</script>
+</table>
+<tr height=100%><td>
+<SKLADiGrid:iGrid id="docstr" width="100%" height="300" Enabled="true" RowMode="true" /><br>
+<sklad:Button value="Добавить товар" onclick="AddGood();" style="width:150px">
+<sklad:Button value="Удалить строку" onclick="RemoveRow();" style="width:150px">
+<sklad:Button value="Очистить строки" onclick="ClearGrid();" style="width:150px">
+<sklad:Button value="Пересчитать сумму" onclick="Summa.value=docstr.GetTableSumma();" style="width:160px">
+<tr><td>
+<center><br><sklad:Button value="Сохранить" onclick="startFun();" style="#($G(SaveButtonStyle))#"><sklad:Button onclick="windowclose();" value="Отмена"></center>
+</table>
+
+</body>
+</html>

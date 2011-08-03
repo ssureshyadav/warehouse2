@@ -1,0 +1,251 @@
+<script language="cache" runat="server">
+ s Tunes=$NA(^Tunes(2))
+ s i="" f  s i=$O(@Tunes@(i)) q:i=""  d
+ . s CommonVars=$G(CommonVars)_"var "_i_"="""_$G(@Tunes@(i,"Value"),"undefined")_""";"
+</script>
+<html XMLNS:SKLADz XMLNS:SKLAD2>
+<head>
+<IMPORT NAMESPACE="SKLADz" IMPLEMENTATION="htc/treeview.htc">
+<IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc">
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="jscript" src="common.js"></script>
+<script language="Jscript">
+var everythingok=false;
+var Trick=0;
+var ItemsPercents = new Array();
+depot='#(%session.Data("depot"))#'
+#(CommonVars)#
+var CurrentElement="";
+
+function load(){
+depotelem.startDownload('Data.csp?class=Store.Depot&fields=ID,Name', put);
+LoadAddress();
+AddressTree.onClick="TreeClick()";
+TreeClick();
+everythingok=true;
+}
+
+function put(textStr){
+addOptions(textStr,"depotelem");
+}
+
+function TreeClick(NodeCode){
+if(NodeCode==""){Trick=1;}
+else{Trick=0;}
+CreateAddressLine();
+Clear();
+if(NodeCode==null)NodeCode=AddressTree.NodeCode;
+var childs=""
+if(NodeCode==""){var childs=sparents}
+else{var childs=ReturnSpace(parents[NodeCode])}
+//ok=#server(Store.Action.GetChilds(NodeCode))#
+//if(ok!=""){
+if(childs!=""){
+tablefield.style.display="none";
+//var strings = ok.split(StringSplitter);
+var strings = childs.split(InnerSplitter);
+if (strings.length!=1){
+	for (var i = 0; i < strings.length-1; i++){
+	//element=strings[i].split(InnerSplitter)
+	//ElemId=element[0]
+	//ElemCode=element[1]
+	//ElemName=element[2]
+	//ElemComment=element[3]
+	//tempstore=element[4]
+	//percent=element[5]
+	var id1=strings[i]
+	//alert("i1="+id1+"\ncode[id1]="+code[id1]+"\name[id1]="+name[id1])
+	ElemId=id1
+	ElemCode=code[id1]
+	//alert(ElemCode)
+	ElemName=name[id1]
+	ElemComment=comment[id1]
+	elemtempstore=tempstore[id1]
+	elempercent=percent[id1]
+	ElementStr="<div ondblclick='HandleClick(this)' onmouseover=\"Comment.innerText='"+ElemComment+"'\" onmouseout=\"Comment.innerText=''\" style='margin:6;height:"+BlockHeight+";width:"+BlockWidth+";border:1 solid;display:inline' id='"+ElemId+"'></div>";
+	aElement=document.createElement(ElementStr);
+	if(elemtempstore=="1"){aElement.style.backgroundColor="#efefef"}
+	//QuantityStr=AddressTree.ChildrenQuantity(ElemCode)
+	var littlecols=CreateChQuant(ReturnSpace(parents[ElemCode]))
+	aElement.innerHTML="<center>"+ElemName+"<font color=gray> ("+elempercent+"%) </font>"+littlecols+"</center>";
+	aElement.tag=ElemCode;
+	MoveField.appendChild(aElement);
+	}
+}
+else{alert(ok);}
+}
+else{
+	var currentid=AddressTree.NodeID;
+	var currentpercent=ItemsPercents[currentid];
+	tablefield.style.display="block";
+	PropTable.ClearRows();
+	PropTable.DownLoadPairs("",currentid,"Depot,Code,Parent");
+	}
+}
+
+function CreateChQuant(str){
+var res=""
+var string=str.split(InnerSplitter);
+if(string.length>1)res="<br>"
+for(z=0;z<string.length-1;z++){
+var curid=string[z];
+var procent=percent[curid]
+var heightz=(ColumnHeight-Math.ceil(ColumnHeight*(procent/100)))-2
+var res=res+"<div style='margin:1;padding:0;border:1 solid;background-color:#898989;height:"+ColumnHeight+";display:inline' ><img src='images/WhitePixel.gif' width=4 height="+heightz+" style='cursor:auto' ></div>"
+}
+return res
+}
+
+function Create(){
+number=MoveField.childNodes.length
+ElementStr="<button oncontrolselect='HandleClick(this.id)' style='position:absolute;height:28;width:40' id='but"+number+"'></button>";
+aElement=document.createElement(ElementStr);
+MoveField.appendChild(aElement);
+}
+
+function fnHandleMove(){
+if(event.srcElement.offsetTop<TableMoveField.offsetTop)event.srcElement.style.pixelTop=TableMoveField.offsetTop;
+if(event.srcElement.offsetLeft<MoveField2.offsetLeft)event.srcElement.style.pixelLeft=MoveField2.offsetLeft;
+}
+
+function Save(){
+res="";
+for (i = 0; i <MoveField.childNodes.length; i++){
+res=res+MoveField.childNodes(i).id+InnerSplitter;
+res=res+MoveField.childNodes(i).offsetLeft+InnerSplitter;
+res=res+MoveField.childNodes(i).offsetTop+InnerSplitter;
+res=res+MoveField.childNodes(i).style.pixelWidth+InnerSplitter;
+res=res+MoveField.childNodes(i).style.pixelHeight+InnerSplitter;
+val=ReturnSpace(MoveField.childNodes(i).value);
+if(val==""){alert("Элементы без подписи недопустимы");return false;}
+res=res+val;
+res=res+StringSplitter;
+}
+ok=#server(Store.Action.SaveButs(AddressTree.NodeCode,res))#
+if(ok!=1){alert(ok)}
+else{alert("Сохранено")}
+}
+
+function HandleClick(Obj){
+AddressLine(Obj.tag)
+}
+
+function CreateSub(sublevel){
+code=ReturnSpace(AddressTree.NodeCode);
+if((sublevel==1)&(code=="")){return false;}
+ok=window.showModalDialog("addZone.csp",code+";"+sublevel,"center:yes;status:no;dialogHeight:220px;resizable:yes")
+if(ok==null)return false;
+if(ok==1){load()}
+else{alert(ok)}
+}
+function LoadAddress(){
+AddressTree.DownLoad("Data.csp?class=Store.Address&fields=Parent,Code,Name,ID&where=depot="+depot)
+}
+
+function Clear(){
+MoveField.innerHTML="";
+}
+function AddressLine(code){
+AddressTree.SelectedItem=code;
+TreeClick();
+}
+
+function CreateAddressLine(){
+if (Trick==1){addresspath.innerHTML="";return false;}
+ParentNames=AddressTree.ParentNames;
+ParentCodes=AddressTree.ParentCodes;
+if(ParentNames=="")return false
+addresspath.innerHTML="";
+NamesArr=ParentNames.split("~");
+CodesArr=ParentCodes.split("~");
+for(i=0;i<NamesArr.length;i++){
+	aElement=CreateLink(NamesArr[i],CodesArr[i]);
+	addresspath.appendChild(aElement);
+	addresspath.innerHTML=addresspath.innerHTML+" > ";
+}
+}
+
+function CreateLink(name,hrefz){
+ElementStr="<a ></a>";
+aElement=document.createElement(ElementStr);
+hrefz="javascript:AddressLine('"+hrefz+"')";
+aElement.href=hrefz;
+//javascript:TreeClick('"+hrefz+"')
+aElement.innerText=name;
+return aElement;
+}
+
+function changedepot(){
+depot=depotelem.value;
+LoadAddress();
+}
+
+function TreeClick2(){
+if(everythingok)TreeClick();
+}
+
+function startFun(){
+returnValue=depotelem.value+InnerSplitter+depotelem.options(depotelem.selectedIndex).text;
+window.close();
+}
+</script>
+
+</head>
+<body onload="load();" onkeypress="ManageWindow()" >
+<script language="cache" runat="server">
+w "<script language=""Jscript"">"
+  f var="ids","percent","code","name","comment","tempstore","parents" d
+  . w "var "_var_"=new Array();",!
+ s depot=%session.Data("depot")
+ s sql="select ID,Code,Name,Comment,tempstore,Currentsize,Size1,Parent from Store.Address where depot="_depot_" order by Name"
+ s result=##class(%ResultSet).%New()
+ d result.Prepare(sql)
+ s result.RuntimeMode=2
+ s ok=result.Execute()
+ s res=""
+ While result.Next() {
+  s OutString=""
+  s id=result.Get("ID")
+  s code=result.Get("Code")
+  s name=result.Get("Name")
+  s comment=result.Get("Comment")
+  s tempstore=result.Get("tempstore")
+  s percent=0
+  s Currentsize=+result.Get("Currentsize")
+  s Maxsize=+result.Get("Size1")
+  s str2(code)=id
+  s parent=result.Get("Parent")
+  i parent'="" s str(parent)=$G(str(parent))_id_"~"
+  e  s str=$G(str)_id_"~"
+  i Maxsize>0 s percent=$J((Currentsize/Maxsize)*100,".",0)
+  f var="percent","code","name","comment","tempstore" d
+  . w var_"["_id_"]="""_@var_""";"
+  w "ids["""_code_"""]="_id_";"
+ }
+  s i=""
+  w "",!
+  f  s i=$O(str(i)) q:i=""  d
+  . q:str2(i)=""
+  . w "parents["""_i_"""]="""_$G(str(i))_""";"
+  w "sparents="""_$G(str)_""";"
+w "</script"_">"
+</script>
+<center><br><sklad:Button value="Да" onclick="startFun();"><sklad:Button onclick="window.close()" value="Отмена"></center>
+<select style="width:150px" onchange="changedepot()" id="depotelem" style='behavior:url(#default#download)'></select>
+<br>
+<span style="display:none"><a href="javascript:TreeClick('')" >#(%session.Data("depotName"))#</a> > <span id="addresspath"></span></span>
+<table cellspacing=0 cellpadding=0 width=100% height=100% border=0 id="TableMoveField"><tr>
+<td valign=top><SKLADz:treeview id="AddressTree" width=150 height=200 ShowImages=1 ImagesPath="#(%session.Data("ImagesPath"))#" onDownloadCmpl="TreeClick2()"/>
+<br><br><span id="Comment" style="color:darkgrey"></span>
+</td>
+<td width=100% style="border-left:1 solid black;border-top:1 solid black" valign=top id="MoveField2">
+<div id="MoveField" CONTENTEDITABLE='false' ></div>
+<div id="tablefield" >
+<SKLAD2:table id="PropTable" width="400" ClassName="Store.Address" /><br>
+</div></td>
+<!--
+при включенном CONTENTEDITABLE срабатывает событие oncontrolselect
+-->
+</table>
+</body>
+</html>

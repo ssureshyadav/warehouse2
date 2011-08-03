@@ -1,0 +1,48 @@
+<html>
+<head>
+<title>#($G(%session.Data("systemname")))#</title>
+<script language="jscript" src="common.js"></script>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="Jscript">
+var args=window.dialogArguments.split(";");
+code=args[0];
+sub=args[1];
+function startFun(){
+	if(!window.confirm("Создать?"))return false;
+	if(Name.value==""){alert("Не указано наименование");return false;}
+	//draw=Draw.checked;
+	quant=Quant.value;
+	name=Name.value;
+	comment=txtComments.value;
+	//var dd=0;
+	//if(rad[0].checked)var dd=1;
+	//if(rad[1].checked)var dd=2;
+	//if(rad[2].checked)var dd=3;
+	ok=#server(Store.Action.CreateLevel(name,quant,code,sub,comment,"",sta.value))#
+	if(ok!=1){alert(ok);}
+	else{
+		window.returnValue=1;
+		window.close();}
+}
+</script>
+</head>
+<body onkeypress="ManageWindow()">
+<Table width=100%>
+<tr><td>Наименование</td><td><input type="text" id="Name" name="Name"></td></tr>
+<!--<tr><td>Требуется прорисовка</td><td><input style="border:none" type="checkbox" id="Draw"></td></tr>-->
+<tr><td>Количество ячеек </td><td><input type="text" id="Quant" value=1> нумерация с <input type="text" id="sta" value=1></td></tr>
+<tr><td>Пояснение</td><td><TEXTAREA STYLE="overflow:auto;border:solid 1 grey;" ID=txtComments rows=3 cols=40></TEXTAREA></td>
+<!--
+<tr><td>Временное хранение</td><td><input type=checkbox id=tempstore></td>
+<!--
+<tr><td colspan=2>
+<INPUT type=radio name="rad" CHECKED >маленький 1 (3981,3)
+<INPUT type=radio name="rad" >маленький 2 (4516,8)
+<INPUT type=radio name="rad" >большой (21840)
+<INPUT type=radio name="rad" >не указывать
+</td></tr>
+-->
+<tr><td colspan=2 align="center"><br><sklad:Button value="Да" onclick="startFun();"><sklad:Button onclick="window.close()" value="Отмена"></td></tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.storeplace">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62010,51070.341796</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body>"
+	Write !,"<Table width=100% height=100% ><tr valign=top><td>",!
+	Write "<table width=100% class=""LeftTop"" cellspacing=0 >",!
+	s StoreId=%request.Get("StoreId")
+	s StoreObj=##class(Store.Address).%OpenId(StoreId)
+	d:$ISOBJECT(StoreObj)
+	. s Name=StoreObj.Name
+	. s Comment=StoreObj.Comment
+	. s Size1=StoreObj.Size1
+	. s Currentsize=StoreObj.Currentsize
+	. s Weight=StoreObj.Weight
+	. s Currentweight=StoreObj.Currentweight
+	. s DepotName=$S($ISOBJECT(StoreObj.Depot):StoreObj.Depot.Name,1:"")
+	. s oldnumb=StoreObj.oldnumb
+	. s speed=StoreObj.speed
+	. s block=StoreObj.block
+	. s AddressName=StoreObj.AddressName
+	&html<
+	<tr>
+	<td colspan=4 class=RightBottom><b>#($G(DepotName))#&nbsp;&nbsp;#($G(AddressName))#</b></td>
+	</tr>
+	<tr>
+	<td class=RightBottom>Наименование</td>
+	<td class=RightBottom><input type=text id=Name MAXLENGTH=50 value="#($G(Name))#"></td>
+	<td class=RightBottom>Комментарий</td>
+	<td class=RightBottom><input type=text id=Comment MAXLENGTH=50 value="#($G(Comment))#"></td>
+	</tr>
+	<tr>
+	<td class=RightBottom>Максимальный объём ячейки</td>
+	<td class=RightBottom><input type=text id=Size1 MAXLENGTH=50 value="#($G(Size1))#"></td>
+	<td class=RightBottom>Текущий объём</td>
+	<td class=RightBottom>#($G(Currentsize))#</td>
+	</tr>
+	<tr>
+	<td class=RightBottom>Максимальный вес в ячейке</td>
+	<td class=RightBottom><input type=text id=Weight MAXLENGTH=50 value="#($G(Weight))#"></td>
+	<td class=RightBottom>Текущий вес</td>
+	<td class=RightBottom>#($G(Currentweight))#</td>
+	</tr>
+	<tr>
+	<td class=RightBottom>Старый номер</td>
+	<td class=RightBottom><input type=text id=oldnumb MAXLENGTH=50 value="#($G(oldnumb))#"></td>
+	<td class=RightBottom>Коэффициент доступности</td>
+	<td class=RightBottom><input type=text id=speed MAXLENGTH=50 value="#($G(speed))#"></td>
+	</tr>
+	<tr>
+	<td class=RightBottom>Блокировка</td>
+	<td class=RightBottom colspan=3><select id="block">
+	>
+	w ##class(Docs.Action2).GetDisplaylistOptions($G(block),"Store.Address||block")
+	&html<
+	</select></td>
+	</tr>
+	>
+	w "<tr><td class=RightBottom colspan=4>"
+	d:+StoreId
+	. &sql(declare cur2 cursor for 
+	select Goods,Goods->FullName,Value1,Value2
+	into :Goods,:GoodsFullName,:Value1,:Value2
+	from Store.Quantity where Address=:StoreId)
+	. &sql(open cur2)
+	. f  &sql(fetch cur2) q:SQLCODE  d
+	. . s Array(Goods,"Value1")=Value1
+	. . s Array(Goods,"Value2")=Value2
+	. . s Array(Goods,"GoodsFullName")=GoodsFullName
+	. &sql(close cur2)
+	. &sql(declare cur3 cursor for 
+	select Goods,Goods->FullName,Qnt into :Goods,:GoodsFullName,:Qnt
+	from Store.Brak where Address=:StoreId)
+	. &sql(open cur3)
+	. f  &sql(fetch cur3) q:SQLCODE  d
+	. . s Array(Goods,"Qnt")=Qnt
+	. . s Array(Goods,"GoodsFullName")=GoodsFullName
+	. &sql(close cur3)
+	. w "<br><table width=100% BGCOLOR=""#f1f1f1"" cellspacing=0 class=LeftTop><tr><td class=RightBottom>Товар</td><td class=RightBottom>Свободно</td><td class=RightBottom>Резерв</td><td class=RightBottom>Брак</td></tr>"
+	. s i="" f  s i=$O(Array(i)) d  q:i=""
+	. . q:i=""
+	. . w "<tr>"
+	. . w "<td class=RightBottom>"_$G(Array(i,"GoodsFullName"),"не найдено имя товара")_"</td>"
+	. . w "<td class=RightBottom>"_$G(Array(i,"Value1"),"&nbsp;")_"</td>"
+	. . w "<td class=RightBottom>"_$G(Array(i,"Value2"),"&nbsp;")_"</td>"
+	. . w "<td class=RightBottom>"_$G(Array(i,"Qnt"),"&nbsp;")_"</td>"
+	. . w "</tr>"
+	. w "</table>"
+	w "</td></tr>"
+	Write !,"</table>",!
+	Write "</td></tr>",!
+	Write "<tr valign=bottom><td align=center>",!
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"_($G(SaveButtonStyle))_""" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""startFun();"" TITLE=""""><center>Сохранить</center></span>"
+	Write !,!,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""windowclose();"" TITLE=""""><center>Отмена</center></span>"
+	Write !,"</td></tr>",!
+	Write "</table>",!
+	Write "</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<title> Карточка ячейки </title>",!
+	Write "<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"<style>"
+	Write !,".LeftTop{border-left : 1 solid black;border-top : 1 solid black;}",!
+	Write ".RightBottom{font-family:Arial;font-size:14px;border-right : 1 solid black;border-bottom : 1 solid black;}",!
+	Write "SELECT{width:170px}",!
+	Write "</style>"
+	Write !,"<script language=""jscript"" src=""common.js"">"
+	Write "</script>"
+	Write !,"<script language=""jscript"">"
+	Write !,"var StoreId="""_(%request.Get("StoreId"))_""";",!
+	Write "var sessionid="""_(%session.SessionId)_""";",!
+	Write !,"function startFun(){",!
+	Write "var xmlDoc = new ActiveXObject(""Msxml2.DOMDocument.3.0"");",!
+	Write "var RootElement = xmlDoc.createElement(""RootElement"");",!
+	Write "xmlDoc.documentElement=RootElement;",!
+	Write "var Properties= new Array(""Name"",""Comment"",""Size1"",""Weight"",""oldnumb"",""speed"",""block"");",!
+	Write "for(var i=0;i<Properties.length;i++){",!
+	Write "	var elementValue=document.getElementById(Properties[i]).value;",!
+	Write "	InsertXmlHeader(xmlDoc,Properties[i],elementValue,""%String"");",!
+	Write "}",!
+	Write "var DocID=SendXml(StoreId,""Store.Address"",xmlDoc,sessionid,""Docs.Action.SaveSingleGood"");",!
+	Write "if(isNaN(DocID)){alert(DocID)}",!
+	Write "else{",!
+	Write "	returnValue=1;",!
+	Write "	window.close();",!
+	Write "	}",!
+	Write "}",!
+	Write "</script>"
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\StorePlace.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/StorePlace.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>61222,80047</Default>
+</Parameter>
+</Class>
+</Export>

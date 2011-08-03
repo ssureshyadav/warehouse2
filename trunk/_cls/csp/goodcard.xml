@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.goodcard">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62196,37441.630448</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body onkeypress=""ManageWindow();"">"
+	Write !,(##class(%CSP.Response).HyperEventBody())
+	Write !,"<Table width=100% height=100%><tr valign=top><td>",!
+	Write "<table width=100% class=""LeftTop"" cellspacing=0>",!
+	d:GoodId
+	. s GoodObj=##class(Goods.Goods).%OpenId(GoodId)
+	. q:'$ISOBJECT(GoodObj)
+	. f i="Name","Property5300","abbr","Property3609","EnglishName","codedetail","Size1","Weight","Property9469","Comment","ChangeDate","ChangeTime","Composition","Description","MaterialEng","CodeOKVED" d
+	. . s @i=$ZOBJPROPERTY(GoodObj,i)
+	. d:$ISOBJECT(GoodObj.Tovar)
+	. . s Tovar=GoodObj.Tovar.%Id()
+	. . s TovarName=GoodObj.Tovar.FullName
+	. if $ISOBJECT(GoodObj.ChangeUser) s ChangeUser=GoodObj.ChangeUser.Name
+	. if ChangeDate s ChangeDate=$ZD(ChangeDate,4)
+	. if ChangeTime s ChangeTime=$ZT(ChangeTime)
+	&html<
+	<tr>
+	<td class=RightBottom>Наименование</td>
+	<td class=RightBottom><input type=text id=Name MAXLENGTH=200 value="#($G(Name))#"></td>
+	<td class=RightBottom>Номер по схеме</td>
+	<td class=RightBottom><input type=text id=Property5300 MAXLENGTH=50 value="#($G(Property5300))#"></td>
+	</tr>
+	<tr>
+	<td class=RightBottom>Аббревиатура модели</td>
+	<td class=RightBottom><input type=text id=abbr MAXLENGTH=50 value="#($G(abbr))#"></td>
+	<td class=RightBottom>Номер модели</td>
+	<td class=RightBottom><input type=text id=Property3609 MAXLENGTH=50 value="#($G(Property3609))#"></td>
+	</tr>
+	<tr>
+	<td class=RightBottom>Английское наименование</td>
+	<td class=RightBottom><input type=text id=EnglishName MAXLENGTH=50 value="#($G(EnglishName))#"></td>
+	<td class=RightBottom>Код детали</td>
+	<td class=RightBottom><input type=text id=codedetail MAXLENGTH=50 value="#($G(codedetail))#"></td>
+	</tr>
+	<tr>
+	<td class=RightBottom>Объем</td>
+	<td class=RightBottom><input type=text id=Size1 MAXLENGTH=50 value="#($G(Size1))#"></td>
+	<td class=RightBottom>Вес</td>
+	<td class=RightBottom><input type=text id=Weight MAXLENGTH=50 value="#($G(Weight))#"></td>
+	</tr>
+	<tr>
+	<td class=RightBottom>Категория</td>
+	<td class=RightBottom><select name="Property9469" id=Property9469>
+	>
+	w ##class(Docs.Action2).GetDisplaylistOptions($G(Property9469),"Goods.Goods||Property9469")
+	&html<
+	</select></td>
+	<td class=RightBottom>Код ТНВЭД</td>
+	<td class=RightBottom><input type=text id="CodeOKVED" MAXLENGTH=50 value="#($G(CodeOKVED))#"></td>
+	</tr>
+	<tr>
+	<td class=RightBottom>Товар которому принадлежит запчасть</td>
+	<td class=RightBottom><span onmouseout="UnPaint(this)" onmouseover="Paint(this)" class=Kontragent onclick="ChooseTovar(this)" oncontextmenu="this.innerText='';this.Tag=''" id="Tovar" Tag="#($G(Tovar))#">#($G(TovarName))#</span></td>
+	<td class=RightBottom>Материал (англ.)</td>
+	<td class=RightBottom><input type=text id="MaterialEng" MAXLENGTH=50 value="#($G(MaterialEng))#"></td>
+	</tr>
+	<tr>
+	<td class=RightBottom>Комментарий</td>
+	<td class=RightBottom colspan=3>
+	<textarea name=Comment id=Comment style="width:100%">#($G(Comment))#</textarea>
+	</td>
+	</tr>
+	<tr>
+	<td class=RightBottom>Состав</td>
+	<td class=RightBottom colspan=3>
+	<textarea name="Composition" id="Composition" style="width:100%">#($G(Composition))#</textarea>
+	</td>
+	</tr>
+	<tr>
+	<td class=RightBottom>Подробное описание</td>
+	<td class=RightBottom colspan=3>
+	<textarea name="Description" id="Description" style="width:100%">#($G(Description))#</textarea>
+	</td>
+	</tr>
+	>
+	w:GoodId "<tr><td colspan=4 class=RightBottom>Последнее сохранение: <i>"_$G(ChangeUser)_" "_$G(ChangeDate)_" "_$G(ChangeTime)_"</i></td></tr>"
+	Write !,"</table>",!
+	Write "</td></tr>",!
+	Write "<tr valign=bottom><td align=center>",!
+	If '(Access9func=1) Goto %csp00001 ;{
+	Write !,"	"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"_($G(SaveButtonStyle))_""" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""startFun();"" TITLE=""""><center>Сохранить</center></span>"
+	Write !
+%csp00001	;}
+	Write !,!,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""windowclose();"" TITLE=""""><center>Отмена</center></span>"
+	Write !,"</td></tr>",!
+	Write "</table>",!
+	Write "</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !
+	s GoodId=%request.Get("GoodId")
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,!,"<title>Товар</title>",!
+	Write !,"<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"<script language=""jscript"" src=""common.js"">"
+	Write "</script>"
+	Write !,"<script language=""jscript"">"
+	Write !,"var GoodId="""_(GoodId)_""";",!
+	Write "var GroupId="""_(%request.Get("GroupId"))_""";",!
+	Write "if((GoodId=="""")&&(GroupId==""""))",!
+	Write "	{",!
+	Write "	alert(""Создаётся новый товар, однако не указана товарная группа. Создание товара невозможно."");",!
+	Write "	window.close()",!
+	Write "	}",!
+	Write "var sessionid="""_($G(sessionid))_""";",!
+	Write !,"function ChooseTovar(Obj){",!
+	Write "WinResult=window.showModalDialog(""selectgoods2.csp"","""",""center:yes;status:no;dialogHeight:700px;dialogWidth:800px;resizable:yes;"")",!
+	Write "if(WinResult==null)return",!
+	Write "var newArr=WinResult.split(InnerSplitter)",!
+	Write "Obj.innerText=newArr[8];",!
+	Write "Obj.Tag=newArr[0];",!
+	Write "}",!
+	Write !,"function startFun(){",!
+	Write ($G(Func9Refuse)),!
+	Write "var xmlDoc = new ActiveXObject(""Msxml2.DOMDocument.3.0"");",!
+	Write "var RootElement = xmlDoc.createElement(""RootElement"");",!
+	Write "xmlDoc.documentElement=RootElement;",!
+	Write "var Properties= new Array(""Name"",""Property5300"",""abbr"",""Property3609"",""EnglishName"",""codedetail"",""Size1"",""Weight"",""Property9469"",""Comment"",""Composition"",""Description"",""MaterialEng"",""CodeOKVED"");",!
+	Write "for(var i=0;i<Properties.length;i++){",!
+	Write "	var elementValue=document.getElementById(Properties[i]).value;",!
+	Write "	InsertXmlHeader(xmlDoc,Properties[i],elementValue,""%String"");",!
+	Write "}",!
+	Write "InsertXmlHeader(xmlDoc,""Tovar"",Tovar.Tag,""Goods.Goods"")",!
+	Write "var DocID=SendXml(GoodId,""Goods.Goods"",xmlDoc,sessionid,""Docs.Action.SaveSingleGood"");",!
+	Write "if(isNaN(DocID)){alert(DocID)}",!
+	Write "else{",!
+	Write "	if(GoodId=="""")",!
+	Write "		{",!
+	Write "		"_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Goods.GoodsAction.AddGoodToGroup:csp.goodcard"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',DocID,GroupId)",!
+	Write "		}",!
+	Write "	returnValue=1;",!
+	Write "	window.close();",!
+	Write "	}",!
+	Write "}",!
+	Write "</script>"
+	Write !,"<style>"
+	Write !,".LeftTop{border-left : 1 solid black;border-top : 1 solid black;}",!
+	Write ".RightBottom{font-family:Arial;font-size:14px;border-right : 1 solid black;border-bottom : 1 solid black;}",!
+	Write "SELECT{width:170px}",!
+	Write ".Kontragent{width:100%;cursor:hand;}",!
+	Write "</style>"
+	Write !,(..HyperEventHead())
+	Write !,!,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+  
+  i %session.NewSession d
+  . s %session.EndSession=1
+  . s sessionid=%request.Get("sessionid",1)
+  . s %session=%session.GetSession(sessionid)
+  e  s sessionid=%session.SessionId
+  
+  s login=$G(%session.Data("user"),0)
+  i '+login s %response.ServerSideRedirect="norights.csp" 
+  s Access9func=##class(Common.Rights).getrights($G(login,0),9)
+  if 'Access9func s Func9Refuse="return;"
+  
+ Quit 1
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\GoodCard.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/GoodCard.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>62044,43313</Default>
+</Parameter>
+</Class>
+</Export>

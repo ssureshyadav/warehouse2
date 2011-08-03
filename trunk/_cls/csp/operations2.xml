@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.operations2">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62010,51058.696901</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body>"
+	Write !
+	If '(GoodsId="") Goto %csp00001 ;{
+	Write !,!,!,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""window.location.href='tuneup.csp'"" TITLE=""""><center>Назад</center></span>"
+	Write "<br>",!
+	Write "<TABLE cellSpacing=0 width=""100%"" celpadding=""0"" >",!
+	Write "<TR>",!
+	Write "<td width=10%>"
+	Write "<img alt=""Обновить раздел"" src=""images/refresh.gif"" onclick=""window.location.reload()"">"
+	Write "</td>",!
+	Write "<TD width=80% align=center style=""BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid"" ><strong>Операции</strong></TD>",!
+	Write "<td width=10% align=right>&nbsp;</td>",!
+	Write "</TABLE>",!
+	Write "<br>",!
+	Write "<fieldset><legend>Параметры отбора</legend>",!
+	Write "<table width=""100%"">",!
+	Write "<tR><td>",!
+	Write "	<b>Товар</b>&nbsp;&nbsp;аббревиатура: "
+	Write "<input type=""text"" id=""abbrz"" style=""width:40px;"" value="""_($G(Abbr))_""">"
+	Write "&nbsp;&nbsp;номер модели: "
+	Write "<input type=""text"" id=""Property3609z"" style=""width:40px;"" value="""_($G(Property3609))_""">"
+	Write "&nbsp;&nbsp;наименование: "
+	Write "<input type=""text"" id=""gnamez"" style=""width:200px;"" value="""_($G(Gname))_""">"
+	Write " <br>",!
+	Write "	<b>Период</b> c "
+	Write "<input type=text id=""dat1z"" value="""_($G(Dat1,$ZD($H,4)))_""" onclick=""fnCalendar(this)"" class=""datar"">"
+	Write " по "
+	Write "<input type=text id=""dat2z"" value="""_($G(Dat2,$ZD($H,4)))_""" onclick=""fnCalendar(this)"" class=""datar"">"
+	Write "<br>",!
+	Write "	<b>Тип операции</b> ",!
+	Write "		"
+	Write "<select id=""OperationTypez"">"
+	Write !,"			"
+	w ##class(Docs.Action2).GetDisplaylistOptions($G(OperationType),"Operation.Operation||OperationType")
+	Write !,"		"
+	Write "</select>"
+	Write "<br>",!
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""startFun();"" TITLE=""""><center>Выбрать</center></span>"
+	Write !,"</td>",!
+	Write "<td align=""right"" valign=""top"">",!
+	Write "<img src=""images/BIGHelp.bmp"" onclick=""divSelectHelp.style.display='block'"" width=""20"" height=""25"" id=""imgHelp"" onmouseout=""divSelectHelp.style.display='none';"">"
+	Write !,"<div id=""divSelectHelp"" style=""background:yellow;display:none;position:absolute;top:40px;left:500px;width:200px;height:70px;"" onmouseout=""this.style.display='none';"">"
+	Write "<table cellpadding=5><tr><td>Наименование или аббревиатуру товара не обязательно вводить полностью, достаточно ввести начальные буквы.<br>Тип операции можно не указывать.<br></td></tr></table>"
+	Write "</div>"
+	Write !,"</td>",!
+	Write "</table>",!
+	Write "</fieldset>",!
+	Write !
+%csp00001	;}
+	Write !,!,"<br>",!
+	Write "<table>",!
+	Write "<thead bgcolor=""#dedede"">",!
+	Write "	<td><b>Тип операции</b></td><td><b>Товар</b></td><td><b>Ячейка</b></td><td><b>Документ</b></td><td><b>Количество</b></td><td><b>Остаток<br>после операции</b></td><td><b>Дата, время</b></td><td><b>Оператор</b></td>",!
+	Write "</thead>",!
+	n ID,GoodsFullName,AddrPath,Goods,Address
+	s select="select ID,Goods->FullName as GoodsFullName,Common.SqlProcs_AddrPath(Address) as AddrPath,Quantity,Ostatok,Goods,Address,Dat,Tim,User1->Name as User1Name,%external(OperationType) as OperationTypeName,DocStr->doc->name as docname,DocStr->doc as doc,DocStr->doc->DocumentClass as DocumentClass"_
+	" from Operation.Operation Where Dat>='"_$ZDH(Dat1,4)_"' and Dat<='"_$ZDH(Dat2,4)_"'"
+	if Abbr'="" s select=select_" and Goods->abbr %STARTSWITH '"_Abbr_"'"
+	if Property3609'="" s select=select_" and Goods->Property3609 %STARTSWITH '"_Property3609_"'"
+	if Gname'="" s select=select_" and Goods->Name %STARTSWITH '"_Gname_"'"
+	if GoodsId'="" s select=select_" and Goods = '"_GoodsId_"'"
+	if +OperationType s select=select_" and OperationType = '"_OperationType_"'"
+	//&sql(declare zzz cursor for select 
+	//ID,Goods->FullName as GoodsFullName,Common.SqlProcs_AddrPath(Address) as AddrPath,Quantity,Ostatok,Goods,Address,Dat,Tim,User1->Name,%external(OperationType),DocStr->doc->name,DocStr->doc,DocStr->doc->DocumentClass
+	//into :ID,:GoodsFullName,:AddrPath,:Quantity,:Ostatok,:Goods,:Address,:Dat,:Tim,:User1,:OperationType,:Document,:DocId,:DocumentClass
+	//from Operation.Operation)
+	//&sql(open zzz)
+	//f  &sql(fetch zzz) q:SQLCODE  d
+	s rs=##class(%ResultSet).%New()
+	s ok=rs.Prepare(select)
+	s ok=rs.Execute()
+	while rs.Next(){
+	f i="ID","GoodsFullName","AddrPath","Quantity","Ostatok","Goods","Address","Dat","Tim","User1Name","DocumentClass","doc","docname","OperationTypeName" d
+	. s @i=rs.Data(i)   
+	s Datetime=$S(+Dat:$ZD(Dat,4),1:"")_" "_$S(+Tim:$ZT(Tim),1:"")
+	w "<tr bgcolor=""#effafa"" id="""_ID_""" onmouseover=""this.style.backgroundColor='#efefee'"" onmouseout=""this.style.backgroundColor='#effafa'"">"
+	w "<td>"_OperationTypeName_"</td>"
+	w "<td><a href=""#"" style=""text-decoration:none;color:black"" title=""Открыть карточку товара"" onclick=""GoodCard('"_Goods_"')"" onmouseover=""this.style.color='blue'"" onmouseout=""this.style.color='black'"">"_GoodsFullName_"</a></td>"
+	w "<td><a href=""#"" style=""text-decoration:none;color:black"" title=""Открыть карточку ячейки"" onclick=""StoragePlaceCard('"_Address_"')"" onmouseover=""this.style.color='blue'"" onmouseout=""this.style.color='black'"">"_AddrPath_"</a></td>"
+	if +doc s DocumentString="<a href=""#"" style=""text-decoration:none;color:black"" title=""Просмотреть документ"" onclick=""print('"_doc_"','"_DocumentClass_"')"" onmouseover=""this.style.color='blue'"" onmouseout=""this.style.color='black'"">"_docname_"</a>"   
+	else  s DocumentString="&nbsp;"
+	w "<td>"_DocumentString_"</td>"
+	w "<td>"_Quantity_"</td>"
+	w "<td>"_Ostatok_"</td>"
+	w "<td>"_Datetime_"</td>"
+	w "<td>"_User1Name_"</td>"
+	w "</tr>",!
+	}
+	//&sql(close zzz)
+	Write !,"</table>",!
+	Write "<br><p font-color=gray font-face=Arial>",!
+	Write "Что бы открыть карточку товара необходимо кликнуть на сам товар<br>",!
+	Write "Что бы открыть карточку ячейки необходимо кликнуть на ячейку<br>",!
+	Write "<br></p>",!
+	Write "</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	s Dat1=%request.Get("Dat1")
+	s Dat2=%request.Get("Dat2")
+	if '+Dat1 s Dat1=$ZD(+$H,4)
+	if '+Dat2 s Dat2=$ZD(+$H,4)
+	s Abbr=%request.Get("abbr")
+	s Property3609=%request.Get("Property3609")
+	s Gname=%request.Get("Gname")
+	s GoodsId=%request.Get("GoodsId")
+	s OperationType=%request.Get("OperationType")
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<title>	Операции </title>",!
+	Write "<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"<script language=""jscript"">"
+	Write !," sessionid="""_(%session.SessionId)_""";",!
+	Write " ",!
+	Write " function GoodCard(GoodsId){",!
+	Write "	InnerSplitter=""~"";",!
+	Write "	ok=window.showModalDialog(""GoodsCard.csp?GoodsId=""+GoodsId+""&groupspath="",GoodsId+InnerSplitter+"""",""center:yes;status:no;dialogHeight:600px;dialogWidth:650px;resizable:yes"")",!
+	Write " }",!
+	Write " ",!
+	Write " function print(docid,docclass){",!
+	Write " window.open(""print.csp?id=""+docid+""&class=""+docclass+""&sessionid=""+sessionid)",!
+	Write " }",!
+	Write !," function StoragePlaceCard(StoreId){",!
+	Write " ok=window.showModalDialog(""StorePlace.csp?StoreId=""+StoreId,"""",""center:yes;status:no;dialogHeight:500px;dialogWidth:740px;resizable:yes"")",!
+	Write " } ",!
+	Write " ",!
+	Write " function fnCalendar(cal){",!
+	Write "var newDate=window.showModalDialog(""calendar1.htm"","""",""center:yes;status:no;dialogHeight:350px;dialogWidth:310px;resizable:yes;"");",!
+	Write "if(ReturnSpace(newDate)!=""""){cal.value=newDate;}",!
+	Write "}",!
+	Write !,"function startFun(){",!
+	Write " var Dat1=dat1z.value;",!
+	Write " var Dat2=dat2z.value;",!
+	Write " var abbr=abbrz.value;",!
+	Write " var Property3609=Property3609z.value;",!
+	Write " var Gname=gnamez.value;",!
+	Write " var OperationType=OperationTypez.value;",!
+	Write " window.location.href=""Operations2.csp?Dat1=""+Dat1+""&Dat2=""+Dat2+""&abbr=""+abbr+""&Property3609=""+Property3609+""&Gname=""+Gname+""&OperationType=""+OperationType;",!
+	Write "}",!
+	Write !,"function ReturnSpace(Txt){",!
+	Write "if(Txt==null)return """";",!
+	Write "return Txt;",!
+	Write "}",!
+	Write "</script>"
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\Operations2.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/Operations2.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>61433,3137</Default>
+</Parameter>
+</Class>
+</Export>

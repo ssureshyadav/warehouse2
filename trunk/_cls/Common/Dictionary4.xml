@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Common.Dictionary4">
+<ClassType>persistent</ClassType>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%Persistent</Super>
+<TimeCreated>60400,63326</TimeCreated>
+
+<Property name="Name">
+<Description>
+Товар</Description>
+<Type>Goods.Goods</Type>
+<Parameter name="CAPTION" value="Товар"/>
+</Property>
+
+<Index name="NameInd">
+<Properties>Name</Properties>
+</Index>
+
+<Property name="Property6625">
+<Description>
+Аналог</Description>
+<Type>Goods.Goods</Type>
+<Parameter name="CAPTION" value="Аналог"/>
+</Property>
+
+<Index name="Property6625Ind">
+<Properties>Property6625</Properties>
+</Index>
+
+<Index name="Uniq">
+<Properties>Name,Property6625</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Common.Dictionary4D</DataLocation>
+<DefaultData>Dictionary4DefaultData</DefaultData>
+<IdLocation>^Common.Dictionary4D</IdLocation>
+<IndexLocation>^Common.Dictionary4I</IndexLocation>
+<StreamLocation>^Common.Dictionary4S</StreamLocation>
+<Data name="Dictionary4DefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Name</Value>
+</Value>
+<Value name="3">
+<Value>Property6625</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

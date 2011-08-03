@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.storemodal2">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62300,60123.742893</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body onload=""load();"" onkeypress=""ManageWindow()"">"
+	Write !,(##class(%CSP.Response).HyperEventBody())
+	Write !,"<font color=""#447788"">"_($G(AddressPath))_"</font>",!
+	w "<script language=""Jscript"">"
+	f var="ids","percent","code","name","comment","tempstore","parents" d
+	. w "var "_var_"=new Array();",!
+	//s depot=%session.Data("depot")
+	s sql="select ID,Code,Name,Comment,tempstore,Currentsize,Size1,Parent from Store.Address where depot="_depot_" order by Name"
+	s result=##class(%ResultSet).%New()
+	d result.Prepare(sql)
+	s result.RuntimeMode=2
+	s ok=result.Execute()
+	s res=""
+	While result.Next() {
+	s OutString=""
+	s id=result.Get("ID")
+	s code=result.Get("Code")
+	s name=result.Get("Name")
+	s comment=result.Get("Comment")
+	s tempstore=result.Get("tempstore")
+	s percent=0
+	s Currentsize=+result.Get("Currentsize")
+	s Maxsize=+result.Get("Size1")
+	s str2(code)=id
+	s parent=result.Get("Parent")
+	i parent'="" s str(parent)=$G(str(parent))_id_"~"
+	e  s str=$G(str)_id_"~"
+	i Maxsize>0 s percent=$J((Currentsize/Maxsize)*100,".",0)
+	f var="percent","code","name","comment","tempstore" d
+	. w var_"["_id_"]="""_@var_""";"
+	w "ids["""_code_"""]="_id_";"
+	}
+	s i=""
+	w "",!
+	f  s i=$O(str(i)) q:i=""  d
+	. q:str2(i)=""
+	. w "parents["""_i_"""]="""_$G(str(i))_""";"
+	w "sparents="""_$G(str)_""";",!
+	w "function GetDepotData(Depot) {",!
+	w "var Str = new Array(2);",!
+	w "Str[1]='"
+	s param("order")="Code"
+	d ##class(Common.Common).showdata("Store.Address","Parent,Code,Name,ID","","depot=1",,,.param)
+	w "';"
+	w "Str[2]='"
+	d ##class(Common.Common).showdata("Store.Address","Parent,Code,Name,ID","","depot=2",,,.param)
+	w "';"
+	w "return Str[Depot];"
+	w "}",!
+	w "</script"_">"
+	Write !,"<center><br>"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""startFun();"" TITLE=""""><center>Да</center></span>"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""window.close()"" TITLE=""""><center>Отмена</center></span>"
+	Write "</center>",!
+	Write "<select style=""width:150px"" name=""depotSelect"" onchange=""depotFun()"">"
+	Write !
+	w ##class(Docs.Action2).GetClassValuesOptions($G(%session.Data("depot")),"Store.Depot",,,0)
+	Write !,"</select>"
+	Write "<div class=""textlikelink"" style=""margin-top:20px;margin-left:20px;margin-bottom:20px;"">"
+	Write "<span onclick=""TreeClick('')"" onmouseover=""this.className='textlikelink2'"" onmouseout=""this.className='textlikelink'"" id=""DepotNameSpan"">"
+	Write ($G(depotName))
+	Write "</span>"
+	Write " > "
+	Write "<span id=""addresspath"">"
+	Write "</span>"
+	Write "</div>"
+	Write !,"<table cellspacing=0 cellpadding=0 width=100%  border=0 id=""TableMoveField""><tr>",!
+	Write "<td valign=top>",!
+	Write "<SKLADz:treeview id=""AddressTree"" width=150 height=200 ShowImages=1 ImagesPath="""_(%session.Data("ImagesPath"))_""" onDownloadCmpl=""TreeClick2()""/>",!
+	Write "<br><br>"
+	Write "<span id=""Comment"" style=""color:darkgrey"">"
+	Write "</span>"
+	Write !,"</td>",!
+	Write "<td width=100% style=""border-left:1 solid black;border-top:1 solid black"" valign=top id=""MoveField2"">",!
+	Write "<div id=""MoveField"" CONTENTEDITABLE='false'>"
+	Write "</div>"
+	Write !,"<div id=""tablefield"">"
+	Write !,"<SKLAD2:table id=""PropTable"" width=""400"" ClassName=""Store.Address"" /><br>",!
+	Write "</div>"
+	Write "</td>",!
+	Write "<!--",!
+	Write "при включенном CONTENTEDITABLE срабатывает событие oncontrolselect",!
+	Write "-->"
+	Write !,"</table>",!
+	Write "<IE:DOWNLOAD id='downloader' style='behavior:url(#default#download)'/>",!
+	Write !,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	s Tunes=$NA(^Tunes(2))
+	s tovid=%request.Get("goods")
+	s depot=$G(%session.Data("depot"))
+	s RequestDepot=%request.Get("depot")
+	i RequestDepot'="" s depot=RequestDepot
+	&sql(select Name into :depotName from Store.Depot where id=:depot)
+	s:SQLCODE depotName="склад не найден"
+	//s depotName=$G(%session.Data("depotName"))
+	i tovid'="" d
+	. &sql(declare sd cursor for select Address,Value1,Value2,%external(Address->block) into :addr,:Value1,:Value2,:block from Store.Quantity where Goods=:tovid and Address->Depot=:depot)
+	. &sql(open sd)
+	. i SQLCODE=100 s AddressPath=" Товар отсутствует на складе "_depotName q
+	. f  &sql(fetch sd) q:SQLCODE  d
+	. . s AddressPath=$G(AddressPath)_" Местоположение товара "_##class(Store.Action).AddressPath($G(addr))_" ("_(Value1-Value2)_") <font color=darkblue>"_block_"</font><br>"
+	. &sql(close sd)
+	s i="" f  s i=$O(@Tunes@(i)) q:i=""  d
+	. s CommonVars=$G(CommonVars)_"var "_i_"="""_$G(@Tunes@(i,"Value"),"undefined")_""";"
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<IMPORT NAMESPACE=""SKLADz"" IMPLEMENTATION=""htc/treeview.htc"">",!
+	Write "<IMPORT NAMESPACE=""SKLAD2"" IMPLEMENTATION=""htc/table.htc"">",!
+	Write "<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"<script language=""jscript"" src=""common.js"">"
+	Write "</script>"
+	Write !,"<script language=""Jscript"">"
+	Write !,"var everythingok=false;",!
+	Write "var Trick=0;",!
+	Write "var ItemsPercents = new Array();",!
+	Write "depot='"_($G(depot))_"'",!
+	Write (CommonVars),!
+	Write "var CurrentElement="""";",!
+	Write !,"function load(){",!
+	Write "LoadAddress();",!
+	Write "AddressTree.onClick=""TreeClick()"";",!
+	Write "TreeClick();",!
+	Write "everythingok=true;",!
+	Write "//loaddepot();",!
+	Write "}",!
+	Write !,"function put(textStr){",!
+	Write "addOptions(textStr,""depotelem"");",!
+	Write "}",!
+	Write !,"function TreeClick(NodeCode){",!
+	Write "if(NodeCode==""""){Trick=1;}",!
+	Write "else{Trick=0;}",!
+	Write "CreateAddressLine();",!
+	Write "Clear();",!
+	Write "if(depot!=depotSelect.value)return",!
+	Write "if(NodeCode==null)NodeCode=AddressTree.NodeCode;",!
+	Write "var childs=""""",!
+	Write "if(NodeCode==""""){var childs=sparents}",!
+	Write "else{var childs=ReturnSpace(parents[NodeCode])}",!
+	Write "//ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Store.Action.GetChilds:csp.storemodal2"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',NodeCode)",!
+	Write "//if(ok!=""""){",!
+	Write "if(childs!=""""){",!
+	Write "tablefield.style.display=""none"";",!
+	Write "//var strings = ok.split(StringSplitter);",!
+	Write "var strings = childs.split(InnerSplitter);",!
+	Write "if (strings.length!=1){",!
+	Write "	for (var i = 0; i < strings.length-1; i++){",!
+	Write "	//element=strings[i].split(InnerSplitter)",!
+	Write "	//ElemId=element[0]",!
+	Write "	//ElemCode=element[1]",!
+	Write "	//ElemName=element[2]",!
+	Write "	//ElemComment=element[3]",!
+	Write "	//tempstore=element[4]",!
+	Write "	//percent=element[5]",!
+	Write "	var id1=strings[i]",!
+	Write "	//alert(""i1=""+id1+""\ncode[id1]=""+code[id1]+""\name[id1]=""+name[id1])",!
+	Write "	ElemId=id1",!
+	Write "	ElemCode=code[id1]",!
+	Write "	//alert(ElemCode)",!
+	Write "	ElemName=name[id1]",!
+	Write "	ElemComment=comment[id1]",!
+	Write "	elemtempstore=tempstore[id1]",!
+	Write "	elempercent=percent[id1]",!
+	Write "	ElementStr=""<div ondblclick='HandleClick(this)' onmouseover=\""Comment.innerText='""+ElemComment+""'\"" onmouseout=\""Comment.innerText=''\"" style='margin:6;height:""+BlockHeight+"";width:""+BlockWidth+"";border:1 solid;display:inline' id='""+ElemId+""'></div>"";",!
+	Write "	aElement=document.createElement(ElementStr);",!
+	Write "	if(elemtempstore==""1""){aElement.style.backgroundColor=""#efefef""}",!
+	Write "	//QuantityStr=AddressTree.ChildrenQuantity(ElemCode)",!
+	Write "	var littlecols=CreateChQuant(ReturnSpace(parents[ElemCode]))",!
+	Write "	aElement.innerHTML=""<center>""+ElemName+""<font color=gray> (""+elempercent+""%) </font>""+littlecols+""</center>"";",!
+	Write "	aElement.tag=ElemCode;",!
+	Write "	MoveField.appendChild(aElement);",!
+	Write "	}",!
+	Write "}",!
+	Write "else{alert(ok);}",!
+	Write "}",!
+	Write "else{",!
+	Write "	var currentid=AddressTree.NodeID;",!
+	Write "	var currentpercent=ItemsPercents[currentid];",!
+	Write "	tablefield.style.display=""block"";",!
+	Write "	PropTable.ClearRows();",!
+	Write "	PropTable.DownLoadPairs("""",currentid,""Depot,Code,Parent"");",!
+	Write "	}",!
+	Write "}",!
+	Write !,"function CreateChQuant(str){",!
+	Write "var res=""""",!
+	Write "var string=str.split(InnerSplitter);",!
+	Write "if(string.length>1)res=""<br>""",!
+	Write "for(z=0;z<string.length-1;z++){",!
+	Write "var curid=string[z];",!
+	Write "var procent=percent[curid]",!
+	Write "var heightz=(ColumnHeight-Math.ceil(ColumnHeight*(procent/100)))-2",!
+	Write "var res=res+""<div style='margin:1;padding:0;border:1 solid;background-color:#898989;height:""+ColumnHeight+"";display:inline' ><img src='images/WhitePixel.gif' width=4 height=""+heightz+"" style='cursor:auto' ></div>""",!
+	Write "}",!
+	Write "return res",!
+	Write "}",!
+	Write !,"function Create(){",!
+	Write "number=MoveField.childNodes.length",!
+	Write "ElementStr=""<button oncontrolselect='HandleClick(this.id)' style='position:absolute;height:28;width:40' id='but""+number+""'></button>"";",!
+	Write "aElement=document.createElement(ElementStr);",!
+	Write "MoveField.appendChild(aElement);",!
+	Write "}",!
+	Write !,"function fnHandleMove(){",!
+	Write "if(event.srcElement.offsetTop<TableMoveField.offsetTop)event.srcElement.style.pixelTop=TableMoveField.offsetTop;",!
+	Write "if(event.srcElement.offsetLeft<MoveField2.offsetLeft)event.srcElement.style.pixelLeft=MoveField2.offsetLeft;",!
+	Write "}",!
+	Write !,"function Save(){",!
+	Write "res="""";",!
+	Write "for (i = 0; i <MoveField.childNodes.length; i++){",!
+	Write "res=res+MoveField.childNodes(i).id+InnerSplitter;",!
+	Write "res=res+MoveField.childNodes(i).offsetLeft+InnerSplitter;",!
+	Write "res=res+MoveField.childNodes(i).offsetTop+InnerSplitter;",!
+	Write "res=res+MoveField.childNodes(i).style.pixelWidth+InnerSplitter;",!
+	Write "res=res+MoveField.childNodes(i).style.pixelHeight+InnerSplitter;",!
+	Write "val=ReturnSpace(MoveField.childNodes(i).value);",!
+	Write "if(val==""""){alert(""Элементы без подписи недопустимы"");return false;}",!
+	Write "res=res+val;",!
+	Write "res=res+StringSplitter;",!
+	Write "}",!
+	Write "ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Store.Action.SaveButs:csp.storemodal2"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',AddressTree.NodeCode,res)",!
+	Write "if(ok!=1){alert(ok)}",!
+	Write "else{alert(""Сохранено"")}",!
+	Write "}",!
+	Write !,"function HandleClick(Obj){",!
+	Write "AddressLine(Obj.tag)",!
+	Write "}",!
+	Write !,"function LoadAddress(){",!
+	Write "AddressTree.AddTreeView(GetDepotData(depotSelect.value))",!
+	Write "//AddressTree.DownLoad(""Data.csp?class=Store.Address&fields=Parent,Code,Name,ID&where=depot=""+depot)",!
+	Write "}",!
+	Write !,"function Clear(){",!
+	Write "MoveField.innerHTML="""";",!
+	Write "}",!
+	Write "function AddressLine(code){",!
+	Write "AddressTree.SelectedItem=code;",!
+	Write "TreeClick();",!
+	Write "}",!
+	Write !,"function CreateAddressLine(){",!
+	Write "if (Trick==1){addresspath.innerHTML="""";return false;}",!
+	Write "ParentNames=AddressTree.ParentNames;",!
+	Write "ParentCodes=AddressTree.ParentCodes;",!
+	Write "if(ParentNames=="""")return false",!
+	Write "addresspath.innerHTML="""";",!
+	Write "NamesArr=ParentNames.split(""~"");",!
+	Write "CodesArr=ParentCodes.split(""~"");",!
+	Write "for(i=0;i<NamesArr.length;i++){",!
+	Write "	aElement=CreateLink(NamesArr[i],CodesArr[i]);",!
+	Write "	addresspath.appendChild(aElement);",!
+	Write "	addresspath.innerHTML=addresspath.innerHTML+"" > "";",!
+	Write "}",!
+	Write "}",!
+	Write !,"function CreateLink(name,hrefz){",!
+	Write "ElementStr=""<span onclick=\""AddressLine('""+hrefz+""')\""onmouseover=\""this.className='textlikelink2'\"" onmouseout=\""this.className='textlikelink'\"" ></span>"";",!
+	Write "aElement=document.createElement(ElementStr);",!
+	Write "aElement.innerText=name;",!
+	Write "return aElement;",!
+	Write "}",!
+	Write !,"function TreeClick2(){",!
+	Write "if(everythingok)TreeClick();",!
+	Write "}",!
+	Write !,"function startFun(){",!
+	Write "	text=addresspath.innerText;",!
+	Write "	text=text.substr(0 , text.length-2)",!
+	Write "	nodeid=AddressTree.NodeID;",!
+	Write "returnValue=nodeid+InnerSplitter+text;",!
+	Write "window.close();",!
+	Write "}",!
+	Write !,"function depotFun(){",!
+	Write "DepotNameSpan.innerText=depotSelect.options(depotSelect.selectedIndex).text",!
+	Write "AddressTree.AddTreeView(GetDepotData(depotSelect.value))",!
+	Write "//returnValue=""changedepot""+InnerSplitter+depotSelect.value;",!
+	Write "//window.close();",!
+	Write "}",!
+	Write "</script>"
+	Write !,(..HyperEventHead())
+	Write !,!,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html XMLNS:SKLADz XMLNS:SKLAD2>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\storemodal2.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/storemodal2.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>61136,40727</Default>
+</Parameter>
+</Class>
+</Export>

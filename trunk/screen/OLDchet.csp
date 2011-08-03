@@ -1,0 +1,210 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+if %request.Get("word")="on"
+{
+ set %response.ContentType = "application/msword"
+ do %response.SetHeader("Content-Disposition","attachment;word.doc")
+ set %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+}
+ q 1
+</script>
+<script language="cache" runat="server">
+ s mn(1)="января",mn(2)="февраля",mn(3)="марта",mn(4)="апреля",mn(5)="мая",mn(6)="июня",mn(7)="июля",mn(8)="августа",mn(9)="сентября",mn(10)="октября",mn(11)="ноября",mn(12)="декабря"
+ s kontr2=%request.Get("kontr2")
+ s kontr=%request.Get("kontr")
+ s docid=%request.Get("id")
+ s DocDate=%request.Get("DocDate")
+ s docname="Платежное поручение"
+ 
+ s doc=##class(Docs.Rash).%OpenId(docid)
+ d:$ISOBJECT(doc)
+ . s docname=doc.Name_"-П"
+ . s:doc.Dat'="" docdate=$ZD(doc.Dat,4)
+ . s:DocDate'="" docdate=DocDate
+ . q:$G(docdate)=""
+ . s docdate=$P(docdate,"/",1)_" "_mn(+$P(docdate,"/",2))_" "_$P(docdate,"/",3)
+ 
+ // Поставщик и Получатель
+ s k=##class(Common.Kontragent).%OpenId(kontr)
+ d:$ISOBJECT(k)
+ . s ppname=k.Name
+ . s ppadress=k.Address
+ . s bank=k.bank
+ . d:$ISOBJECT(bank)
+ . . s ppbankname=bank.pbank
+ . . s ppbankcity=bank.city
+ . . s ppkpp=bank.kpp
+ . . s ppinn=bank.inn
+ . . s ppbik=bank.bik
+ . . s pprsch=bank.rsch
+ . . s ppksch=bank.ksch
+ . . s ppcode=bank.code
+ . . s ppokpo=bank.okpo
+
+ // Заказчик и плательщик
+ s k=##class(Common.Kontragent).%OpenId(kontr2)
+ d:$ISOBJECT(k)
+ . s zpname=k.Name
+ . s zpadress=k.Address
+ . s bank=k.bank
+ . d:$ISOBJECT(bank)
+ . . s zpbankname=bank.pbank
+ . . s zpbankcity=bank.city
+ . . s zpkpp=bank.kpp
+ . . s zpinn=bank.inn
+ . . s zpbik=bank.bik
+ . . s zprsch=bank.rsch
+ . . s zpksch=bank.ksch
+ . . s zpcode=bank.code
+ . . s zpokpo=bank.okpo
+ 
+ s kurs=##class(Goods.GoodsAction).kurs(.other)
+ s kurs2=$J(kurs,".",2)
+ s nds=+$G(other("nds"))/100
+ s nsp=+$G(other("nsp"))/100
+ s antinds=1/(1+nds)
+ 
+</script>
+
+<html>
+
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+		<meta http-equiv="Content-Language" content="ru">
+		<style>
+			.xlsFont { font-family: Arial; font-size: 9pt }
+			td { font-family: Arial; font-size: 9pt }
+		</style>
+	<title>Счёт #($G(docname))#</title>
+	</head>
+	
+	<body>
+	<p class="xlsFont">
+		<b>ПОСТАВЩИК #($G(ppname))#<br />
+		Адрес: #($G(ppadress))#	
+	</b>	
+	</p>
+	<p style="margin: 40px">
+	<table><tr><td>
+	<p align="center" style="margin: 2px"><b>Образец заполнения платежного поручения</b></p>
+	<table cellpadding="2" cellspacing="0" border="1" style="border-collapse: collapse" bordercolor="#000000">
+		<tr>
+			<td style="border-bottom: 0px;"><b>Получатель:</b></td>
+			<td style="border-bottom: 0px;" width="80">&nbsp;</td>
+			<td style="border-bottom: 0px;">&nbsp;</td>
+		</tr>
+		<tr>
+			<td style="border-top: 0px"><b>#($G(ppname))# ИНН #($G(ppinn))# КПП #($G(ppkpp))#</b></td>
+			<td style="border-top: 0px"><b>Сч</b></td>
+			<td style="border-top: 0px"><b>
+			#($G(pprsch))#</b></td>
+		</tr>
+		<tr>
+			<td style="border-bottom: 0px">
+			<b>Банк получателя</b></td>
+			<td><b><span lang="ru">БИК</span></b></td>
+			<td style="border-bottom: 0px"><b>#($G(ppbik))#</b></td>
+		</tr>
+		<tr>
+			<td style="border-top: 0px"><b>#($G(ppbankname))# #($G(ppbankcity))#</b><br /><br /></td>
+			<td valign="top"><b><span lang="ru">Сч</span></b></td>
+			<td valign="top" style="border-top: 0px"><b>#($G(ppksch))#</b></td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td>&nbsp;</td>
+			<td>&nbsp;</td>
+		</tr>
+	</table>
+	</td>
+	</tr></table>
+	</p>
+	
+	<p style="margin: 40px" class="xlsFont">
+		<b>Счет No #($G(docname))# ОТ #($G(docdate))#.</b>
+	</p>	
+
+	<p class="xlsFont">
+		<b>Заказчик: #($G(zpname))# АДРЕС: #($G(zpadress))#<br />
+		Плательщик: #($G(zpname))# АДРЕС: #($G(zpadress))#<br /><br />	
+		Договор N_______________от__________________<br /></b>	
+	</p>	
+		
+	<table cellpadding="2" style="border-collapse: collapse" border="1" bordercolor="#000000">
+		<tr>
+			<td><b>N п/п</b></td>
+			<td width="323"><b>Наименование</b></td>
+			<td><b>Ед.изм</b></td>
+			<td><b>Кол-во</b></td>
+			<td><b>Цена</b></td>
+			<td><b>Цена с НДС</b></td>
+			<td><b>Сумма</b></td>
+		</tr>
+		<tr>
+			<td>&nbsp;</td>
+			<td></td>
+			<td>&nbsp;</td>
+			<td>&nbsp;</td>
+			<td><b>(<span lang="ru">руб</span>)</b></td>
+			<td><b>(<span lang="ru">руб</span>)</b></td>
+			<td><b>(<span lang="ru">руб</span>)</b></td>
+		</tr>
+
+ <script language="cache" runat="server">
+ d:$ISOBJECT(doc.Items)
+ . s tot=0,totquant=0
+ . s i="" f  s i=doc.Items.Next(i) q:i=""  d
+ . . i $I(count)
+ . . s item=doc.Items.GetAt(i)
+ . . s:$ISOBJECT(item.Goods) goods=item.Goods.Property3609_" "_item.Goods.Name
+ . . s quant=item.Quantity
+ . . s itempr=item.Price
+ . . s price=$J(kurs*itempr*antinds,".",2)
+ . . s pricends=$J(kurs*itempr,".",2)
+ . . s total=$J(item.Total*kurs,".",2)
+ . . //s totquant=totquant+quant
+ . . s tot=tot+total
+ . . //s pricechanged=$J(price*kurs,".",2)
+ . . w "	<tr>"
+ . . w "		<td>"_count_"</td>"
+ . . w "		<td style='mso-height-source:userset'>"_$G(goods)_"</td>"
+ . . w "		<td></td>"
+ . . w "		<td>"_quant_"</td>"
+ . . w "		<td>"_price_"</td>"
+ . . w "		<td>"_pricends_"</td>"
+ . . w "		<td>"_total_"</td>" 
+ . . w "	</tr>"
+ 
+ s totnds=$J((tot-(tot*antinds)),".",2)
+ s tot=$J(tot,".",2)
+ s totantinsp=tot
+ s totnsp=$J(tot*nsp,".",2)
+ s totlast=$J(totantinsp+totnsp,".",2)
+</script>
+		<tr>
+			<td colspan="6" align="right"><b>Итого без НДС:</b></td>
+			<td><b>#(tot)#</b></td>
+		</tr>
+		<tr>
+			<td colspan="6" align="right"><b>Итого НДС:</b></td>
+			<td><b>#(totnds)#</b></td>
+		</tr>
+		<tr>
+			<td colspan="6" align="right"><b>Всего к оплате:</b></td>
+			<td><b>#(tot+totnds)#</b></td>
+		</tr>
+	</table>
+	
+		
+	<p class="xlsFont"><b>К оплате: 
+			<script src="./screen/ru_convert_moneyvalue.js" language="javascript"></script>
+			<script language="javascript">
+				document.write("<b>"+ru_convert_moneyvalue("#(tot+totnds)#")+"</b>");
+			</script>	
+	</b></p>
+	<p class="xlsFont" style="margin: 40px;"><b>
+	Руководитель предприятия_____________________<br /><br />	
+	Главный бухгалтер____________________________
+	</b>
+	</p>	
+	</body>
+</html>

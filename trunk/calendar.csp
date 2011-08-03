@@ -1,0 +1,28 @@
+<script language="cache" runat="server">
+ 
+</script>
+<HTML XMLNS:IE>
+<HEAD>
+<title>#($G(%session.Data("systemname")))#</title>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="Jscript" src="common.js"></script>
+<STYLE>
+@media all{
+   IE\:Calendar{
+      behavior: url(htc/calendar.htc) ;
+      width : 33%;
+   }}
+</STYLE>
+<script language="Jscript">
+function startFun(){
+window.returnValue=cal.value;
+window.close();
+}
+</script>
+</HEAD>
+<BODY onkeypress="ManageWindow();">
+<center>
+<IE:Calendar ID = "cal" STYLE = "width: 300; height: 275; border: '1px solid black';" ></IE:Calendar>
+<sklad:Button value="Да" onclick="startFun()">&nbsp;&nbsp;&nbsp;<sklad:Button value="Отмена" onclick="window.close()"></center>
+</BODY>
+</HTML>

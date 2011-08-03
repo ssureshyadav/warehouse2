@@ -1,0 +1,11 @@
+<html>
+<body>
+<script language="cache" runat="server">
+w "^mtempArt(""i"")="_$G(^mtempArt("i"))_"<br>"
+w "^mtempArt(""isobj"")="_$G(^mtempArt("isobj"))_"<br>"
+w "^mtempArt(""have"")="_$G(^mtempArt("have"))_"<br>"
+w "^mtempArt(""DocClass"")="_$G(^mtempArt("DocClass"))_"<br>"
+
+</script>
+</body>
+</html>

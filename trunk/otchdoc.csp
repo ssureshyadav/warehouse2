@@ -1,0 +1,112 @@
+<script language="cache" runat="server">
+ s Kontr=%request.Get("Kontr")
+ s silent=%request.Get("silent")
+ s remdoc=%request.Get("remdoc")
+ i remdoc="" s otchdoc=""
+ e  d
+ . s remdocobj=##class(Docs.Remont).%OpenId(remdoc)
+ . s otchdoc=remdocobj.Otchet
+ i $ISOBJECT(otchdoc) s otchdoc=otchdoc.%Id()
+ s edit=%request.Get("edit")
+</script>
+<html XMLNS:SKLADz XMLNS:SKLAD2 XMLNS:SKLADList>
+<IMPORT NAMESPACE="SKLADz" IMPLEMENTATION="htc/treeview.htc">
+<IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc">
+<IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
+<head>
+<title>#($G(%session.Data("systemname")))#</title>
+<link href="style.css" type=text/css rel=stylesheet>
+
+<script language="Jscript" src="common.js"></script>
+<script language="JScript">
+var Arguments=window.dialogArguments.split(InnerSplitter);
+var ClassName="Docs.Otchet";
+window.dialogWidth=screen.availWidth+"px";
+
+var DocID="#(otchdoc)#";
+var remdoc=Arguments[1];
+var DocType="Отчёт о ремонте";
+var source="";
+var Kontr="#(Kontr)#";
+var otchdoc="#(otchdoc)#";
+var edit="#(edit)#";
+if((otchdoc!="")&&(edit!="1")){
+	alert("К данной заявке уже создан отчёт");
+	window.close();
+	}
+function load(){
+PropTable.ClassName=ClassName;
+TypDocument.innerText=DocType;
+PropTable.DownLoadPairs("",DocID,"Dat,Tim,Stat,Source,DocType,Kontr,Rem,User1",source);
+docstr.ClassName=ClassName+"Items";
+docstr.attachEvent("onAddColumns",loadgoods2)
+docstr.LoadHeadersXML("Doc,DocType");
+}
+
+function loadgoods2(){
+if(DocID!=""){
+docstr.loadfrommethod("Docs.Action.GetStrFromDoc",DocID,2,3)}
+else{docstr.loadfrommethod("Docs.Action.tovsforotchet",Kontr,2,3)}
+}
+
+function startFun(){
+var xmldoc=PropTable.GetXmlContent();
+xmldoc=addnode(xmldoc,"Rem",remdoc+"@Docs.Remont")
+xmldoc=addnode(xmldoc,"Kontr",Kontr+"@Common.Kontragent")
+var xmldoc2=docstr.GetXmlContent();
+var ok=SplitSendXml("",ClassName,xmldoc,xmldoc2,"#(%session.SessionId)#");
+if(isNaN(ok)){
+	alert(ok);
+}
+else{
+ if(source!=""){
+	var ok=#server(Docs.Action.SetSourceDoc(ClassName,ok,source))#
+ 	if(isNaN(ok))alert(ok)
+ }
+ returnValue=1;
+ window.close();
+}
+}
+
+function addtovars(){
+WinResult=window.showModalDialog("selectgoods2.csp","","cener:yes;status:no;dialogHeight:700px;dialogWidth:800px;resizable:yes;")
+if(WinResult==null)return
+WinResult=WinResult.split(StringSplitter)
+var FieldCaption = new Array();
+var FieldValue = new Array();
+for(i=0 ; i<WinResult.length-1 ; i++){
+	var onestr=WinResult[i].split(InnerSplitter);
+	FieldCaption["Goods"]=onestr[1];
+	FieldValue["Goods"]=onestr[0];
+	FieldCaption["Price"]=getPrice(FieldValue["Goods"]);
+	FieldCaption["goodssource"]=2;
+
+	docstr.AddRow(FieldCaption,FieldValue);
+}
+}
+
+function getPrice(tovid){
+return #server(Goods.GoodsAction.getprice(tovid))#;
+}
+
+function setsumm(){
+var val=docstr.Total;
+var val=val.toFixed(2);
+PropTable.setCellValue("Summa",val);
+}
+
+</script>
+</head>
+<body  onload="load()" onkeypress="ManageWindow()">
+<center id="TypDocument" style="font-size:14pt;font:Arial;color:#112255"></center>
+<SKLAD2:table id="PropTable" width=400 height=200  />
+<fieldset><legend>Строки документа</legend>
+<SKLAD2:table id="docstr" width=100% height=200 CountTotal="true"  Totalchange="setsumm()" displaybar=true />
+<sklad:LittleButton name="new+" id="add2" onclick="addtovars()" alt="Вставить товары">
+<sklad:LittleButton name="print" id="apint" onclick="prntdoc()" alt="Распечатать документ">
+</fieldset>
+<csp:IF CONDITION=silent'="true">
+<center><sklad:Button value="Да" onclick="startFun()">&nbsp;&nbsp;&nbsp;<sklad:Button value="Отмена" onclick="window.close()"></center>
+</csp:IF>
+</body>
+</html>

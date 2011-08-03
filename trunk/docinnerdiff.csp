@@ -1,0 +1,103 @@
+<script language="cache" runat="server">
+ s silent=%request.Get("silent")
+ s source=%request.Get("source")
+ //s source="360"
+ s:source'="" sourceClass=##class(Docs.Action).GetClassFromSource(source)
+ s DocType=##class(Docs.Action).GetDocNameFromClass("Docs.InnerDiff")
+</script>
+<html XMLNS:SKLADz XMLNS:SKLAD2 XMLNS:SKLADList>
+<IMPORT NAMESPACE="SKLADz" IMPLEMENTATION="htc/treeview.htc">
+<IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc">
+<IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
+<head>
+<title>#($G(%session.Data("systemname")))#</title>
+<link href="style.css" type=text/css rel=stylesheet>
+
+<script language="Jscript" src="common.js"></script>
+<script language="JScript">
+var Arguments=window.dialogArguments.split(InnerSplitter);
+var ClassName=Arguments[0];
+var DocID=Arguments[1];
+var DocType="#(DocType)#";
+var source="#(source)#";
+var sourceClass="#($G(sourceClass))#";
+
+if((source=="")&&(DocID=="")){
+	alert("Внутренний акт расхождения не может быть создан отдельно.");
+	window.close();}
+
+
+function load(){
+PropTable.ClassName=ClassName;
+TypDocument.innerText=DocType;
+if(source!=""){var srcdoc=source+"@Docs.StorageOut";}
+else{var srcdoc="";}
+PropTable.DownLoadPairs("",DocID,"Dat,Tim,Stat,Source,DocType,Kontr",srcdoc);
+docstr.ClassName=ClassName+"Items";
+docstr.attachEvent("onAddColumns",loadgoods2)
+docstr.LoadHeadersXML("Doc,DocType,Quantity");
+}
+
+function loadgoods2(){
+if(source!=""){var doc=source}
+else{var doc=DocID}
+docstr.loadfrommethod("Docs.Action.GetStrFromDoc",doc,2,ClassName)
+}
+
+
+function startFun(){
+var xmldoc=PropTable.GetXmlContent();
+var xmldoc2=docstr.GetXmlContent();
+var ok=SplitSendXml("",ClassName,xmldoc,xmldoc2,"#(%session.SessionId)#");
+
+//создатель документа вернёт его ID
+if(isNaN(ok)){
+	alert("Ошибка \n"+ok);
+}
+else{
+ var ok2=#server(Docs.Action.SetSourceDoc(ClassName,ok,source))#
+ if(isNaN(ok2))alert("Ошибка \n" +ok2)
+ returnValue=1;
+ window.close();
+}
+}
+
+function addtovars(){
+WinResult=window.showModalDialog("selectgoods2.csp","","center:yes;status:no;dialogHeight:700px;dialogWidth:800px;resizable:yes;")
+if(WinResult==null)return
+WinResult=WinResult.split(StringSplitter)
+var FieldCaption = new Array();
+var FieldValue = new Array();
+for(i=0 ; i<WinResult.length-1 ; i++){
+	var onestr=WinResult[i].split(InnerSplitter);
+	FieldCaption["Goods"]=onestr[1];
+	FieldValue["Goods"]=onestr[0];
+	docstr.AddRow(FieldCaption,FieldValue);
+}
+}
+
+function getstorecell(goods,addr){
+var val=#server(Store.Action.getquantaddr(goods,addr))#
+return val
+}
+
+function setsumm(){
+var val=docstr.Total;
+var val=val.toFixed(2);
+PropTable.setCellValue("Summa",val);
+}
+</script>
+</head>
+<body  onload="load()" onkeypress="ManageWindow()">
+<center id="TypDocument" style="font-size:14pt;font:Arial;color:#112255"></center>
+<SKLAD2:table id="PropTable" width=400 height=200 />
+<fieldset><legend>Строки документа</legend>
+<SKLAD2:table id="docstr" width=100% height=200 Silent="Goods" CountTotal="true" QuantityField="quantreal" displaybar=true Totalchange="setsumm()" />
+<sklad:LittleButton name="new+" id="add2" onclick="addtovars()" alt="Вставить товары">
+<sklad:LittleButton name="print" id="apint" onclick="prntdoc()" alt="Распечатать документ">
+</fieldset>
+<csp:IF CONDITION=silent'="true">
+<center><sklad:Button value="Да" onclick="startFun()">&nbsp;&nbsp;&nbsp;<sklad:Button value="Отмена" onclick="window.close()"></center>
+</csp:IF>
+</body>
+</html>

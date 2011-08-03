@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.Prih">
+<Description>
+Приходная накладная</Description>
+<Super>Docs.Super</Super>
+<TimeCreated>60363,72111.620385</TimeCreated>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>PrihDefaultData</DefaultData>
+<Data name="PrihDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"Prih"</Subscript>
+<Value name="1">
+<Value>Depot</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

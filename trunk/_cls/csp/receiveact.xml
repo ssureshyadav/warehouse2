@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.receiveact">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62196,42637.160929</TimeCreated>
+
+<Method name="GetRowIdByGoods">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec>RequestId:%String,GoodsId:%String</FormalSpec>
+<Language>cache</Language>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+  &sql(select ID into :RequestRowId from Operation.InstructionsItems where Goods=:GoodsId and Doc=:RequestId)
+  if 'SQLCODE q RequestRowId
+  q ""
+ 
+]]></Implementation>
+</Method>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !
+	n Passw,Code,Data,KontrId,RequestObj,FirstLine,ItemObj,i,serial,garant,rus,error
+	//Code - Код сервисного ценра
+	//Passw - пароль сервисного центра
+	s Passw=%request.Get("Pwd")
+	if Passw="" w "Невозможно зарегистрировать акт технического ."_$C(13,10)_"Не указан пароль." q 1
+	s Code=%request.Get("Code")
+	s Data=%request.Get("Data")
+	s ^Requests($I(^Requests),$zdt($H,4))="Код центра "_Code_"   REMOTE_ADDR="_%request.CgiEnvs("REMOTE_ADDR")_" CurrentVersion=? ""Создание акта"""
+	if ##class(Common.Common).GetPasswordFromCode(Code, .KontrId)'=Passw d  q 1
+	. w "Невозможно зарегистрировать акт."_$C(13,10)
+	. w "В базе данных не существует клиент с кодом "_Code_" и паролем "_Passw_$C(13,10)
+	. w "Уточните ваши персональные данные и внесите их в параметры программы."
+	if '##class(%Library.File).DirectoryExists("c:\acts") d ##class(%Library.File).CreateDirectory("c:\acts")
+	s filename="c:\acts\"_Code_"_"_$ZD(+$H,3)_"_"_$TR($ZT($P($H,",",2),2),":","-")_".txt"
+	s fileobj = ##class(%File).%New(filename)
+	d fileobj.Open("WSN")
+	s glob=$NA(^mtempAct($J))
+	k @glob
+	s rus="АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬабвгдеёжзийклмнопрстуфхцчшщъыьэюя"
+	s AllowedSymbols="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	s error=""
+	for i=1:1 q:'$D(%request.Data("Data"_i))  d
+	. s linetext=$G(%request.Data("Data"_i,1))
+	. if linetext=$C(9) q
+	. s @glob@(i)=linetext
+	. s FieldName = $P(linetext,$C(9),1)
+	. s FieldValue = $P(linetext,$C(9),2) 
+	. if FieldName="ActId" s ActId=FieldValue
+	. if FieldName="ActSate" s ActState=FieldValue
+	. if FieldName="ActState" s ActState=FieldValue
+	//либо создаём, либо открываем
+	if +$G(ActId) d
+	. //s DocObj = ##class(Docs.Act).%OpenId(ActId)
+	s:'$ISOBJECT($G(DocObj)) DocObj = ##class(Docs.Act).%New()
+	if DocObj.Stat = 2 w "Акт уже принят и не может быть изменён."_$C(9)_DocObj.%Id()_$C(9)_DocObj.Stat q
+	//если указан ID и указан статус НЕ 3 (то есть отвергнут)
+	if ($G(ActId)'="")&($G(ActState)'=3) d  q
+	. w "Акт уже зарегистрирован на сервере и не может быть перезаписан"_$C(9)_DocObj.%Id()_$C(9)_DocObj.Stat
+	s DocObj.DefectDescription=""
+	s DocObj.DefectEstimate=""
+	s DocObj.RepairRefuseReason=""
+	s DocObj.NumbersHistory=""
+	d DocObj.KontrSetObjectId(KontrId)
+	s i="" f  s i=$O(@glob@(i)) q:i=""  d
+	. s linetext=@glob@(i)
+	. //s @g@(i)=linetext
+	. Do fileobj.WriteLine(linetext)
+	. if linetext=$C(9) q
+	. s Item = ##class(Docs.ActItems).%New()
+	. s FieldName = $P(linetext,$C(9),1)
+	. s FieldValue = $P(linetext,$C(9),2)
+	. if FieldName="Goods" d DocObj.GoodsSetObjectId(FieldValue)
+	. if FieldName="Remonts" s DocObj.RepairsQnt=FieldValue
+	. if FieldName="Serial" d
+	. . s DocObj.Serial=FieldValue
+	. . //цикл проверки наличия кириллицы в серийном номере
+	. . for zz=1:1:$L(FieldValue) d
+	. . . if AllowedSymbols'[$E(FieldValue,zz) s error=error_" в серийном номере "_FieldValue_" есть недопустимый символ "_"'"_$E(FieldValue,zz)_"'"_$C(10,13)
+	. if FieldName="Garant" d
+	. . s DocObj.Garant=FieldValue
+	. . //цикл проверки наличия кириллицы в серийном номере
+	. . for zz=1:1:$L(FieldValue) d
+	. . . if AllowedSymbols'[$E(FieldValue,zz) s error=error_" в гарантийном номере "_FieldValue_" есть недопустимый символ "_"'"_$E(FieldValue,zz)_"'"_$C(10,13)
+	. if FieldName="ExpertDate",FieldValue?2N1"."2N1"."4N,FieldValue'="30.12.1899" s DocObj.ExpertDate=$ZDH($TR(FieldValue,".","/"),4)
+	. if FieldName="RemontDate",FieldValue?2N1"."2N1"."4N,FieldValue'="30.12.1899" s DocObj.RemontDate=$ZDH($TR(FieldValue,".","/"),4)
+	. if FieldName="DefectClass" s DocObj.DefectClass=+FieldValue
+	. if FieldName="DefectClassDescr" s DocObj.DefectClassDescr=FieldValue
+	. if FieldName="Description" s DocObj.DefectDescription=DocObj.DefectDescription_$C(13,10)_FieldValue
+	. if FieldName="DefectEstimate" s DocObj.DefectEstimate=DocObj.DefectEstimate_$C(13,10)_FieldValue
+	. if FieldName="RefuseReason" s DocObj.RepairRefuseReason=DocObj.RepairRefuseReason_$C(13,10)_FieldValue
+	. if FieldName="NumbersHistory" s DocObj.NumbersHistory=DocObj.NumbersHistory_$C(13,10)_FieldValue
+	. if FieldName="SellerName" s DocObj.SellerName=FieldValue
+	. if FieldName="SellerPhone" s DocObj.SellerPhone=FieldValue
+	. if FieldName="SellerAddress" s DocObj.SellerAddress=FieldValue
+	. if FieldName="SellDate",FieldValue?2N1"."2N1"."4N,FieldValue'="30.12.1899" s DocObj.SellerDate=$ZDH($TR(FieldValue,".","/"),4)
+	. if FieldName="CustomerName" s DocObj.CustomerName=FieldValue
+	. if FieldName="CustomerDoc" s DocObj.CustomerDoc=FieldValue
+	. if FieldName="CustomerAddress" s DocObj.CustomerAddress=FieldValue
+	. if FieldName="CustomerPhone" s DocObj.CustomerPhone=FieldValue
+	. if FieldName="ActDate",FieldValue?2N1"."2N1"."4N,FieldValue'="30.12.1899" s DocObj.ActDate=$ZDH($TR(FieldValue,".","/"),4)
+	. if FieldName="GoodsKeeping" s DocObj.GoodsKeeping=+FieldValue
+	. if FieldName="SrvName" s DocObj.SrvName=FieldValue
+	. if FieldName="SrvPhone" s DocObj.SrvPhone=FieldValue
+	. if FieldName="SrvAddr" s DocObj.SrvAddr=FieldValue
+	. if FieldName="SrvFIO" s DocObj.SrvFIO=FieldValue
+	. if FieldName="Row" d
+	. . s Item = ##class(Docs.ActItems).%New()
+	. . s Goods=$P(linetext,$C(9),5)
+	. . s Request=$P(linetext,$C(9),3)
+	. . d:+Goods Item.GoodsSetObjectId(Goods)
+	. . d:+Request Item.RequestSetObjectId(Request)
+	. . s RequestItem=..GetRowIdByGoods(Request,Goods)
+	. . d:+RequestItem Item.RequestItemSetObjectId(RequestItem)
+	. . d Item.DocTypeSetObjectId("Docs.Act")
+	. . d DocObj.Items.Insert(Item)
+	s ok = fileobj.%Save()
+	if error'="" w "Невозможно сохранить акт. Исправьте пожалуйста следующие неточности: "_error q
+	s ok = DocObj.%Save()
+	if ok w "Документ успешно сохранён на сервере"_$C(9)_DocObj.%Id()_$C(9)_DocObj.Stat
+	else  Do 
+	. w "Извините. Ошибка при сохранении акта технической экспертизы"
+	. JOB saveerror^saveerror($$GetOneErrorText^%apiOBJ(ok,1),$ZNAME)
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\ReceiveAct.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/ReceiveAct.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>62147,57198</Default>
+</Parameter>
+</Class>
+</Export>

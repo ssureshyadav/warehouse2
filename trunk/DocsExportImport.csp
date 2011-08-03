@@ -1,0 +1,51 @@
+<script language="cache" runat="server">
+ s ok=""
+ d:%request.ContentType="multipart/form-data"
+ . s obj=$G(%request.MimeData("oFile1",1))
+ . q:'$ISOBJECT(obj)
+ . s filepath="c:\"_$P(obj.FileName,"\",$L(obj.FileName,"\"))
+ . s file=##class(%File).%New(filepath)
+ . Do file.Open("WSN")
+ . d file.CopyFrom(obj)
+ . s ok=file.%Save()
+ . d file.Close()
+ . i '+ok d
+ . . Do DecomposeStatus^%apiOBJ(ok,.Err)
+ . . s ok="Ошибка при сохранении отправленного файла "_filepath_" <br> "_Err(Err)
+ . e  d
+ . . s ok=##class(Docs.Action2).ImportDocsGlobal(filepath)
+</script>
+<html>
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="jscript" src="common.js"></script>
+<title></title>
+<script language="jscript">
+function ExportDocs(){
+var ok=#server(Docs.Action2.ExportDocsGlobal(dat1.value,dat2.value))#;
+alert(ok);
+}
+
+</script>
+</head>
+
+<body>
+<sklad:Button value="Назад" onclick="window.location.href='tuneup.csp'"><br>
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<TD align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=3><strong>Выгрузка и загрузка документов</strong></TD></tr>
+<tr>
+</table>
+<br><br>
+Период c <input type=text id="dat1" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"> по <input type=text id="dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar">
+<sklad:Button value="Выгрузить" onclick="ExportDocs();"><br>
+<br>
+<hr widht=80%>
+<h1>#($G(ok))#</h1>
+<form enctype="multipart/form-data" method="post" >
+Загрузить документы<br>
+<input name="oFile1" id="oFile1" size=30 type=file style="width:300px"><br>
+<input type="submit" value="ок" style="width:60px">
+</form>
+</body>
+</html>

@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Store.Address">
+<Description>
+Структура адреса</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60319,64789.414885</TimeCreated>
+
+<Property name="Depot">
+<Description>
+Склад</Description>
+<Type>Depot</Type>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Склад"/>
+</Property>
+
+<Index name="DepotIndex">
+<Properties>Depot</Properties>
+</Index>
+
+<Property name="Code">
+<Description>
+Элемент адреса</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Элемент адреса"/>
+</Property>
+
+<Index name="NewIndex1">
+<Properties>Code</Properties>
+</Index>
+
+<Index name="DepotCodeIDX">
+<Description>
+Надо сделать уникальным !!!</Description>
+<Properties>Depot,Code</Properties>
+</Index>
+
+<Method name="GetByCode">
+<Description>
+Поиск ид по коду</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>code:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	s id="" &sql(Select ID Into :id From Store.Address Where Code=:code)	
+	Q:'SQLCODE id Q ""
+]]></Implementation>
+</Method>
+
+<Property name="Name">
+<Description>
+Наименование</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Наименование"/>
+</Property>
+
+<Index name="NameIDX">
+<Description>
+Индекс по наименованию</Description>
+<Properties>Name</Properties>
+</Index>
+
+<Property name="Comment">
+<Description>
+Справочная информация</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Справочная информация"/>
+</Property>
+
+<Property name="Parent">
+<Description>
+Родительский код
+Неудачно...</Description>
+<Type>%String</Type>
+<SqlComputeCode> Set {*} = ##class(Store.Address).GetParent({Code})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+<SqlComputeOnChange>Code</SqlComputeOnChange>
+<Parameter name="CAPTION" value="Родитель"/>
+</Property>
+
+<Index name="ParentIndex">
+<Properties>Parent</Properties>
+</Index>
+
+<Method name="GetParent">
+<Description>
+Вычисление родителя по коду</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>code:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	s code=$g(code) Q:code="" ""
+	Q $P(code,"*",1,$L(code,"*")-1)
+]]></Implementation>
+</Method>
+
+<Property name="ParentID">
+<Description>
+Свойство для использования через SQL</Description>
+<Type>Store.Address</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {*}= ##class(Store.Address).GetParentID({Depot},{Code}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+<SqlComputeOnChange>Code</SqlComputeOnChange>
+</Property>
+
+<Method name="GetParentID">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>depot:%String,code:%String</FormalSpec>
+<ReturnType>%Integer</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	s pcode=..GetParent(code) 
+	s pid="" &sql(Select TOP 1 ID Into :pid From Store.Address Where Depot=:depot And Code=:pcode)
+	Q pid
+]]></Implementation>
+</Method>
+
+<Index name="ParentIDX">
+<Description>
+Могут быть проблемы с его перестройкой</Description>
+<Properties>ParentID</Properties>
+</Index>
+
+<Property name="Percent">
+<Description>
+Процент заполнения места хранения</Description>
+<Type>%Integer</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {*}=##class(Store.Address).CalcPercent({CurrentSize},{Size1}) </SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Method name="CalcPercent">
+<Description>
+Расчет процента заполнения</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>part:%String,whole:%String</FormalSpec>
+<ReturnType>%Integer</ReturnType>
+<Implementation><![CDATA[
+	q:+$g(part)=0 0
+	q:+$g(whole)=0 0
+	s perc=part/whole*100
+	if perc<0 s perc=perc*-1
+	Q +$j(perc,0,0)
+]]></Implementation>
+</Method>
+
+<Method name="HasChild">
+<Description>
+Есть дочерние узлы?</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	Q:'..%ExistsId(id) 0
+	s child="" &sql(Select TOP 1 ID Into :child From Store.Address Where ParentID = :id)
+	Q child
+]]></Implementation>
+</Method>
+
+<Property name="tempstore">
+<Description>
+Временное хранение</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Временное хранение"/>
+</Property>
+
+<Property name="Size1">
+<Description>
+Максимальный объём ячейки</Description>
+<Type>%Numeric</Type>
+<Parameter name="SCALE" value="3"/>
+</Property>
+
+<Property name="Currentsize">
+<Description>
+Текущий объём ячейки</Description>
+<Type>%Numeric</Type>
+<Parameter name="SCALE" value="3"/>
+</Property>
+
+<Property name="Weight">
+<Description>
+Максимальная нагрузка на ячейку</Description>
+<Type>%Numeric</Type>
+<Parameter name="SCALE" value="3"/>
+</Property>
+
+<Property name="Currentweight">
+<Description>
+Текущая нагрузка на ячейку</Description>
+<Type>%Numeric</Type>
+<Parameter name="SCALE" value="3"/>
+</Property>
+
+<Property name="oldnumb">
+<Description>
+Старый номер</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="speed">
+<Description>
+Скорость доступа</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Index name="speedind">
+<Properties>speed</Properties>
+</Index>
+
+<Property name="block">
+<Description>
+Состояние</Description>
+<Type>%String</Type>
+<InitialExpression>1</InitialExpression>
+<Parameter name="DISPLAYLIST" value=",Используется,Заблокировано"/>
+<Parameter name="VALUELIST" value=",1,0"/>
+</Property>
+
+<Property name="AddressName">
+<Description>
+Адрес ячейки</Description>
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode>Set {AddressName}=##class(Store.Action).AddressPath({ID})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Query name="Common">
+<Type>%SQLQuery</Type>
+<FormalSpec>Depot</FormalSpec>
+<SqlQuery>SELECT Parent,Code,Name,ID FROM "Address"
+where Depot=:Depot
+ ORDER BY Code</SqlQuery>
+</Query>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Store.AddressD</DataLocation>
+<DefaultData>AddressDefaultData</DefaultData>
+<IdLocation>^Store.AddressD</IdLocation>
+<IndexLocation>^Store.AddressI</IndexLocation>
+<StreamLocation>^Store.AddressS</StreamLocation>
+<Data name="AddressDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Depot</Value>
+</Value>
+<Value name="3">
+<Value>Zone</Value>
+</Value>
+<Value name="4">
+<Value>Comment</Value>
+</Value>
+<Value name="5">
+<Value>Element</Value>
+</Value>
+<Value name="6">
+<Value>Name</Value>
+</Value>
+<Value name="7">
+<Value>MaxValue</Value>
+</Value>
+<Value name="8">
+<Value>Code</Value>
+</Value>
+<Value name="9">
+<Value>Parent</Value>
+</Value>
+<Value name="10">
+<Value>Draw</Value>
+</Value>
+<Value name="11">
+<Value>tempstore</Value>
+</Value>
+<Value name="12">
+<Value>tempztore</Value>
+</Value>
+<Value name="13">
+<Value>Currentsize</Value>
+</Value>
+<Value name="14">
+<Value>Currentweight</Value>
+</Value>
+<Value name="15">
+<Value>Maxsize</Value>
+</Value>
+<Value name="16">
+<Value>Maxweight</Value>
+</Value>
+<Value name="17">
+<Value>Size</Value>
+</Value>
+<Value name="18">
+<Value>Weight</Value>
+</Value>
+<Value name="19">
+<Value>Size1</Value>
+</Value>
+<Value name="20">
+<Value>oldnumb</Value>
+</Value>
+<Value name="21">
+<Value>speed</Value>
+</Value>
+<Value name="22">
+<Value>block</Value>
+</Value>
+<Value name="23">
+<Value>ParentId</Value>
+</Value>
+<Value name="24">
+<Value>oParent</Value>
+</Value>
+<Value name="25">
+<Value>Parent2</Value>
+</Value>
+<Value name="26">
+<Value>Custom</Value>
+</Value>
+<Value name="27">
+<Value>Test</Value>
+</Value>
+<Value name="28">
+<Value>Percent</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

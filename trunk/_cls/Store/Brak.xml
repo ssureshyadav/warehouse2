@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Store.Brak">
+<Description>
+Брак</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60955,53796.276033</TimeCreated>
+
+<Property name="Goods">
+<Description>
+Товар</Description>
+<Type>Goods.Goods</Type>
+</Property>
+
+<Index name="GoodsInd">
+<Properties>Goods</Properties>
+</Index>
+
+<Property name="Address">
+<Description>
+Место на складе</Description>
+<Type>Store.Address</Type>
+</Property>
+
+<Index name="AddressInd">
+<Properties>Address</Properties>
+</Index>
+
+<Property name="Qnt">
+<Description>
+Количество</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="SourceDoc">
+<Description>
+Документ - основание приёма</Description>
+<Type>Docs.Super</Type>
+</Property>
+
+<Index name="SourceDocInd">
+<Properties>SourceDoc</Properties>
+</Index>
+
+<Property name="Kontr">
+<Description>
+Контрагент</Description>
+<Type>Common.Kontragent</Type>
+</Property>
+
+<Index name="Kontragent">
+<Properties>Kontr</Properties>
+</Index>
+
+<Index name="NewIndex1">
+<Data>Qnt</Data>
+<Properties>Goods,Address,Kontr</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Store.BrakD</DataLocation>
+<DefaultData>BrakDefaultData</DefaultData>
+<IdLocation>^Store.BrakD</IdLocation>
+<IndexLocation>^Store.BrakI</IndexLocation>
+<StreamLocation>^Store.BrakS</StreamLocation>
+<Data name="BrakDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Address</Value>
+</Value>
+<Value name="3">
+<Value>Goods</Value>
+</Value>
+<Value name="4">
+<Value>Qnt</Value>
+</Value>
+<Value name="5">
+<Value>SourceDoc</Value>
+</Value>
+<Value name="6">
+<Value>Kontragent</Value>
+</Value>
+<Value name="7">
+<Value>Kontr</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

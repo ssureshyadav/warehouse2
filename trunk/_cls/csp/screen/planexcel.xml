@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.screen.planexcel">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>61612,42028.311787</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body>"
+	Write !,"<table x:str border=0 cellpadding=0 cellspacing=0 width=848 style='border-collapse:",!
+	Write " collapse;table-layout:fixed;width:636pt'>",!
+	Write " <col class=xl2824542 width=64 style='width:48pt'>",!
+	Write " <col width=255 style='mso-width-source:userset;mso-width-alt:9325;width:191pt'>",!
+	Write " <col width=161 style='mso-width-source:userset;mso-width-alt:5888;width:121pt'>",!
+	Write " <col class=xl2824542 width=112 style='mso-width-source:userset;mso-width-alt:",!
+	Write " 4096;width:84pt'>",!
+	Write " <col width=64 span=4 style='width:48pt'>",!
+	Write " "
+	n tempGlob,docid,docobj,DocLanguage,i,Quantity,DocString,count,abbr,digits,Name,TovarName,
+	EnglishTovarName,o
+	s docid=%request.Get("docid")
+	s:docid ok=##class(Reports.ShowTables).MakeGlobForCheifPlan(docid,.tempGlob)
+	s i="" f  s i=$O(@tempGlob@(i)) q:i=""  d
+	. s TovarName=@tempGlob@(i,"Name")
+	. w "<tr height=24 style='height:18.0pt'><td></td></tr>"
+	. w "<tr height=24 style='height:18.0pt'><td height=24 class=xl2824542 width=64 style='height:18.0pt;width:48pt'></td><td class=xl2424542 colspan=3 width=528 style='width:396pt'>Spare parts order for "_i_" "_TovarName_"</td><td class=xl2624542 width=64 style='width:48pt'></td><td class=xl2624542 width=64 style='width:48pt'></td><td class=xl2624542 width=64 style='width:48pt'></td><td class=xl2624542 width=64 style='width:48pt'></td></tr>"
+	. w "<tr height=24 style='height:18.0pt'><td height=24 class=xl2924542 style='height:18.0pt'>No</td><td class=xl3024542 style='border-left:none'>PART NAME</td><td class=xl3024542 style='border-left:none'>№ pos.</td><td class=xl3024542 style='border-left:none'>QUANTITY</td><td class=xl2624542></td><td class=xl3424542></td><td class=xl2624542></td><td class=xl2624542></td></tr>"
+	. s count=0
+	. s o="" f  s o=$O(@tempGlob@(i,"Name",o)) q:o=""  d
+	. . i $i(count)
+	. . s Quantity=@tempGlob@(i,"Name",o,"Quantity")
+	. . s Name=@tempGlob@(i,"Name",o,"Name")
+	. . s SchemaNumber=@tempGlob@(i,"Name",o,"SchemaNumber")
+	. . w "<tr height=20 style='height:15.0pt'>"
+	. . w "<td height=20 class=xl3324542 style='height:15.0pt;border-top:none' x:num>"_count_"</td>"
+	. . w "<td class=xl2724542 style='border-top:none;border-left:none'>"_Name_"</td>"
+	. . w "<td class=xl3224542 style='border-top:none;border-left:none' x:num>"_SchemaNumber_"</td>"
+	. . w "<td class=xl3224542 style='border-top:none;border-left:none' x:num>"_Quantity_"</td>"
+	. . w "<td class=xl2624542></td>"
+	. . w "<td class=xl2624542></td>"
+	. . w "<td class=xl2624542></td>"
+	. . w "<td class=xl2624542></td>"
+	. . w "</tr>"
+	k @tempGlob
+	Write !,"</table>",!
+	Write !,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<style id=""th3-06_24542_Styles"">"
+	Write !,"<!--table",!
+	Write "	{mso-displayed-decimal-separator:""\."";",!
+	Write "	mso-displayed-thousand-separator:"" "";}",!
+	Write ".xl1524542",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:10.0pt;",!
+	Write "	font-weight:400;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:""Arial Cyr"";",!
+	Write "	mso-generic-font-family:auto;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:general;",!
+	Write "	vertical-align:bottom;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl2424542",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:14.0pt;",!
+	Write "	font-weight:700;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:""Arial Cyr"", sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:""\@"";",!
+	Write "	text-align:general;",!
+	Write "	vertical-align:bottom;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl2524542",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:12.0pt;",!
+	Write "	font-weight:700;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:""Arial CYR"", sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:""\@"";",!
+	Write "	text-align:general;",!
+	Write "	vertical-align:bottom;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl2624542",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:12.0pt;",!
+	Write "	font-weight:400;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:""Arial Cyr"";",!
+	Write "	mso-generic-font-family:auto;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:general;",!
+	Write "	vertical-align:bottom;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl2724542",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:12.0pt;",!
+	Write "	font-weight:400;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:""Arial Cyr"", sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:general;",!
+	Write "	vertical-align:bottom;",!
+	Write "	border:.5pt solid windowtext;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl2824542",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:10.0pt;",!
+	Write "	font-weight:400;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:""Arial Cyr"";",!
+	Write "	mso-generic-font-family:auto;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:center;",!
+	Write "	vertical-align:bottom;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl2924542",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:14.0pt;",!
+	Write "	font-weight:700;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:""Arial Cyr"", sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:""\@"";",!
+	Write "	text-align:center;",!
+	Write "	vertical-align:bottom;",!
+	Write "	border:.5pt solid windowtext;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl3024542",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:14.0pt;",!
+	Write "	font-weight:700;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:center;",!
+	Write "	vertical-align:middle;",!
+	Write "	border:.5pt solid windowtext;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl3124542",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:12.0pt;",!
+	Write "	font-weight:400;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:""Arial Cyr"";",!
+	Write "	mso-generic-font-family:auto;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:center;",!
+	Write "	vertical-align:bottom;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl3224542",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:12.0pt;",!
+	Write "	font-weight:400;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:""Arial Cyr"", sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:center;",!
+	Write "	vertical-align:bottom;",!
+	Write "	border:.5pt solid windowtext;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl3324542",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:10.0pt;",!
+	Write "	font-weight:400;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:""Arial Cyr"", sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:center;",!
+	Write "	vertical-align:bottom;",!
+	Write "	border:.5pt solid windowtext;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write ".xl3424542",!
+	Write "	{padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:12.0pt;",!
+	Write "	font-weight:700;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:""Arial Cyr"";",!
+	Write "	mso-generic-font-family:auto;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:general;",!
+	Write "	vertical-align:bottom;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	white-space:nowrap;}",!
+	Write "-->"
+	Write !,"</style>"
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !,!
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,!,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+  set %response.ContentType = "application/x-msexcel"
+  do %response.SetHeader("Content-Disposition","attachment;excel.xls")
+  set %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+ 
+ if %request.Get("word")="on"
+ {
+  set %response.ContentType = "application/msword"
+  do %response.SetHeader("Content-Disposition","attachment;word.doc")
+  set %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+ }
+  q 1
+ 
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\screen\PlanExcel.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/screen/PlanExcel.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>61612,42029</Default>
+</Parameter>
+</Class>
+</Export>

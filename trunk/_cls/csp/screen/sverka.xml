@@ -1,0 +1,498 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.screen.sverka">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>61948,41576.395828</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body link=blue vlink=purple>"
+	Write !,!,"<table border=0 cellpadding=0 cellspacing=0 width=768 style='border-collapse:",!
+	Write " collapse;table-layout:fixed;width:576pt'>",!
+	Write " <col width=16 style='mso-width-source:userset;mso-width-alt:682;width:12pt'>",!
+	Write " <col width=78 style='mso-width-source:userset;mso-width-alt:3328;width:59pt'>",!
+	Write " <col width=364 style='mso-width-source:userset;mso-width-alt:15530;width:273pt'>",!
+	Write " <col width=100 style='mso-width-source:userset;mso-width-alt:4266;width:75pt'>",!
+	Write " <col width=119 style='mso-width-source:userset;mso-width-alt:5077;width:89pt'>",!
+	Write " <col width=27 style='mso-width-source:userset;mso-width-alt:1152;width:20pt'>",!
+	Write " <col width=64 style='width:48pt'>",!
+	Write " <tr height=24 style='height:18.0pt'>",!
+	Write "  <td height=24 width=16 style='height:18.0pt;width:12pt'>"
+	Write "<a name=""Print_Area"">"
+	Write "</a>"
+	Write "</td>",!
+	Write "  <td colspan=4 class=xl78 width=661 style='width:496pt'>Акт</td>",!
+	Write "  <td width=27 style='width:20pt'></td>",!
+	Write "  <td width=64 style='width:48pt'></td>",!
+	Write " </tr>",!
+	Write " <tr height=20 style='height:15.0pt'>",!
+	Write "  <td height=20 style='height:15.0pt'></td>",!
+	Write "  <td colspan=4 class=xl79>сверки взаимных расчетов</td>",!
+	Write "  <td colspan=2 style='mso-ignore:colspan'></td>",!
+	Write " </tr>",!
+	Write " <tr height=16 style='mso-height-source:userset;height:12.6pt'>",!
+	Write "  <td height=16 style='height:12.6pt'></td>",!
+	Write "  <td colspan=4 class=xl80 width=661 style='width:496pt'>между "_($G(Kontr1Name))_" и "_($G(Kontr2Name))_"</td>",!
+	Write "  <td colspan=2 style='mso-ignore:colspan'></td>",!
+	Write " </tr>",!
+	Write " <tr height=16 style='height:12.0pt'>",!
+	Write "  <td height=16 style='height:12.0pt'></td>",!
+	Write "  <td colspan=4 class=xl81>на период: "_($G(dat1))_" - "_($G(dat2))_"</td>",!
+	Write "  <td colspan=2 style='mso-ignore:colspan'></td>",!
+	Write " </tr>",!
+	Write " <tr height=15 style='height:11.25pt'>",!
+	Write "  <td height=15 colspan=7 style='height:11.25pt;mso-ignore:colspan'></td>",!
+	Write " </tr>",!
+	Write " <tr height=43 style='mso-height-source:userset;height:32.85pt'>",!
+	Write "  <td height=43 style='height:32.85pt'></td>",!
+	Write "  <td colspan=4 class=xl75 width=661 style='width:496pt'>"
+	Write "<span style='mso-spacerun:yes'>"
+	Write "   "
+	Write "</span>"
+	Write "Мы, нижеподписавшиеся, главный бухгалтер",!
+	Write "  "_($G(Kontr1Name))_" ___________________________________ с одной стороны и",!
+	Write "  главный бухгалтер "_($G(Kontr2Name)),!
+	Write "  ___________________________________, с другой стороны, произвели сверку",!
+	Write "  взаимных расчетов</td>",!
+	Write "  <td colspan=2 style='mso-ignore:colspan'></td>",!
+	Write " </tr>",!
+	Write " <tr height=15 style='height:11.25pt'>",!
+	Write "  <td height=15 colspan=7 style='height:11.25pt;mso-ignore:colspan'></td>",!
+	Write " </tr>",!
+	Write " <tr height=15 style='height:11.25pt'>",!
+	Write "  <td height=15 style='height:11.25pt'></td>",!
+	Write "  <td rowspan=2 class=xl76>Дата</td>",!
+	Write "  <td rowspan=2 class=xl76>Наименование операции, документ</td>",!
+	Write "  <td rowspan=2 class=xl76>Дебет</td>",!
+	Write "  <td rowspan=2 class=xl77>Кредит</td>",!
+	Write "  <td colspan=2 style='mso-ignore:colspan'></td>",!
+	Write " </tr>",!
+	Write " <tr height=15 style='height:11.25pt'>",!
+	Write "  <td height=15 style='height:11.25pt'></td>",!
+	Write "  <td colspan=2 style='mso-ignore:colspan'></td>",!
+	Write " </tr>",!
+	Write " <tr height=15 style='height:11.25pt'>",!
+	Write "  <td height=15 class=xl71 style='height:11.25pt'></td>",!
+	Write "  <td class=xl72 style='border-top:none' colspan=2>Остаток на "_(dat1)_"</td>",!
+	Write "  <td class=xl61 style='border-top:none'>&nbsp;</td>",!
+	Write "  <td class=xl61 style='border-top:none;border-left:none'>&nbsp;</td>",!
+	Write "  <td colspan=2 style='mso-ignore:colspan'></td>",!
+	Write " </tr>",!
+	Write " "
+	Write "<!--",!
+	Write " <tr height=15 style='height:11.25pt'>",!
+	Write "  <td height=15 style='height:11.25pt'></td>",!
+	Write "  <td class=xl73 style='border-top:none'>15.01.2009</td>",!
+	Write "  <td class=xl62 style='border-top:none;border-left:none'>Технический отчёт № 7",!
+	Write "  от 15.01.2009<span style='mso-spacerun:yes'> </span></td>",!
+	Write "  <td class=xl63 style='border-top:none;border-left:none'>405 221,00</td>",!
+	Write "  <td class=xl64 style='border-top:none;border-left:none'>&nbsp;</td>",!
+	Write "  <td colspan=2 style='mso-ignore:colspan'></td>",!
+	Write " </tr>",!
+	Write " -->"
+	Write !," "
+	&sql(declare z1 cursor for
+	select ID,Summa,Name,Dat
+	into :ID,:Summa,:Name,:Dat
+	from Docs.Otchet
+	where Stat=2
+	and Dat>=:date1 and Dat<=:date2
+	and Kontr=:Kontr2Id)
+	&sql(Open z1)
+	f  &sql(Fetch z1) q:SQLCODE  d
+	. s Docs(ID,"Name")=Name
+	. s Docs(ID,"Dat")=Dat
+	. s Docs(ID,"Summa")=Summa
+	. s Docs(ID,"Type")="Docs.Otchet"
+	&sql(Close z1)
+	&sql(declare z2 cursor for
+	select ID,RubSumma,Dat,Name
+	into :ID,:Summa,:Dat,:Name
+	from Docs.Platejka
+	where Dat>=:date1 and Dat<=:date2
+	and Poluh=:Kontr1Id and Kontr=:Kontr2Id)
+	&sql(Open z2)
+	f  &sql(fetch z2) q:SQLCODE  d
+	. s Docs(ID,"Name")=Name
+	. s Docs(ID,"Dat")=Dat
+	. s Docs(ID,"Summa")=Summa
+	. s Docs(ID,"Type")="Docs.Platejka"
+	&sql(close z2)
+	s (AllDebet,AllCredit)=0
+	s ID="" f  s ID=$O(Docs(ID)) q:ID=""  d
+	. w "<tr height=15 style='height:11.25pt'>",!
+	. w "<td height=15 style='height:11.25pt'></td>",!
+	. w "<td class=xl73 style='border-top:none'>"_$ZD(Docs(ID,"Dat"),4)_"</td>",!
+	. if Docs(ID,"Type")="Docs.Otchet" s DocTypeName="Технический отчёт ",Debet=Docs(ID,"Summa"),Credit=""
+	. e  s DocTypeName="Платёжное поручение № ",Debet="",Credit=Docs(ID,"Summa")
+	. s Debet=$J(Debet,"",2)
+	. s Credit=$J(Credit,"",2)
+	. w "<td class=xl62 style='border-top:none;border-left:none'>"_DocTypeName_" "_Docs(ID,"Name")_"</td>"
+	. w "<td class=xl63 style='border-top:none;border-left:none'>"_Debet_"</td>"
+	. w "<td class=xl64 style='border-top:none;border-left:none'>"_Credit_"</td>"
+	. w "<td colspan=2 style='mso-ignore:colspan'></td>",!
+	. w "</tr>",!
+	. s AllCredit=AllCredit+Credit
+	. s AllDebet=AllDebet+Debet
+	if AllCredit>AllDebet s Kreditor=Kontr1Name
+	if AllCredit<AllDebet s Kreditor=Kontr2Name
+	Write !," <tr height=15 style='height:11.25pt'>",!
+	Write "  <td height=15 class=xl71 style='height:11.25pt'></td>",!
+	Write "  <td class=xl72 colspan=2 style='mso-ignore:colspan'>Обороты за период</td>",!
+	Write "  <td class=xl66 style='border-top:none'>"_($J(AllDebet,"",2))_"</td>",!
+	Write "  <td class=xl66 style='border-top:none;border-left:none'>"_($J(AllCredit,"",2))_"</td>",!
+	Write "  <td colspan=2 style='mso-ignore:colspan'></td>",!
+	Write " </tr>",!
+	Write " ",!
+	Write " <tr height=15 style='height:11.25pt'>",!
+	Write "  <td height=15 class=xl71 style='height:11.25pt'></td>",!
+	Write "  <td class=xl72 colspan=2 style='mso-ignore:colspan'>Остаток на "_($G(dat2))_"</td>",!
+	Write "  <td class=xl66 style='border-top:none'>"_($G(Ostatok))_"</td>",!
+	Write "  <td class=xl61 style='border-top:none;border-left:none'>&nbsp;</td>",!
+	Write "  <td colspan=2 style='mso-ignore:colspan'></td>",!
+	Write " </tr>",!
+	Write " <tr height=15 style='mso-height-source:userset;height:11.85pt'>",!
+	Write "  <td height=15 style='height:11.85pt'></td>",!
+	Write "  <td class=xl67></td>",!
+	Write "  <td colspan=5 style='mso-ignore:colspan'></td>",!
+	Write " </tr>",!
+	Write " <tr height=29 style='mso-height-source:userset;height:22.35pt'>",!
+	Write "  <td height=29 style='height:22.35pt'></td>",!
+	Write "  <td colspan=4 class=xl67 width=661 style='width:496pt'>Задолженность на",!
+	Write "  "_($G(dat2))_" в пользу "_($G(Kreditor))_" составляет "_($G(debt))_" "_($G(debtString))_"</td>",!
+	Write "  <td colspan=2 style='mso-ignore:colspan'></td>",!
+	Write " </tr>",!
+	Write " <tr height=15 style='height:11.25pt'>",!
+	Write "  <td height=15 colspan=7 style='height:11.25pt;mso-ignore:colspan'></td>",!
+	Write " </tr>",!
+	Write " <tr height=15 style='mso-height-source:userset;height:11.85pt'>",!
+	Write "  <td height=15 style='height:11.85pt'></td>",!
+	Write "  <td colspan=4 class=xl67 width=661 style='width:496pt'>Один экземпляр акта",!
+	Write "  просим подписать и вернуть в наш адрес в течении 10 дней со дня получения.</td>",!
+	Write "  <td colspan=2 style='mso-ignore:colspan'></td>",!
+	Write " </tr>",!
+	Write " <tr height=15 style='mso-height-source:userset;height:11.85pt'>",!
+	Write "  <td height=15 style='height:11.85pt'></td>",!
+	Write "  <td colspan=4 class=xl67 width=661 style='width:496pt'>В противном случае",!
+	Write "  считаем данную задолженность подтвержденной с Вашей стороны.</td>",!
+	Write "  <td colspan=2 style='mso-ignore:colspan'></td>",!
+	Write " </tr>",!
+	Write " <tr height=15 style='mso-height-source:userset;height:11.85pt'>",!
+	Write "  <td height=15 style='height:11.85pt'></td>",!
+	Write "  <td colspan=4 class=xl67 width=661 style='width:496pt'>Настоящий акт",!
+	Write "  составлен в двух экземплярах.</td>",!
+	Write "  <td colspan=2 style='mso-ignore:colspan'></td>",!
+	Write " </tr>",!
+	Write " <tr height=15 style='height:11.25pt'>",!
+	Write "  <td height=15 colspan=7 style='height:11.25pt;mso-ignore:colspan'></td>",!
+	Write " </tr>",!
+	Write " <tr height=15 style='height:11.25pt'>",!
+	Write "  <td height=15 style='height:11.25pt'></td>",!
+	Write "  <td class=xl68 colspan=2 style='mso-ignore:colspan'>"_($G(Kontr1Name))_"</td>",!
+	Write "  <td class=xl68 colspan=2 style='mso-ignore:colspan'>"_($G(Kontr2Name))_"</td>",!
+	Write "  <td colspan=2 style='mso-ignore:colspan'></td>",!
+	Write " </tr>",!
+	Write " <tr height=15 style='height:11.25pt'>",!
+	Write "  <td height=15 style='height:11.25pt'></td>",!
+	Write "  <td class=xl68 colspan=2 style='mso-ignore:colspan'>ИНН: "_($G(Kontr1inn))_"</td>",!
+	Write "  <td class=xl68>ИНН: "_($G(Kontr2inn))_"</td>",!
+	Write "  <td colspan=3 style='mso-ignore:colspan'></td>",!
+	Write " </tr>",!
+	Write " <tr height=21 style='mso-height-source:userset;height:15.75pt'>",!
+	Write "  <td height=21 style='height:15.75pt'></td>",!
+	Write "  <td colspan=2 style='mso-ignore:colspan'>Главный бухгалтер",!
+	Write "  ____________________________</td>",!
+	Write "  <td colspan=4 style='mso-ignore:colspan'>Главный бухгалтер",!
+	Write "  ___________________________</td>",!
+	Write " </tr>",!
+	Write " ",!
+	Write "</table>",!
+	Write !,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	s Kontr1Id=%request.Get("Kontr1Id")
+	s Kontr2Id=%request.Get("Kontr2Id")
+	s dat1=%request.Get("dat1")
+	s dat2=%request.Get("dat2")
+	s date1=$S(dat1="":"",1:$ZDH(dat1,4))
+	s date2=$S(dat2="":"",1:$ZDH(dat2,4))
+	s Kontr1Obj=##class(Common.Kontragent).%OpenId(Kontr1Id)
+	if $ISOBJECT(Kontr1Obj) d
+	. s Kontr1Name=Kontr1Obj.Name
+	. s Kontr1inn=Kontr1Obj.bank.inn
+	s Kontr2Obj=##class(Common.Kontragent).%OpenId(Kontr2Id)
+	if $ISOBJECT(Kontr2Obj) d
+	. s Kontr2Name=Kontr2Obj.Name
+	. s Kontr2inn=Kontr2Obj.bank.inn 
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<meta http-equiv=Content-Type content=""text/html; charset=windows-1251"">"
+	Write !,"<style>"
+	Write !,"<!--table",!
+	Write "	{mso-displayed-decimal-separator:""\,"";",!
+	Write "	mso-displayed-thousand-separator:"" "";}",!
+	Write "@page",!
+	Write "	{margin:1.0in .24in 1.0in .24in;",!
+	Write "	mso-header-margin:.5in;",!
+	Write "	mso-footer-margin:.5in;}",!
+	Write "-->"
+	Write !,"tr",!
+	Write "	{mso-height-source:auto;}",!
+	Write "col",!
+	Write "	{mso-width-source:auto;}",!
+	Write "br",!
+	Write "	{mso-data-placement:same-cell;}",!
+	Write ".style0",!
+	Write "	{mso-number-format:General;",!
+	Write "	text-align:general;",!
+	Write "	vertical-align:bottom;",!
+	Write "	white-space:nowrap;",!
+	Write "	mso-rotate:0;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:8.0pt;",!
+	Write "	font-weight:400;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:0;",!
+	Write "	border:none;",!
+	Write "	mso-protection:locked visible;",!
+	Write "	mso-style-name:Обычный;",!
+	Write "	mso-style-id:0;}",!
+	Write "td",!
+	Write "	{mso-style-parent:style0;",!
+	Write "	padding-top:1px;",!
+	Write "	padding-right:1px;",!
+	Write "	padding-left:1px;",!
+	Write "	mso-ignore:padding;",!
+	Write "	color:windowtext;",!
+	Write "	font-size:8.0pt;",!
+	Write "	font-weight:400;",!
+	Write "	font-style:normal;",!
+	Write "	text-decoration:none;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:0;",!
+	Write "	mso-number-format:General;",!
+	Write "	text-align:left;",!
+	Write "	vertical-align:bottom;",!
+	Write "	border:none;",!
+	Write "	mso-background-source:auto;",!
+	Write "	mso-pattern:auto;",!
+	Write "	mso-protection:locked visible;",!
+	Write "	white-space:nowrap;",!
+	Write "	mso-rotate:0;}",!
+	Write ".xl60",!
+	Write "	{mso-style-parent:style0;",!
+	Write "	border-top:none;",!
+	Write "	border-right:none;",!
+	Write "	border-bottom:.5pt solid windowtext;",!
+	Write "	border-left:none;}",!
+	Write ".xl61",!
+	Write "	{mso-style-parent:style0;",!
+	Write "	font-weight:700;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:186;",!
+	Write "	text-align:right;",!
+	Write "	border:.5pt solid windowtext;}",!
+	Write ".xl62",!
+	Write "	{mso-style-parent:style0;",!
+	Write "	border:.5pt solid windowtext;}",!
+	Write ".xl63",!
+	Write "	{mso-style-parent:style0;",!
+	Write "	mso-number-format:Standard;",!
+	Write "	text-align:right;",!
+	Write "	border:.5pt solid windowtext;}",!
+	Write ".xl64",!
+	Write "	{mso-style-parent:style0;",!
+	Write "	text-align:right;",!
+	Write "	border:.5pt solid windowtext;}",!
+	Write ".xl65",!
+	Write "	{mso-style-parent:style0;",!
+	Write "	border-top:.5pt solid windowtext;",!
+	Write "	border-right:none;",!
+	Write "	border-bottom:.5pt solid windowtext;",!
+	Write "	border-left:none;}",!
+	Write ".xl66",!
+	Write "	{mso-style-parent:style0;",!
+	Write "	font-weight:700;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:186;",!
+	Write "	mso-number-format:Standard;",!
+	Write "	text-align:right;",!
+	Write "	border:.5pt solid windowtext;}",!
+	Write ".xl67",!
+	Write "	{mso-style-parent:style0;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	text-align:justify;",!
+	Write "	white-space:normal;}",!
+	Write ".xl68",!
+	Write "	{mso-style-parent:style0;",!
+	Write "	font-weight:700;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;}",!
+	Write ".xl69",!
+	Write "	{mso-style-parent:style0;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	mso-number-format:Standard;",!
+	Write "	text-align:right;",!
+	Write "	border:.5pt solid windowtext;}",!
+	Write ".xl70",!
+	Write "	{mso-style-parent:style0;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	text-align:right;",!
+	Write "	border:.5pt solid windowtext;}",!
+	Write ".xl71",!
+	Write "	{mso-style-parent:style0;",!
+	Write "	font-weight:700;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:186;}",!
+	Write ".xl72",!
+	Write "	{mso-style-parent:style0;",!
+	Write "	font-weight:700;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	border-top:.5pt solid windowtext;",!
+	Write "	border-right:none;",!
+	Write "	border-bottom:.5pt solid windowtext;",!
+	Write "	border-left:.5pt solid windowtext;}",!
+	Write ".xl73",!
+	Write "	{mso-style-parent:style0;",!
+	Write "	text-align:center;",!
+	Write "	border:.5pt solid windowtext;}",!
+	Write ".xl74",!
+	Write "	{mso-style-parent:style0;",!
+	Write "	mso-number-format:""Short Date"";",!
+	Write "	text-align:center;",!
+	Write "	border:.5pt solid windowtext;}",!
+	Write ".xl75",!
+	Write "	{mso-style-parent:style0;",!
+	Write "	text-align:justify;",!
+	Write "	white-space:normal;}",!
+	Write ".xl76",!
+	Write "	{mso-style-parent:style0;",!
+	Write "	font-weight:700;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	text-align:center;",!
+	Write "	vertical-align:middle;",!
+	Write "	border:.5pt solid windowtext;}",!
+	Write ".xl77",!
+	Write "	{mso-style-parent:style0;",!
+	Write "	font-weight:700;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	text-align:center;",!
+	Write "	vertical-align:middle;",!
+	Write "	border-top:.5pt solid windowtext;",!
+	Write "	border-right:.5pt solid windowtext;",!
+	Write "	border-bottom:.5pt solid windowtext;",!
+	Write "	border-left:none;}",!
+	Write ".xl78",!
+	Write "	{mso-style-parent:style0;",!
+	Write "	font-size:14.0pt;",!
+	Write "	font-weight:700;",!
+	Write "	font-family:Tahoma, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	text-align:center;",!
+	Write "	vertical-align:middle;}",!
+	Write ".xl79",!
+	Write "	{mso-style-parent:style0;",!
+	Write "	font-size:12.0pt;",!
+	Write "	font-weight:700;",!
+	Write "	font-family:Tahoma, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	text-align:center;",!
+	Write "	vertical-align:middle;}",!
+	Write ".xl80",!
+	Write "	{mso-style-parent:style0;",!
+	Write "	font-size:9.0pt;",!
+	Write "	font-weight:700;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	text-align:center;",!
+	Write "	white-space:normal;}",!
+	Write ".xl81",!
+	Write "	{mso-style-parent:style0;",!
+	Write "	font-size:9.0pt;",!
+	Write "	font-weight:700;",!
+	Write "	font-family:Arial, sans-serif;",!
+	Write "	mso-font-charset:204;",!
+	Write "	text-align:center;}",!
+	Write "</style>"
+	Write !,!,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !,!
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,!,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CHARSET">
+<Default>windows-1251</Default>
+</Parameter>
+
+<Parameter name="CONTENTTYPE">
+<Default>text/html</Default>
+</Parameter>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\screen\Sverka.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/screen/Sverka.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>61711,8095</Default>
+</Parameter>
+</Class>
+</Export>

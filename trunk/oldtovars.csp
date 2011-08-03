@@ -1,0 +1,33 @@
+<html>
+<head>
+
+<!-- Put your page Title here -->
+<title>	Cache Server Page </title>
+
+</head>
+
+<body>
+<a href="\\pups\Мои документы\Товар.xls">файл</a><br>
+всего строк #($O(^tovar(""),-1))#
+<table border=1><tr><td>обработано строк<td>#($G(^result(3,"обработано")))#
+<tr><td>пропущено строк<td>#($G(^result(4,"пропущено")))#
+</table>
+<input type="button" onclick="window.location.href='oldtovars.csp?dd=1'" value="не обработанные">
+<input type="button" onclick="window.location.href='oldtovars.csp?dd=2'" value="обработанные">
+<script language="cache" runat="server">
+ s d=%request.Get("dd")
+ s n=$S(d="1":"не обработанные",d="2":"обработанные",1:"не обработанные")
+ w "<center>"_n_"</center>"
+ s tovar=$NA(^tovar)
+ s wh=1
+ i d=2 s wh=0
+ &html<<table border=1><tr><td>наименование<td>товар<td>склад<td>количество>
+ s i=1 f  s i=$O(@tovar@(i)) q:i=""  d
+ . q:+$G(@tovar@(i))=wh
+ . w "<tr><td>"_$G(@tovar@(i,1))
+ . w "<td>"_$G(@tovar@(i,2))
+ . w "<td>"_$G(@tovar@(i,3))
+ . w "<td>"_$G(@tovar@(i,4))
+</script>
+</body>
+</html>

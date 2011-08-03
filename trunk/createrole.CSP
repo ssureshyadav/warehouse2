@@ -1,0 +1,57 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ s login=$G(%session.Data("user"))
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ q 1
+</script>
+
+<script language="cache" runat="server">
+	s sbor=""
+	&sql(declare perscur Cursor for
+	select ID,Name into IDname,Funcname 
+	from Users.Functions)
+	&sql(open perscur)
+	f  &sql(fetch perscur) q:SQLCODE  d
+	.i $I(i)
+	.s iden(i)=IDname
+	.s func(i)=Funcname
+	&sql(close perscur)
+s rolename=$G(%request.Data("rolename",1))
+s zrolename=%request.Get("rolename")
+f k=1:1:i d
+ .s sbor=sbor_"if (myform.comp"_k_".checked==true){(func["_k_"]="_iden(k)_")};                                                           "
+ 
+</script>
+<html>
+<head>
+<script language="JScript">
+	var func=new Array();
+	function Saveroles(){
+	qwe=#(i)#;
+	for(l=1;l<=qwe;l++){
+	 func[l]=0;}
+	role=document.myform.rolename.value;
+	#(sbor)#
+	var str = func.join("~"); 
+	if (role==""){alert("ведите название роли"); document.my.rolename.focus(); return false};
+	if(!window.confirm("Создать роль"+" "+role))return false; 
+	#server(Users.NameRoles.SaveRole(role))#;
+	#server(Users.Roles.SaveRole(role,str))#;	
+    window.close();
+	}
+</script>
+<title>	Пользователи </title>
+</head>
+<body>
+<table><tr><td>
+<form name="myform">
+Введите название роли:</td><td>
+<input type="text" name="rolename" width=100 value=""></td></tr>
+<tr><td>Функции роли:</td><td>
+<script language="cache" runat="server">
+f j=1:1:i w "<INPUT TYPE=checkbox NAME=""comp"_j,""" VALUE=""",j,""">",func(j),"</td></tr><tr><td></td><td>",!
+</script>
+<input type="button" value="Сохранить" onclick="Saveroles()"></td></tr>
+</form>
+</table>
+</body>
+</html>

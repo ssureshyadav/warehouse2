@@ -1,0 +1,775 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Goods.Goods">
+<Description>
+Товары</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60319,67371.691037</TimeCreated>
+
+<Property name="Property312">
+<Description>
+Количество в упаковке</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Количество в упаковке"/>
+</Property>
+
+<Property name="Property675">
+<Description>
+Ед. Изм.</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Ед. Изм."/>
+</Property>
+
+<Property name="Property9469">
+<Description>
+Категория</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Категория"/>
+<Parameter name="DISPLAYLIST" value=",Товар,Запчасть"/>
+<Parameter name="VALUELIST" value=",1,2"/>
+</Property>
+
+<Property name="Property3609">
+<Description>
+Модель</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="Property5300">
+<Description>
+Номер по схеме</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Номер по схеме"/>
+</Property>
+
+<Property name="Property7053">
+<Description>
+Изделие</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="Name">
+<Description>
+Наименование</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
+</Property>
+
+<Index name="NamInd">
+<Properties>Name</Properties>
+</Index>
+
+<Property name="Images">
+<Description>
+Изображения товара</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Property name="Size1">
+<Description>
+Объём</Description>
+<Type>%Numeric</Type>
+<Parameter name="SCALE" value="3"/>
+</Property>
+
+<Property name="Weight">
+<Description>
+Вес</Description>
+<Type>%Numeric</Type>
+<Parameter name="SCALE" value="3"/>
+</Property>
+
+<Property name="Price">
+<Description>
+Цена</Description>
+<Type>%Numeric</Type>
+<Parameter name="SCALE" value="2"/>
+</Property>
+
+<Property name="abbr">
+<Description>
+Аббревиатура модели</Description>
+<Type>%String</Type>
+</Property>
+
+<Index name="abbrind">
+<Properties>abbr</Properties>
+</Index>
+
+<Property name="Params">
+<Type>Goods.GoodsParams</Type>
+<Cardinality>many</Cardinality>
+<Inverse>Goods</Inverse>
+<Relationship>1</Relationship>
+</Property>
+
+<Property name="aspektid">
+<Description>
+ID в аспекте</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Index name="aspektidind">
+<Properties>aspektid</Properties>
+</Index>
+
+<Property name="Comment">
+<Description>
+Комментарий</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="300"/>
+</Property>
+
+<Property name="codedetail">
+<Description>
+Код детали</Description>
+<Type>%String</Type>
+</Property>
+
+<Index name="codedetailInd">
+<Properties>codedetail</Properties>
+</Index>
+
+<Property name="izdelie">
+<Description>
+Изделие</Description>
+<Type>Common.Dictionary12</Type>
+</Property>
+
+<Index name="izdelieInd">
+<Properties>izdelie</Properties>
+</Index>
+
+<Property name="FullName">
+<Description>
+Полное наименование</Description>
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {*}={abbr}_"-"_{Property3609}_" "_{Name}</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+<Parameter name="MAXLEN" value="100"/>
+</Property>
+
+<Property name="ModelNumber">
+<Description>
+Модель и номер</Description>
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode> Set {*}={abbr}_"-"_{Property3609}</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+</Property>
+
+<Property name="EnglishName">
+<Description>
+Английское наименование</Description>
+<Type>%String</Type>
+</Property>
+
+<Index name="EnglishNameIndex">
+<Properties>EnglishName</Properties>
+</Index>
+
+<Property name="Tovar">
+<Description>
+Товар</Description>
+<Type>Goods.Goods</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Index name="TovarInd">
+<Properties>Tovar</Properties>
+</Index>
+
+<Property name="ChangeDate">
+<Description>
+Дата закрытия</Description>
+<Type>%Date</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+<Parameter name="FORMAT" value="4"/>
+</Property>
+
+<Index name="ChangeDateInd">
+<Properties>ChangeDate</Properties>
+</Index>
+
+<Property name="ChangeTime">
+<Description>
+Время закрытия</Description>
+<Type>%Time</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Index name="ChangeTimeInd">
+<Properties>ChangeTime</Properties>
+</Index>
+
+<Property name="ChangeUser">
+<Description>
+Человек закрывший</Description>
+<Type>Users.Dates</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Index name="ChangeUserInd">
+<Properties>ChangeUser</Properties>
+</Index>
+
+<Property name="Composition">
+<Description>
+Состав запчасти</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="2048"/>
+</Property>
+
+<Property name="Description">
+<Description>
+Подробное описание</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="2048"/>
+</Property>
+
+<Property name="CodeOKVED">
+<Description>
+Код ТНВЭД</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="MaterialEng">
+<Description>
+Материал (англ.)</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="AllowAct">
+<Description>
+Разрешать выписывать акт без заявки</Description>
+<Type>%String</Type>
+<InitialExpression>0</InitialExpression>
+<Parameter name="CAPTION" value="Разрешать акт без заявки"/>
+<Parameter name="DISPLAYLIST" value=",Да,Нет"/>
+<Parameter name="VALUELIST" value=",1,0"/>
+</Property>
+
+<Method name="GetPropertyListIndex">
+<ClassMethod>1</ClassMethod>
+<CodeMode>objectgenerator</CodeMode>
+<FormalSpec><![CDATA[PropertyName:%String="",&DataLocation]]></FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<Implementation><![CDATA[
+ Do %code.WriteLine(" s DataLocation="""_%compiledclass.Storages.GetAt(1).DataLocation_"""")
+ Do %code.WriteLine(" q:PropertyName="""" """"")
+ s number=""
+ s StorageStrategy=%compiledclass.Storages.GetAt(1)
+ f i=1:1:StorageStrategy.Data.Count() d  q:StorageData.Name[%compiledclass.SqlTableName
+ . s StorageData=StorageStrategy.Data.GetAt(i)
+ s data=StorageData.Values.GetNext(.number)
+ while $ISOBJECT(data) {
+ 	s PropertyName=data.Value
+ 	s ListIndex=data.Name
+ 	Do %code.WriteLine(" s Prop( """ _ PropertyName _ """)="_ListIndex)
+ 	s data=StorageData.Values.GetNext(.number)
+ 	} 	
+ Do %code.WriteLine(" Quit $G(Prop(PropertyName))")
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetPropertyValue">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ID:%String="",Property:%String=""</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ q:ID=""
+ q:Property=""
+ s PropertyNumber=..GetPropertyListIndex(Property,.DataLocation)
+ q:Property=""
+ q $ZSTRIP($LG(@DataLocation@(ID),PropertyNumber),"<W")
+]]></Implementation>
+</Method>
+
+<Trigger name="UpdTrigger">
+<Description>
+Набор триггеров и методов для поддержки версии справочника</Description>
+<Code> d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")</Code>
+<Event>UPDATE</Event>
+<Time>AFTER</Time>
+</Trigger>
+
+<Trigger name="InsTrigger">
+<Code> d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")</Code>
+<Event>INSERT</Event>
+<Time>AFTER</Time>
+</Trigger>
+
+<Trigger name="DelTrigger">
+<Code> d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")</Code>
+<Event>DELETE</Event>
+<Time>AFTER</Time>
+</Trigger>
+
+<Method name="%OnDelete">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>oid:%ObjectIdentity</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="%OnAfterSave">
+<FormalSpec>insert:%Boolean</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	if (insert)||(%this.%IsModified()) d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetPropertyType">
+<ClassMethod>1</ClassMethod>
+<CodeMode>objectgenerator</CodeMode>
+<FormalSpec>PropertyName:%String=""</FormalSpec>
+<ProcedureBlock>1</ProcedureBlock>
+<Implementation><![CDATA[
+ f i=1:1:%compiledclass.Properties.Count() d
+ . Do %code.WriteLine(" Set Prop("""_%compiledclass.Properties.GetAt(i).Name_""")="""_%compiledclass.Properties.GetAt(i).Type_"""")
+ Do %code.WriteLine(" Quit $G(Prop(PropertyName))")
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="%OnBeforeSave">
+<FormalSpec>insert:%Boolean</FormalSpec>
+<Private>1</Private>
+<ProcedureBlock>0</ProcedureBlock>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ n ChangeUser
+ s %this.ChangeDate=+$H
+ s %this.ChangeTime=$P($H,",",2)
+ s ChangeUser=$S($ISOBJECT($G(%session)):$G(%session.Data("user")),1:"")
+ d:ChangeUser %this.ChangeUserSetObjectId(ChangeUser)
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Goods.GoodsD</DataLocation>
+<DefaultData>GoodsDefaultData</DefaultData>
+<IdLocation>^Goods.GoodsD</IdLocation>
+<IndexLocation>^Goods.GoodsI</IndexLocation>
+<StreamLocation>^Goods.GoodsS</StreamLocation>
+<Data name="GoodsDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Name</Value>
+</Value>
+<Value name="3">
+<Value>Measure</Value>
+</Value>
+<Value name="4">
+<Value>manufact</Value>
+</Value>
+<Value name="5">
+<Value>articul</Value>
+</Value>
+<Value name="6">
+<Value>test</Value>
+</Value>
+<Value name="7">
+<Value>Property7636</Value>
+</Value>
+<Value name="8">
+<Value>Property3584</Value>
+</Value>
+<Value name="9">
+<Value>Property9410</Value>
+</Value>
+<Value name="10">
+<Value>Property82</Value>
+</Value>
+<Value name="11">
+<Value>Property4727</Value>
+</Value>
+<Value name="12">
+<Value>fghhh</Value>
+</Value>
+<Value name="13">
+<Value>gh</Value>
+</Value>
+<Value name="14">
+<Value>Property8263</Value>
+</Value>
+<Value name="15">
+<Value>Property2833</Value>
+</Value>
+<Value name="16">
+<Value>Property271</Value>
+</Value>
+<Value name="17">
+<Value>Property8678</Value>
+</Value>
+<Value name="18">
+<Value>Property8595</Value>
+</Value>
+<Value name="19">
+<Value>Property2901</Value>
+</Value>
+<Value name="20">
+<Value>Property75</Value>
+</Value>
+<Value name="21">
+<Value>Property3642</Value>
+</Value>
+<Value name="22">
+<Value>Property5348</Value>
+</Value>
+<Value name="23">
+<Value>Property4968</Value>
+</Value>
+<Value name="24">
+<Value>Property895</Value>
+</Value>
+<Value name="25">
+<Value>Property348</Value>
+</Value>
+<Value name="26">
+<Value>Property3287</Value>
+</Value>
+<Value name="27">
+<Value>Property2859</Value>
+</Value>
+<Value name="28">
+<Value>Property1988</Value>
+</Value>
+<Value name="29">
+<Value>Property7607</Value>
+</Value>
+<Value name="30">
+<Value>Property3885</Value>
+</Value>
+<Value name="31">
+<Value>Property5100</Value>
+</Value>
+<Value name="32">
+<Value>Property3541</Value>
+</Value>
+<Value name="33">
+<Value>Property5325</Value>
+</Value>
+<Value name="34">
+<Value>Property6074</Value>
+</Value>
+<Value name="35">
+<Value>Property8462</Value>
+</Value>
+<Value name="36">
+<Value>Property936</Value>
+</Value>
+<Value name="37">
+<Value>Property2405</Value>
+</Value>
+<Value name="38">
+<Value>Property1435</Value>
+</Value>
+<Value name="39">
+<Value>Property6025</Value>
+</Value>
+<Value name="40">
+<Value>Property4974</Value>
+</Value>
+<Value name="41">
+<Value>Property7534</Value>
+</Value>
+<Value name="42">
+<Value>Property6438</Value>
+</Value>
+<Value name="43">
+<Value>Property7379</Value>
+</Value>
+<Value name="44">
+<Value>Property3309</Value>
+</Value>
+<Value name="45">
+<Value>Property9173</Value>
+</Value>
+<Value name="46">
+<Value>Property2468</Value>
+</Value>
+<Value name="47">
+<Value>Property2274</Value>
+</Value>
+<Value name="48">
+<Value>Property26</Value>
+</Value>
+<Value name="49">
+<Value>Property1576</Value>
+</Value>
+<Value name="50">
+<Value>Property4680</Value>
+</Value>
+<Value name="51">
+<Value>Property8640</Value>
+</Value>
+<Value name="52">
+<Value>Property2224</Value>
+</Value>
+<Value name="53">
+<Value>Property4927</Value>
+</Value>
+<Value name="54">
+<Value>Property9581</Value>
+</Value>
+<Value name="55">
+<Value>Property7126</Value>
+</Value>
+<Value name="56">
+<Value>Property6903</Value>
+</Value>
+<Value name="57">
+<Value>Property1776</Value>
+</Value>
+<Value name="58">
+<Value>Property1525</Value>
+</Value>
+<Value name="59">
+<Value>Property3351</Value>
+</Value>
+<Value name="60">
+<Value>Property8738</Value>
+</Value>
+<Value name="61">
+<Value>Property2151</Value>
+</Value>
+<Value name="62">
+<Value>Property6488</Value>
+</Value>
+<Value name="63">
+<Value>Property8230</Value>
+</Value>
+<Value name="64">
+<Value>Property7992</Value>
+</Value>
+<Value name="65">
+<Value>Property5857</Value>
+</Value>
+<Value name="66">
+<Value>Property2307</Value>
+</Value>
+<Value name="67">
+<Value>Property2275</Value>
+</Value>
+<Value name="68">
+<Value>Property9823</Value>
+</Value>
+<Value name="69">
+<Value>Property4127</Value>
+</Value>
+<Value name="70">
+<Value>Property117</Value>
+</Value>
+<Value name="71">
+<Value>Property5206</Value>
+</Value>
+<Value name="72">
+<Value>Property627</Value>
+</Value>
+<Value name="73">
+<Value>Property5293</Value>
+</Value>
+<Value name="74">
+<Value>Property7912</Value>
+</Value>
+<Value name="75">
+<Value>Property9521</Value>
+</Value>
+<Value name="76">
+<Value>Property4905</Value>
+</Value>
+<Value name="77">
+<Value>Property2469</Value>
+</Value>
+<Value name="78">
+<Value>Property4483</Value>
+</Value>
+<Value name="79">
+<Value>Property287</Value>
+</Value>
+<Value name="80">
+<Value>Property7492</Value>
+</Value>
+<Value name="81">
+<Value>Property684</Value>
+</Value>
+<Value name="82">
+<Value>Property969</Value>
+</Value>
+<Value name="83">
+<Value>Property5370</Value>
+</Value>
+<Value name="84">
+<Value>Params</Value>
+</Value>
+<Value name="85">
+<Value>Property2822</Value>
+</Value>
+<Value name="86">
+<Value>Property1509</Value>
+</Value>
+<Value name="87">
+<Value>Property7274</Value>
+</Value>
+<Value name="88">
+<Value>Property7499</Value>
+</Value>
+<Value name="89">
+<Value>Property7854</Value>
+</Value>
+<Value name="90">
+<Value>Property6620</Value>
+</Value>
+<Value name="91">
+<Value>Property8603</Value>
+</Value>
+<Value name="92">
+<Value>Property115</Value>
+</Value>
+<Value name="93">
+<Value>Property7053</Value>
+</Value>
+<Value name="94">
+<Value>Property9801</Value>
+</Value>
+<Value name="95">
+<Value>Property7451</Value>
+</Value>
+<Value name="96">
+<Value>Property8077</Value>
+</Value>
+<Value name="97">
+<Value>Property5300</Value>
+</Value>
+<Value name="98">
+<Value>Property4861</Value>
+</Value>
+<Value name="99">
+<Value>Size</Value>
+</Value>
+<Value name="100">
+<Value>Weight</Value>
+</Value>
+<Value name="101">
+<Value>Property6969</Value>
+</Value>
+<Value name="102">
+<Value>Property8270</Value>
+</Value>
+<Value name="103">
+<Value>Property1242</Value>
+</Value>
+<Value name="104">
+<Value>Property9363</Value>
+</Value>
+<Value name="105">
+<Value>Property6187</Value>
+</Value>
+<Value name="106">
+<Value>Property5353</Value>
+</Value>
+<Value name="107">
+<Value>Property84</Value>
+</Value>
+<Value name="108">
+<Value>Property7286</Value>
+</Value>
+<Value name="109">
+<Value>Property3609</Value>
+</Value>
+<Value name="110">
+<Value>Property9313</Value>
+</Value>
+<Value name="111">
+<Value>Images</Value>
+</Value>
+<Value name="112">
+<Value>Size1</Value>
+</Value>
+<Value name="113">
+<Value>Property2268</Value>
+</Value>
+<Value name="114">
+<Value>Property9469</Value>
+</Value>
+<Value name="115">
+<Value>Property3880</Value>
+</Value>
+<Value name="116">
+<Value>Price</Value>
+</Value>
+<Value name="117">
+<Value>Property675</Value>
+</Value>
+<Value name="118">
+<Value>abbr</Value>
+</Value>
+<Value name="119">
+<Value>Property312</Value>
+</Value>
+<Value name="120">
+<Value>aspektid</Value>
+</Value>
+<Value name="121">
+<Value>Comment</Value>
+</Value>
+<Value name="122">
+<Value>codedetail</Value>
+</Value>
+<Value name="123">
+<Value>izdelie</Value>
+</Value>
+<Value name="124">
+<Value>EnglishName</Value>
+</Value>
+<Value name="125">
+<Value>Tovar</Value>
+</Value>
+<Value name="126">
+<Value>ChangeDate</Value>
+</Value>
+<Value name="127">
+<Value>ChangeTime</Value>
+</Value>
+<Value name="128">
+<Value>ChangeUser</Value>
+</Value>
+<Value name="129">
+<Value>Composition</Value>
+</Value>
+<Value name="130">
+<Value>Description</Value>
+</Value>
+<Value name="131">
+<Value>CodeOKVED</Value>
+</Value>
+<Value name="132">
+<Value>MaterialEng</Value>
+</Value>
+<Value name="133">
+<Value>AllowAct</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

@@ -1,0 +1,114 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ s login=$G(%session.Data("user"))
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ i '##class(Common.Rights).getrights(login,1) s %response.ServerSideRedirect="norights.csp" 
+ s Access9func=##class(Common.Rights).getrights(login,9)
+ if 'Access9func s Func9Refuse="return;"
+ q 1
+</script>
+<html XMLNS:SKLADz XMLNS:SKLAD2>
+<IMPORT NAMESPACE="SKLADz" IMPLEMENTATION="htc/treeview.htc">
+<IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc">
+<head>
+<title>#($G(%session.Data("systemname")))#</title>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="Jscript" src="common.js"></script>
+<script language="JScript">
+var NodeData = new Array();
+
+Arguments=window.dialogArguments.split(InnerSplitter);
+if(Arguments[1]==null){alert("Не указана группа товара!");}
+Catalogue=ReturnSpace(Arguments[0]);
+GroupId=  ReturnSpace(Arguments[1]);
+GroupCode=ReturnSpace(Arguments[2]);
+GoodsId=  ReturnSpace(Arguments[3]);
+GroupName=ReturnSpace(Arguments[4]);
+//Классификатор+InnerSplitter+IDГруппы+InnerSplitter+КодГруппы+InnerSplitter+IDТовара
+
+function startFun(){
+if(GoodsId!=""){question="Внести изменения?"}
+else{question="Создать товар?"}
+if(!window.confirm(question))return false;
+NamesStr=PropTable.names;
+RowDataStr=PropTable.ColumnData(1);
+NodesStr=trViewProp.IDsStr;
+NodesDataStr=trViewProp.ValuesStr;
+TypesStr=PropTable.ColumnTypes(1);
+ok=#server(Goods.GoodsAction.SaveGoods(GroupId,NamesStr,RowDataStr,TypesStr,NodesStr,NodesDataStr,GoodsId))#
+if(ok==1){returnValue=1;window.close();}
+else{alert(ok);}
+}
+
+function LoadList(){
+PropTable.DownLoadPairs('',GoodsId,"FullName,ModelNumber","","Tovar");
+LoadPropTree2("trViewProp",GoodsId,GroupCode,Catalogue);
+}
+function load(){
+LoadList()
+trViewProp.onClick="Click()"
+GrupName.innerText=GroupName;
+}
+
+function Click(){
+NodeDatastrLayer.style.display="inline";
+NodeDatastrText.innerText=trViewProp.NodeCaption;
+NodeDatastr.value=trViewProp.NodeValue;
+NodeDatastr.focus();
+}
+
+function ConvertArray(Arr){
+res=""
+for (z = 0; z < Arr.length; z++){
+  res=res+Arr[z]+"~";
+}
+return res;
+}
+
+function ManageTextBox(element){
+if(window.event.keyCode==13){okTextBox(element);}
+if(window.event.keyCode==27){cancelTextBox(element);}
+}
+
+function okTextBox(element){
+	document.getElementById(element+"Layer").style.display="none";
+	trViewProp.NodeValue=ReturnSpace(document.getElementById(element).value);
+}
+function cancelTextBox(element){
+	document.getElementById(element+"Layer").style.display="none";
+}
+function ManageWindow2(element){
+if(event.srcElement.tagName=="INPUT")return false;
+if(window.event.keyCode==13)
+	{
+	#($G(Func9Refuse))#
+	startFun();
+	}
+if(window.event.keyCode==27)windowclose();
+}
+</script>
+</head>
+<body  onload="load();" onkeypress="ManageWindow2();">
+<center><h3>Группа <span id="GrupName"></span></h3></center>
+<table cellpadding=0 cellspacing=0 width=100% border=0><tr>
+<td width=50% align=center valign=top>
+<fieldset style="width:250px"><legend>Основные свойства</legend>
+<SKLAD2:table id="PropTable" width=350 height=400 Silent="Price"/>
+</fieldset>
+</td>
+<td width=50% align=certer valign=top>
+<fieldset style="width:215px"><legend>Дополнительные свойства</legend>
+<SKLADz:treeview id="trViewProp" width=200 height=400 ShowImages=0 ImagesPath="#(%session.Data("ImagesPath"))#" border=0 />
+</fieldset>
+</td></tr>
+<tr><td colspan=2 align=center style="height:28px;" valign=middle><div id="NodeDatastrLayer" style="display:none"><span id="NodeDatastrText"></span>&nbsp;<input type="text" id="NodeDatastr" onkeypress="ManageTextBox(this.id);">
+<sklad:LittleButton name="ok" id="okBut" onclick="okTextBox('NodeDatastr')">
+<sklad:LittleButton name="del" id="cancelBut" onclick="cancelTextBox('NodeDatastr')">
+</div><img src="images/brace.gif" width=1 height=19></td></tr>
+<tr><td colspan=2 align=center>
+	<CSP:IF CONDITION="Access9func=1">
+		<sklad:Button value="Да" onclick="startFun()">
+	</CSP:IF>	
+	&nbsp;&nbsp;&nbsp;<sklad:Button value="Отмена" onclick="windowclose()"></td></tr>
+</table>
+</body>
+</html>

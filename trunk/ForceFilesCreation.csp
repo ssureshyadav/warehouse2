@@ -1,0 +1,18 @@
+<script language="cache" runat="server">
+ n Client,ok
+ s Client=%request.Get("number")
+ i Client="" w "Не указан уникальный номер клиента"
+ e  d
+ . s ok=##class(Common.Common).SaveGoodsDictionary(Client)
+ . i '+ok w ok q
+ . s ok=##class(Common.Common).SaveGroupsDictionary(Client)
+ . i '+ok w ok q
+ . w 1
+</script>
+<html>
+<head>
+</head>
+
+<body>
+</body>
+</html>

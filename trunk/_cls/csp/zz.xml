@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.zz">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>60961,5670.34875</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	s number=%request.Get("number")
+	i number="" s number=1
+	s count=$I(^mtempArt("number"))
+	s ^AccessLog(number,count)=$ZDT($H,4)
+	s ^AccessLog(number,count,"HTTP_REFERER")=%request.GetCgiEnv("HTTP_REFERER")
+	s ^AccessLog(number,count,"REMOTE_ADDR")=%request.GetCgiEnv("REMOTE_ADDR")
+	q 1
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\zz.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/zz.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>60961,5671</Default>
+</Parameter>
+</Class>
+</Export>

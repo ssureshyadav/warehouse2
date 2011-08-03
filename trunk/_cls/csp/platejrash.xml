@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.platejrash">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62124,49583.59743</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body>"
+	Write !,(##class(%CSP.Response).HyperEventBody())
+	Write !,"<font face=""Arial"" size=3>",!
+	s DocId=%request.Get("DocId")
+	s glob=$NA(^mtempOplata($J))
+	k @glob
+	s PlatejkaObj=##class(Docs.Platejka).%OpenId(DocId)
+	i $ISOBJECT(PlatejkaObj) d
+	. w "<center>Платёжное поручение</center>"
+	. w "№ "_$ZD(PlatejkaObj.Dat,4)_" "_$ZT(PlatejkaObj.Dat)
+	. w "<br>"
+	. w "Контрагент "_PlatejkaObj.Kontr.Name
+	. w "<br>"
+	. w "Общая сумма: "_PlatejkaObj.Summa
+	. s FreeSumma=PlatejkaObj.GetFreeSumma()
+	. w "  Свободная сумма: "_FreeSumma
+	. w "<br>"
+	. s next="" f  s next=PlatejkaObj.PlatejkaItems.Next(next) q:next=""  d
+	. . s item=PlatejkaObj.PlatejkaItems.GetAt(next)
+	. . q:'$ISOBJECT(item)
+	. . s RashObj=item.Rash
+	. . q:'$ISOBJECT(RashObj)
+	. . s ID=RashObj.%Id()
+	. . s Summa=item.Summa
+	. . s @glob@(ID,"Name")=RashObj.Name
+	. . s @glob@(ID,"Summa")=RashObj.Summa
+	. . s @glob@(ID,"Dat")=RashObj.Dat
+	. . s @glob@(ID,"OplSumma")=RashObj.OplSumma
+	. s KontrId=$S($ISOBJECT(PlatejkaObj.Kontr):PlatejkaObj.Kontr.%Id(),1:"")
+	. &sql(declare jok cursor for select ID,Name,Summa,Dat into :ID,:Name,:Summa,:Dat from Docs.Rash where (OplatStatus<>2 or OplSumma is null) and Kontr=:KontrId)
+	. &sql(open jok)
+	. f  &sql(fetch jok) q:SQLCODE  d
+	. . s @glob@(ID,"Name")=Name
+	. . s @glob@(ID,"Summa")=Summa
+	. . s @glob@(ID,"Dat")=Dat
+	. . s OplSumma=0
+	. . if FreeSumma-Summa>0 s OplSumma=Summa,FreeSumma=FreeSumma-Summa
+	. . s @glob@(ID,"OplSumma")=OplSumma
+	. &sql(close jok)
+	. w "<form method=""POST"" id=""forma"">"
+	. w "<table border=1><tr><td>Наименование<td>Дата<td>Сумма<td>Оплачено"
+	. s i="" f  s i=$O(@glob@(i)) q:i=""  d
+	. . s dat=@glob@(i,"Dat")
+	. . w "<tr>"
+	. . w "<td>"_@glob@(i,"Name")
+	. . w "<td>"_$S(+dat:$ZD(dat),1:"")
+	. . w "<td>"_@glob@(i,"Summa")
+	. . w "<td><input type=""text"" value="""_+$G(@glob@(i,"OplSumma"))_""" id=""RashID|"_i_""">"
+	. w "</table>"
+	. w "<input type=""button"" value=""Записать"" onclick=""SubmitForm()""><input type=""button"" value=""Отмена"" onclick=""WindowClose()"">"
+	. w "</form>"
+	k @glob
+	Write !,"</font>",!
+	Write "</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"<title>	Занесение платежа на расходные накладные </title>",!
+	Write "<script language=""jscript"">"
+	Write " ",!
+	Write "var DocId="""_(DocId)_""";",!
+	Write "function WindowClose(){",!
+	Write "if(window.confirm(""Закрыть окно? (Все несохранённые данные будут утеряны)""))window.close();",!
+	Write "}",!
+	Write !,"function SubmitForm(){",!
+	Write "var res="""";",!
+	Write "for(var i=0;i<forma.elements.length;i++){",!
+	Write "	var id=forma.elements[i].id;",!
+	Write "	if(id.split(""|"")[0]==""RashID"")",!
+	Write "		{",!
+	Write "		var value=forma.elements[i].value;",!
+	Write "		if(value!=0)",!
+	Write "			{",!
+	Write "			var RashId=id.split(""|"")[1];",!
+	Write "			var res=res+RashId+""~""+value+"";"";",!
+	Write "			}",!
+	Write "		}",!
+	Write "	}",!
+	Write "var ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Docs.Action.GetDataForPlatejka:csp.platejrash"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',DocId,res)",!
+	Write "if(isNaN(ok)){alert(ok)}",!
+	Write "else{alert(""Данные успешно зафиксированы. Документ необходимо обработать."");window.close();}",!
+	Write "}",!
+	Write "</script>"
+	Write !,(..HyperEventHead())
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+  s login=$G(%session.Data("user"))
+  i '+login s %response.ServerSideRedirect="norights.csp" 
+  s DocId=%request.Get("DocId")
+  q 1
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\PlatejRash.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/PlatejRash.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>60969,12446</Default>
+</Parameter>
+</Class>
+</Export>

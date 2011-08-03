@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.docsexportimport">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>60967,45000.921893</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body>"
+	Write !,(##class(%CSP.Response).HyperEventBody())
+	Write !,!,"<span class=ButtonDiv style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""window.location.href='tuneup.csp'"" ><center>Назад</center></span>"
+	Write "<br>",!
+	Write "<TABLE cellSpacing=0 width=""100%"" celpadding=""0"" >",!
+	Write "<TR>",!
+	Write "<TD align=center style=""BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid"" colspan=3><strong>Выгрузка и загрузка документов</strong></TD></tr>",!
+	Write "<tr>",!
+	Write "</table>",!
+	Write "<br><br>",!
+	Write "Период c "
+	Write "<input type=text id=""dat1"" value="""_($ZD($H,4))_""" onclick=""fnCalendar(this)"" class=""datar"">"
+	Write " по "
+	Write "<input type=text id=""dat2"" value="""_($ZD($H,4))_""" onclick=""fnCalendar(this)"" class=""datar"">"
+	Write !,!,"<span class=ButtonDiv style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""ExportDocs();"" ><center>Выгрузить</center></span>"
+	Write "<br>",!
+	Write "<br>",!
+	Write "<hr widht=80%>",!
+	Write "<h1>"_($G(ok))_"</h1>",!
+	Write "<form enctype=""multipart/form-data"" method=""post"">"
+	Write !,..InsertHiddenFields(""),!
+	Write !,"Загрузить документы<br>",!
+	Write "<input name=""oFile1"" id=""oFile1"" size=30 type=file style=""width:300px"">"
+	Write "<br>",!
+	Write "<input type=""submit"" value=""ок"" style=""width:60px"">"
+	Write !,"</form>"
+	Write !,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	s ok=""
+	d:%request.ContentType="multipart/form-data"
+	. s obj=$G(%request.MimeData("oFile1",1))
+	. q:'$ISOBJECT(obj)
+	. s filepath="c:\"_$P(obj.FileName,"\",$L(obj.FileName,"\"))
+	. s file=##class(%File).%New(filepath)
+	. Do file.Open("WSN")
+	. d file.CopyFrom(obj)
+	. s ok=file.%Save()
+	. d file.Close()
+	. i '+ok d
+	. . Do DecomposeStatus^%apiOBJ(ok,.Err)
+	. . s ok="Ошибка при сохранении отправленного файла "_filepath_" <br> "_Err(Err)
+	. e  d
+	. . s ok=##class(Docs.Action2).ImportDocsGlobal(filepath)
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"<script language=""jscript"" src=""common.js"">"
+	Write "</script>"
+	Write !,"<title></title>",!
+	Write "<script language=""jscript"">"
+	Write !,"function ExportDocs(){",!
+	Write "var ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Docs.Action2.ExportDocsGlobal:csp.docsexportimport"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',dat1.value,dat2.value);",!
+	Write "alert(ok);",!
+	Write "}",!
+	Write !,"</script>"
+	Write !,(..HyperEventHead())
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html>"
+	Write !
+	Do ..OnPageHEAD()
+	Write !,!
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\DocsExportImport.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/DocsExportImport.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>60967,44995</Default>
+</Parameter>
+</Class>
+</Export>

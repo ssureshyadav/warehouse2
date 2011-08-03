@@ -1,0 +1,35 @@
+<html>
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<SCRIPT Language="VBScript">
+Sub Window_onLoad()
+//stbar.Font.Name="Arial"
+//stbar.Font.Size="10"
+Set s=stbar.Panels.Add()
+Set s=stbar.Panels.Add()
+
+stbar.Panels.Item(1).AutoSize="2"
+stbar.Panels.Item(1).Text="Пользователь: #($G(%session.Data("userName")))#"
+stbar.Panels.Item(1).ToolTipText ="Текущий пользователь"
+
+stbar.Panels.Item(2).AutoSize="2"
+stbar.Panels.Item(2).Text="#(%session.Data("depotName"))#"
+stbar.Panels.Item(2).ToolTipText ="Текущий склад"
+
+stbar.Panels.Item(3).ToolTipText ="Системные сообщения"
+stbar.Panels.Item(3).AutoSize="2"
+
+End Sub
+
+Sub WriteStatus(Txt)
+stbar.Panels.Item(3).Text=Txt
+End Sub
+</SCRIPT>
+</head>
+<body topmargin=0 bottommargin=0 leftmargin=0 rightmargin=0 bgcolor="ButtonFace">
+<object classid=clsid:8E3867A3-8586-11D1-B16A-00C0F0283628 id="stbar" style="width:100%;height:16pt;position:relative;top:0px;left:0px">
+<PARAM NAME="Align" VALUE="2">
+<PARAM NAME="Style" VALUE="0">
+</object>
+</body>
+</html>

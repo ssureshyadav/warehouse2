@@ -1,0 +1,144 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ i %session.NewSession d
+ . s %session.EndSession=1
+ . s sessionid=%request.Get("sessionid",1)
+ . s %session=%session.GetSession(sessionid)
+ .  s login=$G(%session.Data("user"))
+ . i '+login s %response.ServerSideRedirect="norights.csp" 
+ e  s sessionid=%session.SessionId
+ 
+Quit 1
+</script>
+<script language="cache" runat="server">
+ s DocId=%request.Get("DocId")
+ s ClassName=%request.Get("ClassName")
+</script>
+<html XMLNS:SKLADiGrid>
+<IMPORT NAMESPACE="SKLADiGrid" IMPLEMENTATION="htc/iGridV7.htc">
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="jscript" src="common.js"></script>
+<script language="JScript">
+var DocId="#($G(DocId))#";
+var ClassName="#($G(ClassName))#";
+var sessionid="#($G(sessionid))#";
+
+function load(){
+var Captions = new Array(5);
+var Keys = new Array(5);
+var Tags = new Array(5);
+
+Captions[0]="Место";
+Captions[1]="Товар";
+Captions[2]="Количество по накладной";
+Captions[3]="Фактическое количество";
+Captions[4]="Изображение";
+
+Tags[0]="Store.Address";
+Tags[1]="Goods.Goods";
+Tags[2]="%Numeric";
+Tags[3]="%Numeric";
+Tags[4]="%String";
+
+Keys[0]="addr";
+Keys[1]="Goods";
+Keys[2]="quantdefault";
+Keys[3]="quantreal";
+Keys[4]="image";
+docstr.DrawHeaders(Captions,Keys,Tags);
+docstr.loadfrommethod("Docs.Action2.InnerInstructNewStr",DocId,"",ClassName+"Items");
+}
+
+function startFun()
+{
+	var InnerSplitter="~";
+	xmlDoc=docstr.GetXmlContentByRows();
+	InsertXmlHeader(xmlDoc,"storeman",storeman.Tag,"Common.Dictionary5")
+	var DocID=SendXml(DocId,ClassName,xmlDoc,sessionid);
+	if(isNaN(DocID)){alert(DocID);return}
+	var ok3=#server(Docs.Action.PrihNeedsDiff(DocID))#
+	if(isNaN(ok3)&&(ok3!="yes")){alert(ok3);return false;}
+	if(ok3=="yes")
+	{
+		okdiff=window.showModalDialog("docinnerdiff.csp?source="+DocID,"Docs.InnerDiff"+InnerSplitter+""+InnerSplitter+"","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+		if(okdiff!=1)
+		{
+			if(okdiff!=null)alert(okdiff);
+			return false;
+		}
+	 	var ok2=#server(Docs.Action.SetSourceDoc("Docs.InnerDiff",okdiff,DocID))#
+	}	 
+	returnValue=1;
+	window.close();
+}
+
+function SendXml(DocID,ClassName,xmlDoc,sessionid)
+{
+	var xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+	xmlhttp.open("POST","xmlmethod.csp?classmethod=Docs.Action.SaveStorageDoc&id="+DocID+"&documentclass="+ClassName+"&sessionid="+sessionid, false);
+	xmlhttp.send(xmlDoc)
+	var ok=xmlhttp.responseText;
+	return ok;
+}
+
+ function winclose(){
+ if(window.confirm("Вы уверены?"))window.close();
+ }
+ 
+function ChangeStoreMan(TdObject){
+var newItem=window.showModalDialog("Dictionary.csp","Common.Dictionary5","center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");
+if(newItem==null){return false;}
+newArr=newItem.split("~");
+TdObject.Tag=newArr[0];
+TdObject.innerText=newArr[1];
+ }
+</script>
+<title>#($G(%session.Data("systemname")))#</title>
+<style>
+td{
+font-family:Arial;
+font-size:14px;
+}
+</style>
+</head>
+
+<body onload="load()">
+<table border=0 width=100% height=100%>
+<tr><td>
+<script language="cache" runat="server">
+ s DocObj=$ZOBJCLASSMETHOD(ClassName,"%OpenId",DocId)
+ s Stat=""
+ d:$ISOBJECT(DocObj)
+ . s DocName=DocObj.Name
+ . s DocComment=DocObj.Comment
+ . s Stat=DocObj.Stat
+ . i (ClassName="Docs.StorageIn")||(ClassName="Docs.StorageOut") d
+ . . s Storeman=$S($ISOBJECT(DocObj.storeman):DocObj.storeman.Name,1:"")
+ . . s StoremanId=$S($ISOBJECT(DocObj.storeman):DocObj.storeman.%Id(),1:"")
+ . . if ClassName="Docs.StorageOut" s Brak=DocObj.Brak
+ . . if ClassName="Docs.StorageIn" s Brak=DocObj.PrihodType
+ . s DatClose=$S(DocObj.CloseDate?5N:$ZD(DocObj.CloseDate,4),1:"")
+ . s TimClose=$S(DocObj.CloseTime?5N:$ZT(DocObj.CloseTime),1:"")
+ . s UserClose=$S($ISOBJECT(DocObj.CloseUser):DocObj.CloseUser.Name,1:"")
+ s ClassNameName=##class(Docs.Action).GetDocNameFromClass(ClassName)
+ 
+ w "<table width=100%><tr><td width=10%>&nbsp;<td width=80% align=center><h3>"_ClassNameName_"</h3><td width=10% align=""center"">&nbsp;"
+ if $G(Brak) w " <font size=4 color=""red"">некондиционные<br>товары</font>"
+ w "</table>"
+ w "<table border=0>"
+ w "<tr><td><b>Номер<td>"_$G(DocName)_"<td width=50>&nbsp;<td><b>Дата закрытия<td>"_$G(DatClose)
+ w "<tr><td><b>Комментарий<td>"_$G(DocComment)_"<td width=50>&nbsp;<td><b>Время закрытия<td>"_$G(TimClose)
+ w "<tr><td><b>Ответственный<br>за погрузку<td id=""storeman"" onmouseout=""this.style.backgroundColor='#ffffff'"" onmouseover=""this.style.backgroundColor='#ddeeee'"" style='cursor:hand' Tag="""_$G(StoremanId)_""" onclick=""ChangeStoreMan(this)"">"_$G(Storeman)_"<td width=50>&nbsp;<td><b>Ответственный<br>за закрытие<td>"_$G(UserClose)
+ w "</table>"
+</script>
+<tr height=100%><td>
+<SKLADiGrid:iGrid id="docstr" width="100%" height="300" Enabled="true"/>
+<tr><td>
+<center><br>
+<CSP:IF CONDITION="Stat'=2">
+<sklad:Button value="Сохранить" onclick="startFun();">
+</CSP:IF>
+<sklad:Button onclick="winclose();" value="Отмена"></center>
+</table>
+</body>
+</html>

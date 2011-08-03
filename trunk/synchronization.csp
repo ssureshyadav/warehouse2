@@ -1,0 +1,96 @@
+<html>
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<script language="jscript" src="common.js"></script>
+<title>	Cache Server Page </title>
+<script language="javascript">
+var Progress="#server(Common.Sync.Progress())#";
+function startFun(){
+	#call(Common.Sync.Synchronization2())#;
+	alert("Процесс синхронизации запущен в фоновом режиме.\nРезультаты будут доступны через минуту или несколько. Необходимо будет обновить страницу.")
+	window.location.reload();
+}
+
+function lookup(){
+Progress="#server(Common.Sync.Progress())#";
+load();
+if(!ReturnBoolean(Progress))
+	{
+	ShowResult();
+	window.clearInterval(timerID);
+	}
+}
+
+function ShowResult(){
+CurrentProgress.innerHTML=#server(Common.Sync.ShowResult())#;
+}
+
+function load(){
+	return
+if(ReturnBoolean(Progress))
+	{
+	SyncLabel.innerText='..Идёт синхронизация';
+	ShowResult();
+	}
+else{SyncLabel.innerText='Данные синхронизации';}
+}
+
+function Export(){
+var result=#server(Common.Sync.ExportSyncFile())#
+if(result.split("@")[0]==1){ExportedFile.innerText="Экспортировано в файл: "+result.split("@")[1];}
+else{alert("Ошибка\n"+result)}
+}
+
+function Import(){
+var file=oFile1.value
+var result=#server(Common.Sync.ImportSyncFile(file))#
+if(result==1){alert("Данные успешно загружены.")}
+else{alert(result)}
+}
+
+function ReloadPage(){
+window.location.href="synchronization.csp?dt1="+dat1.value+"&dt2="+dat2.value
+}
+</script>
+</head>
+
+<body >
+<sklad:Button value="Назад" onclick="window.location.href='tuneup.csp'"><br>
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<TD align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=3><strong>Синхронизация</strong></TD></tr>
+<tr>
+</table>
+
+<!--
+<sklad:Button value="Синхронизировать" onclick="startFun()">&nbsp;&nbsp;&nbsp;<sklad:Button value="Итоги" onclick="ShowResult()">
+
+<sklad:Button value="Выгрузка данных" onclick="Export()"> <span id="ExportedFile"></span><br>
+<hr width=80%>
+<input name="oFile1" id="oFile1" size=30 type=file style="width:450px"><br>
+<sklad:Button value="Загрузка данных" onclick="Import()">
+<!--
+<fieldset><legend id="SyncLabel">Данные синхронизации</legend>
+<span id="CurrentProgress">
+</span>
+</fieldset>
+-->
+<sklad:Button value="Синхронизировать" onclick="startFun()">&nbsp;&nbsp;&nbsp;<sklad:Button value="Обновить" onclick="ReloadPage()"><br>
+Период c <input type=text id="dat1" value="#(%request.Get("dt1",$ZD($H,4)))#" onclick="fnCalendar(this)" class="datar"> по <input type=text id="dat2" value="#(%request.Get("dt2",$ZD($H,4)))#" onclick="fnCalendar(this)" class="datar">
+<table><tr><td>Дата, время<td>Результат
+<script language="cache" runat="server">
+ s dt1=%request.Get("dt1")
+ s dt2=%request.Get("dt2")
+ i dt1?1.2N1"/"2N1"/"4N s dt1=$ZDH(dt1,4)
+ e  s dt1=+$H
+ i dt2?1.2N1"/"2N1"/"4N s dt2=$ZDH(dt2,4)
+ e  s dt2=+$H
+ s date=dt1-1
+ f  s date=$O(^Sync(date)) q:(date="")||(date>dt2)  d
+ . s time="" f  s time=$O(^Sync(date,time)) q:time=""  d
+ . . w "<tr><td>"_$ZD(date,4)_" "_$ZT(time)_"<td>"_$G(^Sync(date,time))
+</script>
+
+</table>
+</body>
+</html>

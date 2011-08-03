@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Operation.Step">
+<Description>
+Шаги операций</Description>
+<Super>%Persistent</Super>
+<TimeCreated>60320,35175.524796</TimeCreated>
+
+<Property name="Name">
+<Description>
+Наименование</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Наименование"/>
+</Property>
+
+<Property name="Depot">
+<Description>
+Склад</Description>
+<Type>Store.Depot</Type>
+<Parameter name="CAPTION" value="Склад"/>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Operation.StepD</DataLocation>
+<DefaultData>StepDefaultData</DefaultData>
+<IdLocation>^Operation.StepD</IdLocation>
+<IndexLocation>^Operation.StepI</IndexLocation>
+<StreamLocation>^Operation.StepS</StreamLocation>
+<Data name="StepDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Name</Value>
+</Value>
+<Value name="3">
+<Value>Place</Value>
+</Value>
+<Value name="4">
+<Value>Resource</Value>
+</Value>
+<Value name="5">
+<Value>Depot</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

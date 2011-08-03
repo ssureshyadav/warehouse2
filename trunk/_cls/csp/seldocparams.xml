@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.seldocparams">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62193,58768.63355</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body onload=""load();"" onkeypress=""ManageWindow();"">"
+	Write !,"<SKLAD2:table id=""PropTable"" width=220 height=200 zonTableClick=""TableClick()"" DisplaySecondCol=""none"" />",!
+	Write "<center>"
+	Write "<span id=""Pname"">"
+	Write "</span>"
+	Write "&nbsp;&nbsp;",!
+	Write "	"
+	Write "<select id=""Pequal"">"
+	Write !,"		"
+	Write "<option value=""="">"
+	Write "=</option>",!
+	Write "		"
+	Write "<option value=""<>"">"
+	Write "&#8800;</option>",!
+	Write "		"
+	Write "<option value=""<"">"
+	Write "&lt;</option>",!
+	Write "		"
+	Write "<option value=""<="">"
+	Write "&lt;=</option>",!
+	Write "		"
+	Write "<option value="">"">"
+	Write "&gt;</option>",!
+	Write "		"
+	Write "<option value="">="">"
+	Write "&gt;=</option>",!
+	Write "	"
+	Write "</select>"
+	Write "&nbsp;&nbsp;",!
+	Write "	"
+	Write "<span id=""Pvalue"" style=""background:#ddffff;width:150px;border:dotted 1 gray"">"
+	Write "&nbsp;&nbsp;&nbsp;"
+	Write "</span>"
+	Write !,"</center>",!
+	Write !,"	<center>",!
+	Write "	"
+	Write "<input type=""button"" value=""И"" id=""Pand"" onclick=""dork('AND')"" style=""width:50px"">"
+	Write !,"	"
+	Write "<input type=""button"" value=""ИЛИ"" id=""Por"" onclick=""dork('OR')"" style=""width:50px"">"
+	Write !,"<img src=""images/del.gif"" onmouseover=""Clear.src='images/Ondel.gif'"" onmouseout=""Clear.src='images/del.gif'""  id=""Clear"" name=""Clear"" alt=""Очистить поле 'Параметры'"" onclick=""ClearSelect();"" style="""">"
+	Write "</center>",!
+	Write "<fieldset><legend>Параметры отбора</legend>",!
+	Write "&nbsp;"
+	Write "<span id=""Express"" style=""font:Arial 13;color:#000033"">"
+	Write "</span>"
+	Write !,"</fieldset>",!
+	Write "<center>"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""startFun();"" TITLE=""""><center>Да</center></span>"
+	Write !,"<span class=ButtonDiv ID="""" style=""cursor:hand;"" onmouseover=""this.className='ButtonDivHover'"" onmouseout=""this.className='ButtonDiv'"" onclick=""window.close()"" TITLE=""""><center>Отмена</center></span>"
+	Write "</center>",!
+	Write "</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	s docclass=%request.Get("docclass")
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<title>"_($G(%session.Data("systemname")))_"</title>",!
+	Write "<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"<script language=""Jscript"" src=""common.js"">"
+	Write "</script>"
+	Write !,"<script language=""JScript"">"
+	Write !,"Arguments=window.dialogArguments.split(InnerSplitter);",!
+	Write "sessionid="""_(%session.SessionId)_""";",!
+	Write "var depot="""_($G(%session.Data("depot")))_"""",!
+	Write "var docclass="""_($G(docclass))_""";",!
+	Write "CardId=Arguments[0];",!
+	Write "var CurrentProperty;",!
+	Write "var Objvalue;",!
+	Write "var InCard=false;",!
+	Write "var FromTable="""";",!
+	Write "var FromTree="""";",!
+	Write "var Number=0;",!
+	Write "ExpressType2=""""",!
+	Write "var ColCode="""";",!
+	Write !,"//последняя функция, выполняется по клику на Enter",!
+	Write "function startFun(){",!
+	Write "returnValue=FromTable;",!
+	Write "window.close();",!
+	Write "}",!
+	Write !,"function load(){",!
+	Write "PropTable.DownLoadPairs(docclass,"""");",!
+	Write "}",!
+	Write !,"function TableClick()",!
+	Write "{",!
+	Write "	ExpressType=""FromTable"";",!
+	Write "	CurrentProperty=PropTable.CurrentRowTag;",!
+	Write "	Pname.innerText=PropTable.CurrentRowName;",!
+	Write "	newObj=PropTable.CurrentRowElement.cloneNode(true);",!
+	Write "	Pvalue.innerHTML="""";",!
+	Write "	Pvalue.appendChild(newObj);",!
+	Write "}",!
+	Write !,"function AddExpress()",!
+	Write "{",!
+	Write "	tagNamez=Pvalue.firstChild.tagName;",!
+	Write "	if(tagNamez==""DIV""){",!
+	Write "		Objvalue=Pvalue.firstChild.Tag;",!
+	Write "		if(Objvalue.split(""@"")[0]==""""){Objvalue=Pvalue.firstChild.innerText+Objvalue;}",!
+	Write "		}",!
+	Write "	if(tagNamez==""SELECT""){Objvalue=Pvalue.firstChild.options(Objec.selectedIndex).text+""@%String"";}",!
+	Write "	return Objvalue;",!
+	Write "}",!
+	Write !,"function TakeValue(){",!
+	Write "FrstPart=AddExpress().split(""@"")[0]",!
+	Write "ScndPart=AddExpress().split(""@"")[1]",!
+	Write "//if(ScndPart!=""%Date"")return FrstPart",!
+	Write "if(ScndPart!=""%Date"")return ""'""+FrstPart+""'""",!
+	Write "else {",!
+	Write "	dateArr=FrstPart.split(""/"")",!
+	Write "	Data=dateArr[2]+""-""+dateArr[1]+""-""+dateArr[0]",!
+	Write "	return ""CAST('""+Data+""' AS DATE)""",!
+	Write "}",!
+	Write "}",!
+	Write !,"function dork(concatenation){",!
+	Write "if(Pname.innerText=="""")return false",!
+	Write "if(ExpressType2!=ExpressType){",!
+	Write "	Express.innerHTML="""";",!
+	Write "	ExpressType2=ExpressType;",!
+	Write "	}",!
+	Write "newCaption=Pname.innerText;",!
+	Write "newEqual=Pequal.options(Pequal.selectedIndex).text;",!
+	Write "newValue=TakeVisibleValue();",!
+	Write "newExpression=newCaption+newEqual+newValue;",!
+	Write "value=TakeValue();",!
+	Write "if(ExpressType==""FromTable""){",!
+	Write "	if(FromTable==""""){FromTableconcatenation="""";}",!
+	Write "	else{FromTableconcatenation=concatenation}",!
+	Write "	exp="" ""+CurrentProperty+Pequal.value+value+"" """,!
+	Write "	FromTable=FromTable+FromTableconcatenation + exp;",!
+	Write "	}",!
+	Write "if(Express.innerHTML=="""")concatenation="""";",!
+	Write "if(concatenation==""AND""){concatenation=""И""}",!
+	Write "if(concatenation==""OR""){concatenation=""ИЛИ""}",!
+	Write "newString=Express.innerHTML+""<b> ""+concatenation+"" (</b>""+newExpression+""<b>)</b>""",!
+	Write "Express.innerHTML=newString;",!
+	Write "}",!
+	Write !,"function TakeVisibleValue(){",!
+	Write "	Objec=Pvalue.firstChild;",!
+	Write "	if(Objec.tagName==""SELECT"")return Objec.options(Objec.selectedIndex).text",!
+	Write "	else{return Objec.innerText;}",!
+	Write "}",!
+	Write !,"function DelItems(element){",!
+	Write "document.getElementById(element).DelItems();",!
+	Write "}",!
+	Write !,"function ClearSelect(){",!
+	Write "Express.innerText='';",!
+	Write "FromTree="""";",!
+	Write "FromTable="""";",!
+	Write "Number=0;",!
+	Write "}",!
+	Write !,"function cellaction(oo){",!
+	Write "}",!
+	Write !,"function getDivChange(oo){",!
+	Write "}",!
+	Write "</script>"
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html XMLNS:SKLADz XMLNS:SKLADList XMLNS:SKLAD2>"
+	Write !,"<IMPORT NAMESPACE=""SKLADList"" IMPLEMENTATION=""htc/listview2.htc"">",!
+	Write "<IMPORT NAMESPACE=""SKLADz"" IMPLEMENTATION=""htc/treeview.htc"">",!
+	Write "<IMPORT NAMESPACE=""SKLAD2"" IMPLEMENTATION=""htc/table.htc"">",!
+	Write !
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\seldocparams.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/seldocparams.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>62164,45292</Default>
+</Parameter>
+</Class>
+</Export>

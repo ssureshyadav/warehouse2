@@ -1,0 +1,10 @@
+<script language="cache" runat="Server">
+ s id=%request.Get("id")
+ if +id
+ {
+	 &sql(select Images into :images from Goods.Goods where id=:id)
+	 if SQLCODE=100 w "Извините, указанный товар не найден." q
+	 w "OK"_$C(9)_images
+ }
+ q
+</script>

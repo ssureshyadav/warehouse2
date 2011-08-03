@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.kontr">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62301,49219.422034</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBODY">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<body onload=""load()"">"
+	Write !,(##class(%CSP.Response).HyperEventBody())
+	Write !,"<TABLE cellSpacing=0 width=""100%"" celpadding=""0"" >",!
+	Write "<TR>",!
+	Write "<td width=10%>"
+	Write "<img alt=""Обновить раздел"" src=""images/refresh.gif"" onclick=""window.location.reload()"">"
+	Write "</td>",!
+	Write "<TD width=80% align=center style=""BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid"" ><strong>Учёт отгрузок и платежей</strong></TD>",!
+	Write "<td width=10% align=right>"
+	Write "<a href=""help/Platej.html"">"
+	Write "<img src=""images/BIGHelp.bmp"" width=""20"" height=25 border=0>"
+	Write "</a>"
+	Write "</td>",!
+	Write "</TABLE>",!
+	Write "<br>",!
+	Write "<fieldset><legend>Контрагенты</legend>",!
+	Write "Поиск:",!
+	Write "<span id=""namfld"">"
+	Write "</span>"
+	Write "&nbsp;"
+	Write "<input type=""text"" id=""fldval"" onkeyup=""gg();"">"
+	Write !,!,"<SKLADList:listview width=100% height=150 id=""currentdict"" zClick=""KontrClick()"" zonDblClick=""addrecord(currentdict.ItemID);"" zonColumnClick=""colclick()"" onAddColumns=""showdictionary()"" ClassName=""Common.Kontragent""/><br>",!
+	Write "<table width=100%><tr><td>",!
+	Write "  "
+	Write !,"<img src=""images/new.gif"" onmouseover=""newrec.src='images/Onnew.gif'"" onmouseout=""newrec.src='images/new.gif'""  id=""newrec"" name=""newrec"" alt=""Создать контрагента"" onclick=""addrecord()"" style="""">"
+	Write !,"  "
+	Write !,"<img src=""images/edit.gif"" onmouseover=""addrec.src='images/Onedit.gif'"" onmouseout=""addrec.src='images/edit.gif'""  id=""addrec"" name=""addrec"" alt=""Редактировать данные контрагента"" onclick=""addrecord(currentdict.ItemID)"" style="""">"
+	Write !,"  "
+	Write !,"<img src=""images/down.gif"" onmouseover=""showdata.src='images/Ondown.gif'"" onmouseout=""showdata.src='images/down.gif'""  id=""showdata"" name=""showdata"" alt=""Вывести информацию по контрагенту"" onclick=""ShowKontrData()"" style="""">"
+	Write !,"  "
+	Write !,"<img src=""images/history.gif"" onmouseover=""btnKontrListEdit.src='images/Onhistory.gif'"" onmouseout=""btnKontrListEdit.src='images/history.gif'""  id=""btnKontrListEdit"" name=""btnKontrListEdit"" alt=""Редактировать список контрагентов"" onclick=""fnKontrList()"" style="""">"
+	Write !,"  "
+	Write !,"<img src=""images/user.gif"" onmouseover=""btnUser.src='images/Onuser.gif'"" onmouseout=""btnUser.src='images/user.gif'""  id=""btnUser"" name=""btnUser"" alt=""История общения с контрагентом"" onclick=""fnMeetingResult()"" style="""">"
+	Write !,"</td><td align=right>",!
+	Write "	Поддерживать таблицу в актуальном состоянии",!
+	Write "	"
+	Write "<input type=checkbox id=""makeShowDict"" checked style=""width:20pt;border:none;"">"
+	Write !,"</td>",!
+	Write "</tr>",!
+	Write "</table>",!
+	Write "</fieldset><br>",!
+	Write "<span style=""FONT-size: 15px ; font-family: arial; COLOR: rgb(0,0,102);"">"
+	Write "&nbsp;"
+	Write "<span id=""KontrName"">"
+	Write "</span>"
+	Write " "
+	Write "<span style=""font-family: Times"" id=""KontrBalance"">"
+	Write "</span>"
+	Write "</span>"
+	Write !,"<br><br>",!
+	Write "<table width=100%>",!
+	Write "<tr><td width=50% valign=top>",!
+	Write "<fieldset><legend>Отгрузки</legend>",!
+	Write "Период c "
+	Write "<input type=text id=""dat1"" value="""_($ZD($H,4))_""" onclick=""fnCalendar(this)"" class=""datar"">"
+	Write " по "
+	Write "<input type=text id=""dat2"" value="""_($ZD($H,4))_""" onclick=""fnCalendar(this)"" class=""datar"">"
+	Write !," "
+	Write "<input type=""text"" id=""DocName"">"
+	Write " ",!
+	Write "<select id=""RashTypes"">"
+	Write !,"	"
+	Write "<option value=0>"
+	Write "Все</option>",!
+	Write "	"
+	Write "<option value=1>"
+	Write "Полностью оплаченные</option>",!
+	Write "	"
+	Write "<option value=2>"
+	Write "Частично оплаченные</option>",!
+	Write "	"
+	Write "<option value=3>"
+	Write "Не оплаченные</option>",!
+	Write "</select>"
+	Write !,!,"<img src=""images/ok.gif"" onmouseover=""okbut.src='images/Onok.gif'"" onmouseout=""okbut.src='images/ok.gif'""  id=""okbut"" name=""okbut"" alt=""Показать документы"" onclick=""showdocums()"" style="""">"
+	Write "<br>",!
+	Write "<!-- Таблица отгрузок -->"
+	Write !,"<SKLADList:listview width=100% height=200 id=""docums"" ClassName=""Docs.Rash"" /><br>",!
+	Write !,"<img src=""images/edit.gif"" onmouseover=""editrash.src='images/Onedit.gif'"" onmouseout=""editrash.src='images/edit.gif'""  id=""editrash"" name=""editrash"" alt=""Редактировать документ"" onclick=""CreateDocument(docums.ItemID,'Docs.Rash')"" style="""">"
+	Write !,!,"<img src=""images/card.gif"" onmouseover=""PayRashButton.src='images/Oncard.gif'"" onmouseout=""PayRashButton.src='images/card.gif'""  id=""PayRashButton"" name=""PayRashButton"" alt=""Оплатить расходную накладную"" onclick=""PayRashFn(docums.ItemID)"" style="""">"
+	Write !,"</fieldset>",!
+	Write "</td>",!
+	Write "<td width=50% valign=top>",!
+	Write "<fieldset><legend>Платежи</legend>",!
+	Write "Период c "
+	Write "<input type=text id=""dat11"" value="""_($ZD($H,4))_""" onclick=""fnCalendar(this)"" class=""datar"">"
+	Write " по "
+	Write "<input type=text id=""dat22"" value="""_($ZD($H,4))_""" onclick=""fnCalendar(this)"" class=""datar"">"
+	Write !," "
+	Write "<input type=""text"" id=""DocName2"">"
+	Write " ",!
+	Write "<select id=""PlatejTypes"">"
+	Write !,"	"
+	Write "<option value=0>"
+	Write "Все</option>",!
+	Write "	"
+	Write "<option value=1>"
+	Write "Зачисленные</option>",!
+	Write "	"
+	Write "<option value=2>"
+	Write "Не зачисленные</option>",!
+	Write "</select>"
+	Write !,!,"<img src=""images/ok.gif"" onmouseover=""okbut2.src='images/Onok.gif'"" onmouseout=""okbut2.src='images/ok.gif'""  id=""okbut2"" name=""okbut2"" alt=""Показать документы"" onclick=""showdocums2()"" style="""">"
+	Write "<br>",!
+	Write "<!-- Таблица платежей -->"
+	Write !,"<SKLADList:listview width=100% height=200 id=""docums2"" ClassName=""Docs.Platejka"" /><br>",!
+	Write !,"<img src=""images/new.gif"" onmouseover=""newbut.src='images/Onnew.gif'"" onmouseout=""newbut.src='images/new.gif'""  id=""newbut"" name=""newbut"" alt=""Внести платёж"" onclick=""CreateDocument('','Docs.Platejka')"" style="""">"
+	Write !,!,"<img src=""images/edit.gif"" onmouseover=""editplatej.src='images/Onedit.gif'"" onmouseout=""editplatej.src='images/edit.gif'""  id=""editplatej"" name=""editplatej"" alt=""Редактировать документ"" onclick=""CreateDocument(docums2.ItemID,'Docs.Platejka')"" style="""">"
+	Write !,!,"<img src=""images/del+.gif"" onmouseover=""delplatejkaitems.src='images/Ondel+.gif'"" onmouseout=""delplatejkaitems.src='images/del+.gif'""  id=""delplatejkaitems"" name=""delplatejkaitems"" alt=""Очистить оплачиваемые расходные накладные"" onclick=""ClearPlatejkaItems()"" style="""">"
+	Write !,!,"<img src=""images/price.gif"" onmouseover=""pricebut.src='images/Onprice.gif'"" onmouseout=""pricebut.src='images/price.gif'""  id=""pricebut"" name=""pricebut"" alt=""Разнести платёжный документ по расходным накладным"" onclick=""OpenPlatejWindow(docums2.ItemID)"" style="""">"
+	Write !,!,"<img src=""images/ok.gif"" onmouseover=""okbut22.src='images/Onok.gif'"" onmouseout=""okbut22.src='images/ok.gif'""  id=""okbut22"" name=""okbut22"" alt=""Обработать документ"" onclick=""processdoc(docums2.ItemID)"" style="""">"
+	Write !,"</fieldset>",!
+	Write "</td>",!
+	Write "</tr>",!
+	Write "</table>",!
+	Write "<fieldset><legend>Запчасти на балансе "
+	Write "<span id=""KontrNameSpan"">"
+	Write "</span>"
+	Write "</legend>",!
+	Write " <SKLADList:listview width=100% height=200 id=""dfdf""  ClassName=""Goods.Goods"" /><br>",!
+	Write !,"<img src=""images/new+.gif"" onmouseover=""AddDetail.src='images/Onnew+.gif'"" onmouseout=""AddDetail.src='images/new+.gif'""  id=""AddDetail"" name=""AddDetail"" alt=""Добавить деталь на баланс контрагента"" onclick=""AddGoodsToKontr()"" style="""">"
+	Write !,!,"<img src=""images/del.gif"" onmouseover=""RemoveDetail.src='images/Ondel.gif'"" onmouseout=""RemoveDetail.src='images/del.gif'""  id=""RemoveDetail"" name=""RemoveDetail"" alt=""Убрать деталь с баланса контрагента"" onclick=""MoveGoodsFromKontr()"" style="""">"
+	Write !,!,"<img src=""images/history.gif"" onmouseover=""HistoryDetail.src='images/Onhistory.gif'"" onmouseout=""HistoryDetail.src='images/history.gif'""  id=""HistoryDetail"" name=""HistoryDetail"" alt=""История этой детали на балансе контрагента"" onclick=""alert('Функция не реализована')"" style="""">"
+	Write !,"</fieldset>",!
+	Write !,"</body>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write !
+	Do ..OnPageHTML()
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHEAD">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<head>"
+	Write !,"<link href=""style.css"" type=text/css rel=stylesheet>"
+	Write !,"<script language=""jscript"" src=""common.js"">"
+	Write "</script>"
+	Write !,"<script language=""Jscript"">"
+	Write !,"var ColCode="""";",!
+	Write "sessionid="""_(%session.SessionId)_""";",!
+	Write "var where =""""",!
+	Write "var CurrentKontrShown = false;",!
+	Write "var currentKontragent="""";",!
+	Write !,"function load()",!
+	Write "{",!
+	Write "	currentdict.LoadHeaders();",!
+	Write "	dfdf.attachEvent(""onAddColumns"", showgoods)",!
+	Write "	dfdf.LoadHeaders(""izdelie"");",!
+	Write "	docums.LoadHeaders();",!
+	Write "	docums2.LoadHeaders();",!
+	Write "}",!
+	Write !,"//вывод контрагентов",!
+	Write "function showdictionary(where)",!
+	Write "{",!
+	Write "	parent.statusFR.WriteStatus(""Идёт вывод списка контрагентов..."")",!
+	Write "	var where=ReturnSpace(where);",!
+	Write "	var made=false;",!
+	Write "	currentdict.DownLoad(where);",!
+	Write "	parent.statusFR.WriteStatus("""")",!
+	Write "}",!
+	Write !,"function gg()",!
+	Write "{",!
+	Write "	if(ColCode=="""")return false;",!
+	Write "	where = ColCode+"" %STARTSWITH '""+fldval.value+""'"";",!
+	Write "	if(fldval.value=="""")where="""";",!
+	Write "	showdictionary(where);",!
+	Write "}",!
+	Write !,"//клик на колонке в таблице контрагентов",!
+	Write "function colclick()",!
+	Write "{",!
+	Write "	if(currentdict.ColType==""%Date""){alert(""Поля с датами не обрабатываются"");return false;}",!
+	Write "	namfld.innerText=currentdict.ColName;",!
+	Write "	ColCode=currentdict.ColCode;",!
+	Write "}",!
+	Write !,"// ",!
+	Write "function addrecord(currentrecord)",!
+	Write "{",!
+	Write "	var currentrecord=ReturnSpace(currentrecord)",!
+	Write "	ok=window.showModalDialog(""kontragent.csp?KontrId=""+currentrecord,"""",""center:yes;status:no;dialogHeight:708px;dialogWidth:800px;resizable:yes;"")",!
+	Write "	if((ok!=null)&&(makeShowDict.checked)){showdictionary(where)}",!
+	Write "}",!
+	Write !,"//показать запчасти на балансе контрагента",!
+	Write "function showgoods()",!
+	Write "{",!
+	Write "	dfdf.detachEvent(""onAddColumns"", showgoods);",!
+	Write "	if(currentKontragent=="""")return;",!
+	Write "	parent.statusFR.WriteStatus(""Идёт вывод списка запчастей на балансе..."");",!
+	Write "	dfdf.loadfrommethod(""Reports.Analyzis.GoodsOnKontr"",currentKontragent);",!
+	Write "	parent.statusFR.WriteStatus("""");",!
+	Write "	KontrNameSpan.innerText=currentdict.ItemName",!
+	Write "}",!
+	Write !,"function showdocums()",!
+	Write "{",!
+	Write "	currentKontragent=currentdict.ItemID;",!
+	Write "	if(currentKontragent=="""")return",!
+	Write "	parent.statusFR.WriteStatus(""Идёт вывод списка поставок..."")",!
+	Write "	dateArr=dat1.value.split(""/"")",!
+	Write "	Data1=dateArr[2]+""-""+dateArr[1]+""-""+dateArr[0]",!
+	Write "	dateArr=dat2.value.split(""/"")",!
+	Write "	Data2=dateArr[2]+""-""+dateArr[1]+""-""+dateArr[0]",!
+	Write "	var request=""Dat>=CAST('""+Data1+""' AS DATE) and Dat<=CAST('""+Data2+""' AS DATE)"";",!
+	Write "	if(currentKontragent!=""all""){var request=request+"" and Kontr=""+currentKontragent}",!
+	Write "	if(DocName.value!=""""){var request=request+"" and Name %STARTSWITH '""+DocName.value+""'"";}",!
+	Write "	if(RashTypes.value!=0)",!
+	Write "	{",!
+	Write "		if(RashTypes.value==1)var request=request+"" and Summa=OplSumma""",!
+	Write "		if(RashTypes.value==2)var request=request+"" and (Summa<>OplSumma and OplSumma>0)""",!
+	Write "		if(RashTypes.value==3)var request=request+"" and (OplSumma=0 or OplSumma='' or OplSumma is Null)""",!
+	Write "	}",!
+	Write "	docums.DownLoad(request);",!
+	Write "	parent.statusFR.WriteStatus("""")",!
+	Write "}",!
+	Write !,"function showdocums2()",!
+	Write "{",!
+	Write "	var currentKontragent=currentdict.ItemID;",!
+	Write "	if(currentKontragent=="""")return",!
+	Write "	parent.statusFR.WriteStatus(""Идёт вывод списка платежей..."")",!
+	Write "	dateArr=dat11.value.split(""/"")",!
+	Write "	Data1=dateArr[2]+""-""+dateArr[1]+""-""+dateArr[0]",!
+	Write "	dateArr=dat22.value.split(""/"")",!
+	Write "	Data2=dateArr[2]+""-""+dateArr[1]+""-""+dateArr[0]",!
+	Write "	var request=""Dat>=CAST('""+Data1+""' AS DATE) and Dat<=CAST('""+Data2+""' AS DATE)"";",!
+	Write "	if(currentKontragent!=""all""){var request=request+"" and Kontr=""+currentKontragent}",!
+	Write "	if(DocName.value!=""""){var request=request+"" and Name %STARTSWITH '""+DocName.value+""'"";}",!
+	Write "	if(PlatejTypes.value!=0)",!
+	Write "	{",!
+	Write "		if(PlatejTypes.value==1)var request=request+"" and (not Rash is null or Rash<>'')"";",!
+	Write "		if(PlatejTypes.value==2)var request=request+"" and (Rash is null or Rash='')"";",!
+	Write "	}",!
+	Write "	docums2.DownLoad(request);",!
+	Write "	parent.statusFR.WriteStatus("""")",!
+	Write "}",!
+	Write !,"//показать данные по контрагенту",!
+	Write "function ShowKontrData()",!
+	Write "{",!
+	Write "	currentKontragent=currentdict.ItemID;",!
+	Write "	showdocums();",!
+	Write "	showdocums2();",!
+	Write "	showgoods();",!
+	Write "	CurrentKontrShown = true;",!
+	Write "}",!
+	Write !,"//клик по контрагенту",!
+	Write "function KontrClick()",!
+	Write "{",!
+	Write "	CurrentKontrShown = false;",!
+	Write "	KontrName.innerText=currentdict.ItemName",!
+	Write "	KontrBalance.innerText=currentdict.item(""Balance"")",!
+	Write "}",!
+	Write !,"function processdoc(ItemID)",!
+	Write "{",!
+	Write "	if(ReturnSpace(ItemID)=="""")return",!
+	Write "	var doc=ItemID+""@Docs.Platejka"";",!
+	Write "	var ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Docs.Action.processdoc:csp.kontr"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',doc)",!
+	Write "	if(isNaN(ok))",!
+	Write "	{",!
+	Write "		alert(ok);",!
+	Write "	}",!
+	Write "	else",!
+	Write "	{",!
+	Write "		showdocums2();",!
+	Write "		if(KontrBalance.innerText!=""""){var OldBalance=parseInt(KontrBalance.innerText);}",!
+	Write "		else{var OldBalance=0;}",!
+	Write "		var NewBalance=parseInt(docums2.item(""Summa""));",!
+	Write "		KontrBalance.innerText=OldBalance+NewBalance;",!
+	Write "		alert(""Документ успешно обработан"");",!
+	Write "	}",!
+	Write "	return ok;",!
+	Write "}",!
+	Write !,"function CreateDocument(ItemID,CurrentDocementClass)",!
+	Write "{",!
+	Write "	var doccsp=""document.csp"";",!
+	Write "	if(CurrentDocementClass==""Docs.Platejka"")doccsp=""docplatej.csp?DocId=""+ReturnSpace(ItemID)",!
+	Write "	WinResult=window.showModalDialog(doccsp,CurrentDocementClass+InnerSplitter+ItemID+InnerSplitter+"""",""center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;"")",!
+	Write "	if(WinResult==1)",!
+	Write "	{",!
+	Write "		if(CurrentDocementClass==""Docs.Rash"")showdocums();",!
+	Write "		if(CurrentDocementClass==""Docs.Platejka"")showdocums2();",!
+	Write "	}",!
+	Write "}",!
+	Write !,"//открыть окно для разноски платёжки по расходным накладным",!
+	Write "function OpenPlatejWindow(ItemID)",!
+	Write "{",!
+	Write "	if(ReturnSpace(ItemID)=="""")return",!
+	Write "	WinResult=window.showModalDialog(""PlatejRash.csp?DocId=""+ItemID,"""",""center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;"")",!
+	Write "}",!
+	Write !,"function ClearPlatejkaItems()",!
+	Write "{",!
+	Write "	if(!window.confirm(""Очистить привязку платёжного поручения к отгрузкам?""))return",!
+	Write "	var ok="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Docs.Action.ClearPlatejkaItems:csp.kontr"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',docums2.ItemID)",!
+	Write "	if(isNaN(ok)){alert(ok)}",!
+	Write "	else{alert(""Привязка платёжного поручения к отгрузкам очищена. Укажите на какие отгрузки следует разнести платёж."")}",!
+	Write "}",!
+	Write !,"function PayRashFn(DocId)",!
+	Write "{",!
+	Write "	if(ReturnSpace(DocId)=="""")return;",!
+	Write "	var DocId="_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Docs.Action.CreatePlatejForRash:csp.kontr"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',DocId)",!
+	Write "	if(isNaN(DocId)){ alert(DocId); }",!
+	Write "	else",!
+	Write "	{",!
+	Write "		if(window.confirm((""Платёжный документ успешно создан. Открыть для редактирования?"")))CreateDocument(DocId,'Docs.Platejka')",!
+	Write "		if(window.confirm((""Обработать документ?"")))",!
+	Write "		{",!
+	Write "			var ok=processdoc(DocId);",!
+	Write "			if(isNaN(ok))",!
+	Write "			{",!
+	Write "				alert(ok);",!
+	Write "			}",!
+	Write "			else",!
+	Write "			{",!
+	Write "				showdocums2();",!
+	Write "				showdocums();",!
+	Write "			}",!
+	Write "		}",!
+	Write "	}",!
+	Write "}",!
+	Write !,"function fnMeetingResult()",!
+	Write "{",!
+	Write "	var KontrId=currentdict.ItemID;",!
+	Write "	if(KontrId=="""")return;",!
+	Write "	var ok=window.showModalDialog(""KontrMeetingResult.csp?Kontr=""+KontrId,"""",""center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;"")",!
+	Write "}",!
+	Write !,"function fnKontrList()",!
+	Write "{",!
+	Write "	var ok=window.showModalDialog(""KontragentsListEdit.csp?Where=""+where,"""",""center:yes;status:no;dialogHeight:650px;dialogWidth:1000px;resizable:yes;"")",!
+	Write "	if((ok!=null)&&(makeShowDict.checked)){showdictionary(where)}",!
+	Write "}",!
+	Write !,"// добавить запчасть на баланс контрагенту",!
+	Write "function AddGoodsToKontr()",!
+	Write "{",!
+	Write "	if(!CurrentKontrShown)",!
+	Write "	{",!
+	Write "		alert(""Что бы зачислить товары или запчасти на баланс контрагента, пожалуйста выберете контрагента и нажмите кнопку 'Вывести информацию по контрагенту'"");",!
+	Write "		return;",!
+	Write "	}",!
+	Write "	WinResult=window.showModalDialog(""selectgoods2.csp?OnlyID=1"","""",""center:yes;status:no;dialogHeight:700px;dialogWidth:800px;resizable:yes;"")",!
+	Write "	if(WinResult==null)return",!
+	Write "	var quant=window.prompt(""Укажите количество для каждой запчасти"",""1"");",!
+	Write "	if (quant==null) return;",!
+	Write "	ok = "_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Common.Common.AddGoodsToKontr:csp.kontr"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',currentKontragent,WinResult,quant)",!
+	Write "	if(isNaN(ok)){alert(ok);}",!
+	Write "	else{showgoods();}",!
+	Write "}",!
+	Write !,"// снять запчасти с баланса контрагента",!
+	Write "function MoveGoodsFromKontr()",!
+	Write "{",!
+	Write "	var quant=0;",!
+	Write "	if(!CurrentKontrShown)",!
+	Write "	{",!
+	Write "		alert(""Что бы снять товары или запчасти с баланса контрагента, пожалуйста выберете контрагента и нажмите кнопку 'Вывести информацию по контрагенту'"");",!
+	Write "		return;",!
+	Write "	}",!
+	Write "	if(!window.confirm(""Снять отмеченные запчасти с баланса контрагента?""))return;",!
+	Write "	ResultArray=dfdf.ListViewGetItems(""selected"",1);",!
+	Write "	if(ResultArray.split(""#@#"").length==2)",!
+	Write "	{",!
+	Write "		quant = window.prompt(""Введите количество которое спишется с контрагента"",1);",!
+	Write "		if (quant==null) return",!
+	Write "	}",!
+	Write "	else",!
+	Write "	{",!
+	Write "		if(!window.confirm(""Внимание! Указано несколько строк. Все указанные позиции спишутся с контрагента полностью. Чтобы списывать поштучно, указывайте только одну строку. Продолжить списание позиций полностью?""))return;	",!
+	Write "	}",!
+	Write !,"	ok = "_($case(%session.BrokerImplementation,1:"cspRunServerMethod",2:"cspHttpServerMethod",:"cspSelectServerMethod"))_"('"_(..Encrypt($listbuild("Common.Common.RemoveGoodsFromKontr:csp.kontr"))_$select(%session.UseSessionCookie'=2:"&CSPCHD="_%session.CSPSessionCookie,1:""))_"',currentKontragent,ResultArray,quant)",!
+	Write "	if(isNaN(ok)){alert(ok);}",!
+	Write "	else{showgoods();}	",!
+	Write "}",!
+	Write "</script>"
+	Write !,(..HyperEventHead())
+	Write !,"</head>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPageHTML">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	Write "<html XMLNS:SKLADList XMLNS:SKLAD2>"
+	Write !,"<IMPORT NAMESPACE=""SKLADList"" IMPLEMENTATION=""htc/listview2.htc"">",!
+	Do ..OnPageHEAD()
+	Write !
+	Do ..OnPageBODY()
+	Write !,"</html>"
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<FormalSpec/>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+  s login=$G(%session.Data("user"))
+  i '+login s %response.ServerSideRedirect="norights.csp" 
+  i '##class(Common.Rights).getrights(login,2) s %response.ServerSideRedirect="norights.csp" 
+  q 1
+ 
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\kontr.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/kontr.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>62167,65532</Default>
+</Parameter>
+</Class>
+</Export>

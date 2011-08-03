@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.goodsparams">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62301,49232.999169</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	Do ..OnPageCSPROOT()
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPageCSPROOT">
+<ClassMethod>1</ClassMethod>
+<CodeMode>code</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	s class=%request.Get("class") 
+	i class="" w "Error=Не указан класс" q
+	s fields=%request.Get("fields")
+	i fields="" w "Error=Не указаны поля" q
+	s Goods=%request.Get("Goods")
+	s where=%request.Get("where")
+	s Groups=%request.Get("Groups")
+	s Catalogue=%request.Get("Catalogue")
+	//Разложим код группы на коды родителей
+	if Groups'="" d
+	. f i=2:1:$L(Groups,"*") d
+	. . s parents=$G(parents)_" or Groups='"_$P(Groups,"*",1,i)_"'"
+	s result = ##class(%ResultSet).%New()
+	s sql="SELECT "_fields_" FROM "_class_" where (Groups is null "_$G(parents)_") and Catalogue='"_Catalogue_"' "
+	if where'="" s sql=sql_where
+	s sql=sql_" order by Code"
+	d result.Prepare(sql)
+	//s result.RuntimeMode=2
+	s ok=result.Execute()
+	q:'+ok ok
+	While result.Next() {
+	f i=1:1:$L(fields,",") d
+	. s val=$G(result.Data($P(fields,",",i)))
+	. s $P(OutString,"~",i)=val
+	s value=""
+	i (Goods'="") {
+	s ParamId=$G(result.Data("ID"))
+	&sql(select Gvalue into :value from Goods.GoodsParams where goods=:Goods and Param=:ParamId)
+	s:('%ROWCOUNT)&(SQLCODE) value=""
+	}
+	//Последним в строке пойдёт значение свойства для данного товара
+	s res=$G(res)_OutString_"~"_value_"#@#"
+	}
+	w $G(res)
+	Write !," ",!
+	Write " "
+]]></Implementation>
+</Method>
+
+<Parameter name="CSPFILE">
+<Default>c:\cachesys\csp\sklad2\GoodsParams.csp</Default>
+</Parameter>
+
+<Parameter name="CSPURL">
+<Default>/csp/sklad2/GoodsParams.csp</Default>
+</Parameter>
+
+<Parameter name="FileTimestamp">
+<Default>60556,48668</Default>
+</Parameter>
+</Class>
+</Export>

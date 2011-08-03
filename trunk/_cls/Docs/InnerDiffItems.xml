@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.InnerDiffItems">
+<Super>Docs.DocItems</Super>
+<TimeCreated>60398,65468.298027</TimeCreated>
+
+<Property name="addr">
+<Description>
+Адрес</Description>
+<Type>Store.Address</Type>
+</Property>
+
+<Property name="quantdefault">
+<Description>
+Количество по накладной</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Property name="quantreal">
+<Description>
+Количество фактическое</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>InnerDiffItemsDefaultData</DefaultData>
+<Data name="InnerDiffItemsDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"InnerDiffItems"</Subscript>
+<Value name="1">
+<Value>storeman</Value>
+</Value>
+<Value name="2">
+<Value>addr</Value>
+</Value>
+<Value name="3">
+<Value>quantdefault</Value>
+</Value>
+<Value name="4">
+<Value>quantreal</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>
