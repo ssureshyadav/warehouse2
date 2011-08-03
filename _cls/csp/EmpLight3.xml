@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.EmpLight3">
+<Description>
+3 Вариант страницы emplight.csp
+параметры тип инструкции и контрагент</Description>
+<Super>%CSP.Page</Super>
+<TimeCreated>62305,77157.240215</TimeCreated>
+
+<Method name="OnPreHTTP">
+<Description>
+Перед выгрузкой страницы</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Boolean</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+ /*s login=$G(%session.Data("user"))
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ i '##class(Common.Rights).getrights(login,5) s %response.ServerSideRedirect="norights.csp" 
+ */
+ q 1
+]]></Implementation>
+</Method>
+
+<Method name="wITypeOpts">
+<Description>
+Вывести типы инструкций в html-options</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	&sql(Declare itors Cursor For 
+		SELECT id,name Into :id,:name
+		From Operation.OperTemplate Order By Name
+	) &sql(Open itors)
+	for { &sql(Fetch itors) Q:SQLCODE
+		w "<option value='",id,"'>",name,"</option>"		
+	} &sql(Close itors)
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wIDocs">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&where:%String="",&qp:%String="",&order:%String=""]]></FormalSpec>
+<ReturnType>%ResultSet</ReturnType>
+<Implementation><![CDATA[
+ s sql="SELECT IID,INAME,IKONTR,IKONTRNAME,IUSERNAME,IDATE"
+ 	   _",ISTATE,ISTATENAME,IDOSTAVKANAME,ICOLOR,IOPER,IOPERNAME"
+ 	   _",IPOSTNUM,IPOSTDATE,IROTNAME"
+ 	   _",DCLASS,DOCID,DNAME"
+ 	   _" from Operation.IDocView "
+ 	   _" where (ISTATE Between 2 and 8) "
+ #; расписываем where
+ s i="" for { s i=$o(where(i)) q:i=""
+	s cond=$g(where(i))  continue:cond=""
+	s sql=sql_" AND "_cond
+ }
+ #; расписываем order
+ if $d(order)>1 {
+	s sql=sql_" ORDER BY " 
+	s i="" for { s i=$o(order(i)) q:i=""
+		s field=$o(order(i,""))
+		s dir=$g(order(i,field))
+		s:i>1 sql=sql_","
+		s sql=sql_field_$s(dir=-1:" DESC",1:"")
+	} 
+ } 
+ 
+ ;w "SQL:",sql
+ 
+ s rs=##class(%ResultSet).%New()
+ s ok=rs.Prepare(sql) i '+ok w "Ошибка при формировании списка инструкций" Q ""
+ 
+ #define qp(%i) $g(qp(%i))
+ #;в этой версии всего 16 параметров запроса
+ s ok=rs.Execute($$$qp(1),$$$qp(2),$$$qp(3),$$$qp(4),$$$qp(5),$$$qp(6),$$$qp(7)
+ 	,$$$qp(8),$$$qp(9),$$$qp(10),$$$qp(11),$$$qp(12),$$$qp(13),$$$qp(14),$$$qp(15),$$$qp(16)
+ ) 
+ 
+ if '+ok w "Ошибка при формировании списка инструкций" Q ""
+ 
+ s odm=$$SetDCFormat^%NLS("DateSeparator",".") ;разделитель в дате 
+ 
+ #define g(%field) s %field=$g(rs.Data("%field"))
+ while rs.Next(){
+	$$$g(IID) $$$g(INAME) $$$g(IKONTR) $$$g(IKONTRNAME)
+	$$$g(IUSERNAME) $$$g(IDATE) $$$g(ISTATE)
+	$$$g(ISTATENAME) $$$g(IDOSTAVKANAME) $$$g(ICOLOR)
+	$$$g(IOPER) $$$g(IOPERNAME) $$$g(IPOSTNUM)
+	$$$g(IPOSTDATE) $$$g(IROTNAME)
+	$$$g(DCLASS) $$$g(DOCID) $$$g(DNAME)
+	
+	s IDATE=$ZD(IDATE,4,,,,,,,"") ;преобразование даты
+ 	s css="" s:ICOLOR'="" css="style='color:"_ICOLOR_"'"
+ 	
+ 	s DCLASS1=$p(DCLASS,",") ;основной класс документа
+ 	if DCLASS1="Docs.Rash" { 
+ 		#;подменяем название типа оплаты инструкции
+ 		#;названием типа оплаты документа
+	 	&sql(Select opl->Name INTO :IROTNAME From Docs.Rash Where ID=:DOCID)
+	}
+ 	
+ 	
+ 	w "<tr ",css,">"
+ 	w "<td>",INAME," (",DNAME,") ",IROTNAME,"</td>"
+ 	w "<td>",IDATE,"</td>"
+ 	w "<td style='cursor:hand' onclick=""ShowKontr('",IKONTR,"')"">",IKONTRNAME,"</td>"
+ 	w "<td>",IUSERNAME,"</td>"
+ 	w "<td id=""Instr",DOCID,"Stat"">",ISTATENAME
+ 	s:IOPER'=10 IDOSTAVKANAME=IOPERNAME
+ 	w "<td>",IDOSTAVKANAME,"</td>"
+ 	w "<td><nobr>"
+ 	w "<button title='Изменить состояние' onclick='chstat(",IID,",",DOCID,")'><span class='state'/></button>"
+ 	w "<button title='Распечатать накладную' onclick=""prnt('",DOCID,"@",DCLASS1,"')""><span class='print' /></button>"
+ 	
+ 	#;определяем наличие документов третьего уровня от инструкции (дочерние дочерних)
+ 	&sql(select ID,DocumentClass,Name,stat into :DOC2,:DCLASS2,:DNAME2,:DSTAT2 
+ 		 From Docs.Super where Source=:DOCID
+ 	)
+ 	if SQLCODE {
+	 	w "<button title='Создать внутреннюю инструкцию' onclick=""create('",DCLASS,"',",DOCID,")""><span class='new'/></button>"
+ 	} else {	 
+ 		w "<button title='Редактировать внутреннюю инструкцию' onclick=""lookinnerinstr('"_DOC2_"@"_DCLASS2_"')""><span class='edit'></button>"
+ 		w "<button title='Распечатать внутреннюю инструкцию' onclick=""prnt('"_DOC2_"@"_DCLASS2_"')""><span class='print'/></button>"
+ 		if DSTAT2=1 {
+	 		w "<button title='Обработать документ' onclick=""savestore(",DOC2,",'",DNAME2,"')"" ><span class='state'/></button>"
+ 		} else {
+ 			w "<button title='Документ уже обработан'><span class='out' /></button>"
+ 		}
+ 		
+	 }
+	w:ISTATE=8 "<button title='Указать реквизиты почтового документа' onclick=""post('",IID,"')""><span class='post'/></button>"
+ 	w "</nobr></td>"
+ 	w "</tr>"	
+ }
+ d rs.Close(), rs.%Close() k rs
+ Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPage">
+<Description><![CDATA[
+Event handler for <b>PAGE</b> event: this is invoked in order to  
+generate the content of a csp page.]]></Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+ &html<<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html><head><meta http-equiv="Content-Language" content="ru"><meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<title>Рабочее место кладовщика</title>
+
+ <link type="text/css" rel="stylesheet" href="style.css" />
+ <link type="text/css" rel="stylesheet" href="css/csp.EmpLight3.css" />
+ 
+</head><body>
+	<table><tr><td>
+		<button id='btnRefresh' title="Обновить раздел [ F5 ]" onclick="window.location.reload()">
+			<img src="images/refresh.gif"/>
+		</button>
+		</td><td>
+		<div class="pageLegend">Рабочее место на складе</div>
+		</td></tr>
+	</table>
+	
+	<p><a class='button' href='BrakUtiliz.csp'>Списание брака</a> 
+	<label for='ChooseInstrType'>Тип инструкции:</label> 
+	<select id="ChooseInstrType" onchange="ReloadWithParams()">
+	<option value="">Все</option>>
+		d ..wITypeOpts()
+	&html<</select>
+	<label for='ChooseKontragent'>Контрагент:</label>
+	<select id="ChooseKontragent" onchange="ChooseKontragentFunc()">
+	<option value="">Все</option>
+	<option value="choose">Выбрать контрагента...</option>
+	</select>
+	
+	
+	</p>
+
+<fieldset id="fsInstr"><legend>Инструкции</legend>
+<table id="TIH">>
+	#; выводим шапку таблицы с текущим режимом сортировки
+	s SignCode(-1)="&#9650;", SignCode(1)="&#9660;" ;символы направления сортировки
+	#; режим сортировки 
+	s sort=$g(%request.Data("sort",1)) s:sort="" sort="DNAME" ;по умолчанию сортировка по номеру связанного с инструкцией документа
+	s dir=$g(%request.Data("dir",1)) s:dir="" dir=1 ;направление сортировки
+	#; закладываем следующие режимы сортировки
+    if sort="DNAME" s NumberOrder=dir*-1,NumberSign=SignCode(dir)
+	if sort="IDATE" s DateOrder=dir*-1,DateSign=SignCode(dir)
+	if sort="IKONTR" s KontrOrder=dir*-1,KontrSign=SignCode(dir)
+	if sort="IOPERNAME" s OperOrder=dir*-1,OperSign=SignCode(dir)
+	if sort="ISTATE" s StateOrder=dir*-1,StateSign=SignCode(dir)
+	if sort="IDOSTAVKA" s TaskOrder=dir*-1,TaskSign=SignCode(dir)
+    f i=1:1:7 w "<col class='c",i,"'/>"
+	w "<thead><tr>"
+	w "<th><a href='?sort=DNAME&dir=",$g(NumberOrder,1),"'>Номер ",$g(NumberSign),"</a></th>"
+	w "<th><a href='?sort=IDATE&dir=",$g(DateOrder,1),"'>Дата ",$g(DateSign),"</a></th>"
+	w "<th><a href='?sort=IKONTR&dir=",$g(KontrOrder,1),"'>Контрагент ",$g(KontrSign),"</a></th>"
+	w "<th><a href='?sort=IOPERNAME&dir=",$g(OperOrder,1),"'>Оператор ",$g(OperSign),"</a></th>"
+	w "<th><a href='?sort=ISTATE&dir=",$g(StateOrder,1),"'>Состояние ",$g(StateSign),"</a></th>"
+	w "<th><a href='?sort=IDOSTAVKA&dir=",$g(TaskOrder,1),"'>Задача<br>(Способ отправки) ",$g(TaskSign),"</a></th>"
+	w "<th style='font-weight:normal;font-size:12px;font-family:Arial'>Действия</th>"
+	w "</thead></table>"
+	&html<<div id="TIBbox"><table id="TIB">>
+	f i=1:1:7 w "<col class='c",i,"'/>"
+	&html<<tbody>>
+	
+	s depot=$G(%session.Data("depot"),1) ;по какому складу показывать
+	s instr=$G(%request.Data("instr",1)) 
+	s kontr=$G(%request.Data("kontr",1)) ;фильтр по контрагенту
+	s instrtype=$G(%request.Data("instrtype",1)) ;фильтр по типу инструкции
+	
+	k where,qp,order 
+	
+	if depot'="" s where($i(where))="IDEPOT1=?",qp($i(qp))=depot
+	if kontr'="" s where($i(where))="IKONTR=?",qp($i(qp))=$P(kontr,"~")
+	if instrtype'="" s where($i(where))="IOPER=?",qp($i(qp))=$P(instrtype,"~")
+	if sort'="" s order($i(order),sort)=dir ;выбранный режим сортировки
+	d ..wIDocs(.where,.qp,.order) ;выводим документы с выбранными параметрами
+	
+	&html<</tbody></table>
+	</fieldset>
+	<div id="debug"></div>
+	<script type='text/javascript' src='js/m.js'></script>
+	<script type='text/javascript' src='js/csp.EmpLight.js'></script>
+	</body></html>
+	>
+	
+	/*
+	s sess=%request.Get("sessionid")
+	s userid=$G(%session.Data("user"))
+	s newstat=%request.Get("newstat")
+ 
+	i newstat'="" d
+	. s ok=##class(Operation.InstrActions).changestat(instr,newstat)
+	. i '+ok d
+	. . w "<script language=""javascript"">alert('",ok,"')</script",">"
+ 
+	*/
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>
