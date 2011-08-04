@@ -14,11 +14,10 @@
 <ReturnType>%Boolean</ReturnType>
 <ServerOnly>1</ServerOnly>
 <Implementation><![CDATA[
- /*s login=$G(%session.Data("user"))
+ s login=$G(%session.Data("user"))
  i '+login s %response.ServerSideRedirect="norights.csp" 
  i '##class(Common.Rights).getrights(login,5) s %response.ServerSideRedirect="norights.csp" 
- */
- q 1
+ Q 1
 ]]></Implementation>
 </Method>
 
@@ -28,18 +27,23 @@
 <ClassMethod>1</ClassMethod>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
-	&sql(Declare itors Cursor For 
+	&sql(Declare iotrs Cursor For 
 		SELECT id,name Into :id,:name
 		From Operation.OperTemplate Order By Name
-	) &sql(Open itors)
-	for { &sql(Fetch itors) Q:SQLCODE
+	) &sql(Open iotrs)
+	for { &sql(Fetch iotrs) Q:SQLCODE
 		w "<option value='",id,"'>",name,"</option>"		
-	} &sql(Close itors)
+	} &sql(Close iotrs)
 	Q ""
 ]]></Implementation>
 </Method>
 
 <Method name="wIDocs">
+<Description><![CDATA[
+Выводит документы по инструкциям
+<var>where</var> - массив условий вида <example>where(key)="FIELD < ?"</example>
+<var>qp</var> - массив соответсвующих условиям параметров вида <example>qp(key)="VALUE"</example>
+<var>order</var> - массив правил сортировки вида <example>order(key,FIELD)=direction</example>]]></Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec><![CDATA[&where:%String="",&qp:%String="",&order:%String=""]]></FormalSpec>
 <ReturnType>%ResultSet</ReturnType>
@@ -66,10 +70,19 @@
 	} 
  } 
  
- ;w "SQL:",sql
+ 
  
  s rs=##class(%ResultSet).%New()
  s ok=rs.Prepare(sql) i '+ok w "Ошибка при формировании списка инструкций" Q ""
+ 
+ #;define debug
+ #ifdef debug
+ 	w "<div style='white-space:pre'>"
+ 	w !,"SQL:",sql,!
+ 	zw qp
+ 	w !,ok
+ 	w "<div>"
+ #endif
  
  #define qp(%i) $g(qp(%i))
  #;в этой версии всего 16 параметров запроса
@@ -139,9 +152,6 @@
 </Method>
 
 <Method name="OnPage">
-<Description><![CDATA[
-Event handler for <b>PAGE</b> event: this is invoked in order to  
-generate the content of a csp page.]]></Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <ServerOnly>1</ServerOnly>
@@ -149,11 +159,10 @@ generate the content of a csp page.]]></Description>
  &html<<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html><head><meta http-equiv="Content-Language" content="ru"><meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
 <title>Рабочее место кладовщика</title>
-
- <link type="text/css" rel="stylesheet" href="style.css" />
- <link type="text/css" rel="stylesheet" href="css/csp.EmpLight3.css" />
- 
-</head><body>
+<link type="text/css" rel="stylesheet" href="style.css" />
+<link type="text/css" rel="stylesheet" href="css/csp.EmpLight3.css"/>>
+ w ..HyperEventHead()
+ &html<</head><body>
 	<table><tr><td>
 		<button id='btnRefresh' title="Обновить раздел [ F5 ]" onclick="window.location.reload()">
 			<img src="images/refresh.gif"/>
@@ -214,8 +223,8 @@ generate the content of a csp page.]]></Description>
 	k where,qp,order 
 	
 	if depot'="" s where($i(where))="IDEPOT1=?",qp($i(qp))=depot
-	if kontr'="" s where($i(where))="IKONTR=?",qp($i(qp))=$P(kontr,"~")
-	if instrtype'="" s where($i(where))="IOPER=?",qp($i(qp))=$P(instrtype,"~")
+	s kontrID=$P(kontr,"~") if kontrID'="" s where($i(where))="IKONTR=?",qp($i(qp))=kontrID
+	s ITypeId=$P(instrtype,"~") if ITypeId'="" s where($i(where))="IOPER=?",qp($i(qp))=ITypeId
 	if sort'="" s order($i(order),sort)=dir ;выбранный режим сортировки
 	d ..wIDocs(.where,.qp,.order) ;выводим документы с выбранными параметрами
 	
@@ -223,22 +232,39 @@ generate the content of a csp page.]]></Description>
 	</fieldset>
 	<div id="debug"></div>
 	<script type='text/javascript' src='js/m.js'></script>
-	<script type='text/javascript' src='js/csp.EmpLight.js'></script>
-	</body></html>
+	<script type='text/javascript'>
+	var sessionid="#(%session.SessionId)#";
+	var kontr='#(kontr)#';
+	var instrtype='#(instrtype)#';
+	var server={ /*прячем сюда все серверные вызовы*/
+		changeState: function(docid,newstat){
+			return #server(Operation.InstrActions.changestat(docid,newstat))#
+		}
+		,killTempAddress: function(){
+			#server(Store.Action.KillTempAddress())#	
+		}
+		,createChildDoc: function(docid,cl){
+			return #server(Docs.Action.CreateChildDoc(docid,cl))#	
+		}
+		,saveQuantFromInstr: function(InstrID){
+			return #server(Store.Action.SaveQuantFromInstr(InstrID))#	
+		}	
+	}
+
+   </script>
+	<script type='text/javascript' src='js/csp.EmpLight3.js'></script>
 	>
-	
-	/*
 	s sess=%request.Get("sessionid")
 	s userid=$G(%session.Data("user"))
 	s newstat=%request.Get("newstat")
- 
-	i newstat'="" d
+  	i newstat'="" d
 	. s ok=##class(Operation.InstrActions).changestat(instr,newstat)
 	. i '+ok d
-	. . w "<script language=""javascript"">alert('",ok,"')</script",">"
+	. . w "<script type='text/javascript'>alert('",ok,"')</script",">"
  
-	*/
 	
+	w ..HyperEventFrame()
+	&html<</body></html>>
 	Quit $$$OK
 ]]></Implementation>
 </Method>
