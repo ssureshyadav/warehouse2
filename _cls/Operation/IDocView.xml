@@ -2,7 +2,8 @@
 <Export generator="Cache" version="20">
 <Class name="Operation.IDocView">
 <Description>
-инструкции в состоянии 2-9 вместе со связанными документами</Description>
+Инструкции в вместе со связанными документами
+только Инструкции у которых есть дочерние документы</Description>
 <ClassType>view</ClassType>
 <CompileAfter>Docs.Super,Operation.Instructions</CompileAfter>
 <Owner>_SYSTEM</Owner>
