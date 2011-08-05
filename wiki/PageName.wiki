@@ -2,7 +2,7 @@
 
 = Introduction =
 
-Add your content here.
+Общее описание бизнес процесса
 
 
 = Details =
