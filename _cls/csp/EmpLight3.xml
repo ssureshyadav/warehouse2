@@ -14,9 +14,10 @@
 <ReturnType>%Boolean</ReturnType>
 <ServerOnly>1</ServerOnly>
 <Implementation><![CDATA[
- s login=$G(%session.Data("user"))
+ /*s login=$G(%session.Data("user"))
  i '+login s %response.ServerSideRedirect="norights.csp" 
  i '##class(Common.Rights).getrights(login,5) s %response.ServerSideRedirect="norights.csp" 
+ */
  Q 1
 ]]></Implementation>
 </Method>
@@ -197,16 +198,16 @@
 	#; закладываем следующие режимы сортировки
     if sort="DNAME" s NumberOrder=dir*-1,NumberSign=SignCode(dir)
 	if sort="IDATE" s DateOrder=dir*-1,DateSign=SignCode(dir)
-	if sort="IKONTR" s KontrOrder=dir*-1,KontrSign=SignCode(dir)
-	if sort="IOPERNAME" s OperOrder=dir*-1,OperSign=SignCode(dir)
+	if sort="IKONTRNAME" s KontrOrder=dir*-1,KontrSign=SignCode(dir)
+	if sort="IUSERNAME" s OperOrder=dir*-1,OperSign=SignCode(dir)
 	if sort="ISTATE" s StateOrder=dir*-1,StateSign=SignCode(dir)
 	if sort="IDOSTAVKA" s TaskOrder=dir*-1,TaskSign=SignCode(dir)
     f i=1:1:7 w "<col class='c",i,"'/>"
 	w "<thead><tr>"
 	w "<th><a href='?sort=DNAME&dir=",$g(NumberOrder,1),"'>Номер ",$g(NumberSign),"</a></th>"
 	w "<th><a href='?sort=IDATE&dir=",$g(DateOrder,1),"'>Дата ",$g(DateSign),"</a></th>"
-	w "<th><a href='?sort=IKONTR&dir=",$g(KontrOrder,1),"'>Контрагент ",$g(KontrSign),"</a></th>"
-	w "<th><a href='?sort=IOPERNAME&dir=",$g(OperOrder,1),"'>Оператор ",$g(OperSign),"</a></th>"
+	w "<th><a href='?sort=IKONTRNAME&dir=",$g(KontrOrder,1),"'>Контрагент ",$g(KontrSign),"</a></th>"
+	w "<th><a href='?sort=IUSERNAME&dir=",$g(OperOrder,1),"'>Оператор ",$g(OperSign),"</a></th>"
 	w "<th><a href='?sort=ISTATE&dir=",$g(StateOrder,1),"'>Состояние ",$g(StateSign),"</a></th>"
 	w "<th><a href='?sort=IDOSTAVKA&dir=",$g(TaskOrder,1),"'>Задача<br>(Способ отправки) ",$g(TaskSign),"</a></th>"
 	w "<th style='font-weight:normal;font-size:12px;font-family:Arial'>Действия</th>"
