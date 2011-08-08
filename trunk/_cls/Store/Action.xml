@@ -403,72 +403,112 @@ savequantErr
 <Method name="remquant">
 <Description><![CDATA[
 Изъять товар из ячейки
-<br><var>Goods</var> - Товар (ID или объект)
-<br><var>Address</var> - Ячейка (ID или объект)
+<br><var>Goods</var> - Товар (ID или объект <class>Goods.Goods</class>)
+<br><var>Address</var> - Ячейка (ID или объект <class>Store.Address</class>)
 <br><var>Value</var> - Количество
-<br><var>StoreQntID</var> - ID в таблице Store.Quantity откуда брали количество (где убирать резерв)
+<br><var>StoreQntID</var> - ID в таблице <class>Store.Quantity</class> откуда брали количество (где убирать резерв)
 <br><var>quantdefault</var> - сколько просили в накладной
-<br><var>docitemId</var> - id строчки в инструкции]]></Description>
+<br><var>docitemId</var> - id строчки в инструкции
+<br/>Возвращает ошибку (строка) или 1 в случае успеха]]></Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>Goods,Address="",Value=0,StoreQntID,quantdefault,docitemId</FormalSpec>
+<FormalSpec>Goods,Address,Value=0,StoreQntID="",quantdefault,docitemId</FormalSpec>
+<ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
  s $ZT="remquantErr",err="Извините, операция списания остатков вызвала ошибку."
+  
+ #; переходим на использование только id
+ s Goods=$g(Goods),Address=$g(Address),Value=+$g(Value),StoreQntID=$g(StoreQntID)
+ 
+ #; нулевое количество, можно ничего не делать
+ Q:Value=0 1  
+ 
+ #; Goods.Goods
+ s goodId=Goods s:$IsObject(Goods) goodId=Goods.%Id()
+ Q:goodId="" "Не указан товар"
+ s GoodsFullName="" ;название товара
+ s:##class(Goods.Goods).%ExistsId(goodId) GoodsFullName=##class(Goods.Goods).FullNameGetStored(goodId)
 
- i Value=0 q 1
-
- s allright='$$$TunesVariable("allowminus") //если 0 значит не всё в порядке и можно количество выводить в минус
+ #;Store.Address
+ s addrId=Address s:$IsObject(Address) addrId=Address.%Id()
+ i addrId="" Q "Для товара "_$G(GoodsFullName)_" ("_Value_" шт.) не указана ячейка."
  
- i '$ISOBJECT(Goods) d
- . s GoodsId=Goods
- . s Goods=##class(Goods.Goods).%OpenId(Goods)
- e  s GoodsId=Goods.%Id()
-
- s GoodsFullName=$S($ISOBJECT(Goods):Goods.FullName,1:"")
- i Address="" q "Для товара "_$G(GoodsFullName)_" ("_Value_" шт.) не указано место."
- //i Address="" s Address=1254  //!!! если не указали ячейку, выписываем из "не распределённых" 1 склада
+ #;партия в ячейке
+ s storeId=StoreQntID s:$IsObject(StoreQntID) storeId=StoreQntID.%Id()
+  
+ #;списываем по умолчанию с основного количества
+ #;но если указали ID в Store.Quantity то количество забираем из резерва (а в резерв перегнали когда создавали документ) 
+ s main=1 s:storeId'="" main=0 
  
- i '$ISOBJECT(Address) d
- . s AddressId=Address
- . s Address=##class(Store.Address).%OpenId(Address)
- e  s AddressId=Address.%Id()
- i '$ISOBJECT(Goods) q "Не указан товар."
- i '$ISOBJECT(Address) q "Для товара "_Goods.FullName_" не указана ячейка."
- s error=1
+ #;если конкретно указали партию в Store.Quantity, то берём из неё
+ #;иначе ищем эту партию по адресу и товару
+ if storeId="" {
+ 	&sql(select ID into :storeId from Store.Quantity where Address=:addrId and Goods=:goodId)
+ }
  
- // если конкретно указали ячейку в Store.Quantity то берём из неё, иначе ищем эту ячейку по адресу и товару
- if $ISOBJECT($G(StoreQntID)) d
- .	s storeid=StoreQntID.%Id()
- .	//если указали ID в Store.Quantity то количество забираем из резерва (а в резерв перегнали когда создавали документ)
- .	s QuantityProperty="Value2"
- .	//если вдруг указали другую ячейку, а мы в этой уже резерв поставили
- else  d
- .	&sql(select ID into :storeid from Store.Quantity where Address=:AddressId and Goods=:GoodsId)
- .	if (SQLCODE=100)&(allright) s error="В ячейке "_..AddressPath(Address)_" нет товара "_Goods.FullName
- .	i SQLCODE<0 $$$WriteError("remquant %SQLCODE="_SQLCODE_" Address="_AddressId_" and Goods="_GoodsId) s error=err
- .	//если не указан ID в Store.Quantity то количество забираем из Value1
- .	s QuantityProperty="Value1"
- q:'+error error
+ #; Смотрим настройки. Можно ли списывать в минус
+ s subzero=$$$TunesVariable("allowminus") //если 0 значит не всё в порядке и можно количество выводить в минус
  
+ #;порцию не нашли и отрицательное количество запрещено
+ if storeId=""&&('subzero) Q "В ячейке "_..AddressPath(Address)_" нет товара "_GoodsFullName
  
+ #;порцию не нашли, но отрицательное количество разрешено		
+ #;тогда создаем нулевую порцию
+ if storeId="" {
+	s Store=##class(Store.Quantity).%New()
+	d Store.GoodsSetObjectId(goodId)
+ 	d Store.AddressSetObjectId(addrId)
+ 	s Store.Value1=0, Store.Value2=0
+ 	s sc=Store.%Save() if 'sc k Store Q "Не удалось создать пустую порцию товара "_GoodsFullName
+ 	s storeId=Store.%Id() d Store.%Close() k Store
+ }
  
- s:$G(storeid)'="" storeobj=##class(Store.Quantity).%OpenId(storeid)
- i '$ISOBJECT($G(storeobj)) d
- . s storeobj=##class(Store.Quantity).%New()
- . d storeobj.GoodsSetObjectId(GoodsId)
- . d storeobj.AddressSetObjectId(AddressId)
- . s storeobj.Value1=0
- . s storeobj.Value2=0
+ #; блокировка
+ s Store=##class(Store.Quantity).%OpenId(storeId,4,.sc) 
+ Q:'$IsObject(Store) "Не удалось получить эксклюзивный доступ к порции"
  
- if ($ZOBJPROPERTY(storeobj,QuantityProperty)<$G(Value))&(allright) q "Обнаружена попытка забрать товар "_GoodsFullName_" "_$G(Value)_" штук из ячейки в которой "_$ZOBJPROPERTY(storeobj,QuantityProperty)_" штук"
+ #;проверить остаток при настройке "Запрет отрицательных"
+ s amount=$s(main=1:Store.Value1,1:Store.Value2)
+ if amount<Value&&('subzero) {
+	 d Store.%Close() k Store ;сбрасываем блокировку
+	 Q "Попытка забрать товар "_GoodsFullName_" "_Value
+	 	_" штук из ячейки в которой "_$s(main=1:"",1:" зарезервировано ")_amount_" штук."
+	 	_" Выберите другую ячейку"
+ }
  
- s $ZOBJPROPERTY(storeobj,QuantityProperty)=$ZOBJPROPERTY(storeobj,QuantityProperty)-$G(Value)
- s ok=storeobj.%Save()
- i (storeobj.Value1=0)&(storeobj.Value2=0) d storeobj.%DeleteId(storeobj.%Id())
- k storeobj
- i '+ok $$$WriteObjError(ok) q "Извините. При записи остатков произошла ошибка."
- s Address.Currentweight=Address.Currentweight-(+Goods.Weight*Value)
- s Address.Currentsize=Address.Currentsize-(+Goods.Size1*Value)
- s ok=Address.%Save()
+ #;блокировки 
+ s Address=Address.%OpenId(addrId,4) 
+ Q:'$IsObject(Address) "Не удалось получить эксклюзивный доступ к свойствам ячейки"
+ 
+ s msg=1
+ TSTART
+  #;списать товар с основного или зарезервированного количества
+  if main {
+	  s Store.Value1=amount-Value
+  } else {
+	  s Store.Value2=amount-Value
+  }
+  s sc=Store.%Save()
+  
+  #;проверить остатки основного и зарезервированного количества, если нулевые удалить пустую порцию из ячейки
+  if (Store.Value1=0)&(Store.Value2=0) {
+	  s sc=sc && ##class(Store.Quantity).%DeleteId(storeId)
+  }
+  
+  #;уменьшить вес и объем ячейки на количество списанного товара
+  s weight=Address.Currentweight s Address.Currentweight=weight-(+Goods.Weight*Value)
+  s size=Address.Currentsize s Address.Currentsize=size-(+Goods.Size1*Value)
+  s sc=sc && Address.%Save()
+  #; обработка результатов
+  if 'sc {
+	  $$$WriteObjError(sc)
+	  s msg="Извините. При записи остатков произошла ошибка."
+	  k Address,Store 
+	  TROLLBACK  ;вернуть все взад
+	  Q msg
+  }
+  
+  TCOMMIT
+  Q msg 
  
  /*
  //если был резерв и если сняли меньше чем был резерв
@@ -478,8 +518,6 @@ savequantErr
  . d ##class(Docs.StorageOutItems).RemoveReserve(storeid,RemoveReserve,docitemId)
  */
  
- i '+ok $$$WriteObjError(ok) q "Извините. При записи остатков произошла ошибка."
- q 1
 remquantErr
  $$$WriteError($ZE)
  q "Извините. При записи остатков произошла ошибка."
