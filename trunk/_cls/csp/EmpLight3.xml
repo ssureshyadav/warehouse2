@@ -14,10 +14,9 @@
 <ReturnType>%Boolean</ReturnType>
 <ServerOnly>1</ServerOnly>
 <Implementation><![CDATA[
- /*s login=$G(%session.Data("user"))
+ s login=$G(%session.Data("user"))
  i '+login s %response.ServerSideRedirect="norights.csp" 
  i '##class(Common.Rights).getrights(login,5) s %response.ServerSideRedirect="norights.csp" 
- */
  Q 1
 ]]></Implementation>
 </Method>
@@ -148,6 +147,8 @@
  	w "</tr>"	
  }
  d rs.Close(), rs.%Close() k rs
+ d SetDCFormat^%NLS("DateSeparator",odm) ;восстанавливаем разделитель в дате 
+ 
  Q $$$OK
 ]]></Implementation>
 </Method>
