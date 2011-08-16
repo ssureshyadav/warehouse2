@@ -1,0 +1,321 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="svn.operation">
+<Description>
+Основные операции</Description>
+<IncludeCode>svn</IncludeCode>
+<Super>%RegisteredObject</Super>
+<TimeCreated>62299,44549.986739</TimeCreated>
+
+<Method name="Import">
+<Description>
+Импорт из файла описания класса в базу без компиляции</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[InternalName:%String,&msg:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ 
+ Set filename=..GetFileName(InternalName)
+ #; File not mapped so nothing to do
+ If filename="" Quit $$$OK
+ #; CSP files are already files so no work needed
+ If InternalName["/" Quit $$$OK
+ #; плагин не грузит сам себя
+ if $e(InternalName,1,$l($$$svnPackage))=$$$svnPackage Q $$$OK
+ 
+ 
+ 
+ #; If no file then skip the import
+ If '##class(%File).Exists(filename) {
+  $$$svnLog(msg,"SVN: Файл '"_filename_"' не найден, пропускаю импорт")
+  q $$$OK
+ }
+
+ #; Если все штампы времени совпали, можно ничего не делать
+ if $$$svnFileTS(filename)=$$$svnFileTSstored(InternalName) && 
+ 	($$$svnItemTS(InternalName)=$$$svnItemTSstored(InternalName)) {
+	 	q $$$OK
+ }
+
+ d $$$svnSplit(InternalName,name,ext)
+
+ If ext="CLS" ||
+ 	(ext="PRJ") ||
+ 	(ext="GBL") ||
+ 	(ext="XML") ||
+ 	(##class(%RoutineMgr).UserType(InternalName)) {
+  s sc=$$Import^%occSAX(filename,"fv-d-l")
+ } Else {
+  s sc=$$Import^%apiRTN(filename,"all,replace,nocompile,lock=0",,,,"-d")
+ }
+
+ If $$$ISOK(sc) {
+  $$$svnLog(msg,"SVN: Импорт '"_InternalName_"' из файла '"_filename_"'")
+  #;если импорт завершен запоминаем штампы времени файла и элемента
+  s $$$gSVN(2,InternalName)=$lb($$$svnFileTS(filename),$$$svnItemTS(InternalName))
+ }
+ Quit sc
+]]></Implementation>
+</Method>
+
+<Method name="Export">
+<Description>
+Экспорт из базы на диск</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[InternalName:%String,&msg:%String,projectItems:%Boolean=1,force=0]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ s filename=..GetFileName(InternalName) if filename="" Quit $$$OK
+ s name=$p(InternalName,".",1,$l(InternalName,".")-1)
+ s ext=$zcvt($p(InternalName,".",$l(InternalName,".")),"U")
+ 
+ // csp related files are already normal files and does not need to be exported
+ i ext="CSP"||(ext="CSR")||(ext="CSS") q $$$OK
+ 
+ 
+ #; Do not export the default projects
+ i ext="PRJ",$zcvt($e(name,1,$l("default_")),"l")="default_" {
+  $$$svnLog(msg,"SVN: Warning! Rename project to export it.")
+  q $$$OK
+ }
+ 
+ 
+ #; By convention items starting with Z,z,%z,%Z are not exported
+ ;If ext'="PRJ",$extract($translate(name,"Z%","z"))="z" q $$$OK
+ ;,'##class(%File).Exists(filename) Write !,"File ",filename," not found, skipping export" Quit $$$OK
+ 
+ s existsWarn=0
+ i '##class(%File).Exists(filename) s existsWarn=1
+ 
+ #; If time already matches nothing to do
+ ; globaly nemaji timestamp, exportujeme je tedy radeji vzdy
+ i 'force,ext'="GBL",$$$svnItemTS(InternalName)=$$$svnItemTSstored(InternalName) q $$$OK
+ 
+ If ##class(%File).Exists(filename),##class(%File).ReadOnly(filename) $$$svnLog(msg,"SVN: File '"_filename_"' is read only, not exporting.") Quit $$$OK
+ Do ##class(%File).CreateDirectoryChain(##class(%File).GetDirectory(filename))
+ 
+ s sc=$$$OK
+ /*
+ i ext="PRJ" {
+  s pName=$p(InternalName,".",1,$l(InternalName,".")-1)
+  s prj=##class(%Studio.Project).%OpenId(pName)
+  s:$isobject(prj) sc=prj.Export(filename,"-d /diffexport",1)
+  s prj=$$$NULLOREF
+ }
+ */
+ if ext="CLS"||(ext="PRJ")||(ext="GBL")||(ext="XML")||(##class(%RoutineMgr).UserType(InternalName)) {
+  i ext="GBL" s InternalName=$zstrip(InternalName,"<P") ; odstraneni pripadneho ^% ze jmena globalu
+  Set sc=$$Export^%occXMLExport(filename,"-d /diffexport",InternalName)
+ } Else {
+  Set sc=$$Export^%apiRTN(InternalName,filename,"Save for Subversion",,"-d /diffexport")
+ }
+ If $$$ISOK(sc) {
+  $$$svnLog(msg,"SVN: Экспорт '"_InternalName_"' в файл '"_filename_"'.")
+  i existsWarn $$$svnLog(msg,"SVN: Внимание! Файл '"_filename_"' не существует в рабочей копии, запустите 'Добавить...' для добавления в контроль версий.")
+  
+  s $$$gSVN(2,InternalName)=$lb($$$svnFileTS(filename),$$$svnItemTS(InternalName))
+  
+  s doProjectExp=$g($$$gSVN(1,"PRJ","G"),1)+$g($$$gSVN(1,"PRJ","C"),0)+$g($$$gSVN(1,"PRJ","R"),0)
+  i projectItems,ext="PRJ",doProjectExp {
+   ; export dalsich polozek projektu
+   d ##class(Utils).ExportPrj(InternalName,0,.msg)
+  }
+ }
+ else {
+  s errMsg=$system.Status.GetErrorText(sc)
+  $$$svnLog(msg,"SVN: Error! '"_errMsg_"'.")
+ }
+ 
+ Quit sc
+]]></Implementation>
+</Method>
+
+<Method name="GetName">
+<Description>
+Return the name of this item without the prefix to be added by ExtName</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>InternalName:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ 
+ /*
+ // For an abstract document, use the GetOther() method to try to determine its "real" class
+ If ##class(%RoutineMgr).UserType(InternalName,.docclass,.doctype) {
+  // Check for a real abstract document subclass (or GetOther() may not work)
+  If $ZOBJCLASSMETHOD(docclass,"%IsA","%Studio.AbstractDocument") {
+   // Grab the actual name
+   Set actualName = $ZOBJCLASSMETHOD(docclass,"GetOther",InternalName)
+   // The actualName is only valid if we get a single .cls as a result
+   If actualName'[",",$ZCVT($P(actualName,".",$L(actualName,".")),"U")="CLS" {
+    // We use what GetOther() gives us, thus Demo.Loan.FindRateProcess.bpl becomes Demo.Loan.FindRateProcess.cls
+    Set InternalName = actualName
+   }
+  }
+ } 
+ */
+ #;Ничего не делаем сами с собой, экспорт/импорт только вручную
+ #;Но в этом месте это не правильно
+ #;i $e(InternalName,1,3)="svn" Q ""
+ 
+ #; процентные классы и программы не из системных областей пропускаем
+ if $e(InternalName)="%" , ($zu(5)'="%SYS") ,$zu(5)'="%CACHELIB" q ""
+
+ #; игнорируем генерированные классы и программы (cls из csp, int из mac, ....)
+ if ..IsGenerated(InternalName) q ""
+
+ ; otestovani pristupu k polozce (security opravneni) 
+ if $$CheckProtect^%qccServer(InternalName) {
+    Quit ""
+ }
+ 
+ ; обрабатываем спроецированные элементы, для ситуации когда код и дата разнесены в разные базы
+ ;i ##class(Utils).IsMapped(InternalName) q ""
+ 
+ #;Выделяем имя элемента и его расширение
+ s nam=$p(InternalName,".",1,$l(InternalName,".")-1)
+ s ext=$p(InternalName,".",$l(InternalName,".")), ext=$zcvt(ext,"u")
+ 
+ If nam="" Quit "" ;
+ 
+ #; игнорируем проект по умолчанию
+ If ext="PRJ"&&(nam["Default_") Quit ""
+ 
+ #; определяем родительский каталог файла по его расширению
+ #; видимо есть возможность определять частные варианты проецирования в файловую структуру
+ /* Структура по умолчанию
+  ^SVN("BAS","*")="_rou\"
+  ^SVN("CLS","*")="_cls\"
+  ^SVN("GBL","*")="_gbl\"
+  ^SVN("INC","*")="_inc\"
+  ^SVN("INT","*")="_int\"
+  ^SVN("MAC","*")="_rou\"
+  ^SVN("PRJ","*")="_project\"
+ */
+ s p=$o($$$gSVN(ext,nam)) ;ищем ближайщий к имени элемента узел
+ for { 
+  s p=$o($$$gSVN(ext,p),-1) //возвращаемся на узел с именем элемента 
+  Q:p=""  
+  i $e(nam,1,$l(p))=p,$d($$$gSVN(ext,p),found) q  ;если совпало и есть спец.настройка выходим
+ }
+ if '$d(found),$d($$$gSVN(ext,"*"),found) ; если нет спецнастройки берем значение по умолчанию
+ 
+ If $d(found)=0 Quit ""  ;если нет настройки по умолчанию - выходим
+
+ If InternalName["/" {
+  Set InternalName=$e(InternalName,$length(p)+1,$l(InternalName))
+  Quit found_$tr(InternalName,"%","_")
+ }
+ ; классы, проекты, глобалы, программы экспортируются как xml
+ If ext="CLS"||(ext="PRJ")||(ext="GBL")||(##class(%RoutineMgr).UserType(InternalName)) q found_$tr(nam,"%.","_\")_".xml"
+ ; остальные как простой текст s priponou podle puvodniho typu
+ q found_$tr(nam,"%.","_\")_"."_$zcvt(ext,"L")
+]]></Implementation>
+</Method>
+
+<Method name="GetFileName">
+<Description>
+Return filename of this item</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>InternalName:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s name=..GetName(InternalName)
+ q $s(name="":"",1:$$$gSVN_name)
+]]></Implementation>
+</Method>
+
+<Method name="IsGenerated">
+<Description>
+Return true if document is generated and false otherwise
+taken from %RoutineMgr and fixed bugs</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>name:%String</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ s nm=$P(name,".",1,$L(name,".")-1) Quit:nm="" 0
+ s ext=$zcvt($p(name,".",$l(name,".")),"U")
+ s name=nm_"."_ext ;нормализованное имя объекта
+ 
+ #; если обрабатывается исходный csp файл
+ Q:##class(%RoutineMgr).IsCSPName(name) 0
+ 
+ #; не понял
+ If ##class(%RoutineMgr).UserType(name,.cls) {
+  Q $zobjclassmethod(cls,"IsGenerated",name)
+ } 
+ 
+ If $$$rtnIsMAC(ext) {
+  Q +$get(^rMAC(nm,0,"GENERATED"))
+ } 
+ 
+ If $$$rtnIsINT(ext) {
+  Q +$get(^ROUTINE(nm,0,"GENERATED"))
+ }
+ 
+ If $$$rtnIsINC(ext) {
+  Q +$get(^rINC(nm,0,"GENERATED"))
+ }
+ 
+ #; в версии 5.1 возникла проблема с проверкой классов 
+ #; сгенерированных из csp файлов
+ #; особенности - в родителях %СSP.Page, #CSPFILE'="", Hidden
+ If ext="CLS" { 
+   s paramid=nm_"||CSPFILE"
+   s (hidden,super,file)=""
+   &sql(Select parent->Hidden,parent->Super,_Default 
+   	Into :hidden,:super,:file
+   	From %Dictionary.ParameterDefinition 
+   	Where ID=:paramid
+   )
+   Q:SQLCODE 0 ;нет параметра - значит не CSP	
+   if hidden&&(file'="")&&$f(super,"%CSP.Page") Q 1
+ } 
+  
+ Q:ext="PRJ" 0
+ Quit 0
+]]></Implementation>
+</Method>
+
+<Method name="ExportSoures">
+<Description>
+pC = classes
+pR = routines</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pC:%Boolean=0,pR:%Boolean=0</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ d:+$g(pC) ..ExportClasses()
+ d:+$g(pR) ..ExportRoutines()
+ q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="ExportClasses">
+<Description>
+Выгрузить все классы из области</Description>
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+  d $system.OBJ.GetPackageList(.list,"*","/application=1/system=0/percent=0")
+  s class="" for { s class=$order(list(class)) Quit:class=""
+   d ..Export(class_".CLS")
+  }
+]]></Implementation>
+</Method>
+
+<Method name="ExportRoutines">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+  Set routine="" For  { Set routine=$order(^rINDEX(routine)) Quit:routine=""
+   Set type="" For  { Set type=$order(^rINDEX(routine,type)) Quit:type=""
+    continue:$e(routine)="%" ; skip % routines
+    continue:..IsGenerated(routine_"."_type)
+    continue:##class(utils).IsMapped(routine_"."_type)
+    i ",MAC,INT,BAS,MVB,INC,"[(","_type_",") {
+     d ..Export(routine_"."_type)
+    }
+   }
+  }
+]]></Implementation>
+</Method>
+</Class>
+</Export>

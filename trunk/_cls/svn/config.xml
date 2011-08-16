@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="svn.config">
+<Description>
+Основные настройки</Description>
+<IncludeCode>svn</IncludeCode>
+<Super>%CSP.Page</Super>
+<TimeCreated>62299,44817.513609</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	
+ if '$d($$$gSVN) {
+  d ##class(utils).CreateStructure()  // intial structure 
+ }	
+	
+ &html<<html><head><title>SVN - Конфигурация</title>
+ <style type="text/css">
+ body {margin:0px;padding:0px;}
+ label {display:block;}
+ button { height:32px; width:100px}
+ .tac {text-align: center;}
+ #tabs a {display:block;float:left;width:80px;margin:0px 5px; text-align:center; text-decoration:none; border:1px solid #777;}
+ fieldset {clear:both;}
+ .hidden {display:none;}
+ .selected {background-color:gold;}
+</style>>
+ w ..HyperEventHead()
+ &html<</head><body>
+<form>
+<div id='tabs'>
+	<a href='#BS'>Основные настройки</a>
+	<a href='#PS'>Настройки проектов</a>
+	<a href='#CS'>Настройки CSP</a>
+</div><fieldset id='BS'><legend>Основные настройки</legend>
+	<table>
+		<tr><td><label>Область (Namespace):</label></td><td>#($zu(5))#</td></tr>
+		<tr><td><label>Рабочая директория: </label></td><td>>
+			w "<input type='text' id='edWC' value='",$g($$$gSVN),"' size='50'/>"
+		&html<</td></tr>
+		<tr><td><label>Директория Subversion клиента (exe):</label></td><td>>
+			w "<input type='text' id='edCLIENT' value='",$g($$$gSVN(1)),"' size='50'/>"
+		&html<</td></tr>
+		<tr><td><label>Флаги компиляции:</label></td><td>>
+			w "<input type='text' id='edCFLAGS' value='",$g($$$gSVN(1,2),"ck"),"'/>"
+		&html<</td></tr>
+		<tr><td valign='top'><label>Директория меток SVN*: </label></td><td><input type='text' id="edSVNSTATE" size="30" value='#($g($$$gSVN(1,1),".svn"))#'/>
+			<br/>Директория в которой SVN хранит информацию о состоянии. Не изменяйте значение, если не понимаете, что это значит.
+		</td></tr>
+	</table>
+	<div class='tac'><button onclick="zenPage.DoSaveConfig()">Сохранить</button></div>
+</fieldset>
+<fieldset id='PS'><legend>Настройки проектов</legend>
+	Если проект сохраняется...
+	<label><input type="checkbox" id="chkClasses"
+		#( $s(+$g($$$gSVN(1,"PRJ","C"),0):" checked ",1:"") )#
+	/>Экспортировать классы</label>
+	<label><input type="checkbox" id="chkRoutines"
+		#( $s(+$g($$$gSVN(1,"PRJ","R"),0):" checked ",1:"") )#
+	/>Экспортировать программы</label>
+	<label><input type="checkbox" id="chkGlobals"
+		#( $s(+$g($$$gSVN(1,"PRJ","G"),1):" checked ",1:"") )#
+	/>Экспортировать глобалы</label>
+	<div class='tac'><button onclick="zenPage.DoSaveProject()">Сохранить</button></div>
+</fieldSet>
+<fieldset id='CS'><legend>CSP Приложение</legend>
+	<table>
+		<tr><td valign="top"><label>Основное CSP приложение:</label></td>
+			<td>>
+				w "<input type='text' id='edCSP' name='edCSP' value='",$g($$$gSVNcfg("CSP","BASE_APP")),"' size='30' valign='top'/>"
+			&html<<br/>(пусто) = автоопределение, если не сработает, csr&amp;csp файлы не будут компилироваться в процессе импорта
+		</td></tr>
+	</table>
+	<div class='tac'><button onclick="zenPage.DoSaveCSP()">Сохранить</button></div>
+</fieldset>
+</form>
+<script type="text/javascript">
+	var $g=function(id){return document.getElementById(id)};
+	var zenPage={
+		DoSaveConfig: function(){
+			var wc=$g("edWC").value,client=$g("edCLIENT").value
+			,flags=$g("edCFLAGS").value,svn=$g("edSVNSTATE").value
+ 			#call(..DoSaveConfig(wc,client,flags,svn))#
+		}
+		,DoSaveProject: function(){
+			var chkGlobals=$g("chkGlobals").checked?1:0
+			,chkClasses=$g("chkClasses").checked?1:0
+			,chkRoutines=$g("chkRoutines").checked?1:0	
+			#call(..DoSaveProject(chkGlobals,chkClasses,chkRoutines))#
+		}
+		,DoSaveCSP:function(){
+			var edCSP=$g("edCSP").value;
+			#call(..DoSaveCSP(edCSP))#
+		}
+	};
+	
+	var $bind=function(o,e,h){o.attachEvent("on"+e,h);};
+	var $g=function(id){return document.getElementById(id);};
+	
+	function tabs(tabs){
+		if (!tabs) return;
+		var _tb=[]; 
+		var len=tabs.childNodes.length;
+		var _ch=function(e){ //click handler
+			if (!e) e=window.event;
+			var obj=e.srcElement;
+			for (var i in _tb){
+				var a=_tb[i]; a.className="";
+				var id=a.getAttribute("tag");
+				if (!id){
+					var href=a.hash;
+					var id=href.substring(1,href.length);
+					a.setAttribute("tag",id);
+				}
+				$g(id).className="hidden";
+			}
+			obj.className="selected";
+			id=obj.getAttribute("tag");
+			$g(id).className="";
+		};
+		
+		for (var i=0;i<len;i++){ //загрузка
+			var a=tabs.childNodes[i]; 
+			if (a.tagName!=="A") continue;
+			_tb.push(a); $bind(a,"click",_ch);
+		}
+		if (_tb.length===0) return;
+		_tb[0].click();
+	};
+	
+	
+	$bind(window,"load",function(){
+		tabs($g("tabs"));
+	});
+	
+	
+</script>>
+	w ..HyperEventFrame()
+ &html<</body></html>>
+ Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="DoSaveConfig">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>wc,client,flags,svn</FormalSpec>
+<Implementation><![CDATA[
+ s wc=$zstrip(wc,"<>WC") s:$e(wc,$l(wc))'="\" wc=wc_"\"
+ s client=$zstrip(client,"<>WC") s:$e(client,$l(client))'="\" client=client_"\"
+ s $$$gSVN=wc,$$$gSVN(1)=client,$$$gSVN(1,2)=flags,$$$gSVN(1,1)=svn
+ &js<alert("Saved.")>
+]]></Implementation>
+</Method>
+
+<Method name="DoSaveProject">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>chkGlobals,chkClasses,chkRoutines</FormalSpec>
+<Implementation><![CDATA[
+ s $$$gSVN(1,"PRJ","G")=+chkGlobals
+ s $$$gSVN(1,"PRJ","C")=+chkClasses
+ s $$$gSVN(1,"PRJ","R")=+chkRoutines
+ &js<alert("Saved.")>
+]]></Implementation>
+</Method>
+
+<Method name="DoSaveCSP">
+<Description>
+Сохранение настроек для CSP</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>csp</FormalSpec>
+<Implementation><![CDATA[
+ s autodetect=0
+ if $g(csp)="" {
+	 s autodetect=1, csp=$$getDefaultApp^%SYS.cspServer2($zu(5))
+ }	
+ s $$$gSVNcfg("CSP","BASE_APP")=csp
+ if autodetect w "parent.document.getElementById('edCSP').value='",csp,"';"
+ &js<alert("Saved.")>
+]]></Implementation>
+</Method>
+</Class>
+</Export>

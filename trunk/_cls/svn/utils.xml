@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="svn.utils">
+<IncludeCode>svn</IncludeCode>
+<Super>%RegisteredObject</Super>
+<TimeCreated>62299,44976.228611</TimeCreated>
+
+<Method name="CreateStructure">
+<Description><![CDATA[
+Определяет структуру каталогов экспорта
+* - заложена возможность специфических путей?
+см. <method>svn.operation.GetName</method>]]></Description>
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+ s $$$gSVN("BAS","*")="_rou\"
+ s $$$gSVN("CLS","*")="_cls\"
+ s $$$gSVN("GBL","*")="_gbl\"
+ s $$$gSVN("INC","*")="_inc\"
+ s $$$gSVN("INT","*")="_int\"
+ s $$$gSVN("MAC","*")="_rou\"
+ s $$$gSVN("PRJ","*")="_project\"
+]]></Implementation>
+</Method>
+
+<Method name="CheckoutImport">
+<Description>
+sestavuje seznam polozek pro import do nsp z wc</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[compile:%Boolean=0,&msg:%String]]></FormalSpec>
+<Implementation><![CDATA[
+ k $$$svnFileList,$$$svnErrList,$$$svnLoadedList
+ s dir=$$$gSVN
+ 
+ $$$svnLog(msg,"SVN: (CHECKOUT IMPORT) Inspecting working copy...")
+ d ..FileList(dir,.msg)
+
+ d ..ProcessImport("CHECKOUT",compile,.msg)
+
+ k $$$svnFileList,$$$svnErrList,$$$svnLoadedList
+ $$$svnLog(msg,"SVN: (CHECKOUT IMPORT) Done.")
+]]></Implementation>
+</Method>
+
+<Method name="UpdateImport">
+<Description>
+Обновление </Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[compile:%Boolean=0,&msg:%String]]></FormalSpec>
+<Implementation><![CDATA[
+ 
+ ;сброс списка файлов, списка ошибок, списка загруженного, списка элементов
+ k $$$svnFileList,$$$svnErrList,$$$svnLoadedList,$$$svnItemList
+ s dir=$$$gSVN ;рабочая директория 
+
+ $$$svnLog(msg,"SVN: (UPDATE IMPORT) Просмотр рабочей области на обновление ...")
+ d ..FileList(dir,.msg) ;составление списка файлов рабочей копии
+ 
+ $$$svnLog(msg,"SVN: (UPDATE IMPORT) Просмотр локальных записей SVN...")
+ s item="" f { s item=$o($$$gSVN(2,item)) q:item=""  ;проходим по всем элементам в свн 
+  s file=##class(Operation).GetName(item) ;получаем соответствующее имя файла
+  s:file'="" $$$svnItemList(file)=item ;заносим его в список элементов
+ }
+ 
+ $$$svnLog(msg,"SVN: (UPDATE IMPORT) Подготовка...")
+ 
+ ; svnD = Delete, svnI = Import, svnP = Protected
+ s gln=$na(^CacheTemp.svn($P))
+ s svnD=$na(@gln@("Delete"))
+ s svnI=$na(@gln@("Import"))
+ s svnP=$na(@gln@("Protect"))
+ k @svnD,@svnI,@svnP
+ 
+ ;
+ s item="" f { s item=$o($$$svnItemList(item)) q:item=""  ;по всем элементам в базе
+  if $d($$$svnFileList(item)) { ; пункт есть в базе данных и на диске, контролируем штамп времени
+   s fileTS=$$$svnFileTS($$$gSVN_item), fileTSstored=$$$svnFileTSstored($$$svnItemList(item))
+   #;w !," fileTS:",fileTS,"; fileTSS: ",fileTSstored
+   s flnew=$zdth(fileTS,3)]$zdth(fileTSstored,3)   
+   if flnew {
+    $$$svnLog(msg,"SVN: Отмечаем для импорта "_item)
+    s @svnI@(item)=""  ; если есть более новый исходник на диске - импортируем его 
+   }
+   s:'flnew @svnP@(item)="" ; нет, означает что пункт был локально изменен, защищаем его 
+  } else { ;нет на диске
+   ; не существует, нужно удалить пункт в Базе данных 
+   ; но защищаем сами себя ( контроль исходников)
+   ; ничего не удаляем
+   ;if item'["NLMLIB.SourceControl." s ^||svnD($$$svnItemList(item))=""
+   k $$$gSVN(2,item) ;удаляем его из локальных записей
+  }
+  
+ }
+ 
+ Q
+ 
+ 
+ ; Идем по списку файлов из Рабочей Копии
+ s file="" f { s file=$o($$$svnFileList(file)) q:file=""
+  ;пропускаем локально изменные файлы
+  continue:$d(@svnP@(file))
+  ; все остальные забрасываем в импорт
+  s @svnI@(file)=""
+ }
+
+ ; Контролируем возможность, что пункт маппирован из другой базы данных
+ ; маппированные пункты пропускаем
+ $$$svnLog(msg,"SVN: (UPDATE IMPORT) Проверяем маппинг пунктов для импорта...")
+ s item="" f  s item=$o(@svnI@(item)) q:item=""  k:..IsMapped(item) @svnI@(item)
+ $$$svnLog(msg,"SVN: (UPDATE IMPORT) Проверяем маппинг пунктов для удаления...")
+ s item="" f  s item=$o(@svnD@(item)) q:item=""  k:..IsMapped(item) @svnD@(item)
+ 
+ 
+ /*
+ ; Собственно удаление
+ $$$svnLog(msg,"SVN: (UPDATE IMPORT) Удаление...")
+ s item="" f { s item=$o(^||svnD(item)) q:item=""
+  $$$svnLog(msg,"SVN: Del "_item) continue
+  s sc=$$$OK, ext=$zcvt($p(item,".",$l(item,".")),"U") ;тип пункта
+  i ext="GBL" { 
+   ;нормализация имени глобала
+   s global="^"_$p(item,".",1,$l(item,".")-1),global=$zstrip(global,"=W","^")
+   w !,"Удаление глобала "_global
+   k @global
+   s sc=$$$OK
+  } else {
+   w !,"Удаление элемента "_item
+   s sc=##class(%RoutineMgr).Delete(item) 
+  }
+ 
+ 
+  i $$$ISOK(sc) {
+   k $$$gSVN(2,item) ;убираем из локальных записей
+  } else {
+   s code=$system.Status.GetErrorCodes(sc)
+   i code=5351 { // пункт не существует в БД
+    ;Удаляем из локального кеша
+    k $$$gSVN(2,item) 
+   } else {
+    s pocet=$i($$$svnErrList("DELETE")) ;Заносим в список ошибок
+    m $$$svnErrList("DELETE",pocet)=ERR
+   }
+  }
+ }
+ 
+ Q  ;выход без действий
+ */
+ 
+ ; Импорт и компиляция
+ k $$$svnFileList m $$$svnFileList=@svnI
+ 
+ d ..ProcessImport("UPDATE",compile,.msg)
+ 
+ ; uklid
+ k @svnD,@svnI,@svnP
+ k $$$svnFileList,$$$svnErrList,$$$svnLoadedList,$$$svnItemList
+ $$$svnLog(msg,"SVN: (UPDATE IMPORT) Выполнен.")
+]]></Implementation>
+</Method>
+
+<Method name="ProcessImport">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[mode,compile:%Boolean=0,&msg:%String]]></FormalSpec>
+<Implementation><![CDATA[
+ 
+ $$$svnLog(msg,"SVN: ("_mode_" IMPORT) Importing macros...")
+ d ..ProcessGroup("_inc")
+
+ $$$svnLog(msg,"SVN: ("_mode_" IMPORT) Importing globals...")
+ d ..ProcessGroup("_gbl")
+ 
+ $$$svnLog(msg,"SVN: ("_mode_" IMPORT) Importing classes...")
+ d ..ProcessGroup("_cls")
+ 
+ $$$svnLog(msg,"SVN: ("_mode_" IMPORT) Importing routines...")
+ d ..ProcessGroup("_int")
+ d ..ProcessGroup("_rou")
+ 
+ $$$svnLog(msg,"SVN: ("_mode_" IMPORT) Importing project definitions...")
+ d ..ProcessGroup("_project")
+ 
+ i compile {
+  $$$svnLog(msg,"SVN: ("_mode_" IMPORT) Compilation started.")
+  d ..CompileGroup("_int")
+  d ..CompileGroup("_cls")
+  d ..CompileGroup("_rou")
+  s sc=..LoadCSP(.msg) $$$svnLog(msg,$system.Status.GetErrorText(sc))
+ }
+ else {
+  $$$svnLog(msg,"SVN: ("_mode_" IMPORT) Compilation skipped (operator request).")
+ }
+]]></Implementation>
+</Method>
+
+<Method name="FileList">
+<Description>
+Составление списка файлов в директории</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[dir:%String,&msg:%String]]></FormalSpec>
+<Implementation><![CDATA[
+ s svndir=$g($$$gSVN(1,1),".svn")_"\" ;путь к директории svn
+ s lsvndir=$l(svndir) ;длина
+ s rs=##class(%ResultSet).%New("%File:FileSet")
+ d rs.Execute(dir)
+ while rs.Next() {
+  s fullPath=$g(rs.Data("Name"))
+  if rs.Data("Type")="D" { ;если директория, рекурсивно уходим в нее
+   ;w !,"Директория: "_fullPath
+   d ..FileList(fullPath,.msg) continue
+  } 
+  
+  ;w !,"Файл: ", fullPath
+  s subPath=$p(fullPath,$$$gSVN,2,1000) ; имя без пути к рабочей копии {WC}
+  
+  if $p(subPath,"\")="_csp" {
+   ;w !, "пропускаем csp приложение"
+   continue  ; 
+  }
+
+  if $e(subPath,1,lsvndir)=svndir  {
+   ;w !, "пропускаем адреса со значением директории svn"
+   continue  
+  }
+  
+  continue:subPath[("\"_svndir)
+  continue:subPath=""
+  s $$$svnFileList(subPath)="" ;все остальные заносим в глобаль
+  
+ }
+ d rs.Close(),rs.%Close() k rs s rs=$$$NULLOREF
+]]></Implementation>
+</Method>
+
+<Method name="ProcessGroup">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>grp:%String</FormalSpec>
+<Implementation><![CDATA[
+ s data="" f {
+  s data=$o($$$svnFileList(data)) q:data=""
+  i $e(data,1,$l(grp))=grp {
+   w !,?10,"Loading item '"_data_"' ..."
+   s sc=$system.OBJ.Load($$$gSVN_data,"-d",.ERR,.LOADED)
+   i $$$ISERR(sc) {
+    w " failed."
+    s pocet=$i($$$svnErrList(grp))
+    m $$$svnErrList(grp,pocet)=ERR
+   }
+   else {
+    s LOADED=##class(%RoutineMgr).NormalizeName(LOADED)
+    s $$$svnLoadedList(grp,LOADED)=""
+    ; zapis priznaku o importovanem souboru
+    s $$$gSVN(2,LOADED)=$lb($$$svnFileTS($$$gSVN_data),$$$svnItemTS(LOADED))
+   }
+  }
+ }
+]]></Implementation>
+</Method>
+
+<Method name="CompileGroup">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>grp:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ ; zpracovani pripravenych projektu pro postupnou kompilaci
+ k prj
+ s rs=##class(%ResultSet).%New("%Studio.Project:ProjectList")
+ d rs.Execute()
+ while rs.Next() {
+  s name=$zcvt(rs.Data("Name"),"L")
+  if $e(name,1,7)="svn"_grp {
+   s poradi=$e(name,8,$l(name))
+   s:$isvalidnum(poradi) prj(+poradi)=rs.Data("ID") ; pridame do seznamu pro kompilaci
+  }
+ }
+ s rs=$$$NULLOREF
+
+ ; vsechny polozky, ktere by se mely zkompilovat
+ m items=$$$svnLoadedList(grp)
+
+ i $d(prj) {
+  ; mame seznam - zpracujeme ho 
+  $$$svnLog(msg,"SVN: (IMPORT - COMPILE) Compiling predefined projects...")
+  
+  s sc=$$$OK
+  d  ; novy stack (schvalne!)
+  . n %SourceControl ; potlaceni aktualni source control class
+  . s o="" f  s o=$o(prj(o),1,project) q:o=""
+  . . s prjObj=##class(%Studio.Project).%OpenId(project)
+  . . s:$isobject(prjObj) sc=prjObj.Compile($$$svnCompileFlags)
+  . . q:$$$ISERR(sc)
+  
+  i $$$ISOK(sc) {
+   ; jestli se to zkompilovalo, odebereme polozky projektu ze seznamu cekajicich na kompilaci
+   s itemobj=prjObj.Items.GetNext(.item)
+   while item'="" {
+    s name=itemobj.Name,type=itemobj.Type
+    i $l(name,".")=1 s name=name_type
+    k items(name)
+   }
+  }
+ }
+ 
+ ; finalni kompilace polozek, ktere zbyly
+ s sc=$system.OBJ.CompileList(.items,$$$svnCompileFlags,.ERR)
+ m:$$$ISERR(sc) $$$svnErrList(grp,"COMPILE")=ERR
+ q sc
+]]></Implementation>
+</Method>
+
+<Method name="LoadCSP">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&msg:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ s sc=$$$OK
+ s cspdir=$g($$$gSVNcfg("CSP","BASE_APP"))
+ i $zstrip(cspdir,"<>WC")="" s cspdir=$system.CSP.GetDefaultApp($zu(5))
+ i cspdir="" {
+  s sc=$$$ERROR(5001,"SVN: No csp application found, csp import&compile skipped.")
+ }
+ else {
+  ; hledame svn projekty, ktere se tykaji csp souboru
+  k prj
+  s rs=##class(%ResultSet).%New("%Studio.Project:ProjectList")
+  d rs.Execute()
+  while rs.Next() {
+   s name=$zcvt(rs.Data("Name"),"L")
+   i $e(name,1,7)="svn_csp" {
+    s poradi=$e(name,8,$l(name))
+    s:$isvalidnum(poradi) prj(+poradi)=rs.Data("ID") ; pridame do seznamu pro kompilaci
+   }
+  }
+  s rs=$$$NULLOREF
+  
+  i $d(prj) {
+   ; mame seznam - zpracujeme ho 
+   $$$svnLog(msg,"SVN: (IMPORT - CSP) Compilation based on predefined projects...")
+   ; potlaceni source control class
+   s tmpSVN=$Get(%SourceControl) n %SourceControl
+   
+   s o="" f {
+    s o=$o(prj(o),1,project) q:o=""
+    s prjObj=##class(%Studio.Project).%OpenId(project)
+    i $isobject(prjObj) s sc=prjObj.Compile($$$svnCompileFlags)
+    q:$$$ISERR(sc)
+   }
+   //s %SourceControl=tmpSVN
+  }
+  else {
+   ; seznam neni zkusime klasickou kompilaci vsecho
+   $$$svnLog(msg,"SVN: (IMPORT - CSP) Compilation based on standard directory load...")
+   s sc=$system.CSP.LoadPageDir(cspdir,$$$svnCompileFlags)
+  }
+  
+ }
+ q sc
+]]></Implementation>
+</Method>
+
+<Method name="ExportPrj">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[InternalName:%String,commitExp:%Boolean=0,&msg:%String]]></FormalSpec>
+<Implementation><![CDATA[
+ s pName=$p(InternalName,".",1,$l(InternalName,".")-1)
+ s rs=##class(%ResultSet).%New("%Studio.Project:ProjectItemsList")
+ d rs.Execute(pName)
+ while rs.Next() {
+  s xDo=1
+  i commitExp=0 {
+   s xDo=0
+   i rs.Data("Type")="GBL",+$g($$$gSVN(1,"PRJ","G"),1) s xDo=1
+   i rs.Data("Type")="MAC",+$g($$$gSVN(1,"PRJ","R"),0) s xDo=1
+   i rs.Data("Type")="CLS",+$g($$$gSVN(1,"PRJ","C"),0) s xDo=1
+  }
+  d:xDo ##class(Operation).Export(rs.Data("Name"),.msg)
+ }
+ s rs=$$$NULLOREF
+]]></Implementation>
+</Method>
+
+<Method name="svnExportPrj">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&msg:%String]]></FormalSpec>
+<Implementation><![CDATA[
+ $$$svnLog(msg,"SVN: (COMMIT) Saving commit&compile projects to [WorkingCopy]...")
+  
+ s rs=##class(%ResultSet).%New("%Studio.Project:ProjectList")
+ d rs.Execute()
+ while rs.Next() {
+  s name=$zcvt(rs.Data("Name"),"U")
+  i name?1"SVN_"1(1"GBL",1"ROU",1"CLS",1"INC",1"INT",1"CSP")1.N d ##class(Operation).Export(name_".PRJ",.msg,0,1)
+ }
+ s rs=$$$NULLOREF
+
+ f grp="GBL","ROU","CLS","INC","INT","CSP" {
+  ; commit project
+  d:##class(%Studio.Project).%ExistsId("SVN_"_grp_"COMMIT") ##class(Operation).Export("SVN_"_grp_"COMMIT.PRJ",.msg,0,1)
+ }
+ 
+ $$$svnLog(msg,"SVN: (COMMIT) Exporting commit projects...")
+ d ..ExportPrj("SVN_GBLCOMMIT.PRJ",1,.msg)
+ d ..ExportPrj("SVN_ROUCOMMIT.PRJ",1,.msg)
+ d ..ExportPrj("SVN_CLSCOMMIT.PRJ",1,.msg)
+ d ..ExportPrj("SVN_INCCOMMIT.PRJ",1,.msg)
+ d ..ExportPrj("SVN_INTCOMMIT.PRJ",1,.msg)
+ d ..ExportPrj("SVN_CSPCOMMIT.PRJ",1,.msg)
+]]></Implementation>
+</Method>
+
+<Method name="IsMapped">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>item:%String</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ s res=0
+ d ..GetParts(item,.name,.ext)
+ 
+ i ext="GBL" {
+  s res=..CheckGlobalMap(item)
+  
+ }
+ //elseif ext="CLS"||(ext="PRJ")||(ext="XML")||(##class(%RoutineMgr).UserType(InternalName)) {
+  
+  
+ //} 
+ else {
+  ; test na mapovane rutiny
+  s res=..CheckRoutineMap(item)
+ }
+ 
+
+ q res
+]]></Implementation>
+</Method>
+
+<Method name="CheckRoutineMap">
+<Description>
+testuje, zda rutina neni mapovana z jine databaze</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>routine:%String,*dirRoutine:%String</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ s dir=$zu(12,"")
+ d ..GetParts(routine,.name,.type)
+ s dirRoutine=##class(%SYS.Namespace).GetRoutineDest(,name,type)
+ i $p(dirRoutine,"^")'="" q 1 ; pokud je rutina z jineho systemu - je mapovana vzdy
+ q dir'=$p(dirRoutine,"^",2)
+]]></Implementation>
+</Method>
+
+<Method name="CheckGlobalMap">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>global:%String,*dirGlobal:%String</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ s dir=$zu(12,"")
+ d ..GetParts(global,.name,.type)
+ s dirGlobal=##class(%SYS.Namespace).GetGlobalDest(,name)
+ i $p(dirGlobal,"^")'="" q 1 ; pokud je rutina z jineho systemu - je mapovana vzdy
+ q dir'=$p(dirGlobal,"^",2)
+]]></Implementation>
+</Method>
+
+<Method name="GetParts">
+<Description>
+Разбор имени на части - наименование и расширение 
+Причем расширение приводится к верхнему регистру</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[InternalName:%String,&name:%String,&ext:%String]]></FormalSpec>
+<Implementation><![CDATA[ s length=$l(InternalName,"."), name=$P(InternalName,".",1,length-1), ext=$zcvt($p(InternalName,".",length),"U")
+]]></Implementation>
+</Method>
+</Class>
+</Export>
