@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Test.Goods.Goods">
+<Super>%UnitTest.TestCase</Super>
+<TimeCreated>62321,66823.126407</TimeCreated>
+
+<Method name="TestOnNew">
+<Description>
+Тестирование инициализация свойств товара через конструктор</Description>
+<Implementation><![CDATA[
+   s props=""
+   s props("Name")="Goods", props("Size1")="100"
+   s props("Weight")="1", props("Price")=1
+   s goods=##class(Goods.Goods).%New(.props)
+   d $$$AssertEquals($IsObject(goods),1,"Создание объекта Goods.Goods")
+   s prop="" for { s prop=$o(props(prop)) Q:prop=""
+    s value=$zobjproperty(goods,prop)
+    d $$$AssertEquals(value,$g(props(prop)),"Назначение свойства "_prop_" в конструкторе")
+   }
+   k prop, goods
+]]></Implementation>
+</Method>
+</Class>
+</Export>

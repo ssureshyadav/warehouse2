@@ -267,11 +267,11 @@ ID в аспекте</Description>
  . s StorageData=StorageStrategy.Data.GetAt(i)
  s data=StorageData.Values.GetNext(.number)
  while $ISOBJECT(data) {
- 	s PropertyName=data.Value
- 	s ListIndex=data.Name
- 	Do %code.WriteLine(" s Prop( """ _ PropertyName _ """)="_ListIndex)
- 	s data=StorageData.Values.GetNext(.number)
- 	} 	
+  s PropertyName=data.Value
+  s ListIndex=data.Name
+  Do %code.WriteLine(" s Prop( """ _ PropertyName _ """)="_ListIndex)
+  s data=StorageData.Values.GetNext(.number)
+  }  
  Do %code.WriteLine(" Quit $G(Prop(PropertyName))")
  Quit $$$OK
 ]]></Implementation>
@@ -327,8 +327,8 @@ ID в аспекте</Description>
 <Private>1</Private>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	if (insert)||(%this.%IsModified()) d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")
-	Quit $$$OK
+ if (insert)||(%this.%IsModified()) d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")
+ Quit $$$OK
 ]]></Implementation>
 </Method>
 
@@ -356,6 +356,22 @@ ID в аспекте</Description>
  s %this.ChangeTime=$P($H,",",2)
  s ChangeUser=$S($ISOBJECT($G(%session)):$G(%session.Data("user")),1:"")
  d:ChangeUser %this.ChangeUserSetObjectId(ChangeUser)
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="%OnNew">
+<Description>
+Инициализация через конструктор</Description>
+<FormalSpec><![CDATA[&initvalue:%CacheString]]></FormalSpec>
+<Private>1</Private>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ s ..Name=$g(initvalue("Name"))
+ s ..Size1=$g(initvalue("Size1"))
+ s ..Weight=$g(initvalue("Weight"))
+ s ..Price=$g(initvalue("Price"))
  Quit $$$OK
 ]]></Implementation>
 </Method>

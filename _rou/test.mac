@@ -1,0 +1,10 @@
+^MAC^Save for Subversion^^~Format=Cache.S~
+%RO
+test^MAC^^^0
+test(opt="")
+ s ^UnitTestRoot="C:\CacheSys\CSP\sklad2\_cls\Test\"
+ Do ##class(%UnitTest.Manager).RunTest(opt,"/delete=0/debug=0")
+ Q
+
+
+
