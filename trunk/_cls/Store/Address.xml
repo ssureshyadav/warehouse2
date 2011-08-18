@@ -43,8 +43,8 @@
 <ReturnType>%String</ReturnType>
 <SqlProc>1</SqlProc>
 <Implementation><![CDATA[
-	s id="" &sql(Select ID Into :id From Store.Address Where Code=:code)	
-	Q:'SQLCODE id Q ""
+ s id="" &sql(Select ID Into :id From Store.Address Where Code=:code) 
+ Q:'SQLCODE id Q ""
 ]]></Implementation>
 </Method>
 
@@ -91,8 +91,8 @@
 <ReturnType>%String</ReturnType>
 <SqlProc>1</SqlProc>
 <Implementation><![CDATA[
-	s code=$g(code) Q:code="" ""
-	Q $P(code,"*",1,$L(code,"*")-1)
+ s code=$g(code) Q:code="" ""
+ Q $P(code,"*",1,$L(code,"*")-1)
 ]]></Implementation>
 </Method>
 
@@ -112,9 +112,9 @@
 <ReturnType>%Integer</ReturnType>
 <SqlProc>1</SqlProc>
 <Implementation><![CDATA[
-	s pcode=..GetParent(code) 
-	s pid="" &sql(Select TOP 1 ID Into :pid From Store.Address Where Depot=:depot And Code=:pcode)
-	Q pid
+ s pcode=..GetParent(code) 
+ s pid="" &sql(Select TOP 1 ID Into :pid From Store.Address Where Depot=:depot And Code=:pcode)
+ Q pid
 ]]></Implementation>
 </Method>
 
@@ -140,11 +140,11 @@
 <FormalSpec>part:%String,whole:%String</FormalSpec>
 <ReturnType>%Integer</ReturnType>
 <Implementation><![CDATA[
-	q:+$g(part)=0 0
-	q:+$g(whole)=0 0
-	s perc=part/whole*100
-	if perc<0 s perc=perc*-1
-	Q +$j(perc,0,0)
+ q:+$g(part)=0 0
+ q:+$g(whole)=0 0
+ s perc=part/whole*100
+ if perc<0 s perc=perc*-1
+ Q +$j(perc,0,0)
 ]]></Implementation>
 </Method>
 
@@ -156,9 +156,9 @@
 <ReturnType>%String</ReturnType>
 <SqlProc>1</SqlProc>
 <Implementation><![CDATA[
-	Q:'..%ExistsId(id) 0
-	s child="" &sql(Select TOP 1 ID Into :child From Store.Address Where ParentID = :id)
-	Q child
+ Q:'..%ExistsId(id) 0
+ s child="" &sql(Select TOP 1 ID Into :child From Store.Address Where ParentID = :id)
+ Q child
 ]]></Implementation>
 </Method>
 
@@ -239,6 +239,20 @@
 where Depot=:Depot
  ORDER BY Code</SqlQuery>
 </Query>
+
+<Method name="%OnNew">
+<FormalSpec>initvalue:%CacheString</FormalSpec>
+<Private>1</Private>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ d:$g(initvalue("Depot"))'="" ..DepotSetObjectId($g(initvalue("Depot")))
+ s ..Code=$g(initvalue("Code")), ..Name=$g(initvalue("Name"))
+ s ..Size1=$g(initvalue("Size1")), ..Weight=$g(initvalue("Weight"))
+ 
+ Quit $$$OK
+]]></Implementation>
+</Method>
 
 <Storage name="Default">
 <Type>%Library.CacheStorage</Type>

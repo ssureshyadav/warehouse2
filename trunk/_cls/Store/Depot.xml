@@ -25,6 +25,18 @@
 <Parameter name="CONTAINID" value="1"/>
 </Query>
 
+<Method name="%OnNew">
+<FormalSpec><![CDATA[&init:%CacheString]]></FormalSpec>
+<Private>1</Private>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ s ..Name=$g(init("Name"))
+ s ..Comment=$g(init("Comment"))
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
 <Storage name="Default">
 <Type>%Library.CacheStorage</Type>
 <DataLocation>^Store.DepotD</DataLocation>

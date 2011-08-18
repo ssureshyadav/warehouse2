@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Test.Store.Address">
+<Super>%UnitTest.TestCase</Super>
+<TimeCreated>62321,69053.029639</TimeCreated>
+
+<Method name="TestOnNew">
+<Description>
+Создание ячейки через конструктор</Description>
+<Implementation><![CDATA[
+  s depot("Name")="Test depot for test Address"
+  s depot=##class(Store.Depot).%New(.depot)
+  s sc=depot.%Save()
+  d $$$AssertEquals(sc,1,"Создание склада для тестирования конструктора ячейки")
+  
+  
+  s props("Name")="Test cell", props("Size1")=1, props("Weight")=1, props("Code")=1
+  s props("Depot")=depot.%Id()
+  
+  s addr=##class(Store.Address).%New(.props)
+  d $$$AssertEquals($IsObject(addr),1,"Создание объекта через конструктор")
+  s prop="" for { s prop=$o(props(prop)) Q:prop=""
+   s value=$zobjproperty(addr,prop)
+   d:prop'="Depot" $$$AssertEquals(value,$g(props(prop)),"Инициализация свойства "_prop_" через конструктор")
+  }
+  d $$$AssertEquals(addr.Depot.%Id(),depot.%Id(),"Назначение склада через конструктор ячейки")
+  
+  
+  k props,addr
+  d depot.%DeleteId(depot.%Id())
+  k depot
+]]></Implementation>
+</Method>
+</Class>
+</Export>

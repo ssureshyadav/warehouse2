@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Test.Store.Action">
+<Description><![CDATA[
+Тестирование класса <class>Store.Action</class>]]></Description>
+<Super>%UnitTest.TestCase</Super>
+<TimeCreated>62321,64023.314642</TimeCreated>
+
+<Method name="Testremquant">
+<Description>
+Тестирование метода целевого класса </Description>
+<Implementation><![CDATA[
+ #; нужен склад
+ s depot("Name")="TestDepot"
+ s depot("Comment")="TestDepot for test Store.Action.remquant method"
+ s depot=##class(Store.Depot).%New(.depot)
+ s sc=depot.%Save()
+ d $$$AssertEquals(sc,1,"Попытка создать тестовый склад")
+ 
+ d depot.%DeleteId(depot.%Id()) k depot
+ 
+ #; нужна ячейка на складе
+ #; нужен товар
+ #; нужен товар в ячейке
+ #; нужна строка в инструкции
+]]></Implementation>
+</Method>
+</Class>
+</Export>
