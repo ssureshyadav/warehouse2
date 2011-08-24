@@ -430,7 +430,7 @@ savequantErr
 
  #;Store.Address
  s addrId=Address s:$IsObject(Address) addrId=Address.%Id()
- i addrId="" Q "Для товара "_$G(GoodsFullName)_" ("_Value_" шт.) не указана ячейка."
+ if addrId="" Q "Для товара "_$G(GoodsFullName)_" ("_Value_" шт.) не указана ячейка."
  
  #;партия в ячейке
  s storeId=StoreQntID s:$IsObject(StoreQntID) storeId=StoreQntID.%Id()
