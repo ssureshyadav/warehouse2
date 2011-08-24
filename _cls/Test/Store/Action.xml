@@ -3,6 +3,7 @@
 <Class name="Test.Store.Action">
 <Description><![CDATA[
 Тестирование класса <class>Store.Action</class>]]></Description>
+<IncludeCode>xmlmacros</IncludeCode>
 <Super>%UnitTest.TestCase</Super>
 <TimeCreated>62321,64023.314642</TimeCreated>
 
@@ -14,15 +15,43 @@
  s depot("Name")="TestDepot"
  s depot("Comment")="TestDepot for test Store.Action.remquant method"
  s depot=##class(Store.Depot).%New(.depot)
+ d $$$AssertEquals($IsObject(depot),1,"Создание тестового склада через конструктор")
  s sc=depot.%Save()
  d $$$AssertEquals(sc,1,"Попытка создать тестовый склад")
  
- d depot.%DeleteId(depot.%Id()) k depot
- 
  #; нужна ячейка на складе
+ s cell("Code")="*1972",cell("Name")="test cell",cell("Size1")=10,cell("Weight")=10
+ s cell=##class(Store.Address).%New(.cell)
+ s cell.Depot=depot
+ s sc=cell.%Save()
+ 
+ d $$$AssertEquals(sc,1,"Создание ячейки на складе")
+ 
  #; нужен товар
+ 
+ s good("Name")="Test Good",good("Price")=1,good("Size1")=1,good("Weight")=1
+ s good=##class(Goods.Goods).%New(.good)
+ s sc=good.%Save()
+ 
+ d $$$AssertEquals(sc,1,"Создание товара")
+ 
  #; нужен товар в ячейке
+ 
+ s part=##class(Store.Quantity).%New()
+ s part.Address=cell,part.Goods=good,part.Value1=10,part.Value2=5
+ s sc=part.%Save()
+ 
+ d $$$AssertEquals(sc,1,"Создание товара в ячейке")
+ 
+ 
+ 
+ 
+ 
  #; нужна строка в инструкции
+ d part.%DeleteId(part.%Id()) k part
+ d good.%DeleteId(good.%Id()) k good
+ d cell.%DeleteId(cell.%Id()) k cell
+ d depot.%DeleteId(depot.%Id()) k depot
 ]]></Implementation>
 </Method>
 </Class>
