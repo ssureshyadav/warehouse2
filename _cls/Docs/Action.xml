@@ -1174,9 +1174,9 @@ processdocErr
  . . . . s item.Brak=""
  . . . e  s item.Brak.Qnt=item.Brak.Qnt-item.Quantity
  . . e  d
- . . . //списываем из общего количества
- . . . // если указан адрес то списываем остаток с адреса
- . . . s:item.addr'="" ok=##class(Store.Action).remquant(item.Goods,item.addr,item.Quantity)
+ . . . ;списываем из общего количества, если указан адрес то списываем остаток с адреса
+ . . . ;s:item.addr'="" ok=##class(Store.Action).remquant(item.Goods,item.addr,item.Quantity)
+ . . . s:item.addr'="" ok=##class(Store.Action).RemoveQuantity(item.Goods,item.addr,item.Quantity)
  . . . d:item.Client'="" ..remTovarOnKontr(item.Client,item.Goods,item.Quantity)
  . . d ##class(Store.GarantAction).SetGarantNotActual(item.garant)
  i '+ok TROLLBACK
@@ -1206,7 +1206,8 @@ processdocErr
  s ok=1
  f i=1:1:doc.Items.Count() q:'+ok  d
  . s item=doc.Items.GetAt(i)
- . s ok=##class(Store.Action).remquant(item.Goods,item.addr2,item.Quantity)
+ . ;s ok=##class(Store.Action).remquant(item.Goods,item.addr2,item.Quantity)
+ . s ok=##class(Store.Action).RemoveQuantity(item.Goods,item.addr2,item.Quantity)
  . q:'+ok
  . s ok=##class(Store.Action).savequant(item.Goods,item.addr,item.Quantity)
  . q:'+ok
