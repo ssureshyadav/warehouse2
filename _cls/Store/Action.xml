@@ -195,23 +195,26 @@ GetChildsErr
       s itemId = item.%Id()
       
       if (+item.quantreal>0)&&('$ISOBJECT(item.addr)) s ok="Ошибка. Для товара "_itemGoodsFullName_" не указана ячейка на складе." q
-      if (+item.quantreal>0)&&($ISOBJECT(item.addr)) {
+      
+     if (+item.quantreal>0)&&($ISOBJECT(item.addr)) {
        #; если инструкция по браку, то удаляем из брака, иначе из обычного количества 
        if Brak {
         s ok=..RemQuantBrak(itemGoods,item.addr,$G(KontrId),itemquantreal)
        } else {
-     if ($ISOBJECT(item.StoreQntID)),(item.StoreQntID.Address.%Id()'=item.addr.%Id()) {
-      d ##class(Docs.StorageOutItems).RemoveReserve(item.StoreQntID.%Id(),item.Quantity,itemId)
-      s item.StoreQntID=""
-     }
-        s ok=..remquant(itemGoods,item.addr,itemquantreal,item.StoreQntID,quantdefault,itemId)
+     	if ($ISOBJECT(item.StoreQntID)),(item.StoreQntID.Address.%Id()'=item.addr.%Id()) {
+      		d ##class(Docs.StorageOutItems).RemoveReserve(item.StoreQntID.%Id(),item.Quantity,itemId)
+      		s item.StoreQntID=""
+     	}
+        #;s ok=..remquant(itemGoods,item.addr,itemquantreal,item.StoreQntID,quantdefault,itemId)
+        s ok=..RemoveQuantity(itemGoods,item.addr,itemquantreal,item.StoreQntID,quantdefault,itemId)
        }
-      }
-      //если был резерв и сняли меньше чем ставили в резерв, то снимем остальное
-      if (item.Quantity>item.quantreal)&($ISOBJECT(item.StoreQntID)) d ##class(Docs.StorageOutItems).RemoveReserve(item.StoreQntID.%Id(),item.Quantity-item.quantreal,itemId)
+     }
+     
+     //если был резерв и сняли меньше чем ставили в резерв, то снимем остальное
+     if (item.Quantity>item.quantreal)&($ISOBJECT(item.StoreQntID)) d ##class(Docs.StorageOutItems).RemoveReserve(item.StoreQntID.%Id(),item.Quantity-item.quantreal,itemId)
       s @tempGlob@(itemGoodsId)=$G(@tempGlob@(itemGoodsId))+itemquantreal
       s item.Total=$J(itemquantreal*itemPrice,".",2)
-      }
+     }
      q:'+ok
    } While (key '= "")
    
@@ -488,9 +491,10 @@ remquantErr
 <br><var>Good</var> - Товар (ID или объект <class>Goods.Goods</class>)
 <br><var>Cell</var> - Ячейка (ID или объект <class>Store.Address</class>)
 <br><var>Amount</var> - Количество
-<br><var>Portion</var> - Порция <class>Store.Quantity</class> откуда брали количество (где убирать резерв)
-<br><var>Need</var> - какое количество просили в накладной
-<br><var>RowId</var> - id строчки в инструкции
+<br><var>Portion</var> - Порция (ID или объект) <class>Store.Quantity</class> откуда брали количество (где убирать резерв)
+<br><var>Need</var> - какое количество просили в накладной (!!! В алгоритме не используется)
+<br><var>RowId</var> - id строчки в инструкции (!!! в алгоритме не используется)
+
 <br/>Возвращает 1 в случае успеха или ошибку (строка c описанием) 
 <br/>Доп. эффекты: если порция обнуляется, то этот метод удалит ее
 <br/>              если порции нет, то (при настройке allowMinus=1) этот  метод создаст ее]]></Description>
@@ -620,24 +624,15 @@ remquantErr
  
  TCOMMIT
  
- #;необязательная сервисная функция
+ #;сервисная функция
  #;проверить остатки основного и зарезервированного количества
  #;,если нулевые, удалить пустую порцию из ячейки
- 
  if (Portion.Value1=0)&(Portion.Value2=0) {
    d ##class(Store.Quantity).%DeleteId(Portion.%Id())
  }
   
  k Portion,Cell,Good
-  
  Q 1
- /*
- //если был резерв и если сняли меньше чем был резерв
- if QuantityProperty="Value2",quantdefault>Value d
- . //сколько лишнего осталось в резерве
- . s FinallyJustRemoveReserve = quantdefault-Value
- . d ##class(Docs.StorageOutItems).RemoveReserve(storeid,RemoveReserve,docitemId)
- */
 ]]></Implementation>
 </Method>
 
