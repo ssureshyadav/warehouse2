@@ -43,7 +43,12 @@
  
  d $$$AssertEquals(sc,1,"Создание товара в ячейке")
  
- 
+ #; Сверка алгоритмов работы старой и новой реализации
+ s res1=##class(Store.Action).remquant(good.%Id(),cell.%Id(),1,"")
+ s res2=##class(Store.Action).RemoveQuantity(good.%Id(),cell.%Id(),1,"")
+ w !,"remquant: ",res1
+ w !,"RemoveQuantity: ",res2
+ d $$$AssertEquals(res1,res2,"Сравнение алгоритмов работы")
  
  
  
