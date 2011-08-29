@@ -249,6 +249,7 @@ where Depot=:Depot
  d:$g(initvalue("Depot"))'="" ..DepotSetObjectId($g(initvalue("Depot")))
  s ..Code=$g(initvalue("Code")), ..Name=$g(initvalue("Name"))
  s ..Size1=$g(initvalue("Size1")), ..Weight=$g(initvalue("Weight"))
+ s ..Currentsize=$g(initvalue("Currentsize")), ..Currentweight=$g(initvalue("Currentweight"))
  
  Quit $$$OK
 ]]></Implementation>
