@@ -7,7 +7,7 @@
 <Super>%UnitTest.TestCase</Super>
 <TimeCreated>62321,64023.314642</TimeCreated>
 
-<Method name="Testremquant">
+<Method name="TestRemoveQuantity">
 <Description>
 Тестирование метода целевого класса </Description>
 <Implementation><![CDATA[
@@ -15,44 +15,50 @@
  s depot("Name")="TestDepot"
  s depot("Comment")="TestDepot for test Store.Action.remquant method"
  s depot=##class(Store.Depot).%New(.depot)
- d $$$AssertEquals($IsObject(depot),1,"Создание тестового склада через конструктор")
  s sc=depot.%Save()
- d $$$AssertEquals(sc,1,"Попытка создать тестовый склад")
+ d $$$AssertEquals(sc,1,"Создание тестового склада")
  
  #; нужна ячейка на складе
  s cell("Code")="*1972",cell("Name")="test cell",cell("Size1")=10,cell("Weight")=10
+ s cell("Currentsize")=10,cell("Currentweight")=10
  s cell=##class(Store.Address).%New(.cell)
  s cell.Depot=depot
  s sc=cell.%Save()
- 
- d $$$AssertEquals(sc,1,"Создание ячейки на складе")
+ d $$$AssertEquals(sc,1,"Создание тестовой ячейки на складе")
  
  #; нужен товар
- 
  s good("Name")="Test Good",good("Price")=1,good("Size1")=1,good("Weight")=1
  s good=##class(Goods.Goods).%New(.good)
  s sc=good.%Save()
+ d $$$AssertEquals(sc,1,"Создание тестового товара")
  
- d $$$AssertEquals(sc,1,"Создание товара")
- 
- #; нужен товар в ячейке
- 
+ #; нужен порция товара в ячейке
  s part=##class(Store.Quantity).%New()
  s part.Address=cell,part.Goods=good,part.Value1=10,part.Value2=5
  s sc=part.%Save()
- 
- d $$$AssertEquals(sc,1,"Создание товара в ячейке")
- 
- #; Сверка алгоритмов работы старой и новой реализации
- s res1=##class(Store.Action).remquant(good.%Id(),cell.%Id(),1,"")
- s res2=##class(Store.Action).RemoveQuantity(good.%Id(),cell.%Id(),1,"")
- w !,"remquant: ",res1
- w !,"RemoveQuantity: ",res2
- d $$$AssertEquals(res1,res2,"Сравнение алгоритмов работы")
+ d $$$AssertEquals(sc,1,"Создание тестовой порции товара в ячейке")
  
  
+ s cellId=cell.%Id(), goodId=good.%Id(), partId=part.%Id()
+ s sc=##class(Store.Action).RemoveQuantity(goodId,cellId,1,"")
+ d $$$AssertEquals(sc,1,"Результат списания ")
  
- #; нужна строка в инструкции
+ s part=part.%OpenId(partId) ;Переоткрываем
+ d $$$AssertEquals(part.Value1,9,"Списание с основного количества")
+ s cell=cell.%OpenId(cellId) ;Переоткрываем
+ d $$$AssertEquals(cell.Currentsize,9,"Уменьшение объема ячейки")
+ d $$$AssertEquals(cell.Currentweight,9,"Уменьшение веса ячейки")
+ 
+ 
+ s sc=##class(Store.Action).RemoveQuantity(goodId,cellId,1,partId)
+ s part=part.%OpenId(partId) ;Переоткрываем
+ d $$$AssertEquals(part.Value2,4,"Списание с резерва ")
+  
+ s sc=##class(Store.Action).RemoveQuantity(goodId,cellId,9,"")
+ s sc=##class(Store.Action).RemoveQuantity(goodId,cellId,4,partId)
+ d $$$AssertEquals(##class(Store.Quantity).%ExistsId(partId),0,"Удаление пустой порции")
+ 
+ 
  d part.%DeleteId(part.%Id()) k part
  d good.%DeleteId(good.%Id()) k good
  d cell.%DeleteId(cell.%Id()) k cell
