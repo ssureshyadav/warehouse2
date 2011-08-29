@@ -1,0 +1,50 @@
+^MAC^Save for Subversion^^~Format=Cache.S~
+%RO
+testRemQuant^MAC^^^0
+testRemQuant
+ TSTART
+ s depot("Name")="TestDepot"
+ s depot("Comment")="TestDepot for test Store.Action.remquant method"
+ s depot=##class(Store.Depot).%New(.depot)
+ s sc=depot.%Save()
+ w !,"Склад: ", sc
+ 
+ #; нужна ячейка на складе
+ s cell("Code")="*1972",cell("Name")="test cell",cell("Size1")=10,cell("Weight")=10
+ s cell("Currentsize")=10,cell("Currentweight")=10
+ s cell=##class(Store.Address).%New(.cell)
+ s cell.Depot=depot
+ s sc=cell.%Save()
+ w !,"Ячейка: ",sc
+ 
+ 
+ #; нужен товар
+ s good("Name")="Test Good",good("Price")=1,good("Size1")=1,good("Weight")=1
+ s good=##class(Goods.Goods).%New(.good)
+ s sc=good.%Save()
+ w !,"Товар: ",sc
+ 
+ #; нужен товар в ячейке
+ s part=##class(Store.Quantity).%New()
+ s part.Address=cell,part.Goods=good,part.Value1=10,part.Value2=5
+ s sc=part.%Save()
+ w !, "Порция: ",sc
+ 
+ s goodId=good.%Id()
+ s cellId=cell.%Id()
+ s partId=part.%Id()
+ 
+ s res2=##class(Store.Action).RemoveQuantity(goodId,cellId,1,partId)
+ w !,"RemoveQuantity: ",res2
+ 
+ w !
+ d $system.OBJ.Dump(cell.%OpenId(cell.%Id()))
+ w !
+ d $system.OBJ.Dump(part.%OpenId(part.%Id()))
+ 
+ TROLLBACK
+ 
+ k  
+
+
+
