@@ -4,20 +4,53 @@
 <Description>
 3 Вариант страницы emplight.csp
 параметры тип инструкции и контрагент</Description>
-<Super>%CSP.Page</Super>
+<Super>csp.Base</Super>
 <TimeCreated>62305,77157.240215</TimeCreated>
 
-<Method name="OnPreHTTP">
+<Parameter name="UseAppSecurity">
 <Description>
-Перед выгрузкой страницы</Description>
+Использование безопасности приложения
+Выполнять ли проверку пользователя</Description>
+<Type>%Boolean</Type>
+<Default>1</Default>
+</Parameter>
+
+<Method name="wTitle">
+<Description>
+write заголовок страницы</Description>
 <ClassMethod>1</ClassMethod>
-<ReturnType>%Boolean</ReturnType>
-<ServerOnly>1</ServerOnly>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
- s login=$G(%session.Data("user"))
- i '+login s %response.ServerSideRedirect="norights.csp" 
- i '##class(Common.Rights).getrights(login,5) s %response.ServerSideRedirect="norights.csp" 
- Q 1
+	w "Рабочее место кладовщика"
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wCss">
+<Description>
+write заголовок страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	d ##super()
+	&html<<link type="text/css" rel="stylesheet" href="css/csp.EmpLight3.css"/>>
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wPageHeader">
+<Description>
+write заголовок на странице</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	&html<
+		<div class="pageLegend">Рабочее место на складе</div>
+	>
+	Q ""
 ]]></Implementation>
 </Method>
 
@@ -153,29 +186,32 @@
 ]]></Implementation>
 </Method>
 
-<Method name="OnPage">
+<Method name="wBody">
+<Description>
+write содержимое страницы</Description>
 <ClassMethod>1</ClassMethod>
-<ReturnType>%Status</ReturnType>
-<ServerOnly>1</ServerOnly>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
- &html<<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html><head><meta http-equiv="Content-Language" content="ru"><meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
-<title>Рабочее место кладовщика</title>
-<link type="text/css" rel="stylesheet" href="style.css" />
-<link type="text/css" rel="stylesheet" href="css/csp.EmpLight3.css"/>>
- w ..HyperEventHead()
- &html<</head><body>
-	<table><tr><td>
-		<button id='btnRefresh' title="Обновить раздел [ F5 ]" onclick="window.location.reload()">
-			<img src="images/refresh.gif"/>
-		</button>
-		</td><td>
-		<div class="pageLegend">Рабочее место на складе</div>
-		</td></tr>
-	</table>
-	
-	<p><a class='button' href='BrakUtiliz.csp'>Списание брака</a> 
-	<label for='ChooseInstrType'>Тип инструкции:</label> 
+ &html<
+  <table><tr><td>
+ 	<img title="Обновить раздел [ F5 ]" 
+		onclick="window.location.reload()"
+		src="images/refresh.gif" 
+	/></td>
+	<td>
+	<button onclick="window.location='BrakUtiliz.csp'"
+	 style="padding:3px;" 
+	>
+		Списание брака
+	</button> 
+	</td>
+ </tr></table>
+ 
+ <fieldset id="fsInstr"><legend>Инструкции</legend>
+
+ 
+<p style="margin:5px 0px;"><label for='ChooseInstrType'>Тип инструкции:</label> 
 	<select id="ChooseInstrType" onchange="ReloadWithParams()">
 	<option value="">Все</option>>
 		d ..wITypeOpts()
@@ -185,11 +221,7 @@
 	<option value="">Все</option>
 	<option value="choose">Выбрать контрагента...</option>
 	</select>
-	
-	
 	</p>
-
-<fieldset id="fsInstr"><legend>Инструкции</legend>
 <table id="TIH">>
 	#; выводим шапку таблицы с текущим режимом сортировки
 	s SignCode(-1)="&#9650;", SignCode(1)="&#9660;" ;символы направления сортировки
@@ -263,11 +295,8 @@
 	. s ok=##class(Operation.InstrActions).changestat(instr,newstat)
 	. i '+ok d
 	. . w "<script type='text/javascript'>alert('",ok,"')</script",">"
- 
-	
-	w ..HyperEventFrame()
-	&html<</body></html>>
-	Quit $$$OK
+
+	Q ""
 ]]></Implementation>
 </Method>
 </Class>
