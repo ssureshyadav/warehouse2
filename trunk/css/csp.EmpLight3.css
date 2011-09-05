@@ -1,6 +1,6 @@
 body {padding:0px 5px;margin:0px;}
 .pageLegend { /*Шапка страницы*/
-	height:29px; width:700px;
+	height:29px;
 	margin:0px;padding:0px;
 	font: bold 18px "Arial" ;
 	text-align:center; vertical-align:center;

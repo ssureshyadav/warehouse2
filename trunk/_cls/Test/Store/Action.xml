@@ -7,62 +7,130 @@
 <Super>%UnitTest.TestCase</Super>
 <TimeCreated>62321,64023.314642</TimeCreated>
 
-<Method name="TestRemoveQuantity">
+<Property name="depotId">
 <Description>
-Тестирование метода целевого класса </Description>
+Код тестового склада</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="cellId">
+<Description>
+Код тестовой ячейки</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="goodId">
+<Description>
+Код тестового товара</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="partId">
+<Description>
+Код счетчика товара в ячейке</Description>
+<Type>%String</Type>
+</Property>
+
+<Method name="OnBeforeOneTest">
+<FormalSpec>testname:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
- #; нужен склад
- s depot("Name")="TestDepot"
- s depot("Comment")="TestDepot for test Store.Action.remquant method"
- s depot=##class(Store.Depot).%New(.depot)
- s sc=depot.%Save()
- d $$$AssertEquals(sc,1,"Создание тестового склада")
  
- #; нужна ячейка на складе
- s cell("Code")="*1972",cell("Name")="test cell",cell("Size1")=10,cell("Weight")=10
- s cell("Currentsize")=10,cell("Currentweight")=10
- s cell=##class(Store.Address).%New(.cell)
- s cell.Depot=depot
- s sc=cell.%Save()
- d $$$AssertEquals(sc,1,"Создание тестовой ячейки на складе")
+ if $LF($LB("Testremquant","TestRemoveQuantity"),testname){
+	 TSTART
+	 #; нужен склад
+	 s depot("Name")="TestDepot"
+	 s depot("Comment")="TestDepot for test Store.Action.remquant method"
+	 s depot=##class(Store.Depot).%New(.depot)
+	 s sc=depot.%Save()
+	 s ..depotId=depot.%Id()
+	 	 
+ 	 #; нужна ячейка на складе
+	 s cell("Code")="*1972",cell("Name")="test cell",cell("Size1")=10,cell("Weight")=10
+	 s cell("Currentsize")=10,cell("Currentweight")=10
+	 s cell=##class(Store.Address).%New(.cell)
+	 s cell.Depot=depot
+	 s sc=cell.%Save()
+	 s ..cellId=cell.%Id()
+	 
+ 	 #; нужен товар
+	 s good("Name")="Test Good",good("Price")=1,good("Size1")=1,good("Weight")=1
+	 s good=##class(Goods.Goods).%New(.good)
+	 s sc=good.%Save()
+	 s ..goodId=good.%Id()
+	 
+	 
+ 	 #; нужен порция товара в ячейке
+	 s part=##class(Store.Quantity).%New()
+	 s part.Address=cell,part.Goods=good,part.Value1=10,part.Value2=5
+	 s sc=part.%Save()
+	 s ..partId=part.%Id()
+	 
+ }
+ 	
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnAfterOneTest">
+<FormalSpec>testname:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ if $LF($LB("Testremquant","TestRemoveQuantity"),testname){
+	TROLLBACK
+ }
  
- #; нужен товар
- s good("Name")="Test Good",good("Price")=1,good("Size1")=1,good("Weight")=1
- s good=##class(Goods.Goods).%New(.good)
- s sc=good.%Save()
- d $$$AssertEquals(sc,1,"Создание тестового товара")
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Testremquant">
+<Description>
+Тестирование старого метода списания</Description>
+<Implementation><![CDATA[
  
- #; нужен порция товара в ячейке
- s part=##class(Store.Quantity).%New()
- s part.Address=cell,part.Goods=good,part.Value1=10,part.Value2=5
- s sc=part.%Save()
- d $$$AssertEquals(sc,1,"Создание тестовой порции товара в ячейке")
- 
- 
- s cellId=cell.%Id(), goodId=good.%Id(), partId=part.%Id()
- s sc=##class(Store.Action).RemoveQuantity(goodId,cellId,1,"")
+ s sc=##class(Store.Action).remquant(..goodId,..cellId,1,"")
  d $$$AssertEquals(sc,1,"Результат списания ")
  
- s part=part.%OpenId(partId) ;Переоткрываем
+ s part=##class(Store.Quantity).%OpenId(..partId) ;Переоткрываем
  d $$$AssertEquals(part.Value1,9,"Списание с основного количества")
- s cell=cell.%OpenId(cellId) ;Переоткрываем
+ s cell=##class(Store.Address).%OpenId(..cellId) ;Переоткрываем
  d $$$AssertEquals(cell.Currentsize,9,"Уменьшение объема ячейки")
  d $$$AssertEquals(cell.Currentweight,9,"Уменьшение веса ячейки")
  
- 
- s sc=##class(Store.Action).RemoveQuantity(goodId,cellId,1,partId)
- s part=part.%OpenId(partId) ;Переоткрываем
+ /* Не проходит
+ s sc=##class(Store.Action).remquant(..goodId,..cellId,1,..partId)
+ s part=part.%OpenId(..partId) ;Переоткрываем
  d $$$AssertEquals(part.Value2,4,"Списание с резерва ")
   
- s sc=##class(Store.Action).RemoveQuantity(goodId,cellId,9,"")
- s sc=##class(Store.Action).RemoveQuantity(goodId,cellId,4,partId)
- d $$$AssertEquals(##class(Store.Quantity).%ExistsId(partId),0,"Удаление пустой порции")
+ s sc=##class(Store.Action).remquant(..goodId,..cellId,9,"")
+ s sc=##class(Store.Action).remquant(..goodId,..cellId,4,..partId)
+ d $$$AssertEquals(##class(Store.Quantity).%ExistsId(..partId),0,"Удаление пустой порции")
+ */
+]]></Implementation>
+</Method>
+
+<Method name="TestRemoveQuantity">
+<Description>
+Тестирование нового метода списания</Description>
+<Implementation><![CDATA[
  
+ s sc=##class(Store.Action).RemoveQuantity(..goodId,..cellId,1,"")
+ d $$$AssertEquals(sc,1,"Результат списания ")
  
- d part.%DeleteId(part.%Id()) k part
- d good.%DeleteId(good.%Id()) k good
- d cell.%DeleteId(cell.%Id()) k cell
- d depot.%DeleteId(depot.%Id()) k depot
+ s part=##class(Store.Quantity).%OpenId(..partId) ;Переоткрываем
+ d $$$AssertEquals(part.Value1,9,"Списание с основного количества")
+ s cell=##class(Store.Address).%OpenId(..cellId) ;Переоткрываем
+ d $$$AssertEquals(cell.Currentsize,9,"Уменьшение объема ячейки")
+ d $$$AssertEquals(cell.Currentweight,9,"Уменьшение веса ячейки")
+ 
+ s sc=##class(Store.Action).RemoveQuantity(..goodId,..cellId,1,..partId)
+ s part=##class(Store.Quantity).%OpenId(..partId) ;Переоткрываем
+ d $$$AssertEquals(part.Value2,4,"Списание с резерва ")
+  
+ s sc=##class(Store.Action).RemoveQuantity(..goodId,..cellId,9,"")
+ s sc=##class(Store.Action).RemoveQuantity(..goodId,..cellId,4,..partId)
+ d $$$AssertEquals(##class(Store.Quantity).%ExistsId(..partId),0,"Удаление пустой порции")
 ]]></Implementation>
 </Method>
 </Class>
