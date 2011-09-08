@@ -88,25 +88,43 @@
 <Description>
 Тестирование старого метода списания</Description>
 <Implementation><![CDATA[
+ #;через объекты
+ s good=##class(Goods.Goods).%OpenId(..goodId)
+ s cell=##class(Store.Address).%OpenId(..cellId)
+ s part=##class(Store.Quantity).%OpenId(..partId) ;Переоткрываем
+ 
+ 
+ 
+ s sc=##class(Store.Action).remquant(good,cell,1)
+ d $$$AssertEquals(sc,1,"Результат списания через объекты")
+ d $$$AssertEquals(part.Value1,9,"Списание с основного количества")
+ 
+ s cell=##class(Store.Address).%OpenId(..cellId) ;Переоткрываем
+ d $$$AssertEquals(cell.Currentsize,9,"Уменьшение объема ячейки через объекты")
+ d $$$AssertEquals(cell.Currentweight,9,"Уменьшение веса ячейки через объекты")
+ 
+  s sc=##class(Store.Action).remquant(good,cell,1,part)
+ s part=part.%OpenId(..partId) ;Переоткрываем
+ d $$$AssertEquals(part.Value2,4,"Списание с резерва через объекты")
+  
+ 
  
  s sc=##class(Store.Action).remquant(..goodId,..cellId,1,"")
- d $$$AssertEquals(sc,1,"Результат списания ")
- 
+ d $$$AssertEquals(sc,1,"Результат списания c основного через id ")
  s part=##class(Store.Quantity).%OpenId(..partId) ;Переоткрываем
- d $$$AssertEquals(part.Value1,9,"Списание с основного количества")
- s cell=##class(Store.Address).%OpenId(..cellId) ;Переоткрываем
- d $$$AssertEquals(cell.Currentsize,9,"Уменьшение объема ячейки")
- d $$$AssertEquals(cell.Currentweight,9,"Уменьшение веса ячейки")
+ d $$$AssertEquals(part.Value1,8,"Списание с основного количества через id")
  
- /* Не проходит
- s sc=##class(Store.Action).remquant(..goodId,..cellId,1,..partId)
- s part=part.%OpenId(..partId) ;Переоткрываем
- d $$$AssertEquals(part.Value2,4,"Списание с резерва ")
-  
- s sc=##class(Store.Action).remquant(..goodId,..cellId,9,"")
- s sc=##class(Store.Action).remquant(..goodId,..cellId,4,..partId)
- d $$$AssertEquals(##class(Store.Quantity).%ExistsId(..partId),0,"Удаление пустой порции")
- */
+ s sc=##class(Store.Action).remquant(..goodId,..cellId,1,part)
+ d $$$AssertEquals(sc,1,"Результат списания c резерва через id ")
+ s part=##class(Store.Quantity).%OpenId(..partId) ;Переоткрываем
+ d $$$AssertEquals(part.Value2,3,"Списание с резерва через id")
+ 
+ #;спишем все
+ s sc=##class(Store.Action).remquant(..goodId,..cellId,8)
+ s sc=##class(Store.Action).remquant(..goodId,..cellId,3)
+ 
+ #;не проходит
+ #;d $$$AssertEquals(##class(Store.Quantity).%ExistsId(..partId),0,"Удаление пустой порции")
 ]]></Implementation>
 </Method>
 
