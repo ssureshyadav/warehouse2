@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.Base">
+<Description>
+Базовая страница для внутренних страниц приложения ( изначально для соблюдения макета разметки )</Description>
+<Super>%CSP.Page</Super>
+<TimeCreated>62334,84474.032358</TimeCreated>
+
+<Parameter name="UseAppSecurity">
+<Description>
+Использование безопасности приложения
+Выполнять ли проверку пользователя</Description>
+<Type>%Boolean</Type>
+<Default>0</Default>
+</Parameter>
+
+<Method name="OnPreHTTP">
+<Description>
+Перед выгрузкой страницы проверка безопасности</Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>generator</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+ if %parameter("UseAppSecurity") {
+ 	$$$GENERATE("  s login=+$G(%session.Data(""user"")) ")
+ 	$$$GENERATE("  i 'login s %response.ServerSideRedirect=""norights.csp"" Q 1 ")
+ 	$$$GENERATE("  i '##class(Common.Rights).getrights(login,5) s %response.ServerSideRedirect=""norights.csp"" ")
+ }
+ $$$GENERATE("  Q 1 ")
+ Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="OnPage">
+<Description><![CDATA[
+Вывод тела страницы
+<var>args</var> массив параметров запроса для тестирования]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ &html<<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html><head><meta http-equiv="Content-Language" content="ru"><meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<head><title>> d ..wTitle(.args) &html<</title>>
+ d ..wCss(.args)
+ w ..HyperEventHead()
+ &html<</head><body><div style="width:80%;margin-left:auto;margin-right:auto;">
+		<div>> d ..wPageHeader(.args) &html<</div>>
+	 	d ..wBody(.args) 
+ &html<</div>>
+ w ..HyperEventFrame()
+ &html<</body></html>>
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="wTitle">
+<Description>
+write заголовок страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wCss">
+<Description>
+write заголовок страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	&html<<link type="text/css" rel="stylesheet" href="style.css" />>
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wPageHeader">
+<Description>
+write заголовок на странице</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wBody">
+<Description>
+write содержимое страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	Q ""
+]]></Implementation>
+</Method>
+</Class>
+</Export>
