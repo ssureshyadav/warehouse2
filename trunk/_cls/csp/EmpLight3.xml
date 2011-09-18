@@ -7,14 +7,6 @@
 <Super>csp.Base</Super>
 <TimeCreated>62305,77157.240215</TimeCreated>
 
-<Parameter name="UseAppSecurity">
-<Description>
-Использование безопасности приложения
-Выполнять ли проверку пользователя</Description>
-<Type>%Boolean</Type>
-<Default>1</Default>
-</Parameter>
-
 <Method name="wTitle">
 <Description>
 write заголовок страницы</Description>
@@ -79,7 +71,7 @@ write заголовок на странице</Description>
 <var>order</var> - массив правил сортировки вида <example>order(key,FIELD)=direction</example>]]></Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec><![CDATA[&where:%String="",&qp:%String="",&order:%String=""]]></FormalSpec>
-<ReturnType>%ResultSet</ReturnType>
+<ReturnType>%Integer</ReturnType>
 <Implementation><![CDATA[
  s sql="SELECT IID,INAME,IKONTR,IKONTRNAME,IUSERNAME,IDATE"
  	   _",ISTATE,ISTATENAME,IDOSTAVKANAME,ICOLOR,IOPER,IOPERNAME"
@@ -156,33 +148,33 @@ write заголовок на странице</Description>
  	s:IOPER'=10 IDOSTAVKANAME=IOPERNAME
  	w "<td>",IDOSTAVKANAME,"</td>"
  	w "<td><nobr>"
- 	w "<button title='Изменить состояние' onclick='chstat(",IID,",",DOCID,")'><span class='state'/></button>"
- 	w "<button title='Распечатать накладную' onclick=""prnt('",DOCID,"@",DCLASS1,"')""><span class='print' /></button>"
+ 	w "<button class='stateDoc' onclick='chstat(",IID,",",DOCID,")'></button>"
+ 	w "<button class='printDoc' onclick=""prnt('",DOCID,"@",DCLASS1,"')""></button>"
  	
  	#;определяем наличие документов третьего уровня от инструкции (дочерние дочерних)
  	&sql(select ID,DocumentClass,Name,stat into :DOC2,:DCLASS2,:DNAME2,:DSTAT2 
  		 From Docs.Super where Source=:DOCID
  	)
  	if SQLCODE {
-	 	w "<button title='Создать внутреннюю инструкцию' onclick=""create('",DCLASS,"',",DOCID,")""><span class='new'/></button>"
+	 	w "<button class='new' onclick=""create('",DCLASS,"',",DOCID,")""></button>"
  	} else {	 
- 		w "<button title='Редактировать внутреннюю инструкцию' onclick=""lookinnerinstr('"_DOC2_"@"_DCLASS2_"')""><span class='edit'></button>"
- 		w "<button title='Распечатать внутреннюю инструкцию' onclick=""prnt('"_DOC2_"@"_DCLASS2_"')""><span class='print'/></button>"
+ 		w "<button class='edit' onclick=""lookinnerinstr('",DOC2,"@",DCLASS2,"')""></button>"
+ 		w "<button class='print' onclick=""prnt('",DOC2,"@",DCLASS2,"')""></button>"
  		if DSTAT2=1 {
-	 		w "<button title='Обработать документ' onclick=""savestore(",DOC2,",'",DNAME2,"')"" ><span class='state'/></button>"
+	 		w "<button class='state' onclick=""savestore(",DOC2,",'",DNAME2,"')"" ></button>"
  		} else {
- 			w "<button title='Документ уже обработан'><span class='out' /></button>"
+ 			w "<button class='out'></button>"
  		}
  		
 	 }
-	w:ISTATE=8 "<button title='Указать реквизиты почтового документа' onclick=""post('",IID,"')""><span class='post'/></button>"
+	w:ISTATE=8 "<button class='post' onclick=""post('",IID,"')""></button>"
  	w "</nobr></td>"
  	w "</tr>"	
  }
  d rs.Close(), rs.%Close() k rs
  d SetDCFormat^%NLS("DateSeparator",odm) ;восстанавливаем разделитель в дате 
  
- Q $$$OK
+ Q %ROWCOUNT
 ]]></Implementation>
 </Method>
 
@@ -260,10 +252,11 @@ write содержимое страницы</Description>
 	s kontrID=$P(kontr,"~") if kontrID'="" s where($i(where))="IKONTR=?",qp($i(qp))=kontrID
 	s ITypeId=$P(instrtype,"~") if ITypeId'="" s where($i(where))="IOPER=?",qp($i(qp))=ITypeId
 	if sort'="" s order($i(order),sort)=dir ;выбранный режим сортировки
-	d ..wIDocs(.where,.qp,.order) ;выводим документы с выбранными параметрами
+	s docs=..wIDocs(.where,.qp,.order) ;выводим документы с выбранными параметрами
 	
-	&html<</tbody></table>
-	</fieldset>
+	&html<</tbody></table></div>>
+	w "Всего: ",docs," документ(ов)"
+	&html<</fieldset>
 	<div id="debug"></div>
 	<script type='text/javascript' src='js/m.js'></script>
 	<script type='text/javascript'>
