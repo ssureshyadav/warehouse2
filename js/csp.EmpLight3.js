@@ -111,8 +111,18 @@ function ChangeFn(DocId){
 	var answer=window.showModalDialog("ChangeGoods.csp?DocId="+DocId,"","center:yes;status:no;dialogHeight:550px;dialogWidth:800px;resizable:yes;");
 }
 
+///собираем смещение от верха экрана
+function position(obj){
+	var top=0;
+	for (var i=obj;i;i=i.offsetParent){
+		top+=obj.offsetTop;
+	}
+	return {top:top};
+}
+
 $bind(window,"load",function(){
 	load(); //основная функция инициализации страницы
+	
 	var fr=function(o){ //ищем строку Find Row
 		var tr=null;
 		for (;o.tagName!=="TABLE";o=o.parentElement){
@@ -121,10 +131,53 @@ $bind(window,"load",function(){
 		}
 		return tr;
 	}
+	
+	var titles={
+		stateDoc: 'Изменить состояние'
+		,printDoc: 'Распечатать накладную'
+		,'new': "Создать внутреннюю инструкцию"
+		,edit: "Редактировать внутреннюю инструкцию"
+		,print: "Распечатать внутреннюю инструкцию"
+		,state: "Обработать документ"
+		,out: "Документ уже обработан"
+		,post: "Указать реквизиты почтового документа"
+	};
+	
+	var addTitle=function(obj,title){
+		if (!obj) return; if (obj.title) return;
+		var oclass=obj.className; if(!oclass) return;
+		var title=titles[oclass];  obj.title=title; 	
+	}
+	
 	$bind($g("TIB"),"mouseover",function(e){
-		if (!e) e=window.event; var tr=fr(e.srcElement); if (tr) tr.className="hover";
+		if (!e) e=window.event; var obj=e.srcElement;
+		var tr=fr(obj); if (tr) { tr.className="hover"; }
+		var tagName=obj.tagName; if (tagName==="BUTTON") { addTitle(obj); obj.style.border="1px solid #777"; }
+		
+		
 	});
+	
 	$bind($g("TIB"),"mouseout",function(e){
-		if (!e) e=window.event; var tr=fr(e.srcElement); if (tr) tr.className="";
+		if (!e) e=window.event; var obj=e.srcElement;
+		var tr=fr(obj); if (tr) tr.className="";
+		var tagName=obj.tagName; if (tagName==="BUTTON") { obj.style.border=""; }
 	});
+	
+	/// универсальные обработчики для кнопок действий
+	$bind($g("TIB"),"click",function(e){
+		if (!e) e=window.event; var obj=e.srcElement;
+		
+	});
+	
+	var boxResize=function(){
+		var screenHeight=window.screen.availHeight; //вся доступная высота
+		var box=$g("TIBbox"), top=position(box).top; //смещение от верха экрана
+		var height=box.offsetHeight; //высота самого элемента
+		var free=screenHeight-(top+height); //осталось до конца экрана
+		box.style.height=(height+free)+"px"; //
+	};
+	boxResize();
+	
+	
+	
 });
