@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.Protected">
+<Description>
+Базовая страница для защищенных страниц</Description>
+<Super>%CSP.Page</Super>
+<TimeCreated>62345,30872.045779</TimeCreated>
+
+<Method name="OnPreHTTP">
+<Description>
+Проверка пра доступа к странице</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Boolean</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+ s login=$G(%session.Data("user"))
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ q 1
+]]></Implementation>
+</Method>
+</Class>
+</Export>
