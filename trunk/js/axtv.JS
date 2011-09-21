@@ -62,13 +62,22 @@ function axtv(/*ActiveX TreeView*/tv,/*ActiveX Tree View Image List*/tvil){
 	var _fnGetPath=function(id){
 		var path=new Array();
 		var start=tv.SelectedItem;
-		if (id){ start=tv.Nodes.Item(_PREFIX+id)}
+		if (id){ start=tv.Nodes.Item(_PREFIX+id);};
 		for (var node=start;node;node=node.Parent) {
-			var nodeId=_fnExtract(node.Key)
-			path.push({id:nodeId,name:node.Text})
+			var nodeId=_fnExtract(node.Key);
+			path.push({id:nodeId,name:node.Text});
 		}
 		return path;
 	}
+	
+	var _fnIsLeaf=function(id){
+		var node=tv.SelectedItem; 
+		if (id) node=tv.Nodes.Item(_PREFIX+id);
+		
+		var count=node.Children;
+		return (!count);
+	}
+	
 	/*выделить необходимый узел*/
 	var _fnSelect=function(nodeId){
 		var nodeKey=_PREFIX+nodeId;
@@ -85,6 +94,7 @@ function axtv(/*ActiveX TreeView*/tv,/*ActiveX Tree View Image List*/tvil){
 	    ,onChange: _fnOnChange  //подключение внешнего обработчика
 	    ,getPath: _fnGetPath
 	    ,select: _fnSelect
+	    ,isLeaf: _fnIsLeaf
 	    ,getData: function(){
 		    var node=tv.SelectedItem;
 		    var id=null,text=null;

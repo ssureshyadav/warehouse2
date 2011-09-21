@@ -322,7 +322,7 @@ generate the content of a csp page.]]></Description>
 	</tr>
 	<tr><td colspan="2">
 		<div id='dlgBar'>
-			<button id="btnSelect" title="Выбрать место хранения и закрыть окно">Выбрать</button>
+			<button id="btnSelect" disabled="disabled" title="Выбрать место хранения и закрыть окно">Выбрать</button>
 			<button id="btnCancel" title="Отказаться от выбора и закрыть окно">Отмена</button>
 		</div>
 	</td></tr>
