@@ -17,15 +17,16 @@ function prnt(idclass){
 	window.open("print.csp?id="+docid+"&class="+docclass+"&sessionid="+sessionid)
 };
  
-//изменить состояние инструкции
-function chstat(docid,innerdoc){
+//изменить состояние инструкции и отобразить изменение в состоянии связанного документа
+function chstat(/*Код инструкции */docid,/*Код связанного документа*/innerdoc){
  	var newstat=window.showModalDialog("instrstates.csp","","center:yes;status:no;dialogHeight:300px;dialogWidth:300px;resizable:yes;")
 	if(newstat!=null){
-		 var ok=server.changeState(docid,newstat);
+		 var ok=server.changeState(docid,newstat); //изменение статуса инструкции
 		 if(ok.split("@")[0]!=1){
-			 alert(ok)
+			 alert(ok); //сообщение об ощибке
 		 } else {
-			 document.getElementById("Instr"+docid+"Stat").innerText=ok.split("@")[1];
+			 var stateFld=$g("Instr"+innerdoc+"Stat"); //ячейка с состоянием документа
+			 stateFld.innerText=ok.split("@")[1]; //меняем название состояния 
 		 }
 		 //location.href="emplight.csp?instr="+docid+"&newstat="+newstat;
 	 }
@@ -164,19 +165,24 @@ $bind(window,"load",function(){
 	});
 	
 	/// универсальные обработчики для кнопок действий
-	$bind($g("TIB"),"click",function(e){
+	/*$bind($g("TIB"),"click",function(e){
 		if (!e) e=window.event; var obj=e.srcElement;
 		
-	});
+	});*/
 	
 	var boxResize=function(){
-		var screenHeight=window.screen.availHeight; //вся доступная высота
+		var screenHeight=(window.innerHeight)?window.innerHeight:document.documentElement.offsetHeight;  //вся доступная высота
 		var box=$g("TIBbox"), top=position(box).top; //смещение от верха экрана
 		var height=box.offsetHeight; //высота самого элемента
 		var free=screenHeight-(top+height); //осталось до конца экрана
-		box.style.height=(height+free)+"px"; //
+		var add=(height+free+125); if (add<350) return;
+		box.style.height=add+"px"; //
+			
 	};
 	boxResize();
+	
+	$bind(window,"resize",boxResize);
+	
 	
 	
 	
