@@ -78,7 +78,7 @@ write заголовок на странице</Description>
  	   _",IPOSTNUM,IPOSTDATE,IROTNAME"
  	   _",DCLASS,DOCID,DNAME"
  	   _" from Operation.IDocView "
- 	   _" where (ISTATE Between 2 and 8) "
+ 	   _" where (ISTATE Between 2 and 8.5) "
  #; расписываем where
  s i="" for { s i=$o(where(i)) q:i=""
 	s cond=$g(where(i))  continue:cond=""
