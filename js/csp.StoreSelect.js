@@ -12,7 +12,8 @@ page.init=function(){
 	$bind($g("btnSelect"),"click",function(){ //выбор €чейки
 		var data=page.axtv.getData();
 		returnValue=data[0]+InnerSplitter+data[1];
-		window.close();
+		alert(returnValue);
+		//window.close();
 	}); //кнопка выбора
 	
 	$bind($g("btnCancel"),"click",function(){window.close()}); //отказ от выбора 
@@ -35,6 +36,7 @@ page.init=function(){
 			}
 		}
 		if (!id) return;
+		page.axtv.select(id);
 		page.setAddressBar(id);
 	});
 	$bind($g("tvToggle"),"click",function(e){
@@ -61,6 +63,10 @@ page.TreeSelectChange=function(nodeId){ //выделили узел, основна€ задача выделит
 
 //‘ормирование адресной строки
 page.setAddressBar=function(id){
+	//разрешаем или запрещаем выбор
+	var btn=$g("btnSelect"); var leaf=page.axtv.isLeaf(id);
+	(leaf)?btn.removeAttribute("disabled"):btn.setAttribute("disabled","disabled");
+	
 	var path=page.axtv.getPath(id); var html=new Array();
 	for (var i in path) {
 		var obj=path[i]; html.push("<a id='"+obj.id+"'>"+obj.name+"</a>");		
