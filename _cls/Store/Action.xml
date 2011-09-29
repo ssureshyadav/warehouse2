@@ -221,7 +221,15 @@ GetChildsErr
   q:'+ok ok
    // введем в расходную накладную реальное количество
   s ok=..ChangeRashQuant(doc.Source,tempGlob)
-  s:$ISOBJECT(doc.Source.Kontr) doc.Source.Kontr.Balance=doc.Source.Kontr.Balance-doc.Source.Summa
+  s kagent=doc.Source.Kontr
+  if $ISOBJECT(kagent){
+	  s sd=doc.Source,sdk=sd.Kontr
+	  s newBalance=sdk.Balance-sd.Summa
+	  s sdk.Balance=newBalance
+	  d ##class(Account.KontragentDetail).Change(kagent.%Id(),sd.%Id(),-sd.Summa)
+  }
+  
+  
   q:'+ok ok
   j ##class(Kontragent.Action).SendMail(doc.Source.%Id(),"Docs.Rash")
   s ok=doc.%Save()

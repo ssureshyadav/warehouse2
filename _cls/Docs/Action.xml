@@ -2069,7 +2069,8 @@ SetRashItem(RashItem,CurrentUserId,Accumulated,GoodsId,NewGoodsId)
 Обработать платёжное поручение
 <br><var>doc</var> - объект документа]]></Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>doc</FormalSpec>
+<FormalSpec>doc:Docs.Platejka</FormalSpec>
+<ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
  i '$ISOBJECT(doc.Kontr) q "В платёжном поручении не указан контрагент. Обработка документа невозможна."
  i '$ISOBJECT(doc.Poluh) q "В платёжном поручении не указан получатель платежа. Обработка документа невозможна."
@@ -2091,6 +2092,7 @@ SetRashItem(RashItem,CurrentUserId,Accumulated,GoodsId,NewGoodsId)
  s ^mtempArt("processplatej","doc.Summa")=doc.Summa
  i 'doc.Kontr.IsWe,CommonSumma<doc.Summa q "Общая сумма оплачиваемых отгрузок меньше чем сумма документа. Скорректируйте оплату."
  s doc.Kontr.Balance=doc.Kontr.Balance+doc.Summa
+ d ##class(Account.KontragentDetail).Change(doc.Kontr.%Id(),doc.%Id(),doc.Summa)
  q 1
 ]]></Implementation>
 </Method>
