@@ -201,10 +201,10 @@ GetChildsErr
        if Brak {
         s ok=..RemQuantBrak(itemGoods,item.addr,$G(KontrId),itemquantreal)
        } else {
-     	if ($ISOBJECT(item.StoreQntID)),(item.StoreQntID.Address.%Id()'=item.addr.%Id()) {
-      		d ##class(Docs.StorageOutItems).RemoveReserve(item.StoreQntID.%Id(),item.Quantity,itemId)
-      		s item.StoreQntID=""
-     	}
+      if ($ISOBJECT(item.StoreQntID)),(item.StoreQntID.Address.%Id()'=item.addr.%Id()) {
+        d ##class(Docs.StorageOutItems).RemoveReserve(item.StoreQntID.%Id(),item.Quantity,itemId)
+        s item.StoreQntID=""
+      }
         #;s ok=..remquant(itemGoods,item.addr,itemquantreal,item.StoreQntID,quantdefault,itemId)
         s ok=..RemoveQuantity(itemGoods,item.addr,itemquantreal,item.StoreQntID,quantdefault,itemId)
        }
@@ -223,10 +223,11 @@ GetChildsErr
   s ok=..ChangeRashQuant(doc.Source,tempGlob)
   s kagent=doc.Source.Kontr
   if $ISOBJECT(kagent){
-	  s sd=doc.Source,sdk=sd.Kontr
-	  s newBalance=sdk.Balance-sd.Summa
-	  s sdk.Balance=newBalance
-	  d ##class(Account.KontragentDetail).Change(kagent.%Id(),sd.%Id(),-sd.Summa)
+   s sd=doc.Source,sdk=sd.Kontr
+   s balance=sdk.Balance,docsum=sd.Summa
+   s newBalance=balance-docsum
+   s sdk.Balance=newBalance
+   d ##class(Account.Kontragent).Change(kagent.%Id(),sd.%Id(),-docsum)
   }
   
   

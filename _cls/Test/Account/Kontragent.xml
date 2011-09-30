@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Test.Account.Kontragent">
+<Description>
+Тесты для счета контрагента</Description>
+<Super>%UnitTest.TestCase</Super>
+<TimeCreated>62364,63745.683774</TimeCreated>
+
+<Method name="TestChange">
+<Description>
+Контролируем изменение счета контрагента</Description>
+<Implementation><![CDATA[
+  TSTART
+  
+  #;сбрасываем курсы 
+  &sql(Delete From Common.Dictionary16)
+  
+  #;Должен быть курс валюты 
+  s d1=$zdh("1900-01-01",3)
+  &sql(Insert Into Common.Dictionary16 (Dat,Name) Values (:d1,1))
+  s factor=##class(Common.Dictionary16).Get(d1)
+  d $$$AssertEquals(factor,1,"Подготовка курса валюты")
+  
+  #;Нужен контрагент
+  s holder=##class(Common.Kontragent).%New()
+  s holder.Name="Account holder test"
+  s sc=holder.%Save()
+  d $$$AssertEquals(sc,1,"Подготовка владельца")
+  
+  s hid=holder.%Id()
+  
+  #;Нужен документ
+  s doc=##class(Docs.Super).%New()
+  s sc=doc.%Save()
+  d $$$AssertEquals(sc,1,"Подготовка документа")
+  s did=doc.%Id()
+   
+  
+  #; Изменили счет
+  s sc=##class(Account.Kontragent).Change(holder.%Id(),doc.%Id(),10)
+  d $$$AssertEquals(sc,1,"Результат изменение счета")
+  &sql(Select shift,shiftUSD,amount,amountUSD 
+         Into :shift,:shiftUSD,:amount,:amountUSD
+       From Account.Kontragent
+       Where holder=:hid
+  )
+  
+  d $$$AssertEquals(shift,10,"Изменение в рублях")
+  d $$$AssertEquals(shiftUSD,10,"Изменение в долларах")
+  d $$$AssertEquals(amount,10,"Сумма в рублях")
+  d $$$AssertEquals(amountUSD,10,"Изменение в долларах")
+  
+  #; Добавим еще 
+  s sc=##class(Account.Kontragent).Change(holder.%Id(),doc.%Id(),20)
+  d $$$AssertEquals(sc,1,"Результат изменения счета")
+  &sql(Select shift,shiftUSD,amount,amountUSD 
+         Into :shift,:shiftUSD,:amount,:amountUSD
+       From Account.Kontragent
+       Where holder=:hid 
+       Order By Id Desc
+  )
+  
+  d $$$AssertEquals(shift,20,"Изменение в рублях")
+  d $$$AssertEquals(shiftUSD,20,"Изменение в долларах")
+  d $$$AssertEquals(amount,30,"Сумма в рублях")
+  d $$$AssertEquals(amountUSD,30,"Изменение в долларах")
+
+  #; Спишем
+  s sc=##class(Account.Kontragent).Change(holder.%Id(),doc.%Id(),-20)
+  d $$$AssertEquals(sc,1,"Результат изменения счета")
+  s (amount,amountUSD)=""
+  s sc=##class(Account.Kontragent).Get(hid,,.amount,.amountUSD)       
+  d $$$AssertEquals(amount,10,"Сумма в рублях через метод Get")
+  d $$$AssertEquals(amountUSD,10,"Изменение в долларах через метод Get")
+  
+  
+  TROLLBACK
+]]></Implementation>
+</Method>
+</Class>
+</Export>
