@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Test.Common.Dictionary16">
+<Super>%UnitTest.TestCase</Super>
+<TimeCreated>62364,63803.187259</TimeCreated>
+
+<Method name="TestGet">
+<Description>
+Получение курса на определенную дату </Description>
+<Implementation><![CDATA[
+  #;Работаем в прошлом столетии
+  TSTART
+  s d1=$zdh("1900-01-01",3) 
+  s d3=$zdh("1900-01-03",3) ;через два дня
+    
+  &sql(Insert Into Common.Dictionary16 (Dat,Name) Values (:d1,1))
+  &sql(Insert Into Common.Dictionary16 (Dat,Name) Values (:d3,3))
+    
+  s factor=##class(Common.Dictionary16).Get(d1)
+  d $$$AssertEquals(factor,1," Вставка курса доллара ")
+  s factor=##class(Common.Dictionary16).Get(d1+1) 
+  d $$$AssertEquals(factor,1," На следующий день ")
+  s factor=##class(Common.Dictionary16).Get(d3) 
+  d $$$AssertEquals(factor,3," Точно работает? ")
+  
+  TROLLBACK
+]]></Implementation>
+</Method>
+</Class>
+</Export>
