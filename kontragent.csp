@@ -302,7 +302,15 @@ w "</select></td>",!
 	</tr>
 	
 	<tr>
-		<td class=RightBottom colspan=3>Баланс <i>#($G(Balance))# </i><br>Последнее сохранение: <i>#($G(CloseString))#</i></td>
+		<td class=RightBottom colspan=3>
+			<a target="_blank" 
+			   href="csp.KontragentAccount.cls?id=#($G(KontrId))#"
+			   title="Просмотр баланса"
+			 >
+				Баланс <i>#(+$G(Balance))#</i>
+			</a>
+			<br>Последнее сохранение: <i>#($G(CloseString))#</i>
+		</td>
 		<td class=RightBottom align=center valign=middle><input type="button" style="width:250;border:0" onclick="showbank()" value="Просмотреть банковские реквизиты"></td>
 	</tr>
 >

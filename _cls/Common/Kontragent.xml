@@ -4,7 +4,7 @@
 <Description>
 Контрагенты (поставщики, производители, клиенты)</Description>
 <IncludeCode>xmlmacros</IncludeCode>
-<Super>%Persistent</Super>
+<Super>%Persistent,%Populate</Super>
 <TimeCreated>60319,62442.888387</TimeCreated>
 
 <Property name="Property126">

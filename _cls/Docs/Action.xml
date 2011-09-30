@@ -2092,7 +2092,7 @@ SetRashItem(RashItem,CurrentUserId,Accumulated,GoodsId,NewGoodsId)
  s ^mtempArt("processplatej","doc.Summa")=doc.Summa
  i 'doc.Kontr.IsWe,CommonSumma<doc.Summa q "Общая сумма оплачиваемых отгрузок меньше чем сумма документа. Скорректируйте оплату."
  s doc.Kontr.Balance=doc.Kontr.Balance+doc.Summa
- d ##class(Account.KontragentDetail).Change(doc.Kontr.%Id(),doc.%Id(),doc.Summa)
+ d ##class(Account.Kontragent).Change(doc.Kontr.%Id(),doc.%Id(),doc.Summa)
  q 1
 ]]></Implementation>
 </Method>

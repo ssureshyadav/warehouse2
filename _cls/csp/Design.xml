@@ -14,9 +14,11 @@
 <FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
+ if $IsObject(%request) m args=%request.Data
  &html<<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html><head><meta http-equiv="Content-Language" content="ru"><meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
-<head><title>> d ..wTitle(.args) &html<</title>>
+<html><head>>  d ..wMeta(.args) 
+
+ &html<<head><title>> d ..wTitle(.args) &html<</title>>
  d ..wCss(.args)
  w ..HyperEventHead()
  &html<</head><body><div style="width:90%;margin-left:auto;margin-right:auto;">
@@ -26,6 +28,18 @@
  w ..HyperEventFrame()
  &html<</body></html>>
  Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="wMeta">
+<Description>
+write Вывод мета тэгов</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	&html<<meta http-equiv="Content-Language" content="ru"><meta http-equiv="Content-Type" content="text/html; charset=windows-1251">>
+	Q ""
 ]]></Implementation>
 </Method>
 
