@@ -56,6 +56,12 @@
 <Properties>shift</Properties>
 </Index>
 
+<Property name="factor">
+<Description>
+Курс на момент изменения</Description>
+<Type>%Currency</Type>
+</Property>
+
 <Property name="shiftUSD">
 <Description>
 Насколько изменился счет</Description>
@@ -95,8 +101,8 @@
   s shift=+$g(shift,0), factor=##class(Common.Dictionary16).Get(+ts), shiftUSD=shift*factor
   s ts=$zdt(ts,3,,5) ;ODBC формат c микросекундами
   #; Проводим изменение
-  &sql( Insert Into Account.Kontragent (holder,ts,doc,shift,shiftUSD) 
-   Values (:holder,:ts,:doc,:shift,:shiftUSD) 
+  &sql( Insert Into Account.Kontragent (holder,ts,doc,shift,shiftUSD,factor) 
+   Values (:holder,:ts,:doc,:shift,:shiftUSD,:factor) 
   )
   s id=%ROWID,(sum,sumUSD)=0
   #; Узнаем итого 
@@ -172,6 +178,9 @@
 </Value>
 <Value name="9">
 <Value>shiftUSD</Value>
+</Value>
+<Value name="10">
+<Value>factor</Value>
 </Value>
 </Data>
 </Storage>
