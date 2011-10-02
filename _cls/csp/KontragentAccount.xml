@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.KontragentAccount">
+<Description>
+Просмотр журнала транзакций с контрагентом</Description>
+<Super>csp.Base</Super>
+<TimeCreated>62365,79584.542154</TimeCreated>
+
+<Parameter name="CHARSET">
+<Description><![CDATA[
+Specifies the default character set for the page.  This can be overriden using the
+&lt;CSP:CONTENT CHARSET=&gt; tag, or by setting the <b>%response</b>.CharSet property
+in the <method>OnPreHTTP</method> method.  If this parameter is not specified, then
+for Unicode systems the default charset is utf-8 and for 8-bit systems it is the
+system default charset.]]></Description>
+<Default>utf-8</Default>
+</Parameter>
+
+<Method name="wMeta">
+<Description>
+write Вывод мета тэгов</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	&html<<meta http-equiv="Content-Language" content="ru"><meta http-equiv="Content-Type" content="text/html; charset=utf-8">>
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wTitle">
+<Description>
+write заголовок страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	w "Склад.v2::Просмотр баланса контрагента"	
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wPageHeader">
+<Description>
+write заголовок на странице</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s kid=$g(args("id",1))
+	s name="",balance=""
+	if ##class(Common.Kontragent).%ExistsId(kid) {
+		s name=##class(Common.Kontragent).NameGetStored(kid)
+		s balance=##class(Common.Kontragent).BalanceGetStored(kid)
+	}
+	w "Контрагент: ",name,"; Текущий баланс: ",balance
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wCss">
+<Description>
+write заголовок страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	&html<
+	<link rel='stylesheet' type='text/css' href='css/redmond/jquery-ui-1.8.16.custom.css'/>
+	<link rel='stylesheet' type='text/css' href='css/ui.jqgrid.css'/>
+	<style type="text/css">.ui-jqgrid {font-size:90%;}</style>
+	>
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wBody">
+<Description>
+write содержимое страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ &html<<table id="table"><tr><td></td></tr></table><div id="tableCtrl"></div>
+<script type='text/javascript' src='js/jquery-1.6.4.min.js'></script>
+<script type='text/javascript' src='js/jquery-ui-1.8.16.custom.min.js'></script>
+<script type='text/javascript' src='js/i18n/grid.locale-ru.js'></script>
+<script type='text/javascript' src='js/jquery.jqGrid-4.1.2.min.js'></script>
+<script type="text/javascript">
+
+$(function(){
+ 
+ function obj2str(obj){ //преобразование js объекта в строку
+ 	var arr=new Array();
+ 	for (var i in obj){
+	 arr.push(i+"="+obj[i]);	
+	}
+ 	return arr.join("&")
+ };	
+	
+ $("#table").jqGrid({
+	datatype: function(p){
+		var query=obj2str(p); //объект в GET строку
+		#call(..gData(query,"parent.add2grid"))#		
+	}
+	,jsonReader: {repeatitems:false}
+    ,caption: "Баланс контрагента"
+    ,colModel: [
+      {name:'id',label:'Код', width:'40' ,hidden:true}
+      ,{name:'ts',label:'Дата Время', width:'140'}
+      ,{name:'doc',label:'Документ', width:'250'}
+      ,{name:'shift',label:'Cумма, руб',width:'100',search:false,align:"right"}
+      ,{name:'amount',label:'Итого, руб.',width:'100',search:false,align:"right"}
+      ,{name:'factor',label:'Курс $',width:'100',search:false,align:"right"}
+      ,{name:'amountUSD',label:'Итого, $',width:'100',search:false,align:"right"}
+    ]
+    ,postData:{holder: #(..QuoteJS($g(args("id",1))))#}
+    ,sortname:"ts",sortorder:"desc"
+    ,autowidth:true,height:450,hidegrid:false 
+    ,gridview:true ,rownumbers:true,viewrecords:true,rowNum:100
+    ,pager:"#tableCtrl" ,/*scrollrows:true,*/hoverrows:true ,scroll:1
+   });
+
+   $("#table").jqGrid('navGrid',"#tableCtrl", 
+       {add:false,edit:false,del:false,view:false,search:false}
+       ,{} //Параметры редактирования
+       ,{} //Параметры добавления - см выше
+       ,{}
+   ).jqGrid('gridResize',{minWidth:100,minHeight:100})
+    .jqGrid('filterToolbar',{searchOnEnter:false})
+   .jqGrid('navButtonAdd',"#tableCtrl",{
+    caption: "Столбцы",
+    title: "Настройка столбцов",
+    onClickButton : function (){
+        jQuery("#table").jqGrid('columnChooser');
+    }
+});
+    
+
+});
+
+window.add2grid=function(json){
+	$("#table")[0].addJSONData(json);	
+};
+
+</script>>
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="gData">
+<Description>
+Подготовка и выдача данных </Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>p:%String="",jsfunc:%String="alert"</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	
+	#;w "alert(",..QuoteJS(p),");"
+	
+	#; разбор на пары holder=12&search=false&....
+	s list=$LFS(p,"&"),i=0,keyval=""
+	while $listnext(list,i,keyval){
+		s key=$p(keyval,"="),val=$p(keyval,"=",2)
+		s p(key)=val	
+	}
+	
+	s sql="Select id,ts,STRING(doc->DocumentClass,doc) as doc,shift,amount,factor,amountUSD"
+		 _" FROM Account.Kontragent "
+		 _" Where holder = ? "
+	s qp="" s qp($i(qp))=$g(p("holder")) ;обязательный по логике параметр
+	
+	#; Where
+	if $g(p("_search"))="true" { ;включен режим поиска 
+		#; ожидаем поиска по дате времени и наименованию документа
+		#; поля ts и doc соответственно	
+		if $d(p("doc")) {
+			s sql=sql_" AND STRING(doc->DocumentClass,doc) LIKE ? "
+			s qp($i(qp))=$g(p("doc")) 
+		}
+		if $d(p("ts")) {
+			s sql=sql_" AND ts %STARTSWITH ? "
+			s qp($i(qp))=$g(p("ts")) 
+		}
+	}
+	#; сортировка 
+	s sidx=$g(p("sidx")), sord=$g(p("sord"))
+	s:sidx'="" sql=sql_" ORDER BY "_sidx_" "_sord
+	
+	#;w "alert(",..QuoteJS(sql),");"
+	
+	#; ограничения - какую страницу по сколько строк
+	s page=$g(p("page"),1), rows=$g(p("rows"),100)
+	s max=page*rows, min=max-rows
+	
+	#DIM rs as %ResultSet
+	s sc="", rs=..GetRS(sql,.qp,.sc) if '$IsObject(rs) Q 
+	
+	w jsfunc,"({rows:["
+	s records=0
+	while rs.Next(){
+		s records=records+1
+		if records<min continue
+		if records>max continue
+		d ..wRow(rs)
+		w:records<max "," 
+		
+	}
+	s total=records\rows ;целых страниц
+	s:records#rows>0 total=total+1 ;учтем остаток
+	w "],page:",page,",records:",records,",total:",total,"});"
+	d rs.Close(), rs.%Close() k rs
+]]></Implementation>
+</Method>
+
+<Method name="GetRS">
+<Description><![CDATA[
+Подготавливает запрос
+<var>qp</var> - Query Paramaters - массив(1)=value,(2)=value2]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[sql:%String,&qp:%String="",&sc:%String=""]]></FormalSpec>
+<ReturnType>%ResultSet</ReturnType>
+<Implementation><![CDATA[
+	s rs=##class(%ResultSet).%New("%DynamicQuery:SQL")
+	s sc=rs.Prepare(sql) Q:'sc ""
+	s sc=rs.Execute(
+		$g(qp(1)),$g(qp(2)),$g(qp(3)),$g(qp(4)),$g(qp(5)),$g(qp(6)),$g(qp(7)),$g(qp(8))
+		,$g(qp(9)),$g(qp(10)),$g(qp(11)),$g(qp(12)),$g(qp(13)),$g(qp(14)),$g(qp(15)),$g(qp(16))
+	)
+	q rs
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+/*&js<{"page":1,"total":1,"records":1,"rows":[
+	{"id":1
+	 ,"ts":"2011-01-01 01:01:01.75642"
+	 ,"doc":"Платежка"
+	 ,"shift":300
+	 ,"amount":1000
+	 ,"factor":28.5778
+	 ,"amountUSD":30
+	}
+]}>*/
+]]></Content>
+</UDLText>
+
+<Method name="wRow">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>rs:%ResultSet</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#define g(%fn) $g(rs.Data(%fn))
+	&js<{id:#($$$g("ID"))#,ts:#(..QuoteJS($$$g("ts")))#,doc:#(..QuoteJS($$$g("doc")))#,shift:#($$$g("shift"))#,amount:#($$$g("amount"))#,factor:#($$$g("factor"))#,amountUSD:#($$$g("amountUSD"))#}>
+	Q ""
+]]></Implementation>
+</Method>
+</Class>
+</Export>
