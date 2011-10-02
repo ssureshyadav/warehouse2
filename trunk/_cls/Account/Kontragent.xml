@@ -6,7 +6,7 @@
 Предполагается, что работа с этим классом будет производиться 
 изменение - через методы
 просмотр - SQL</Description>
-<Super>%Persistent</Super>
+<Super>%Persistent,%Populate</Super>
 <TimeCreated>62365,3056.361766</TimeCreated>
 
 <Property name="holder">
