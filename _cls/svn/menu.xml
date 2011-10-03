@@ -11,13 +11,12 @@
 <XData name="Menu">
 <Data><![CDATA[
 <MenuBase>
-<MenuBase>
 <Menu Name="%svn" Type="0">
 <MenuItem Name="topLog"/>
 <MenuItem Name="topBrowser"/>
 <MenuItem Separator="true"/>
 <MenuItem Name="topAdd" Save="100"/>
-<!--MenuItem Name="topUpdate"/>
+<MenuItem Name="topUpdate"/>
 <MenuItem Name="topUpdateRev"/>
 <MenuItem Name="topCommit"/>
 <MenuItem Separator="true"/>
@@ -28,12 +27,12 @@
 <MenuItem Name="topSwitch"/>
 <MenuItem Separator="true"/>
 <MenuItem Name="topIUpdate"/>
-<MenuItem Name="topICheckout"/-->
+<MenuItem Name="topICheckout"/>
 <MenuItem Name="topIE"/>
 <MenuItem Separator="true"/>
 <MenuItem Name="topConfig"/>
 </Menu>
-<!--Menu Name="%svnContext" Type="1">
+<Menu Name="%svnContext" Type="1">
 <MenuItem Name="subLog" Save="000"/>
 <MenuItem Separator="true"/>
 <MenuItem Name="subLock"/>
@@ -42,8 +41,7 @@
 <MenuItem Name="subUpdate" Save="000"/>
 <MenuItem Name="subCommit" Save="100"/>
 <MenuItem Name="subResolve"/>
-</Menu-->
-</MenuBase>
+</Menu>
 </MenuBase>
 ]]></Data>
 </XData>
@@ -139,41 +137,37 @@
  s menu=$piece(MenuName,","),name=$piece(MenuName,",",2)
  #; если не наше меню
  If $e(menu,1,$l($$$svn))'=$$$svn Q $$$OK
- i name="" s DisplayName="SVN"
+ 
  
  i menu=$$$svn {
-  
-  i name="topAdd" s DisplayName="Добавить новые (в рабочую копию)..." 
-  i name="topLog" s DisplayName="Показать журнал изменений" 
-  i name="topBrowser" s DisplayName="Просмотр хранилища" 
-  
-  /*i name="topUpdate" s DisplayName="1. Update working copy"
-  i name="topUpdateRev" s DisplayName="1.1. Update working copy (to revision)..."
-  i name="topCommit" s DisplayName="3. Commit changes to repository..." 
-  i name="topCheck" s DisplayName="Check for modifications"
-  
-  */
-
-  s:name="topIE" DisplayName="Экспорт..."
-  s:name="topConfig" DisplayName="Настройки плагина..."
-
-  /*i name="topRevert" s DisplayName="Revert (undo local changes)..."
-  i name="topSwitch" s DisplayName="Switch..."
-  i name="topResolve" s DisplayName="Resolve..."
-  i name="topCopy" s DisplayName="Copy (brach/tag)..."
-  i name="topIUpdate" s DisplayName="Import (UPDATE)"
-  i name="topICheckout" s DisplayName="Import (CHECKOUT)"
-  */
+  s DisplayName=$CASE(name
+  ,"topAdd":"Добавить новые (в рабочую копию)..." 
+  ,"topLog":"Показать журнал изменений" 
+  ,"topBrowser":"Просмотр хранилища" 
+  ,"topUpdate":"1. Update working copy"
+  ,"topUpdateRev":"1.1. Update working copy (to revision)..."
+  ,"topCommit":"3. Commit changes to repository..." 
+  ,"topCheck":"Check for modifications"
+  ,"topIE":"Экспорт..."
+  ,"topConfig":"Настройки плагина..."
+  ,"topRevert":"Revert (undo local changes)..."
+  ,"topSwitch":"Switch..."
+  ,"topResolve":"Resolve..."
+  ,"topCopy":"Copy (brach/tag)..."
+  ,"topIUpdate":"Обновление после UPDATE"
+  ,"topICheckout":"Обновление после CHECKOUT"
+  ,:"SVN")
   
  } elseif menu=$$$svnContext {
-  /*
-  i name="subUpdate" s DisplayName="1. Update '"_$$$removeEXT(InternalName)_"' in working copy"
-  i name="subCommit" s DisplayName="2. Commit '"_$$$removeEXT(InternalName)_"' to repository"
-  i name="subLog" s DisplayName="Show Log"
-  i name="subLock" s DisplayName="Lock..."
-  i name="subUnLock" s DisplayName="UnLock..."
-  i name="subResolve" s DisplayName="Resolved"
-  */
+  s DisplayName=$CASE(name
+  ,"subUpdate":"1. Update '"_$$$removeEXT(InternalName)_"' in working copy"
+  ,"subCommit":"2. Commit '"_$$$removeEXT(InternalName)_"' to repository"
+  ,"subLog":"Show Log"
+  ,"subLock":"Lock..."
+  ,"subUnLock":"UnLock..."
+  ,"subResolve":"Resolved"
+  ,:name)
+  
  }
  
  /*
@@ -209,13 +203,13 @@
 <CodeMode>generator</CodeMode>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
-	s ver=$system.Version.GetMajor()
-	if ver > 5 {
-		$$$GENERATE("  Q $system.CSP.GetDefaultApp($zu(5))")	
-	} else {
-		$$$GENERATE("  Q $$getDefaultApp^%SYS.cspServer2($zu(5))")	
-	}
-	Q $$$OK
+ s ver=$system.Version.GetMajor()
+ if ver > 5 {
+  $$$GENERATE("  Q $system.CSP.GetDefaultApp($zu(5))") 
+ } else {
+  $$$GENERATE("  Q $$getDefaultApp^%SYS.cspServer2($zu(5))") 
+ }
+ Q $$$OK
 ]]></Implementation>
 </Method>
 
@@ -260,9 +254,7 @@
  if Name=$$$svn_",topBrowser" {
   s Action=3, Target=$$$SVNCMD("repobrowser")_" /path:"""_$$$gSVN_"""" Q $$$OK
  }
- 
- 
- 
+  
 
  #; определение имени файла 
  if $e(InternalName)="/" {
@@ -270,11 +262,6 @@
  } else {
   s filename=..ExternalName(InternalName) ;иначе простое преобразование 
  }
-
-
- 
- 
-
 
 
  if Name=($$$svnContext_",subLog") {
@@ -328,7 +315,7 @@
   s Action=1, Target="(UPDATE IMPORT)"_$c(13,10)_"This is an import after update! Database items will be synchronized with working copy. Do you want to compile all items after import?"
  }
  
- q $$$OK
+ Q $$$OK
 ]]></Implementation>
 </Method>
 
