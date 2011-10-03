@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.GlobalBinary">
+<Description><![CDATA[
+Хранение больших файлов ресурсов (js,png,css) > 32kb в глобале и выгрузка их через csp страницу]]></Description>
+<Super>%CSP.Page</Super>
+<TimeCreated>62367,56627.311672</TimeCreated>
+
+<Parameter name="CONTENTTYPE">
+<Description><![CDATA[
+Specifies the default content type for the page.  This can be overriden using the
+&lt;CSP:CONTENT TYPE=&gt; tag, or by setting the <b>%response</b>.ContentType property
+in the <method>OnPreHTTP</method> method.  The default value if this parameter is
+not set is text/html.
+text/javascript
+text/css]]></Description>
+<Default>image/png</Default>
+</Parameter>
+
+<Parameter name="EXPIRES">
+<Description>
+В течении суток не меняется!!!</Description>
+<Default>86400</Default>
+</Parameter>
+
+<Method name="OnPage">
+<Description>
+Вывод на страницу</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ d ..Export()
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Export">
+<Description>
+Выгрузка на страницу</Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>generator</CodeMode>
+<Implementation><![CDATA[
+  s major=$system.Version.GetMajor(), class="^"_%class
+  if major < 2008 {
+   $$$GENERATE(" s strm=##class(%GlobalBinaryStream).%New() ")
+   $$$GENERATE(" s id=$LB("""_class_""",1) ")
+   $$$GENERATE(" d strm.OpenStream(id) ")
+  } else {
+   $$$GENERATE(" s oid=$lb(1,""%Stream.GlobalBinary"","""_class_""") ")
+   $$$GENERATE(" s strm=##class(%Stream.GlobalBinary).%Open(oid) ")
+  }
+  $$$GENERATE(" d strm.OutputToDevice() k strm ")
+]]></Implementation>
+</Method>
+
+<Method name="Import">
+<Description>
+Загрузка файла в глобаль </Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>generator</CodeMode>
+<FormalSpec>file:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+  s major=$system.Version.GetMajor()
+  s class="^"_%class, class=$na(@class@(1))
+  $$$GENERATE(" k "_class_" ")
+  $$$GENERATE(" s file=##class(%File).%New(file) ")
+  $$$GENERATE(" d file.Open(""RU:/TRANSLATE=0"") ")
+  if major < 2008 {
+  $$$GENERATE(" s s=##class(%GlobalBinaryStream).%New("""_class_""") ")
+  } else {
+  $$$GENERATE(" s s=##class(%Stream.GlobalBinary).%New("""_class_""") ")
+  }
+  $$$GENERATE(" d s.CopyFromAndSave(file) ")
+  $$$GENERATE(" d file.Close() k file,s ")
+  $$$GENERATE(" Q $$$OK ")
+  Q $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>
