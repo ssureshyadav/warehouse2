@@ -41,10 +41,10 @@ xmlDoc.documentElement=RootElement;
 //"Region",
 var Properties= new Array("Name","Status","Address","AddressUr","City","CityUr","Postalcode","PostalcodeUr","chief","ContPers","glavbuh","Agree","CityCode","EMail","Phones","fax","Code","Password","Activity","Property2506","Koeff","Manager","OtgruzPrincip","Property126","Property127","Property831","WCalc","Currency","Comment","Discount","NDSPayment","NotifyEmails","IsWe","AdPhone","Pseudonym");
 for(var i=0;i<Properties.length;i++){
-	var elementObject = document.getElementById(Properties[i])
-	if(elementObject==null)continue;
-	var elementValue=elementObject.value;
-	InsertXmlHeader(xmlDoc,Properties[i],elementValue,"%String");
+ var elementObject = document.getElementById(Properties[i])
+ if(elementObject==null)continue;
+ var elementValue=elementObject.value;
+ InsertXmlHeader(xmlDoc,Properties[i],elementValue,"%String");
 }
 InsertXmlHeader(xmlDoc,"region2",region2.Tag,"Users.REGION")
 InsertXmlHeader(xmlDoc,"Federal",Federal.Tag,"Common.Dictionary18")
@@ -52,9 +52,9 @@ InsertXmlHeader(xmlDoc,"OurCompany",OurCompany.Tag,"Common.Kontragent")
 var DocID=SendXml(KontrId,"Common.Kontragent",xmlDoc,sessionid,"Docs.Action.SaveSingleGood");
 if(isNaN(DocID)){alert(DocID)}
 else{
-	returnValue=1;
-	window.close();
-	}
+ returnValue=1;
+ window.close();
+ }
 }
 
 function showbank(){
@@ -63,19 +63,19 @@ window.showModalDialog("bank.csp?Kontr="+KontrId,"","center:yes;status:no;dialog
 
 function windowclose(KontrId){
 if(NewObject)
-	{
-	var ok=#server(Common.Common.DeleteItem("Common.Kontragent",KontrId))#;
-	if(isNaN(ok))alert("Ошибка удаления временного объекта\n"+ok);
-	}
+ {
+ var ok=#server(Common.Common.DeleteItem("Common.Kontragent",KontrId))#;
+ if(isNaN(ok))alert("Ошибка удаления временного объекта\n"+ok);
+ }
 if(window.confirm("Вы уверены?"))window.close();
 }
 
 function GeneratePassword() {
-	if(window.confirm("Сгенерировать новый пароль?")) 
-	{
-		 var passw = #server(Common.Common.GeneratePassword())#;
-		 Password.value = passw;
-	}
+ if(window.confirm("Сгенерировать новый пароль?")) 
+ {
+   var passw = #server(Common.Common.GeneratePassword())#;
+   Password.value = passw;
+ }
 }
 
 //функция выбора контрагента (подставит выбранного в innerText переданного объекта
@@ -142,139 +142,139 @@ SELECT{width:170px}
  s KontragentProperty2506 = ##class(Docs.Action2).GetDisplaylistOptions($G(Property2506),"Common.Kontragent||Property2506") 
 &html<
 <tr>
-	<td class=RightBottom>Наименование</td>
-	<td class=RightBottom><input type=text id=Name MAXLENGTH=50 value="#($G(Name))#"></td>
-	<td class=RightBottom>Псевдоним
-	<td class=RightBottom><input type="text" name="Pseudonym" id="Pseudonym" value="#($G(Pseudonym))#">
+ <td class=RightBottom>Наименование</td>
+ <td class=RightBottom><input type=text id=Name MAXLENGTH=50 value="#($G(Name))#"></td>
+ <td class=RightBottom>Псевдоним
+ <td class=RightBottom><input type="text" name="Pseudonym" id="Pseudonym" value="#($G(Pseudonym))#">
 
 </tr>
 
 <tr>
-	<td class=RightBottom>Адрес факт.</td>
-	<td class=RightBottom><input type=text id=Address MAXLENGTH=50 value="#($G(Address))#"></td>
-	<td class=RightBottom>Адрес юр.</td>
-	<td class=RightBottom><input type=text id=AddressUr MAXLENGTH=50 value="#($G(AddressUr))#"></td>
+ <td class=RightBottom>Адрес факт.</td>
+ <td class=RightBottom><input type=text id=Address MAXLENGTH=50 value="#($G(Address))#"></td>
+ <td class=RightBottom>Адрес юр.</td>
+ <td class=RightBottom><input type=text id=AddressUr MAXLENGTH=50 value="#($G(AddressUr))#"></td>
 </tr>
 
 <tr>
-	<td class=RightBottom>Город факт.</td>
-	<td class=RightBottom><input type=text id=City MAXLENGTH=50 value="#($G(City))#"></td>
-	<td class=RightBottom>Город юр.</td>
-	<td class=RightBottom><input type=text id=CityUr MAXLENGTH=50 value="#($G(CityUr))#"></td>
+ <td class=RightBottom>Город факт.</td>
+ <td class=RightBottom><input type=text id=City MAXLENGTH=50 value="#($G(City))#"></td>
+ <td class=RightBottom>Город юр.</td>
+ <td class=RightBottom><input type=text id=CityUr MAXLENGTH=50 value="#($G(CityUr))#"></td>
 </tr>
 
 <tr>
-	<td class=RightBottom>Индекс факт.</td>
-	<td class=RightBottom><input type=text id=Postalcode MAXLENGTH=50 value="#($G(Postalcode))#"></td>
-	<td class=RightBottom>Индекс юр.</td>
-	<td class=RightBottom><input type=text id=PostalcodeUr MAXLENGTH=50 value="#($G(PostalcodeUr))#"></td>
+ <td class=RightBottom>Индекс факт.</td>
+ <td class=RightBottom><input type=text id=Postalcode MAXLENGTH=50 value="#($G(Postalcode))#"></td>
+ <td class=RightBottom>Индекс юр.</td>
+ <td class=RightBottom><input type=text id=PostalcodeUr MAXLENGTH=50 value="#($G(PostalcodeUr))#"></td>
 </tr>
 
 <tr>
-	<td class=RightBottom>Федеральный округ</td>
-	<td class=RightBottom><span onmouseout="UnPaint(this)" onmouseover="Paint(this)" class=Kontragent onclick="ChooseRegion2(this,'Common.Dictionary18')" oncontextmenu="this.innerText='';this.Tag=''" id="Federal" Tag="#($G(Federal))#">#($G(FederalName))#</span></td>
-	<td class=RightBottom>Регион</td>
-	<td class=RightBottom><span onmouseout="UnPaint(this)" onmouseover="Paint(this)" class=Kontragent onclick="ChooseRegion2(this,'User.REGION')" oncontextmenu="this.innerText='';this.Tag=''" id="region2" Tag="#($G(region2))#">#($G(region2Name))#</span></td>
+ <td class=RightBottom>Федеральный округ</td>
+ <td class=RightBottom><span onmouseout="UnPaint(this)" onmouseover="Paint(this)" class=Kontragent onclick="ChooseRegion2(this,'Common.Dictionary18')" oncontextmenu="this.innerText='';this.Tag=''" id="Federal" Tag="#($G(Federal))#">#($G(FederalName))#</span></td>
+ <td class=RightBottom>Регион</td>
+ <td class=RightBottom><span onmouseout="UnPaint(this)" onmouseover="Paint(this)" class=Kontragent onclick="ChooseRegion2(this,'User.REGION')" oncontextmenu="this.innerText='';this.Tag=''" id="region2" Tag="#($G(region2))#">#($G(region2Name))#</span></td>
 </tr>
 
 <tr>
-	<td class=RightBottom>Директор</td>
-	<td class=RightBottom><input type=text id=chief MAXLENGTH=50 value="#($G(chief))#"></td>
-	<td class=RightBottom>Контактные лица</td>
-	<td class=RightBottom><input type=text id=ContPers MAXLENGTH=50 value="#($G(ContPers))#"></td>
+ <td class=RightBottom>Директор</td>
+ <td class=RightBottom><input type=text id=chief MAXLENGTH=50 value="#($G(chief))#"></td>
+ <td class=RightBottom>Контактные лица</td>
+ <td class=RightBottom><input type=text id=ContPers MAXLENGTH=50 value="#($G(ContPers))#"></td>
 </tr>
 
 <tr>
-	<td class=RightBottom>Главбух</td>
-	<td class=RightBottom><input type=text id=glavbuh MAXLENGTH=50 value="#($G(glavbuh))#"></td>
-	<td class=RightBottom>№ Договора</td>
-	<td class=RightBottom><input type=text id=Agree MAXLENGTH=50 value="#($G(Agree))#"></td>
+ <td class=RightBottom>Главбух</td>
+ <td class=RightBottom><input type=text id=glavbuh MAXLENGTH=50 value="#($G(glavbuh))#"></td>
+ <td class=RightBottom>№ Договора</td>
+ <td class=RightBottom><input type=text id=Agree MAXLENGTH=50 value="#($G(Agree))#"></td>
 </tr>
 
 <tr>
-	<td class=RightBottom>Код города</td>
-	<td class=RightBottom><input type=text id=CityCode MAXLENGTH=50 value="#($G(CityCode))#"></td>
-	<td class=RightBottom>E-mail</td>
-	<td class=RightBottom><input type=text id=EMail MAXLENGTH=200 value="#($G(EMail))#"></td>
+ <td class=RightBottom>Код города</td>
+ <td class=RightBottom><input type=text id=CityCode MAXLENGTH=50 value="#($G(CityCode))#"></td>
+ <td class=RightBottom>E-mail</td>
+ <td class=RightBottom><input type=text id=EMail MAXLENGTH=200 value="#($G(EMail))#"></td>
 </tr>
 
 <tr>
-	<td class=RightBottom>Телефон</td>
-	<td class=RightBottom><input type=text id=Phones MAXLENGTH=50 value="#($G(Phones))#"></td>
-	<td class=RightBottom>Факс</td>
-	<td class=RightBottom><input type=text id=fax MAXLENGTH=50 value="#($G(fax))#"></td>
+ <td class=RightBottom>Телефон</td>
+ <td class=RightBottom><input type=text id=Phones MAXLENGTH=50 value="#($G(Phones))#"></td>
+ <td class=RightBottom>Факс</td>
+ <td class=RightBottom><input type=text id=fax MAXLENGTH=50 value="#($G(fax))#"></td>
 </tr>
 
 <tr>
-	<td class=RightBottom>Телефон указанный<br>в рекламе</td>
-	<td class=RightBottom><input type=text id="AdPhone" MAXLENGTH=50 value="#($G(AdPhone))#"></td>
-	<td class=RightBottom>Статус</td>
-	<td class=RightBottom><select name="Status" id=Status>#(KontragentStatus)#</select></td>
+ <td class=RightBottom>Телефон указанный<br>в рекламе</td>
+ <td class=RightBottom><input type=text id="AdPhone" MAXLENGTH=50 value="#($G(AdPhone))#"></td>
+ <td class=RightBottom>Статус</td>
+ <td class=RightBottom><select name="Status" id=Status>#(KontragentStatus)#</select></td>
 </tr>
 
 <!-- разделитель -->
 <tr>
-	<td class=RightBottom colspan=4><br><br><br>
+ <td class=RightBottom colspan=4><br><br><br>
 </tr>
 
 
 <tr>
-	<td class=RightBottom>Уник. номер</td>
-	<td class=RightBottom><input type=text id=Code MAXLENGTH=50 value="#($G(Code))#"></td>
-	<td class=RightBottom>Пароль</td>
-	<td class=RightBottom><input type=text id="Password" MAXLENGTH=50 value="#($G(Password))#">&nbsp;&nbsp;<input type="button" onclick="GeneratePassword()" value="..." style="width:30px" title="Сгенерировать новый пароль"></td>
+ <td class=RightBottom>Уник. номер</td>
+ <td class=RightBottom><input type=text id=Code MAXLENGTH=50 value="#($G(Code))#"></td>
+ <td class=RightBottom>Пароль</td>
+ <td class=RightBottom><input type=text id="Password" MAXLENGTH=50 value="#($G(Password))#">&nbsp;&nbsp;<input type="button" onclick="GeneratePassword()" value="..." style="width:30px" title="Сгенерировать новый пароль"></td>
 </tr>
 
 <tr>
-	<td class=RightBottom>Активность</td>
-	<td class=RightBottom><select name="Activity" id=Activity>#(KontragentActivity)#</select></td>
-	<td class=RightBottom>Вид деятельности</td>
-	<td class=RightBottom><select name="Property2506" id=Property2506>#(KontragentProperty2506)#</select></td>
+ <td class=RightBottom>Активность</td>
+ <td class=RightBottom><select name="Activity" id=Activity>#(KontragentActivity)#</select></td>
+ <td class=RightBottom>Вид деятельности</td>
+ <td class=RightBottom><select name="Property2506" id=Property2506>#(KontragentProperty2506)#</select></td>
 </tr>
 
 <tr>
-	<td class=RightBottom>Работает (коэф. 1-3)</td>
-	<td class=RightBottom><input type=text id=Koeff MAXLENGTH=50 value="#($G(Koeff))#"></td>
-	<td class=RightBottom>Менеджер</td>
-	<td class=RightBottom><input type=text id=Manager MAXLENGTH=50 value="#($G(Manager))#"></td>
+ <td class=RightBottom>Работает (коэф. 1-3)</td>
+ <td class=RightBottom><input type=text id=Koeff MAXLENGTH=50 value="#($G(Koeff))#"></td>
+ <td class=RightBottom>Менеджер</td>
+ <td class=RightBottom><input type=text id=Manager MAXLENGTH=50 value="#($G(Manager))#"></td>
 </tr>
 
 <tr>
-	<td class=RightBottom>Категория цен<br>электроинструмент</td>
-	<td class=RightBottom><select name="Property126" id=Property126>> w ##class(Docs.Action2).GetClassValuesOptions($G(Property126),"Common.Dictionary9") &html<</select>
-	<td class=RightBottom>Категория цен<br>бытовая техника</td>
-	<td class=RightBottom><select name="Property127" id=Property127>> w ##class(Docs.Action2).GetClassValuesOptions($G(Property127),"Common.Dictionary9") &html<</select>
-	</td>
+ <td class=RightBottom>Категория цен<br>электроинструмент</td>
+ <td class=RightBottom><select name="Property126" id=Property126>> w ##class(Docs.Action2).GetClassValuesOptions($G(Property126),"Common.Dictionary9") &html<</select>
+ <td class=RightBottom>Категория цен<br>бытовая техника</td>
+ <td class=RightBottom><select name="Property127" id=Property127>> w ##class(Docs.Action2).GetClassValuesOptions($G(Property127),"Common.Dictionary9") &html<</select>
+ </td>
 </tr>
 
 <tr>
-	<td class=RightBottom>Принцип отгрузки</td>
-	<td class=RightBottom><select name="OtgruzPrincip" id=OtgruzPrincip>#(KontragentOtgruzPrincip)#</select></td>
-	<td class=RightBottom>Уведомлять при поступлении сообщений</td>
-	<td class=RightBottom><input type=text id="NotifyEmails" MAXLENGTH=50 value="#($G(NotifyEmails))#"></td>
-</tr>	
+ <td class=RightBottom>Принцип отгрузки</td>
+ <td class=RightBottom><select name="OtgruzPrincip" id=OtgruzPrincip>#(KontragentOtgruzPrincip)#</select></td>
+ <td class=RightBottom>Уведомлять при поступлении сообщений</td>
+ <td class=RightBottom><input type=text id="NotifyEmails" MAXLENGTH=50 value="#($G(NotifyEmails))#"></td>
+</tr> 
 
 <tr>
-	<td class=RightBottom>Способ доставки</td>
-	<td class=RightBottom><select name="Property831" id=Property831>#(CommonDictionary1)#</select></td>
-	<td class=RightBottom>Как рассчитываемся</td>
-	<td class=RightBottom><input type=text id=WCalc MAXLENGTH=50 value="#($G(WCalc))#"></td>
+ <td class=RightBottom>Способ доставки</td>
+ <td class=RightBottom><select name="Property831" id=Property831>#(CommonDictionary1)#</select></td>
+ <td class=RightBottom>Как рассчитываемся</td>
+ <td class=RightBottom><input type=text id=WCalc MAXLENGTH=50 value="#($G(WCalc))#"></td>
 </tr>
 
 <tr>
-	<td class=RightBottom>Валюта расчётов</td>
-	<td class=RightBottom><select name="Currency" id="Currency">#(KontragentCurrency)#</select></td>
+ <td class=RightBottom>Валюта расчётов</td>
+ <td class=RightBottom><select name="Currency" id="Currency">#(KontragentCurrency)#</select></td>
 >
 
 if Access11func=1 d
-	. w "<td class=RightBottom>Скидка (%)</td>"
-	. w "<td class=RightBottom><input type=text id=""Discount"" MAXLENGTH=10 value="""_$G(Discount)_"""></td>"
+ . w "<td class=RightBottom>Скидка (%)</td>"
+ . w "<td class=RightBottom><input type=text id=""Discount"" MAXLENGTH=10 value="""_$G(Discount)_"""></td>"
 else  d
-	. w "<td class=RightBottom colspan=2>Недостаточно прав для редактирования скидки</td>"
+ . w "<td class=RightBottom colspan=2>Недостаточно прав для редактирования скидки</td>"
 &html<
-	<tr>
-		<td class=RightBottom>Оплата по договору
-		<td class=RightBottom><select name="NDSPayment" id="NDSPayment">
+ <tr>
+  <td class=RightBottom>Оплата по договору
+  <td class=RightBottom><select name="NDSPayment" id="NDSPayment">
 >
 w ##class(Docs.Action2).GetDisplaylistOptions($G(NDSPayment),"Common.Kontragent||NDSPayment")
 w "</select>",!
@@ -283,41 +283,41 @@ w "<td class=RightBottom>",!
 w "<span onmouseout=""UnPaint(this)"" onmouseover=""Paint(this)"" class=Kontragent onclick=""ChooseKonragent(this)"" oncontextmenu=""this.innerText='';this.Tag=''"" id=""OurCompany"" Tag='"_$G(OurCompany)_"'>"_$G(OurCompanyName)_"</span>"
 w "</td>",!
 &html<
-	<tr>
-		<td class=RightBottom>Кому принадлежит юр.лицо
-		<td class=RightBottom><select name="IsWe" id="IsWe">
+ <tr>
+  <td class=RightBottom>Кому принадлежит юр.лицо
+  <td class=RightBottom><select name="IsWe" id="IsWe">
 >
 w ##class(Docs.Action2).GetDisplaylistOptions($G(IsWe),"Common.Kontragent||IsWe")
 w "</select></td>",!
 &html<
-		<td class=RightBottom colspan=2>&nbsp;
-	</tr>
-	</tr>
-	
-	<tr>
-		<td class=RightBottom>Комментарий</td>
-		<td class=RightBottom colspan=3>
-			<textarea name=Comment id=Comment style="width:100%">#($G(Comment))#</textarea>
-		</td>
-	</tr>
-	
-	<tr>
-		<td class=RightBottom colspan=3>Баланс: 
-			<a target="_blank" style="text-decoration: underline;" 
-			   href="csp.KontragentAccount.cls?id=#($G(KontrId))#"
-			   title="Просмотр истории баланса"
-			 >#(+$G(Balance))#</a>
-			<br>Последнее сохранение: <i>#($G(CloseString))#</i>
-		</td>
-		<td class=RightBottom align=center valign=middle><input type="button" style="width:250;border:0" onclick="showbank()" value="Просмотреть банковские реквизиты"></td>
-	</tr>
+  <td class=RightBottom colspan=2>&nbsp;
+ </tr>
+ </tr>
+ 
+ <tr>
+  <td class=RightBottom>Комментарий</td>
+  <td class=RightBottom colspan=3>
+   <textarea name=Comment id=Comment style="width:100%">#($G(Comment))#</textarea>
+  </td>
+ </tr>
+ 
+ <tr>
+  <td class=RightBottom colspan=3>Баланс: 
+   <a target="_blank" style="text-decoration: underline;" 
+      href="csp.KontragentAccount.cls?id=#($G(KontrId))#"
+      title="Просмотр истории баланса"
+    >#(+$G(Balance))#</a> руб.
+   <br>Последнее сохранение: <i>#($G(CloseString))#</i>
+  </td>
+  <td class=RightBottom align=center valign=middle><input type="button" style="width:250;border:0" onclick="showbank()" value="Просмотреть банковские реквизиты"></td>
+ </tr>
 >
 </script>
 </table>
 </td></tr>
 <tr valign=bottom><td align=center>
 <CSP:IF CONDITION="Access10func=1">
-	<sklad:Button value="Сохранить" onclick="startFun();" style="#($G(SaveButtonStyle))#">
+ <sklad:Button value="Сохранить" onclick="startFun();" style="#($G(SaveButtonStyle))#">
 </CSP:IF>
 <sklad:Button onclick="windowclose(#(KontrId)#);" value="Отмена">
 </td></tr>
