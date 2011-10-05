@@ -19,29 +19,29 @@
 <script language="jscript">
  function startFun()
  {
-	forma.submit();
+ forma.submit();
  }
-		 
+   
 function onload(){
 #(result)#
 }
 
 function hui()
 {
-	frameElement.document.all.MainFrameSet.rows="37px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,*,20px";
-	frameElement.document.all.statusFR.src='status.csp';
-	frameElement.document.all.topFR.src='toolbar.csp';
-	frameElement.document.all.goods.src="goods.csp";
-	frameElement.document.all.docs.src="docs.csp";
-	frameElement.document.all.dicts.src="dicts.csp";
-	frameElement.document.all.store.src="store.csp";
-	frameElement.document.all.tuneup.src="tuneup.csp";
-	frameElement.document.all.chief.src="chief.csp";
-	frameElement.document.all.emplight.src="emplight.csp";
-	frameElement.document.all.analyzis.src="analyzis.csp";
-	frameElement.document.all.kontr.src="kontr.csp";
-	frameElement.document.all.finance.src="finance.csp";
-	frameElement.document.all.director.src="director.csp";
+ frameElement.document.all.MainFrameSet.rows="37px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,*,20px";
+ frameElement.document.all.statusFR.src='status.csp';
+ frameElement.document.all.topFR.src='toolbar.csp';
+ frameElement.document.all.goods.src="goods.csp";
+ frameElement.document.all.docs.src="docs.csp";
+ frameElement.document.all.dicts.src="dicts.csp";
+ frameElement.document.all.store.src="store.csp";
+ frameElement.document.all.tuneup.src="tuneup.csp";
+ frameElement.document.all.chief.src="chief.csp";
+ frameElement.document.all.emplight.src="csp.EmpLight3.cls";
+ frameElement.document.all.analyzis.src="analyzis.csp";
+ frameElement.document.all.kontr.src="kontr.csp";
+ frameElement.document.all.finance.src="finance.csp";
+ frameElement.document.all.director.src="director.csp";
 }
 
 </script>
@@ -76,7 +76,7 @@ function hui()
 </script>
 </span>
 <CSP:IF CONDITION="login=7">
-	<input type="text" id="edtText" style="width:300px">
+ <input type="text" id="edtText" style="width:300px">
 <input type="button" value="test" onclick="alert(eval(edtText.value));">
 </CSP:IF>
 </body>
