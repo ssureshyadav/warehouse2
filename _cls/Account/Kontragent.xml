@@ -6,7 +6,7 @@
 Предполагается, что работа с этим классом будет производиться 
 изменение - через методы
 просмотр - SQL</Description>
-<Super>%Persistent,%Populate</Super>
+<Super>%Persistent</Super>
 <TimeCreated>62365,3056.361766</TimeCreated>
 
 <Property name="holder">
@@ -98,7 +98,7 @@
   s ts=$zu(188) ;Когда
   s holder=$g(holder) Q:'##class(Common.Kontragent).%ExistsId(holder) $$$err($$$method_"не найден контрагент с кодом: "_holder)
   s doc=$g(doc) Q:'##class(Docs.Super).%ExistsId(doc) $$$err($$$method_"не найден документ с кодом: "_doc)
-  s shift=+$g(shift,0), factor=##class(Common.Dictionary16).Get(+ts), shiftUSD=shift*factor
+  s shift=+$g(shift,0), factor=+##class(Common.Dictionary16).Get(+ts) s:factor'=0 shiftUSD=shift/factor
   s ts=$zdt(ts,3,,5) ;ODBC формат c микросекундами
   #; Проводим изменение
   &sql( Insert Into Account.Kontragent (holder,ts,doc,shift,shiftUSD,factor) 
