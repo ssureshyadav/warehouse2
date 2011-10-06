@@ -3,7 +3,7 @@
 <Class name="csp.KontragentAccount">
 <Description>
 Просмотр журнала транзакций с контрагентом</Description>
-<Super>csp.Design</Super>
+<Super>csp.Base</Super>
 <TimeCreated>62365,79584.542154</TimeCreated>
 
 <Parameter name="CHARSET">
@@ -51,9 +51,9 @@ write заголовок на странице</Description>
  s name="",balance=""
  if ##class(Common.Kontragent).%ExistsId(kid) {
   s name=##class(Common.Kontragent).NameGetStored(kid)
-  s balance=##class(Common.Kontragent).BalanceGetStored(kid)
+  s balance=+##class(Common.Kontragent).BalanceGetStored(kid)
  }
- w "Контрагент: ",name,"; Текущий баланс: ",balance
+ w "Контрагент: ",name,"; Текущий баланс: ",balance," руб. "
  Q ""
 ]]></Implementation>
 </Method>
@@ -85,51 +85,55 @@ write содержимое страницы</Description>
 <script type='text/javascript' src='js/jquery-1.6.4.min.js'></script>
 <script type='text/javascript' src='js/jquery-ui-1.8.16.custom.min.js'></script>
 <script type='text/javascript' src='js/i18n/grid.locale-ru.js'></script>
-<!--script type='text/javascript' src='js/jquery.jqGrid-4.1.2.min.js'></script-->
-<script type='text/javascript' src='js.jqgrid412min.cls'></script>
+<script type='text/javascript' src='js/jquery.jqGrid-4.1.2.min.js'></script>
 <script type="text/javascript">
 
+;
+
 $(function(){
- 
  function obj2str(obj){ //преобразование js объекта в строку
   var arr=new Array();
-  for (var i in obj){
-  arr.push(i+"="+obj[i]); 
- }
-  return arr.join("&")
+  for (var i in obj){ arr.push(i+"="+obj[i]); }
+  return arr.join("&");
  }; 
  
  $("#table").jqGrid({
- datatype: function(p){
-  var query=obj2str(p); //объект в GET строку
-  #call(..gData(query,"parent.add2grid"))#  
- }
- ,jsonReader: {repeatitems:false}
-    ,caption: "Баланс контрагента"
-    ,colModel: [
+  datatype: function(p){
+   var query=obj2str(p); //объект в GET строку
+   #call(..gData(query,"parent.add2grid"))#  
+  }
+  ,jsonReader: {repeatitems:false}
+  ,caption: "Баланс контрагента"
+  ,colModel: [
       {name:'id',label:'Код', width:'40' ,hidden:true}
-      ,{name:'ts',label:'Дата Время', width:'140'}
-      ,{name:'doc',label:'Документ', width:'250'}
+      ,{name:'doc',label:'Документ', hidden:true,search:false}
+      ,{name:'ts',label:'Дата Время', width:'140'
+      		,formatter: function (cellvalue, options, rowObject){ 
+      				var doc=rowObject["doc"].split(",");
+      				var dclass=doc[0],docid=doc[1];
+      				return "<a href='print.csp?class="+dclass+"&id="+docid+"' title='Просмотреть документ' >"+cellvalue+"</a>"; 
+      			}
+      	}
       ,{name:'shift',label:'Cумма, руб',width:'100',search:false,align:"right"}
       ,{name:'amount',label:'Итого, руб.',width:'100',search:false,align:"right"}
       ,{name:'factor',label:'Курс $',width:'100',search:false,align:"right"}
       ,{name:'amountUSD',label:'Итого, $',width:'100',search:false,align:"right"}
     ]
-    ,postData:{holder: #(..QuoteJS($g(args("id",1))))#}
-    ,sortname:"ts",sortorder:"desc"
-    ,autowidth:true,height:450,hidegrid:false 
-    ,gridview:true ,rownumbers:true,viewrecords:true,rowNum:100
-    ,pager:"#tableCtrl" ,/*scrollrows:true,*/hoverrows:true ,scroll:1
-   });
-
-   $("#table").jqGrid('navGrid',"#tableCtrl", 
+  ,postData:{holder: #(..QuoteJS($g(args("id",1))))#}
+  ,sortname:"ts",sortorder:"desc"
+  ,autowidth:true,height:450,hidegrid:false 
+  ,gridview:true ,rownumbers:true,viewrecords:true,rowNum:100
+  ,pager:"#tableCtrl" ,/*scrollrows:true,*/hoverrows:true ,scroll:1
+ });
+ 
+ $("#table").jqGrid('navGrid',"#tableCtrl", 
        {add:false,edit:false,del:false,view:false,search:false}
        ,{} //Параметры редактирования
-       ,{} //Параметры добавления - см выше
+       ,{} //Параметры добавления
        ,{}
-   ).jqGrid('gridResize',{minWidth:100,minHeight:100})
-    .jqGrid('filterToolbar',{searchOnEnter:false})
-   .jqGrid('navButtonAdd',"#tableCtrl",{
+ ).jqGrid('gridResize',{minWidth:100,minHeight:100})
+  .jqGrid('filterToolbar',{searchOnEnter:false})
+  .jqGrid('navButtonAdd',"#tableCtrl",{
     caption: "Столбцы",
     title: "Настройка столбцов",
     onClickButton : function (){
@@ -166,22 +170,24 @@ window.add2grid=function(json){
   s p(key)=val 
  }
  
- s sql="Select id,ts,STRING(doc->DocumentClass,doc) as doc,shift,amount,factor,amountUSD"
+ s sql="Select ID,ts,doc->DocumentClass as dclass,doc,shift,amount,factor,amountUSD"
    _" FROM Account.Kontragent "
    _" Where holder = ? "
  s qp="" s qp($i(qp))=$g(p("holder")) ;обязательный по логике параметр
  
  #; Where
  if $g(p("_search"))="true" { ;включен режим поиска 
-  #; ожидаем поиска по дате времени и наименованию документа
-  #; поля ts и doc соответственно 
-  if $d(p("doc")) {
-   s sql=sql_" AND STRING(doc->DocumentClass,doc) LIKE ? "
-   s qp($i(qp))=$g(p("doc")) 
-  }
+  
+  
+  #; ожидаем поиска по дата-времени 
   if $d(p("ts")) {
    s sql=sql_" AND ts %STARTSWITH ? "
    s qp($i(qp))=$g(p("ts")) 
+  }
+  #; или id 
+  if $d(p("id")) {
+   s sql=sql_" AND id = ? "
+   s qp($i(qp))=$g(p("id")) 
   }
  }
  #; сортировка 
@@ -193,6 +199,7 @@ window.add2grid=function(json){
  #; ограничения - какую страницу по сколько строк
  s page=$g(p("page"),1), rows=$g(p("rows"),100)
  s max=page*rows, min=max-rows
+ 
  
  s sc="", rs=..GetRS(sql,.qp,.sc) if '$IsObject(rs) Q 
  
@@ -252,7 +259,9 @@ window.add2grid=function(json){
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
  #define g(%fn) $g(rs.Data(%fn))
- &js<{id:#($$$g("ID"))#,ts:#(..QuoteJS($$$g("ts")))#,doc:#(..QuoteJS($$$g("doc")))#,shift:#($$$g("shift"))#,amount:#($$$g("amount"))#,factor:#($$$g("factor"))#,amountUSD:#($$$g("amountUSD"))#}>
+ &js<{id:#($$$g("ID"))#,ts:#(..QuoteJS($$$g("ts")))#
+ 			,doc:#(..QuoteJS($$$g("dclass")_","_$$$g("doc")))#
+ 			,shift:#($$$g("shift"))#,amount:#($$$g("amount"))#,factor:#($$$g("factor"))#,amountUSD:#($$$g("amountUSD"))#}>
  Q ""
 ]]></Implementation>
 </Method>
