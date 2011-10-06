@@ -12,7 +12,6 @@
  s DocDate=%request.Get("DocDate")
  s id=%request.Get("id")
  s nomnaklad=%request.Get("nomernakl")
- s ^mtempArt("Zzz") = %request.Get("AllColumns")
  
  Set:class="Docs.Remont" %response.ServerSideRedirect="screen/zayavka.csp?id="_id
  Set:class="Docs.Utiliz" %response.ServerSideRedirect="screen/actutil.csp?id="_id
@@ -31,6 +30,8 @@
  Set:class="Docs.Act" %response.ServerSideRedirect="screen/Act.csp"
  Set:class="Docs.ActNote" %response.ServerSideRedirect="screen/actnote.csp"
  Set:class="Docs.Brakremont" %response.ServerSideRedirect="screen/Brakremont.csp"
+ Set:class="Docs.Platejka" %response.ServerSideRedirect="csp.PaymentOrderView.cls"
+ 
 Quit 1
 </script>
 <html>
