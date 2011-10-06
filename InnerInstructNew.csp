@@ -12,6 +12,30 @@ Quit 1
 <script language="cache" runat="server">
  s DocId=%request.Get("DocId")
  s ClassName=%request.Get("ClassName")
+
+ s joiu=$TR($G(f),"\","?")
+ d:%request.ContentType="multipart/form-data"
+ . s obj=$G(%request.MimeData("oFile1",1))
+ . q:'$ISOBJECT(obj)
+ . //s f=$P(f,"\",1,$L(f,"\")-1)_"\GoodsImages\"
+ . s f=$P($ZU(86),"\",1,$L($ZU(86),"\")-1)_"\CSP\sklad2\SkladInstrImages\"
+ . s filename=DocId_"-"_$P(obj.FileName,"\",$L(obj.FileName,"\"))
+ . s filepath=f_filename
+ . s file=##class(%File).%New(filepath)
+ . Do file.Open("WSN")
+ . d file.CopyFrom(obj)
+ . s ok=file.%Save()
+ . i '+ok d
+ . . Do DecomposeStatus^%apiOBJ(ok,.Err)
+ . . s ^Errors($H,"err")=Err(Err)
+ . e  d
+ . . d ##class(Common.Common).SaveDocsImage(DocId,filename)
+ . . s d="window.close();"
+ . . d file.Close()
+ . . s cmd = "c:\progra~1\IrfanView\i_view32.exe "_filepath_" /resize_long=800 /aspectratio /resample /convert="_filename
+ . . if %request.Get("resize") d $ZF(-1,cmd)
+ . . //d $ZF(-1,cmd)
+
 </script>
 <html XMLNS:SKLADiGrid>
 <IMPORT NAMESPACE="SKLADiGrid" IMPLEMENTATION="htc/iGridV7.htc">
@@ -19,6 +43,7 @@ Quit 1
 <link href="style.css" type=text/css rel=stylesheet>
 <script language="jscript" src="common.js"></script>
 <script language="JScript">
+#($G(d))#;
 var DocId="#($G(DocId))#";
 var ClassName="#($G(ClassName))#";
 var sessionid="#($G(sessionid))#";
@@ -49,49 +74,66 @@ docstr.DrawHeaders(Captions,Keys,Tags);
 docstr.loadfrommethod("Docs.Action2.InnerInstructNewStr",DocId,"",ClassName+"Items");
 }
 
-function startFun()
-{
-	var InnerSplitter="~";
-	xmlDoc=docstr.GetXmlContentByRows();
-	InsertXmlHeader(xmlDoc,"storeman",storeman.Tag,"Common.Dictionary5")
-	var DocID=SendXml(DocId,ClassName,xmlDoc,sessionid);
-	if(isNaN(DocID)){alert(DocID);return}
-	var ok3=#server(Docs.Action.PrihNeedsDiff(DocID))#
-	if(isNaN(ok3)&&(ok3!="yes")){alert(ok3);return false;}
-	if(ok3=="yes")
-	{
-		okdiff=window.showModalDialog("docinnerdiff.csp?source="+DocID,"Docs.InnerDiff"+InnerSplitter+""+InnerSplitter+"","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
-		if(okdiff!=1)
-		{
-			if(okdiff!=null)alert(okdiff);
-			return false;
-		}
-	 	var ok2=#server(Docs.Action.SetSourceDoc("Docs.InnerDiff",okdiff,DocID))#
-	}	 
-	returnValue=1;
-	window.close();
+function startFun() {
+ var InnerSplitter="~";
+ xmlDoc=docstr.GetXmlContentByRows();
+ InsertXmlHeader(xmlDoc,"storeman",storeman.Tag,"Common.Dictionary5")
+ var DocID=SendXml(DocId,ClassName,xmlDoc,sessionid);
+ if(isNaN(DocID)){alert(DocID);return}
+ 
+ /*
+ //отключаем внутренние акты расхождения и проверку на необходимость создания актов
+ var ok3=#server(Docs.Action.PrihNeedsDiff(DocID))#
+ if(isNaN(ok3)&&(ok3!="yes")){alert(ok3);return false;}
+ 
+ if(ok3=="yes")  {
+  okdiff=window.showModalDialog("docinnerdiff.csp?source="+DocID,"Docs.InnerDiff"+InnerSplitter+""+InnerSplitter+"","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+  if(okdiff!=1)
+  {
+   if(okdiff!=null)alert(okdiff);
+   return false;
+  }
+   var ok2=#server(Docs.Action.SetSourceDoc("Docs.InnerDiff",okdiff,DocID))#
+ } 
+ */ 
+ 
+ returnValue=1;
+ window.close();
 }
 
 function SendXml(DocID,ClassName,xmlDoc,sessionid)
 {
-	var xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
-	xmlhttp.open("POST","xmlmethod.csp?classmethod=Docs.Action.SaveStorageDoc&id="+DocID+"&documentclass="+ClassName+"&sessionid="+sessionid, false);
-	xmlhttp.send(xmlDoc)
-	var ok=xmlhttp.responseText;
-	return ok;
+ var xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+ xmlhttp.open("POST","xmlmethod.csp?classmethod=Docs.Action.SaveStorageDoc&id="+DocID+"&documentclass="+ClassName+"&sessionid="+sessionid, false);
+ xmlhttp.send(xmlDoc)
+ var ok=xmlhttp.responseText;
+ return ok;
 }
 
  function winclose(){
  if(window.confirm("Вы уверены?"))window.close();
  }
  
-function ChangeStoreMan(TdObject){
-var newItem=window.showModalDialog("Dictionary.csp","Common.Dictionary5","center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");
-if(newItem==null){return false;}
-newArr=newItem.split("~");
-TdObject.Tag=newArr[0];
-TdObject.innerText=newArr[1];
- }
+function ChangeStoreMan(TdObject)
+{
+ var newItem=window.showModalDialog("Dictionary.csp","Common.Dictionary5","center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");
+ if(newItem==null){return false;}
+ newArr=newItem.split("~");
+ TdObject.Tag=newArr[0];
+ TdObject.innerText=newArr[1];
+}
+
+function myOnSubmitEventHandler()
+{
+ if(!window.confirm("Сохранить выбранную картинку?"))return false;
+}
+
+function ShowFoto()
+{
+ window.open("DocImages.csp?DocId="+DocId);
+}
+
+
 </script>
 <title>#($G(%session.Data("systemname")))#</title>
 <style>
@@ -131,6 +173,16 @@ font-size:14px;
  w "<tr><td><b>Ответственный<br>за погрузку<td id=""storeman"" onmouseout=""this.style.backgroundColor='#ffffff'"" onmouseover=""this.style.backgroundColor='#ddeeee'"" style='cursor:hand' Tag="""_$G(StoremanId)_""" onclick=""ChangeStoreMan(this)"">"_$G(Storeman)_"<td width=50>&nbsp;<td><b>Ответственный<br>за закрытие<td>"_$G(UserClose)
  w "</table>"
 </script>
+<tr><td>
+ <form enctype="multipart/form-data" method="post" onsubmit="return(myOnSubmitEventHandler());">
+ 
+  <input type="hidden" name="DocId" value="#(DocId)#" >
+  Добавить изображение товара<br>
+  <input name="oFile1" id="oFile1" size=30 type=file style="width:200px">
+  <input type="submit" value="загрузить" style="width:80px"><br>
+  Сжимать картинку до размера 800px по широкой стороне <input type="checkbox" name="resize" value="1" style="width:15px;border:none">
+ </form>
+ <input type="button" value="Фотографии" onclick="ShowFoto()">
 <tr height=100%><td>
 <SKLADiGrid:iGrid id="docstr" width="100%" height="300" Enabled="true"/>
 <tr><td>
