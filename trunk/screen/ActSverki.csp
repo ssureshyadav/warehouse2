@@ -1,0 +1,749 @@
+<script language="cache" runat="server">
+ 
+ s dat1=%request.Get("dat1")
+ s dat2=%request.Get("dat2")
+ 
+ s date1=$S(dat1="":"",1:$ZDH(dat1,4))
+ s date2=$S(dat2="":"",1:$ZDH(dat2,4))
+
+ s KontrId = $g(%request.Data("kontr",1)), OurCompany=$g(%request.Data("OurCompany",1))
+ if KontrId {
+	 s KontrObj = ##class(Common.Kontragent).%OpenId(KontrId)
+	 s KontrName = KontrObj.Name, KontrDir = KontrObj.chief
+	 
+	 if (+OurCompany) {
+		 s OurCompanyObj = ##class(Common.Kontragent).%OpenId(OurCompany)
+	 } else  {
+		 s OurCompanyObj = KontrObj.OurCompany
+	 }
+	 
+	 if $ISOBJECT(OurCompanyObj)  {
+		 s OurName =OurCompanyObj.Name, OurDir = OurCompanyObj.chief
+	 }
+ }
+ 
+ s ok=##class(Account.Kontragent).Get(KontrId,dat1,.saldo)
+ if '+ok s saldo=$J(0,"",2)
+ if (saldo<0) {
+	 s SaldoDeb=saldo, SaldoCred=""
+ } else {
+	 s SaldoCred=saldo, SaldoDeb=""
+ }
+</script><html xmlns:v="urn:schemas-microsoft-com:vml"
+xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:x="urn:schemas-microsoft-com:office:excel"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1251">
+<meta name=ProgId content=Excel.Sheet>
+<meta name=Generator content="Microsoft Excel 11">
+
+<!--[if !mso]>
+<style>
+v\:* {behavior:url(#default#VML);}
+o\:* {behavior:url(#default#VML);}
+x\:* {behavior:url(#default#VML);}
+.shape {behavior:url(#default#VML);}
+</style>
+<![endif]--><!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:LastAuthor>Art</o:LastAuthor>
+  <o:Revision>1</o:Revision>
+  <o:TotalTime>0</o:TotalTime>
+  <o:LastPrinted>2011-08-01T10:59:29Z</o:LastPrinted>
+  <o:Created>2011-08-01T10:59:29Z</o:Created>
+  <o:LastSaved>2011-08-15T18:07:22Z</o:LastSaved>
+  <o:Version>11.9999</o:Version>
+ </o:DocumentProperties>
+ <o:OfficeDocumentSettings>
+ </o:OfficeDocumentSettings>
+</xml><![endif]-->
+<style>
+<!--table
+	{mso-displayed-decimal-separator:"\,";
+	mso-displayed-thousand-separator:" ";}
+@page
+	{margin:.98in .79in .98in .79in;
+	mso-header-margin:.5in;
+	mso-footer-margin:.5in;}
+tr
+	{mso-height-source:auto;}
+col
+	{mso-width-source:auto;}
+br
+	{mso-data-placement:same-cell;}
+td
+	{mso-style-parent:style0;
+	padding:0px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:8.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:Arial, sans-serif;
+	mso-font-charset:0;
+	mso-number-format:General;
+	text-align:left;
+	vertical-align:bottom;
+	border:none;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	mso-protection:locked visible;
+	white-space:nowrap;
+	mso-rotate:0;}
+.xl18
+	{mso-style-parent:style0;
+	font-size:9.0pt;
+	font-weight:700;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	text-align:center;
+	vertical-align:middle;
+	border:.5pt solid windowtext;}
+.xl19
+	{mso-style-parent:style0;
+	font-weight:700;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;}
+.xl20
+	{mso-style-parent:style0;
+	font-weight:700;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	border-top:.5pt solid windowtext;
+	border-right:none;
+	border-bottom:.5pt solid windowtext;
+	border-left:.5pt solid windowtext;}
+.xl21
+	{mso-style-parent:style0;
+	font-weight:700;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	border-top:.5pt solid windowtext;
+	border-right:.5pt solid windowtext;
+	border-bottom:.5pt solid windowtext;
+	border-left:none;}
+.xl22
+	{mso-style-parent:style0;
+	font-weight:700;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	border-top:.5pt solid windowtext;
+	border-right:none;
+	border-bottom:.5pt solid windowtext;
+	border-left:none;}
+.xl23
+	{mso-style-parent:style0;
+	font-weight:700;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	text-align:right;
+	vertical-align:middle;
+	border-top:.5pt solid windowtext;
+	border-right:none;
+	border-bottom:.5pt solid windowtext;
+	border-left:none;}
+.xl24
+	{mso-style-parent:style0;
+	font-weight:700;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	text-align:right;
+	vertical-align:middle;
+	border-top:.5pt solid windowtext;
+	border-right:none;
+	border-bottom:.5pt solid windowtext;
+	border-left:.5pt solid windowtext;}
+.xl25
+	{mso-style-parent:style0;
+	font-weight:700;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	text-align:right;
+	vertical-align:middle;
+	border-top:.5pt solid windowtext;
+	border-right:.5pt solid windowtext;
+	border-bottom:.5pt solid windowtext;
+	border-left:none;}
+.xl26
+	{mso-style-parent:style0;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	vertical-align:middle;
+	border:.5pt solid windowtext;
+	white-space:normal;}
+.xl27
+	{mso-style-parent:style0;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	text-align:right;
+	vertical-align:middle;
+	border-top:.5pt solid windowtext;
+	border-right:none;
+	border-bottom:.5pt solid windowtext;
+	border-left:none;}
+.xl28
+	{mso-style-parent:style0;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	text-align:right;
+	vertical-align:middle;
+	border-top:.5pt solid windowtext;
+	border-right:none;
+	border-bottom:.5pt solid windowtext;
+	border-left:.5pt solid windowtext;}
+.xl29
+	{mso-style-parent:style0;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	text-align:right;
+	vertical-align:middle;
+	border-top:.5pt solid windowtext;
+	border-right:.5pt solid windowtext;
+	border-bottom:.5pt solid windowtext;
+	border-left:none;}
+.xl30
+	{mso-style-parent:style0;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	vertical-align:middle;
+	border-top:.5pt solid windowtext;
+	border-right:.5pt solid windowtext;
+	border-bottom:.5pt solid windowtext;
+	border-left:none;
+	white-space:normal;}
+.xl31
+	{mso-style-parent:style0;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	vertical-align:middle;
+	border-top:.5pt solid windowtext;
+	border-right:none;
+	border-bottom:.5pt solid windowtext;
+	border-left:.5pt solid windowtext;
+	white-space:normal;}
+.xl32
+	{mso-style-parent:style0;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	vertical-align:middle;
+	border-top:.5pt solid windowtext;
+	border-right:.5pt solid windowtext;
+	border-bottom:.5pt solid windowtext;
+	border-left:none;}
+.xl33
+	{mso-style-parent:style0;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	vertical-align:middle;
+	border-top:.5pt solid windowtext;
+	border-right:none;
+	border-bottom:.5pt solid windowtext;
+	border-left:.5pt solid windowtext;}
+.xl34
+	{mso-style-parent:style0;
+	font-weight:700;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	vertical-align:middle;
+	border-top:.5pt solid windowtext;
+	border-right:.5pt solid windowtext;
+	border-bottom:.5pt solid windowtext;
+	border-left:none;}
+.xl35
+	{mso-style-parent:style0;
+	font-weight:700;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	vertical-align:middle;
+	border-top:.5pt solid windowtext;
+	border-right:none;
+	border-bottom:.5pt solid windowtext;
+	border-left:.5pt solid windowtext;}
+.xl36
+	{mso-style-parent:style0;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;
+	border-top:none;
+	border-right:none;
+	border-bottom:.5pt solid windowtext;
+	border-left:none;}
+.xl37
+	{mso-style-parent:style0;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;
+	border-top:none;
+	border-right:none;
+	border-bottom:none;
+	border-left:none;}
+.xl38
+	{mso-style-parent:style0;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;}
+.xl39
+	{mso-style-parent:style0;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;
+	white-space:normal;}
+.xl40
+	{mso-style-parent:style0;
+	font-size:14.0pt;
+	font-weight:700;
+	font-family:Tahoma, sans-serif;
+	mso-font-charset:204;
+	text-align:center;
+	vertical-align:middle;}
+.xl41
+	{mso-style-parent:style0;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	white-space:normal;}
+.xl42
+	{mso-style-parent:style0;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	white-space:normal;}
+.xl43
+	{mso-style-parent:style0;
+	font-weight:700;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	mso-number-format:"\#\,\#\#0\.00\;\[Red\]\\-\#\,\#\#0\.00";
+	text-align:right;
+	vertical-align:middle;
+	border:.5pt solid windowtext;}
+.xl44
+	{mso-style-parent:style0;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	mso-number-format:"\#\,\#\#0\.00\;\[Red\]\\-\#\,\#\#0\.00";
+	text-align:right;
+	vertical-align:middle;
+	border:.5pt solid windowtext;}
+.xl45
+	{mso-style-parent:style0;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	mso-number-format:"0\.00\;\[Red\]\\-0\.00";
+	text-align:right;
+	vertical-align:middle;
+	border:.5pt solid windowtext;}
+.xl46
+	{mso-style-parent:style0;
+	font-size:10.0pt;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;
+	text-align:center;
+	white-space:normal;}
+.xl47
+	{mso-style-parent:style0;
+	font-size:10.0pt;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;
+	text-align:justify;
+	white-space:normal;}
+.xl48
+	{mso-style-parent:style0;
+	font-size:10.0pt;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;
+	vertical-align:top;
+	border-top:.5pt solid windowtext;
+	border-right:.5pt solid windowtext;
+	border-bottom:none;
+	border-left:.5pt solid windowtext;
+	white-space:normal;}
+-->
+</style>
+<!--[if gte mso 9]><xml>
+ <x:ExcelWorkbook>
+  <x:ExcelWorksheets>
+   <x:ExcelWorksheet>
+    <x:Name>TDSheet</x:Name>
+    <x:WorksheetOptions>
+     <x:DefaultRowHeight>225</x:DefaultRowHeight>
+     <x:NoSummaryRowsBelowDetail/>
+     <x:NoSummaryColumnsRightDetail/>
+     <x:DisplayPageBreak/>
+     <x:NoSummaryRowsBelowDetail/>
+     <x:NoSummaryColumnsRightDetail/>
+     <x:DisplayPageBreak/>
+     <x:Selected/>
+     <x:Panes>
+      <x:Pane>
+       <x:Number>3</x:Number>
+       <x:ActiveRow>1</x:ActiveRow>
+       <x:ActiveCol>1</x:ActiveCol>
+       <x:RangeSelection>$B$2:$O$2</x:RangeSelection>
+      </x:Pane>
+     </x:Panes>
+     <x:ProtectContents>False</x:ProtectContents>
+     <x:ProtectObjects>False</x:ProtectObjects>
+     <x:ProtectScenarios>False</x:ProtectScenarios>
+    </x:WorksheetOptions>
+   </x:ExcelWorksheet>
+  </x:ExcelWorksheets>
+  <x:WindowHeight>5895</x:WindowHeight>
+  <x:WindowWidth>11400</x:WindowWidth>
+  <x:WindowTopX>0</x:WindowTopX>
+  <x:WindowTopY>0</x:WindowTopY>
+  <x:TabRatio>0</x:TabRatio>
+  <x:RefModeR1C1/>
+  <x:ProtectStructure>False</x:ProtectStructure>
+  <x:ProtectWindows>False</x:ProtectWindows>
+ </x:ExcelWorkbook>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <o:shapedefaults v:ext="edit" spidmax="2049"/>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <o:shapelayout v:ext="edit">
+  <o:idmap v:ext="edit" data="1"/>
+ </o:shapelayout></xml><![endif]--></head><body>
+<table x:str border=0 cellpadding=0 cellspacing=0 width=971 style='border-collapse: collapse;table-layout:fixed;width:730pt'>
+ <tr height=15 style='height:11.25pt'>
+  <td height=15 width=14 style='height:11.25pt;width:11pt'></td>
+  <td width=75 style='width:61pt'></td>
+  <td width=183 style='width:135pt'></td>
+  <td width=12 style='width:9pt'></td>
+  <td width=61 style='width:43pt'></td>
+  <td width=38 style='width:29pt'></td>
+  <td width=92 style='width:69pt'></td>
+  <td width=15 style='width:11pt'></td>
+  <td width=2 style='width:2pt'></td>
+  <td width=55 style='width:41pt'></td>
+  <td width=188 style='width:141pt'></td>
+  <td width=17 style='width:13pt'></td>
+  <td width=65 style='width:49pt'></td>
+  <td width=44 style='width:33pt'></td>
+  <td width=109 style='width:82pt'></td>
+  <td width=1 style='width:1pt'></td>
+ </tr>
+ <tr height=24 style='height:18.0pt'>
+  <td height=24 style='height:18.0pt'></td>
+  <td colspan=14 class=xl40>Акт сверки</td>
+  <td></td>
+ </tr>
+ <tr height=51 style='mso-height-source:userset;height:38.45pt'>
+  <td height=51 style='height:38.45pt'></td>
+  <server>
+ #define dtru(%date) $tr(%date,"/",".") 
+ </server>
+  <td colspan=15 class=xl46 width=957 style='width:719pt'>взаимных расчетов<br>
+    между #($G(OurName))# и #($G(KontrName))# за период с #($$$dtru(dat1))# по #($$$dtru(dat2))#</td>
+ </tr>
+ <tr height=24 style='mso-height-source:userset;height:18.0pt'>
+  <td height=24 colspan=16 style='height:18.0pt;mso-ignore:colspan'></td>
+ </tr>
+ <tr height=49 style='mso-height-source:userset;height:37.35pt'>
+  <td height=49 style='height:37.35pt'></td>
+  <td colspan=15 class=xl47 width=957 style='width:719pt'>Мы,
+  нижеподписавшиеся, <u>#($G(OurDir))#</u>, с одной стороны, и <u>#($G(KontrDir))#</u>, с другой стороны, составили настоящий акт
+  сверки в том, что состояние взаимных расчетов по данным учета следующее:</td>
+ </tr>
+ <tr height=18 style='mso-height-source:userset;height:13.5pt'>
+  <td height=18 colspan=16 style='height:13.5pt;mso-ignore:colspan'></td>
+ </tr>
+
+ <tr height=17 style='mso-height-source:userset;height:13.35pt'>
+  <td height=17 style='height:13.35pt'></td>
+  <td colspan=8 class=xl48 width=478 style='width:359pt'>По
+  данным #($G(OurName))#</td>
+  <td colspan=7 class=xl48 width=479 style='border-left:none;width:360pt'>По данным #($G(KontrName))#</td>
+ </tr>
+ <tr height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 style='height:11.85pt'></td>
+  <td class=xl18>Дата</td>
+  <td colspan=2 class=xl18 style='border-left:none'>Документ</td>
+  <td colspan=2 class=xl18 style='border-left:none'>Дебет</td>
+  <td colspan=3 class=xl18 style='border-left:none'>Кредит</td>
+  <td class=xl18 style='border-left:none'>Дата</td>
+  <td colspan=2 class=xl18 style='border-left:none'>Документ</td>
+  <td colspan=2 class=xl18 style='border-left:none'>Дебет</td>
+  <td colspan=2 class=xl18 style='border-left:none'>Кредит</td>
+ </tr>
+ 
+ <tr class=xl19 height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 class=xl19 style='height:11.85pt'></td>
+  <td class=xl20 colspan=2 style='mso-ignore:colspan'>Сальдо начальное</td>
+  <td class=xl21 style='border-top:none'>&nbsp;</td>
+  <td colspan=2 class=xl43 style='border-left:none'>#(SaldoDeb)#</td>
+  <td class=xl24 style='border-top:none;border-left:none'>#(SaldoCred)#</td>
+  <td class=xl23 style='border-top:none'>&nbsp;</td>
+  <td class=xl25 style='border-top:none'>&nbsp;</td>
+  <td class=xl20 colspan=2 style='mso-ignore:colspan'>Сальдо начальное</td>
+  <td class=xl21 style='border-top:none'>&nbsp;</td>
+  <td class=xl24 style='border-top:none;border-left:none'>&nbsp;</td>
+  <td class=xl25 style='border-top:none'>&nbsp;</td>
+  <td colspan=2 class=xl43 style='border-left:none'>&nbsp;</td>
+ </tr>
+  
+<script language="cache" runat="server">
+
+ s AllowedDocs=$LB("Docs.Platejka","Docs.Rash","Docs.Otchet")
+ 
+ // выбрать все документы этого контрагента, в том числе платёжки от этого контрагента к нам
+ &sql(declare zz cursor for 
+ 	SELECT ID,Name,Dat,Tim,Summa,DocumentClass,DocumentClass->Name
+ 	INTO :ID,:Name,:Dat,:Tim,:Summa,:DocumentClass,:DocumentClassName
+ 	FROM Docs.Super
+ 	WHERE Kontr=:KontrId
+ 	and Dat>=:date1 and Dat<=:date2)
+ &sql(open zz)
+ f  &sql(fetch zz) q:SQLCODE  d
+ . //пропускаем документы не из списка AllowedDocs
+ . s return=0	//boolean переменная - определяет, стоит ли пропустить эту итерацию
+ . if '$LF(AllowedDocs,DocumentClass) s return =1
+ . k RubSumma
+ . //если расходная накладная, то извлечём рублёвую сумму
+ . if (DocumentClass="Docs.Rash") d
+ . . s obj=##class(Docs.Rash).%OpenId(ID)
+ . . if '$ISOBJECT(obj) q
+ . . s RubSumma=obj.RubSumma
+ . . if '$ISOBJECT(obj.opl) q
+ . . if obj.opl.%Id()=1 s return =1	//чейта???
+ . //если платёжка - вытащим рублёвую сумму
+ . if (DocumentClass="Docs.Platejka") d
+ . . s obj=##class(Docs.Platejka).%OpenId(ID)
+ . . if '$ISOBJECT(obj) q
+ . . s RubSumma=obj.RubSumma
+ . //если технический отчёт то попадёт только если получено бумажное подверждение
+ . if (DocumentClass="Docs.Otchet") d
+ . . s obj=##class(Docs.Otchet).%OpenId(ID)
+ . . if '$ISOBJECT(obj) q
+ . . if 'obj.GotPaperProve s return =1
+ . q:return
+ . s Docs(1,Dat,Tim,ID,"ID")=ID
+ . s Docs(1,Dat,Tim,ID,"Name")=Name
+ . s Docs(1,Dat,Tim,ID,"Dat")=Dat
+ . s Docs(1,Dat,Tim,ID,"Summa")=$G(RubSumma,Summa)
+ . s Docs(1,Dat,Tim,ID,"DocumentClass")=DocumentClass
+ . s Docs(1,Dat,Tim,ID,"DocumentClassName")=DocumentClassName
+ . s Docs(1,Dat,Tim,ID,"Kontr")=KontrId
+ &sql(close zz)
+ 
+ 
+ // выбрать платёжки от нас к этому контрагенту
+ &sql(declare zz1 cursor for 
+ 	SELECT ID,Name,Dat,Tim,RubSumma,DocumentClass,DocumentClass->Name,Kontr
+ 	INTO :ID,:Name,:Dat,:Tim,:RubSumma,:DocumentClass,:DocumentClassName,:Kontr
+ 	FROM Docs.Platejka
+ 	WHERE Poluh=:KontrId and Kontr=:OurCompany
+ 	and Dat>=:date1 and Dat<=:date2)
+ &sql(open zz1)
+ f  &sql(fetch zz1) q:SQLCODE  d
+ . //если это расходная, то извлечём рублёвую сумму
+ . s Docs(1,Dat,Tim,ID,"ID")=ID
+ . s Docs(1,Dat,Tim,ID,"Name")=Name
+ . s Docs(1,Dat,Tim,ID,"Dat")=Dat
+ . s Docs(1,Dat,Tim,ID,"Summa")=RubSumma
+ . s Docs(1,Dat,Tim,ID,"DocumentClass")=DocumentClass
+ . s Docs(1,Dat,Tim,ID,"DocumentClassName")=DocumentClassName
+ . s Docs(1,Dat,Tim,ID,"Kontr")=Kontr
+ . s Docs(1,Dat,Tim,ID,"Poluh")=KontrId
+ &sql(close zz1)
+ 
+ /*w "<!-- ",!
+ //zw Docs
+ w " -->",!*/
+ 
+ 
+ //цикл по выбранным документам
+ s dt="" f  s dt=$O(Docs(1,dt)) q:dt=""  d
+ . s tm="" f  s tm=$O(Docs(1,dt,tm)) q:tm=""  d
+ . . s (cred,deb)=""
+ . . s DocId=$O(Docs(1,dt,tm,""))
+ . . s name = Docs(1,dt,tm,DocId,"Name")
+ . . s DocumentClass = Docs(1,dt,tm,DocId,"DocumentClass")
+ . . s DocumentClassName = Docs(1,dt,tm,DocId,"DocumentClassName")
+ . . s date = Docs(1,dt,tm,DocId,"Dat")
+ . . s summa=Docs(1,dt,tm,DocId,"Summa")
+ . . s Kontr=Docs(1,dt,tm,DocId,"Kontr")
+ . . s Poluh=$G(Docs(1,dt,tm,DocId,"Poluh"))
+ . . if (DocumentClass="Docs.Rash") s cred="",deb=summa		//платная расходная накладная
+ . . if (DocumentClass="Docs.Otchet") s cred=summa,deb=""	//технический отчёт
+ . . if (DocumentClass="Docs.Platejka"),Kontr=KontrId s cred=summa,deb=""	//входящие платёжки
+ . . if (DocumentClass="Docs.Platejka"),Poluh=KontrId s cred="",deb=summa	//исходящие платёжки
+ . . s deb=$J(deb,"",2)
+ . . s cred=$J(cred,"",2)
+ . . 
+ . . s DebAll=$J($G(DebAll)+deb,"",2)
+ . . s CredAll=$J($G(CredAll)+cred,"",2)
+ . . s:+date date = $ZD(date,4)
+ . . &html<
+ <tr height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 style='height:11.85pt'></td>
+  <td class=xl18>#($$$dtru(date))#</td>
+  <td colspan=2 class=xl18 style='border-left:none'><a href="../print.csp?id=#(DocId)#&class=#(DocumentClass)#" target=_blank>#(name)#</a> (#(DocumentClassName)#)</td>
+  <td colspan=2 class=xl18 style='border-left:none'>#(deb)#</td>
+  <td colspan=3 class=xl18 style='border-left:none'>#(cred)#</td>
+  <td class=xl18 style='border-left:none'></td>
+  <td colspan=2 class=xl18 style='border-left:none'></td>
+  <td colspan=2 class=xl18 style='border-left:none'></td>
+  <td colspan=2 class=xl18 style='border-left:none'></td>
+ </tr>
+ >
+ 
+ s EndSaldoDeb=$J($ZABS(SaldoDeb-$G(DebAll)),"",2), EndSaldoCred=$J($ZABS(SaldoCred-$G(CredAll)),"",2)
+ 
+ 
+</script>
+ 
+ <tr height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 style='height:11.85pt'></td>
+  <td class=xl20 colspan=2 style='mso-ignore:colspan'>&nbsp;Обороты за период</td>
+  <td class=xl21 style='border-top:none'>&nbsp;</td>
+  <td colspan=2 class=xl43 style='border-left:none'>#($G(DebAll))#</td>
+  <td colspan=3 class=xl43 style='border-left:none'>#($G(CredAll))#</td>
+  <td class=xl20 colspan=2 style='mso-ignore:colspan'>&nbsp;Обороты за период</td>
+  <td class=xl21 style='border-top:none'>&nbsp;</td>
+  <td class=xl35 style='border-top:none;border-left:none'>&nbsp;</td>
+  <td class=xl34 style='border-top:none'>&nbsp;</td>
+  <td class=xl35 style='border-top:none;border-left:none'>&nbsp;</td>
+  <td class=xl34 style='border-top:none'>&nbsp;</td>
+ </tr>
+ <tr height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 style='height:11.85pt'></td>
+  <td class=xl20 colspan=2 style='mso-ignore:colspan'>&nbsp;Сальдо конечное</td>
+  <td class=xl21 style='border-top:none'>&nbsp;</td>
+  <td colspan=2 class=xl43 style='border-left:none'>#(EndSaldoDeb)#</td>
+  <td class=xl24 style='border-top:none;border-left:none'>#(EndSaldoCred)#</td>
+  <td class=xl23 style='border-top:none'>&nbsp;</td>
+  <td class=xl25 style='border-top:none'>&nbsp;</td>
+  <td class=xl20 colspan=2 style='mso-ignore:colspan'>&nbsp;Сальдо конечное</td>
+  <td class=xl21 style='border-top:none'>&nbsp;</td>
+  <td class=xl35 style='border-top:none;border-left:none'>&nbsp;</td>
+  <td class=xl34 style='border-top:none'>&nbsp;</td>
+  <td class=xl35 style='border-top:none;border-left:none'>&nbsp;</td>
+  <td class=xl34 style='border-top:none'>&nbsp;</td>
+ </tr>
+ <tr height=15 style='height:11.25pt'>
+  <td height=15 colspan=16 style='height:11.25pt;mso-ignore:colspan'></td>
+ </tr>
+ <tr height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 style='height:11.85pt'></td>
+  <td colspan=6 class=xl42 width=461 style='width:346pt'>&nbsp;</td>
+  <td colspan=3 style='mso-ignore:colspan'></td>
+  <td height=15 width=188 style='height:11.85pt;width:141pt'><!--[if gte vml 1]><v:shapetype
+   id="_x0000_t75" coordsize="21600,21600" o:spt="75" o:preferrelative="t"
+   path="m@4@5l@4@11@9@11@9@5xe" filled="f" stroked="f">
+   <v:stroke joinstyle="miter"/>
+   <v:formulas>
+    <v:f eqn="if lineDrawn pixelLineWidth 0"/>
+    <v:f eqn="sum @0 1 0"/>
+    <v:f eqn="sum 0 0 @1"/>
+    <v:f eqn="prod @2 1 2"/>
+    <v:f eqn="prod @3 21600 pixelWidth"/>
+    <v:f eqn="prod @3 21600 pixelHeight"/>
+    <v:f eqn="sum @0 0 1"/>
+    <v:f eqn="prod @6 1 2"/>
+    <v:f eqn="prod @7 21600 pixelWidth"/>
+    <v:f eqn="sum @8 21600 0"/>
+    <v:f eqn="prod @7 21600 pixelHeight"/>
+    <v:f eqn="sum @10 21600 0"/>
+   </v:formulas>
+   <v:path o:extrusionok="f" gradientshapeok="t" o:connecttype="rect"/>
+   <o:lock v:ext="edit" aspectratio="t"/>
+  </v:shapetype><v:shape id="_x0000_s1025" type="#_x0000_t75" style='position:absolute;
+   margin-left:13.5pt;margin-top:6.75pt;width:0;height:0;z-index:1' stroked="t"
+   strokecolor="windowText [64]">
+   <v:fill color2="windowText [64]" type="frame"/>
+   <v:imagedata src="Акт%20сверки%20№%20212.files/image001.wmz" o:title=""/>
+   <x:ClientData ObjectType="Pict">
+   </x:ClientData>
+  </v:shape><![endif]--><!--[if !mso & vml]><span style='width:141.0pt;height:11.25pt'></span><![endif]--></td>
+  <td colspan=5 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr>
+  <td></td>
+  <td colspan=6 class=xl41 width=461 style='width:346pt'><server>
+  
+   #; Footer Text
+   w "По данным ",OurName, " на ", $tr(dat2,"/","."),"<br/>"
+   s propis=0,saldo=(EndSaldoDeb-EndSaldoCred)
+ 		if (saldo>0) { ;Сальдо дебетовое
+	  	w "Задолженность ",OurName," в пользу ",KontrName," составляет <br/>",$J(EndSaldoDeb,"",2)," руб."
+	  	s propis=$J(EndSaldoDeb,"",2) w " ( ", ##class(Utils.Propis).Write(propis)," )"
+ 		} elseif (saldo<0) { ;Сальдо кредитовое
+ 			w "Задолженность ",KontrName," в пользу ",OurName," составляет <br/>",$J(EndSaldoCred,"",2)," руб."
+	 		s propis=$J(EndSaldoCred,"",2) w " ( ", ##class(Utils.Propis).Write(propis)," )"
+ 		} else {
+	 		w "Задолженность отсутствует"
+	 	} 
+   
+  </server></td>
+  <td colspan=9 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=21 style='mso-height-source:userset;height:15.75pt'>
+  <td height=21 colspan=16 style='height:15.75pt;mso-ignore:colspan'></td>
+ </tr>
+ <tr height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 style='height:11.85pt'></td>
+  <td colspan=6 class=xl42 width=461 style='width:346pt'><!-- От #($G(OurName))# -->&nbsp;</td>
+  <td></td>
+  <td colspan=7 class=xl42 width=480 style='width:361pt'></td>
+  <td></td>
+ </tr>
+ <tr height=15 style='height:11.25pt'>
+  <td height=15 colspan=16 style='height:11.25pt;mso-ignore:colspan'></td>
+ </tr>
+ <tr height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 style='height:11.85pt'></td>
+  <td colspan=6 class=xl42 width=461 style='width:346pt'>________________</td>
+  <td></td>
+  <td colspan=7 class=xl42 width=480 style='width:361pt'>________________</td>
+  <td></td>
+ </tr>
+ <tr height=15 style='height:11.25pt'>
+  <td height=15 colspan=16 style='height:11.25pt;mso-ignore:colspan'></td>
+ </tr>
+ <tr height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 style='height:11.85pt'></td>
+  <td class=xl36>&nbsp;</td>
+  <td class=xl36>&nbsp;</td>
+  <td colspan=4 width=213 style='width:160pt'> <u>(#($G(OurDir))#)</u></td>
+  <td class=xl37></td>
+  <td class=xl36>&nbsp;</td>
+  <td class=xl36>&nbsp;</td>
+  <td class=xl36>&nbsp;</td>
+  <td colspan=4 class=xl38> <u>(#($G(KontrDir))#)</u></td>
+  <td></td>
+ </tr>
+ <tr height=15 style='height:11.25pt'>
+  <td height=15 colspan=16 style='height:11.25pt;mso-ignore:colspan'></td>
+ </tr>
+ <tr height=15 style='height:11.25pt'>
+  <td height=15 style='height:11.25pt'></td>
+  <td class=xl38>М.П.</td>
+  <td class=xl38></td>
+  <td colspan=5 style='mso-ignore:colspan'></td>
+  <td class=xl38 colspan=2 style='mso-ignore:colspan'>М.П.</td>
+  <td class=xl38></td>
+  <td colspan=5 style='mso-ignore:colspan'></td>
+ </tr>
+
+</table>
+</body>
+</html>

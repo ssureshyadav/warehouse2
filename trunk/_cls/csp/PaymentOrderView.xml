@@ -191,7 +191,7 @@
   <p class=MsoNormal style='margin-left:2.85pt'><o:p>>
   
   #; Сумма прописью  
-  w ..GP(doc, "RubSumma")
+  w ##class(Utils.Propis).Write(..GP(doc, "RubSumma"))
   
   &html<</o:p></p>
   </td>
@@ -238,7 +238,8 @@
   
    #; Сумма 
    #;w doc.Summa
-   w ..GP(doc,"Summa")	 
+   ;w ..GP(doc,"Summa")	 
+   w ..GP(doc, "RubSumma")
   
   &html<</o:p></p>
   </td>
