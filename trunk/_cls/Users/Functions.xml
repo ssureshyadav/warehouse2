@@ -2,7 +2,8 @@
 <Export generator="Cache" version="20">
 <Class name="Users.Functions">
 <Description>
-Функции</Description>
+Функции системы
+Системная таблица - ИД записей из таблицы используются в коде </Description>
 <Super>%Persistent</Super>
 <TimeCreated>60407,58581.772904</TimeCreated>
 
