@@ -3,24 +3,35 @@
 <Class name="Users.FunctionUser">
 <Description>
 Функции пользователя</Description>
-<Super>%Persistent</Super>
 <TimeCreated>60399,47244.799868</TimeCreated>
 
 <Method name="ReadRole">
+<Description>
+Подготовка глобали с доступными функциями
+#define goods 1
+#define docs 3
+#define dicts 4
+#define store 15
+#define tunes 16
+#define chief 2
+#define employee 5
+#define analyzis 17
+#define kontr 18
+#define finance 14
+#define director 13</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>userid,Rol</FormalSpec>
+<FormalSpec>userid:%String,Role:%String=""</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	k ^func(userid)
 	//в параметре получаем имя роли
 	&sql(declare sdf cursor for 
-	select NameFunction into :func
-	from Users.Roles where Name=:Rol)
-    &sql(open sdf)
-    f  &sql(fetch sdf) q:SQLCODE  d
-    . s ^func(userid,func)=1 //запишем все функции данной роли данному юзеру
-    &sql(close sdf)
-	q
+		select NameFunction into :func from Users.Roles where Name=:Role
+	) &sql(open sdf)
+    for  { &sql(fetch sdf) q:SQLCODE  
+     s ^func(userid,func)=1 //запишем все функции данной роли данному юзеру
+    } &sql(close sdf)
+	q $$$OK
 ]]></Implementation>
 </Method>
 

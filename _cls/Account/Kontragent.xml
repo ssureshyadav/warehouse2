@@ -90,12 +90,12 @@
 <Description>
 Провести изменение баланса для контрагента</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>holder:%String,doc:%String,shift:%Numeric=0</FormalSpec>
+<FormalSpec>holder:%String,doc:%String,shift:%Numeric=0,ts:%TimeStamp=""</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
  #define err(%msg) $$$ERROR($$$GeneralError,%msg)
  #define method "Изменение баланса: "
-  s ts=$zu(188) ;Когда
+  s:ts="" ts=$zu(188) ;Когда
   s holder=$g(holder) Q:'##class(Common.Kontragent).%ExistsId(holder) $$$err($$$method_"не найден контрагент с кодом: "_holder)
   s doc=$g(doc) Q:'##class(Docs.Super).%ExistsId(doc) $$$err($$$method_"не найден документ с кодом: "_doc)
   s shift=+$g(shift,0), factor=+##class(Common.Dictionary16).Get(+ts) s:factor'=0 shiftUSD=shift/factor
@@ -137,8 +137,40 @@
   Where holder=:holder And ts<=:ts 
   Order By ts Desc
  )
- Q:SQLCODE=0 $$$OK
+ Q:SQLCODE=0||(SQLCODE=100) $$$OK
  Q $$$ERROR($$$GeneralError,$system.SQL.SQLCODE(SQLCODE))
+]]></Implementation>
+</Method>
+
+<Method name="Init">
+<Description>
+Инициализация счетов контрагентов по уже проведенным документам
+Вся текущая информация будет удалена
+пополняется через платежки в Doc.Action:processplatej(Docs.Platejka)
+понижается через расходную накладную в Store.Action:SaveQuantFromInstr(Docs.Rash)
+Алгоритм: проход по закрытым платежкам и расходным накладным и (пополнение/списание) баланса</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>*err:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	d ##class(Account.Kontragent).%KillExtent()
+	d ##class(Account.Kontragent).%PurgeIndices()
+	&sql(DECLARE docs CURSOR  FOR 
+		SELECT DocumentClass,ID,Kontr,Dat,Tim,Summa 
+		INTO :dclass,:did,:kontr,:d,:t,:sum
+		FROM Docs.Super
+		WHERE DocumentClass In ('Docs.Platejka','Docs.Rash')
+			 AND Stat=2
+		ORDER BY Dat,Tim
+	) &sql(OPEN docs)
+	k err
+	for { &sql(FETCH docs) Q:SQLCODE'=0
+		s sign=1 s:dclass="Docs.Rash" sign=-1
+		s sc=..Change(kontr,did,sign*sum,d_","_t)
+		s:'sc err($i(err))=sc
+	} &sql(CLOSE docs)
+	
+	Q $$$OK
 ]]></Implementation>
 </Method>
 
@@ -183,6 +215,22 @@
 <Value>factor</Value>
 </Value>
 </Data>
+<Property name="amount">
+</Property>
+<Property name="amountUSD">
+</Property>
+<Property name="doc">
+</Property>
+<Property name="factor">
+</Property>
+<Property name="holder">
+</Property>
+<Property name="shift">
+</Property>
+<Property name="shiftUSD">
+</Property>
+<Property name="ts">
+</Property>
 </Storage>
 </Class>
 </Export>

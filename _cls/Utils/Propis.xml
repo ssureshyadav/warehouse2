@@ -13,7 +13,7 @@ http://www.nestor.minsk.by/kg/2002/04/kg20411.html
 1 копейка,2 копейки,5 копеек
 тысяча - женский род
 миллион, миллиард и т.д - мужской</Description>
-<TimeCreated>62354,82118.857508</TimeCreated>
+<TimeCreated>62354,49824.646263</TimeCreated>
 
 <Method name="Write">
 <Description>
@@ -39,6 +39,8 @@ dn=2(женский), dn(10)="копеек", in(5)="копеек", in(2)="коп
 	s dn=2, dn(10)="копеек", dn(5)="копеек", dn(2)="копейки", dn(1)="копейка", dn(-1)="копеек"
  }
  s propis=$$is(int,.in)_" "_$$is(dec,.dn)
+ #; хак
+ s:+num=0 propis="ноль "_$g(in(10))_" 00 "_$g(dn(10))
  s $e(propis)=$zcvt($e(propis),"U") ;Выделение заглавной буквы
  Q propis
  
