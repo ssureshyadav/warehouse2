@@ -3,7 +3,7 @@
 <Class name="csp.KontragentAccount">
 <Description>
 Просмотр журнала транзакций с контрагентом</Description>
-<Super>csp.Base</Super>
+<Super>csp.Design</Super>
 <TimeCreated>62365,79584.542154</TimeCreated>
 
 <Parameter name="CHARSET">
