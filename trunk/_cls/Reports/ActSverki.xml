@@ -1,59 +1,108 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="20">
 <Class name="Reports.ActSverki">
-<Description>
+<Description><![CDATA[
 Акт сверки взаиморасчетов
 Замена csp-файлу screen/AktSverki 
 Необходимость появилась после требования выводить сумму в валюте контрагента
 Акт сверки взаиморасчетов — это документ, 
 отражающий состояние взаимных расчетов между сторонами за определенный период. 
-http://formz.ru/forms/act_sverki/info</Description>
+http://formz.ru/forms/act_sverki/info
+Данный класс - это объектная модель акта сверки
+<example>s act=##class(Reports.ActSverki).%New(597,192,61600,61602)
+d act.Prepare(), act.html()
+k act
+</example>]]></Description>
 <Super>%RegisteredObject</Super>
 <TimeCreated>62407,74343.06928</TimeCreated>
 
-<Property name="date1">
+<Property name="start">
 <Description>
-Начало периода </Description>
+Начало периода сверки</Description>
 <Type>%Date</Type>
 </Property>
 
-<Property name="date2">
+<Property name="stop">
 <Description>
-Конец периода </Description>
+Конец периода сверки</Description>
 <Type>%Date</Type>
 </Property>
 
-<Property name="side1">
+<Property name="we">
 <Description>
-код контрагента </Description>
+код нашей компании (слева)</Description>
 <Type>%String</Type>
 </Property>
 
-<Method name="side1Set">
+<Property name="saldoBegin">
+<Description>
+начальное сальдо контрагента</Description>
+<Type>%Currency</Type>
+<ReadOnly>1</ReadOnly>
+</Property>
+
+<Method name="weSet">
+<Description>
+Должен инициализироваться перед контрагентом</Description>
+<FormalSpec>Arg:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+		s Arg=$g(Arg) 
+	 if ##class(Common.Kontragent).%ExistsId(Arg) {
+	 	s i%we = Arg
+	 	s i%weName = ##class(Common.Kontragent).NameGetStored(Arg)
+	 	s i%weBoss = ##class(Common.Kontragent).chiefGetStored(Arg)
+	 }
+]]></Implementation>
+</Method>
+
+<Property name="weName">
+<Description>
+наименование контрагента 2, определяется при назначении кода контрагента</Description>
+<Type>%String</Type>
+<ReadOnly>1</ReadOnly>
+</Property>
+
+<Property name="weBoss">
+<Description>
+наименование контрагента 2, определяется при назначении кода контрагента</Description>
+<Type>%String</Type>
+<ReadOnly>1</ReadOnly>
+</Property>
+
+<Property name="they">
+<Description>
+код контрагента (справа) </Description>
+<Type>%String</Type>
+</Property>
+
+<Method name="theySet">
 <Description>
 При присвоении контрагента инициализируем остальные переменные </Description>
 <FormalSpec>Arg:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	 s Arg=$g(Arg) if ##class(Common.Kontragent).%ExistsId(Arg) {
-	 	s i%side1Name = ##class(Common.Kontragent).NameGetStored(KontrId)
-	 	s i%side1Boss = ##class(Common.Kontragent).chiefGetStored(KontrId)
-	 	s ..currency=##class(Common.Kontragent).OurCompanyGetStored(KontrId)  
+	 s Arg=$g(Arg) 
+	 if ##class(Common.Kontragent).%ExistsId(Arg) {
+		 s i%they=Arg
+	 	s i%theyName = ##class(Common.Kontragent).NameGetStored(Arg)
+	 	s i%theyBoss = ##class(Common.Kontragent).chiefGetStored(Arg)
+	 	s i%currency=##class(Common.Kontragent).CurrencyGetStored(Arg)  
 	 	#;Наше юр. лицо с которым работает контрагент
-	 	s ..side2=##class(Common.Kontragent).OurCompanyGetStored(KontrId)  
-	 	
+	 	s:(..we="") ..we=##class(Common.Kontragent).OurCompanyGetStored(Arg)  
 	 }
+	 Q $$$OK
 ]]></Implementation>
 </Method>
 
-<Property name="side1Name">
+<Property name="theyName">
 <Description>
 наименование контрагента, определяется при назначении кода контрагента</Description>
 <Type>%String</Type>
 <ReadOnly>1</ReadOnly>
 </Property>
 
-<Property name="side1Boss">
+<Property name="theyBoss">
 <Description>
 директор контрагента, определяется при назначении кода контрагента</Description>
 <Type>%String</Type>
@@ -65,26 +114,8 @@ http://formz.ru/forms/act_sverki/info</Description>
 Валюта расчета определяется исходя из кода контрагента</Description>
 <Type>%String</Type>
 <ReadOnly>1</ReadOnly>
-</Property>
-
-<Property name="side2">
-<Description>
-код нашей компании </Description>
-<Type>%String</Type>
-</Property>
-
-<Property name="side2Name">
-<Description>
-наименование контрагента 2, определяется при назначении кода контрагента</Description>
-<Type>%String</Type>
-<ReadOnly>1</ReadOnly>
-</Property>
-
-<Property name="side2Boss">
-<Description>
-наименование контрагента 2, определяется при назначении кода контрагента</Description>
-<Type>%String</Type>
-<ReadOnly>1</ReadOnly>
+<Parameter name="DISPLAYLIST" value=",руб.,долл."/>
+<Parameter name="VALUELIST" value=",1,2"/>
 </Property>
 
 <Property name="error">
@@ -92,5 +123,104 @@ http://formz.ru/forms/act_sverki/info</Description>
 Обнаруженные ошибки</Description>
 <Type>%String</Type>
 </Property>
+
+<Property name="docs">
+<Description>
+Массив со списком документов </Description>
+<Type>%String</Type>
+<MultiDimensional>1</MultiDimensional>
+</Property>
+
+<Method name="%OnNew">
+<Description>
+инициализация объекта </Description>
+<FormalSpec>we:%String,they:%String,start:%Date,stop:%Date</FormalSpec>
+<Private>1</Private>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s ..we=$g(we), ..they=$g(they), ..start=$g(start), ..stop=$g(stop)
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="prepare">
+<Description>
+Подготовка отчета с указанными параметрами</Description>
+<Implementation><![CDATA[
+	;узнаем начальное сальдо контрагента
+	k saldo,saldoRUR,saldoUSD s (saldo,saldoRUR,saldoUSD)=""
+	s sc=##class(Account.Kontragent).Get(..they,..start,.saldoRUR,.saldoUSD) ;начальное сальдо
+	s saldo(1)=saldoRUR, saldo(2)=saldoUSD
+	s i%saldoBegin=$g(saldo(..currency)) ;начальное сальдо в валюте контрагента
+]]></Implementation>
+</Method>
+
+<Method name="collectDocs">
+<Description>
+Выбираем все доступные документы</Description>
+<Implementation><![CDATA[
+ k ..docs ;сбрасываем список документов
+ s they=..they,start=..start,stop=..stop ;копируем для запроса
+ // выбрать все документы этого контрагента, в том числе платёжки от этого контрагента к нам
+ &sql(declare docs cursor for 
+ 	SELECT ID,DocumentClass,DocumentClass->Name,Name,Dat,Tim,Summa
+ 	-- AR: долларовая сумма документа лежит в поле "Summa"
+		-- AR: а рублёвая в поле RubSumma
+  INTO :id,:class,:classText,:name,:date,:time,:sum
+ 	FROM Docs.Super
+ 	WHERE Kontr=:they
+ 	and Dat>=:start and Dat<=:stop 
+ 	-- Обработанные документы влияющие на взаиморасчеты
+ 	and Stat=2 and DocumentClass In ('Docs.Platejka','Docs.Rash','Docs.Otchet')
+ 	) &sql(OPEN docs)
+  for { &sql(FETCH docs) q:SQLCODE  
+  s return=0	//boolean переменная - определяет, стоит ли пропустить эту итерацию
+  k RubSumma
+  
+  if (class="Docs.Rash") { ;если расходная накладная, то извлечём рублёвую сумму
+	  s RubSumma=##class(Docs.Rash).RubSummaGetStored(id)
+	  s opl="" s opl=##class(Docs.Rash).oplGetStored(id) 
+	  if opl=1 s return =1 ; оплачено по гарантии не учитывать
+  }
+  ;если платёжка - вытащим рублёвую сумму
+  if (DocumentClass="Docs.Platejka") {
+  	s exist=##class(Docs.Platejka).%ExistsId(ID) 
+  	if exist 
+  	{
+	  	s PoluhObj = ##class(Docs.Platejka).%OpenId(ID)	//документ Платёжное Поручение
+	  	if ($ISOBJECT(PoluhObj.Poluh)) s PoluhId = PoluhObj.Poluh.%Id()
+	  	//if PoluhId'=OurCompany s return=1
+	  	s RubSumma=##class(Docs.Platejka).RubSummaGetStored(ID)
+  	}
+  } 
+  ;если технический отчёт то попадёт только если получено бумажное подверждение
+  if (DocumentClass="Docs.Otchet") {
+   s exist=##class(Docs.Otchet).%ExistsId(ID) 
+   s prove=""  s:exist prove=##class(Docs.Otchet).GotPaperProveGetStored(ID) 
+   s:'prove return=1
+  }
+  continue:return
+  ;накапливаем
+  s $$$gl(1,Dat,Tim,ID,"ID")=ID
+  s $$$gl(1,Dat,Tim,ID,"Name")=Name
+  s $$$gl(1,Dat,Tim,ID,"Dat")=Dat
+  s $$$gl(1,Dat,Tim,ID,"Summa")=$G(RubSumma,Summa)
+  s $$$gl(1,Dat,Tim,ID,"DocumentClass")=DocumentClass
+  s $$$gl(1,Dat,Tim,ID,"DocumentClassName")=DocumentClassName
+  s $$$gl(1,Dat,Tim,ID,"Kontr")=KontrId
+ } &sql(close docs)
+]]></Implementation>
+</Method>
+
+<Method name="wHtml">
+<Description>
+вывод страницы с отчетом в html-excel</Description>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+
+ Q ""
+]]></Implementation>
+</Method>
 </Class>
 </Export>
