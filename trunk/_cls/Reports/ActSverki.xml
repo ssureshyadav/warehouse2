@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Reports.ActSverki">
+<Description>
+Акт сверки взаиморасчетов
+Замена csp-файлу screen/AktSverki 
+Необходимость появилась после требования выводить сумму в валюте контрагента
+Акт сверки взаиморасчетов — это документ, 
+отражающий состояние взаимных расчетов между сторонами за определенный период. 
+http://formz.ru/forms/act_sverki/info</Description>
+<Super>%RegisteredObject</Super>
+<TimeCreated>62407,74343.06928</TimeCreated>
+
+<Property name="date1">
+<Description>
+Начало периода </Description>
+<Type>%Date</Type>
+</Property>
+
+<Property name="date2">
+<Description>
+Конец периода </Description>
+<Type>%Date</Type>
+</Property>
+
+<Property name="side1">
+<Description>
+код контрагента </Description>
+<Type>%String</Type>
+</Property>
+
+<Method name="side1Set">
+<Description>
+При присвоении контрагента инициализируем остальные переменные </Description>
+<FormalSpec>Arg:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	 s Arg=$g(Arg) if ##class(Common.Kontragent).%ExistsId(Arg) {
+	 	s i%side1Name = ##class(Common.Kontragent).NameGetStored(KontrId)
+	 	s i%side1Boss = ##class(Common.Kontragent).chiefGetStored(KontrId)
+	 	s ..currency=##class(Common.Kontragent).OurCompanyGetStored(KontrId)  
+	 	#;Наше юр. лицо с которым работает контрагент
+	 	s ..side2=##class(Common.Kontragent).OurCompanyGetStored(KontrId)  
+	 	
+	 }
+]]></Implementation>
+</Method>
+
+<Property name="side1Name">
+<Description>
+наименование контрагента, определяется при назначении кода контрагента</Description>
+<Type>%String</Type>
+<ReadOnly>1</ReadOnly>
+</Property>
+
+<Property name="side1Boss">
+<Description>
+директор контрагента, определяется при назначении кода контрагента</Description>
+<Type>%String</Type>
+<ReadOnly>1</ReadOnly>
+</Property>
+
+<Property name="currency">
+<Description>
+Валюта расчета определяется исходя из кода контрагента</Description>
+<Type>%String</Type>
+<ReadOnly>1</ReadOnly>
+</Property>
+
+<Property name="side2">
+<Description>
+код нашей компании </Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="side2Name">
+<Description>
+наименование контрагента 2, определяется при назначении кода контрагента</Description>
+<Type>%String</Type>
+<ReadOnly>1</ReadOnly>
+</Property>
+
+<Property name="side2Boss">
+<Description>
+наименование контрагента 2, определяется при назначении кода контрагента</Description>
+<Type>%String</Type>
+<ReadOnly>1</ReadOnly>
+</Property>
+
+<Property name="error">
+<Description>
+Обнаруженные ошибки</Description>
+<Type>%String</Type>
+</Property>
+</Class>
+</Export>
