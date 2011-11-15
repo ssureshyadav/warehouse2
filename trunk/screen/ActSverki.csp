@@ -47,7 +47,10 @@
 	 s OurDir = ##class(Common.Kontragent).chiefGetStored(OurCompany)
  } 
  s ok=##class(Account.Kontragent).Get(KontrId,dat1,.saldo) 
+ #;w !,KontrId,";",dat1,";",saldo
+ 
  if $$$ISERR(ok) w $system.Status.GetOneErrorText(ok)  s saldo=""
+ 
  /* исправлено по замечанию Татьяны Текуновой от 26.10.2011
  	"у некоторых контрагентов, например у ООО "Элемент-сервис" входящее сальдо
   	стоит в Дебете со знаком минус. Это неверно. Данная сумма должна стоять в

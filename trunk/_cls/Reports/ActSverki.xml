@@ -10,11 +10,25 @@
 http://formz.ru/forms/act_sverki/info
 Данный класс - это объектная модель акта сверки
 <example>s act=##class(Reports.ActSverki).%New(597,192,61600,61602)
-d act.Prepare(), act.html()
+d act.Prepare(), act.Output()
 k act
 </example>]]></Description>
-<Super>%RegisteredObject</Super>
+<Super>%RegisteredObject,%CSP.Page</Super>
 <TimeCreated>62407,74343.06928</TimeCreated>
+
+<Parameter name="RUR">
+<Description>
+Код рубля</Description>
+<Type>%Integer</Type>
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="USD">
+<Description>
+Код доллара</Description>
+<Type>%Integer</Type>
+<Default>2</Default>
+</Parameter>
 
 <Property name="start">
 <Description>
@@ -34,10 +48,51 @@ k act
 <Type>%String</Type>
 </Property>
 
-<Property name="saldoBegin">
+<Property name="saldoStart">
 <Description>
-начальное сальдо контрагента</Description>
+сальдо контрагента на начало периода</Description>
 <Type>%Currency</Type>
+<InitialExpression>0</InitialExpression>
+<ReadOnly>1</ReadOnly>
+</Property>
+
+<Property name="debitStart">
+<Description>
+положительное сальдо контрагента</Description>
+<Type>%Currency</Type>
+<InitialExpression>0</InitialExpression>
+<ReadOnly>1</ReadOnly>
+</Property>
+
+<Property name="creditStart">
+<Description>
+отрицательное сальдо контрагента</Description>
+<Type>%Currency</Type>
+<InitialExpression>0</InitialExpression>
+<ReadOnly>1</ReadOnly>
+</Property>
+
+<Property name="saldoStop">
+<Description>
+сальдо контрагента на начало периода</Description>
+<Type>%Currency</Type>
+<InitialExpression>0</InitialExpression>
+<ReadOnly>1</ReadOnly>
+</Property>
+
+<Property name="debitStop">
+<Description>
+положительное сальдо контрагента</Description>
+<Type>%Currency</Type>
+<InitialExpression>0</InitialExpression>
+<ReadOnly>1</ReadOnly>
+</Property>
+
+<Property name="creditStop">
+<Description>
+отрицательное сальдо контрагента</Description>
+<Type>%Currency</Type>
+<InitialExpression>0</InitialExpression>
 <ReadOnly>1</ReadOnly>
 </Property>
 
@@ -47,12 +102,12 @@ k act
 <FormalSpec>Arg:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-		s Arg=$g(Arg) 
-	 if ##class(Common.Kontragent).%ExistsId(Arg) {
-	 	s i%we = Arg
+	s Arg=$g(Arg) 
+	if ##class(Common.Kontragent).%ExistsId(Arg) {
+		s i%we = Arg
 	 	s i%weName = ##class(Common.Kontragent).NameGetStored(Arg)
 	 	s i%weBoss = ##class(Common.Kontragent).chiefGetStored(Arg)
-	 }
+	}
 ]]></Implementation>
 </Method>
 
@@ -88,6 +143,7 @@ k act
 	 	s i%theyName = ##class(Common.Kontragent).NameGetStored(Arg)
 	 	s i%theyBoss = ##class(Common.Kontragent).chiefGetStored(Arg)
 	 	s i%currency=##class(Common.Kontragent).CurrencyGetStored(Arg)  
+	 	s i%rurMode=(..#RUR=..currency) 
 	 	#;Наше юр. лицо с которым работает контрагент
 	 	s:(..we="") ..we=##class(Common.Kontragent).OurCompanyGetStored(Arg)  
 	 }
@@ -113,15 +169,16 @@ k act
 <Description>
 Валюта расчета определяется исходя из кода контрагента</Description>
 <Type>%String</Type>
+<InitialExpression>..#RUR</InitialExpression>
 <ReadOnly>1</ReadOnly>
-<Parameter name="DISPLAYLIST" value=",руб.,долл."/>
+<Parameter name="DISPLAYLIST" value=",RUR,USD"/>
 <Parameter name="VALUELIST" value=",1,2"/>
 </Property>
 
-<Property name="error">
-<Description>
-Обнаруженные ошибки</Description>
-<Type>%String</Type>
+<Property name="rurMode">
+<Type>%Boolean</Type>
+<InitialExpression>1</InitialExpression>
+<ReadOnly>1</ReadOnly>
 </Property>
 
 <Property name="docs">
@@ -129,6 +186,22 @@ k act
 Массив со списком документов </Description>
 <Type>%String</Type>
 <MultiDimensional>1</MultiDimensional>
+</Property>
+
+<Property name="Debit">
+<Description>
+Приход за период</Description>
+<Type>%Currency</Type>
+<InitialExpression>0</InitialExpression>
+<ReadOnly>1</ReadOnly>
+</Property>
+
+<Property name="Credit">
+<Description>
+Расход за период</Description>
+<Type>%Currency</Type>
+<InitialExpression>0</InitialExpression>
+<ReadOnly>1</ReadOnly>
 </Property>
 
 <Method name="%OnNew">
@@ -144,82 +217,632 @@ k act
 ]]></Implementation>
 </Method>
 
-<Method name="prepare">
+<Method name="Prepare">
 <Description>
 Подготовка отчета с указанными параметрами</Description>
 <Implementation><![CDATA[
 	;узнаем начальное сальдо контрагента
-	k saldo,saldoRUR,saldoUSD s (saldo,saldoRUR,saldoUSD)=""
-	s sc=##class(Account.Kontragent).Get(..they,..start,.saldoRUR,.saldoUSD) ;начальное сальдо
-	s saldo(1)=saldoRUR, saldo(2)=saldoUSD
-	s i%saldoBegin=$g(saldo(..currency)) ;начальное сальдо в валюте контрагента
+	s sc=##class(Account.Kontragent).Get(..they,$zd(..start,4),.rur,.usd) ;начальное сальдо
+	#;w ..they,";",..start,";",rur,";",usd
+	s saldo=$S(..rurMode:rur,1:usd) ;если валюты только две
+	s i%saldoStart=saldo ;начальное сальдо в валюте контрагента
+	if saldo>0 s i%debitStart=saldo
+	if saldo<0 s i%creditStart=saldo*-1
+	
+	d ..getTheyDocs() ;собираем документы от контрагента (кредит)
+	d ..getOurDocs() ;собираем документы от контрагента (дебет)
+	
+	s total = saldo + ..Debit - ..Credit
+	s i%saldoStop=total
+	if total>0 s i%debitStop=total
+	if total<0 s i%creditStop=total*-1
 ]]></Implementation>
 </Method>
 
-<Method name="collectDocs">
+<Method name="getTheyDocs">
 <Description>
-Выбираем все доступные документы</Description>
+Выбираем все документы от контрагента</Description>
+<ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
+	
  k ..docs ;сбрасываем список документов
  s they=..they,start=..start,stop=..stop ;копируем для запроса
  // выбрать все документы этого контрагента, в том числе платёжки от этого контрагента к нам
- &sql(declare docs cursor for 
+ &sql(declare theyDocs cursor for 
  	SELECT ID,DocumentClass,DocumentClass->Name,Name,Dat,Tim,Summa
- 	-- AR: долларовая сумма документа лежит в поле "Summa"
-		-- AR: а рублёвая в поле RubSumma
-  INTO :id,:class,:classText,:name,:date,:time,:sum
+ 	INTO :id,:class,:classText,:name,:date,:time,:sum
  	FROM Docs.Super
- 	WHERE Kontr=:they
- 	and Dat>=:start and Dat<=:stop 
- 	-- Обработанные документы влияющие на взаиморасчеты
- 	and Stat=2 and DocumentClass In ('Docs.Platejka','Docs.Rash','Docs.Otchet')
- 	) &sql(OPEN docs)
-  for { &sql(FETCH docs) q:SQLCODE  
-  s return=0	//boolean переменная - определяет, стоит ли пропустить эту итерацию
-  k RubSumma
-  
-  if (class="Docs.Rash") { ;если расходная накладная, то извлечём рублёвую сумму
-	  s RubSumma=##class(Docs.Rash).RubSummaGetStored(id)
-	  s opl="" s opl=##class(Docs.Rash).oplGetStored(id) 
-	  if opl=1 s return =1 ; оплачено по гарантии не учитывать
-  }
-  ;если платёжка - вытащим рублёвую сумму
-  if (DocumentClass="Docs.Platejka") {
-  	s exist=##class(Docs.Platejka).%ExistsId(ID) 
-  	if exist 
-  	{
-	  	s PoluhObj = ##class(Docs.Platejka).%OpenId(ID)	//документ Платёжное Поручение
-	  	if ($ISOBJECT(PoluhObj.Poluh)) s PoluhId = PoluhObj.Poluh.%Id()
-	  	//if PoluhId'=OurCompany s return=1
-	  	s RubSumma=##class(Docs.Platejka).RubSummaGetStored(ID)
-  	}
-  } 
-  ;если технический отчёт то попадёт только если получено бумажное подверждение
-  if (DocumentClass="Docs.Otchet") {
-   s exist=##class(Docs.Otchet).%ExistsId(ID) 
-   s prove=""  s:exist prove=##class(Docs.Otchet).GotPaperProveGetStored(ID) 
-   s:'prove return=1
-  }
-  continue:return
-  ;накапливаем
-  s $$$gl(1,Dat,Tim,ID,"ID")=ID
-  s $$$gl(1,Dat,Tim,ID,"Name")=Name
-  s $$$gl(1,Dat,Tim,ID,"Dat")=Dat
-  s $$$gl(1,Dat,Tim,ID,"Summa")=$G(RubSumma,Summa)
-  s $$$gl(1,Dat,Tim,ID,"DocumentClass")=DocumentClass
-  s $$$gl(1,Dat,Tim,ID,"DocumentClassName")=DocumentClassName
-  s $$$gl(1,Dat,Tim,ID,"Kontr")=KontrId
- } &sql(close docs)
+ 	WHERE Kontr=:they And Dat>=:start and Dat<=:stop 
+ 	 And Stat=2 -- Обработанные документы 
+ 	 And DocumentClass In ('Docs.Platejka','Docs.Rash','Docs.Otchet') -- влияющие на взаиморасчеты
+  ) &sql(OPEN theyDocs)
+  s count=0
+  for { &sql(FETCH theyDocs) q:SQLCODE  
+					if (class="Docs.Rash") { ;если расходная накладная, то извлечём рублёвую сумму
+						s opl=##class(Docs.Rash).oplGetStored(id) 
+						if opl=1 continue ; оплачено по гарантии не учитывать
+						s:..rurMode sum=##class(Docs.Rash).RubSummaGetStored(id)
+					}
+					if (class="Docs.Otchet") { ;если технический отчёт
+						s prove=##class(Docs.Otchet).GotPaperProveGetStored(id) 
+						if 'prove continue  ;только если получено бумажное подверждение
+						#; технический отчет валюто-зависимый, поле Summa содержит в валюте контрагента
+					}
+					if (class="Docs.Platejka") { ;если платёжка - вытащим рублёвую сумму
+						s:..rurMode sum=##class(Docs.Platejka).RubSummaGetStored(id)
+					} 
+					s count=count+1
+					s ..docs(id)="" 
+					s ..docs(id,"class")=class, ..docs(id,"classText")=classText
+					s ..docs(id,"name")=name, ..docs(id,"date")=date
+					s ..docs(id,"credit")=sum ;все уходит в кредит
+					s i%Credit=sum+..Credit
+
+ } &sql(close theyDocs)
+ s ..docs=count
+ Q $$$OK
 ]]></Implementation>
 </Method>
 
-<Method name="wHtml">
+<Method name="getOurDocs">
+<Description>
+Собираем документы от нас к контрагенту</Description>
+<Implementation><![CDATA[
+ // выбрать платёжки от нас к этому контрагенту
+ s we=..we, they=..they,start=..start,stop=..stop ;копируем для запроса 
+ &sql(declare ourDocs cursor for 
+ 	SELECT ID,DocumentClass,DocumentClass->Name,Name,Dat,Tim,Summa,RubSumma
+ 	INTO :id,:class,:classText,:name,:date,:time,:sum,:rSum
+ 	FROM Docs.Platejka
+ 	WHERE Poluh=:they and Kontr=:we and Stat=2
+ 	and Dat>=:start and Dat<=:stop)
+ &sql(open ourDocs)
+ s count=..docs
+ f { &sql(fetch ourDocs) q:SQLCODE  
+	s ..docs(id)=""
+	s ..docs(id,"class")=class, ..docs(id,"classText")=classText
+	s ..docs(id,"name")=name, ..docs(id,"date")=date
+	s summa=$S(..rurMode:rSum,1:sum) 
+	s ..docs(id,"debit")=summa ;все уходит в дебит
+	s i%Debit=summa+..Debit
+	s count=count+1
+ } &sql(close ourDocs)
+ s ..docs=count
+]]></Implementation>
+</Method>
+
+<Method name="Dump">
+<Implementation><![CDATA[
+	w "<table border=1>"
+ s num=0
+ s id="" for { s id=$o(..docs(id)) q:id=""
+ 	s num=num+1
+	w "<tr>"
+	w "<td>",num,"</td>"	 
+	s class=..docs(id,"classText")
+	w "<td>",id,",",class,"</td>"	 
+	s debit=$g(..docs(id,"debit"))	
+	w "<td>",debit,"</td>"	 
+	s credit=$g(..docs(id,"credit"))
+	w "<td>",credit,"</td>"	 
+	w "</tr>"
+ }
+ w "<table>"
+]]></Implementation>
+</Method>
+
+<Method name="Output">
 <Description>
 вывод страницы с отчетом в html-excel</Description>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
+ #define dtru(%date) $tr($zd(%date,4),"/",".")
+ #define fn(%num) $s(+%num=0:"",1:$j(+%num,"",2))
+  
+ &html<<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta http-equiv=Content-Type content="text/html; charset=windows-1251"><meta name=ProgId content=Excel.Sheet><meta name=Generator content="Microsoft Excel 11">>
+ d ..outputCss()
+ &html<</head><body>
+<table x:str border=0 cellpadding=0 cellspacing=0 width=971 style='border-collapse: collapse;table-layout:fixed;width:730pt'>
+ <tr height=15 style='height:11.25pt'>
+  <td height=15 width=14 style='height:11.25pt;width:11pt'></td>
+  <td width=75 style='width:61pt'></td>
+  <td width=183 style='width:135pt'></td>
+  <td width=12 style='width:9pt'></td>
+  <td width=61 style='width:43pt'></td>
+  <td width=38 style='width:29pt'></td>
+  <td width=92 style='width:69pt'></td>
+  <td width=15 style='width:11pt'></td>
+  <td width=2 style='width:2pt'></td>
+  <td width=55 style='width:41pt'></td>
+  <td width=188 style='width:141pt'></td>
+  <td width=17 style='width:13pt'></td>
+  <td width=65 style='width:49pt'></td>
+  <td width=44 style='width:33pt'></td>
+  <td width=109 style='width:82pt'></td>
+  <td width=1 style='width:1pt'></td>
+ </tr>
+ <tr height=24 style='height:18.0pt'>
+  <td height=24 style='height:18.0pt'></td>
+  <td colspan=14 class=xl40>Акт сверки</td>
+  <td></td>
+ </tr>
+ <tr height=51 style='mso-height-source:userset;height:38.45pt'>
+  <td height=51 style='height:38.45pt'></td>
+  <td colspan=15 class=xl46 width=957 style='width:719pt'>взаимных расчетов<br>
+    между #(..weName)# и #(..theyName)# за период с #($$$dtru(..start))# по #($$$dtru(..stop))#</td>
+ </tr>
+ <tr height=24 style='mso-height-source:userset;height:18.0pt'>
+  <td height=24 colspan=16 style='height:18.0pt;mso-ignore:colspan'></td>
+ </tr>
+ <tr height=49 style='mso-height-source:userset;height:37.35pt'>
+  <td height=49 style='height:37.35pt'></td>
+  <td colspan=15 class=xl47 width=957 style='width:719pt'>Мы,
+  нижеподписавшиеся, <u>#(..weName)#</u>, с одной стороны, и <u>#(..theyName)#</u>, с другой стороны, составили настоящий акт
+  сверки в том, что состояние взаимных расчетов по данным учета следующее:</td>
+ </tr>
+ <tr height=18 style='mso-height-source:userset;height:13.5pt'>
+  <td height=18 colspan=16 style='height:13.5pt;mso-ignore:colspan'></td>
+ </tr>
+
+ <tr height=17 style='mso-height-source:userset;height:13.35pt'>
+  <td height=17 style='height:13.35pt'></td>
+  <td colspan=8 class=xl48 width=478 style='width:359pt'>По
+  данным #(..weName)#</td>
+  <td colspan=7 class=xl48 width=479 style='border-left:none;width:360pt'>По данным > w ..theyName &html<</td>
+ </tr>
+ <tr height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 style='height:11.85pt'></td>
+  <td class=xl18>Дата</td>
+  <td colspan=2 class=xl18 >Документ</td>
+  <td colspan=2 class=xl18 >Дебет, > w ..currencyLogicalToDisplay(..currency) &html<</td>
+  <td colspan=3 class=xl18 >Кредит, > w ..currencyLogicalToDisplay(..currency) &html<</td>
+  <td class=xl18 >Дата</td>
+  <td colspan=2 class=xl18>Документ</td>
+  <td colspan=2 class=xl18>Дебет</td>
+  <td colspan=2 class=xl18>Кредит</td>
+ </tr>
+ 
+ <tr class=xl19 height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 class=xl19 style='height:11.85pt'></td>
+  <td class=xl20 colspan=3 style='mso-ignore:colspan;padding:0pt 4pt'>Сальдо начальное</td>
+  <td colspan=2 class=xl43 style='padding:0pt 4pt'>> w $$$fn(..debitStart) &html<</td>
+  <td colspan=3 class=xl43 style='padding:0pt 4pt'>> w $$$fn(..creditStart) &html<</td>
+  <td class=xl20 colspan=3 style='mso-ignore:colspan'>Сальдо начальное</td>
+  <td class=xl24 colspan=2 style=''>&nbsp;</td>
+  <td class=xl24 colspan=2 style=''>&nbsp;</td>
+ </tr>>
+ 
+ #;цикл по выбранным документам
+ s count=0
+ s id="" for { s id=$o(..docs(id)) q:id=""  
+  s count=count+1 
+ 	s name = $g(..docs(id,"name")), class = $g(..docs(id,"class"))
+ 	s classText = $g(..docs(id,"classText")), date = $g(..docs(id,"date"))
+ 	s debit = $g(..docs(id,"debit")),  credit = $g(..docs(id,"credit"))
+ 	s debit=$J(debit,"",2), credit=$J(credit,"",2)
+ 	&html<<!--height=15 style='mso-height-source:userset;height:11.85pt'-->
+ 	<tr><td style="text-align:right;font-size:50%;">#(count)#</td>
+  <td class=xl49>#($$$dtru(date))#</td>
+  <td colspan=2 class=xl49 style="white-space:normal">
+  	<a href="../print.csp?id=#(id)#&class=#(class)#" target=_blank>#(name)#</a> (#(classText)#)</td>
+  <td colspan=2 class=xl50>#($$$fn(debit))#</td>
+  <td colspan=3 class=xl50>#($$$fn(credit))#</td>
+  <td class=xl49></td>
+  <td colspan=2 class=xl49></td>
+  <td colspan=2 class=xl49></td>
+  <td colspan=2 class=xl49></td>
+  </tr>>
+ }
+ 
+ &html<<tr height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 style='height:11.85pt'></td>
+  <td class=xl20 colspan=3 style='mso-ignore:colspan'>&nbsp;Обороты за период</td>
+  <td colspan=2 class=xl43 style='padding:0pt 4pt;border-left:none'>> 
+  	w $$$fn(..Debit) 
+  &html<</td>
+  <td colspan=3 class=xl43 style='padding:0pt 4pt;border-left:none'>> 
+   w $$$fn(..Credit) 
+  &html<</td>
+  <td class=xl20 colspan=3 style='mso-ignore:colspan'>&nbsp;Обороты за период</td>
+  <td colspan=2 class=xl35 style=''>&nbsp;</td>
+  <td colspan=2 class=xl35 style=''>&nbsp;</td>
+ </tr>>
+ 
+ &html<<tr height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 style='height:11.85pt'></td>
+  <td class=xl20 colspan=3 style='mso-ignore:colspan'>&nbsp;Сальдо конечное</td>
+  <td colspan=2 class=xl43 style='padding:0pt 4pt'>#($$$fn(..debitStop))#</td>
+  <td colspan=3 class=xl24 style='padding:0pt 4pt'>#($$$fn(..creditStop))#</td>
+  <td class=xl20 colspan=3 style='mso-ignore:colspan'>&nbsp;Сальдо конечное</td>
+  <td colspan=2 class=xl35 style=''>&nbsp;</td>
+  <td colspan=2 class=xl35 style=''>&nbsp;</td>
+ </tr>>
+ 
+ &html<<tr height=15 style='height:11.25pt'>
+  <td height=15 colspan=16 style='height:11.25pt;mso-ignore:colspan'></td>
+ </tr>
+ <tr height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 style='height:11.85pt'></td>
+  <td colspan=6 class=xl42 width=461 style='width:346pt'>&nbsp;</td>
+  <td colspan=3 style='mso-ignore:colspan'></td>
+  <td height=15 width=188 style='height:11.85pt;width:141pt'><!--[if gte vml 1]><v:shapetype
+   id="_x0000_t75" coordsize="21600,21600" o:spt="75" o:preferrelative="t"
+   path="m@4@5l@4@11@9@11@9@5xe" filled="f" stroked="f">
+   <v:stroke joinstyle="miter"/>
+   <v:formulas>
+    <v:f eqn="if lineDrawn pixelLineWidth 0"/>
+    <v:f eqn="sum @0 1 0"/>
+    <v:f eqn="sum 0 0 @1"/>
+    <v:f eqn="prod @2 1 2"/>
+    <v:f eqn="prod @3 21600 pixelWidth"/>
+    <v:f eqn="prod @3 21600 pixelHeight"/>
+    <v:f eqn="sum @0 0 1"/>
+    <v:f eqn="prod @6 1 2"/>
+    <v:f eqn="prod @7 21600 pixelWidth"/>
+    <v:f eqn="sum @8 21600 0"/>
+    <v:f eqn="prod @7 21600 pixelHeight"/>
+    <v:f eqn="sum @10 21600 0"/>
+   </v:formulas>
+   <v:path o:extrusionok="f" gradientshapeok="t" o:connecttype="rect"/>
+   <o:lock v:ext="edit" aspectratio="t"/>
+  </v:shapetype><v:shape id="_x0000_s1025" type="#_x0000_t75" style='position:absolute;
+   margin-left:13.5pt;margin-top:6.75pt;width:0;height:0;z-index:1' stroked="t"
+   strokecolor="windowText [64]">
+   <v:fill color2="windowText [64]" type="frame"/>
+   <v:imagedata src="Акт%20сверки%20№%20212.files/image001.wmz" o:title=""/>
+   <x:ClientData ObjectType="Pict">
+   </x:ClientData>
+  </v:shape><![endif]--><!--[if !mso & vml]><span style='width:141.0pt;height:11.25pt'></span><![endif]--></td>
+  <td colspan=5 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr><td></td><td colspan=6 class=xl41 width=461 style='width:346pt'>>
+  #; Footer Text
+   w "По данным ",..weName, "<div style='font-weight:600'> на ", $$$dtru(..stop)," задолженность "
+   
+   k in,dn s (in,dn)=""
+   s cut="руб."
+   if '..rurMode { ;формируем словари для прописи
+    s cut="долл. США "
+	   s in=1 ;доллар - мужской род 
+	   s in(10)="долларов", in(5)="долларов", in(2)="доллара", in(1)="доллар", in(-1)="долларов"
+	   s dn=1 ;цент - мужской род
+	   s dn(10)="центов", dn(5)="центов", dn(2)="цента", dn(1)="цент", dn(-1)="цента"
+	  }
+   
+   if (..saldoStop<0) { ;Сальдо кредитовое
+    s full=$J(..creditStop,"",2)
+	  	w " в пользу ",..theyName," составляет <span style='white-space:nowrap'>",full," ",cut,".</span>"
+	  	w " (", ##class(Utils.Propis).Write(full,.in,.dn),")"
+   } elseif (..saldoStop>0) { ;Сальдо дебетовое
+ 		 s full=$J(..debitStop,"",2)
+ 			w " в пользу ",..weName," составляет <span style='white-space:nowrap'>",full," ",cut,".</span>"
+	 		w " (", ##class(Utils.Propis).Write(full,.in,.dn),")"
+   } else {
+				w " отсутствует"
+   }
+   w "</div>" 
+	 	
+  &html<</td>
+  <td colspan=9 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=21 style='mso-height-source:userset;height:15.75pt'>
+  <td height=21 colspan=16 style='height:15.75pt;mso-ignore:colspan'></td>
+ </tr>
+ <tr height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 style='height:11.85pt'></td>
+  <td colspan=6 class=xl42 width=461 style='width:346pt'><!-- От #(..weName))# -->&nbsp;</td>
+  <td></td>
+  <td colspan=7 class=xl42 width=480 style='width:361pt'></td>
+  <td></td>
+ </tr>
+ <tr height=15 style='height:11.25pt'>
+  <td height=15 colspan=16 style='height:11.25pt;mso-ignore:colspan'></td>
+ </tr>
+ <tr height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 style='height:11.85pt'></td>
+  <td colspan=6 class=xl42 width=461 style='width:346pt'>________________</td>
+  <td></td>
+  <td colspan=7 class=xl42 width=480 style='width:361pt'>________________</td>
+  <td></td>
+ </tr>
+ <tr height=15 style='height:11.25pt'>
+  <td height=15 colspan=16 style='height:11.25pt;mso-ignore:colspan'></td>
+ </tr>
+ <tr height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 style='height:11.85pt'></td>
+  <td class=xl36>&nbsp;</td>
+  <td class=xl36>&nbsp;</td>
+  <td colspan=4 width=213 style='width:160pt'> <u>(#(..theyBoss)#)</u></td>
+  <td class=xl37></td>
+  <td class=xl36>&nbsp;</td>
+  <td class=xl36>&nbsp;</td>
+  <td class=xl36>&nbsp;</td>
+  <td colspan=4 class=xl38> <u>(#(..weBoss)#)</u></td>
+  <td></td>
+ </tr>
+ <tr height=15 style='height:11.25pt'>
+  <td height=15 colspan=16 style='height:11.25pt;mso-ignore:colspan'></td>
+ </tr>
+ <tr height=15 style='height:11.25pt'>
+  <td height=15 style='height:11.25pt'></td>
+  <td class=xl38>М.П.</td>
+  <td class=xl38></td>
+  <td colspan=5 style='mso-ignore:colspan'></td>
+  <td class=xl38 colspan=2 style='mso-ignore:colspan'>М.П.</td>
+  <td class=xl38></td>
+  <td colspan=5 style='mso-ignore:colspan'></td>
+ </tr>
+</table></body></html>>
 
  Q ""
+]]></Implementation>
+</Method>
+
+<Method name="outputCss">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+ &html<<!--[if !mso]><style>
+ v\:* {behavior:url(#default#VML);}
+ o\:* {behavior:url(#default#VML);}
+ x\:* {behavior:url(#default#VML);}
+.shape {behavior:url(#default#VML);}
+</style><![endif]-->
+<!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:LastAuthor>Учетно-информационная система "Склад"</o:LastAuthor>
+  <o:Revision>1</o:Revision>
+  <o:TotalTime>0</o:TotalTime>
+  <o:LastPrinted>2011-01-01T00:00:00Z</o:LastPrinted>
+  <o:Created>2011-08-01T10:59:29Z</o:Created>
+  <o:LastSaved>2011-08-15T18:07:22Z</o:LastSaved>
+  <o:Version>11.9999</o:Version>
+ </o:DocumentProperties>
+ <o:OfficeDocumentSettings>
+ </o:OfficeDocumentSettings>
+</xml><![endif]-->
+<style>
+<!--table
+	{mso-displayed-decimal-separator:"\,";
+	mso-displayed-thousand-separator:" ";}
+@page
+	{margin:.98in .79in .98in .79in;
+	mso-header-margin:.5in;
+	mso-footer-margin:.5in;}
+tr
+	{mso-height-source:auto;}
+col
+	{mso-width-source:auto;}
+br
+	{mso-data-placement:same-cell;}
+td
+	{mso-style-parent:style0;
+	padding:0px;
+	mso-ignore:padding;
+	color:windowtext;
+	font-size:8.0pt;
+	font-weight:400;
+	font-style:normal;
+	text-decoration:none;
+	font-family:Arial, sans-serif;
+	mso-font-charset:0;
+	mso-number-format:General;
+	text-align:left;
+	vertical-align:bottom;
+	border:none;
+	mso-background-source:auto;
+	mso-pattern:auto;
+	mso-protection:locked visible;
+	white-space:nowrap;
+	mso-rotate:0;
+	}
+.xl18
+	{mso-style-parent:style0;
+	font-size:9.0pt;
+	font-weight:600;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	text-align:center;
+	padding: 0pt 4pt;
+	vertical-align:middle;
+	border:.5pt solid windowtext;}
+.xl19
+	{mso-style-parent:style0;
+	font-weight:700;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;}
+.xl20
+	{mso-style-parent:style0;
+	font-size:9.0pt;
+	font-weight:600;
+	font-family:"MS Shell Dlg";
+	padding: 0pt 4pt;
+	vertical-align:middle;
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	border:.5pt solid windowtext;
+	}
+.xl24
+	{mso-style-parent:style0;
+	font-weight:700;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	text-align:right;
+	vertical-align:middle;
+	border:.5pt solid windowtext;
+	}
+.xl35
+	{mso-style-parent:style0;
+	font-weight:700;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	vertical-align:middle;
+	border:.5pt solid windowtext;
+}
+.xl36
+	{mso-style-parent:style0;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;
+	border-top:none;
+	border-right:none;
+	border-bottom:.5pt solid windowtext;
+	border-left:none;}
+.xl37
+	{mso-style-parent:style0;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;
+	border:none;}
+.xl38
+	{mso-style-parent:style0;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;}
+.xl40
+	{mso-style-parent:style0;
+	font-size:14.0pt;
+	font-weight:700;
+	font-family:Tahoma, sans-serif;
+	mso-font-charset:204;
+	text-align:center;
+	vertical-align:middle;}
+.xl41
+	{mso-style-parent:style0;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	white-space:normal;}
+.xl42
+	{mso-style-parent:style0;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	white-space:normal;}
+.xl43
+	{mso-style-parent:style0;
+	font-weight:700;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	mso-number-format:"\#\,\#\#0\.00\;\[Red\]\\-\#\,\#\#0\.00";
+	text-align:right;
+	vertical-align:middle;
+	border:.5pt solid windowtext;}
+.xl46
+	{mso-style-parent:style0;
+	font-size:10.0pt;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;
+	text-align:center;
+	white-space:normal;}
+.xl47
+	{mso-style-parent:style0;
+	font-size:10.0pt;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;
+	text-align:justify;
+	white-space:normal;}
+.xl48
+	{mso-style-parent:style0;
+	font-size:10.0pt;
+	font-family:Arial, sans-serif;
+	mso-font-charset:204;
+	vertical-align:top;
+	border-top:.5pt solid windowtext;
+	border-right:.5pt solid windowtext;
+	border-bottom:none;
+	border-left:.5pt solid windowtext;
+	white-space:normal;
+	padding:0pt 4pt;
+	}
+.xl49
+	{mso-style-parent:style0;
+	font-size:9.0pt;
+	font-weight:normal;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	text-align:left;
+	padding:0pt 4pt;
+	vertical-align:middle;
+	border:.5pt solid windowtext;
+}
+.xl50
+	{mso-style-parent:style0;
+	font-size:9.0pt;
+	font-weight:normal;
+	font-family:"MS Shell Dlg";
+	mso-generic-font-family:auto;
+	mso-font-charset:204;
+	text-align:right;
+	padding:0pt 4pt;
+	vertical-align:middle;
+	border:.5pt solid windowtext;
+}
+-->
+</style>
+<!--[if gte mso 9]><xml>
+ <x:ExcelWorkbook>
+  <x:ExcelWorksheets>
+   <x:ExcelWorksheet>
+    <x:Name>TDSheet</x:Name>
+    <x:WorksheetOptions>
+     <x:DefaultRowHeight>225</x:DefaultRowHeight>
+     <x:NoSummaryRowsBelowDetail/>
+     <x:NoSummaryColumnsRightDetail/>
+     <x:DisplayPageBreak/>
+     <x:NoSummaryRowsBelowDetail/>
+     <x:NoSummaryColumnsRightDetail/>
+     <x:DisplayPageBreak/>
+     <x:Selected/>
+     <x:Panes>
+      <x:Pane>
+       <x:Number>3</x:Number>
+       <x:ActiveRow>1</x:ActiveRow>
+       <x:ActiveCol>1</x:ActiveCol>
+       <x:RangeSelection>$B$2:$O$2</x:RangeSelection>
+      </x:Pane>
+     </x:Panes>
+     <x:ProtectContents>False</x:ProtectContents>
+     <x:ProtectObjects>False</x:ProtectObjects>
+     <x:ProtectScenarios>False</x:ProtectScenarios>
+    </x:WorksheetOptions>
+   </x:ExcelWorksheet>
+  </x:ExcelWorksheets>
+  <x:WindowHeight>5895</x:WindowHeight>
+  <x:WindowWidth>11400</x:WindowWidth>
+  <x:WindowTopX>0</x:WindowTopX>
+  <x:WindowTopY>0</x:WindowTopY>
+  <x:TabRatio>0</x:TabRatio>
+  <x:RefModeR1C1/>
+  <x:ProtectStructure>False</x:ProtectStructure>
+  <x:ProtectWindows>False</x:ProtectWindows>
+ </x:ExcelWorkbook>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <o:shapedefaults v:ext="edit" spidmax="2049"/>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <o:shapelayout v:ext="edit">
+  <o:idmap v:ext="edit" data="1"/>
+ </o:shapelayout></xml><![endif]-->
+  >
+]]></Implementation>
+</Method>
+
+<Method name="OnPage">
+<Description>
+Переопределяем вывод страницы</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+ s start=%request.Get("dat1"), start=$S(start="":"",1:$ZDH(start,4))
+ s stop=%request.Get("dat2"), stop=$S(stop="":"",1:$ZDH(stop,4))
+ s we=$g(%request.Data("OurCompany",1)), they = $g(%request.Data("kontr",1))
+ s act=##class(Reports.ActSverki).%New(we,they,start,stop)	
+ d act.Prepare()
+ d act.Output()
+ Quit $$$OK
 ]]></Implementation>
 </Method>
 </Class>
