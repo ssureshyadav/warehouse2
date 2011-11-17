@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.StatusBar">
+<Description>
+Замена ActiveX статус-бара на html</Description>
+<Super>%CSP.Page</Super>
+<TimeCreated>62411,76216.715852</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	&html<<html><head><style type="text/css">
+	* {margin:0px;padding:0px;border-width:0;}
+	body {background-color:buttonface;}
+	div {padding: 2px 0px;height:99%;}
+	table {border-collapse:collapse;height:16px;}
+	td {border:1px solid #999999; color:#444444; font:normal 10px 'Arial';padding:0 3px; cursor:default;}
+	</style>
+	</head>
+	<body><div id="stbar"><table><tr>
+	<td title="Текущий пользователь">#($g(%session.Data("userName")))#</td>
+	<td title="Текущий склад">#(%session.Data("depotName"))#</td>
+	</tr></table>
+	</div></body></html>>
+	Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>
