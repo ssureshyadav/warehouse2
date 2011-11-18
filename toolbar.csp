@@ -8,33 +8,29 @@
 <SCRIPT Language="jscript">
 gobo = Image('');
 function ChangePage(BtnKey){
-RowsStr="37px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,*,20px"
-if(BtnKey=="goods"){RowsStr="37px,*,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,20px"}
-if(BtnKey=="docs"){RowsStr="37px,0px,*,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,20px"}
-if(BtnKey=="dicts"){RowsStr="37px,0px,0px,*,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,20px"}
-if(BtnKey=="store"){RowsStr="37px,0px,0px,0px,*,0px,0px,0px,0px,0px,0px,0px,0px,0px,20px"}
-if(BtnKey=="tunes"){RowsStr="37px,0px,0px,0px,0px,*,0px,0px,0px,0px,0px,0px,0px,0px,20px"}
-if(BtnKey=="chief"){RowsStr="37px,0px,0px,0px,0px,0px,*,0px,0px,0px,0px,0px,0px,0px,20px"}
-if(BtnKey=="employee"){RowsStr="37px,0px,0px,0px,0px,0px,0px,*,0px,0px,0px,0px,0px,0px,20px"}
-if(BtnKey=="analyzis"){RowsStr="37px,0px,0px,0px,0px,0px,0px,0px,*,0px,0px,0px,0px,0px,20px"}
-if(BtnKey=="kontr"){RowsStr="37px,0px,0px,0px,0px,0px,0px,0px,0px,*,0px,0px,0px,0px,20px"}
-if(BtnKey=="finance"){RowsStr="37px,0px,0px,0px,0px,0px,0px,0px,0px,0px,*,0px,0px,0px,20px"}
-if(BtnKey=="director"){RowsStr="37px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,*,0px,0px,20px"}
-if(BtnKey=="login"){RowsStr="37px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,*,0px,20px"}
-if(BtnKey=="exit"){
-	if(window.confirm("Выйти из программы?")){
-		var xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
-		try{
-			xmlhttp.open("POST","CloseSession.csp",false)
-			xmlhttp.send()
+	if(BtnKey==="exit"){
+		if(window.confirm("Выйти из программы?")){
+			var xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+			try{
+				xmlhttp.open("POST","CloseSession.csp",false); xmlhttp.send();
+			} catch(e){
 			}
-		catch(e){
-			}
-		window.parent.close()
+			window.parent.close(); return;
+		}
 	}
-}
-
-frameElement.document.all.MainFrameSet.rows = RowsStr
+    //Высота фреймов на index.csp	
+    var hof={ //heights of the frames, начальная инициализация
+		toolbar:"37px"
+		,goods:"0px",docs:"0px",dicts:"0px",store:"0px",tunes:"0px"
+		,chief:"0px",employee:"0px",analyzis:"0px",kontr:"0px",finance:"0px"
+		,director:"0px",login:"0px",select:"*",status:"20px"
+	};
+    if (hof[BtnKey]){
+	 	hof[BtnKey]="*"; //раскрываем указанный фрейм
+	 	hof["select"]="0px"; //закрываем фрейм по умолчанию
+	}
+    var arr=new Array(); for (var i in hof) { arr.push(hof[i]);}
+    frameElement.document.all.MainFrameSet.rows = arr.join(",");
 }
 </SCRIPT>
 
