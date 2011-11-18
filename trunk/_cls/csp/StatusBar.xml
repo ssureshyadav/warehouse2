@@ -10,19 +10,29 @@
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	&html<<html><head><style type="text/css">
+s	&html<<html><head><style type="text/css">
 	* {margin:0px;padding:0px;border-width:0;}
 	body {background-color:buttonface;}
 	div {padding: 2px 0px;height:99%;}
 	table {border-collapse:collapse;height:16px;}
 	td {border:1px solid #999999; color:#444444; font:normal 10px 'Arial';padding:0 3px; cursor:default;}
+	#sysmsg {width:300px; height:16px; white-space:nowrap;overflow:hidden;}
 	</style>
-	</head>
+	<script type="text/javascript">
+		function $(id){return document.getElementById(id);};
+		window.WriteStatus=function(msg){ 
+			var sysmsg=$("sysmsg"); if (!sysmsg) return;
+	 		sysmsg.innerHTML=msg; 
+		}
+	</script>
+    </head>
 	<body><div id="stbar"><table><tr>
-	<td title="Текущий пользователь">#($g(%session.Data("userName")))#</td>
-	<td title="Текущий склад">#(%session.Data("depotName"))#</td>
+		<td title="Текущий пользователь">#($g(%session.Data("userName")))#</td>
+		<td title="Текущий склад">#(%session.Data("depotName"))#</td>
+		<td title="Сообщения системы"><div id="sysmsg" /></td>
 	</tr></table>
-	</div></body></html>>
+	</div></body>
+	</html>>
 	Quit $$$OK
 ]]></Implementation>
 </Method>
