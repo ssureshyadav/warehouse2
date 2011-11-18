@@ -60,15 +60,10 @@ function ChangePage(BtnKey){
 	if(BtnKey==="help"){
 		window.open('help/index.html'); return;
 	}
-	
 	if(BtnKey==="exit"){
 		if(window.confirm("Выйти из программы?")){
-			var xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
-			try{
-				xmlhttp.open("POST","CloseSession.csp",false); xmlhttp.send();
-			} catch(e){
-			}
-			window.parent.close(); return;
+			#server(csp.closesession.OnPage())#
+			;window.parent.close(); return;
 		}
 	}
 	
