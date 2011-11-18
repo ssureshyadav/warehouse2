@@ -3,11 +3,64 @@
  i '+login s %response.ServerSideRedirect="norights.csp" 
  q 1
 </script>
-<html>
-<head>
-<SCRIPT Language="jscript">
-gobo = Image('');
+<html><head>
+<style type="text/css">
+body { margin:1px 5px 1px 5px; background-color: buttonface; }
+td a {display:block;height:30px; width:30px; background: url('images/big/toolbar-4ec6da736b43d.png') no-repeat top left;; text-decoration:none;}
+.analyzis{ background-position: 0 0;} .analyzis:hover{ background-position: -420px 0;} 
+.chief{ background-position: -35px 0;} .chief:hover { background-position: -455px 0;} 
+.dicts{ background-position: -70px 0;} .dicts:hover { background-position: -490px 0;} 
+.director{ background-position: -105px 0;} .director:hover { background-position: -525px 0; } 
+.docs{ background-position: -140px 0;} .docs:hover { background-position: -560px 0; } 
+.employee{ background-position: -175px 0;} .employee:hover { background-position: -595px 0; } 
+.exit{ background-position: -210px 0;} .exit:hover { background-position: -630px 0; } 
+.finance{ background-position: -245px 0;} .finance:hover { background-position: -665px 0; } 
+.goods{ background-position: -280px 0;} .goods:hover { background-position: -700px 0; } 
+.help{ background-position: -315px 0;} .help:hover{ background-position: -735px 0; } 
+.kontr{ background-position: -350px 0;} .kontr:hover  { background-position: -770px 0; } 
+.login{ background-position: -385px 0;} .login:hover  { background-position: -805px 0;  } 
+.rules{ background-position: -945px 0; } .rules:hover { background-position: -840px 0; }
+.store{ background-position: -980px 0; } .store:hover { background-position: -875px 0;  } 
+.tunes{ background-position: -1015px 0; } .tunes:hover { background-position: -910px 0;  } 
+</style></head><body><table><tr id="toolbar">
+<server>
+ s login=$G(%session.Data("user"))
+ s menu(1)=$lb(1,"goods","Товары") ;код функции, имя фрейма, подпись кнопки
+ s menu(2)=$lb(3,"docs","Документы")
+ s menu(3)=$lb(4,"dicts","Справочники")
+ s menu(4)=$lb(15,"store","Места хранения")
+ s menu(5)=$lb(16,"tunes","Настройки")
+ s menu(6)=$lb(2,"chief","Рабочее место сервис менеджера")
+ s menu(7)=$lb(5,"employee","Рабочее место на складе")
+ s menu(8)=$lb(17,"analyzis","Аналитика")
+ s menu(9)=$lb(18,"kontr","Учёт отгрузок и платежей")
+ s menu(10)=$lb(14,"finance","Финансы")
+ s menu(11)=$lb(13,"director","Рабочее место директора")
+  
+ #define access(%func, %login) ##class(Common.Rights).getrights(%login,%func)
+ s i="" for { s i=$o(menu(i)) q:i=""  
+ 	k list s list=$g(menu(i)) 
+ 	k func s func=$lg(list,1)
+ 	k frame s frame=$lg(list,2) 
+ 	k title s title=$lg(list,3)
+ 	if '$$$access(func,login) continue
+ 	w !,"<td><a class='",frame,"' href='#",frame,"' title='",title,"'>&nbsp;</a></td>"
+ }
+ s menu(12)=$lb("","login","Вход в систему")
+;onclick="ChangePage('exit');"
+</server>
+<td><a class='login' href='#login' title='Вход в систему'>&nbsp;</a></td>
+<td><div style="width:150px">&nbsp;</div></td>
+<td><a class='exit' href='#exit' title='Выйти и закрыть'>&nbsp;</a></td>
+<td><a class='help' href='#help' title='Справка'>&nbsp;</a></td>
+</tr></table>
+<script type="text/javascript">
+gobo = Image(''); // зачем?
 function ChangePage(BtnKey){
+	if(BtnKey==="help"){
+		window.open('help/index.html'); return;
+	}
+	
 	if(BtnKey==="exit"){
 		if(window.confirm("Выйти из программы?")){
 			var xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
@@ -18,6 +71,7 @@ function ChangePage(BtnKey){
 			window.parent.close(); return;
 		}
 	}
+	
     //Высота фреймов на index.csp	
     var hof={ //heights of the frames, начальная инициализация
 		toolbar:"37px"
@@ -32,37 +86,14 @@ function ChangePage(BtnKey){
     var arr=new Array(); for (var i in hof) { arr.push(hof[i]);}
     frameElement.document.all.MainFrameSet.rows = arr.join(",");
 }
-</SCRIPT>
-
-</head>
-
-<body bgcolor="ButtonFace" leftmargin=5 rightmargin=5 topmargin=1 bottommargin=5 >
-<Table width=100%><tr><td>
-<script language="cache" runat="server">
- s login=$G(%session.Data("user"))
- s:##class(Common.Rights).getrights(login,1) i($i(i))="goods",i(i,"alt")="Товары"
- s:##class(Common.Rights).getrights(login,3) i($i(i))="docs",i(i,"alt")="Документы"
- s:##class(Common.Rights).getrights(login,4) i($i(i))="dicts",i(i,"alt")="Справочники"
- s:##class(Common.Rights).getrights(login,15) i($i(i))="store",i(i,"alt")="Места хранения"
- s:##class(Common.Rights).getrights(login,16) i($i(i))="tunes",i(i,"alt")="Настройки"
- s:##class(Common.Rights).getrights(login,2) i($i(i))="chief",i(i,"alt")="Рабочее место сервис менеджера"
- s:##class(Common.Rights).getrights(login,5) i($i(i))="employee",i(i,"alt")="Рабочее место на складе"
- s:##class(Common.Rights).getrights(login,17) i($i(i))="analyzis",i(i,"alt")="Аналитика"
- s:##class(Common.Rights).getrights(login,18) i($i(i))="kontr",i(i,"alt")="Учёт отгрузок и платежей"
- s:##class(Common.Rights).getrights(login,14) i($i(i))="finance",i(i,"alt")="Финансы"
- s:##class(Common.Rights).getrights(login,13) i($i(i))="director",i(i,"alt")="Рабочее место директора"
- s i($i(i))="login",i(i,"alt")="Вход в систему"
- 
- s i="" f  s i=$O(i(i)) q:i=""  d
- . w "<img src=""images/big/on"_i(i)_".gif"" width=1 height=1 style=""display:none"">"
- . w "<img src=""images/big/"_i(i)_".gif"" alt="""_i(i,"alt")_"""onmouseover=""this.src='images/big/on"_i(i)_".gif'"" onmouseout=""this.src='images/big/"_i(i)_".gif'"" onclick=""ChangePage('"_i(i)_"');"" style=""cursor:hand"" width=30 height=30>&nbsp;",!
+var $=function(id){return document.getElementById(id);}
+var $bind=("v"=="\v")?function(o,e,h){o.attachEvent("on"+e,h);}:function(o,e,h){o.addEventListener(e,h,false);}
+$bind(window,"load",function(){
+	$bind($("toolbar"),"click",function(e){ e=e?e:window.event; e.target=e.target||e.srcElement;
+		var obj=e.target || null; if (!obj) return; if (obj.tagName!=="A") return;
+		ChangePage(obj.className);
+	});
+});
 </script>
-</td><td align=right>
-<img src="images/big/onexit.gif" width=1 height=1 style="display:none">&nbsp;
-<img src="images/big/exit.gif" onmouseover="this.src='images/big/onexit.gif'" onmouseout="this.src='images/big/exit.gif'" onclick="ChangePage('exit');" style="cursor:hand" width=30 height=30>&nbsp;
-<img src="images/big/onhelp.gif" width=1 height=1 style="display:none">&nbsp;
-<img src="images/big/help.gif" onmouseover="this.src='images/big/onhelp.gif'" onmouseout="this.src='images/big/help.gif'" onclick="window.open('help/index.html');" style="cursor:hand" width=30 height=30>&nbsp;
-</td></tr></table>
 </body>
-
 </html>
