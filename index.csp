@@ -1,0 +1,69 @@
+<HTML><head><meta http-equiv=Content-Type content="text/html;charset=windows-1251">
+<title>Система складского учёта</title>
+<style type="text/css">
+* {border:0px;margin:0px;padding:0px;}
+frameset * {margin:0px;padding:0px;border:0px none;}
+frame {margin:0px;padding:0px;border:0px none;outline:0px none;}
+</style>
+<script language="javascript" type="text/javascript">
+GoodsWindow = "undef";
+StoreWindow = "undef";
+
+fso = new ActiveXObject("Scripting.FileSystemObject");
+SystemDrive=fso.GetSpecialFolder(0).Drive;
+var FilesChecked=false;
+
+function InsertValues(){
+if(FilesChecked)return false;
+login.document.all.SystemDrive.value=SystemDrive;
+//Здесь лежат названия файлов которые должны быть на локальном диске
+s=login.MustExist.innerText;
+filenames=s.split("/");
+NotAllFiles=false;
+for(z = 0; z < filenames.length-1; z++)
+ {
+ if(!fso.FileExists(SystemDrive+"\\SKLAD\\"+filenames[z]))
+  {
+  NotAllFiles=true;
+  break;
+  }
+ }
+if(NotAllFiles){window.showModalDialog("zz.htm","","center:yes;status:no;dialogHeight:100px;dialogWidth:250px");}
+FilesChecked=true;
+}
+
+// посылает сигнал на сервер о завершении сессии
+function sendclose(){
+return
+var xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+try
+ {
+ xmlhttp.open("POST","CloseSession.csp", false);
+ xmlhttp.send();
+ }
+catch(e)
+ {
+ }
+}
+</script>
+</head>
+<frameset rows="35,0,0,0,0,0,0,0,0,0,0,0,*,0,20" cols="*" border="0" framespacing="0" frameborder="0" noresize id="MainFrameSet" onunload="sendclose()">
+<frame src="close.htm" name="topFR" id="topFR" scrolling=no noresize border="0" framespacing="0" frameborder="0"  APPLICATION="yes" >
+<frame src="select.htm" name="goods" id="goods" scrolling=auto border="0" framespacing="0" frameborder="0" noresize  >
+<frame src="select.htm" name="docs" id="docs"   scrolling=auto border="0" framespacing="0" frameborder="0" noresize>
+<frame src="select.htm" name="dicts" id="dicts"  scrolling=auto border="0" framespacing="0" frameborder="0" noresize>
+<frame src="select.htm" name="store" id="store"  scrolling=auto border="0" framespacing="0" frameborder="0" noresize>
+<frame src="select.htm" name="tuneup" id="tuneup"   scrolling=auto border="0" framespacing="0" frameborder="0" noresize>
+<frame src="select.htm" name="chief" id="chief"   scrolling=auto border="0" framespacing="0" frameborder="0" noresize>
+<frame src="select.htm" name="emplight" id="emplight"  scrolling=auto border="0" framespacing="0" frameborder="0" noresize>
+<frame src="select.htm" name="analyzis" id="analyzis"  scrolling=auto border="0" framespacing="0" frameborder="0" noresize>
+<frame src="select.htm" name="kontr" id="kontr"   scrolling=auto APPLICATION="yes" border="0" framespacing="0" frameborder="0" noresize>
+<frame src="select.htm" name="finance" id="finance"   scrolling=auto APPLICATION="yes" border="0" framespacing="0" frameborder="0" noresize>
+<frame src="select.htm" name="director" id="director"  scrolling=auto APPLICATION="yes" border="0" framespacing="0" frameborder="0" noresize>
+<frame src="login.csp" name="login" id="login" onload="InsertValues();" APPLICATION="yes" border="0" framespacing="0" frameborder="0" noresize>
+<frame src="select.htm" name="select" id="select"  scrolling=no border="0" framespacing="0" frameborder="0" noresize >
+<frame name="statusFR" id="statusFR" scrolling=no APPLICATION="yes" border="0" framespacing="0" frameborder="0" noresize >
+<IE:DOWNLOAD id="downloader" STYLE="behavior:url(#default#download)">
+</frameset>
+
+</html>
