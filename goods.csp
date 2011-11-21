@@ -5,35 +5,154 @@
  s Access9func=##class(Common.Rights).getrights(login,9)
  s GoodsGoodsVersion = ##class(Common.Common).GetCurrentDictVersion("Goods.Goods")
  q 1
-</script>
+</script><script runat="server" language="cache" method="wCatalogueOptions" arguments="commonGroup:%String,depot:%String" returnType="%String">
+ s sql="Select ID,Name From Goods.Catalogue "
+ s:commonGroup=0 sql=sql_" Where depot=?"	
+ s rs=##class(%ResultSet).%New("%DynamicQuery:SQL")
+ d rs.Prepare(sql)
+ if commonGroup=0 {
+	 d rs.Execute(depot)
+ } else {
+	 d rs.Execute()
+ }
+ while rs.Next(){
+	s id=$G(rs.Data("ID")),name=$G(rs.Data("Name"))
+	w "<option value='",id,"'>",name,"</option>"
+ }
+ d rs.Close(),rs.%Close() k rs
+ Q ""
 
-<html XMLNS:SKLADz XMLNS:SKLAD2>
+</script><html XMLNS:SKLADz XMLNS:SKLAD2>
 <IMPORT NAMESPACE="SKLADz" IMPLEMENTATION="htc/treeview.htc">
-<head>
-<link href="style.css" type=text/css rel=stylesheet>
+<head><title>Склад :: Товары</title>
+<link href="style.css" type="text/css" rel="stylesheet" />
+<style type="text/css">
+html {margin:0px;padding:0px;}
+body {margin:0px;padding:0px 3px;font:normal Arial 11px;}
+* html button { overflow: visible; } /*тупой padding в кнопках IE*/
+.pageTitle {width:100%;border-collapse:collapse;border:0px;padding:0px;margin:0px;border:0px;}
+.pageTitle tr {background: #e9f3ff;}
+.pageTitle tr td {border-bottom:1px #000066;}
+.toolbar a { display:inline-block; padding:2px; margin: 1px; border:1px solid #336; background:#e9f3ff; text-decoration:none;}
+label {color:#444444;}
+</style></head><body>
+<IE:DOWNLOAD id="downloader" STYLE="behavior:url(#default#download)" />
+<table class="pageTitle" style=""><tr>
+<td style="width:20px;"><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
+<td style="text-align:center; font: Arial 18px;" >Товары</td>
+<td style="width:80px;text-align:right;font-size:11px;color: #6e6e6e;" title="Текущая версия справочника товаров">v #(GoodsGoodsVersion)#</td>
+</table>
+<table>
+<tr><td class="toolbar">
+		<a href="PriceGroups.csp">Ценовые группы товаров
+		</a><a href="Reserves2.csp">Резервы
+		</a><a href="Brak.csp">Некондиция
+		</a><a title="Привязать запчасть к модели" href="Attach2Model.csp">Запчасти и их модели
+		</a><a href="Serials.csp" title="Открыть страницу управления серийными номерами">Cерийные номера
+		</a>
+	</td>
+</tr>
+<table style="width:100%"><tr>
+ <td style="vertical-align:top;width:50%"> 
+  <label for="Catalogues" style="font-size:12px;">Классификатор:</label>
+  <select id="Catalogues" onchange="LoadTree()">
+  <server>
+  s depot=$G(%session.Data("depot"))
+  s commonGroups=$G(%session.Data("commongroups"))
+  d ..wCatalogueOptions(commonGroups,depot)
+  </server>
+  
+  </select>
+  <br/>
+  <SKLADz:treeview id="GroupsTree" width=300 height=160 ImagesPath="#(%session.Data("ImagesPath"))#" onDownloadCmpl="GroupsTreeDnldCmpl()" />
+  <Table width="350"><tr><td>
+  <sklad:LittleButton name="new" id="newgrup" onclick="addGroup(0)" alt="Новая группа">
+  <sklad:LittleButton name="new+" id="newSubgrup" onclick="addGroup(1)" alt="Новая подгруппа">
+  <sklad:LittleButton name="edit" id="EditGroupName" onclick="EditGroupNameFn()" alt="Редактирование названия группы">
+  <sklad:LittleButton name="del+" id="del22" onclick="cleargrup()" alt="Очистить группу">
+  <sklad:LittleButton name="history" id="hist22" onclick="fillgrup()" alt="Заполнить группу">
+  <sklad:LittleButton name="PrintPrice" id="PrintPriceImg" onclick="PrintPriceFunc('')" alt="Вывести прайслист">
+  <sklad:LittleButton name="PrintPriceColor" id="PrintPriceImg2" onclick="PrintPriceFunc('Images')" alt="Вывести прайслист c изображениями">
+  <sklad:LittleButton name="ostatki" id="PrintStorage" onclick="PrintStorageFn()" alt="Вывести остатки">
+  </td><td>
+  <sklad:LittleButton name="del" id="delgrup" onclick="delGroup()" alt="Удалить группу"><br>
+  </td></tr></table>
+ </td>
+ <td valign=top width=50%>
+  <fieldset style="width:200;"><legend id="TovarName"></legend>
+  <SKLADz:treeview id="PropsTree" width=300 height=160 ShowImages=0 ImagesPath="#(%session.Data("ImagesPath"))#" />
+  </fieldset>
+  <Table width="350"><tr><td>
+  <sklad:LittleButton name="new" id="newprop" onclick="AddProp(0)" alt="Новое свойство">
+  <sklad:LittleButton name="new+" id="newSubprop" onclick="AddProp(1)" alt="Новое свойство в существующей группе">
+  </td><td>
+  <sklad:LittleButton name="del" id="delprop" onclick="DelDopProp();" alt="Удалить свойство">
+  </td></tr>
+  </table>
+  </td>
+</tr>
+<tr>
+ <td colspan=2>
+<span id="namfld"></span>&nbsp;<input type="text" id="fldval" onkeyup="gg();">
+   <fieldset style=""><legend>Товары</legend>
+  <!--
+  <sklad:ListView id="LV" style="width:100%;height:200;"  >
+  -->
+ <OBJECT id="LV" classid=clsid:BDD1F04B-858B-11D1-B16A-00C0F0283628 style="width:100%;height:200;behavior:url('#default#download')" codebase="Cab\MSComCtl.CAB" >
+<PARAM NAME="View" VALUE="3">
+<PARAM NAME="Appearance" VALUE="1">
+<PARAM NAME="FullRowSelect" VALUE="True">
+<PARAM NAME="MultiSelect" VALUE="True">
+<PARAM NAME="GridLines" VALUE="True">
+<PARAM NAME="LabelEdit" VALUE="1">
+</OBJECT>
 
+  <Table width=100%><tr><td width="60%" >
+<CSP:IF CONDITION="Access9func=1">
+  <sklad:LittleButton name="new" id="newtov" onclick="addTovar()" alt="Новый товар">
+  <sklad:LittleButton name="edit" id="edittov" onclick="editTovar()" alt="Редактировать товар">
+  <sklad:LittleButton name="edit" id="edittov2" onclick="editTovar2()" alt="Редактировать товар в новой форме ( CTRL+q )">
+</CSP:IF>
+  <sklad:LittleButton name="card" id="cardtov" onclick="OpenCard()" alt="Карточка товара">
+  <sklad:LittleButton name="new+" id="newGprop" onclick="AddProp2()" alt="Новое основное свойство">
+  <sklad:LittleButton name="del+" id="delGprop" onclick="DelProp()" alt="Удалить основное свойство">
+<CSP:IF CONDITION="Access9func=1">
+  <sklad:LittleButton name="copy" id="copy" onclick="cuttov()" alt="Пометить для копирования">
+  <sklad:LittleButton name="paste" id="paste" onclick="pastetov()" alt="Вставить товары из буфера">
+  <sklad:LittleButton name="history" id="buf" onclick="tovbuf()" alt="Товары в буфере обмена">
+</CSP:IF>
+  <sklad:LittleButton name="price" id="price" onclick="tovprice()" alt="Цены товара">
+<CSP:IF CONDITION="Access9func=1">
+  <sklad:LittleButton name="goinside" id="btnMuiltipleEdit" onclick="fnMuiltipleEdit()" alt="Редактировать список товаров">
+</CSP:IF>
+  <sklad:LittleButton name="find" id="btnFindGood" onclick="fnFindGood()" alt="Поиск товаров">
+  </td>
+  <td align=right width="40%">
+  
+<CSP:IF CONDITION="Access9func=1">
+  <sklad:LittleButton name="del" id="deltov" onclick="DelTovar()" alt="Удалить товар">
+</CSP:IF>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <span title="Обновление таблицы после каждого сохранения товара (если отключить, то редактировать товары можно будет быстрее)">
+  	Поддерживать таблицу в актуальном состоянии
+  	<input type=checkbox id="makeShowDict" checked style="width:20pt;border:none;">
+  </span>
+  </td></tr></table>
+</fieldset></td>
+</tr>
+</table>
 <script language="jscript" src="common.js"></script>
 <script language="jscript">
+var $=function(id){return document.getElementById(id);}
+var $bind=("v"=="\v")?function(o,e,h){o.attachEvent("on"+e,h);}:function(o,e,h){o.addEventListener(e,h,false);}
+
 var depot="#($G(%session.Data("depot")))#"
-var commongroups="#($G(%session.Data("commongroups")))#"
-var sessionid="#(%session.SessionId)#";
+;var commongroups="#($G(%session.Data("commongroups")))#"
+;var sessionid="#(%session.SessionId)#";
 var SelectedGroupCode="";
 var GoodsListView="LV";  //id элемента ListView с товарами
 var ColCode="";
 var where="";
-function onload(){
-//при загрузке заполнить комбобокс Каталогов
-LV.AllowColumnReorder=true;
-downloader.startDownload(strForGroups(depot,commongroups), putCatalogue);
-LoadList1();
-document.getElementById(GoodsListView).attachEvent("ItemClick",LVItemClick);
-GroupsTree.onClick="Click()";
-LV.attachEvent("DblClick",OpenCard);
-LV.attachEvent("ColumnClick",colclick);
-LV.attachEvent("KeyPress",KeyPress);
-
-LV.Sorted =false;
-}
 
 function putCatalogue(text){
 addOptions(text,"Catalogues");
@@ -334,107 +453,20 @@ function fnFindGood(){
 var ok=window.showModalDialog("FindGood.csp","","center:yes;status:no;dialogHeight:650px;dialogWidth:800px;resizable:yes;")
 }
 
+$bind(window,"load",function(){ //при загрузке заполнить комбобокс Каталогов
+	LV.AllowColumnReorder=true;
+	//downloader.startDownload(strForGroups(depot,commongroups), putCatalogue);
+	LoadTree(); //инициализация дерева выбранного пункта каталога
+	LoadList1();
+	document.getElementById(GoodsListView).attachEvent("ItemClick",LVItemClick);
+	GroupsTree.onClick="Click()";
+	LV.attachEvent("DblClick",OpenCard);
+	LV.attachEvent("ColumnClick",colclick);
+	LV.attachEvent("KeyPress",KeyPress);
+	LV.Sorted =false;
+});
+
+
 </script>
-</head>
-<body onload="onload()" topmargin=4 bottommargin=0>
-<TABLE cellSpacing=0 width="100%" celpadding="0" border=0>
-<TR><td colspan=2>
-<TABLE cellSpacing=0 width="100%" celpadding="0" >
-<TR>
-<td width=10%><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
-<TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" ><strong>Товары</strong></TD>
-<td width=10% align=right title="Текущая версия справочника товаров" style="FONT-size: 11px ; font-family: arial; COLOR: #6e6e6e;">v #(GoodsGoodsVersion)#</td>
-</TABLE>
-
-<tr>
-	<td colspan=2>
-		<sklad:Button style="width:200px" value="Ценовые группы товаров" onclick="window.location.href='PriceGroups.csp'">
-		<sklad:Button style="width:100px" value="Резервы" onclick="window.location.href='Reserves2.csp'">
-		<sklad:Button style="width:100px" value="Некондиция" onclick="window.location.href='Brak.csp'">
-		<sklad:Button style="width:200px" value="Запчасти и их модели" alt="Привязать запчасть к модели" onclick="window.location.href='Attach2Model.csp'">
-		<sklad:Button style="width:200px" onclick="window.location.href='Serials.csp'" value="Cерийные номера" alt="Открыть страницу управления серийными номерами">
-	</td>
-	
-</tr>
-<tr>
- <td valign=top width=50%>
-  Классификатор:
-  <select id="Catalogues" onchange="LoadTree()"></select><br>
-  <SKLADz:treeview id="GroupsTree" width=300 height=160 ImagesPath="#(%session.Data("ImagesPath"))#" onDownloadCmpl="GroupsTreeDnldCmpl()" />
-  <Table width="350"><tr><td>
-  <sklad:LittleButton name="new" id="newgrup" onclick="addGroup(0)" alt="Новая группа">
-  <sklad:LittleButton name="new+" id="newSubgrup" onclick="addGroup(1)" alt="Новая подгруппа">
-  <sklad:LittleButton name="edit" id="EditGroupName" onclick="EditGroupNameFn()" alt="Редактирование названия группы">
-  <sklad:LittleButton name="del+" id="del22" onclick="cleargrup()" alt="Очистить группу">
-  <sklad:LittleButton name="history" id="hist22" onclick="fillgrup()" alt="Заполнить группу">
-  <sklad:LittleButton name="PrintPrice" id="PrintPriceImg" onclick="PrintPriceFunc('')" alt="Вывести прайслист">
-  <sklad:LittleButton name="PrintPriceColor" id="PrintPriceImg2" onclick="PrintPriceFunc('Images')" alt="Вывести прайслист c изображениями">
-  <sklad:LittleButton name="ostatki" id="PrintStorage" onclick="PrintStorageFn()" alt="Вывести остатки">
-  </td><td>
-  <sklad:LittleButton name="del" id="delgrup" onclick="delGroup()" alt="Удалить группу"><br>
-  </td></tr></table>
- </td>
- <td valign=top width=50%>
-  <fieldset style="width:200;"><legend id="TovarName"></legend>
-  <SKLADz:treeview id="PropsTree" width=300 height=160 ShowImages=0 ImagesPath="#(%session.Data("ImagesPath"))#" />
-  </fieldset>
-  <Table width="350"><tr><td>
-  <sklad:LittleButton name="new" id="newprop" onclick="AddProp(0)" alt="Новое свойство">
-  <sklad:LittleButton name="new+" id="newSubprop" onclick="AddProp(1)" alt="Новое свойство в существующей группе">
-  </td><td>
-  <sklad:LittleButton name="del" id="delprop" onclick="DelDopProp();" alt="Удалить свойство">
-  </td></tr>
-  </table>
-  </td>
-</tr>
-<tr>
- <td colspan=2>
-<span id="namfld"></span>&nbsp;<input type="text" id="fldval" onkeyup="gg();">
-   <fieldset style=""><legend>Товары</legend>
-  <!--
-  <sklad:ListView id="LV" style="width:100%;height:200;"  >
-  -->
- <OBJECT id="LV" classid=clsid:BDD1F04B-858B-11D1-B16A-00C0F0283628 style="width:100%;height:200;behavior:url('#default#download')" codebase="Cab\MSComCtl.CAB" >
-<PARAM NAME="View" VALUE="3">
-<PARAM NAME="Appearance" VALUE="1">
-<PARAM NAME="FullRowSelect" VALUE="True">
-<PARAM NAME="MultiSelect" VALUE="True">
-<PARAM NAME="GridLines" VALUE="True">
-<PARAM NAME="LabelEdit" VALUE="1">
-</OBJECT>
-
-  <Table width=100%><tr><td width="60%" >
-<CSP:IF CONDITION="Access9func=1">
-  <sklad:LittleButton name="new" id="newtov" onclick="addTovar()" alt="Новый товар">
-  <sklad:LittleButton name="edit" id="edittov" onclick="editTovar()" alt="Редактировать товар">
-  <sklad:LittleButton name="edit" id="edittov2" onclick="editTovar2()" alt="Редактировать товар в новой форме ( CTRL+q )">
-</CSP:IF>
-  <sklad:LittleButton name="card" id="cardtov" onclick="OpenCard()" alt="Карточка товара">
-  <sklad:LittleButton name="new+" id="newGprop" onclick="AddProp2()" alt="Новое основное свойство">
-  <sklad:LittleButton name="del+" id="delGprop" onclick="DelProp()" alt="Удалить основное свойство">
-<CSP:IF CONDITION="Access9func=1">
-  <sklad:LittleButton name="copy" id="copy" onclick="cuttov()" alt="Пометить для копирования">
-  <sklad:LittleButton name="paste" id="paste" onclick="pastetov()" alt="Вставить товары из буфера">
-  <sklad:LittleButton name="history" id="buf" onclick="tovbuf()" alt="Товары в буфере обмена">
-</CSP:IF>
-  <sklad:LittleButton name="price" id="price" onclick="tovprice()" alt="Цены товара">
-<CSP:IF CONDITION="Access9func=1">
-  <sklad:LittleButton name="goinside" id="btnMuiltipleEdit" onclick="fnMuiltipleEdit()" alt="Редактировать список товаров">
-</CSP:IF>
-  <sklad:LittleButton name="find" id="btnFindGood" onclick="fnFindGood()" alt="Поиск товаров">
-  </td>
-  <td align=right width="40%"><IE:DOWNLOAD id="downloader" STYLE="behavior:url(#default#download)" />
-<CSP:IF CONDITION="Access9func=1">
-  <sklad:LittleButton name="del" id="deltov" onclick="DelTovar()" alt="Удалить товар">
-</CSP:IF>
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <span title="Обновление таблицы после каждого сохранения товара (если отключить, то редактировать товары можно будет быстрее)">
-  	Поддерживать таблицу в актуальном состоянии
-  	<input type=checkbox id="makeShowDict" checked style="width:20pt;border:none;">
-  </span>
-  </td></tr></table>
-</fieldset></td>
-</tr>
-</TABLE>
 </body>
 </html>

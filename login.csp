@@ -28,7 +28,7 @@ function onload(){
 
 function hui()
 {
- frameElement.document.all.MainFrameSet.rows="37px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,*,20px";
+ frameElement.document.all.MainFrameSet.rows="35,0,0,0,0,0,0,0,0,0,0,0,0,*,20";
  frameElement.document.all.statusFR.src='csp.StatusBar.cls';
  frameElement.document.all.topFR.src='toolbar.csp';
  frameElement.document.all.goods.src="goods.csp";
