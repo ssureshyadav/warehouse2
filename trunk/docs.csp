@@ -41,6 +41,10 @@
 <title>#($G(%session.Data("systemname")))#</title>
 <link href="style.css" type=text/css rel=stylesheet>
 <style>
+html {margin:0px;padding:0px;}
+body {margin:0px;padding:0px 3px;font:normal Arial 11px;}
+* html button { overflow: visible; } /*тупой padding в кнопках IE*/
+.pageTitle {width:100%;border-collapse:collapse;border:0px;padding:0px;margin:0px;}
 .datar{width:70;border:none;cursor:hand}
 </style>
 
@@ -483,13 +487,12 @@ function SetBrakAnswer()
 }
 </script>
 </head>
-<body  onload="load()" >
-<TABLE cellSpacing=0 width="100%" celpadding="0" >
-<TR>
-<td width=10%><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
-<TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" ><strong>Документы</strong></TD>
-<td width=10% align=right><a href="help/docs.htm"><img src="images/BIGHelp.bmp" width="20" height=25 border=0></a></td>
-</TABLE>
+<body  onload="load()" ><table class="pageTitle">
+<TR style="background-color: rgb(233,243,255);">
+<td width="20px"><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
+<TD width=80% style="text-align:center; FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102);" >Документы</TD>
+<td width="20px"><a href="help/docs.htm" style="text-align:right"><img src="images/BIGHelp.bmp" width="20" height=25 border=0></a></td>
+</table>
 
 <TABLE cellSpacing=0 width="100%" celpadding="0" >
 <td rowspan=99 valign=top>
