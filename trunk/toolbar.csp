@@ -3,24 +3,34 @@
  i '+login s %response.ServerSideRedirect="norights.csp" 
  q 1
 </script><html><head><style type="text/css">
-body { margin:1px 5px 1px 5px; background-color: buttonface; }
-td a {display:block;height:30px; width:30px; background: url('images/big/toolbar-4ec6da736b43d.png') no-repeat top left;; text-decoration:none;}
-.analyzis{ background-position: 0 0;} .analyzis:hover{ background-position: -420px 0;} 
-.chief{ background-position: -35px 0;} .chief:hover { background-position: -455px 0;} 
-.dicts{ background-position: -70px 0;} .dicts:hover { background-position: -490px 0;} 
-.director{ background-position: -105px 0;} .director:hover { background-position: -525px 0; } 
-.docs{ background-position: -140px 0;} .docs:hover { background-position: -560px 0; } 
-.employee{ background-position: -175px 0;} .employee:hover { background-position: -595px 0; } 
-.exit{ background-position: -210px 0;} .exit:hover { background-position: -630px 0; } 
-.finance{ background-position: -245px 0;} .finance:hover { background-position: -665px 0; } 
-.goods{ background-position: -280px 0;} .goods:hover { background-position: -700px 0; } 
-.help{ background-position: -315px 0;} .help:hover{ background-position: -735px 0; } 
-.kontr{ background-position: -350px 0;} .kontr:hover  { background-position: -770px 0; } 
-.login{ background-position: -385px 0;} .login:hover  { background-position: -805px 0;  } 
-.rules{ background-position: -945px 0; } .rules:hover { background-position: -840px 0; }
-.store{ background-position: -980px 0; } .store:hover { background-position: -875px 0;  } 
-.tunes{ background-position: -1015px 0; } .tunes:hover { background-position: -910px 0;  } 
-</style></head><body><table><tr id="toolbar"><server>
+html {margin:0px;padding:0px;}
+body {margin:0px; padding:0px;}
+.toolbar  { background-color: buttonface;padding:0px 0px 2px 2px; }
+.toolbar a {
+	margin:0px 1px;
+	display:inline-block;height:36px; width:36px; 
+	background: buttonface url('images/big/toolbar-4ec975f804781.png') no-repeat; 
+	text-decoration:none;
+}
+.toolbar a:hover {background-color:#fefefe;}
+.toolbar a.selected {background-color:#ffffff;}
+#analyzis{ background-position: 2px 2px; } 
+#chief{ background-position: -35px 2px; } 
+#dicts{ background-position: -72px 2px;  } 
+#director{ background-position: -109px 2px;  } 
+#docs{ background-position: -145px 2px;  } 
+#employee{ background-position: -182px 2px; } 
+#exit{ background-position: -220px 2px; } 
+#finance{ background-position: -257px 2px; } 
+#goods{ background-position: -294px 2px; } 
+#help{ background-position: -330px 2px; margin-left:30px;} 
+#kontr{ background-position: -368px 2px; } 
+#login{ background-position: -405px 2px; } 
+#store{ background-position: -442px 2px; } 
+#tunes{ background-position: -479px 2px;  } 
+
+
+</style></head><body><div id="toolbar" class="toolbar"><server>
  s login=$G(%session.Data("user"))
  s menu(1)=$lb(1,"goods","Товары") ;код функции, имя фрейма, подпись кнопки
  s menu(2)=$lb(3,"docs","Документы")
@@ -41,13 +51,12 @@ td a {display:block;height:30px; width:30px; background: url('images/big/toolbar
  	k frame s frame=$lg(list,2) 
  	k title s title=$lg(list,3)
  	if '$$$access(func,login) continue
- 	w "<td><a class='",frame,"' href='#",frame,"' title='",title,"'>&nbsp;</a></td>"
+ 	w "<a id='",frame,"' href='#",frame,"' title='",title,"'>&nbsp;</a>"
  }
-</server><td><a class='login' href='#login' title='Вход в систему'>&nbsp;</a></td>
-<td><div style="width:150px">&nbsp;</div></td>
-<td><a class='exit' href='#exit' title='Выйти и закрыть'>&nbsp;</a></td>
-<td><a class='help' href='#help' title='Справка'>&nbsp;</a></td>
-</tr></table><script type="text/javascript">
+</server><a id='login' href='#login' title='Вход в систему'>&nbsp;
+</a><a id='help' href='#help' title='Справка'>&nbsp;
+</a><a id='exit' href='#exit' title='Выйти и закрыть'>&nbsp;
+</a></div><script type="text/javascript">
 gobo = Image(''); // зачем?
 function ChangePage(BtnKey){
 	if(BtnKey==="help"){
@@ -61,23 +70,30 @@ function ChangePage(BtnKey){
 	}
 	//Высота фреймов на index.csp	
     var hof={ //heights of the frames, начальная инициализация
-		toolbar:"37px"
-		,goods:"0px",docs:"0px",dicts:"0px",store:"0px",tunes:"0px"
-		,chief:"0px",employee:"0px",analyzis:"0px",kontr:"0px",finance:"0px"
-		,director:"0px",login:"0px",select:"*",status:"20px"
+		toolbar:"35"
+		,goods:"0",docs:"0",dicts:"0",store:"0",tunes:"0"
+		,chief:"0",employee:"0",analyzis:"0",kontr:"0",finance:"0"
+		,director:"0",login:"0",select:"*",status:"20"
 	};
     if (hof[BtnKey]){
 	 	hof[BtnKey]="*"; //раскрываем указанный фрейм
-	 	hof["select"]="0px"; //закрываем фрейм по умолчанию
+	 	hof["select"]="0"; //закрываем фрейм по умолчанию
 	}
     var arr=new Array(); for (var i in hof) { arr.push(hof[i]);}
     frameElement.document.all.MainFrameSet.rows = arr.join(",");
 }
 var $=function(id){return document.getElementById(id);}
 var $bind=("v"=="\v")?function(o,e,h){o.attachEvent("on"+e,h);}:function(o,e,h){o.addEventListener(e,h,false);}
+var $addClass=function(obj,className){
+	if(!obj) return; obj.className=obj.className+className;
+};
+
 $bind(window,"load",function(){
+	var lastTab=null;
 	$bind($("toolbar"),"click",function(e){ e=e?e:window.event; e.target=e.target||e.srcElement;
 		var obj=e.target || null; if (!obj) return; if (obj.tagName!=="A") return;
-		ChangePage(obj.className);
+		ChangePage(obj.getAttribute("id"));
+		if (lastTab) lastTab.className="";
+		obj.className="selected"; lastTab=obj;
 	});
 });</script></body></html>
