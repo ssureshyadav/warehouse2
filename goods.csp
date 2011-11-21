@@ -32,7 +32,6 @@ body {margin:0px;padding:0px 3px;font:normal Arial 11px;}
 * html button { overflow: visible; } /*тупой padding в кнопках IE*/
 .pageTitle {width:100%;border-collapse:collapse;border:0px;padding:0px;margin:0px;border:0px;}
 .pageTitle tr {background: #e9f3ff;}
-.pageTitle tr td {border-bottom:1px #000066;}
 .toolbar a { display:inline-block; padding:2px; margin: 1px; border:1px solid #336; background:#e9f3ff; text-decoration:none;}
 label {color:#444444;}
 </style></head><body>
