@@ -28,32 +28,36 @@
 <link href="style.css" type="text/css" rel="stylesheet" />
 <style type="text/css">
 html {margin:0px;padding:0px;}
-body {margin:0px;padding:0px 3px;font:normal Arial 11px;}
+body {margin:0px;padding:2px 1px;}
 * html button { overflow: visible; } /*тупой padding в кнопках IE*/
 .pageTitle {width:100%;border-collapse:collapse;border:0px;padding:0px;margin:0px;border:0px;}
 .pageTitle tr {background: #e9f3ff;}
-.toolbar a { display:inline-block; padding:2px; margin: 1px; border:1px solid #336; background:#e9f3ff; text-decoration:none;}
-label {color:#444444;}
+.actions a { display:inline-block; padding:2px; margin: 1px; 
+	border:1px solid #ccc; background:#eee; 
+}
+.actions a:hover { text-decoration:none;background:#fcfcfc;}
+.actions a:visited {}
+label {color:#333;}
+
 </style></head><body>
 <IE:DOWNLOAD id="downloader" STYLE="behavior:url(#default#download)" />
 <table class="pageTitle" style=""><tr>
-<td style="width:20px;"><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
-<td style="text-align:center; font: Arial 18px;" >Товары</td>
+<td style="width:20px;"><img alt="Обновить раздел" src="images/refresh.png" onclick="window.location.reload()"></td>
+<td style="text-indent:40px;font:16px Arial;" >Товары</td>
 <td style="width:80px;text-align:right;font-size:11px;color: #6e6e6e;" title="Текущая версия справочника товаров">v #(GoodsGoodsVersion)#</td>
 </table>
-<table>
-<tr><td class="toolbar">
+<div class="actions">
 		<a href="PriceGroups.csp">Ценовые группы товаров
 		</a><a href="Reserves2.csp">Резервы
 		</a><a href="Brak.csp">Некондиция
 		</a><a title="Привязать запчасть к модели" href="Attach2Model.csp">Запчасти и их модели
 		</a><a href="Serials.csp" title="Открыть страницу управления серийными номерами">Cерийные номера
 		</a>
-	</td>
-</tr>
+</div>
+
 <table style="width:100%"><tr>
  <td style="vertical-align:top;width:50%"> 
-  <label for="Catalogues" style="font-size:12px;">Классификатор:</label>
+  <label for="Catalogues" >Классификатор:</label>
   <select id="Catalogues" onchange="LoadTree()">
   <server>
   s depot=$G(%session.Data("depot"))
@@ -64,7 +68,7 @@ label {color:#444444;}
   </select>
   <br/>
   <SKLADz:treeview id="GroupsTree" width=300 height=160 ImagesPath="#(%session.Data("ImagesPath"))#" onDownloadCmpl="GroupsTreeDnldCmpl()" />
-  <Table width="350"><tr><td>
+  <table width="350"><tr><td>
   <sklad:LittleButton name="new" id="newgrup" onclick="addGroup(0)" alt="Новая группа">
   <sklad:LittleButton name="new+" id="newSubgrup" onclick="addGroup(1)" alt="Новая подгруппа">
   <sklad:LittleButton name="edit" id="EditGroupName" onclick="EditGroupNameFn()" alt="Редактирование названия группы">
@@ -81,7 +85,7 @@ label {color:#444444;}
   <fieldset style="width:200;"><legend id="TovarName"></legend>
   <SKLADz:treeview id="PropsTree" width=300 height=160 ShowImages=0 ImagesPath="#(%session.Data("ImagesPath"))#" />
   </fieldset>
-  <Table width="350"><tr><td>
+  <table width="350"><tr><td>
   <sklad:LittleButton name="new" id="newprop" onclick="AddProp(0)" alt="Новое свойство">
   <sklad:LittleButton name="new+" id="newSubprop" onclick="AddProp(1)" alt="Новое свойство в существующей группе">
   </td><td>
@@ -133,7 +137,7 @@ label {color:#444444;}
 </CSP:IF>
   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
   <span title="Обновление таблицы после каждого сохранения товара (если отключить, то редактировать товары можно будет быстрее)">
-  	Поддерживать таблицу в актуальном состоянии
+  	<label for="makeShowDict">Поддерживать таблицу в актуальном состоянии</label>
   	<input type=checkbox id="makeShowDict" checked style="width:20pt;border:none;">
   </span>
   </td></tr></table>

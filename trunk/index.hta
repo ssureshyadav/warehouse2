@@ -4,9 +4,13 @@
     ICON="images/sklad.ico"
     SYSMENU="no"
 >
-<head>
-<meta http-equiv=Content-Type content="text/html;charset=windows-1251">
+<head><meta http-equiv=Content-Type content="text/html;charset=windows-1251">
 <title>Система складского учёта</title>
+<style type="text/css">
+* {border:0px;margin:0px;padding:0px;}
+frameset * {margin:0px;padding:0px;border:0px none;}
+frame {margin:0px;padding:0px;border:0px none;outline:0px none;}
+</style>
 <script language="javascript" type="text/javascript">
 GoodsWindow = "undef";
 StoreWindow = "undef";
@@ -23,13 +27,13 @@ s=login.MustExist.innerText;
 filenames=s.split("/");
 NotAllFiles=false;
 for(z = 0; z < filenames.length-1; z++)
-	{
-	if(!fso.FileExists(SystemDrive+"\\SKLAD\\"+filenames[z]))
-		{
-		NotAllFiles=true;
-		break;
-		}
-	}
+ {
+ if(!fso.FileExists(SystemDrive+"\\SKLAD\\"+filenames[z]))
+  {
+  NotAllFiles=true;
+  break;
+  }
+ }
 if(NotAllFiles){window.showModalDialog("zz.htm","","center:yes;status:no;dialogHeight:100px;dialogWidth:250px");}
 FilesChecked=true;
 }
@@ -39,34 +43,32 @@ function sendclose(){
 return
 var xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
 try
-	{
-	xmlhttp.open("POST","CloseSession.csp", false);
-	xmlhttp.send();
-	}
+ {
+ xmlhttp.open("POST","CloseSession.csp", false);
+ xmlhttp.send();
+ }
 catch(e)
-	{
-	}
+ {
+ }
 }
 </script>
 </head>
-
-<FRAMESET rows="37px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,*,0px,20px" noresize id="MainFrameSet" onunload="sendclose()">
-<FRAME src="close.htm" name="topFR" id="topFR"  frameborder="0" scrolling=no noresize APPLICATION="yes">
-<FRAME src="select.htm" name="goods" id="goods"  frameborder="0" scrolling=auto noresize>
-<FRAME src="select.htm" name="docs" id="docs"  frameborder="0" scrolling=auto noresize>
-<FRAME src="select.htm" name="dicts" id="dicts"  frameborder="0" scrolling=auto noresize>
-<FRAME src="select.htm" name="store" id="store"  frameborder="0" scrolling=auto noresize>
-<FRAME src="select.htm" name="tuneup" id="tuneup"  frameborder="0" scrolling=auto noresize>
-<FRAME src="select.htm" name="chief" id="chief"  frameborder="0" scrolling=auto noresize>
-<FRAME src="select.htm" name="emplight" id="emplight"  frameborder="0" scrolling=auto noresize>
-<FRAME src="select.htm" name="analyzis" id="analyzis"  frameborder="0" scrolling=auto noresize>
-<FRAME src="select.htm" name="kontr" id="kontr"  frameborder="0" scrolling=auto noresize APPLICATION="yes">
-<FRAME src="select.htm" name="finance" id="finance"  frameborder="0" scrolling=auto noresize APPLICATION="yes">
-<FRAME src="select.htm" name="director" id="director"  frameborder="0" scrolling=auto noresize APPLICATION="yes">
-<FRAME src="login.csp" name="login" id="login"  frameborder="0" noresize onload="InsertValues();" APPLICATION="yes">
-<FRAME src="select.htm" name="select" id="select"  frameborder="0" scrolling=auto noresize>
-<FRAME name="statusFR" id="statusFR"  frameborder="0" scrolling=no noresize APPLICATION="yes">
-<IE:DOWNLOAD id="downloader" STYLE="behavior:url(#default#download)" />
-</FRAMESET>
+<frameset rows="35,0,0,0,0,0,0,0,0,0,0,0,*,0,20" cols="*" border="0" framespacing="0" frameborder="0" noresize id="MainFrameSet" onunload="sendclose()">
+<frame src="close.htm" name="topFR" id="topFR" scrolling=no noresize border="0" framespacing="0" frameborder="0"  APPLICATION="yes" >
+<frame src="select.htm" name="goods" id="goods" scrolling=auto border="0" framespacing="0" frameborder="0" noresize  >
+<frame src="select.htm" name="docs" id="docs"   scrolling=auto border="0" framespacing="0" frameborder="0" noresize>
+<frame src="select.htm" name="dicts" id="dicts"  scrolling=auto border="0" framespacing="0" frameborder="0" noresize>
+<frame src="select.htm" name="store" id="store"  scrolling=auto border="0" framespacing="0" frameborder="0" noresize>
+<frame src="select.htm" name="tuneup" id="tuneup"   scrolling=auto border="0" framespacing="0" frameborder="0" noresize>
+<frame src="select.htm" name="chief" id="chief"   scrolling=auto border="0" framespacing="0" frameborder="0" noresize>
+<frame src="select.htm" name="emplight" id="emplight"  scrolling=auto border="0" framespacing="0" frameborder="0" noresize>
+<frame src="select.htm" name="analyzis" id="analyzis"  scrolling=auto border="0" framespacing="0" frameborder="0" noresize>
+<frame src="select.htm" name="kontr" id="kontr"   scrolling=auto APPLICATION="yes" border="0" framespacing="0" frameborder="0" noresize>
+<frame src="select.htm" name="finance" id="finance"   scrolling=auto APPLICATION="yes" border="0" framespacing="0" frameborder="0" noresize>
+<frame src="select.htm" name="director" id="director"  scrolling=auto APPLICATION="yes" border="0" framespacing="0" frameborder="0" noresize>
+<frame src="login.csp" name="login" id="login" onload="InsertValues();" APPLICATION="yes" border="0" framespacing="0" frameborder="0" noresize>
+<frame src="select.htm" name="select" id="select"  scrolling=no border="0" framespacing="0" frameborder="0" noresize >
+<frame name="statusFR" id="statusFR" scrolling=no APPLICATION="yes" border="0" framespacing="0" frameborder="0" noresize >
+</frameset>
 
 </html>

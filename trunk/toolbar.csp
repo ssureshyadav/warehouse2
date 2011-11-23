@@ -5,29 +5,30 @@
 </script><html><head><style type="text/css">
 html {margin:0px;padding:0px;}
 body {margin:0px; padding:0px;}
-.toolbar  { background-color: buttonface;padding:0px 0px 2px 2px; }
-.toolbar a {
+.toolbar  {margin:0px; background-color: buttonface;padding:0px 0px 2px 2px; height:38px;}
+.toolbar a { /*кнопки*/
 	margin:0px 1px;
-	display:inline-block;height:36px; width:36px; 
+	display:block;height:36px; width:36px; float:left; /*обтекание слева*/
 	background: buttonface url('images/big/toolbar-4ec975f804781.png') no-repeat; 
 	text-decoration:none;
 }
-.toolbar a:hover {background-color:#fefefe;}
-.toolbar a.selected {background-color:#ffffff;}
+.toolbar a:hover {background-color:#fefefe;} /*кнопки под мышкой*/
+.toolbar a.selected {background-color:#ffffff;} /*нажатая кнопка*/
 #analyzis{ background-position: 2px 2px; } 
 #chief{ background-position: -35px 2px; } 
 #dicts{ background-position: -72px 2px;  } 
 #director{ background-position: -109px 2px;  } 
 #docs{ background-position: -145px 2px;  } 
 #employee{ background-position: -182px 2px; } 
-#exit{ background-position: -220px 2px; } 
+#exit{ background-position: -220px 2px; float:right;} /*крайний правый*/
 #finance{ background-position: -257px 2px; } 
 #goods{ background-position: -294px 2px; } 
-#help{ background-position: -330px 2px; margin-left:30px;} 
+#help{ background-position: -330px 2px; margin-left:38px;} 
 #kontr{ background-position: -368px 2px; } 
 #login{ background-position: -405px 2px; } 
 #store{ background-position: -442px 2px; } 
-#tunes{ background-position: -479px 2px;  } 
+#tunes{ background-position: -479px 2px; }
+.clear {font-size:0px;line-height:0px;clear:both;border:0px none;margin:0px;padding:0px;outline:0px none;} /* выключаем обтекание*/
 
 
 </style></head><body><div id="toolbar" class="toolbar"><server>
@@ -55,8 +56,8 @@ body {margin:0px; padding:0px;}
  }
 </server><a id='login' href='#login' title='Вход в систему'>&nbsp;
 </a><a id='help' href='#help' title='Справка'>&nbsp;
-</a><a id='exit' href='#exit' title='Выйти и закрыть'>&nbsp;
-</a></div><script type="text/javascript">
+</a><a id='exit' href='#exit' title='Выйти и Закрыть'>&nbsp;
+</a><div class="clear">&nbsp;</div></div><script type="text/javascript">
 gobo = Image(''); // зачем?
 function ChangePage(BtnKey){
 	if(BtnKey==="help"){
