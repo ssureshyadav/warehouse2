@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.repSO">
+<Description>
+(Rep)ort (S)torage(O)ut
+отчет по отгрузке</Description>
+<Super>%CSP.Page</Super>
+<TimeCreated>62421,38564.045717</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	k Args m Args=%request.Data
+	s query=$d(Args("query")) ;режим ajax запроса
+	if query Q ..Detail(.Args)
+	s now=$zd(+$h,3)
+	s d1=$g(Args("d1",1),now), d2=$g(Args("d2",1),now)
+	
+	&html<<html><head><title>Склад2 :: Отчет об отгрузке товаров</title>
+	<meta http-equiv="Content-Language" content="ru">
+  	<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+  	<link type="text/css" href="css/redmond/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
+  	<style type="text/css">
+  	.ui-widget {font-size:.8em;}
+  	table {border-collapse:collapse;}
+  	table.report {border:collapse;border:1px solid #6e6e6e;}
+  	table.report th {font-weight:normal;color:#333;font-size:12px;}
+  	table.report {table-layout:fixed; /*ширина столбцов определяется сразу*/}
+  	table.report td,table.report th {border:1px solid #6e6e6e;font-size:12px;}
+  	.c1 {width:200px;}
+  	.c2 {width:250px;}
+  	.c3 {width:50px;}
+  	.c4 {width:70px;}
+  	.c5 {width:70px;}
+  	
+  	td.gb {border-bottom:0px none ! important;} /*визуально объеденяем по контрагенту*/
+  	td.gc {border-top:0px none ! important;border-bottom:0px none ! important;}
+  	
+  	.tar {text-align:right;font-size:16px;}
+  	tr.detail {display:none} /*прячем строки детализации изначально*/
+  	/*раскрываем*/
+  	.expand {float:left;width:8px;padding:0px 2px;cursor:pointer;border:1px solid #555;color:#555;font-family:"Lucida Console"}
+  	.datepicker {width:6em;}
+   </style>
+	</head><body><form>
+	<h2>Отчет по отгрузке товаров контрагентам</h2>
+	<fieldset><legend>Параметры отчета</legend>
+	<table>
+	<tr><td>Период <label for="d1">с:</label></td>
+		<td><input type="text" id="d1" name="d1" maxlength="10" class='datepicker' title="Начало диапазона" value="#(d1)#" />
+			<label for="d2">по:</label>
+			<input type="text" id="d2" name="d2" maxlength="10" class='datepicker' title="Конец диапазона" value="#(d2)#" />
+		</td></tr>
+	<tr><td><label for="kontr">Контрагент:</label></td>
+		<td><select type="text" id="kontr" name="kontr" title="Контрагенты">>
+		 d ..wKontrOptions(.Args)	
+		&html<</select></td></tr>
+	<!--tr><td><label for="gg">Группа(ы) товаров:</label></td>
+		<td><input type="text" id="gg" name="gg" title="Группа(ы) товаров"/></td>
+	</tr-->	
+	</table>
+	<input type="submit" id="btnRun" value="Сформировать" title="Запустить формирование отчета" />
+	</fieldset>
+	</form>
+	<table class='report'><col class="c1"><col class="c2"><col class="c3"><col class="c4"><col class="c5">
+	<thead>
+	<tr><th>Контрагент</th><th>Классификатор - Группа</th>
+	<th>Кол.-во,<br/>шт.</th>
+	<th>Сумма<br/>по докум.</th>
+	<th>Сумма<br/>закупоч.</th>
+	</thead></table>
+	<div id="report" style="height:400px;overflow:auto;">>
+	 d ..wReport(.Args)
+	&html<</div>
+	<script src="js/jquery-1.6.4.min.js" type="text/javascript"></script>
+	<script src="js/jquery-ui-1.8.16.custom.min.js" type="text/javascript"></script>
+	<script src="js/i18n/jquery-ui.datepicker-ru.min.js" type="text/javascript"></script>
+	<script type="text/javascript">
+	/*Расширяем JQuery */
+	(function($){ $.fn.jqDetail = function(){
+        var element = this
+        //$(element).find("tr.detail").hide();
+        //$(element).find("tr:first-child").show();
+        $(element).find("tr.master").click(function() {
+	        var $detailRow=$(this).next("tr");
+	        $detailRow.toggle(); //видимость след строки
+	        
+	        var $expand=$(this).find(".expand"); //+-
+	        var load=($expand.html()=="+");
+	        (load)?$expand.html("-"):$expand.html("+");
+	        if (!load) return; //
+            
+            //проверяем необходимость подгрузки
+            var $detailTd=$(this).next("tr").children(":first-child");
+            if ($detailTd.html()!="") return; //уже заполняли
+            
+            var query=$(this).attr("id")+","+$("#d1").val()+","+$("#d2").val(); //Контрагент, группа
+            $detailTd.css("text-align","center").css("cursor","wait").html("Пожалуйста подождите, загружаю данные... ");
+            
+            $.ajax({
+	            	url: "csp.repSO.cls",
+            		data:{query:query},
+  					dataType:"html",
+  					context: $detailTd[0],
+  					success: function(data){
+    					$(this).css("text-align","left").css("cursor","default").html(data);
+  					}
+	        });
+           	
+            
+        });
+    }})(jQuery); 
+    /**/
+    $(document).ready(function(){
+       	$.datepicker.setDefaults( $.datepicker.regional[ "ru" ] );
+       	$(".datepicker").datepicker({ dateFormat: 'yy-mm-dd', duration: 0 });
+       	$("#report").jqDetail(); //таблица - показываем детализацию
+     });
+	</script>
+	
+	</body></html>>
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="wReport">
+<Description>
+Запрос с группировкой по контрагенту, группе товара
+контрагент, общая сумма запчастей сгруппированная по товарной группе, которой принадлежит запчасть (товар)</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&Args:%String]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#; основной запрос
+	s select="SELECT "
+		  _" Doc->Kontr as kontr, Doc->Kontr->Name as kontrName"
+		  _",Goods"
+		  _",csp.repSO_FirstGroup(Goods) as ggroup "
+		  _",csp.repSO_GroupName(csp.repSO_FirstGroup(Goods)) as ggroupName "
+		  _",Sum(quantreal) as gcount "
+		  _",Sum(quantreal*Price) as summa "
+		  _",Sum(quantreal*csp.repSO_CenaZak(Goods)) as summaZak "
+	s from=" From Docs.StorageOutItems "
+	s where=" Where Doc->Stat=2 "
+	s group=" Group By Doc->Kontr, csp.repSO_FirstGroup(Goods) "
+	s having=" Having Sum(quantreal) > 0"
+	s order=" Order By Doc->Kontr->Name,csp.repSO_GroupName(csp.repSO_FirstGroup(Goods))"
+	
+	#;разбор параметров
+	k qp s qp=0 ;query parameters
+	#;Список контрагентов
+	s kontr=$g(Args("kontr",1))
+	if kontr'="" { 
+		s count=$l(kontr,",") ;список контрагентов
+		if count=1 { //один контрагент
+			s where=where_" AND Doc->Kontr=?"
+			s qp($i(qp))=kontr
+		}
+		if count>1 { //один контрагент
+			s where=where_" AND (Doc->Kontr In ("_kontr_"))"
+		}
+	}
+	#;интервал дат
+	s d1=$g(Args("d1",1)), d1h=$zdh(d1,3,,,,,,,+$h), qp($i(qp))=d1h 
+	s d2=$g(Args("d2",1)), d2h=$zdh(d2,3,,,,,,,+$h), qp($i(qp))=d2h 
+	s where=where_" AND (Doc->Dat Between ? And ? )"
+	s sql=select _ from _where _ group _ having _ order
+	
+	#; w sql
+	s rs=##class(%ResultSet).%New("%DynamicQuery:SQL")
+	s sc=rs.Prepare(sql)
+	d:'sc $system.OBJ.DisplayError(sc)
+	s sc=rs.Execute(
+		$g(qp(1)),$g(qp(2)),$g(qp(3)),$g(qp(4))
+		,$g(qp(5)),$g(qp(6)),$g(qp(7)),$g(qp(8))
+		,$g(qp(9)),$g(qp(10)),$g(qp(11)),$g(qp(12))
+		,$g(qp(13)),$g(qp(14)),$g(qp(15)),$g(qp(16))
+	)
+	d:'sc $system.OBJ.DisplayError(sc)
+	
+	
+	w "<table class='report'><col class='c1'><col class='c2'><col class='c3'><col class='c4'><col class='c5'>"
+	s prevKontr="" ;последний выведенный контрагент
+	s (kcount,ksum,ksumZak)=0
+	while rs.Next(){
+		s kontr=$g(rs.Data("kontr")),kontrName=$g(rs.Data("kontrName"))
+		s ggroup=$g(rs.Data("ggroup")), ggroupName=$g(rs.Data("ggroupName"))
+		s gcount=$g(rs.Data("gcount")), goods=$g(rs.Data("Goods"))
+		s summa=$g(rs.Data("summa")), summaZak=$g(rs.Data("summaZak"))
+		s kcount=kcount+gcount,ksum=ksum+summa,ksumZak=ksumZak+summaZak
+		
+		if (prevKontr'=kontr){
+			if (prevKontr'=""){
+				w "</tbody>"
+				w "<tfoot>"
+				w "<tr><th></th><th>Итого</th>"
+				w "<th class='tar'>",kcount,"</th>"
+				w "<th class='tar'>",ksum,"</th>"
+				w "<th class='tar'>",summaZak,"</th>"
+				w "</tr></tfoot>"
+			}
+			s (kcount,ksum,ksumZak)=0	
+			w "<tbody>"
+		}
+				
+		w "<tr id='",kontr,",",ggroup,"' class='master'><td"
+		if kontr'=prevKontr {
+			w " class='gb'>" ;group begin
+			w kontrName
+			s prevKontr=kontr ;переключаемся на нового контрагента
+		} else {
+			w " class='gc'>&nbsp;"	;group continue
+		}
+		w "</td>"
+		
+		w "<td><div class='expand'>+</div>",ggroupName,"</td>"
+		w "<td class='tar'>",gcount,"</td>"
+		w "<td class='tar'>",summa,"</td>"
+		w "<td class='tar'>",summaZak,"</td>"
+		w "</tr>"
+		#;детализируем
+		w "<tr class='detail'><td colspan='5'></td></tr>"
+	}
+	w "</table>"
+	d rs.Close(),rs.%Close() k rs
+	
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wKontrOptions">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&Args:%String]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s kontr=$g(Args("kontr",1))
+	w "<option value=''>&nbsp;&nbsp;Все контрагенты</option>"
+	&sql(Declare krs Cursor For
+		Select ID,Name Into :id,:name
+		From Common.Kontragent
+		Order By Name
+	) &sql(Open krs)
+	for { &sql(FETCH krs) Q:SQLCODE'=0
+		w "<option value='",id,"' "
+		w:id=kontr "selected='selected' "
+		w ">",name,"</option>"
+	} &sql(Close krs)
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="FirstGroup">
+<Description>
+Определение группы товара по товару
+Товар входит в несколько групп, надо выбрать одну
+Пока берем первую</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>good:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	s group=""
+	&sql(Select Groups Into :group 
+		From Goods.GoodsGroup
+		Where Goods=:good	
+	)
+	if SQLCODE=0 Q group
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="GroupName">
+<Description>
+Имя группы по коду</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>group:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	Q:$g(group)="" "" Q:'##class(Goods.Group).%ExistsId(group) ""
+	s gname=##class(Goods.Group).NameGetStored(group)
+	s cat=##class(Goods.Group).CatalogueGetStored(group)
+	s catName="" s:(cat'="")&&##class(Goods.Catalogue).%ExistsId(cat) catName=##class(Goods.Catalogue).NameGetStored(cat)
+	Q catName_" - "_gname
+]]></Implementation>
+</Method>
+
+<Method name="CenaZak">
+<Description>
+Закупочная цена товара, пока без даты</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>good:%String,date:%Date=""</FormalSpec>
+<ReturnType>%Float</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	s price="" 
+	&sql(
+	 Select Top 1 Price Into :price 
+	 From Store.Price 
+	 Where Goods=:good And typcen=4 --используем индекс
+	 Order By Dat Desc,Tim Desc --используем индекс вместо ID
+	)	
+	Q:SQLCODE=0 price
+	Q 0
+]]></Implementation>
+</Method>
+
+<Method name="Detail">
+<Description>
+Детализация ajax-запросом</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&Args:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s query=$g(Args("query",1)) ;список через запятую контрагент, группа, дата1, дата2
+	s kontr=$P(query,","), ggroup=$P(query,",",2)
+	s d1=$P(query,",",3), d2=$P(query,",",4)
+	#define sqldateh(%date) $zdh(%date,3,,,,,,,+$h)
+	s d1=$$$sqldateh(d1), d2=$$$sqldateh(d2)
+	&sql(Declare drs Cursor For
+	SELECT Doc->Name,Doc->Dat
+		   ,csp.repSO_GroupName(csp.repSO_FirstGroup(Goods))
+		   ,Goods->Name,quantreal,csp.repSO_CenaZak(Goods)
+		   ,Price
+		  INTO :docname,:docdat,:group,:good,:amount,:cenaZak,:cena
+	 FROM Docs.StorageOutItems 
+	 WHERE Doc->Kontr=:kontr And (Doc->Dat Between :d1 And :d2) 
+			 And csp.repSO_FirstGroup(Goods)=:ggroup 
+	) &sql(Open drs)
+	w "<table>"
+	,"<thead><tr><th>Документ</th><th>Дата</th><th>Группа</th>"
+	,"<th>Товар</th><th>Количество</th><th>Цена зак.</th><th>Цена</th>"
+	,"<th>Сумма зак.</th><th>Сумма</th></tr></thead>"
+	for { &sql(FETCH drs) Q:SQLCODE'=0
+		w "<tr>"
+			w "<td>",docname,"</td>"
+			w "<td>",$zd(docdat,3),"</td>"
+			w "<td>",group,"</td>"
+			w "<td>",good,"</td>"
+			w "<td class='tar'>",amount,"</td>"
+			w "<td class='tar'>",cenaZak,"</td>"
+			w "<td class='tar'>",cena,"</td>"
+			w "<td class='tar'>",amount*cenaZak,"</td>"
+			w "<td class='tar'>",amount*cena,"</td>"
+		w "</tr>"
+	} &sql(Close drs)
+	w "</table>"
+	Q $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>
