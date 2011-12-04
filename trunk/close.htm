@@ -1,20 +1,32 @@
-<html>
-<head>
-<script language="JavaScript">
-// посылает сигнал на сервер о завершении сессии
-function sendclose(){
-var xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
-xmlhttp.open("POST","CloseSession.csp", false);
-xmlhttp.send();
-window.parent.close()
+<html><head><style type="text/css">
+/*Копия с toolbar.csp*/
+html {margin:0px;padding:0px;}
+body {margin:0px; padding:0px;}
+.toolbar  {margin:0px; background-color: buttonface;padding:0px 0px 2px 2px; height:38px;}
+.toolbar a { /*кнопки*/
+	display:block;
+	margin:0px 1px;height:36px; width:36px; float:right; /*обтекание слева*/
+	background: buttonface url('images/big/toolbar-4ec975f804781.png') no-repeat; 
+	text-decoration:none;
 }
-</script>
+.toolbar a:hover {background-color:#fefefe;} /*кнопки под мышкой*/
+.toolbar a.selected {background-color:#ffffff;} /*нажатая кнопка*/
+#exit{ background-position: -220px 2px; float:right;} /*крайний правый*/
+.clear {font-size:0px;line-height:0px;clear:both;border:0px none;margin:0px;padding:0px;outline:0px none;} /* выключаем обтекание*/
+</style>
 </head>
-<body TOPMARGIN=0 >
-<table border=0 width=100% height=100% cellpadding=0 cellspacing=0><tr>
-<td align=right valign=middle>
-<a href="#" onclick="sendclose()"><img src="images/exit.gif" border=0></a>
-</td>
-</tr>
+<body>
+<div class="toolbar"> 
+<a id='exit' href="CloseSession.csp" onclick="QuitApp();">&nbsp;</a>
+<div class="clear">&nbsp;</div>
+</div>
+<form name="SendClose" action="CloseSession.csp" target="old_ajax"></form>
+<iframe name="old_ajax"></iframe>
+<script type="text/javascript">
+ function QuitApp(){
+		 SendClose.submit();
+		 window.parent.close();
+	}
+</script>
 </body>
 </html>
