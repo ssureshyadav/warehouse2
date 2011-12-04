@@ -1,7 +1,4 @@
-<html>
-<head>
-<link href="style.css" type=text/css rel=stylesheet>
-<script language="cache" runat="server">
+ <server>
  s user=$G(%request.Data("user",1))
  s useres="" s ^passworders=""
   s password=$G(%request.Data("password",1))
@@ -15,57 +12,36 @@
  . . s result="hui();"
  . e  s result="alert('"_LoginRight_"');"_result
  s login=$G(%session.Data("user"))
-</script>
-<script language="jscript">
- function startFun()
- {
- forma.submit();
- }
-   
-function onload(){
-#(result)#
-}
-
-function hui()
-{
- frameElement.document.all.MainFrameSet.rows="35,0,0,0,0,0,0,0,0,0,0,0,0,*,20";
- frameElement.document.all.statusFR.src='csp.StatusBar.cls';
- frameElement.document.all.topFR.src='toolbar.csp';
- frameElement.document.all.goods.src="goods.csp";
- frameElement.document.all.docs.src="docs.csp";
- frameElement.document.all.dicts.src="dicts.csp";
- frameElement.document.all.store.src="store.csp";
- frameElement.document.all.tuneup.src="tuneup.csp";
- frameElement.document.all.chief.src="chief.csp";
- frameElement.document.all.emplight.src="csp.EmpLight3.cls";
- frameElement.document.all.analyzis.src="analyzis.csp";
- frameElement.document.all.kontr.src="kontr.csp";
- frameElement.document.all.finance.src="finance.csp";
- frameElement.document.all.director.src="director.csp";
-}
-
-</script>
+</server>
+<html>
+<head>
+<link href="style.css" type=text/css rel=stylesheet>
+<style type="text/css">
+ .caption {background-color:#e9f9ff;height:24px;text-align:center;vertical-align:center;margin-bottom:5px;}
+ #forma {margin-top:10%;width:400px;border:1px solid #aaa;}
+</style>
 <script language="jscript" src="common.js"></script>
-
 </head>
 <body onload="onload()" onkeypress="ManageWindow(this)" >
-<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<table width="100%"><tr><td align="center">
 
-<TR>
-<TD align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=2><strong>Регистрация</strong></TD></tr>
-<tr><td colspan=2 align=right><br><br></td></tr>
 <form name="forma" id="forma"><input type="hidden" id="SystemDrive" name="SystemDrive">
-<tr><td width=50%><img src="images/brace.gif" width=200px height=1>Склад:</td><td width=50%>
-<select style="width:150px" name="depot">
-<script language="cache" runat="server">
+<div class='caption'>Регистрация</div>
+<table><tr><td>Склад:</td><td><select style="width:150px" name="depot">
+<server>
  w ##class(Docs.Action2).GetClassValuesOptions(,"Store.Depot",,,0)
-</script>
+</server>
 </select>
 </td></tr>
-<tr><td width=50% valign=right><img src="images/brace.gif" width=200px height=1>Имя пользователя:</td><td width=50%><input type="text" name="user" value=#($G(%session.Data("login")))#></td></tr>
-<tr><td width=50%><img src="images/brace.gif" width=200px height=1>Пароль:</td><td width=50%><input type="password" name="password" value=#($G(%session.Data("passworders")))#></td></tr>
-<tr><td colspan=2 align=center><sklad:Button onclick="startFun()" value="ok"></td></tr>
+<tr><td>Пользователь:</td><td width=50%><input type="text" name="user" value=#($G(%session.Data("login")))#></td></tr>
+<tr><td>Пароль:</td><td><input type="password" name="password" value=#($G(%session.Data("passworders")))#></td></tr>
+<tr><td colspan=2 align=center><sklad:Button onclick="startFun()" value="Войти"></td></tr>
+</table>
 </form>
+
+
+</td></tr></table>
+
 </TABLE>
 
 <span id="MustExist" name="MustExist" style="display:none">
@@ -76,8 +52,36 @@ function hui()
 </script>
 </span>
 <CSP:IF CONDITION="login=7">
- <input type="text" id="edtText" style="width:300px">
-<input type="button" value="test" onclick="alert(eval(edtText.value));">
+	<!--input type="text" id="edtText" style="width:300px">
+<input type="button" value="test" onclick="alert(eval(edtText.value));"-->
 </CSP:IF>
+<script language="jscript">
+ function startFun() { forma.submit(); }
+		 
+function onload(){
+#(result)#
+}
+
+function hui() {
+	frameElement.document.all.MainFrameSet.rows="35px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,*,20px";
+	frameElement.document.all.statusFR.src='csp.StatusBar.cls';
+	frameElement.document.all.topFR.src='toolbar.csp';
+	frameElement.document.all.goods.src="goods.csp";
+	frameElement.document.all.docs.src="docs.csp";
+	frameElement.document.all.dicts.src="dicts.csp";
+	frameElement.document.all.store.src="store.csp";
+	frameElement.document.all.tuneup.src="tuneup.csp";
+	frameElement.document.all.chief.src="chief.csp";
+	frameElement.document.all.emplight.src="csp.EmpLight3.cls";
+	frameElement.document.all.analyzis.src="analyzis.csp";
+	frameElement.document.all.kontr.src="kontr.csp";
+	frameElement.document.all.finance.src="finance.csp";
+	frameElement.document.all.director.src="director.csp";
+}
+
+</script>
+
+
+
 </body>
 </html>
