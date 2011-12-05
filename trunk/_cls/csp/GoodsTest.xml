@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.GoodsTest">
+<Description>
+Тестируем замену TreeView</Description>
+<Super>%CSP.Page</Super>
+<TimeCreated>62423,983.610053</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	m Args=%request.Data
+	&html<<html><head>
+	<link type="text/css" href="css/redmond/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
+	<link type="text/css" href="css/jqTree.css" rel="stylesheet" />
+	</head><body><table><tr><td>
+	<select id="cat">
+	#(..wCatsOptions(.Args))#
+	</select>
+	<div id="tree"></div>
+	</td><td>
+	
+	</td></tr></table>
+	<script src="js/jquery-1.6.4.min.js" type="text/javascript"></script>
+	<script src="js/jqTree.js" type="text/javascript"></script>
+	<script type="text/javascript">
+    $(function(){
+      
+     $("#tree").jqTree({
+	     	nodes:[
+     	 	#(..wJSON(.Args))#	
+     		]
+     		,caption: "Выбор группы товара"
+     		,onClick: function(){
+        	
+        	} //onclick
+     	}
+     );
+     
+     });
+   </script> 
+	</body></html>>
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="wJSON">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&Args:%String]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	k gl s gl("depot")=1 
+	d ..gTree(.gl)
+	k codes m codes=gl("root")
+	d ..wNodes(.gl,.codes) ;раскручиваем с главных листьев
+	k gl
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="gTree">
+<Description>
+Собираем дерево групп
+Все дерево очень большое и не уникальное в рамках каталога</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&gl:%String=""]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s depot=$g(gl("depot"),1)
+	s cat=$g(gl("cat"),1) ;должны были уже определить
+	&sql(Declare grs Cursor For
+		Select ID,Code,Name,Parent
+		Into :id,:code,:name,:parent
+		From Goods."Group"
+		Where Depot=:depot And Catalogue=:cat
+	) &sql(Open grs)
+	
+	for { &sql(Fetch grs) Q:SQLCODE'=0
+	  s gl("data",code)=id,gl("data",code,"name")=name
+	  s gl("data",code,"parent")=parent
+	  if parent'="" {
+		  s gl("data",parent,"childs")=$i(gl("data",parent,"childs"))
+		  s gl("data",parent,"childs",code)=""
+	  }
+	} &sql(Close grs)
+	;Находим рутовые узлы (верхнего уровня)
+	s code="" for { s code=$o(gl("data",code)) Q:code=""
+		if $g(gl("data",code,"parent"))="" {
+			s gl("root",code)=""	
+			s gl("data",code,"root")=1
+		}
+		if $d(gl("data",code,"childs"))=0 {
+			s gl("data",code,"leaf")=1	
+		}	
+	}
+]]></Implementation>
+</Method>
+
+<Method name="wNodes">
+<Description>
+Выгрузка дерева </Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&gl:%String,&codes:%String]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s first=1
+	s code="" for { s code=$o(codes(code)) Q:code=""
+		w:'first "," s:first first=0
+		w !,"{code:",..QuoteJS(code),",name:",..QuoteJS($g(gl("data",code,"name")))
+			s root=$d(gl("data",code,"root")) w ",root:",$CASE(root,0:"0",:"1")
+			s leaf=$d(gl("data",code,"childs")) w ",leaf:",$CASE(leaf,0:"1",:"0")
+			s next=$o(codes(code)) w ",last:",$S(next="":"1",1:"0")
+			if leaf'=0 {
+				w !,",nodes:["
+				k childs m childs=gl("data",code,"childs")
+				d ..wNodes(.gl,.childs)
+				w "]"
+			}
+		w !,"}"
+		
+	}
+]]></Implementation>
+</Method>
+
+<Method name="gCatalogues">
+<Description>
+В локальный массив с ключом по Наименованию</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&Args:%String,&cats:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s depot=$g(Args("depot",1),1)
+	k cats s cats=""
+	&sql(Declare crs Cursor For
+		Select Id,Name Into :id,:name
+		From Goods.Catalogue
+		Where depot=:depot
+		Order By Name
+	) &sql(Open crs)
+	for { &sql(Fetch crs) Q:SQLCODE'=0
+		s cats(id)=name
+	} &sql(Close crs)
+	Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="wCatsOptions">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&Args:%String]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	k cats s cats="" d ..gCatalogues(.Args,.cats)
+	s cat=$g(Args("cat",1)) ;повезло
+	;пересортировка по наименованию
+	k catsName s catsName=""
+	s id="" for { s id=$o(cats(id)) Q:id=""
+		s name=$g(cats(id)), catsName(name,id)=""
+	}
+	if cat="" { ;определяем первый в сортированном списке
+		s name=$o(catsName("")) s:name'="" cat=$o(catsName(name,""))
+	}
+	s name="" for { s name=$o(catsName(name)) Q:name=""
+		s id="" for { s id=$o(catsName(name,id)) Q:id=""
+			w "<option value='",id,"' ",$S(id=cat:"selected='true' ",1:""),">",name,"</option>"
+		}	
+	}
+	s Args("cat",1)=cat ;вернули первый в списке или выбранный
+	
+	Q ""
+]]></Implementation>
+</Method>
+</Class>
+</Export>
