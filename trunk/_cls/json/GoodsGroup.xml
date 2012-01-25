@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="json.GoodsGroup">
+<Description>
+выгружает дерево групп товаров</Description>
+<Super>%CSP.Page</Super>
+<TimeCreated>62463,80009.390097</TimeCreated>
+
+<Parameter name="CONTENTTYPE">
+<Description><![CDATA[
+Specifies the default content type for the page.  This can be overriden using the
+&lt;CSP:CONTENT TYPE=&gt; tag, or by setting the <b>%response</b>.ContentType property
+in the <method>OnPreHTTP</method> method.  The default value if this parameter is
+not set is text/html.]]></Description>
+<Default>text/plain</Default>
+</Parameter>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	m Args=%request.Data
+	s Args("depot",1)=$g(%session.Data("depot"),1)
+	d ..wJSON(.Args)
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="wJSON">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&Args:%String]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	k gl s depot=$g(Args("depot",1),1) 
+	s gl("depot")=depot
+	s defcat="" &sql(Select ID Into :defcat From Goods.Catalogue Where Depot=:depot Order By Name)
+	s cat=$g(Args("cat",1),defcat)
+	s:cat="" cat=1
+	s gl("cat")=cat
+	
+	d ..gTree(.gl)
+	s rows=$g(gl("data"))
+	w "{""page"":""1"",""records"":""",+rows,""",""total"":""",+rows,""",""rows"":["
+	m root=gl("root")
+	d ..wNodes(.gl,.root) ;раскручиваем с главных листьев
+	w "]}"
+	
+	k gl
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="gJSON">
+<Description>
+для асинхроннных вызовов</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>cat:%String,jsfunc:%String="alert"</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	k Args s Args("cat",1)=$g(cat)
+	s depot="" 
+	s:$g(%session)'="" depot=$g(%session.Data("depot"))	
+	s:depot="" depot=1
+	s Args("depot",1)=depot
+		
+	w jsfunc,"("
+	d ..wJSON(.Args)
+	w ");"
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="gTree">
+<Description>
+Собираем дерево групп
+Все дерево очень большое и не уникальное в рамках каталога</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&gl:%String=""]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s depot=$g(gl("depot"),1)
+	s cat=$g(gl("cat"),1) 
+	
+	&sql(Declare grs Cursor For
+		Select ID,Name,Code,Goods.Group_GetParentId(ID) as parent
+		Into :id,:name,:code,:parent
+		From Goods."Group"
+		Where Depot=:depot And Catalogue=:cat
+	) &sql(Open grs)
+	
+	for { &sql(Fetch grs) Q:SQLCODE'=0
+	  s gl("data")=$i(gl("data"))
+	  s gl("data",id,"name")=name
+	  s gl("data",id,"code")=code
+	  s gl("data",id,"parent")=parent
+	  if parent'="" {
+			  s gl("data",parent,"childs",name,"id",id)="" //сортированные по наименованию дети
+	  }
+	} 
+	
+	&sql(Close grs)
+	
+	 
+	
+	#; пост-обработка собранного массива
+	s id="" for { s id=$o(gl("data",id)) Q:id=""
+		
+		if $d(gl("data",id,"childs"))=0 {
+			s gl("data",id,"leaf")=1	
+		}	
+		
+		#;рассчет уровень 
+		s level=0, parent=id  for { s parent=$g(gl("data",parent,"parent")) Q:parent=""
+			s level=level+1
+		} s gl("data",id,"level")=level
+		
+		#;сортированные по наименованию рутовые узлы
+		s name=$g(gl("data",id,"name"))
+		s:level=0 gl("root",name,"id",id)="" 
+		
+	}
+]]></Implementation>
+</Method>
+
+<Method name="wNodes">
+<Description>
+Выгрузка дерева </Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&gl:%String,&childs:%String]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#define qt(%js) $tr(..QuoteJS(%js),"'","""")
+	
+	s first=1	
+	s idx="" for { s idx=$o(childs(idx)) Q:idx=""   ;цикл по наименованию
+	 s id="" for { s id=$o(childs(idx,"id",id)) Q:id=""  ;цикл по кодам
+	
+			w:'first "," s:first first=0
+			w "{""id"":",id
+			w ",""n"":",$$$qt($g(gl("data",id,"name")))
+			w ",""c"":",$$$qt($g(gl("data",id,"code")))
+			s level=$g(gl("data",id,"level")) 
+		 w ",""level"":",level
+		 s parent=$g(gl("data",id,"parent")) 
+			w:parent'="" ",""parent"":",parent
+		 s hasChilds=$d(gl("data",id,"childs")) 
+		 w ",""leaf"":",$CASE(hasChilds,0:"true",:"false")
+			w ",""expanded"":false"
+			w "}"
+			if hasChilds { k codes m codes=gl("data",id,"childs")
+			 w ","
+				d ..wNodes(.gl,.codes)
+			}
+			
+	 }
+	}
+]]></Implementation>
+</Method>
+</Class>
+</Export>

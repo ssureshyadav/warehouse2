@@ -6,6 +6,106 @@
 <Super>%Persistent</Super>
 <TimeCreated>60319,67371.691037</TimeCreated>
 
+<Property name="kban">
+<Description>
+Kontragent ban list
+Список ид контрагентов через запятую, для которых запрещен экспорт данного товара</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+<Parameter name="MAXLEN" value="16384"/>
+</Property>
+
+<Index name="kbanIDX">
+<Description><![CDATA[
+Хитро-ный индекс
+Не менять название, используется в коде <method>..kbanned</method>]]></Description>
+<Type>bitmap</Type>
+<Properties>kban(ELEMENTS)</Properties>
+</Index>
+
+<Method name="kbanBuildValueArray">
+<Description><![CDATA[
+Обязательный метод для построения системой хитро-ного индекса <index>kbanIDX</index>]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[kban:%String,&arr]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s list=$LFS(kban,","),key=0,k=""
+	while $LISTNEXT(list,key,k){
+		s:k'="" arr(k)=""
+	}
+ Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="kbanned">
+<Description>
+Проверка на наличие запрета</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>good,kontr</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	s part=good\64000+1 ;подиндекс в зависимости от кол-ва ид в классе
+	s offset=good#64000+1 ;смещение от начала строки
+	Q $bit($g(^Goods.GoodsI("kbanIDX"," "_kontr,part)),offset)
+]]></Implementation>
+</Method>
+
+<Method name="kbanAdd">
+<Description>
+Добавление запрета на контрагента</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>good,kontr</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	s good=$g(good) Q:'..%ExistsId(good) $$$OK	
+	s kontr=$g(kontr) Q:'##class(Common.Kontragent).%ExistsId(kontr)
+	s kban=..kbanGetStored(good)
+	s list=$LFS(kban,",") if $LF(list,kontr) Q $$$OK ;уже в списке
+	s list=list_$LB(kontr), kban=$LTS(list,",")
+	#; при обновлении через SQL сложный индекс не строится
+	s g=..%OpenId(good,,.sc) if $IsObject(g) s g.kban=kban Q g.%Save()
+	Q sc
+]]></Implementation>
+</Method>
+
+<Method name="kbanDel">
+<Description>
+Удаление запрета на котрагента
+Добавление запрета на контрагента</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>good,kontr</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	s good=$g(good) Q:'..%ExistsId(good) $$$OK	
+	s kontr=$g(kontr) Q:'##class(Common.Kontragent).%ExistsId(kontr)
+	s kban=..kbanGetStored(good)
+	s list=$LFS(kban,",") s pos=$LF(list,kontr)
+	if 'pos Q $$$OK ;уже в нет списке
+	s list=$li(list,1,pos-1)_$li(list,pos+1,$ll(list)), kban=$LTS(list,",")
+	#; при обновлении через SQL сложный индекс не строится
+	s g=..%OpenId(good,,.sc) if $IsObject(g) s g.kban=kban Q g.%Save()
+	Q sc
+]]></Implementation>
+</Method>
+
+<Property name="AllowToSend">
+<Description>
+Разрешено использовать в заявках</Description>
+<Type>%String</Type>
+<InitialExpression>1</InitialExpression>
+<Parameter name="CAPTION" value="Отправлять контрагенту,display=none"/>
+<Parameter name="DISPLAYLIST" value=",Да,Нет"/>
+<Parameter name="VALUELIST" value=",1,0"/>
+</Property>
+
+<Index name="AllowToSend">
+<Properties>AllowToSend</Properties>
+</Index>
+
 <Property name="Property312">
 <Description>
 Количество в упаковке</Description>
@@ -384,8 +484,6 @@ ID в аспекте</Description>
 <IndexLocation>^Goods.GoodsI</IndexLocation>
 <StreamLocation>^Goods.GoodsS</StreamLocation>
 <Data name="GoodsDefaultData">
-<Structure>listnode</Structure>
-<Subscript/>
 <Value name="1">
 <Value>%%CLASSNAME</Value>
 </Value>
@@ -784,6 +882,12 @@ ID в аспекте</Description>
 </Value>
 <Value name="133">
 <Value>AllowAct</Value>
+</Value>
+<Value name="134">
+<Value>AllowToSend</Value>
+</Value>
+<Value name="135">
+<Value>kban</Value>
 </Value>
 </Data>
 </Storage>

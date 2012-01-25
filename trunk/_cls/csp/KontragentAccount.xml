@@ -68,7 +68,10 @@ write заголовок страницы</Description>
  &html<
  <link rel='stylesheet' type='text/css' href='css/redmond/jquery-ui-1.8.16.custom.css'/>
  <link rel='stylesheet' type='text/css' href='css/ui.jqgrid.css'/>
- <style type="text/css">.ui-jqgrid {font-size:90%;}</style>
+ <style type="text/css">
+ 	.ui-jqgrid {font-size:90%;}
+ 	.ui-widget {font-size:.8em;}
+</style>
  >
  Q ""
 ]]></Implementation>
@@ -204,13 +207,14 @@ window.add2grid=function(json){
  s sc="", rs=..GetRS(sql,.qp,.sc) if '$IsObject(rs) Q 
  
  w jsfunc,"({rows:["
- s records=0
+ s records=0, first=1
  while rs.Next(){
+  
   s records=records+1
   if records<min continue
   if records>max continue
+  w:'first "," s:first first=0
   d ..wRow(rs)
-  w:records<max "," 
   
  }
  s total=records\rows ;целых страниц

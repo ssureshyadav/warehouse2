@@ -636,6 +636,7 @@ SetDetailAnalogRelationErr
  . s (ShowPrice,ShowClients)=1
  . s Groups=$$Groups(i,.ShowPrice,.ShowClients)
  . //пропускаем товары которые низя показывать клиентам
+ . if ##class(Goods.Goods).kbanned(i,KontrID) Q
  . if (ShowClients'=0)&(ClientProperty2506'[ShowClients) q
  . i 'ShowPrice s Price="" 	//обнуляем цены которые низя показывать клиентам
  . s RemontPrice=..GetRemontPrice(ClientUniqueCode,$LG(LBLine,izdelieListIndex))
