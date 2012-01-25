@@ -61,6 +61,24 @@
 <Properties>Parent</Properties>
 </Index>
 
+<Method name="GetParentId">
+<Description>
+Определить идентификатор родительского узла</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	Q:'..%ExistsId($g(id)) ""
+	s depot= ..DepotGetStored(id), cat=..CatalogueGetStored(id)
+ s code=..CodeGetStored(id), pcode=$P(code,"*",1,$l(code,"*")-1)
+	s pid=""
+ &sql(Select ID Into :pid From Goods."Group" Where Depot=:depot And Catalogue=:cat And Code=:pcode )
+ Q:'SQLCODE pid
+ Q ""
+]]></Implementation>
+</Method>
+
 <Query name="Common">
 <Type>%SQLQuery</Type>
 <FormalSpec>Depot,Catalogue</FormalSpec>

@@ -4,7 +4,7 @@
 <Description>
 Контрагенты (поставщики, производители, клиенты)</Description>
 <IncludeCode>xmlmacros</IncludeCode>
-<Super>%Persistent,%Populate</Super>
+<Super>%Persistent</Super>
 <TimeCreated>60319,62442.888387</TimeCreated>
 
 <Property name="Property126">
@@ -171,6 +171,18 @@ e-mail</Description>
 
 <Index name="WCalcind">
 <Properties>WCalc</Properties>
+</Index>
+
+<Property name="WCalc2">
+<Description>
+Как рассчитываемся</Description>
+<Type>%String</Type>
+<Parameter name="DISPLAYLIST" value=",б/н,взаимозачет,по договорённости"/>
+<Parameter name="VALUELIST" value=",1,2,3"/>
+</Property>
+
+<Index name="WCalc2ind">
+<Properties>WCalc2</Properties>
 </Index>
 
 <Property name="Address">
@@ -775,7 +787,96 @@ e-mail</Description>
 <Value name="57">
 <Value>Pseudonym</Value>
 </Value>
+<Value name="58">
+<Value>WCalc2</Value>
+</Value>
 </Data>
+<Property name="Activity">
+</Property>
+<Property name="AdPhone">
+</Property>
+<Property name="Address">
+</Property>
+<Property name="AddressUr">
+</Property>
+<Property name="Agree">
+</Property>
+<Property name="Balance">
+</Property>
+<Property name="ChangeDate">
+</Property>
+<Property name="ChangeTime">
+</Property>
+<Property name="ChangeUser">
+</Property>
+<Property name="City">
+</Property>
+<Property name="CityCode">
+</Property>
+<Property name="CityUr">
+</Property>
+<Property name="Code">
+</Property>
+<Property name="Comment">
+</Property>
+<Property name="ContPers">
+</Property>
+<Property name="Currency">
+</Property>
+<Property name="Discount">
+</Property>
+<Property name="EMail">
+</Property>
+<Property name="Federal">
+</Property>
+<Property name="IsWe">
+</Property>
+<Property name="Koeff">
+</Property>
+<Property name="Manager">
+</Property>
+<Property name="NDSPayment">
+</Property>
+<Property name="Name">
+</Property>
+<Property name="NotifyEmails">
+</Property>
+<Property name="OtgruzPrincip">
+</Property>
+<Property name="OurCompany">
+</Property>
+<Property name="Password">
+</Property>
+<Property name="Phones">
+</Property>
+<Property name="Postalcode">
+</Property>
+<Property name="PostalcodeUr">
+</Property>
+<Property name="Property126">
+</Property>
+<Property name="Property127">
+</Property>
+<Property name="Property2506">
+</Property>
+<Property name="Property831">
+</Property>
+<Property name="Pseudonym">
+</Property>
+<Property name="Status">
+</Property>
+<Property name="WCalc">
+</Property>
+<Property name="bank">
+</Property>
+<Property name="chief">
+</Property>
+<Property name="fax">
+</Property>
+<Property name="glavbuh">
+</Property>
+<Property name="region2">
+</Property>
 </Storage>
 </Class>
 </Export>
