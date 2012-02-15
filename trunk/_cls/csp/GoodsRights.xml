@@ -2,8 +2,10 @@
 <Export generator="Cache" version="20">
 <Class name="csp.GoodsRights">
 <Description>
-Установка ограничений на экспорт справочника товаров</Description>
-<Super>%CSP.Page</Super>
+Установка ограничений на экспорт справочника товаров
+csp.Protected</Description>
+<IncludeCode>csp</IncludeCode>
+<Super>csp.Protected,csp.Design</Super>
 <TimeCreated>62462,61031.670471</TimeCreated>
 
 <Parameter name="CHARSET">
@@ -16,43 +18,6 @@ system default charset.]]></Description>
 <Default>utf-8</Default>
 </Parameter>
 
-<Method name="OnPage">
-<Description><![CDATA[
-Вывод тела страницы
-<var>args</var> массив параметров запроса для тестирования
-В некоторых случаях дизайн 10%80%10% - не очень]]></Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
- if $IsObject(%request) m args=%request.Data
-  
- &html<<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html><head>>  d ..wMeta(.args) 
- &html<<head><title>> d ..wTitle(.args) &html<</title>>
- d ..wCss(.args)
- #;w ..HyperEventHead()
- &html<</head><body>>
-		d ..wBody(.args) 
- &html<</div>>
- #;w ..HyperEventFrame()
- &html<</body></html>>
- Quit $$$OK
-]]></Implementation>
-</Method>
-
-<Method name="wMeta">
-<Description>
-write Вывод мета тэгов</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
-	&html<<meta http-equiv="Content-Language" content="ru"><meta http-equiv="Content-Type" content="text/html; charset=utf-8">>
-	Q ""
-]]></Implementation>
-</Method>
-
 <Method name="wTitle">
 <Description>
 write заголовок страницы</Description>
@@ -60,7 +25,7 @@ write заголовок страницы</Description>
 <FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
- w "Склад.v2::Привилегии" 
+ w "Склад2 :: Привилегии" 
  Q ""
 ]]></Implementation>
 </Method>
@@ -76,10 +41,23 @@ write заголовок страницы</Description>
  <link rel='stylesheet' type='text/css' href='css/redmond/jquery-ui-1.8.16.custom.css'/>
  <link rel='stylesheet' type='text/css' href='css/ui.jqgrid.css'/>
  <style type="text/css">
+ 	body {margin:0px;padding:0px;}
  	.ui-jqgrid {font-size:90%;}
- 	.ui-widget {font-size:.8em;}
+ 	.ui-widget {font-size:12px;}
 </style>
  >
+ Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wPageHeader">
+<Description>
+write заголовок на странице</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ 
  Q ""
 ]]></Implementation>
 </Method>
@@ -91,14 +69,20 @@ write содержимое страницы</Description>
 <FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
-	
-	s depot=$g(%session.Data("depot"),1)
-	s cat=$g(args("cat",1),1), catName=""
-	s:##class(Goods.Catalogue).%ExistsId(cat) catName=##class(Goods.Catalogue).NameGetStored(cat)
- &html<
- <table><caption>Установка ограничений на экспорт справочника товаров для контрагентов</caption>
+ s depot=$g(%session.Data("depot"),1)
+ s cat=$g(args("cat",1),1), catName=""
+ s:##class(Goods.Catalogue).%ExistsId(cat) catName=##class(Goods.Catalogue).NameGetStored(cat)
+ &html<<table>
+ 	<tr><td colspan="2">>
+
+ 	&html<<div style="BACKGROUND: rgb(233,243,255); BORDER-BOTTOM: rgb(0,0,102) 1px solid">
+ 	<button id="btnBack">Назад</button>
+ 	<span style="FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102);padding-left:30px;">
+ 		<strong>Ограничение использования запчастей контрагентами</strong>
+ 	</span>
+ 	</div>
+ 	</td></tr>
  	<tr><td style="vertical-align:top;">
- 
  	<label for="catSel">Каталог:&nbsp;</label><input id="catId" type="hidden" value="#(cat)#"/>
  	<input id="cat" value="#(catName)#" readonly="readonly"/><button id="catSel">...</button>
  
@@ -112,17 +96,58 @@ write содержимое страницы</Description>
  
   <label for="kontrSel">Контрагент:&nbsp;</label><input id="kontrId" type="hidden" />
   <input id="kontr" /><button id="kontrSel">...</button>
-  
   <div id="kontrDlg">
   	<table id="kontrGrid"><tr><td></td></tr></table><div id="kontrBar"></div>
   </div>
-  
- 	<table id="good"><tr><td></td></tr></table><div id="goodBar"></div>
+  <table id="good"><tr><td></td></tr></table><div id="goodBar"></div>
  
  </td></tr></table>
- 
- <div id="debug"></div>
- 
+ <div id="debug"></div>>
+ Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wCatOpts">
+<Description>
+В локальный массив с ключом по Наименованию</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&Args:%String]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#define qt(%js) $tr(..QuoteJS(%js),"'","""")
+	
+	s depot=$g(Args("depot",1),1)
+	k cats s cats=""
+	&sql(Declare crs Cursor For
+		Select Id,Name Into :id,:name
+		From Goods.Catalogue
+		Where depot=:depot
+		Order By Name
+	) &sql(Open crs)
+	w "{rows:["
+	s first=1
+	for { &sql(Fetch crs) Q:SQLCODE'=0
+	 w:'first "," s:first first=0
+		w "{id:",id,",name:",$$$qt(name),"}"
+	} &sql(Close crs)
+	w "],page:1,records:",%ROWCOUNT,",total:1}"
+	
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wJs">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+ s depot=$g(%session.Data("depot"),1)
+ s cat=$g(args("cat",1),1), catName=""
+ s:##class(Goods.Catalogue).%ExistsId(cat) catName=##class(Goods.Catalogue).NameGetStored(cat)
+	
+	
+ &html<
 <script type='text/javascript' src='js/jquery-1.6.4.min.js'></script>
 <script type='text/javascript' src='js/jquery-ui-1.8.16.custom.min.js'></script>
 <script type='text/javascript' src='js/i18n/grid.locale-ru.js'></script>
@@ -187,10 +212,11 @@ function kontrSelected(){
 }
 $(function(){ //общий запуск после загрузки страницы
  
- 
- 
- 
- 
+ $("#btnBack").button({icons:{primary:'ui-icon-circle-arrow-w'}})
+ 			  .click(function(){
+	 			 window.location='goods.csp'; 
+	 		  });
+	 		  
  $("#catDlg").dialog({  //диалог выбора каталога
 	 title:"Выбор каталога"
 	 ,autoOpen: false
@@ -210,7 +236,8 @@ $(function(){ //общий запуск после загрузки страни
 	});
  
  $("#catGrid").jqGrid({ //Таблица с категориями
-	 colModel: [
+	 url: 'json.Catalogue.cls'
+	 ,colModel: [
 	 				{name:'id', width:50,hidden:true}
       ,{name:'name',label:'Наименование', width:350,sortable:false}
   ]
@@ -250,7 +277,7 @@ $(function(){ //общий запуск после загрузки страни
       ,{name:'c', width:80,sortable:false,hidden:true,search:false}
   ]
   ,idPrefix:"gg"
-  ,url: "json.GoodsGroup.cls"
+  ,url: "json.GoodsGroup2.cls"
   ,datatype: "json"
   ,postData: {depot: '#(depot)#',cat: '#(cat)#'}
   ,treeGrid: true
@@ -413,7 +440,7 @@ $("#good").jqGrid({
 		{name:"id",hidden:true}
 		,{name:"name",label:"Наименование", width:350}
 		,{name:"kban",label:"Запрет",width:60
-		  ,align: "center" 
+		  ,align: "left" 
 				,formatter: 'checkbox', formatoptions: {disabled:false}
 				,search:false
 			}
@@ -442,15 +469,15 @@ $("#good").jqGrid({
 			var kontr=$("#kontrId").val();
 			var result=false;
 			$.ajax({url: 'json.GoodsRights.cls'
-											,async: false
-											,data: { oper: 'ban'
-																				,gg: gg
-																				,kontr: kontr
-																				,unban: unban
-											}
-											,success: function(res){
-												result=res;
-											}
+					,async: false
+					,data: { oper: 'ban'
+						,gg: gg
+						,kontr: kontr
+						,unban: unban
+					}
+					,success: function(res){
+						result=res;
+					}
 			});
 			
 			return result;
@@ -467,42 +494,8 @@ $("#good").jqGrid({
   ;
 $("#goodBar_center").remove();
 
-
-
-
  });
-
-
 </script>>
- Q ""
-]]></Implementation>
-</Method>
-
-<Method name="wCatOpts">
-<Description>
-В локальный массив с ключом по Наименованию</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[&Args:%String]]></FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
-	#define qt(%js) $tr(..QuoteJS(%js),"'","""")
-	
-	s depot=$g(Args("depot",1),1)
-	k cats s cats=""
-	&sql(Declare crs Cursor For
-		Select Id,Name Into :id,:name
-		From Goods.Catalogue
-		Where depot=:depot
-		Order By Name
-	) &sql(Open crs)
-	w "{rows:["
-	s first=1
-	for { &sql(Fetch crs) Q:SQLCODE'=0
-	 w:'first "," s:first first=0
-		w "{id:",id,",name:",$$$qt(name),"}"
-	} &sql(Close crs)
-	w "],page:1,records:",%ROWCOUNT,",total:1}"
-	
 	Q ""
 ]]></Implementation>
 </Method>

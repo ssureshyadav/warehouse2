@@ -1,0 +1,403 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.Instruction">
+<Description>
+Создание/редактирование экземпляра инструкции</Description>
+<Super>csp.Instructions</Super>
+<TimeCreated>62486,72362.437478</TimeCreated>
+
+<Method name="wPageHeader">
+<Description>
+write заголовок на странице</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wTitle">
+<Description>
+write заголовок страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	w "Склад2 :: Инструкция"
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wCss">
+<Description>
+write заголовок страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	d ##super(.args)
+	&html<<style type="text/css">
+		th {text-align:left;font-weight:normal;font-size:95%;}	
+		th label {display:block; margin:2px 3px;}
+		#Name,#InstDate {width:6em;}
+		#Comment {width:95%}
+	</style>>
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wBody">
+<Description>
+write содержимое страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s InstrID=$g(%request.Data("id",1))
+ s Oper=10 //тип инструкции, по умолчанию - заказ на поставку запасных частей
+ 	,Name="",Comment="быт"
+ 	,InstDate=$zd(+$h,3)
+ 	,Depot1=1 //Склад №1
+ 	,RashOplatType=1 //по гарантии
+ 	,dostavka=8 //Major - способ доставки
+ 	,Summa=0
+ 	,(Kontr,imp,showcolor
+ 	,KontrName,btnSaveStyle
+ 	,CloseDate,CloseTime,CloseUserName
+ 	,Stat,postnumber,postdata
+ 	,HasBeenSent,BrakComment,PhotoFile)=""
+ s ClosedString="" ;информация о закрытии	
+ 
+ /*,Kontr,Kontr->Name*/
+ if InstrID { ;передан код инструкции - выполняем запрос
+ #SqlCompile Select=ODBC
+ 	&sql(SELECT Oper,Name,Comment,InstDate
+ 			,imp,showcolor,Depot1
+ 			,dostavka,RashOplatType
+ 			,CloseDate,CloseTime,CloseUser->Name
+ 			,Stat,postnumber,postdata
+ 			,Summa,%external(HasBeenSent)
+ 			,BrakComment,PhotoFile 
+		 	INTO :Oper,:Name,:Comment,:InstDate
+				,:imp,:showcolor,:Depot1
+				,:dostavka,:RashOplatType
+				,:CloseDate,:CloseTime,:CloseUserName
+				,:Stat,:postnumber,:postdata
+				,:Summa,:HasBeenSent,:BrakComment,:PhotoFile
+		 	FROM Operation.Instructions 
+		 	WHERE ID=:InstrID)
+ s Depot1=$g(Depot1,1), Summa=+Summa
+ if SQLCODE'=0 {
+	 &html<<div>Ошибка при выводе инструкции #(InstrID)#: #($system.SQL.SQLCODE(SQLCODE))#</td></tr>>
+	 if Stat=2 d   ;закрыт? 
+ 	. ;какая-то информационная строка
+ 	. s ClosedString=CloseUserName_" "_$S(CloseDate:$ZD(CloseDate,4),1:"")_" "_$S(CloseTime:$ZT(CloseTime),1:"")
+ 	. s ClosedString=ClosedString_" "_HasBeenSent
+ 	. s btnSaveStyle="display:none" ;прячем кнопку сохранить
+ 	i postdata s postdata=$ZD(postdata,4)
+ }
+} //if $g(id)'=""
+
+ &html<<table id="docHead" class='ui-widget ui-widget-content' style='border-collapse: collapse;'>
+ <tr>
+ 	<th><label for="Oper">Шаблон операции*</label></th>
+	<td colspan="2"><select id='Oper' onchange='ShowHideRashOplatType(this)'>>
+		w ##class(Docs.Action2).GetClassValuesOptions($G(Oper),"Operation.OperTemplate")
+	&html<</select></td>
+</tr>
+<tr>
+	<th><label>Краткое описание (номер)*</label></th>
+	<td><input type="text" id="Name" MAXLENGTH="50" value='#(Name)#'></td>
+	<th><label>Сумма</label></th>
+	 <td>#($G(Summa))#&nbsp;</td>
+</tr>
+<tr>
+<th><label>Дата*</label></th>
+<td><input type="text" id="InstDate" maxlength="10" size="8" value='#(InstDate)#'/></td>
+<th><label>Комментарий</label></th>
+<td><input id="Comment" maxlength="1000" value='#(Comment)#'></td>
+</tr>>
+	/*
+	<tr>
+	<th><label>Важность</label></th>
+	<td><select id="imp">
+		( ##class(Docs.Action2).GetDisplaylistOptions($G(imp),"Operation.Instructions||imp") )
+	</select>
+	</td>
+	<th><label>Выделить цветом</label></th>
+	<td><select id="showcolor">
+		( ##class(Docs.Action2).GetDisplaylistOptions($G(showcolor),"Operation.Instructions||showcolor") )
+		</select>
+	</td>
+	</tr>	
+	*/
+ &html<<tr>
+	<th><label>Склад*</label></th>
+	<td><select id='Depot1'>
+	#( ##class(Docs.Action2).GetClassValuesOptions($G(Depot1),"Store.Depot") )#
+	</select>
+	<th><label>Почтовый документ</label></th>
+	<td><label>#(postnumber)#&nbsp;#(postdata)#</label></td>
+</tr>
+<tr>
+	<th><label>Способ оплаты*</label></th>
+	<td><select id='RashOplatType'>
+	#( ##class(Docs.Action2).GetClassValuesOptions($G(RashOplatType),"Common.Dictionary7") )#
+	</select></td>
+	<th><label>Способ доставки*</label></th>
+	<td><select id='dostavka'>
+	#( ##class(Docs.Action2).GetClassValuesOptions($G(dostavka),"Common.Dictionary1") )#
+	</select></span>
+	</tr>>
+
+ if $G(BrakComment)'="" d
+	. &html<<tr><th><label>Комментарий клиента</label></th><td>#(BrakComment)#>
+	. if PhotoFile'="" &html<<a href="ClientImages\#(PhotoFile)#" target=_blank>фотоприложение</a>>
+ . &html<</td></tr>> 
+
+	if ClosedString'="" &html<<tr><td colspan=4>Инструкция завершена <i>"_ClosedString_"</i></td></tr>>
+
+ &html<</table>
+ <table id="grid"><tr><td></td></tr></table><div id="bar"></div>
+ <div id='gsd'></div>
+ <button id="btnSave" title="Сохранить документ" style="#(btnSaveStyle)#"></button>
+ >
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wJs">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s id=$g(args("id",1))
+	&html<
+		<script type='text/javascript' src='js/jquery-1.6.4.min.js'></script>
+		<script src="js/i18n/jquery-ui.datepicker-ru.min.js" type="text/javascript"></script>
+		<script type='text/javascript' src='js/jquery-ui-1.8.16.custom.min.js'></script>
+		<script type='text/javascript' src='js/i18n/grid.locale-ru.js'></script>
+		<script type='text/javascript' src='js/jquery.jqGrid-4.1.2.min.js'></script>
+		<script type='text/javascript' src='js/jqGoodsDialog.js'></script>
+		<script type="text/javascript">
+		var page={ doc:'#(id)#' //код текущего документа
+			,docSave: function(){ //Сохранение самого документа
+				var required=["#Oper","#Name","#InstDate","#Depot1","#RashOplatType","#dostavka"]
+				,labels=["Шаблон операции","Номер","Дата","Cклад","Способ оплаты","Способ доставки"]
+				;
+				if (!page.docCheckRequired(required,labels)) return; //не все заполнили
+				//собираем данные шапки документа 
+				var docData={
+					id: page.doc
+					,oper: (page.doc=="")?"add":"edit"
+					,type: $("#Oper").val()	
+					,name: $("#Name").val()
+					,date: $("#InstDate").val()
+					,depot: $("#Depot1").val()
+					,payment: $("#RashOplatType").val()
+					,comment: $("#Comment").val()
+					,delivery: $("#dostavka").val()
+				}
+				$.ajax({url:'#(..Link("json.instruction.cls"))#'
+					,async: false
+					,type: "POST"
+					,data: docData
+					,docType: 'text'
+					,success: function(data, textStatus, jqXH){
+					 var arr=eval(data);
+					 if (!arr[0]){
+						alert(arr[1]); return;	 
+					 }
+					 page.doc=arr[2]; //обновили код документа в javascript
+					 var $grid=$("#grid");
+					 var postData=$grid.jqGrid("getGridParam","postData");
+					 postData.Doc=page.doc;
+					 $grid.jqGrid("setGridParam","postData",postData)
+					 .trigger("reloadGrid");
+					 $("#btnSave").button("option","disabled",true);
+					 page.docSaved=true;
+					}
+				});
+				return page.docSaved;
+			
+			}
+			,docCheckRequired: function(arr,lbl){ //Проверяем обязательные поля
+				for (var i in arr){
+					var inp=$(arr[i]);
+					if (!inp.val()) {
+						page.msgBox("Поле [ "+lbl[i]+" ] обязательно для заполнения. Документ не сохранен");
+						if (inp[0]) inp[0].focus();
+						return false; 	
+					}
+				}
+				return true;	
+			}
+			,msgBox: function(msg){
+				alert(msg);
+			}
+			
+		}
+		
+		
+$(function(){
+		
+		$("#btnSave").button({
+	 		text: true
+			 ,label:"Сохранить"
+			 ,icons:{primary:'ui-icon-disk'}
+			 ,disabled: #($CASE(id,"":"false",:"true"))#
+		}).click(function(){
+			page.docSave();
+ 		});
+		
+		//При любом изменении в шапке документа включаем кнопку сохранить
+		$("input,select","#docHead").change(function(){
+		  page.docSaved=false; //флаг, что документ нуждается в сохранении
+		  $("#btnSave").button("option","disabled",false);
+		});
+		
+		$.datepicker.setDefaults( $.datepicker.regional[ "ru" ] );
+		$("#InstDate").datepicker({dateFormat: 'yy-mm-dd' }); //выбор даты документа
+		
+				
+				
+		///Параметры формы рсоздания-редактирования товарной строки
+		var  formOptions={ 
+			addCaption: "Добавить товарную строку"
+			,editCaption: "Редактировать товарную строку"	
+			,closeAfterEdit: true
+			,closeAfterAdd: true
+			,clearAfterAdd: true
+			
+			,width: 600
+			,onInitializeForm: function(fid){
+				$("#sdt",fid).datepicker({dateFormat:"yy-mm-dd"});
+				var fn_selGood=function(obj){
+					$("#g",fid).val(obj.id);
+					$("#gn",fid).val(obj.nm);
+				}
+				/// инициализируем плагин
+				$("#gsd").jqGoodsDialog({onSelect: fn_selGood});
+				/// привязываем его к кнопке
+				$("#btnSelGood",fid).click(function(){
+					$("#gsd").jqGoodsDialog("open");
+				});
+			}
+			//обходим глюки компонента - не отсылал код документа
+			,beforeSubmit: function(postdata, formid) {
+				postdata["Doc"]=page.doc;
+				return[true,""];
+			}
+			,afterSubmit: function(resp){
+				var res=resp.responseText;
+				var arr=eval(res);
+				return arr;
+			}
+			
+		};
+		
+			
+		var GRID="#grid",BAR="#bar",URL="json.irows.cls"
+		$(GRID).jqGrid({
+						caption: 'Содержание инструкции'
+						,url: URL, editurl: URL
+						,colModel: [
+							{name:"id",hidden: true}
+							,{name:"g",hidden: true, label:"Товар"
+								,editable:true
+								,editrules: { required: true}
+							}	
+							,{name:"gn",label:"Товар",width:200
+								, editable: true
+								, editoptions: { readonly: "readonly",size:40,title:'Выбирается из справочника' }
+								, formoptions: { label:"Товар*", elmsuffix: "<button id='btnSelGood'>...</button>"}
+							}	
+							,{name:"sn",label:"Серия",width:120
+								, editable: true
+							}	
+							,{name:"qnt",label:"Кол-во",width:100
+								, editable: true
+								, editrules: {required: true}
+								, formoptions: {label:"Количество*"}
+							}
+							,{name:"sdt",label:"Продан",width:100
+								, editable: true
+								, editoptions: {maxlength:10,size:10}
+							}
+							,{name:"slr",label:"Продавец",width:120
+								, editable: true
+							}
+							,{name:"rsn",label:"Поломка",width:120
+								, editable: true
+							}
+							,{name:"nt",label:"Прим.",width:120
+								, editable: true
+							}
+						]
+						
+						,postData: {Doc:#("'"_id_"'")#}
+						,datatype: "json"
+						,jsonReader : { repeatitems: false }
+						,sortname: "sdt", sortorder: "desc"
+						//,idPrefix:"kt"
+					 ,pager:BAR 
+					 ,viewrecords:true
+					 ,height:300
+					 ,hidegrid: false
+					 ,gridview:true ,rownumbers:true,viewrecords:true,rowNum:100
+					 ,/*scrollrows:true,*/hoverrows:true ,scroll:1
+					 //,ondblClickRow: function(){}
+ 		})
+ 		.jqGrid('navGrid',BAR, {
+	 		add: false //собственная реализация с предварительным сохранением шапки документа
+       		,edit: false //собственная реализация с предварительным сохранением шапки документа
+       		,del: true, deltext: "Удалить" // стандартное удаление
+       		,view: false,search: false
+       	}
+       ,{} //Параметры редактирования
+       ,{} //Параметры добавления
+       ,{} //Параметры удаления
+ )
+  .jqGrid('navButtonAdd',BAR,{ 
+   			caption:"Редактировать", buttonicon:"ui-icon-pencil"
+   			, title:"Редактировать товарную строку" 
+   			, position: 'first'
+   			, onClickButton: function(){
+	   			if (!page.docSaved){ //шапка документа не сохранена
+		   			if (!page.docSave()) return; //пытаемся сохранить
+		   		}
+		   		var grid=$("#grid"),id=$grid.jqGrid('getGridParam',"selrow");
+		   		$grid.jqGrid('editGridRow', id, formOptions );
+	   		}
+  })
+ .jqGrid('navButtonAdd',BAR,{ 
+   			caption:"Создать", buttonicon:"ui-icon-plus"
+   			, title:"Добавить товарную строку" 
+   			, position: 'first'
+   			, onClickButton: function(){
+	   			if (!page.docSaved){ //шапка документа не сохранена
+		   			if (!page.docSave()) return; //пытаемся сохранить
+		   		}
+		   		$("#grid").jqGrid('editGridRow', "new", formOptions );
+		   	}
+  })
+ ///.jqGrid('filterToolbar',{searchOnEnter:false})
+ 
+ .jqGrid('gridResize',{});
+ $(BAR+"_center").remove(); //пагинатора не будет
+ $(BAR+"_left").css("width","70%"); //надпись о количестве записей на бОльшую часть футера
+ 
+ $("th").addClass("ui-state-default").css("font-weight","normal");
+ 
+ 
+  	 
+});
+</script>
+		
+ >
+ 	
+	Q ""
+]]></Implementation>
+</Method>
+</Class>
+</Export>

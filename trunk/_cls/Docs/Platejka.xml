@@ -98,10 +98,19 @@
 <Description>
 Вернуть неизрасходованную сумму, т.е. сумму которую ещё не разнесли по расходным накладным</Description>
 <Implementation><![CDATA[
+	
+ s next="" f  s next=%this.PlatejkaItems.Next(next) q:next=""  d
+ . s item=%this.PlatejkaItems.GetAt(next)
+ . q:'$ISOBJECT(item)
+ . s OplSumma=$G(OplSumma)+item.Summa
+ q %this.Summa-$G(OplSumma)
+ 
+ /*
  s DocId=%this.%Id()
  &sql(Select SUM(OplSumma) into :OplSumma from Docs.Rash where Platej=:DocId)
  i SQLCODE s OplSumma=0
  q %this.Summa-OplSumma
+ */
 ]]></Implementation>
 </Method>
 

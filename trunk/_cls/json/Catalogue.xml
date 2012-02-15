@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="json.Catalogue">
+<Description>
+Служба выгрузки каталогов</Description>
+<Super>json.service2</Super>
+<TimeCreated>62488,59165.527393</TimeCreated>
+
+<Parameter name="CLASSNAME">
+<Description>
+Имя Persistent класса для которого создается служба
+Соглашение: имя класса и имя таблицы совпадает
+Используйте Cache правильно!</Description>
+<Type>%String</Type>
+<Default>Goods.Catalogue</Default>
+</Parameter>
+
+<Parameter name="FIELDS">
+<Description><![CDATA[
+Список SQL полей, возможно с синонимами "Name As nm"
+ID можно не указывать, т.к. выбирается обязательно
+Внимание!, имена синонимов чувствительны к регистру (для javascript клиента)
+В отличие от имен полей (SQL на стороне сервера)
+Соглашение: синоним писать  через " as " - ",OBJ->name as oname "
+Раньше неправильно разбивал на поля ]]></Description>
+<Type>%String</Type>
+<Default>Name as nm</Default>
+</Parameter>
+
+<Parameter name="FTYPES">
+<Description>
+Типы полей, по умолчанию %String
+Используются при построении фильтра
+тип %String </Description>
+<Type>%String</Type>
+<Default>%String</Default>
+</Parameter>
+</Class>
+</Export>
