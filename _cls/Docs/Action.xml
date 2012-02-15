@@ -301,8 +301,21 @@ GetDocNameFromClassErr
 </Method>
 
 <Method name="SaveDocObject">
-<Description>
-Сохранить документ и связанные строки</Description>
+<Description><![CDATA[
+Сохранить документ и связанные строки
+<var>DocData</var> - данные по всему документу
+<example>
+DocData=docid
+DocData("head",fieldName)=fieldValue
+DocData("body",rowindex)=rowid
+DocData("body",rowindex,"DocType")=DocClass_"Items"
+DocData("body",rowindex,itemFieldName)=itemFieldValue
+DocData("body",rowindex,itemFieldName)=itemFieldValue
+</example>
+<var>types</var>	- Типы значений полей документа и строк		
+types(fieldName)=fieldType
+types(className_"Items",itemFieldName)=itemFieldType
+Используется в классах (json.instruction, json.irows)]]></Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>DocClass,DocData,fieldtypes</FormalSpec>
 <Implementation><![CDATA[
@@ -317,8 +330,8 @@ GetDocNameFromClassErr
  //. s waste=##class(Common.Common).showheaders(DocClass,"","","","",.types)
  //. k waste
  //e  m types=fieldtypes(DocClass)
- s waste=##class(Common.Common).showheaders(DocClass,"","","","",.types,"","RashOplatType,Tovar")
-
+ s waste=##class(Common.Common).showheaders(DocClass,"","","","",.types,"","RashOplatType,Tovar,AllowToSend")
+ 
  //пробежимся по строкам документа который прислал пользователь, соберём там ID строк документа
  k DocumentStringsCameFromUser
  s str="" f  s str=$O(@DocData@("body",str)) q:str=""  d
@@ -382,7 +395,7 @@ GetDocNameFromClassErr
  . i '+ok $$$WriteObjError(ok) q
  i '+ok q "Ошибка при сохранении строк документа"
  s ok=doc.%Save()
- i '+ok $$$WriteObjError(ok) TROLLBACK  q "Ошибка при сохранении документа"
+ i '+ok $$$WriteObjError(ok) TROLLBACK  q "Ошибка при сохранении документа: "_$system.Status.GetOneErrorText(ok)
  s scriptok=..script(DocClass,doc)
  i ('+scriptok)&((DocClass="Docs.Remont")||(DocClass="Docs.Otchet")) d  q scriptok 
  . TROLLBACK
@@ -391,8 +404,9 @@ GetDocNameFromClassErr
  if DocClass="Common.Dictionary2" q 1
  q doc.%Id()
 SaveDocObjectErr
+ s errorMessage=$ZE
  $$$WriteError($ZE)
- q "Извините, при сохранении документа произошла ошибка"
+ Q "Извините, при сохранении документа произошла ошибка: "_errorMessage
 unrequired(field,class)
  // здесь лежат поля которые не обязательны для заполнения
  q:class="Goods.Goods" 1
@@ -581,6 +595,7 @@ SaveStorageDocErr
  s CurrentLogin=$S($ISOBJECT($G(%session)):$G(%session.Data("user")),1:"")
  if '##class(Common.Rights).getrights(CurrentLogin,9) q "Нет прав для работы с товаром." 
  s ok=..parsexml(xmlstream,docid,documentclass,.types,.DocData)
+ 
  q:'+ok ok
  s ok=..SaveDocObject(documentclass, DocData, .types)
  q ok
@@ -668,7 +683,7 @@ SaveStorageDocErr
      if itemobj.garant'="",'$D(NumbersInThisDoc(" "_itemobj.garant," "_itemobj.serial)) s ok=..setSerialGarant(itemobj.serial,itemobj.garant,itemobj.Goods,docid,class)
      s NumbersInThisDoc(" "_itemobj.garant," "_itemobj.serial)=""
   }
-  } While (key '= "") q:'+ok ok
+  } While ((key '= "")&&(ok)) q:'+ok ok
  }
  q:'+ok ok
   if class="Docs.Otchet" {
@@ -797,7 +812,7 @@ LookGarantDateErr
 	if serial'="" s ok = ##class(Common.Common).CheckSerialUnique(serial,.GarantIDFoundBySerial)
 	
 	//если такой серийный уже есть и его гарантийный не равен найде
-	if ('+ok)&(GarantIDFoundBySerial'=garantID)
+	if ('+ok)&(GarantIDFoundBySerial'=garantID) q ok
 	
 	s garantobj=##class(Common.Dictionary2).%OpenId(garantID)
 	i $ISOBJECT(garantobj) d
@@ -1417,8 +1432,10 @@ LoadFreeDocsErr
  q:'+err err
  i '+ok $$$WriteObjError(ok) q err
  s ok=..script(class,doc)
+ 
  TCOMMIT
  i '+ok TROLLBACK  q ok
+ 
  //i '+ok q ok
  q doc.%Id()
 DocFromInstrErr

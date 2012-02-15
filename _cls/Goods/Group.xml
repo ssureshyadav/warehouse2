@@ -50,9 +50,11 @@
 
 <Property name="Parent">
 <Description>
-Группа родитель</Description>
+Code родительcкой группы</Description>
 <Type>%String</Type>
-<SqlComputeCode> Set {*} = $Piece({Code},"*",1,$Length({Code},"*")-1)</SqlComputeCode>
+<SqlComputeCode> 
+		s {*}=##class(Goods.Group).GetParentCode({Code})
+	</SqlComputeCode>
 <SqlComputed>1</SqlComputed>
 <Parameter name="CAPTION" value="Группа - родитель"/>
 </Property>
@@ -60,6 +62,33 @@
 <Index name="ParentIndex">
 <Properties>Parent</Properties>
 </Index>
+
+<Property name="ParentGroup">
+<Description>
+Родительская группа</Description>
+<Type>Group</Type>
+<SqlComputeCode> 
+		s {*}=##class(Goods.Group).GetParentId({ID})
+</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+<SqlComputeOnChange>Code,Catalogue,Depot</SqlComputeOnChange>
+<Parameter name="CAPTION" value="ID род. группы"/>
+</Property>
+
+<Index name="ParentGroup">
+<Properties>ParentGroup</Properties>
+</Index>
+
+<Method name="GetParentCode">
+<Description>
+Возвращает код родительской группы по коду подчиненной</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>code</FormalSpec>
+<ReturnType>%String</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[	s len=$L(code,"*")-1  Q $p(code,"*",1,len)
+]]></Implementation>
+</Method>
 
 <Method name="GetParentId">
 <Description>
@@ -69,13 +98,35 @@
 <ReturnType>%String</ReturnType>
 <SqlProc>1</SqlProc>
 <Implementation><![CDATA[
-	Q:'..%ExistsId($g(id)) ""
-	s depot= ..DepotGetStored(id), cat=..CatalogueGetStored(id)
- s code=..CodeGetStored(id), pcode=$P(code,"*",1,$l(code,"*")-1)
-	s pid=""
- &sql(Select ID Into :pid From Goods."Group" Where Depot=:depot And Catalogue=:cat And Code=:pcode )
+ Q:'..%ExistsId($g(id)) ""
+ s depot= ..DepotGetStored(id), cat=..CatalogueGetStored(id), code=..CodeGetStored(id)
+ s code=..GetParentCode(code)
+ 
+ s pid=""
+ &sql( Select ID Into :pid From Goods."Group" 
+ 		Where Depot=:depot And Catalogue=:cat And Code=:code 
+ )
  Q:'SQLCODE pid
  Q ""
+]]></Implementation>
+</Method>
+
+<Method name="HasChild">
+<Description>
+Проверка на наличие дочерних </Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>group:%String</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	s child=""
+	&sql(
+		Select ID Into :child 
+		From Goods."Group"
+	  	Where ParentGroup=:group
+	)
+	if (SQLCODE=0)&&(child'="") Q 1
+	Q 0
 ]]></Implementation>
 </Method>
 
@@ -178,6 +229,9 @@ where Catalogue=:Catalogue
 </Value>
 <Value name="6">
 <Value>Parent</Value>
+</Value>
+<Value name="7">
+<Value>ParentGroup</Value>
 </Value>
 </Data>
 </Storage>

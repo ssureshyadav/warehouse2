@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="json.GoodsGroup2">
+<Description>
+выгружает дерево групп товаров
+Вариант для динамической подгрузки узлов
+Устраняем жалобы на медленную работу дерева</Description>
+<Super>%CSP.Page</Super>
+<TimeCreated>62463,80009.390097</TimeCreated>
+
+<Parameter name="CONTENTTYPE">
+<Description><![CDATA[
+Specifies the default content type for the page.  This can be overriden using the
+&lt;CSP:CONTENT TYPE=&gt; tag, or by setting the <b>%response</b>.ContentType property
+in the <method>OnPreHTTP</method> method.  The default value if this parameter is
+not set is text/html.]]></Description>
+<Default>text/plain</Default>
+</Parameter>
+
+<Method name="OnPage">
+<Description>
+Вывод на страницу</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	m Args=%request.Data
+	s Args("depot",1)=$g(%session.Data("depot"),1)
+	d ..wJSON(.Args)
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="wJSON">
+<Description>
+Последовательная выгрузка узлов</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&Args:%String]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s depot=$g(Args("depot",1),1) ;склад 
+	s defcat="" &sql(Select ID Into :defcat From Goods.Catalogue Where Depot=:depot Order By Name)
+	s cat=$g(Args("cat",1),defcat) ;каталог
+	s:cat="" cat=1
+	
+	s node=$g(Args("nodeid",1)) ;родительский узел
+	s lvl=$g(Args("n_level",1)) ;уровень родительского узла
+	s lvl=$i(lvl) ;уровень дочерних узлов
+	
+	s sql="Select ID,Name From Goods.""Group"" "
+		  _" Where Depot=? And Catalogue=? And Goods.Group_GetParentId(ID)=? "
+		  _" Order By Name"	  
+	s rs=##class(%ResultSet).%New("%DynamicQuery:SQL")
+	s sc=rs.Prepare(sql)
+	s:sc sc=rs.Execute(depot,cat,node)
+	
+	#define qt(%js) $tr(..QuoteJS(%js),"'","""")
+	s count=0
+
+	w "{""rows"":["
+	while rs.Next() {
+	  k id,name,code,child,leaf
+	  s id=$g(rs.Data("ID")), name=$g(rs.Data("Name"))
+	  #;, code=$g(rs.Data("Code"))	
+	  s hasChild=##class(Goods.Group).HasChild(id)
+	  
+	  w:count>0 ","
+	  
+	  w "{""id"":",id
+	  w ",""n"":",$$$qt(name)
+	  
+	  #;w ",""c"":",$$$qt(code)
+	  
+	  w ",""level"":",lvl
+	  w:node'="" ",""parent"":",node
+	  w ",""leaf"":",$CASE(hasChild,1:"false",:"true")
+	  w "}"
+	  s count=$i(count)
+	  
+	} d rs.Close(),rs.%Close()
+	 w "],""page"":1,""total"":1,""records"":",+count,"}"
+	 Q ""
+]]></Implementation>
+</Method>
+
+<Method name="gJSON">
+<Description>
+для асинхроннных вызовов</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>cat:%String,jsfunc:%String="alert"</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	k Args s Args("cat",1)=$g(cat)
+	s depot="" 
+	s:$g(%session)'="" depot=$g(%session.Data("depot"))	
+	s:depot="" depot=1
+	s Args("depot",1)=depot
+		
+	w jsfunc,"("
+	d ..wJSON(.Args)
+	w ");"
+	Q ""
+]]></Implementation>
+</Method>
+</Class>
+</Export>

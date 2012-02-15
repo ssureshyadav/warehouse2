@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="json.xvrs">
+<Description>
+Кросс-версионный резалтсет, адаптер
+Использование: %New(),Prepare(sql),SetMode(2),Execute(.p),Next(),Close()</Description>
+<ClassType/>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%RegisteredObject</Super>
+<TimeCreated>62164,63911.441927</TimeCreated>
+
+<Property name="rs">
+<Description>
+Ссылка на внутренний ResultSet</Description>
+<Type>%ObjectHandle</Type>
+<Private>1</Private>
+</Property>
+
+<Property name="sql">
+<Description>
+sql для %ResultSet.SQL, так как у него только %Prepare</Description>
+<Type>%String</Type>
+<Private>1</Private>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Property name="PreviousMode">
+<Description>
+Предыдущий режим запросов для %ResultSet.SQL</Description>
+<Type>%Integer</Type>
+<InitialExpression>$zu(115,5)</InitialExpression>
+<Private>1</Private>
+</Property>
+
+<Property name="ColNames">
+<Description>
+Массив названий колонок, для 2010</Description>
+<Type>%String</Type>
+<MultiDimensional>1</MultiDimensional>
+<Private>1</Private>
+<Parameter name="TRUNCATE" value="1"/>
+</Property>
+
+<Method name="%OnNew">
+<Description>
+Создание нового запроса</Description>
+<CodeMode>generator</CodeMode>
+<FormalSpec>initvalue:%CacheString</FormalSpec>
+<Private>1</Private>
+<ProcedureBlock>1</ProcedureBlock>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+ s major=$system.Version.GetMajor()
+ s rs="  s ..rs=##class(%ResultSet).%New(""%DynamicQuery:SQL"") "
+ s rssql="  s %this.rs=##class(%ResultSet.SQL).%New() "
+ s sqlstm="  s %this.rs=##class(%SQL.Statement).%New() "
+ if major<2008 {
+  $$$GENERATE(rs)
+ } elseif major<2010 {
+  $$$GENERATE(rssql)
+ } else {  
+  $$$GENERATE(sqlstm)
+ }
+ $$$GENERATE(" Quit $$$OK ")
+ Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetResultSet">
+<Description>
+Типовое использование</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[sql:%String,&p:%String,&err:%String=""]]></FormalSpec>
+<ReturnType>json.xvrs</ReturnType>
+<Implementation><![CDATA[
+  k rs s rs=##class(json.xvrs).%New()
+  s err=rs.Prepare(sql) Q:'err rs
+  s err=rs.Execute(.p) Q:'err rs
+  Q rs
+]]></Implementation>
+</Method>
+
+<Method name="SetMode">
+<Description>
+Режим вывода данных</Description>
+<CodeMode>generator</CodeMode>
+<FormalSpec>mode:%Integer</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ $$$GENERATE(" Q:""012""'[$g(mode) $$$ERROR($$$GeneralError,""Возможные режимы 0,1,2"") ")
+ s major=$system.Version.GetMajor()
+ if major<2008 {
+  $$$GENERATE(" s ..rs.RuntimeMode=mode ")
+ } elseif major<2010 {
+  $$$GENERATE(" s ..PreviousMode=$zu(115,5,mode) ")
+ } else {
+  $$$GENERATE(" s ..rs.%SelectMode=mode ")
+ }
+ $$$GENERATE(" Q $$$OK ")
+ Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Get">
+<CodeMode>generator</CodeMode>
+<FormalSpec>prop:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s major=$system.Version.GetMajor()
+ if major<2008 {
+  $$$GENERATE(" Q $g(..rs.Data(prop)) ")
+ } elseif major<2010 {
+  $$$GENERATE(" Q ..rs.%Get(prop) ")
+ } else {
+  $$$GENERATE(" s i=$g(..ColNames(prop)) Q:i'="""" ..rs.%GetData(i) ")
+ }
+ $$$GENERATE(" Q """" ")
+ Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Prepare">
+<Description>
+Подготовка</Description>
+<CodeMode>generator</CodeMode>
+<FormalSpec>sql:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ s major=$system.Version.GetMajor()
+ if major<2008{
+  $$$GENERATE(" s sc=..rs.Prepare(sql)  ")
+ } elseif major<2010  {
+  $$$GENERATE(" s ..sql=sql Q $$$OK") 
+ } else  { ;SQL Statement
+  $$$GENERATE(" s sc=..rs.%Prepare(.sql) ")
+  $$$GENERATE(" if sc { ")
+  #;Заполняем нумерацию полей
+  $$$GENERATE(" k ..ColNames s meta=..rs.%Metadata ")
+  $$$GENERATE(" s cols=meta.columns.Count() ")
+  $$$GENERATE(" f i=1:1:cols { ")
+  $$$GENERATE("  s col=meta.columns.GetAt(i) ")
+  $$$GENERATE("  s ..ColNames(col.colName)=i ")
+  $$$GENERATE(" } ")  
+  $$$GENERATE(" } ")  
+ } 
+ $$$GENERATE(" Q sc")
+ Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Execute">
+<CodeMode>objectgenerator</CodeMode>
+<FormalSpec><![CDATA[&p:%String=""]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ s major=$system.Version.GetMajor()
+ ;5.0
+ if major<2008 { 
+  s pcount=16, cmd=" s sc=..rs.Execute("
+ } elseif major<2010 {
+  s pcount=251 ;s:major>2009 pcount=124 ;2010 - %ResultSet.SQL
+  s cmd=" s sql=..sql, ..rs=##class(%ResultSet.SQL).%Prepare(.sql,.sc,"""", "
+ }
+ 
+ if major<2010 { ;передача параметров
+  d %code.Write(cmd)
+  f i=1:1:pcount { 
+   d:i'=1 %code.Write(",")
+   d %code.Write("$g(p("_i_"))") 
+  }
+  d %code.WriteLine(" )")
+ } else { 
+  #;SQLStatement 2010 можно сразу скормить массив, но он должен быть правильно оформлен
+  d %code.WriteLine(" if $d(p)>1 { s p=$o(p(""""),-1) s ..rs=..rs.%Execute(p...) ")
+  d %code.WriteLine(" } else { s ..rs=..rs.%Execute() }")
+ }
+ 
+ ;вывод результата
+ if major<2008 {
+   d %code.WriteLine(" Q sc ")
+   Q $$$OK
+ } 
+ 
+ if major<2010 {
+	 	d %code.WriteLine(" s sqlcode=..rs.%SQLCode ")
+ } else { 
+ 	 d %code.WriteLine(" s sqlcode=..rs.%SQLCODE ")
+ }
+ 
+ d %code.WriteLine(" Q:sqlcode=0 $$$OK")   
+ d %code.WriteLine(" Q $$$ERROR($$$GeneralError,$system.SQL.SQLCODE(sqlcode))")    
+ 
+ Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Next">
+<CodeMode>generator</CodeMode>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ s major=$system.Version.GetMajor()
+ if major<2008{
+  $$$GENERATE(" Q ..rs.Next() ") 
+ } else {
+  $$$GENERATE(" Q ..rs.%Next() ") 
+ }
+ Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Close">
+<CodeMode>generator</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+  s major=$system.Version.GetMajor()
+  if major<2008 {
+   $$$GENERATE("  d ..rs.Close(),..rs.%Close() ") 
+  } elseif major<2010 {
+   $$$GENERATE("  s sc=$zu(115,5,..PreviousMode) " ) 
+  }
+  $$$GENERATE("  d ..rs.%Close() ")  
+  $$$GENERATE(" Quit $$$OK ")
+  Q $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

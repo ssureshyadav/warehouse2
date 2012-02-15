@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.Instructions">
+<Description>
+Список заявок</Description>
+<Super>csp.Design</Super>
+<TimeCreated>62482,83020.332849</TimeCreated>
+
+<Parameter name="CHARSET">
+<Description><![CDATA[
+Specifies the default character set for the page.  This can be overriden using the
+&lt;CSP:CONTENT CHARSET=&gt; tag, or by setting the <b>%response</b>.CharSet property
+in the <method>OnPreHTTP</method> method.  If this parameter is not specified, then
+for Unicode systems the default charset is utf-8 and for 8-bit systems it is the
+system default charset.]]></Description>
+<Default>utf-8</Default>
+</Parameter>
+
+<Method name="wTitle">
+<Description>
+write заголовок страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	w "Склад2 :: Список инструкций"
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wPageHeader">
+<Description>
+write заголовок на странице</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	  Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wCss">
+<Description>
+write заголовок страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	&html<<link type="text/css" rel="stylesheet" href="style.css" />
+ <link rel='stylesheet' type='text/css' href='css/redmond/jquery-ui-1.8.16.custom.css'/>
+ <link rel='stylesheet' type='text/css' href='css/ui.jqgrid.css'/>
+ <style type="text/css">
+ 	.ui-jqgrid {font-size:90%;}
+ 	.ui-widget {font-size:1.2em;}
+ 	input {width:auto}
+</style>
+ >
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wBody">
+<Description>
+write содержимое страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	 &html<<table id="grid"><tr><td></td></tr></table><div id="bar"></div>>
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wJs">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	&html<
+		<script type='text/javascript' src='js/jquery-1.6.4.min.js'></script>
+		<script type='text/javascript' src='js/jquery-ui-1.8.16.custom.min.js'></script>
+		<script type='text/javascript' src='js/i18n/grid.locale-ru.js'></script>
+		<script type='text/javascript' src='js/jquery.jqGrid-4.1.2.min.js'></script>
+		<script type="text/javascript">
+		$(function(){
+				
+				var GRID="#grid",BAR="#bar",URL="json.instruction.cls";
+				var openDoc=function(id){
+					if (!id) id="";
+					window.location="csp.Instruction.cls?id="+id;
+	   			}
+	   
+				$(GRID).jqGrid({
+						caption: 'Инструкции'
+						,url: URL, editurl: URL
+						,datatype: "json"
+						,jsonReader : { repeatitems: false }
+						,sortname: "d", sortorder: "desc"
+						,colModel: [
+							{name:"id",hidden: true}
+							,{name:"d",label:"Дата",width:120
+								, search:true
+								, stype: 'text'
+								, searchoptions:{
+									dataInit: function(elem){
+										/*$(elem).datepicker(
+											{dateFormat:'yy-mm-dd'
+												,changeMonth: true
+												,changeYear: true
+												,yearRange: "2006:+1"
+											}
+										);*/	
+									}	
+								}
+								
+							}
+							,{name:"nm",label:"Наименование документа",width:450
+								, search:true
+								
+							}
+							,{name:"ste",index:"st", label:"Статус"
+								,width:150
+								, search:true
+								, stype: 'select'
+								, searchoptions: {value:
+									#(..wInstrStateSelOpts())#
+								}
+							}
+						]
+						
+						
+						//,idPrefix:"kt"
+					 ,pager:BAR 
+					 ,viewrecords:true
+					 ,height:300
+					 ,hidegrid: false
+					 ,gridview:true ,rownumbers:true,viewrecords:true,rowNum:100
+					 ,/*scrollrows:true,*/hoverrows:true ,scroll:1
+					 ,ondblClickRow: function(id){openDoc(id);}
+ 		})
+ 		.jqGrid('navGrid',BAR, {
+	       	add: false
+       		, edit:false
+       		, del:true, deltext: "Удалить"
+       		, view:false
+       		, search:false
+       }
+       ,{} //Параметры редактирования
+       ,{} //Параметры добавления
+       ,{ //Параметры удаления
+	       afterSubmit: function(resp){
+		      var text=resp.responseText;
+		      var arr=eval(text); 
+		      return arr;
+		   }
+	   } 
+   ).jqGrid('navButtonAdd',BAR,{ 
+   			caption:"Редактировать", buttonicon:"ui-icon-pencil"
+   			, title:"Редактировать (просмотреть) выбранную инструкцию" 
+   			, position: 'first'
+   			, onClickButton: function(){
+	   			var id=$(GRID).jqGrid("getGridParam","selrow");
+				if (!id) { alert("Выберите документ"); return;}	
+				openDoc(id);
+	   		}
+   }).jqGrid('navButtonAdd',BAR,{ 
+   			caption:"Создать", buttonicon:"ui-icon-plus"
+   			, title:"Создать новый документ" 
+   			, position: 'first'
+   			, onClickButton: function(){
+	   			openDoc();
+	   		}
+   })
+   .jqGrid('filterToolbar',{searchOnEnter:false})
+   .jqGrid('gridResize',{});
+ 	$(BAR+"_center").remove(); //пагинатора не будет
+ 	$(BAR+"_left").css("width","70%"); //надпись о количестве записей на бОльшую часть футера
+
+});
+</script>>
+  Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wInstrStateSelOpts">
+<Description>
+Выводит Display/Value списки значений в определенном формате</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s property="Operation.Instructions||State" ;id свойства
+	s params="" &sql(Select parameters Into :params From %Dictionary.CompiledProperty Where ID1=:property)
+ s list=$LFS(params,","),key=0,param=""
+ /*
+ * EXAMPLE: ,CALCSELECTIVITY=1,CAPTION=,COLLATION=,CONTENT=STRING,DISPLAYLIST=,Создана,Утверждена,Принята,Укомплектовано,Отправлено в офис,Отправлено c товаром,Отправлено из офиса,Отправлено экпресс-почтой,Нет в наличии,Отклонена,Самовывоз,Отправлено транспортной компанией,Завершена,EXTERNALSQLNAME=,JAVATYPE=,MAXLEN=50,MINLEN=,PATTERN=,SELECTIVITY=,TRUNCATE=0,VALUELIST=,1,2,3,4,5,6,7,8,8.5,8.6,8.7,8.9,9,XSDTYPE=string 
+ */
+ k dlist, vlist
+ while $LISTNEXT(list,key,param) { //цикл по всем параметрам
+			
+			if param="DISPLAYLIST=" { ;начиная с этого момента вычленяем элементы
+				s dkey=key,dparam=""
+				while $LISTNEXT(list,dkey,dparam){ Q:dparam["="
+				 #;собираем список ОТОБРАЖЕНИЯ
+					s dlist($i(dlist))=dparam
+				}
+				s key=dkey, param=dparam ;восстановили контекст основного поиска
+			}
+			
+			if param="VALUELIST=" { ;начиная с этого момента вычленяем элементы
+				s vkey=key,vparam=""
+				while $LISTNEXT(list,vkey,vparam){ Q:vparam["="
+				 #;собираем список ЗНАЧЕНИЙ
+					s vlist($i(vlist))=vparam
+				}
+				s key=vkey, param=vparam ;восстановили контекст основного поиска
+			}
+			
+	}
+	#; выводим в формате значение:отображение; значение:отображение;
+ w "':;" ;пустое значение
+ s i="" for { s i=$o(vlist(i)) Q:i=""
+	 s value=$g(vlist(i)), display=$g(dlist(i)) s:display="" display=value
+	 w value,":",display s next=$o(vlist(i)) w $S(next'="":";",1:"")
+	}
+ w "'"
+ Q ""
+]]></Implementation>
+</Method>
+</Class>
+</Export>

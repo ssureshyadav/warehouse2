@@ -62,11 +62,25 @@
 
 <Property name="GotPaperProve">
 <Description>
-Получено подтверждение на бумаге</Description>
+Бумажный отчёт проверен</Description>
 <Type>%String</Type>
 <InitialExpression>0</InitialExpression>
 <Parameter name="DISPLAYLIST" value=",Нет,Да"/>
 <Parameter name="VALUELIST" value=",0,1"/>
+</Property>
+
+<Property name="DatePaperProve">
+<Description>
+Дата проверки бумажного отчёта</Description>
+<Type>%Date</Type>
+<Parameter name="CAPTION" value=",display=readonly"/>
+<Parameter name="FORMAT" value="4"/>
+</Property>
+
+<Property name="UserPaperProve">
+<Description>
+Оператор проверивший бумажный отчёт</Description>
+<Type>Users.Dates</Type>
 </Property>
 
 <Method name="GetOtchetDat">
@@ -129,8 +143,14 @@
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
 	s $ZT="SetParerProveErr"
+	s CurrentDate = +$H
+	s CurrentUserId = $S($ISOBJECT($G(%session)):$G(%session.Data("user")),1:"")
 	if '+DocId q "Не указан ID отчёта"
-	&sql(update Docs.Otchet set GotPaperProve=1 where ID=:DocId)
+	&sql(update Docs.Otchet 
+		(GotPaperProve,DatePaperProve,UserPaperProve) 
+		Values
+		(1,:CurrentDate,:CurrentUserId)
+		WHERE ID=:DocId)
 	if SQLCODE q "Извините. Ошибка. SQLCODE="_SQLCODE
 	q 1
 SetParerProveErr
@@ -189,6 +209,12 @@ CreatePaperOthetErr
 </Value>
 <Value name="6">
 <Value>Kurs</Value>
+</Value>
+<Value name="7">
+<Value>DatePaperProve</Value>
+</Value>
+<Value name="8">
+<Value>UserPaperProve</Value>
 </Value>
 </Data>
 </Storage>

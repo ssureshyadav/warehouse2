@@ -23,7 +23,7 @@ body {margin:0px; padding:0px;}
 #exit{ background-position: -220px 2px; float:right;} /*крайний правый*/
 #finance{ background-position: -257px 2px; } 
 #goods{ background-position: -294px 2px; } 
-#help{ background-position: -330px 2px; margin-left:38px;} 
+#help{ background-position: -330px 2px; float:right;} 
 #kontr{ background-position: -368px 2px; } 
 #login{ background-position: -405px 2px; } 
 #store{ background-position: -442px 2px; } 

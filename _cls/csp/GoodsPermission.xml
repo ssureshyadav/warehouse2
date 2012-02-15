@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.GoodsPermission">
+<Description>
+Установка ограничений на экспорт справочника товаров</Description>
+<Super>csp.KontragentAccount</Super>
+<TimeCreated>62462,61031.670471</TimeCreated>
+
+<Method name="OnPage">
+<Description><![CDATA[
+Вывод тела страницы
+<var>args</var> массив параметров запроса для тестирования
+В некоторых случаях дизайн 10%80%10% - не очень]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ if $IsObject(%request) m args=%request.Data
+  
+ &html<<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html><head>>  d ..wMeta(.args) 
+ &html<<head><title>> d ..wTitle(.args) &html<</title>>
+ d ..wCss(.args)
+ w ..HyperEventHead()
+ &html<</head><body>>
+		d ..wBody(.args) 
+ &html<</div>>
+ w ..HyperEventFrame()
+ &html<</body></html>>
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="wTitle">
+<Description>
+write заголовок страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ w "Склад.v2::Привилегии" 
+ Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wBody">
+<Description>
+write содержимое страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	s depot=$g(%session.Data("depot"),1)
+	s cat=$g(args("cat",1),1), catName=""
+	s:##class(Goods.Catalogue).%ExistsId(cat) catName=##class(Goods.Catalogue).NameGetStored(cat)
+ &html<
+ <table><caption>Установка ограничений на экспорт справочника товаров для контрагентов</caption>
+ 	<tr><td style="vertical-align:top;">
+ 
+ 	<label for="catSel">Каталог:&nbsp;</label><input id="catId" type="hidden" value="#(cat)#"/>
+ 	<input id="cat" value="#(catName)#" readonly="readonly"/><button id="catSel">...</button>
+ 
+ <div id="catDlg">
+  <table id="catGrid"><tr><td></td></tr></table><div id="catBar"></div>
+ </div>
+ 	
+ 	<table id="group"><tr><td></td></tr></table><div id="groupBar"></div>
+ 
+ </td><td style="vertical-align:top;">
+ 
+  <label for="kontrSel">Контрагент:&nbsp;</label><input id="kontrId" type="hidden" />
+  <input id="kontr" /><button id="kontrSel">...</button>
+  
+  <div id="kontrDlg">
+  	<table id="kontrGrid"><tr><td></td></tr></table><div id="kontrBar"></div>
+  </div>
+  
+ 	<table id="good"><tr><td></td></tr></table><div id="goodBar"></div>
+ 
+ </td></tr></table>
+ 
+
+ 
+ 
+ <div id="debug"></div>
+ 
+<script type='text/javascript' src='js/jquery-1.6.4.min.js'></script>
+<script type='text/javascript' src='js/jquery-ui-1.8.16.custom.min.js'></script>
+<script type='text/javascript' src='js/i18n/grid.locale-ru.js'></script>
+<script type='text/javascript' src='js/jquery.jqGrid-4.1.2.src.js'></script>
+<script type="text/javascript">
+
+;
+var page={
+	groups: 
+	#(##class(json.GoodsGroup).wJSON(.args))#
+	,groupLoad: function(obj){
+		$("#group")[0].addJSONData(obj);
+	}
+	
+};
+
+
+$(function(){
+ function obj2str(obj){ //преобразование js объекта в строку
+  var arr=new Array();
+  for (var i in obj){ arr.push(i+"="+obj[i]); }
+  return arr.join("&");
+ }; 
+ 
+ $("#catDlg").dialog({  //диалог выбора каталога
+	 title:"Выбор каталога"
+	 ,autoOpen: false
+	 ,modal: true
+	 ,height:460
+	 ,width:430
+	 ,position:[227,35]
+	 ,buttons: {
+			"Выбрать":function(){
+				var id=$("#catGrid").jqGrid("getGridParam","selrow");
+				if (id) {
+						var data=$("#catGrid").jqGrid("getRowData",id);
+						var old=$("#catId").val();
+						if (id!=old){
+							$("#catId").val(data.id);
+							$("#cat").val(data.name).attr("title",data.name);
+							
+							$("#group").trigger("reloadGrid"); //перегружаем дерево групп
+							
+							//сбрасываем выбранную группу для товара
+							var postData=$("#good").jqGrid("getGridParam","postData");
+							postData.group=""; 
+							$("#good").jqGrid("setGridParam","postData",postData);
+							$("#good").trigger("reloadGrid"); //перегружаем дерево групп
+							
+							
+						}
+				}
+				$(this).dialog("close");
+			}
+			,"Отмена":function(){$(this).dialog("close");} 
+		}
+		,hide: "slide" //эффекты закрытия диалога
+		,show: "slide" //эффекты открытия диалога
+	 
+	});
+ 
+ $("#catGrid").jqGrid({ //Таблица с категориями
+	 colModel: [
+	 				{name:'id', width:50,hidden:true}
+      ,{name:'name',label:'Наименование', width:350,sortable:false}
+  ]
+  ,idPrefix:"cat"
+  ,jsonReader : { repeatitems: false }
+  ,datatype:function(/*Объект с параметрами запроса*/ p){
+	   $("#catGrid")[0].addJSONData(
+	   	#(..wCatOpts())#
+	   );
+	 }
+	 ,pager:"#catBar"
+  ,viewrecords:true
+  ,height:300
+  ,hidegrid: false
+	 ,gridview:true, rownumbers:true,viewrecords:true
+	 ,hoverrows:true, scroll:1 
+ 
+	}).jqGrid('navGrid',"#catBar", 
+       {add:false,edit:false,del:false,view:false,search:false}
+       ,{} //Параметры редактирования
+       ,{} //Параметры добавления
+       ,{}
+ );
+ $("#catBar_center").remove();
+ 
+ $("#catSel").click(function(){
+		$("#catDlg").dialog("open"); 
+	});
+ 
+ 
+ $("#group").jqGrid({
+  caption: "Группы товаров каталога "
+  ,colModel: [
+      {name:'n',label:'Наименование', width:350,sortable:false}
+      ,{name:'id',label:'id', width:40,sortable:false,hidden:true,search:false}
+      ,{name:'c', width:80,sortable:false,hidden:true,search:false}
+  ]
+  ,idPrefix:"gg"
+  ,datatype:function(p){
+				if (page.groups) { //инициализация страницы
+					page.groupLoad(page.groups);
+					delete page.groups   
+		  } else { //обычная работа
+			 	var cat=$("#catId").val(); //дополняем массив выбранным каталогом
+			 	#call(json.GoodsGroup.gJSON(cat,"window.parent.page.groupLoad"))#
+			 }
+	 }
+  ,treeGrid: true
+  ,treeGridModel: "adjacency"
+  ,treeIcons: {plus:'ui-icon-circlesmall-plus',minus:'ui-icon-circlesmall-minus',leaf:'ui-icon-arrowstop-1-e'} 
+  ,ExpandColumn: "n"
+  ,ExpandColClick: true
+  ,jsonReader : { repeatitems: false }
+  ,treeReader : {
+   	level_field: "lvl",
+   	parent_id_field: "prt", // then why does your table use "parent_id"?
+   	leaf_field: "lf",
+   	expanded_field: "expanded" //не изменять, иначе компонент глючит!!!
+  }
+  ,onSelectRow: function(id){ 
+  	var postData=$("#good").jqGrid("getGridParam","postData");
+  	$.extend(postData,{group:id});
+  	$("#good").jqGrid("setGridParam","postData",postData);
+  	//перезагружать только в случае выбранного контрагента
+  	if ($("#kontr").val()) {
+	  	$("#good").trigger("reloadGrid");
+  	} else {
+	  	$("#kontrDlg").dialog("open");	
+	  }
+  	
+  }
+  ,pager:"#groupBar"
+  ,viewrecords:true
+  ,height:400
+  ,hidegrid: false
+ }).jqGrid('navGrid',"#groupBar", 
+       {add:false,edit:false,del:false,view:false,search:false}
+       ,{} //Параметры редактирования
+       ,{} //Параметры добавления
+       ,{}
+ ).jqGrid('gridResize',{minWidth:100,minHeight:100})
+  .jqGrid('filterToolbar',{searchOnEnter:false})
+  .jqGrid('navButtonAdd',"#groupBar",{
+    caption:""
+    ,buttonicon: "ui-icon-circlesmall-plus"
+    ,title: "Развернуть все узлы"
+    ,onClickButton : function (){
+        
+    }
+  })
+  .jqGrid('navButtonAdd',"#groupBar",{
+    caption:""
+    ,buttonicon: "ui-icon-circlesmall-minus"
+    ,title: "Свернуть все узлы"
+    ,onClickButton : function (){
+        
+    }
+  })
+  .jqGrid('navButtonAdd',"#groupBar",{
+    caption:""
+    ,title: "Настройка отображения столбцов"
+    ,onClickButton : function (){
+        jQuery("#group").jqGrid('columnChooser');
+    }
+});
+$("#groupBar_center").remove(); //упростили панель управления деревом (удалили пустую центральную часть)
+
+
+$("#gs_n").unbind() //убрали все обработчики событий из стандартного фильтра
+.keyup(function(e){ //привязываем свои
+		
+		setTimeout(function(){$("#debug").html($("#gs_n").val())},100);
+}); 
+
+//Контрагент 
+//Форма выбора
+$("#kontrDlg").dialog({
+	
+	title:"Выбор контрагента"
+	 ,autoOpen: false
+	 ,modal: true
+	 ,height:460
+	 ,width:600
+	 ,position:[300,35]
+	 ,buttons: {
+			"Выбрать":function(){
+				var id=$("#kontrGrid").jqGrid("getGridParam","selrow");
+				if (id) {
+						var data=$("#kontrGrid").jqGrid("getRowData",id);
+						var old=$("#kontrId").val();
+						if (id!=old){
+							$("#kontrId").val(data.id);
+							$("#kontr").val(data.name).attr("title",data.name);
+							$("#good").trigger("reloadGrid");
+						}
+				}
+				$(this).dialog("close");
+			}
+			,"Отмена":function(){$(this).dialog("close");} 
+		}
+		,hide: "slide" //эффекты закрытия диалога
+		,show: "slide" //эффекты открытия диалога
+});
+
+$("#kontrSel").click(function(){ //Вызов диалога
+	$("#kontrDlg").dialog("open");
+});
+
+//Таблица с контрагентами
+
+$("#kontrGrid").jqGrid({
+	colModel: [
+		{name:"id",hidden:true}
+		,{name:"name",label:"Наименование",width:450}
+	]
+	,url: "json.Kontragent.cls"
+	,datatype: "json"
+	,jsonReader : { repeatitems: false }
+	,pager: "#kontrBar"	
+	,idPrefix:"kt"
+ ,viewrecords:true
+ ,height:300
+ ,hidegrid: false
+	,gridview:true, rownumbers:true,viewrecords:true
+	,hoverrows:true, scroll:1 
+	
+	
+});
+
+
+//Таблица с товарами
+$("#good").jqGrid({
+	caption: "Товары группы"
+	,colModel: [
+		{name:"id",hidden:true}
+		,{name:"name",label:"Наименование", width:350}
+		,{name:"kban",label:"Запрет",width:60,formatter: 'checkbox', align: "center",search:false,editable:true}
+	]
+	,url: "json.GoodsRights.cls"
+	,datatype: "json"
+	,jsonReader : { repeatitems: false }
+	,postData:{group:'',kontr:''}
+ ,idPrefix:"g"
+	,pager:"#goodBar"
+	,height:400
+ ,hidegrid: false
+ ,gridview:true ,rownumbers:true,viewrecords:true,rowNum:100
+ ,/*scrollrows:true,hoverrows:true, */ scroll:1
+ ,cellEdit: true
+	,cellsubmit: 'remote'
+	,cellurl: 'csp.UnExisting.cls'
+ 
+}).jqGrid('navGrid',"#goodBar", 
+       {add:false,edit:false,del:false,view:false,search:false}
+       ,{} //Параметры редактирования
+       ,{} //Параметры добавления
+       ,{}
+ ).jqGrid('gridResize',{minWidth:100,minHeight:100})
+  .jqGrid('filterToolbar',{searchOnEnter:false})
+  ;
+
+
+
+
+
+ });
+
+
+</script>>
+ Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wCatOpts">
+<Description>
+В локальный массив с ключом по Наименованию</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&Args:%String]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	#define qt(%js) $tr(..QuoteJS(%js),"'","""")
+	
+	s depot=$g(Args("depot",1),1)
+	k cats s cats=""
+	&sql(Declare crs Cursor For
+		Select Id,Name Into :id,:name
+		From Goods.Catalogue
+		Where depot=:depot
+		Order By Name
+	) &sql(Open crs)
+	w "{rows:["
+	s first=1
+	for { &sql(Fetch crs) Q:SQLCODE'=0
+	 w:'first "," s:first first=0
+		w "{id:",id,",name:",$$$qt(name),"}"
+	} &sql(Close crs)
+	w "],page:1,records:",%ROWCOUNT,",total:",%ROWCOUNT,"}"
+	
+	Q ""
+]]></Implementation>
+</Method>
+</Class>
+</Export>

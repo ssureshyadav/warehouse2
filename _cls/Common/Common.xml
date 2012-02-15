@@ -198,6 +198,10 @@ CreateClassErr
 	 s sql="SELECT "_fields_" FROM "_class
 	 s sqlcount="SELECT count(*) as strcount from "_class
 	 if where'="" s sql=sql_" where "_where
+	 
+	 //странная хрень с полем Holding в классе Common.Kontragent 
+	 //если в выборку включить Holding->Name то первичный ключ
+	 if (order="")&&(class="Common.Kontragent") s sql=sql_" order by ID"
 	 if order'="" s sql=sql_" order by "_order
 	 s ^mtempArt("sql")=sql
 	 //s ^lastsql($I(^lastsql))=sql
@@ -616,6 +620,7 @@ SetDetailAnalogRelationErr
  s codedetailListIndex=##class(Goods.Goods).GetPropertyListIndex("codedetail")
  s izdelieListIndex=##class(Goods.Goods).GetPropertyListIndex("izdelie")
  s Property5300ListIndex=##class(Goods.Goods).GetPropertyListIndex("Property5300")
+ s AllowToSendIndex=##class(Goods.Goods).GetPropertyListIndex("AllowToSend")
  s ok=1
 	Set file=##class(%File).%New(FullFileName)
 	s ok=file.Open("WSN")
@@ -633,6 +638,7 @@ SetDetailAnalogRelationErr
  . s Price=$LG(LBLine,PriceListIndex)
  . s codedetail=$LG(LBLine,codedetailListIndex)
  . s Property5300=$LG(LBLine,Property5300ListIndex)
+ . s AllowToSend=+$LG(LBLine,AllowToSendIndex)
  . s (ShowPrice,ShowClients)=1
  . s Groups=$$Groups(i,.ShowPrice,.ShowClients)
  . //пропускаем товары которые низя показывать клиентам
@@ -640,7 +646,7 @@ SetDetailAnalogRelationErr
  . if (ShowClients'=0)&(ClientProperty2506'[ShowClients) q
  . i 'ShowPrice s Price="" 	//обнуляем цены которые низя показывать клиентам
  . s RemontPrice=..GetRemontPrice(ClientUniqueCode,$LG(LBLine,izdelieListIndex))
- . s Line=i_Delimeter_abbr_Delimeter_Property3609_Delimeter_Name_Delimeter_codedetail_Delimeter_Price_Delimeter_Groups_Delimeter_RemontPrice_Delimeter_Property5300
+ . s Line=i_Delimeter_abbr_Delimeter_Property3609_Delimeter_Name_Delimeter_codedetail_Delimeter_Price_Delimeter_Groups_Delimeter_RemontPrice_Delimeter_Property5300_Delimeter_AllowToSend
  . s ok=file.WriteLine(Line)
  i '+ok $$$WriteObjError(ok) q "Ошибка при открытии файла."
  Do file.Close()

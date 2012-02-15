@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="json.service2">
+<Description>
+Улучшения - поддержка синонимов, отладочные сообщения при компиляции, разбивка на доп. методы
+Отличия: режимы просмотра (исп. список полей) и создания+редактирования (список свойств)
+Типы полей указываются разработчиками
+Методы изменения данных по умолчанию не работают и сведены в один метод Set
+Вместо системных запросов используется кроссверсионный (Cache 5.0 - 2010)</Description>
+<Super>%CSP.Page</Super>
+<TimeCreated>62441,68723.484539</TimeCreated>
+
+<Parameter name="CLASSNAME">
+<Description>
+Имя Persistent класса для которого создается служба
+Соглашение: имя класса и имя таблицы совпадает
+Используйте Cache правильно!</Description>
+<Type>%String</Type>
+<Default>Operation.Instructions</Default>
+</Parameter>
+
+<Parameter name="FIELDS">
+<Description><![CDATA[
+Список SQL полей, возможно с синонимами "Name As nm"
+ID можно не указывать, т.к. выбирается обязательно
+Внимание!, имена синонимов чувствительны к регистру (для javascript клиента)
+В отличие от имен полей (SQL на стороне сервера)
+Соглашение: синоним писать  через " as " - ",OBJ->name as oname "
+Раньше неправильно разбивал на поля ]]></Description>
+<Type>%String</Type>
+<Default>Name as nm,Dat as d,%external(State) as st</Default>
+</Parameter>
+
+<Parameter name="PARENTFIELD">
+<Description><![CDATA[
+Поле (или его синоним), связанное с родительским объектом
+Например, поле документ для строк накладной
+Используется при отборе записей чтобы не показывать строки из всех накладных
+Используется в методе <method>GetWhere</method>
+Например Parameter PARENTFIELD = "doc"]]></Description>
+<Type>%String</Type>
+</Parameter>
+
+<Parameter name="FTYPES">
+<Description>
+Типы полей, по умолчанию %String
+Используются при построении фильтра
+тип %String </Description>
+<Type>%String</Type>
+<Default>%String,%String,%String</Default>
+</Parameter>
+
+<Parameter name="OBJECTCONCURRENCY">
+<Description>
+Как открывать объект на редактирование</Description>
+</Parameter>
+
+<Method name="OnPage">
+<Description>
+Вывод на страницу </Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+  m qa=%request.Data 
+  s oper=$G(qa("oper",1)) 
+  Q:oper="add" ..Add(.qa) 
+  Q:oper="edit" ..Edit(.qa) 
+  Q:oper="del" ..Delete(.qa)
+  q ..Out(.qa)
+  Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="DATESTR3">
+<Description>
+Из-за усложнения разбора полей при использовании многоаргументных функций
+типа: FIELDS="fld1,TO_CHAR(fld2,'YYYY-MM-DD') as fld2"</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Dat:%Date</FormalSpec>
+<ReturnType>%String</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[		Q $zd(Dat,3,,,,,,,"")
+]]></Implementation>
+</Method>
+
+<Method name="GetFieldName">
+<Description>
+Соответствие между синонимами и полями</Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>generator</CodeMode>
+<FormalSpec>caption:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	#;первая строчка кода
+	s %code=0 ;начиная с первой строки
+	#; принимаем и проверяем параметр
+	$$$GENERATE("  s caption=$g(caption) Q:caption="""" """" ") 
+	
+	s fields=%parameter("FIELDS"), fields=$zstrip(fields,"<>W")
+	s fieldList=$LFS(fields,",")
+	
+	#; проходим по списку полей с синонимами, выделяем поле и его синоним
+	w !,!,"Cоответствие синонимов и полей"
+	s key=0,pair="" while $LISTNEXT(fieldList,key,pair){ 
+		s field=$zstrip($P(pair," as "),"<>W"), syn=$zstrip($P(pair," as ",2),"<>W")
+		if field'="" && (syn'="") { ;выделили и имя и синоним
+			w !,syn," = ",field  ;отладка
+			#; нашли соответствие вернули значение
+			$$$GENERATE("  Q:caption="""_syn_""" """_field_"""")			
+		}
+	}
+	
+	#; по умолчанию возвращаем принятое значение
+	$$$GENERATE("  Q caption ")
+	w ! ;форматирование отладочных сообщений
+	Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetWhere">
+<Description><![CDATA[
+Построение Where для простых фильтров
+<var>rq</var> - %request.Data]]></Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>generator</CodeMode>
+<FormalSpec>*rq:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s %code=0
+ $$$GENERATE("  s where=$g(rq(""where""))  m qp=rq(""where"",""params"") ")
+ s parentField=%parameter("PARENTFIELD")
+ if parentField '="" { ;если параметр был определен, то условие обязательно должно попасть в запрос
+ 	 $$$GENERATE("  s parentValue=$g(rq("""_parentField_""",1)) ") 
+ 	 $$$GENERATE("  s syn=..GetFieldName("""_parentField_""") ") 
+	 $$$GENERATE("  s where=where_"" and ""_syn_""=?"", qp($i(qp))=parentValue ") 
+	 #; обязательно возвращаем
+	 $$$GENERATE("  s rq(""where"")="" WHERE 1=1 ""_where m rq(""where"",""qp"")=qp ")
+ }
+ #; выбрать список синонимов, которые могут быть в параметрах запроса
+ #; так как служба предназначена для компонента jqgrid
+ #; должен быть установлен параметр _search=true
+ #; без него where не строится
+ 
+ $$$GENERATE("  if $g(rq(""_search"",1))'=""true"" Q $g(rq(""where"")) ")
+ 
+ #; со стороны клиента на сервер фильтр будет приходить в виде пар
+ #; синоним=параметр 
+ #; проверяем запрос на наличие синонимов
+ 
+ s fields=$LFS(%parameter("FIELDS"),","), flen=$LL(fields), pair=""
+ s ftypes=$LFS(%parameter("FTYPES"),",")
+ w !,!,"Условия фильтров"
+ for i=1:1:flen {
+	 	s pair=$LG(fields,i), type=$LG(ftypes,i,"%String")
+	 	s field=$P(pair," as "), syn=$P(pair," as ",2) 
+	 	s:syn="" syn=field
+	  
+	    s cmd=""  
+	 	
+	 	#; Для поля c типом %String "обычно" требуется регистро-независимый поиск по вхождению
+	 	#; что приводит к переводу в верхний регистр как значения запроса, так и поля
+	 	if type="%String" {
+		 
+		 	s cmd="  if $d(rq("""_syn_"""))  s where=where_"" and "
+				s cmd=cmd_" %UPPER("_field_") LIKE %UPPER(?) "" "	 	
+				#; избавляемся от проблемных символов в значении параметра
+				s cmd=cmd_", qp($i(qp))=""%""_$tr($g(rq("""_syn_""",1)),""%"")_""%"" "
+	 	
+	 	} else {
+	 	
+	 		#; для остальных типов полей - поиск на соответствие 
+	 		s cmd="  if $d(rq("""_syn_"""))  s where=where_"" and "_field_"=?"" , qp($i(qp))=$g(rq("""_syn_""",1)) "
+	 	
+	 	}
+	 	w !,cmd  ;отладка генерации
+	 	$$$GENERATE(cmd)
+	 	
+	}
+	#; возвращаем собранное выражение 
+	$$$GENERATE(" s rq(""where"")="" WHERE 1=1 ""_where m rq(""where"",""qp"")=qp ")
+	$$$GENERATE(" Q $g(rq(""where"")) ") 	
+	
+ Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetCount">
+<Description><![CDATA[
+Вычисление количества записей в запросе
+В отличии от предыдущей версии используется 
+<class>%SQL.Statement</class>]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&rq:%String]]></FormalSpec>
+<ReturnType>%Integer</ReturnType>
+<Implementation><![CDATA[
+	 s sql="Select Count(*) as ""count"" From "_..#CLASSNAME
+	 k qp s qp=0  ;query parameters
+	 if $d(rq("where")) {
+		 s sql=sql_$g(rq("where")) m qp=rq("where","qp") ;забираем параметры
+	 }
+	 s count=0,sc=1, rs=##class(json.xvrs).GetResultSet(sql,.qp,.sc)
+	 If $$$ISERR(sc) {
+		 w !,$system.Status.GetOneErrorText(sc)
+		 Q 0
+	 }
+	 s sc=rs.Next(), count=rs.Get("count")  d rs.Close()
+	 Q:sc count
+	 Q 0
+]]></Implementation>
+</Method>
+
+<Method name="GetOrder">
+<Description>
+Строим выражение сортировки с учетом значения параметра FIELDS
+Проверяем запрос на наличие параметров sidx и sord
+Проверяем чтобы sidx был указан в списке синонимов</Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>generator</CodeMode>
+<FormalSpec>*rq:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s %code=0
+ $$$GENERATE(" s sidx=$G(rq(""sidx"",1)), sord=$G(rq(""sord"",1)) ")
+ #;если не задана сортировка 
+ $$$GENERATE(" Q:sidx="""" """" ")
+ #;строим общий список из полей и синонимов, нечувствительный к регистру
+ s fields=$LFS($zcvt(%parameter("FIELDS"),"U"),","), flen=$LL(fields), key=0, pair=""
+ k list s list=""
+ while $LISTNEXT(fields,key,pair){
+	 s field=$zstrip($p(pair," AS "),"<>W"), syn=$zstrip($p(pair," AS ",2),"<>W")
+	 s:syn="" syn=field ;предпочтение синониму, но если нет - берем поле
+	 s:syn'="" list(syn)="" 
+ }
+ 
+ #;Разворачиваем массив в список
+ s name="" for { s name=$o(list(name)) Q:name="" 
+	s:list'="" list=list_","
+	s list=list_name
+ }
+ 
+ #;выходим если имя сортировки не соответствует указанным полям и/или их синониму
+ s cmd=" Q:'$LF($LFS("""_list_""","",""),$zcvt(sidx,""U"")) """" "
+ w !,!,"Проверка параметров сортировки: "
+ w !,cmd
+ $$$GENERATE(cmd)
+ $$$GENERATE(" s sord=$S(sord=""desc"":"" desc"",1:"""") ") 
+ $$$GENERATE(" s field=..GetFieldName(sidx) ")
+ $$$GENERATE(" Q "" ORDER BY ""_field_"" ""_sord ")
+ Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Out">
+<Description><![CDATA[
+Вывод первой или указанной страницы
+<var>rq</var> %request.Data]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&rq:%String=""]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ s classname=..#CLASSNAME
+ 
+ #; Не пригодилось
+ #; если был задан сложный фильтр - за два года работы так и не потребовалось
+ #; s filters=$G(rq("filters",1)), where=""  ;where массив вида where()="Select ID From...", where(params)=3
+ #; парсим из json where
+ #; d ##class(json.filter).Get(filters,.where)
+ #; здесь корректность фильтра надо проверить
+ #; сбросить ненужные поля и выражения
+ #; строим sql where
+ #; d ##class(json.filter).Build(.where)
+ #; w "where:'",where,"'" Q $$$OK
+ #; m rq("where")=where k where
+  
+ #;Узнаем количество записей по запросу 
+ #;Необходимо знать до выполнения основного запроса
+ #;так как нужно определять номер выводимой порции данных
+ d ..GetWhere(.rq)
+ s allrows=..GetCount(.rq)
+ 
+ s rows=+$G(rq("rows",100),100) ;вывести строк на страницу, по умолчанию 100
+ s:rows<1 rows=100 ;контроль количества строк на страницу
+ 
+ s page=+$G(rq("page",1),1) ;номер запрашиваемой страницы, по умолчанию первой
+ s:page<1 page=1 ;контроль номера страницы 
+ 
+ s pages=0 ;всего страниц данных
+ s:allrows>0 pages=allrows\rows ; если есть строки 
+ s:allrows#rows>0 pages=pages+1 ;непоместившиеся строки на след страницу
+ s:page>pages page=pages ;нельзя вывести страницу больше чем есть
+
+ #;диапазон выводимых строк
+ s lastRow=rows*page ;последняя запись которую надо вывести с записи
+ s firstRow=lastRow-rows ; начиная с записи
+ 
+ s sql="SELECT ID FROM "_..#CLASSNAME_$g(rq("where"))_..GetOrder(.rq) 
+ k qp s qp=0 m qp=rq("where","qp")
+ #;w "sql: ",sql
+ #;zw qp
+ 
+ #; Переходим на универсальный интерфейс к динамическим запросам
+ s sc=1, rs=##class(json.xvrs).GetResultSet(sql,.qp,.sc)
+ if 'sc {
+	 w sc Q $$$OK 
+	}
+ s first=1 
+ w "{"
+ #; w """userData"":",..QuoteJS(sql),","
+ w """page"":""",page,""""
+ w ",""total"":""",pages,""",""records"":""",allrows,""",""rows"":["
+ while rs.Next() {
+   s i=$i(i) ;счетчик выведенных строк
+   if i<=firstRow continue ;Не дошли до первой записи
+   if i>lastRow quit  ;прошли последнюю запись
+   w:'first "," s:first first=0 ;запятая перед каждым объектом кроме первого
+   d ..wJson(rs.Get("ID")) ;вывод объекта 
+ }
+ d rs.Close() k rs
+ w "]}"
+ Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="wJson">
+<Description>
+Вывести объект в формате json</Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>generator</CodeMode>
+<FormalSpec>id:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ s %code=0
+ #; устанавливаем режим вывода
+ $$$GENERATE(" #SQLCompile Select=ODBC ")
+ s class=%class
+ #; попался на таком:
+ #; FIELDS="fld1, TO_CHAR(fld,'YYYY-MM-DD') as fld2"
+ #; ошибка разбиения по полям
+
+ s fields=%parameter("FIELDS"), list=$LFS(fields,","), len=$LL(list)
+  
+ #; формируем список INTO
+ s into="" f i=1:1:len s into=into_":var"_i s:i<len into=into_","
+ 
+ #; получаем значения
+ s cmd=" &sql(Select "_fields_" INTO "_into_" FROM "_%parameter("CLASSNAME")_" WHERE ID=:id) "
+ w !,!,"Выражение для получения одной записи:"
+ w !,cmd,!
+ $$$GENERATE(cmd)
+ 
+ #; выводим как синонимы в JSON
+ #; соглашение: id простое число
+ #; количество кавычек напрягает
+ 
+ $$$GENERATE(" w ""{""""id"""":"""""",id,"""""""" ")
+ 
+ for i=1:1:len {
+		s pair=$LG(list,i), field=$P(pair," as "), syn=$P(pair," as ",2)
+		s field=$zstrip(field,"<>W"), syn=$zstrip(syn,"<>W") s:syn="" syn=field
+		if i<=len $$$GENERATE(" w "","" ")
+		$$$GENERATE(" s val"_i_"=..QuoteJS(var"_i_"),len"_i_"=$l(val"_i_") ")
+		$$$GENERATE(" s $e(val"_i_",1)=$c(34),$e(val"_i_",len"_i_")=$c(34) ")
+		$$$GENERATE(" w """""""_syn_""""":"",val"_i_" ")
+	}
+	$$$GENERATE(" w ""}""  ")
+	$$$GENERATE("  Q $$$OK ")
+ Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Add">
+<Description>
+метод добавления
+</Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>generator</CodeMode>
+<FormalSpec><![CDATA[&rq:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ s %code=0, class=%parameter("CLASSNAME")
+ $$$GENERATE(" s obj=##class("_class_").%New() ")
+ $$$GENERATE(" d ..Set(obj,.rq) ")
+ $$$GENERATE(" Q $$$OK ")
+ Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Edit">
+<Description>
+Редактирование </Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>generator</CodeMode>
+<FormalSpec><![CDATA[&rq:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ s %code=0, class=%parameter("CLASSNAME"),concurrency=%parameter("OBJECTCONCURRENCY")
+ $$$GENERATE(" s id=$g(rq(""id"",1)) ")
+ $$$GENERATE(" s obj=##class("_class_").%OpenId(id,"_concurrency_",.sc) ")
+ #; если не удалось открыть
+ $$$GENERATE(" if 'sc d ..wError(sc,id) Q $$$OK ")
+ $$$GENERATE(" d ..Set(obj,.rq) ")
+ $$$GENERATE(" Q $$$OK ")
+ Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Set">
+<Description>
+Самый переопределяемый метод в наследниках </Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[obj,&rq:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	#; Примерный код
+	#define g(%name) $g(rq(%name,1))
+	#; Q:'$IsObject(obj) $$$OK	;если не удалось создать новый объект ?!
+ #; s obj.field=$$$g("field")
+ #; s sc=obj.%Save(),id=obj.%Id()
+ #; d ..wError(sc,id)
+ Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Delete">
+<Description>
+Удаление </Description>
+<ClassMethod>1</ClassMethod>
+<CodeMode>generator</CodeMode>
+<FormalSpec><![CDATA[&rq:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ s %code=0, class=%parameter("CLASSNAME")
+ $$$GENERATE(" s id=$g(rq(""id"",1)) ")
+ $$$GENERATE(" s sc=##class("_class_").%DeleteId(id) ")
+ $$$GENERATE(" d ..wError(sc, id) ")
+ $$$GENERATE(" Q $$$OK ")
+ Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="wError">
+<Description>
+Выводит результат выполнения операций создания, редактирования, удаления в javascript
+на клиенте обычно используется операция eval
+по этому пишем в формате javascript массива [result,message,id]</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>sc:%Status,id:%String=""</FormalSpec>
+<Implementation><![CDATA[
+ w "[",$S(+sc=1:"true",1:"false")
+ s errtext="" s:'sc errtext=$system.Status.GetOneErrorText(sc)
+ w ",",..QuoteJS(errtext)
+ w ",",id
+ w "]"
+]]></Implementation>
+</Method>
+</Class>
+</Export>
