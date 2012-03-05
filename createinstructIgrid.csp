@@ -23,6 +23,7 @@ SELECT{width:170px}
 <script language="jscript" src="common.js"></script>
 <title>Инструкция руководителя</title>
 
+
 <script language="Jscript">
 var DocId='#(%request.Get("source"))#';
 var OriginalInstructionId=DocId;
@@ -65,34 +66,44 @@ FillDocStr();
 }
 
 function FillDocStr(){
-var Captions = new Array(4);
-var Keys = new Array(4);
-var Tags = new Array(4);
-var Widths = new Array(4);
+var Captions = new Array(6);
+var Keys = new Array(6);
+var Tags = new Array(6);
+var Widths = new Array(6);
 
 Captions[0]="Товар";
 Captions[1]="Количество";
 Captions[2]="Цена";
 Captions[3]="Сумма";
 Captions[4]="Отзыв клиента";
+Captions[5]="Серийный н.";
+Captions[6]="Гарантийный н.";
+
 
 Tags[0]="Goods.Goods";
 Tags[1]="%Numeric";
 Tags[2]="%Numeric";
 Tags[3]="%Numeric";
 Tags[4]="%String";
+Tags[5]="%String";
+Tags[6]="%String";
 
 Keys[0]="Goods";
 Keys[1]="Quantity";
 Keys[2]="Price";
 Keys[3]="Total";
 Keys[4]="BrakComment";
+Keys[5]="sn";
+Keys[6]="garant";
 
 Widths[0]=400;
 Widths[1]=80;
 Widths[2]=80;
 Widths[3]=80;
 Widths[4]=80;
+Widths[5]=140;
+Widths[6]=140;
+
 docstr.DrawHeaders(Captions,Keys,Tags, Widths);
 if(DocId!="")
 	{

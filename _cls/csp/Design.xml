@@ -17,15 +17,15 @@
  if $IsObject(%request) m args=%request.Data
  &html<<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html><head>>  d ..wMeta(.args) 
-
  &html<<head><title>> d ..wTitle(.args) &html<</title>>
  d ..wCss(.args)
  w ..HyperEventHead()
  &html<</head><body><div style="width:90%;margin-left:auto;margin-right:auto;">
-		<div>> d ..wPageHeader(.args) &html<</div>>
-	 	d ..wBody(.args) 
+ <div>> d ..wPageHeader(.args) &html<</div>>
+ d ..wBody(.args) 
  &html<</div>>
  w ..HyperEventFrame()
+ d ..wJs(.args) 
  &html<</body></html>>
  Quit $$$OK
 ]]></Implementation>
@@ -78,6 +78,14 @@ write заголовок на странице</Description>
 <Method name="wBody">
 <Description>
 write содержимое страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wJs">
 <ClassMethod>1</ClassMethod>
 <FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
 <ReturnType>%String</ReturnType>

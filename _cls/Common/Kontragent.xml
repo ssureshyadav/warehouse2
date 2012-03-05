@@ -481,6 +481,17 @@ e-mail</Description>
 <Properties>Pseudonym</Properties>
 </Index>
 
+<Property name="Holding">
+<Description>
+Холдинг</Description>
+<Type>Common.Dictionary20</Type>
+<Parameter name="CAPTION" value="Холдинг"/>
+</Property>
+
+<Index name="HoldingInd">
+<Properties>Holding</Properties>
+</Index>
+
 <Method name="%OnBeforeSave">
 <FormalSpec>insert:%Boolean</FormalSpec>
 <Private>1</Private>
@@ -789,6 +800,9 @@ e-mail</Description>
 </Value>
 <Value name="58">
 <Value>WCalc2</Value>
+</Value>
+<Value name="59">
+<Value>Holding</Value>
 </Value>
 </Data>
 <Property name="Activity">

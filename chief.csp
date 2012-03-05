@@ -292,14 +292,19 @@ function ChooseKontragentFunc()
 
 function FillInstrReminder()
 {
+	var ButtonString = "<br><input type='button' style='width:300px' value='проверить пропущенные заявки' onclick='FillInstrReminder();'>"
 	var count = #server(Operation.InstrActions.GetInstrReminderText(1))#;
-	if (count==0)return;
+	if (count==0)
+	{
+		InstrReminder.innerHTML = "Нет пропущенных заявок" + ButtonString;
+		return;
+	}
 	var str = #server(Operation.InstrActions.GetInstrReminderText())#;
 	if (str != "")
 	{
 		InstrReminder.innerHTML = "<p style='color:#de1111'>Внимание! Некоторые инструкции не укомплектованы или не завершены более #($G(DaysCount))# дней:</p>"
 		+	str 
-		+ "<br><input type='button' style='width:300px' value='проверить пропущенные заявки' onclick='FillInstrReminder();'>";
+		+ ButtonString;
 	}
 }
 
@@ -323,6 +328,13 @@ function RefuseInstr(InstrId)
 {
 	if(!window.confirm("Отклонить заявку " + instr.ItemName + " ?"))return;
 	changestat('8.6');
+}
+
+function ShowFoto()
+{
+	var ItemID = instr.ItemID;
+	var DocId = #server(Operation.InstrActions.GetInnerInstr(ItemID))#;
+	if(!isNaN(DocId)) window.open("DocImages.csp?DocId="+DocId);
 }
 </script>
 <script language="VBScript">
@@ -460,6 +472,8 @@ End Sub
   <sklad:LittleButton name="txt" id="tx" onclick="doc()" alt="Создать документ на основании инструкции">
   <sklad:LittleButton name="copy" id="copyInstr" onclick="CopyInstr(instr.ItemID)" alt="Копировать инстукцию">
   <sklad:LittleButton name="print" id="printInstr" onclick="PrintInstr(instr.ItemID)" alt="Печать инстукции">
+  <sklad:LittleButton name="savestore" id="btnShowFoto" onclick="ShowFoto(instr.ItemID)" alt="Показать фотографии внутренней инструкции">
+  
   <img src="images/VertDelimeter.gif">
   	<sklad:LittleButton name="txt" id="btnLookBrakComment" onclick="ShowFieldFn(instr.ItemID,'Operation.Instructions','BrakComment')" alt="Показать негативный отзыв контрагента">
 	<sklad:LittleButton name="txt" id="btnSetBrakAnswer" onclick="SetInstrField(instr.ItemID,'SetBrakAnswer','Ответ на негативный отзыв','Ответ на негативный отзыв сохранён')" alt="Ответить на негативный отзыв">

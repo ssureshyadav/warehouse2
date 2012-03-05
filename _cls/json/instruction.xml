@@ -110,11 +110,14 @@ ID можно не указывать, т.к. выбирается обязат�
 <FormalSpec><![CDATA[&rq:%String]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
+  Q $$$OK	
+  /* 13.02.2012 Артем попросил убрать удаление
   s id=$g(rq("id",1))	
   s res=##class(Docs.Action).deletedoc("Operation.Instructions",id)
   //1 или строка с ошибкой
   s sc=$CASE(+res,1:"true",:"false")
   w "[",sc,",",..QuoteJS(res),",",id,"]"
+  */
   Q $$$OK
 ]]></Implementation>
 </Method>

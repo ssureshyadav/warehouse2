@@ -637,12 +637,16 @@ SetDetailAnalogRelationErr
  . s Property3609=$LG(LBLine,Property3609ListIndex)
  . s Price=$LG(LBLine,PriceListIndex)
  . s codedetail=$LG(LBLine,codedetailListIndex)
- . s Property5300=$LG(LBLine,Property5300ListIndex)
- . s AllowToSend=+$LG(LBLine,AllowToSendIndex)
+ . s Property5300=$LG(LBLine,Property5300ListIndex)	// Номер по схеме
+ . //AllowToSend - определяет, можно ли использовать этот товар в заявках
+ . s AllowToSend=+$LG(LBLine,AllowToSendIndex)	// Артём 29.02.2012
+ . //раньше это поле брали просто из товара, а теперь берём с учётом контрагента
+ . s kbanned='+##class(Goods.Goods).kbanned(i,KontrID)
+ . //если товар запрещён к использованию, то его всё таки можно разрешить в интерфейсе "Ограничение использования запчастей контрагентами"
+ . if 'AllowToSend s AllowToSend=kbanned
  . s (ShowPrice,ShowClients)=1
  . s Groups=$$Groups(i,.ShowPrice,.ShowClients)
  . //пропускаем товары которые низя показывать клиентам
- . if ##class(Goods.Goods).kbanned(i,KontrID) Q
  . if (ShowClients'=0)&(ClientProperty2506'[ShowClients) q
  . i 'ShowPrice s Price="" 	//обнуляем цены которые низя показывать клиентам
  . s RemontPrice=..GetRemontPrice(ClientUniqueCode,$LG(LBLine,izdelieListIndex))

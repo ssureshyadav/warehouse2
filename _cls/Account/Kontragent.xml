@@ -215,22 +215,6 @@
 <Value>factor</Value>
 </Value>
 </Data>
-<Property name="amount">
-</Property>
-<Property name="amountUSD">
-</Property>
-<Property name="doc">
-</Property>
-<Property name="factor">
-</Property>
-<Property name="holder">
-</Property>
-<Property name="shift">
-</Property>
-<Property name="shiftUSD">
-</Property>
-<Property name="ts">
-</Property>
 </Storage>
 </Class>
 </Export>

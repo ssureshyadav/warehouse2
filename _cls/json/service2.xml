@@ -194,7 +194,7 @@ ID можно не указывать, т.к. выбирается обязат�
 <FormalSpec><![CDATA[&rq:%String]]></FormalSpec>
 <ReturnType>%Integer</ReturnType>
 <Implementation><![CDATA[
-	 s sql="Select Count(*) as ""count"" From "_..#CLASSNAME
+	 s sql="Select Count(*) as count1 From "_..#CLASSNAME
 	 k qp s qp=0  ;query parameters
 	 if $d(rq("where")) {
 		 s sql=sql_$g(rq("where")) m qp=rq("where","qp") ;забираем параметры
@@ -204,7 +204,7 @@ ID можно не указывать, т.к. выбирается обязат�
 		 w !,$system.Status.GetOneErrorText(sc)
 		 Q 0
 	 }
-	 s sc=rs.Next(), count=rs.Get("count")  d rs.Close()
+	 s sc=rs.Next(), count=rs.Get("count1")  d rs.Close()
 	 Q:sc count
 	 Q 0
 ]]></Implementation>
@@ -279,7 +279,7 @@ ID можно не указывать, т.к. выбирается обязат�
  d ..GetWhere(.rq)
  s allrows=..GetCount(.rq)
  
- s rows=+$G(rq("rows",100),100) ;вывести строк на страницу, по умолчанию 100
+ s rows=+$G(rq("rows",1),100) ;вывести строк на страницу, по умолчанию 100
  s:rows<1 rows=100 ;контроль количества строк на страницу
  
  s page=+$G(rq("page",1),1) ;номер запрашиваемой страницы, по умолчанию первой
@@ -298,6 +298,8 @@ ID можно не указывать, т.к. выбирается обязат�
  k qp s qp=0 m qp=rq("where","qp")
  #;w "sql: ",sql
  #;zw qp
+ 
+ s ^mtempArt=sql
  
  #; Переходим на универсальный интерфейс к динамическим запросам
  s sc=1, rs=##class(json.xvrs).GetResultSet(sql,.qp,.sc)

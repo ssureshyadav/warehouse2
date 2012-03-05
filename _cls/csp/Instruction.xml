@@ -56,34 +56,27 @@ write содержимое страницы</Description>
  s InstrID=$g(%request.Data("id",1))
  s Oper=10 //тип инструкции, по умолчанию - заказ на поставку запасных частей
  	,Name="",Comment="быт"
- 	,InstDate=$zd(+$h,3)
+ 	,InstDate=$zd(+$h,3) //текуая дата 
  	,Depot1=1 //Склад №1
  	,RashOplatType=1 //по гарантии
- 	,dostavka=8 //Major - способ доставки
+ 	,Stat=1 //Создана
  	,Summa=0
- 	,(Kontr,imp,showcolor
- 	,KontrName,btnSaveStyle
+ 	,(Kontr,KontrName,btnSaveStyle
  	,CloseDate,CloseTime,CloseUserName
- 	,Stat,postnumber,postdata
- 	,HasBeenSent,BrakComment,PhotoFile)=""
- s ClosedString="" ;информация о закрытии	
+ 	)=""
+ 	s ClosedString="" ;информация о закрытии	
  
  /*,Kontr,Kontr->Name*/
  if InstrID { ;передан код инструкции - выполняем запрос
  #SqlCompile Select=ODBC
  	&sql(SELECT Oper,Name,Comment,InstDate
- 			,imp,showcolor,Depot1
- 			,dostavka,RashOplatType
+ 			,Depot1,RashOplatType
  			,CloseDate,CloseTime,CloseUser->Name
- 			,Stat,postnumber,postdata
- 			,Summa,%external(HasBeenSent)
- 			,BrakComment,PhotoFile 
+ 			,State,Summa
 		 	INTO :Oper,:Name,:Comment,:InstDate
-				,:imp,:showcolor,:Depot1
-				,:dostavka,:RashOplatType
+				,:Depot1,:RashOplatType
 				,:CloseDate,:CloseTime,:CloseUserName
-				,:Stat,:postnumber,:postdata
-				,:Summa,:HasBeenSent,:BrakComment,:PhotoFile
+				,:Stat,:Summa
 		 	FROM Operation.Instructions 
 		 	WHERE ID=:InstrID)
  s Depot1=$g(Depot1,1), Summa=+Summa
@@ -97,70 +90,43 @@ write содержимое страницы</Description>
  	i postdata s postdata=$ZD(postdata,4)
  }
 } //if $g(id)'=""
-
+ 
  &html<<table id="docHead" class='ui-widget ui-widget-content' style='border-collapse: collapse;'>
- <tr>
- 	<th><label for="Oper">Шаблон операции*</label></th>
-	<td colspan="2"><select id='Oper' onchange='ShowHideRashOplatType(this)'>>
-		w ##class(Docs.Action2).GetClassValuesOptions($G(Oper),"Operation.OperTemplate")
-	&html<</select></td>
-</tr>
+ 
+<tr><td>
+<input type="hidden" id='Oper' value='#(Oper)#' />
+<input type="hidden" id='Depot1' value='#(Depot1)#' />
+<input type="hidden" id="InstDate" value='#(InstDate)#'/>
+</td></tr>
 <tr>
-	<th><label>Краткое описание (номер)*</label></th>
-	<td><input type="text" id="Name" MAXLENGTH="50" value='#(Name)#'></td>
-	<th><label>Сумма</label></th>
-	 <td>#($G(Summa))#&nbsp;</td>
-</tr>
-<tr>
-<th><label>Дата*</label></th>
-<td><input type="text" id="InstDate" maxlength="10" size="8" value='#(InstDate)#'/></td>
-<th><label>Комментарий</label></th>
-<td><input id="Comment" maxlength="1000" value='#(Comment)#'></td>
-</tr>>
-	/*
-	<tr>
-	<th><label>Важность</label></th>
-	<td><select id="imp">
-		( ##class(Docs.Action2).GetDisplaylistOptions($G(imp),"Operation.Instructions||imp") )
-	</select>
+	<th><label>Номер*</label></th>
+	<td>
+		<input type="text" id="Name" maxlength="50" 
+		value='#(Name)#'>
 	</td>
-	<th><label>Выделить цветом</label></th>
-	<td><select id="showcolor">
-		( ##class(Docs.Action2).GetDisplaylistOptions($G(showcolor),"Operation.Instructions||showcolor") )
-		</select>
-	</td>
-	</tr>	
-	*/
- &html<<tr>
-	<th><label>Склад*</label></th>
-	<td><select id='Depot1'>
-	#( ##class(Docs.Action2).GetClassValuesOptions($G(Depot1),"Store.Depot") )#
-	</select>
-	<th><label>Почтовый документ</label></th>
-	<td><label>#(postnumber)#&nbsp;#(postdata)#</label></td>
-</tr>
-<tr>
-	<th><label>Способ оплаты*</label></th>
-	<td><select id='RashOplatType'>
-	#( ##class(Docs.Action2).GetClassValuesOptions($G(RashOplatType),"Common.Dictionary7") )#
+	<th><label>Оплата*</label></th>
+	<td><select id='RashOplatType' >
+	#( ##class(Docs.Action2).GetClassValuesOptions(RashOplatType,"Common.Dictionary7") )#
 	</select></td>
-	<th><label>Способ доставки*</label></th>
-	<td><select id='dostavka'>
-	#( ##class(Docs.Action2).GetClassValuesOptions($G(dostavka),"Common.Dictionary1") )#
-	</select></span>
-	</tr>>
-
- if $G(BrakComment)'="" d
-	. &html<<tr><th><label>Комментарий клиента</label></th><td>#(BrakComment)#>
-	. if PhotoFile'="" &html<<a href="ClientImages\#(PhotoFile)#" target=_blank>фотоприложение</a>>
- . &html<</td></tr>> 
-
-	if ClosedString'="" &html<<tr><td colspan=4>Инструкция завершена <i>"_ClosedString_"</i></td></tr>>
+	<th><label>Сумма</label></th>
+	<td>#($G(Summa))#&nbsp;</td>
+</tr>
+<tr>
+	<th><label>Комментарий</label></th>
+	<td colspan="5">
+		<input id="Comment" maxlength="1000" 
+			value='#(Comment)#' />
+	</td>
+</tr>
+>
+ if ClosedString'="" {
+	  &html<<tr><td colspan=4>Инструкция завершена <i>"_ClosedString_"</i></td></tr>>
+ }
 
  &html<</table>
  <table id="grid"><tr><td></td></tr></table><div id="bar"></div>
  <div id='gsd'></div>
- <button id="btnSave" title="Сохранить документ" style="#(btnSaveStyle)#"></button>
+ <button id="btnSave" style="#(btnSaveStyle)#" title="Сохранить документ"></button>
  >
 	Q ""
 ]]></Implementation>
@@ -171,19 +137,43 @@ write содержимое страницы</Description>
 <FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
-	s id=$g(args("id",1))
+	s id=$g(args("id",1)),status=1 ;по умолчанию открыта
+	if id'="" && ##class(Operation.Instructions).%ExistsId(id) {
+		s status=##class(Operation.Instructions).StateGetStored(id)
+	}
+	s editable=$s(status=1:"true",1:"false")
+	s saved="false" s:id'="" saved="true"
 	&html<
 		<script type='text/javascript' src='js/jquery-1.6.4.min.js'></script>
 		<script src="js/i18n/jquery-ui.datepicker-ru.min.js" type="text/javascript"></script>
 		<script type='text/javascript' src='js/jquery-ui-1.8.16.custom.min.js'></script>
 		<script type='text/javascript' src='js/i18n/grid.locale-ru.js'></script>
 		<script type='text/javascript' src='js/jquery.jqGrid-4.1.2.min.js'></script>
-		<script type='text/javascript' src='js/jqGoodsDialog.js'></script>
+		<script type='text/javascript' src='js/jqGoodsDialog.min.js'></script>
 		<script type="text/javascript">
 		var page={ doc:'#(id)#' //код текущего документа
+			,docSaved: #(saved)#
+			,editMode: function(/*Boolean*/ edit){ //включает выключает режим редактирования инструкции
+				var Name=$("#Name"),RashOplatType=$("#RashOplatType")
+					,Comment=$("#Comment")
+					,bRowAdd=$("#bRowAdd"),bRowEdit=$("#bRowEdit")
+					,bRowDel=$("#del_grid");
+				if ( edit ) {
+					Name.removeAttr("disabled");
+					RashOplatType.removeAttr("disabled");
+					Comment.removeAttr("disabled")
+					bRowAdd.show(); bRowEdit.show(); bRowDel.show();
+				} else {
+					Name.attr("disabled","disabled");
+					RashOplatType.attr("disabled","disabled");
+					Comment.attr("disabled","disabled")
+					bRowAdd.hide(); bRowEdit.hide(); bRowDel.hide();
+				}
+				
+			}
 			,docSave: function(){ //Сохранение самого документа
-				var required=["#Oper","#Name","#InstDate","#Depot1","#RashOplatType","#dostavka"]
-				,labels=["Шаблон операции","Номер","Дата","Cклад","Способ оплаты","Способ доставки"]
+				var required=["#Name","#RashOplatType"]
+				,labels=["Номер","Способ оплаты",]
 				;
 				if (!page.docCheckRequired(required,labels)) return; //не все заполнили
 				//собираем данные шапки документа 
@@ -196,7 +186,7 @@ write содержимое страницы</Description>
 					,depot: $("#Depot1").val()
 					,payment: $("#RashOplatType").val()
 					,comment: $("#Comment").val()
-					,delivery: $("#dostavka").val()
+					
 				}
 				$.ajax({url:'#(..Link("json.instruction.cls"))#'
 					,async: false
@@ -236,11 +226,12 @@ write содержимое страницы</Description>
 				alert(msg);
 			}
 			
-		}
+		}; //end of page
 		
 		
 $(function(){
-		
+	
+		var editable=#(editable)#;
 		$("#btnSave").button({
 	 		text: true
 			 ,label:"Сохранить"
@@ -262,13 +253,12 @@ $(function(){
 				
 				
 		///Параметры формы рсоздания-редактирования товарной строки
-		var  formOptions={ 
+		var formOptions={ 
 			addCaption: "Добавить товарную строку"
 			,editCaption: "Редактировать товарную строку"	
 			,closeAfterEdit: true
 			,closeAfterAdd: true
 			,clearAfterAdd: true
-			
 			,width: 600
 			,onInitializeForm: function(fid){
 				$("#sdt",fid).datepicker({dateFormat:"yy-mm-dd"});
@@ -276,12 +266,14 @@ $(function(){
 					$("#g",fid).val(obj.id);
 					$("#gn",fid).val(obj.nm);
 				}
-				/// инициализируем плагин
-				$("#gsd").jqGoodsDialog({onSelect: fn_selGood});
 				/// привязываем его к кнопке
 				$("#btnSelGood",fid).click(function(){
 					$("#gsd").jqGoodsDialog("open");
 				});
+				
+				/// инициализируем плагин
+				$("#gsd").jqGoodsDialog({onSelect: fn_selGood});
+				
 			}
 			//обходим глюки компонента - не отсылал код документа
 			,beforeSubmit: function(postdata, formid) {
@@ -357,40 +349,37 @@ $(function(){
        ,{} //Параметры редактирования
        ,{} //Параметры добавления
        ,{} //Параметры удаления
- )
-  .jqGrid('navButtonAdd',BAR,{ 
-   			caption:"Редактировать", buttonicon:"ui-icon-pencil"
-   			, title:"Редактировать товарную строку" 
-   			, position: 'first'
-   			, onClickButton: function(){
-	   			if (!page.docSaved){ //шапка документа не сохранена
-		   			if (!page.docSave()) return; //пытаемся сохранить
-		   		}
-		   		var grid=$("#grid"),id=$grid.jqGrid('getGridParam',"selrow");
-		   		$grid.jqGrid('editGridRow', id, formOptions );
-	   		}
-  })
- .jqGrid('navButtonAdd',BAR,{ 
-   			caption:"Создать", buttonicon:"ui-icon-plus"
-   			, title:"Добавить товарную строку" 
-   			, position: 'first'
-   			, onClickButton: function(){
-	   			if (!page.docSaved){ //шапка документа не сохранена
-		   			if (!page.docSave()) return; //пытаемся сохранить
-		   		}
-		   		$("#grid").jqGrid('editGridRow', "new", formOptions );
-		   	}
-  })
- ///.jqGrid('filterToolbar',{searchOnEnter:false})
- 
- .jqGrid('gridResize',{});
- $(BAR+"_center").remove(); //пагинатора не будет
- $(BAR+"_left").css("width","70%"); //надпись о количестве записей на бОльшую часть футера
- 
- $("th").addClass("ui-state-default").css("font-weight","normal");
- 
- 
-  	 
+	 ).jqGrid('navButtonAdd',BAR,{ 
+		   			caption:"Редактировать", buttonicon:"ui-icon-pencil"
+		   			, id: 'bRowEdit'
+		   			, title:"Редактировать товарную строку" 
+		   			, position: 'first'
+		   			, onClickButton: function(){
+			   			if (!page.docSaved){ //шапка документа не сохранена
+				   			if (!page.docSave()) return; //пытаемся сохранить
+				   		}
+				   		var $grid=$(GRID),id=$grid.jqGrid('getGridParam',"selrow");
+				   		$grid.jqGrid('editGridRow', id, formOptions );
+			   		}
+	 })
+	  .jqGrid('navButtonAdd',BAR,{ 
+		   			caption:"Создать", buttonicon:"ui-icon-plus"
+		   			, id: 'bRowAdd'
+		   			, title:"Добавить товарную строку" 
+		   			, position: 'first'
+		   			, onClickButton: function(){
+			   			if (!page.docSaved){ //шапка документа не сохранена
+				   			if (!page.docSave()) return; //пытаемся сохранить
+				   		}
+				   		$(GRID).jqGrid('editGridRow', "new", formOptions );
+				   	}
+	 })
+	 .jqGrid('gridResize',{});
+	 ///.jqGrid('filterToolbar',{searchOnEnter:false})
+	 $(BAR+"_center").remove(); //пагинатора не будет
+	 $(BAR+"_left").css("width","70%"); //надпись о количестве записей на бОльшую часть футера
+	 $("th").addClass("ui-state-default").css("font-weight","normal");
+  	 page.editMode(editable);
 });
 </script>
 		

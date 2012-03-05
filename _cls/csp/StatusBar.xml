@@ -10,6 +10,7 @@
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
+	
 s	&html<<html><head><style type="text/css">
 	* {margin:0px;padding:0px;border-width:0;}
 	body {background-color:buttonface;}
@@ -22,7 +23,7 @@ s	&html<<html><head><style type="text/css">
 		function $(id){return document.getElementById(id);};
 		window.WriteStatus=function(msg){ 
 			var sysmsg=$("sysmsg"); if (!sysmsg) return;
-	 		sysmsg.innerHTML=msg; 
+			sysmsg.innerHTML=msg;
 		}
 	</script>
     </head>

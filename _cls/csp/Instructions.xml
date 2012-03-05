@@ -45,7 +45,7 @@ write заголовок страницы</Description>
 <FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
-	&html<<link type="text/css" rel="stylesheet" href="style.css" />
+ &html<<link type="text/css" rel="stylesheet" href="style.css" />
  <link rel='stylesheet' type='text/css' href='css/redmond/jquery-ui-1.8.16.custom.css'/>
  <link rel='stylesheet' type='text/css' href='css/ui.jqgrid.css'/>
  <style type="text/css">
@@ -141,7 +141,7 @@ write содержимое страницы</Description>
  		.jqGrid('navGrid',BAR, {
 	       	add: false
        		, edit:false
-       		, del:true, deltext: "Удалить"
+       		, del:false 
        		, view:false
        		, search:false
        }

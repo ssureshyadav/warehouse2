@@ -41,6 +41,7 @@
   	tr.detail {display:none} /*прячем строки детализации изначально*/
   	/*раскрываем*/
   	.expand {float:left;width:8px;padding:0px 2px;cursor:pointer;border:1px solid #555;color:#555;font-family:"Lucida Console"}
+  	.foot {background-color:#cecece;}
   	.datepicker {width:6em;}
    </style>
 	</head><body><form>
@@ -181,46 +182,54 @@
 	
 	
 	w "<table class='report'><col class='c1'><col class='c2'><col class='c3'><col class='c4'><col class='c5'>"
-	s prevKontr="" ;последний выведенный контрагент
+	s last="",new=0 ;последний выведенный контрагент
 	s (kcount,ksum,ksumZak)=0
 	while rs.Next(){
 		s kontr=$g(rs.Data("kontr")),kontrName=$g(rs.Data("kontrName"))
 		s ggroup=$g(rs.Data("ggroup")), ggroupName=$g(rs.Data("ggroupName"))
 		s gcount=$g(rs.Data("gcount")), goods=$g(rs.Data("Goods"))
 		s summa=$g(rs.Data("summa")), summaZak=$g(rs.Data("summaZak"))
-		s kcount=kcount+gcount,ksum=ksum+summa,ksumZak=ksumZak+summaZak
-		
-		if (prevKontr'=kontr){
-			if (prevKontr'=""){
-				w "</tbody>"
-				w "<tfoot>"
-				w "<tr><th></th><th>Итого</th>"
-				w "<th class='tar'>",kcount,"</th>"
-				w "<th class='tar'>",ksum,"</th>"
-				w "<th class='tar'>",summaZak,"</th>"
-				w "</tr></tfoot>"
-			}
-			s (kcount,ksum,ksumZak)=0	
-			w "<tbody>"
-		}
 				
+		if (kontr'=last) { ;новый контрагент
+		  s new=1 ;флаг смены контрагента
+		  if last'="" {
+					w "<tr class='foot'><th></th><th>Итого</th>"
+					w "<th class='tar'>",+kcount,"</th>"
+					w "<th class='tar'>",+ksum,"</th>"
+					w "<th class='tar'>",+ksumZak,"</th>"
+					w "</tr>"
+				}
+			 s kcount=0,ksum=0,ksumZak=0	 ;сбрасываем данные предыдущего контрагента
+			 s last=kontr ;переключаемся на нового контрагента
+			
+		}
+		
+		s kcount=kcount+gcount,ksum=ksum+summa,ksumZak=ksumZak+summaZak
 		w "<tr id='",kontr,",",ggroup,"' class='master'><td"
-		if kontr'=prevKontr {
+		if new {
 			w " class='gb'>" ;group begin
 			w kontrName
-			s prevKontr=kontr ;переключаемся на нового контрагента
+			s new=0
 		} else {
 			w " class='gc'>&nbsp;"	;group continue
 		}
 		w "</td>"
 		
 		w "<td><div class='expand'>+</div>",ggroupName,"</td>"
-		w "<td class='tar'>",gcount,"</td>"
-		w "<td class='tar'>",summa,"</td>"
-		w "<td class='tar'>",summaZak,"</td>"
+		w "<td class='tar'>",+gcount,"</td>"
+		w "<td class='tar'>",+summa,"</td>"
+		w "<td class='tar'>",+summaZak,"</td>"
 		w "</tr>"
 		#;детализируем
 		w "<tr class='detail'><td colspan='5'></td></tr>"
+	} //прошли всех контрагентов
+	
+ if (kontr'="") { ;итого для последнего контрагента
+				w "<tr class='foot'><th></th><th>Итого</th>"
+				w "<th class='tar'>",+kcount,"</th>"
+				w "<th class='tar'>",+ksum,"</th>"
+				w "<th class='tar'>",+ksumZak,"</th>"
+				w "</tr>"
 	}
 	w "</table>"
 	d rs.Close(),rs.%Close() k rs
@@ -338,9 +347,9 @@
 			w "<td>",$zd(docdat,3),"</td>"
 			w "<td>",group,"</td>"
 			w "<td>",good,"</td>"
-			w "<td class='tar'>",amount,"</td>"
-			w "<td class='tar'>",cenaZak,"</td>"
-			w "<td class='tar'>",cena,"</td>"
+			w "<td class='tar'>",+amount,"</td>"
+			w "<td class='tar'>",+cenaZak,"</td>"
+			w "<td class='tar'>",+cena,"</td>"
 			w "<td class='tar'>",amount*cenaZak,"</td>"
 			w "<td class='tar'>",amount*cena,"</td>"
 		w "</tr>"

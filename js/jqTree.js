@@ -3,7 +3,7 @@
   ///options - (String || Object)  - название метода плагина или объект параметров инициализации
   $.fn.jqTree = function(data){
    
-   var defaults={caption:'TreeCaption'}; //Настройки
+   var defaults={caption:'TreeCaption',width:250,height:350}; //Настройки
    
    var PLUGIN="jqTree" //Название контейнера
        ,BOX="tvBox" //Класс контейнера
@@ -32,13 +32,13 @@
    function _wNode( arr, node ){ //Вывод одного узла 
        arr.push("<li id='",node.id,"'");
        arr.push(" class='",NODE)
-       if (node.root===1) arr.push(" ",ROOT)
-       if (node.leaf===1) {
+       if (node.root=="1") arr.push(" ",ROOT)
+       if (node.leaf=="1") {
          arr.push(" ",LEAF);
        } else { 
          arr.push(" ",OPENED);
        }
-       if (node.last===1) arr.push(" ",LAST); 
+       if (node.last=="1") arr.push(" ",LAST); 
        //добавляем пользовательские классы 
        if (node.classes && (node.classes!==""))arr.push(node.classes);
        arr.push("' >");
@@ -48,21 +48,25 @@
        arr.push("</li>");
    };
    
-      
+   var _$content=null;
+
+
+   
    var methods = { //Public методы плагина
     init: function(params) { //Инициализация дерева
-     //вернуть все, но для каждого переданного id
-     return this.each(function(){ 
+
+         //вернуть все, но для каждого переданного id
+     return this.each( function () { 
       var $this=$(this), flag=$this.data(PLUGIN); //проверяем флаг инициализации
       if (flag) return; //элемент уже инициализировался плагином
-      
+      $this.width(defaults.width);
       if ( params ) { $.extend( defaults, params ); }
       $this.addClass("ui-widget");  
       var caption=$("<div>"+params.caption+"</div>")
 	.addClass("ui-widget-header ui-corner-tl ui-corner-tr ui-helper-clearfix")
 	.appendTo($this);
 
-       var $bar=$("<div>Bar</div>")
+      var $bar=$("<div>Bar</div>")
 	.addClass("ui-state-default")
 	.appendTo($this);
 	$bar[0].innerHTML="<table><tr><td></td><td></td><td></td></tr></table>";
@@ -83,60 +87,76 @@
         
 	$td=$td.next();
 	var $search=$("<input type='text' class='search' />")
-		.appendTo($td);
-	
+	.appendTo($td)
+
+	.keyup(function(){ //при попытке набрать что-нить в поиске, подбираем подходящий узел
+        	 $input=$(this); var match=$input.val().toUpperCase();
+	         $this.find(sTEXT).each(function(){
+        	 	var $elem=$(this); 
+			if ($elem.html().toUpperCase().indexOf(match)!=-1){ //узел содержит поисковое слово
+		        	var $li=$elem.parent(); 
+				//раскрыть все родительские узлы 
+				$li.parents(sCLOSED).removeClass(CLOSED).addClass(OPENED);
+				$this.jqTree("select",$li);
+				
+				//var scroll=$this[0].scrollTop+$li.offset().top-$this.offset().top; 
+                                //$this[0].scrollTop=scroll;
+				$li[0].scrollIntoView();
+				return false; //прекращаем просмотр остальных узлов
+			}
+		});
+	});
+ 
 	$td=$td.next();
 	var $zoom=$("<span class='ui-icon ui-icon-search' title='Поиск по наименованию'></span>")
-	.appendTo($td).hover(function(){
+	.appendTo($td)
+	.hover(function(){
 			$(this).toggleClass("ui-state-hover");
 	});
 
 
-
-      /* //Панель поиска	
-              
-        //Начинаем поиск
-        $bar.find("input.search").keyup(function(){ //при попытке набрать что-нить в поиске, подбираем подходящий узел
-         $input=$(this); var match=$input.val().toUpperCase();
-         $this.find(sTEXT).each(function(){
-          var $elem=$(this); 
-	  if ($elem.html().toUpperCase().indexOf(match)!=-1){ //узел содержит поисковое слово
-           var $li=$elem.parent(); $this.jqTree("select",$li);
-           
-           ///Стоимость строчки ниже - 4.5 часа 
-           var scroll=$this[0].scrollTop+$li.offset().top-$this.offset().top; $this[0].scrollTop=scroll;
-           return false; //прекращаем просмотр остальных узлов
-          }
-         });
-        });
-        $bar.find(".ui-icon-minus").
-        */
-
       /*СТРОИМ ДЕРЕВО*/
       var arr=new Array(); 
       _wNodes(arr,defaults.nodes); //собираем html
-      var $content=$("<div class='ui-widget-content' />").appendTo($this).height("350px").css("overflow","auto");	
+      var $content=$("<div class='ui-widget-content' />").appendTo($this);
+      $content.height(defaults.height).width(defaults.width).css("overflow","auto");	
       $content[0].innerHTML=arr.join(""); //закинули дерево-список в элемент
+
+
       delete arr; //сбросили строку
                 
       $this.data(PLUGIN, {init: true,onClick: defaults.onClick}); //выставляем флаг инициализации 
       
       
-      $this.find(sTEXT).hover(function(){$(this).toggleClass("ui-state-hover")});
+      $this.find( sTEXT ).hover( function () { $(this).toggleClass("ui-state-hover") } );
+      
       $this.click(function( $e ) { ///Обработчик нажатия 
          var $obj=$($e.target), $node=$obj.parent();
-         if ($obj.hasClass(EXPAND)) { //щелчок на элементе раскрытия  
-           if ($node.hasClass(LEAF)) return; // клик на листе 
+         if ( $obj.hasClass( EXPAND ) ) { //щелчок на элементе раскрытия  
+           if ( $node.hasClass ( LEAF ) ) return; // клик на листе 
            $node.toggleClass(TOGGLE);
            return;
          }
-         if ($obj.hasClass(TEXT)) {  //щелчок на наименовании узла    
+         
+	if ( $obj.hasClass(TEXT) ) {  //щелчок на наименовании узла    
             $this.jqTree("select",$node);     
             return; 
          }
-       });
+       }); //clickHandler
+
+      }) //return
       
-     });
+    
+
+
+ 
+    }
+    ,reload: function(nodes){
+      var content=$(this).children(".ui-widget-content")[0];
+      var arr=new Array(); 
+      _wNodes(arr,nodes); //собираем html
+      content.innerHTML=arr.join(""); //закинули дерево-список в элемент
+      delete arr; //сбросили строку
     }
     ,select: function($node) {
        return this.each(function(){
@@ -153,7 +173,8 @@
           setTimeout(function(){
               data.onClick.apply($node); //если есть обработчик - вызываем 
           },10);
-       } 
+       }
+ 
      });
     }
     ,expand: function() { //развернуть все узлы 
