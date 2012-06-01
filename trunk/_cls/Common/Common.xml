@@ -379,10 +379,14 @@ WriteOneItem(namedelement,text)
 </Method>
 
 <Method name="showheaders">
+<Description><![CDATA[
+Возвращает заголовки столбцов для элементов отображения
+<var>skip</var> - Список подавляемых (невыводимых) столбцов через запятую]]></Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>Class,ID="",skip="",AddArrow="",xml="",massiv,source="",show=""</FormalSpec>
+<FormalSpec>Class,ID="",skip:%String="",AddArrow="",xml="",massiv,source="",show=""</FormalSpec>
 <Implementation><![CDATA[
  s $ZT="showheadersErr"
+ 
  d:skip'=""
  . f i=1:1:$L(skip,",") d
  . . s skipField=$P(skip,",",i)
@@ -392,8 +396,10 @@ WriteOneItem(namedelement,text)
  . f i=1:1:$L(show,",") d
  . . s showField=$P(show,",",i)
  . . s:showField'="" ShowGlob(showField)=1
-
+ 
+ 
  s glob=$NA(^GoodsPropOrder(Class))  //здесь лежит порядок отображения свойств
+ 
  s ExistTov=0
  d:ID]""
  . s tov=$ZOBJCLASSMETHOD(Class,"%OpenId",ID)
@@ -650,6 +656,8 @@ SetDetailAnalogRelationErr
  . if (ShowClients'=0)&(ClientProperty2506'[ShowClients) q
  . i 'ShowPrice s Price="" 	//обнуляем цены которые низя показывать клиентам
  . s RemontPrice=..GetRemontPrice(ClientUniqueCode,$LG(LBLine,izdelieListIndex))
+ . if i=27206 s ^mtempArt(KontrID)=AllowToSend
+ . if i=27206 s ^mtempArt(KontrID,"kban")=kbanned
  . s Line=i_Delimeter_abbr_Delimeter_Property3609_Delimeter_Name_Delimeter_codedetail_Delimeter_Price_Delimeter_Groups_Delimeter_RemontPrice_Delimeter_Property5300_Delimeter_AllowToSend
  . s ok=file.WriteLine(Line)
  i '+ok $$$WriteObjError(ok) q "Ошибка при открытии файла."

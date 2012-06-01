@@ -336,6 +336,14 @@ function ShowFoto()
 	var DocId = #server(Operation.InstrActions.GetInnerInstr(ItemID))#;
 	if(!isNaN(DocId)) window.open("DocImages.csp?DocId="+DocId);
 }
+
+/// показать гарантийные талоны данной заявки
+function ShowGarantsFromRequest()
+{
+	var iid=instr.ItemID; if (!iid) { alert("Выберите инструкцию!"); return; } 
+	window.showModelessDialog("csp.ReqWar.cls?id="+iid
+   	,iid+";Common.Dictionary2","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;");
+}
 </script>
 <script language="VBScript">
 Sub OpenExcel(docid)
@@ -463,23 +471,24 @@ End Sub
 </table>
 <SKLADList:listview width=100% height=100 id="instr" onAddColumns="ShowInstr()" ClassName="Operation.Instructions" zonDblClick="ItemInstr(instr.ItemID)" zClick="showtovsins()" Skip="Source->Name,child->Name"/>
   <table width=100%><tr><td width=80%>
-  <sklad:LittleButton name="new" id="newtov" onclick="ItemInstr()" alt="Создать запись">
-  <sklad:LittleButton name="edit" id="edittov" onclick="ItemInstr(instr.ItemID)" alt="Редактировать запись">
-  <sklad:LittleButton name="ok2" id="approve" onclick="changestat('2')" alt="Утвердить">
-  <sklad:LittleButton name="calendar" id="eltov" onclick="lookinnerinstr(instr.ItemID)" alt="Просмотр внутренней инструкции">
-  <sklad:LittleButton name="history" id="lookhistory" onclick="lookhist(instr.ItemID)" alt="История инструкции">
-  <sklad:LittleButton name="ok" id="fin" onclick="changestat('9')" alt="Завершить">
-  <sklad:LittleButton name="txt" id="tx" onclick="doc()" alt="Создать документ на основании инструкции">
-  <sklad:LittleButton name="copy" id="copyInstr" onclick="CopyInstr(instr.ItemID)" alt="Копировать инстукцию">
-  <sklad:LittleButton name="print" id="printInstr" onclick="PrintInstr(instr.ItemID)" alt="Печать инстукции">
-  <sklad:LittleButton name="savestore" id="btnShowFoto" onclick="ShowFoto(instr.ItemID)" alt="Показать фотографии внутренней инструкции">
-  
-  <img src="images/VertDelimeter.gif">
-  	<sklad:LittleButton name="txt" id="btnLookBrakComment" onclick="ShowFieldFn(instr.ItemID,'Operation.Instructions','BrakComment')" alt="Показать негативный отзыв контрагента">
-	<sklad:LittleButton name="txt" id="btnSetBrakAnswer" onclick="SetInstrField(instr.ItemID,'SetBrakAnswer','Ответ на негативный отзыв','Ответ на негативный отзыв сохранён')" alt="Ответить на негативный отзыв">
-	<sklad:LittleButton name="txt" id="btnLookBrakCommentAnsw" onclick="ShowFieldFn(instr.ItemID,'Operation.Instructions','BrakCommentAnswer')" alt="Показать ответ на негативный отзыв контрагента">
-  <img src="images/VertDelimeter.gif">
-  	<sklad:LittleButton name="stop" id="btnStop" onclick="RefuseInstr(instr.ItemID)" alt="Отклонить заявку">
+	  <sklad:LittleButton name="new" id="newtov" onclick="ItemInstr()" alt="Создать запись">
+	  <sklad:LittleButton name="edit" id="edittov" onclick="ItemInstr(instr.ItemID)" alt="Редактировать запись">
+	  <sklad:LittleButton name="ok2" id="approve" onclick="changestat('2')" alt="Утвердить">
+	  <sklad:LittleButton name="calendar" id="eltov" onclick="lookinnerinstr(instr.ItemID)" alt="Просмотр внутренней инструкции">
+	  <sklad:LittleButton name="history" id="lookhistory" onclick="lookhist(instr.ItemID)" alt="История инструкции">
+	  <sklad:LittleButton name="ok" id="fin" onclick="changestat('9')" alt="Завершить">
+	  <sklad:LittleButton name="txt" id="tx" onclick="doc()" alt="Создать документ на основании инструкции">
+	  <sklad:LittleButton name="copy" id="copyInstr" onclick="CopyInstr(instr.ItemID)" alt="Копировать инстукцию">
+	  <sklad:LittleButton name="print" id="printInstr" onclick="PrintInstr(instr.ItemID)" alt="Печать инстукции">
+	  <sklad:LittleButton name="savestore" id="btnShowFoto" onclick="ShowFoto(instr.ItemID)" alt="Показать фотографии внутренней инструкции">
+	  
+	  <img src="images/VertDelimeter.gif">
+	  	<sklad:LittleButton name="txt" id="btnLookBrakComment" onclick="ShowFieldFn(instr.ItemID,'Operation.Instructions','BrakComment')" alt="Показать негативный отзыв контрагента">
+		<sklad:LittleButton name="txt" id="btnSetBrakAnswer" onclick="SetInstrField(instr.ItemID,'SetBrakAnswer','Ответ на негативный отзыв','Ответ на негативный отзыв сохранён')" alt="Ответить на негативный отзыв">
+		<sklad:LittleButton name="txt" id="btnLookBrakCommentAnsw" onclick="ShowFieldFn(instr.ItemID,'Operation.Instructions','BrakCommentAnswer')" alt="Показать ответ на негативный отзыв контрагента">
+		<sklad:LittleButton name="txt" id="btnShowGarantsFromRequest" onclick="ShowGarantsFromRequest()" alt="Проверить серийные номера">
+	  <img src="images/VertDelimeter.gif">
+	  	<sklad:LittleButton name="stop" id="btnStop" onclick="RefuseInstr(instr.ItemID)" alt="Отклонить заявку">
   </td><td width=20% align=right>
   <sklad:LittleButton name="del" id="deltov" onclick="DelItemInstr()" alt="Удалить запись">
   <sklad:LittleButton name="del+" id="deltov2" onclick="DelInstrDocs()" alt="Удалить все документы инструкции руководителя">

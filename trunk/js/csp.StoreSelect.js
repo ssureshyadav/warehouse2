@@ -12,8 +12,8 @@ page.init=function(){
 	$bind($g("btnSelect"),"click",function(){ //выбор €чейки
 		var data=page.axtv.getData();
 		returnValue=data[0]+InnerSplitter+data[1];
-		alert(returnValue);
-		//window.close();
+		//alert(returnValue);
+		window.close();
 	}); //кнопка выбора
 	
 	$bind($g("btnCancel"),"click",function(){window.close()}); //отказ от выбора 

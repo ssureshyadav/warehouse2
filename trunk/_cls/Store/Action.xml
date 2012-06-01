@@ -166,12 +166,14 @@ GetChildsErr
  // если переданный документ это инструкция по размещению
  if DocumentClass="Docs.StorageIn" {
   s PrihodType=doc.PrihodType
-  Do {
+  Do 
+  {
      i '$ISOBJECT(doc.Items) $$$WriteError("SaveQuantFromInstr документ класса Docs.StorageIn не имеет Items(???)")
      Set item = doc.Items.GetNext(.key)
-  q:'$ISOBJECT(item)
+  	 q:'$ISOBJECT(item)
      s itemGoods=item.Goods
      s itemquantreal=item.quantreal
+     if itemquantreal="" s ok="Для товара "_item.Goods.FullName_" не указано количество." q
      i '$ISOBJECT(item.addr) s ok="Для товара "_item.Goods.FullName_" не указано место на складе. Укажите места для всех товаров и повторите обработку документа." q
      i PrihodType s ok=..savequantBrak(itemGoods,item.addr,itemquantreal,,doc.Source) //это приход брака
      e  s ok=..savequant(itemGoods,item.addr,itemquantreal)
@@ -190,6 +192,7 @@ GetChildsErr
       s itemPrice=item.Price
       s itemGoodsId=item.Goods.%Id()
       s itemquantreal=item.quantreal
+      if itemquantreal="" s ok="Для товара "_item.Goods.FullName_" не указано количество." q
       s itemGoodsFullName=item.Goods.FullName
       s quantdefault = item.quantdefault
       s itemId = item.%Id()
@@ -524,7 +527,7 @@ remquantErr
  #; Goods.Goods
  Q:Good="" "Не указан товар"
  #; название товара 
- s goodName="" &sql(Select FullName Into :goodName From Goods.Goods Where ID=:goodId)
+ s goodName="" &sql(Select FullName Into :goodName From Goods.Goods Where ID=:Good)
  
 
  #;Store.Address
@@ -545,8 +548,9 @@ remquantErr
  s allowMinus=$$$TunesVariable("allowminus") ;если 0 значит не всё в порядке и можно количество выводить в минус
  
  #;порцию так и не нашли и отрицательное количество запрещено
- if Portion=""&('allowMinus) {
-   Q "В ячейке "_..AddressPath(Cell)_" нет товара "_goodName
+ if Portion=""&('allowMinus) 
+ {
+   Q "В ячейке "_..AddressPath(Cell)_" нет товара "_goodName_"."
  } 
  
  if Portion=""&(allowMinus) {

@@ -167,7 +167,9 @@ function LoadHeaders(skip,addarrow, ccustomrows){
 customrows = ccustomrows;
 skip=ReturnSpace(skip)
 if(ReturnSpace(addarrow)==""){addarrow=1;}
-ListViewID.startDownload("ListData.csp?Class="+ClassName+"&AddArrow="+addarrow+"&skip="+skip+"",AddColumns)
+var url="ListData.csp?Class="+ClassName+"&AddArrow="+addarrow+"&skip="+skip+"";
+var addc=AddColumns;
+ListViewID.startDownload(url,AddColumns);
 }
 
 function GetColumns(InsBefore,oldfield,newfield){

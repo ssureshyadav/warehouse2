@@ -95,7 +95,7 @@ write содержимое страницы</Description>
  </td><td style="vertical-align:top;">
  
   <label for="kontrSel">Контрагент:&nbsp;</label><input id="kontrId" type="hidden" />
-  <input id="kontr" /><button id="kontrSel">...</button>
+  <input id="kontr" readonly="readonly"/><button id="kontrSel">...</button>
   <div id="kontrDlg">
   	<table id="kontrGrid"><tr><td></td></tr></table><div id="kontrBar"></div>
   </div>
@@ -380,8 +380,8 @@ $("#kontrDlg").dialog({
 	 ,autoOpen: false
 	 ,modal: true
 	 ,height:480
-	 ,width:530
-	 ,position:[300,35]
+	 ,width:630
+	 ,position:[200,35]
 	 ,open: function(){
 		 $("#kontrGrid").trigger("reloadGrid"); //глючит прокрутка
 		}
@@ -404,7 +404,9 @@ $("#kontrSel").click(function(){ //Вызов диалога
 $("#kontrGrid").jqGrid({
 	colModel: [
 		{name:"id",hidden: true}
-		,{name:"name",label:"Наименование",width:450}
+		,{name:"name",label:"Наименование",width:250}
+		,{name:"nick",label:"Псевдоним",width:200}
+		,{name:"city",label:"Город",width:100}
 	]
 	,url: "json.Kontragent.cls"
 	,datatype: "json"

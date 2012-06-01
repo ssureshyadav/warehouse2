@@ -56,17 +56,22 @@ Kontragent ban list
 <Description>
 Добавление запрета на контрагента</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>good,kontr</FormalSpec>
+<FormalSpec>good="",kontr="",err</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <SqlProc>1</SqlProc>
 <Implementation><![CDATA[
-	s good=$g(good) Q:'..%ExistsId(good) $$$OK	
-	s kontr=$g(kontr) Q:'##class(Common.Kontragent).%ExistsId(kontr)
+	if '..%ExistsId(good) s err="указан несуществующий товар "_goods q 0
+	if '##class(Common.Kontragent).%ExistsId(kontr) s err="указан несуществующий контрагент "_kontr q 0
+	
 	s kban=..kbanGetStored(good)
-	s list=$LFS(kban,",") if $LF(list,kontr) Q $$$OK ;уже в списке
+	s list=$LFS(kban,",") 
+	if $LF(list,kontr) Q $$$OK ;уже в списке
+	
 	s list=list_$LB(kontr), kban=$LTS(list,",")
 	#; при обновлении через SQL сложный индекс не строится
-	s g=..%OpenId(good,,.sc) if $IsObject(g) s g.kban=kban Q g.%Save()
+	s g=..%OpenId(good,,.sc) 
+	if $IsObject(g) s g.kban=kban Q g.%Save()
+	
 	Q sc
 ]]></Implementation>
 </Method>
@@ -97,7 +102,7 @@ Kontragent ban list
 Разрешено использовать в заявках</Description>
 <Type>%String</Type>
 <InitialExpression>1</InitialExpression>
-<Parameter name="CAPTION" value="Отправлять контрагенту,display=none"/>
+<Parameter name="CAPTION" value="Отправлять контрагенту"/>
 <Parameter name="DISPLAYLIST" value=",Да,Нет"/>
 <Parameter name="VALUELIST" value=",1,0"/>
 </Property>
@@ -110,7 +115,7 @@ Kontragent ban list
 <Description>
 Количество в упаковке</Description>
 <Type>%String</Type>
-<Parameter name="CAPTION" value="Количество в упаковке"/>
+<Parameter name="CAPTION" value="Количество в упаковке,display=none"/>
 </Property>
 
 <Property name="Property675">

@@ -362,6 +362,12 @@ types(className_"Items",itemFieldName)=itemFieldType
  . i type="%Numeric" s val=+val
  . i type["%" s $ZOBJPROPERTY(doc,field)=val
  . e  d $ZOBJMETHOD(doc,field_"SetObjectId",val)
+ . //если запрещаем товар, то запрещаем его для всех
+ . s ^mtempArt("z",DocClass,field)=val
+ . if (DocClass="Goods.Goods") && (field="AllowToSend")&& (+val=0) d  
+ .. s ^mtempArt("docid")=docid
+ .. d ..BanGoodsForAll(docid)
+ 
  q:'+err err
  s ItemsClass=DocClass_"Items"
  s strtypes=1
@@ -1559,27 +1565,44 @@ MarkGarantErr
  s leng=$G(@DocData@("head","leng"))
  s comment=$G(@DocData@("head","comment"))
  s SerialAsGarant=$G(@DocData@("head","SerialAsGarant"))
+ s glob=$NA(^Common.Dictionary2I("serialInd"))	//индексный глобал содержащий серийные номера
+
+ 
 
  s ok=1
  TSTART
  f i=startnumb:1:(kol-1+startnumb) q:'+ok  d
+ . i $I(CountAll)	//подсчёт всего
+ . s Name=prefix_$TR($J(i,leng)," ",0)	//будущий гарантийный номер
+ . if SerialAsGarant s SearchString = " "_$ZCVT(Name,"U")	//серийный номер, как он лежит в индексной глобали
+ . else  s SearchString = " "_$ZCVT(serial,"U")
+ . if $D(@glob@(SearchString)) d  q		//пропускаем создание записи, если такой серийный номер уже есть в базе
+ . . i $I(CountSkipped)	//подсчёт пропущенных с неуникальным серийным
+ . . s SkippedList=$G(SkippedList)_SearchString	//собираем в строчку пропущенные номера
  . s garobj=##class(Common.Dictionary2).%New()
  . d:kontr'="" garobj.Property5330SetObjectId(kontr)
  . s:dat'="" garobj.Property8550=$ZDH(dat,4)
- . s:serial'="" garobj.serial=serial
  . s:Property9194'="" garobj.Property9194=Property9194
  . s:tovar'="" garobj.tovar=tovar
  . s:comment'="" garobj.Comment=comment
- . s garobj.Name=prefix_$TR($J(i,leng)," ",0)
+ . s garobj.Name=Name
  . if SerialAsGarant s garobj.serial=garobj.Name
+ . else  s garobj.serial=serial
  . s ok=garobj.%Save()
- . b	;1
+ . if ok i $I(CountSuccess)
+ 
  i '+ok d  q ok
  . TROLLBACK 1
  . $$$WriteObjError(ok) 
  . s ok="Извините, внутренняя ошибка при генерации списка гарантийных талонов."
  TCOMMIT
- q 1
+ 
+ s result = "Процесс создания серийных номеров успешно завершён."_$C(13,10)_
+ 	"Всего попыток создать: "_+$G(CountAll)_$C(13,10)_
+ 	"  из них успешно созданы: "_+$G(CountSuccess)_$C(13,10)_
+ 	"  пропущены неуникальные серийные номера: "_+$G(CountSkipped)
+ 
+ q result
 makealotgarantsErr
  $$$WriteError($ZE)
  q "Извините, внутренняя ошибка при создании списка гарантийных номеров"
@@ -2104,11 +2127,22 @@ SetRashItem(RashItem,CurrentUserId,Accumulated,GoodsId,NewGoodsId)
  . d RashObj.PlatejSetObjectId(doc.%Id())
  . i +RashObj.OplSumma=+RashObj.Summa s RashObj.OplatStatus=2
  . e  s RashObj.OplatStatus=3
- i 'doc.Kontr.IsWe,CommonSumma>doc.Summa q "Общая сумма оплачиваемых отгрузок больше чем сумма документа. Скорректируйте оплату."
- s ^mtempArt("processplatej","CommonSumma")=CommonSumma
- s ^mtempArt("processplatej","doc.Summa")=doc.Summa
- i 'doc.Kontr.IsWe,CommonSumma<doc.Summa q "Общая сумма оплачиваемых отгрузок меньше чем сумма документа. Скорректируйте оплату."
+ 
+ //лог
+ 	s ^mtempArt("processplatej","CommonSumma")=CommonSumma
+ 	s ^mtempArt("processplatej","doc.Summa")=doc.Summa
+ 
+ //если контрагент не мы и вообще есть расходные
+ i 'doc.Kontr.IsWe,doc.PlatejkaItems.Count() 
+ {
+	 //сумма расходных больше суммы документа 
+	 	if CommonSumma>doc.Summa q "Общая сумма оплачиваемых отгрузок ("_CommonSumma_") больше чем сумма документа("_doc.Summa_"). Скорректируйте оплату."
+	 //сумма расходных меньше суммы документа 
+	 	if CommonSumma<doc.Summa q "Общая сумма оплачиваемых отгрузок ("_CommonSumma_") меньше чем сумма документа ("_doc.Summa_"). Скорректируйте оплату."
+ }
+ 
  s doc.Kontr.Balance=doc.Kontr.Balance+doc.Summa
+ 
  d ##class(Account.Kontragent).Change(doc.Kontr.%Id(),doc.%Id(),doc.Summa)
  q 1
 ]]></Implementation>
@@ -2248,6 +2282,42 @@ SaveListOfObjectsErr
  $$$WriteError($ZE)
  TROLLBACK 1
  q "Извините. Во время сохранения списка произошла ошибка. Список не сохранён."
+]]></Implementation>
+</Method>
+
+<Method name="BanGoodsForAll">
+<Description><![CDATA[
+Забанить запчасть для всех контрагентов
+<var>goodsID</var> - ID запчасти которую нужно забанить для всех контрагентов
+<var>SetBan</var> - поставить/снять бан (1 - поставить, 0 - снять)]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>goods:%String,SetBan:%Boolean=1</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s goods=$g(goods) Q:goods="" 
+	s SetBan=$g(SetBan,1)
+	s kontr=""
+	&sql(DECLARE krs cursor for 
+		SELECT ID INTO :kontr FROM Common.Kontragent
+	) &sql(OPEN krs)
+ TSTART
+	 s sc=0 ;status code
+	 for { &sql(FETCH krs) Q:SQLCODE'=0
+	   
+	 		if ( SetBan ) {
+		 		d ##class(Goods.Goods).kbanAdd(goods, kontr)
+	 		} else {
+	 			d ##class(Goods.Goods).kbanDel(goods, kontr)
+	 		}
+	 		s ban=##class(Goods.Goods).kbanned(goods,kontr) //посмотрим что получилось
+	 		///действие совпало с результатом ?
+	 		k sc s sc= ( ban = SetBan ) Q:'sc  ;quit for
+	 }
+	 &sql(close krs)
+	 if 'sc TROLLBACK  Q 0 ;не получилось установить
+	 
+ TCOMMIT
+ Q 1
 ]]></Implementation>
 </Method>
 </Class>

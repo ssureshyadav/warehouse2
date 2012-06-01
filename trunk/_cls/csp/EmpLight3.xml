@@ -161,7 +161,7 @@ write заголовок на странице</Description>
  		w "<button class='edit' onclick=""lookinnerinstr('",DOC2,"@",DCLASS2,"')""></button>"
  		w "<button class='print' onclick=""prnt('",DOC2,"@",DCLASS2,"')""></button>"
  		if DSTAT2=1 {
-	 		w "<button class='state' onclick=""savestore(",DOC2,",'",DNAME2,"')"" ></button>"
+	 		w "<button class='state' onclick=""savestore(",DOC2,",'",$ZCVT(DNAME2,"O","JS"),"')"" ></button>"
  		} else {
  			w "<button class='out'></button>"
  		}

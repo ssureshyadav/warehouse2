@@ -56,6 +56,17 @@
 Курс</Description>
 </Property>
 
+<Property name="SendMailLog">
+<Description>
+Ссылка на лог отправки</Description>
+<Type>Kontragent.SendMailLog</Type>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Index name="SendMailLog">
+<Properties>SendMailLog</Properties>
+</Index>
+
 <Storage name="Default">
 <Type>%Library.CacheStorage</Type>
 <DefaultData>RashDefaultData</DefaultData>
@@ -82,6 +93,9 @@
 </Value>
 <Value name="7">
 <Value>kurs</Value>
+</Value>
+<Value name="8">
+<Value>SendMailLog</Value>
 </Value>
 </Data>
 </Storage>

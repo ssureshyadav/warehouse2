@@ -1,11 +1,10 @@
 ^MAC^Save for Subversion^^~Format=Cache.S~
 %RO
 test^MAC^^^0
-test(pkg,opts)
- s ^UnitTestRoot="C:\CacheSys\CSP\sklad2\_cls\Test\"
- s pkg=$g(pkg),opts=$g(opts)
- Do ##class(%UnitTest.Manager).RunTest(pkg,"/delete=0"_opts)
- Q
+ d ##class(Docs.Docs).%BuildIndices("",1)
+ 
+ 
+ 
 
 
 

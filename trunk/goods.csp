@@ -6,8 +6,9 @@
  s GoodsGoodsVersion = ##class(Common.Common).GetCurrentDictVersion("Goods.Goods")
  q 1
 </script><script runat="server" language="cache" method="wCatalogueOptions" arguments="commonGroup:%String,depot:%String" returnType="%String">
- s sql="Select ID,Name From Goods.Catalogue "
- s:commonGroup=0 sql=sql_" Where depot=?"	
+ s sql="Select ID,Name From Goods.Catalogue order by Main desc"
+ s:commonGroup=0 sql="Select ID,Name From Goods.Catalogue Where depot=? order by Main desc"	
+ 
  s rs=##class(%ResultSet).%New("%DynamicQuery:SQL")
  d rs.Prepare(sql)
  if commonGroup=0 {
@@ -22,6 +23,70 @@
  d rs.Close(),rs.%Close() k rs
  Q ""
 
+</script><script language="Cache" method="StopGroupSend" arguments="GroupId:%String,AllowToSendValue:%String" returntype="%String">
+ s ^mtempArt=GroupId
+ 
+ //запретить отправку этой группы контрагентам
+ if $G(GroupId)="" q "Укажите, пожалуйста, товарную группу"
+ 
+ s AllowToSendValue=+$g(AllowToSendValue)
+ , ban='AllowToSendValue ;бан имеет ПРОТИВОПОЛОЖНОЕ по смыслу значение
+ 
+ &sql( UPDATE Goods.Goods SET AllowToSend=:AllowToSendValue
+	WHERE ID IN (SELECT Goods FROM Goods.GoodsGroup WHERE Groups=:GroupId) )
+ If SQLCODE {
+	 	Q "Извините, произошла ошибка при установки разрешения на отправку."
+	 			_" Сообщите разработчику csp.goods:StopGroupSend. "
+	 			_SQLCODE
+ }
+ 
+ #; выставляем запрет на выбор контрагентам
+ s goods="",sc="", tsc=1
+ 
+ s kontrs="" ;если снимаем бан
+ if ban { ;если ставим бан
+ 	#; Чтобы не мучаться по каждому контрагенту
+ 	#; составляем их полный список
+	 &sql(declare kontrs cursor for 
+	 	select ID 
+	 	into :KontrId
+	 	from Common.Kontragent)
+	 &sql(open kontrs)
+	 
+	 f { &sql(fetch kontrs) q:SQLCODE  
+	   s kontrs=kontrs_KontrId_","
+	 }
+	 
+	 &sql(close kontrs)
+	 s kontrs=$E(kontrs,1,$L(kontrs)-1)
+ }
+ 
+ #; для каждого товара в группе
+ &sql(Declare ggrs Cursor For 
+ 	Select Goods Into :goods 
+ 	FROM Goods.GoodsGroup 
+ 	WHERE Groups=:GroupId
+ ) &sql(Open ggrs)
+  
+ TSTART
+ 
+ for { &sql(FETCH ggrs) Q:SQLCODE'=0
+
+	s g= ##class(Goods.Goods).%OpenId(goods,,.sc) Q:'+sc
+	#; устанавливаем весь список
+	s g.kban=kontrs, sc=g.%Save() Q:'+sc
+
+ } &sql(Close ggrs)
+ 
+ if 'sc {
+		TROLLBACK
+		Q "Ошибка при установке разрешений контрагентам на товар "_goods_ " из группы "_GroupId 
+ }
+ 
+ TCOMMIT
+
+ 
+ Quit 1
 </script><html XMLNS:SKLADz XMLNS:SKLAD2>
 <IMPORT NAMESPACE="SKLADz" IMPLEMENTATION="htc/treeview.htc">
 <head><title>Склад :: Товары</title>
@@ -32,7 +97,8 @@ body {margin:0px;padding:2px 1px;}
 * html button { overflow: visible; } /*тупой padding в кнопках IE*/
 .pageTitle {width:100%;border-collapse:collapse;border:0px;padding:0px;margin:0px;border:0px;}
 .pageTitle tr {background: #e9f3ff;}
-.actions a { display:inline-block; padding:2px; margin: 1px; 
+.pageTitle tr td {border-bottom:1px #000066;}
+.actions a { display:inline-block; padding:10px; margin: 1px; 
 	border:1px solid #ccc; background:#eee; 
 }
 .actions a:hover { text-decoration:none;background:#fcfcfc;}
@@ -47,12 +113,12 @@ label {color:#333;}
 <td style="width:80px;text-align:right;font-size:11px;color: #6e6e6e;" title="Текущая версия справочника товаров">v #(GoodsGoodsVersion)#</td>
 </table>
 <div class="actions">
-		<a href="PriceGroups.csp">Ценовые группы товаров
-		</a><a href="Reserves2.csp">Резервы
-		</a><a href="Brak.csp">Некондиция
-		</a><a title="Привязать запчасть к модели" href="Attach2Model.csp">Запчасти и их модели
-		</a><a href="Serials.csp" title="Открыть страницу управления серийными номерами">Cерийные номера
-		</a>
+		<a href="PriceGroups.csp">Ценовые группы товаров</a>
+		<a href="Reserves2.csp">Резервы</a>
+		<a href="Brak.csp">Некондиция</a>
+		<a title="Привязать запчасть к модели" href="Attach2Model.csp">Запчасти и их модели</a>
+		<a href="Serials.csp" title="Открыть страницу управления серийными номерами">Cерийные номера</a>
+		<a href="csp.GoodsRights.cls" title="Страница позволяющая установить ограничение в использовании запчастей контрагентами в заявках">Ограничение использования запчастей контрагентами</a>
 </div>
 
 <table style="width:100%"><tr>
@@ -77,6 +143,8 @@ label {color:#333;}
   <sklad:LittleButton name="PrintPrice" id="PrintPriceImg" onclick="PrintPriceFunc('')" alt="Вывести прайслист">
   <sklad:LittleButton name="PrintPriceColor" id="PrintPriceImg2" onclick="PrintPriceFunc('Images')" alt="Вывести прайслист c изображениями">
   <sklad:LittleButton name="ostatki" id="PrintStorage" onclick="PrintStorageFn()" alt="Вывести остатки">
+  <sklad:LittleButton name="StopSend" id="StopAllowToSend" onclick="AllowToSendFn(0,'Группа больше не будет использоваться в заявках')" alt="Не использовать группу в заявках">
+  <sklad:LittleButton name="OkSend" id="OkAllowToSend" onclick="AllowToSendFn(1,'Группа будет использоваться в заявках')" alt="Использовать группу в заявках">
   </td><td>
   <sklad:LittleButton name="del" id="delgrup" onclick="delGroup()" alt="Удалить группу"><br>
   </td></tr></table>
@@ -279,21 +347,28 @@ alert(ok)
 }
 
 //Добавить товар
-function addTovar(Goods,CspFile){
-Goods=ReturnSpace(Goods);
-GroupId=GroupsTree.NodeID;
-if(GroupId==""){alert("Не выбрана группа");return false;}
-GroupCode=GroupsTree.NodeCode;
-Name=GroupsTree.NodeCaption;
-var dialogHeight=600;
-if(ReturnSpace(Goods)=="")
+function addTovar(Goods,CspFile)
+{
+	//установим переменные
+	Goods=ReturnSpace(Goods);
+	GroupId=GroupsTree.NodeID;
+	GroupCode=GroupsTree.NodeCode;
+	if(GroupId==""){alert("Не выбрана группа");return false;}
+	Name=GroupsTree.NodeCaption;
+	var dialogHeight=600;
+	
+	//проверим логическую возможность создавать товар	
+	if(GroupsTree.ChildIDs!=""){ alert("Данная группа содержит подгруппы, она не может содержать товары. Выберете группу, которая не содержит подгрупп."); return; }
+	
+	//если это создание нового товара
+	if(ReturnSpace(Goods)=="")
 	{
-	if(window.confirm("Использовать новую форму?")){var CspFile="GoodCard.csp?GroupId="+GroupId;}
-	else{var CspFile="AddTovar.csp"}
+		if(window.confirm("Использовать новую форму?")){var CspFile="GoodCard.csp?GroupId="+GroupId;var dialogHeight=400;}
+		else{var CspFile="AddTovar.csp"}
 	}
-if(CspFile.substr(0,12)=="GoodCard.csp")var dialogHeight=300;
-ok=window.showModalDialog(CspFile,Catalogues.value+InnerSplitter+GroupId+InnerSplitter+GroupCode+InnerSplitter+Goods+InnerSplitter+Name,"center:yes;status:no;dialogHeight:"+dialogHeight+"px;dialogWidth:800px;resizable:yes")
-if(ok==1){ShowTovars()}
+	
+	ok=window.showModalDialog(CspFile,Catalogues.value+InnerSplitter+GroupId+InnerSplitter+GroupCode+InnerSplitter+Goods+InnerSplitter+Name,"center:yes;status:no;dialogHeight:"+dialogHeight+"px;dialogWidth:800px;resizable:yes")
+	if(ok==1){ShowTovars()}
 }
 
 //Удалить товар
@@ -469,7 +544,20 @@ $bind(window,"load",function(){ //при загрузке заполнить комбобокс Каталогов
 	LV.Sorted =false;
 });
 
+// запретить отправку этой группы контрагенту
+function AllowToSendFn(Allow,message)
+{	
+	var GroupName=GroupsTree.NodeCaption;	//название текущей группы
+	var GroupId=GroupsTree.NodeID;			//код текущей группы
+	
+	if (!window.confirm(GroupName + "\n" + message + " ?"))return;
+	if(GroupId==""){ alert("Выберете, пожалуйста группу"); return;}
+	if(GroupsTree.ChildIDs!=""){ alert("Данная группа не содержит товары/запчасти, выберете группу, которая содержит товары/запчасти"); return; }
 
+	var ok=#server(..StopGroupSend(GroupId,Allow))#
+	if (isNaN(ok)) { alert(ok); }
+	else { alert(message); }
+}
 </script>
 </body>
 </html>

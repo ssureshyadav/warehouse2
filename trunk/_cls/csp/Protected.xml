@@ -2,7 +2,8 @@
 <Export generator="Cache" version="20">
 <Class name="csp.Protected">
 <Description>
-Базовая страница для защищенных страниц</Description>
+Базовая страница для защищенных страниц
+А защищенными должны быть все страницы приложения</Description>
 <Super>%CSP.Page</Super>
 <TimeCreated>62345,30872.045779</TimeCreated>
 

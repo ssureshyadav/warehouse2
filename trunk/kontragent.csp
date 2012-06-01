@@ -25,66 +25,80 @@ Quit 1
 var KontrId="#(KontrId)#";
 var sessionid="#(sessionid)#";
 
-function ChooseRegion2(Obj,ClassName){
-newItem=window.showModalDialog("Dictionary.csp",ClassName,"center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");
-if(newItem==null){return false;}
-var newArr=newItem.split(InnerSplitter);
-Obj.innerText=newArr[1];
-Obj.Tag=newArr[0];
+function ChooseRegion2(Obj,ClassName)
+{
+	newItem=window.showModalDialog("Dictionary.csp",ClassName,"center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");
+	if(newItem==null){return false;}
+	var newArr=newItem.split(InnerSplitter);
+	Obj.innerText=newArr[1];
+	Obj.Tag=newArr[0];
 }
 
-function startFun(){
-#($G(Func10Refuse))#
-var xmlDoc = new ActiveXObject("Msxml2.DOMDocument.3.0");
-var RootElement = xmlDoc.createElement("RootElement");
-xmlDoc.documentElement=RootElement;
-//"Region",
-var Properties= new Array("Name","Status","Address","AddressUr","City","CityUr","Postalcode","PostalcodeUr","chief","ContPers","glavbuh","Agree","CityCode","EMail","Phones","fax","Code","Password","Activity","Property2506","Koeff","Manager","OtgruzPrincip","Property126","Property127","Property831","WCalc","Currency","Comment","Discount","NDSPayment","NotifyEmails","IsWe","AdPhone","Pseudonym");
-for(var i=0;i<Properties.length;i++){
- var elementObject = document.getElementById(Properties[i])
- if(elementObject==null)continue;
- var elementValue=elementObject.value;
- InsertXmlHeader(xmlDoc,Properties[i],elementValue,"%String");
-}
-InsertXmlHeader(xmlDoc,"region2",region2.Tag,"Users.REGION")
-InsertXmlHeader(xmlDoc,"Federal",Federal.Tag,"Common.Dictionary18")
-InsertXmlHeader(xmlDoc,"OurCompany",OurCompany.Tag,"Common.Kontragent")
-var DocID=SendXml(KontrId,"Common.Kontragent",xmlDoc,sessionid,"Docs.Action.SaveSingleGood");
-if(isNaN(DocID)){alert(DocID)}
-else{
- returnValue=1;
- window.close();
- }
+function startFun()
+{
+	#($G(Func10Refuse))#
+	var xmlDoc = new ActiveXObject("Msxml2.DOMDocument.3.0");
+	var RootElement = xmlDoc.createElement("RootElement");
+	xmlDoc.documentElement=RootElement;
+	
+	//"Region",
+	var Properties= new Array("Name","Status","Address","AddressUr","City","CityUr","Postalcode","PostalcodeUr","chief","ContPers","glavbuh","Agree","CityCode","EMail","Phones","fax","Code","Password","Activity","Property2506","Koeff","Manager","OtgruzPrincip","Property126","Property127","Property831","WCalc","Currency","Comment","Discount","NDSPayment","NotifyEmails","IsWe","AdPhone","Pseudonym","Holding");
+	
+	for(var i=0;i<Properties.length;i++)
+	{
+		var elementObject = document.getElementById(Properties[i])
+		if(elementObject==null)continue;
+		var elementValue=elementObject.value;
+		InsertXmlHeader(xmlDoc,Properties[i],elementValue,"%String");
+	}
+	
+	InsertXmlHeader(xmlDoc,"region2",region2.Tag,"Users.REGION")
+	InsertXmlHeader(xmlDoc,"Federal",Federal.Tag,"Common.Dictionary18")
+	InsertXmlHeader(xmlDoc,"OurCompany",OurCompany.Tag,"Common.Kontragent")
+	var DocID=SendXml(KontrId,"Common.Kontragent",xmlDoc,sessionid,"Docs.Action.SaveSingleGood");
+	
+	if(isNaN(DocID))
+	{
+		alert(DocID)
+	}
+	else
+	{
+		returnValue=1;
+		window.close();
+	}
 }
 
 function showbank(){
 window.showModalDialog("bank.csp?Kontr="+KontrId,"","center:yes;status:no;dialogHeight:400px;dialogWidth:600px;resizable:yes;");
 }
 
-function windowclose(KontrId){
-if(NewObject)
- {
- var ok=#server(Common.Common.DeleteItem("Common.Kontragent",KontrId))#;
- if(isNaN(ok))alert("Ошибка удаления временного объекта\n"+ok);
- }
-if(window.confirm("Вы уверены?"))window.close();
+function windowclose(KontrId)
+{
+	if(NewObject)
+	{
+		var ok=#server(Common.Common.DeleteItem("Common.Kontragent",KontrId))#;
+		if(isNaN(ok))alert("Ошибка удаления временного объекта\n"+ok);
+	}
+	if(window.confirm("Вы уверены?"))window.close();
 }
 
-function GeneratePassword() {
- if(window.confirm("Сгенерировать новый пароль?")) 
- {
-   var passw = #server(Common.Common.GeneratePassword())#;
-   Password.value = passw;
- }
+function GeneratePassword() 
+{
+	 if(window.confirm("Сгенерировать новый пароль?")) 
+	 {
+	   var passw = #server(Common.Common.GeneratePassword())#;
+	   Password.value = passw;
+	 }
 }
 
 //функция выбора контрагента (подставит выбранного в innerText переданного объекта
-function ChooseKonragent(Obj){
-newItem=window.showModalDialog("Dictionary.csp","Common.Kontragent","center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");
-if(newItem==null){return false;}
-var newArr=newItem.split(InnerSplitter);
-Obj.innerText=newArr[1];
-Obj.Tag=newArr[0];
+function ChooseKonragent(Obj)
+{
+	newItem=window.showModalDialog("Dictionary.csp","Common.Kontragent","center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");
+	if(newItem==null){return false;}
+	var newArr=newItem.split(InnerSplitter);
+	Obj.innerText=newArr[1];
+	Obj.Tag=newArr[0];
 }
 
 </script>
@@ -129,6 +143,8 @@ SELECT{width:170px}
  . if $ISOBJECT(KontrObj.OurCompany) d
  . . s OurCompany=KontrObj.OurCompany.%Id()
  . . s OurCompanyName=KontrObj.OurCompany.Name
+ . if $ISOBJECT(KontrObj.Holding) d
+ . . s Holding=KontrObj.Holding.%Id()
  . if +ChangeDate s ChangeDate=$ZD(ChangeDate,4) 
  . if +ChangeTime s ChangeTime=$ZT(ChangeTime) 
  . s CloseString=ChangeUser_" "_ChangeDate_" "_ChangeTime
@@ -290,14 +306,19 @@ w "</td>",!
 w ##class(Docs.Action2).GetDisplaylistOptions($G(IsWe),"Common.Kontragent||IsWe")
 w "</select></td>",!
 &html<
-  <td class=RightBottom colspan=2>&nbsp;
- </tr>
+  <td class=RightBottom>Холдинг, которому принадлежит контрагент</td>
+  <td class=RightBottom>
+  	<select name="Holding" id="Holding">
+ >
+	w ##class(Docs.Action2).GetClassValuesOptions($G(Holding),"Common.Dictionary20")
+ &html<
+  	</select>
  </tr>
  
  <tr>
   <td class=RightBottom>Комментарий</td>
   <td class=RightBottom colspan=3>
-   <textarea name=Comment id=Comment style="width:100%">#($G(Comment))#</textarea>
+   <textarea name=Comment id=Comment style="width:100%" ROWS=5>#($G(Comment))#</textarea>
   </td>
  </tr>
  
