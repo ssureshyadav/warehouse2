@@ -67,13 +67,17 @@
 
 <Property name="Name">
 <Description>
-серийный номер</Description>
+Серийный номер</Description>
 <Type>%String</Type>
 <Parameter name="CAPTION" value="Номер"/>
 </Property>
 
 <Index name="garantInd">
-<Data>Name</Data>
+<Description>
+Имя индекса используется в коде serials.csp !!!
+Отключил ибо бессмыссленно [ Data = Name ]
+Нашел такое //Index NewIndex1 On Name [ IdKey, Unique ];
+ВНИМАНИЕ!!! Путаница в наименованиях</Description>
 <Properties>Name</Properties>
 </Index>
 
@@ -102,20 +106,17 @@
 <Parameter name="VALUELIST" value=",1,2"/>
 </Property>
 
-<UDLText name="T">
-<Content><![CDATA[
-//Index NewIndex1 On Name [ IdKey, Unique ];
-
-]]></Content>
-</UDLText>
-
 <Property name="serial">
 <Description>
-гарантийный номер</Description>
+Гарантийный номер</Description>
 <Type>%String</Type>
 </Property>
 
 <Index name="serialInd">
+<Description>
+Имя индекса используется в коде serials.csp !!!
+Используется для прямого доступа в csp.WarrantyCardImport
+ВНИМАНИЕ!!! Путаница в наименованиях</Description>
 <Data>Name</Data>
 <Properties>serial</Properties>
 <Unique>1</Unique>
@@ -189,6 +190,25 @@
 Дата продажи</Description>
 <Type>%Date</Type>
 </Property>
+
+<Method name="Delete">
+<Description>
+Удаление гарантийного талона с проверками</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	 if '..%ExistsId(id) Q $$$ERROR($$$GeneralError,"Нет такого гарантийного талона")
+	 #;проверки
+	 s inInstructions=##class(Operation.InstructionsItems).HasGarant(id)
+	 Q:inInstructions $$$ERROR($$$GeneralError,"Гарантийный талон используется в заявках")
+	 s inOtchetItems=##class(Docs.OtchetItems).HasGarant(id)
+	 Q:inOtchetItems $$$ERROR($$$GeneralError,"Гарантийный талон используется в отчетах")
+	 s inActs=##class(Docs.Act).HasGarant(id)
+	 Q:inActs $$$ERROR($$$GeneralError,"Гарантийный талон используется в актах")
+	 Q ..%DeleteId(id)
+]]></Implementation>
+</Method>
 
 <Method name="GetPropertyListIndex">
 <ClassMethod>1</ClassMethod>

@@ -4,155 +4,26 @@
 <Description>
 Вывод списка контрагентов</Description>
 <IncludeCode>csp</IncludeCode>
-<Super>%CSP.Page</Super>
+<Super>json.service2</Super>
 <TimeCreated>62465,3515.037625</TimeCreated>
 
 <Parameter name="CHARSET">
-<Description><![CDATA[
-Specifies the default character set for the page.  This can be overriden using the
-&lt;CSP:CONTENT CHARSET=&gt; tag, or by setting the <b>%response</b>.CharSet property
-in the <method>OnPreHTTP</method> method.  If this parameter is not specified, then
-for Unicode systems the default charset is utf-8 and for 8-bit systems it is the
-system default charset.]]></Description>
 <Default>utf-8</Default>
 </Parameter>
 
-<Parameter name="CONTENTTYPE">
-<Description><![CDATA[
-Specifies the default content type for the page.  This can be overriden using the
-&lt;CSP:CONTENT TYPE=&gt; tag, or by setting the <b>%response</b>.ContentType property
-in the <method>OnPreHTTP</method> method.  The default value if this parameter is
-not set is text/html.]]></Description>
-<Default>text/html</Default>
+<Parameter name="CLASSNAME">
+<Type>%String</Type>
+<Default>Common.Kontragent</Default>
 </Parameter>
 
-<Method name="OnPage">
-<ClassMethod>1</ClassMethod>
-<ReturnType>%Status</ReturnType>
-<Implementation><![CDATA[
-	m args=%request.Data
-	s oper=$g(args("oper",1))
-	Q:oper="add" $$$OK
-	Q:oper="edit" $$$OK
-	Q:oper="del" $$$OK
-	s:$d(args("_search")) ^test=$g(args("name"),1)
-	d ..wOut(.args)
-	Quit $$$OK
-]]></Implementation>
-</Method>
+<Parameter name="FIELDS">
+<Type>%String</Type>
+<Default>Name as name,Pseudonym as nick,City as city</Default>
+</Parameter>
 
-<Method name="wOut">
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[&args:%String]]></FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
- 
- s page=$g(args("page",1),1) ;какую страницу данных
-	s rows=+$g(args("rows",1),100) ;по сколько записей на страницу
-	s sql="Select Count(ID) as total From Common.Kontragent"
-	s where=" WHERE 1=1 ",qp=0
- d ..BuildWhere(.args,.where,.qp)
-	
- s total=..GetTotal(sql_where,.qp)  ;всего записей с такими параметрами будет ?
-	
- #; проверяем корретность номера страницы
- s pages=total\rows ;целых страниц
- s:total#rows>0 pages=pages+1 ;учтем остаток
- s:page<0 page=1 s:page>pages page=pages
- 
- #; ограничения порции данных
- s max=page*rows, min=max-rows
- 
- #;только теперь интересуемся сортировкой
- s order=..GetOrder(.args)
- 
- s sql="Select ID From Common.Kontragent "_where_order
- s rs=##class(%ResultSet).%New("%DynamicQuery:SQL")
- d rs.Prepare(sql)
- d rs.Execute($g(qp(1)))
- s count=0,records=0
- 
- w "{""rows"":["
- 
- #define qt(%str) $tr(..QuoteJS(%str),"'","""")
- s first=1
- while rs.Next() {
-	 
-  s count=count+1  ;порядковый
-  if count<min continue
-  if count>max Q
-  
-  s records=records+1 ;кол-во выведенных
-  
-  w:'first "," s:first first=0
-  k id s id=$g(rs.Data("ID"))
-  d ..wJSON(id) 
- 
-  }
- d rs.Close(),rs.%Close() k rs
-	
- w "],""page"":""",page,""",""total"":""",pages,""",""records"":""",total,"""}"
- Q ""
-]]></Implementation>
-</Method>
-
-<Method name="BuildWhere">
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[&args:%String,&where:%String,&qp:%String]]></FormalSpec>
-<Implementation><![CDATA[
-	if $d(args("_search")) { //в режиме поиска
-		if $d(args("name")) {
-			s name=$g(args("name",1))
-			s qp($i(qp))="%"_$tr(name,"%")_"%"
-			s where=where_" AND Name Like ? "
-		}	
-	}
-]]></Implementation>
-</Method>
-
-<Method name="GetOrder">
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[&args:%String]]></FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
-	s order=""
-	if $d(args("sidx")){ //задана сортировка
-	 #;сортировка возможна по единственному полю - наименование
-		s sord=$g(args("sord",1)) //без проверки
-		s order=" ORDER BY Name "_sord
-	}	
-	Q order
-]]></Implementation>
-</Method>
-
-<Method name="GetTotal">
-<Description>
-Подсчет количества</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[sql:%String,&qp:%String]]></FormalSpec>
-<ReturnType>%Integer</ReturnType>
-<Implementation><![CDATA[
-	s total=0
-	s rs=##class(%ResultSet).%New("%DynamicQuery:SQL")	
- d rs.Prepare(sql)
- d rs.Execute($g(qp(1)))
-	while rs.Next() {
-		s total=+$g(rs.Data("total"))
-	}
-	d rs.Close(),rs.%Close() k rs
-	Q total
-]]></Implementation>
-</Method>
-
-<Method name="wJSON">
-<ClassMethod>1</ClassMethod>
-<FormalSpec>id:%String</FormalSpec>
-<Implementation><![CDATA[
-	 w "{""id"":",$$$qt(id)
-	 s name=##class(Common.Kontragent).NameGetStored(id)
-  w ",""name"":",$$$qt(name)
-  w "}"
-]]></Implementation>
-</Method>
+<Parameter name="FTYPES">
+<Type>%String</Type>
+<Default>%String</Default>
+</Parameter>
 </Class>
 </Export>

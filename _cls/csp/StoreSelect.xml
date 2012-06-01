@@ -349,7 +349,7 @@ var DepotData=
 	#(..wJsDepotTree(depot))#
 ;
 </script>
-<script type="text/javascript" src="js/csp.StoreSelect.js"></script>>
+<script type="text/javascript" src="js/csp.StoreSelect2.js"></script>>
  Write ..HyperEventFrame(),!
  &html<</body></html>>
  Quit $$$OK

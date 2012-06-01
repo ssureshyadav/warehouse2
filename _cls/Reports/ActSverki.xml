@@ -222,7 +222,7 @@ k act
 Подготовка отчета с указанными параметрами</Description>
 <Implementation><![CDATA[
 	;узнаем начальное сальдо контрагента
-	s sc=##class(Account.Kontragent).Get(..they,$zd(..start,4),.rur,.usd) ;начальное сальдо
+	s sc=##class(Account.Kontragent).Get(..they,$zd(..start,3),.rur,.usd) ;начальное сальдо
 	#;w ..they,";",..start,";",rur,";",usd
 	s saldo=$S(..rurMode:rur,1:usd) ;если валюты только две
 	s i%saldoStart=saldo ;начальное сальдо в валюте контрагента
@@ -275,8 +275,16 @@ k act
 					s ..docs(id)="" 
 					s ..docs(id,"class")=class, ..docs(id,"classText")=classText
 					s ..docs(id,"name")=name, ..docs(id,"date")=date
-					s ..docs(id,"credit")=sum ;все уходит в кредит
-					s i%Credit=sum+..Credit
+					if (class="Docs.Rash")
+					{
+						s ..docs(id,"debit")=sum ;все уходит в дебит
+						s i%Debit=sum+..Debit
+					}
+					else
+					{
+						s ..docs(id,"credit")=sum ;все уходит в кредит
+						s i%Credit=sum+..Credit						
+					}
 
  } &sql(close theyDocs)
  s ..docs=count

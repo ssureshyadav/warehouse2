@@ -5,7 +5,8 @@
 Права контрагента на товары определенной группы
 По умолчанию разрешен доступ ко всем товарам - скорее таблица запретов
 Назначение - ограничивать экспорт справочника товаров</Description>
-<Super>json.Kontragent</Super>
+<IncludeCode>csp</IncludeCode>
+<Super>json.service2</Super>
 <TimeCreated>62464,47974.92532</TimeCreated>
 
 <Method name="OnPage">
@@ -77,7 +78,7 @@
   s records=records+1 ;считаем количество выведенных записей
   w:'first "," s:first first=0
   k id s id=$g(rs.Data("ID"))
-  d ..wJSON(id,.args) 
+  d ..wJson(id,.args) 
  
 	}
 	d rs.Close(),rs.%Close() k rs
@@ -143,9 +144,10 @@
 ]]></Implementation>
 </Method>
 
-<Method name="wJSON">
+<Method name="wJson">
 <ClassMethod>1</ClassMethod>
 <FormalSpec><![CDATA[id:%String,&args=""]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
   s kontr=$g(args("kontr",1))
   w "{""id"":",$$$qt(id)

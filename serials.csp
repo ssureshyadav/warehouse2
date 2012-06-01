@@ -1,141 +1,245 @@
-<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
- s login=$G(%session.Data("user"))
- i '+login s %response.ServerSideRedirect="norights.csp" 
- i '##class(Common.Rights).getrights(login,1) s %response.ServerSideRedirect="norights.csp" 
- //s Access9func=##class(Common.Rights).getrights(login,9)
- q 1
-</script>
-<script language="Cache" method="Find" arguments="WhereToFind:%String,SearchString:%String,ShowFields:%String" returntype="%String">
- n glob,i,res,number,GarantName,ID
- 
- s ShowFieldsLB = $LB("")
- f i=1:1:$L(ShowFields) s $LIST(ShowFieldsLB,i)=$P(ShowFields,";",i)
- 
- // индекс свойства "комментарий" и "действителен"
- s:$LF(ShowFieldsLB,"Comment") ListIndex("Comment") = ##class(Common.Dictionary2).GetPropertyListIndex("Comment",.DataLocation)
- d:$LF(ShowFieldsLB,"Property9194") 
- . s ListIndex("Property9194") = ##class(Common.Dictionary2).GetPropertyListIndex("Property9194",.DataLocation)
- . s cl="Common.Dictionary2||Property9194"
- . d ##class(Docs.Action2).GetDisplayListArray(cl,.Property9194Array)
+<!DOCTYPE html>
+<html><head>
+<script type='text/javascript' src='js/jquery-1.6.4.min.js'></script>
+<link rel='stylesheet' type='text/css' href='css/redmond/jquery-ui-1.8.16.custom.css'/>
+<style type='text/css'>
+	.ui-widget {font-size:.9em;color:black;font-family:Arial}
+	.ui-state-default {font-weight:normal}
+	caption {text-align: left; }
+	#DivResult {overflow: auto;}
+</style>
+</head><body>
+<table class="ui-widget" style="width:98%;padding:0px;margin:0px;" >
+<tr><td style="white-space:nowrap">
+	
+	<button id="bBack" type="button"
+		class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" 
+		title="Вернуться на страницу товаров"
+	>
+	 <span class="ui-button-icon-primary ui-icon ui-icon-circle-arrow-w"></span>
+	 <span class="ui-button-text">Товары</span>
+	</button>
+	
+	<button id="bRefresh" title="Обновить раздел"
+		class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" 
+	>
+		<span class="ui-button-icon-primary ui-icon ui-icon-refresh"></span>
+		<span class="ui-button-text">&nbsp;</span>
+	</button>
+</td><td colspan="2" class="ui-widget-header" style="width:80%;text-align:center;font-size:18px;">
+	Управление серийными номерами
+</td><td style="width:15%">
+	<a href="csp.Serials2.cls" 
+		class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary ui-button-text-icon-secondary"
+		title="Новая версия для тестирования">
+		<span class="ui-button-text ui-state-highlight"	
+		>New *</span>
+	</a>
+</td></tr></table>
+<div style="font-size:5px">&nbsp;</div>
+<button id="check" type="button" name="check"
+	title="Проверка списка серийных номеров" 
+	class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" 
+>
+<span class="ui-button-icon-primary ui-icon ui-icon-check"></span>
+<span class="ui-button-text">Проверка серийных номеров</span>
+</button>
+<button id="create" type="button" name="create"
+	class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" 
+	>
+	<span class="ui-button-icon-primary ui-icon ui-icon-document"></span>
+	<span class="ui-button-text">Создание серийных номеров из файла</span>
+</button>
+<div style="font-size:5px">&nbsp;</div>
 
- //
- 
- s res=""
- s glob=$NA(^Common.Dictionary2I(WhereToFind))
- s SearchString = " "_$ZCVT(SearchString,"U")
- 
- if $D(@glob@(SearchString)) d
- . s ID = $O(@glob@(SearchString,""))
- . s GarantName=$LG(@glob@(SearchString,ID),2)
- . if GarantName="" s GarantName="(не заполнен)"
- . s res=res_"<a href=""javascript:s('"_ID_"')"">"_GarantName_"</a>"
- . s:$LF(ShowFieldsLB,"Comment") res=res_" "_##class(Common.Dictionary2).GetPropertyValue(ID,"Comment",ListIndex("Comment"),.DataLocation)
- . s Property9194 = ##class(Common.Dictionary2).GetPropertyValue(ID,"Property9194",ListIndex("Property9194"),.DataLocation)
- . if ($LF(ShowFieldsLB,"Property9194"))&(Property9194'="") s res=res_" "_$G(Property9194Array(Property9194))
- . s res=res_"<br>"
- 
- s i = SearchString
- f  s i=$O(@glob@(i)) q:(i="")||(i'[SearchString)||($L(res)>32000)  d
- . s ID = $O(@glob@(i,""))
- . s GarantName=$LG(@glob@(i,ID),2)
- . if GarantName="" s GarantName="(не заполнен)"
- . s res=res_"<a href=""javascript:s('"_ID_"')"">"_GarantName_"</a>"
- . s:$LF(ShowFieldsLB,"Comment") res=res_" "_##class(Common.Dictionary2).GetPropertyValue(ID,"Comment",ListIndex("Comment"),.DataLocation)
- . s Property9194 = ##class(Common.Dictionary2).GetPropertyValue(ID,"Property9194",ListIndex("Property9194"),.DataLocation)
- . if ($LF(ShowFieldsLB,"Property9194"))&(Property9194'="") s res=res_" "_$G(Property9194Array(Property9194))
- . s res=res_"<br>"
- 
- if $L(res)>32000 s res=res_"Невозможно вывести все результаты. Уточните запрос."
- if res="" s res=$ZDT($H)_" не найдено ни одной записи."
- q res
-</script>
+<table class="ui-widget ui-widget-content " > <!-- для синей подложки таблицы добавить ui-state-default -->
+<caption class="ui-widget-header">Поиск по первым символам номера</caption>
+<tr><td><label for="FieldToFind">Искать по:</label></td>
+	<td><select id="FieldToFind">
+		<option value="serialInd">серийному номеру</option>
+		<option value="garantInd">гарантийному номеру</option>
+	</select></td>
+</tr><tr class="ui-state-active">
+	<td><label for="edtSearch">Номер:</label></td>
+	<td>
+		<input type="text" id="edtSearch" value="" 
+			title="Введите минимум два первых символа номера"
+			style="font-size:20pt"
+		/>
+		<button id="bFind"
+			title="Искать"
+			class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" 
+		>
+		<span class="ui-button-icon-primary ui-icon ui-icon-search"></span>
+		<span class="ui-button-text">&nbsp;</span>
+			
+		</button>
+	</td>
+</tr><tr>
+		<td><label>Фильтр:</label></td>
+		<td>
+		 	<label><input type="checkbox" id="HasReqCB" checked="checked"
+		 		/><span>Есть заявка</span>
+		 	</label>
+		 	<label><input type="checkbox" id="HasCommentCB" checked="checked" 
+		 		/><span>Есть примечание</span>
+		 	</label>
+		</td>
+</tr><tr>
+	<td style="vertical-align: top"><label>Показать поля:<label></td>
+	<td>
+		<div>
+		 <label>
+		 	<input type="checkbox" id="Property9194CB" checked="checked"/>
+		 	<span>Актуальность</span>
+		 </label>
+		</div>
+		<div>
+		 <label>
+		 	<input type="checkbox" id="CommentCB" checked="checked"/>
+		 	<span>Комментарий</span>
+		 </label>
+		</div>
+	</td>
+ </tr>
+</table>
+<div style="font-size:5px">&nbsp;</div>
+<button onclick="newitem()" 
+	title="Создать один серийный номер"
+	class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" 
+>
+	<span class="ui-button-icon-primary ui-icon ui-icon-plus"></span>
+	<span class="ui-button-text">Новая</span>
+</button>
 
-<html>
-<head>
-<link href="style.css" type=text/css rel=stylesheet>
-<script language="jscript" src="common.js"></script>
-<Script language="Jscript">
+<button onclick="newitems()" 
+	title="Создать несколько серийных номеров"
+	class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" 
+>
+	<span class="ui-button-icon-primary ui-icon ui-icon-copy"></span>
+	<span class="ui-button-text">Новые</span>
+</button>
+<div style="font-size:5px">&nbsp;</div>
+
+<div id="MsgResult" class="ui-state-active"></div>
+<div id="DivResult"></div>
+
+</div>
+	
+
+
+<script type="text/javascript" src="common.js"></script>
+<script type="text/javascript">
+
 var ColCode="";
 sessionid="#(%session.SessionId)#";
 var divObj;
 var FieldToFindObj;
 
-function Find()
-{
+function Find() {
 	var ShowFields = "";
+	var Params = "";
+	
 	if (CommentCBObj.checked) ShowFields=ShowFields+"Comment;";
 	if (Property9194CBObj.checked) ShowFields=ShowFields+"Property9194;";
+	if (HasReqCBObj.checked) Params=Params+"HasReq;";
+	if (HasCommentCBObj.checked) Params=Params+"HasComment;";
 	var SearchStr = edtSearch.value;
-	ok = #server(..Find(FieldToFindObj.value,SearchStr,ShowFields))#;
-	ShowResult(ok);
+	
+	$.get("serialsResult.csp",
+      {
+	    "byf": FieldToFindObj.value
+        ,"q":  SearchStr
+        ,"fs": ShowFields
+        ,"qp": Params
+      }
+      	,ShowResult
+	 );
 }
-
-function ShowResult(res)
-{
+///Функция вызывается с сервера, не менять наименование
+function ShowResult(res,msg) {
 	divObj.innerHTML = res;
+	//if (!msg) msg=""; $("#MsgResult").text(msg);
+	$(divObj).find("a").click(function(){
+		var id=this.href.split("#")[1]; s(id);
+	});
 }
 
-function edtKeyUp()
-{
-	if(window.event.keyCode==13)Find();
+function edtKeyUp() {
+	if(window.event.keyCode==13) Find();
 }
 
 function s(currentrecord)
 {
-	ok=window.showModalDialog("garant.csp?GarantId="+currentrecord,currentrecord+";Common.Dictionary2","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+	ok=window.showModalDialog("garant.csp?GarantId="+currentrecord,currentrecord+";Common.Dictionary2","center:yes;status:no;dialogHeight:440px;dialogWidth:800px;resizable:yes;")
 }
 
-function load()
-{
+function load() {
 	divObj = document.getElementById("DivResult");
 	FieldToFindObj = document.getElementById("FieldToFind");
 	CommentCBObj = document.getElementById("CommentCB");
 	Property9194CBObj = document.getElementById("Property9194CB");
-	CommentCBObj.checked = ( GetCookie("SerialsCommentCB")== 'true');
-	Property9194CBObj.checked = (GetCookie("SerialsProperty9194CB")== 'true');
+	
+	HasReqCBObj = document.getElementById("HasReqCB");
+	HasReqCBObj.checked = ( GetCookie("HasReqCB")== 'true');
+	
+	HasCommentCBObj = document.getElementById("HasCommentCB");
+	HasCommentCBObj.checked = (GetCookie("HasCommentCB")== 'true');
 }
 
-function newitems()
-{
+function newitems() {
 	ok=window.showModalDialog("ManyGarants.csp",";Common.Dictionary2","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
 }
 
-function newitem()
-{
+function newitem() {
 	ok=window.showModalDialog("garant.csp?sessionid="+sessionid,";Common.Dictionary2","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
 }
-</Script>
 
-</head>
 
-<body onload="load();">
-<sklad:Button value="Товары" onclick="window.location.href='goods.csp'"><br>
+$(function(){
+		
+	$("#bBack").click(function(){
+			window.location.href='goods.csp';		
+	});
+	$("#bRefresh").click(function(){
+			window.location.reload();
+	});
+	$("#check").click(function(){
+			window.location.href='CheckSerial.csp';
+	});
+	$("#create").click(function(){
+			window.open('csp.WarrantyCardImport.cls');
+	});
 
-<TABLE cellSpacing=0 width="100%" celpadding="0" >
-<TR>
-<td width=10%><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
-<TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=2><strong>Управление серийными номерами</strong></TD>
-<td  width=10% align=right><!--<a href="talk.csp" ><img src="images/BIGProp.gif" width="20" height=25 border=0></a>--></td>
-</tr>
-</TABLE>
-<br><br>
-Выводить поля: 
-	<div style="border:1 solid black;display:inline">
-		<div style="margin:3px;background-color:#dedeef;display:inline;">Комментарий <input type="checkbox" id="CommentCB" style="border:none;width:15px;" onclick="SetCookie('SerialsCommentCB',this.checked)"></div>
-		<div style="margin:3px;background-color:#dedeef;display:inline;">Актуальность <input type="checkbox" id="Property9194CB" style="border:none;width:15px;" onclick="SetCookie('SerialsProperty9194CB',this.checked)"></div>
-	</div>
-<br><br>
-Первые символы 
-<select id="FieldToFind">
-	<option value="serialInd">Серийного номера</option>
-	<option value="garantInd">Гарантийного номера</option>
-</select>
-<input type="text" id="edtSearch" value="" onkeyup="edtKeyUp();" title="Достаточно ввести несколько первых символов">
- <input type="button" value="найти" onclick="Find()" style="width:50px" title="Начать поиск по указанным символам (ENTER)">
-<br><br>
-<input type="button" value="Создать несколько записей" onclick="newitems()" title="Создать несколько серийных номеров" style="width:200px;">
-<input type="button" value="Создать одну запись" onclick="newitem()" title="Создать один серийный номер">
-<br><br>
-<div id="DivResult"></div>
-</body>
-</html>
+	$("#HasReqCB").click(function(){
+		SetCookie('HasReqCB',this.checked);
+	});
+	$("#HasCommentCB").click(function(){
+		SetCookie('HasCommentCB',this.checked);
+	});
+	$("#edtSearch")
+		.css("width","20em")
+		.keyup(edtKeyUp)
+	;
+	
+	$("#CommentCB").click(function(){
+		SetCookie('SerialsCommentCB',this.checked);
+	})
+	;
+	
+	$("#Property9194CB").click(function(){
+		SetCookie('SerialsProperty9194CB',this.checked);
+	})
+	;
+	load();
+	
+	$(":checked").parent().addClass("ui-state-highlight");	
+	$(":checkbox").change(function(){
+		$(this).parent().toggleClass("ui-state-default ui-state-highlight");	
+	});
+	$("#bFind").click( Find );
+	
+	
+});
+
+</script></body></html>

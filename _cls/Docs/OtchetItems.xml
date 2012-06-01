@@ -24,6 +24,22 @@
 <Type>%String</Type>
 </Property>
 
+<Method name="HasGarant">
+<Description><![CDATA[
+Проверяет наличие в данных записей с указаным гарантийным талоном
+Необходим для проверки перед удалением гарантийного талона 
+<class>Common.Dictionary2</class> из базы]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>garantId:%String</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	#; Переделать на прямой доступ к индексной глобали
+	&sql(Select Top 1 ID Into :id From Docs.OtchetItems Where garant=:garantId)
+	Q (SQLCODE'=100)
+]]></Implementation>
+</Method>
+
 <Property name="talon">
 <Description>
 Отрывной талон</Description>
