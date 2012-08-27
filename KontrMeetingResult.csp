@@ -1,41 +1,39 @@
 <script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ 
+ #;s %response.Redirect="csp.Chat2Ka.cls" Q 1
  s login=$G(%session.Data("user"))
  i '+login s %response.ServerSideRedirect="norights.csp" 
  i '##class(Common.Rights).getrights(login,3) s %response.ServerSideRedirect="norights.csp" 
  s HaveRightToWrite = ##class(Common.Rights).getrights(login,19)
  q 1
 </script>
-
-<html>
-<head>
+<html lang="ru"><head>
 <link href="style.css" type=text/css rel=stylesheet>
 <!-- Put your page Title here -->
 <title>Результаты общений с контрагентом</title>
-<script language="jscript">
-
+<script type="text/javascript"> 
 //добавить результат
-function AddResult(MessageType)
-{
-	var Result=NewResult.value;
-	var Dat=dat.value;
-	var Tim=tim.value;
-	var KontrId="#(%request.Get("Kontr"))#";
+function AddResult(MessageType) {
+	var KontrId="#(%request.Get("Kontr"))#"
+		, Result=NewResult.value
+		, Dat=dat.value, Tim=tim.value
+	;
+	
 	var ok=#server(Kontragent.Action.AddMeetingResult(Result,Dat,Tim,KontrId,MessageType))#
-	if(isNaN(ok)){alert(ok)}
-	else
-		{
+	if(isNaN(ok)){
+		alert(ok)
+	} else {
 		var trObject=ResTable.insertRow();
 		if(MessageType==3)trObject.style.backgroundColor="#deefef";
 		var tdObject=trObject.insertCell();
 		tdObject.innerText=Dat+" "+Tim;
 		var tdObject=trObject.insertCell();
 		tdObject.innerText=Result;
-		}
+	}
 }
 
 //вывести на печать
-function PrintHistory()
-{
+function PrintHistory() {
 	AddMessageRow.style.display="none";
 	ButtonsRow.style.display="none";
 	MainTable.height="1%";
@@ -46,8 +44,7 @@ function PrintHistory()
 }
 
 //копировать в буфер обмена
-function CopyInClipBoard(TextCellId)
-{
+function CopyInClipBoard(TextCellId) {
    var TextAreaObj = document.getElementById("TextAreaText");
    var TextCellObj = document.getElementById(TextCellId);
 	TextAreaObj.value = TextCellObj.innerText;
@@ -60,13 +57,11 @@ function CopyInClipBoard(TextCellId)
    alert("Данные успешно скопированы")
 }
 
-function load()
-{
+function load() {
 	var id = setInterval(UpdateTime, 1000);
 }
 
-function UpdateTime()
-{
+function UpdateTime() {
 	var dateObj = new Date();
 	var m = TwoDigits(dateObj.getMinutes());
 	var h = TwoDigits(dateObj.getHours()); // + dateObj.getTimezoneOffset() / 60;
@@ -74,8 +69,7 @@ function UpdateTime()
 	tim.value = h + ":" + m + ":" + s;
 }
 
-function TwoDigits(variable)
-{
+function TwoDigits(variable) {
 	//if (variable.length==1) variable="0"+variable;
 	varStr=variable.toString();
 	if(varStr.length==1)varStr="0"+varStr;
@@ -100,8 +94,8 @@ function TwoDigits(variable)
  w "<table width=100% border=1 id=""ResTable"">",!
  w "<tr><td width=1%>Дата, время</td><td width=98%>Результат разговора</td><td width=1%>&nbsp;</td></tr>"
  &sql(declare zz cursor for 
- 	select ID,Dat,Tim,Result,User1->Name,MessageType,%external(MessageType)
- 	into :ID,:Dat,:Tim,:Result,:User1,:MessageType,:MessageTypeText
+ 	select ID,Dat,Tim,Result,User1->Name,MessageType,%external(MessageType),SendMailLog->Result,SendMailLog,SendMailLog->ResultCode
+ 	into :ID,:Dat,:Tim,:Result,:User1,:MessageType,:MessageTypeText,:SendMailLogResult,:SendMailLog,:SendMailLogResultCode
  	from Kontragent.Meeting where Kontr=:KontrId)
  &sql(open zz)
  f  &sql(fetch zz) q:SQLCODE  d
@@ -112,6 +106,10 @@ function TwoDigits(variable)
  . w "<td>"_$ZDT(Dat_","_Tim,4)_"</td>"
  . w "<td><b><font size=-1>"_MessageTypeText_"</font></b> <div style=""display:inline"" id="""_ID_""" onclick=""CopyInClipBoard('"_ID_"')"">"_Result_"</div>"
  . w "<img src=""images/txt.gif"" onmouseover=""this.src='images/Ontxt.gif'"" onmouseout=""this.src='images/txt.gif'""  alt=""Копировать в буфер обмена"" onclick=""CopyInClipBoard('"_ID_"')"" style=""cursor:hand;float:right;"">"
+ . if SendMailLog do
+ . . if SendMailLogResultCode s ImgPath = "images/okay.png",alt="Сообщение успешно доставлено"
+ . . else  s ImgPath = "images/fail.png",alt=SendMailLogResult
+ . . w "<img src="""_ImgPath_""" alt="""_alt_""" style=""cursor:arrow;float:right;"">"
  . w "</td>"
  . w "<td>"_User1_"</td>"
  . w "</tr>",!
@@ -130,6 +128,6 @@ function TwoDigits(variable)
 </td></tr>
 <tr height=1% id="ButtonsRow"><td align=right><sklad:Button value="Печать" onclick="PrintHistory();">&nbsp;&nbsp;<sklad:Button value="Закрыть" onclick="window.close();"></td></tr>
 </table>
-<textarea id="TextAreaText" cols=20 rows=5 style="display:none"></textarea>
+<textarea id="TextAreaText" cols="1" rows="1" style="display:none"></textarea>
 </body>
 </html>

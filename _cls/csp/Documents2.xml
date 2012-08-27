@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.Documents2">
+<Description>
+Сразу перевести страницу docs.csp не получилось
+Попробую частями</Description>
+<Super>csp.Base</Super>
+<TimeCreated>62556,78800.403714</TimeCreated>
+
+<Method name="wBody">
+<Description>
+write содержимое страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	&html<
+	 <!--Грид и панель грида для выбора типа документа-->
+	 <label>Тип документов:</label>
+	 <input type="text" id="dt" readonly="readonly" />
+	 <button type="button" id="bdt">Выбрать</button>
+	 <table id="dtg"></table><div id="dtb"></div>
+	 <!--Грид и панель грида c шапками документов-->
+	 <table id="docg"></table><div id="docb"></div>
+	 <!--Грид и панель грида cо строками документов-->
+	 <table id="rowg"></table><div id="rowb"></div>
+	>
+	
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wCss">
+<Description>
+write заголовок страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	&html<<link rel='stylesheet' type='text/css' href='css/redmond/jquery-ui-1.8.16.custom.css'/>
+<link rel='stylesheet' type='text/css' href='css/ui.jqgrid.css'/>
+
+ <style type="text/css">
+ 	body {margin:0px;padding:0px;}
+ 	.ui-jqgrid {font-size:90%;}
+ 	.ui-widget {font-size:12px;}
+ 	.datar{width:70;border:none;cursor:hand}
+</style>
+
+	>
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wJs">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ &html<<script type='text/javascript' src='js/jquery-1.6.4.min.js'></script>
+<script type='text/javascript' src='js/jquery-ui-1.8.16.custom.min.js'></script>
+<script type='text/javascript' src='js/i18n/grid.locale-ru_win1251.js'></script>
+<script type='text/javascript' src='js/jquery.jqGrid-4.1.2.min.js'></script>
+<!-- настройки гридов для каждого типа документа вынесены в отдельные файлы -->
+<script type='text/javascript' src='js/csp.Documents.Act.js'></script>
+<script type='text/javascript' src='js/csp.Documents.ActNote.js'></script>
+<script type='text/javascript' src='js/csp.Documents.Brakremont.js'></script>
+<script type='text/javascript' src='js/csp.Documents.Diff.js'></script>
+<script type='text/javascript' src='js/csp.Documents.DocBrak.js'></script>
+<script type='text/javascript' src='js/csp.Documents.Inner.js'></script>
+<script type='text/javascript' src='js/csp.Documents.InnerDiff.js'></script>
+<script type='text/javascript' src='js/csp.Documents.Invent.js'></script>
+<script type='text/javascript' src='js/csp.Documents.Otchet.js'></script>
+<script type='text/javascript' src='js/csp.Documents.OtchetNote.js'></script>
+<script type='text/javascript' src='js/csp.Documents.Platejka.js'></script>
+<script type='text/javascript' src='js/csp.Documents.Prih.js'></script>
+<script type='text/javascript' src='js/csp.Documents.Rash.js'></script>
+<script type='text/javascript' src='js/csp.Documents.Remont.js'></script>
+<script type='text/javascript' src='js/csp.Documents.StorageIn.js'></script>
+<script type='text/javascript' src='js/csp.Documents.StorageOut.js'></script>
+<script type='text/javascript' src='js/csp.Documents.Utiliz.js'></script>
+<script type='text/javascript' src='js/csp.Documents.Instructions.js'></script>
+<script type='text/javascript' src='js/csp.Documents.Plan.js'></script>
+
+
+<script type="text/javascript">
+	$(function(){
+		var GRID="#dtg",BAR="#dtb",JSON="json.Docs.Docs.cls";
+		$(GRID).jqGrid({ //Таблица с типами  документов
+		 	caption: "Типы документов"
+		 	,url: JSON, datatype: "json", jsonReader : { repeatitems: false }
+		 	, colModel: [
+		  	{name:'id', hidden:true}
+	    , {name:'nm',label:'Тип', width:250}
+	    , {name:'ot',label:'Операция', width:150}
+	  	]
+	  	, pager: BAR
+	  	, viewrecords:true
+	  	, height:300
+	  	, hidegrid: false
+	   , gridview:true ,rownumbers:true,viewrecords:true,rowNum:100
+	   , hoverrows:true ,scroll:1 
+	  	, onSelectRow: function(/*Тип документа*/ id){ //выбран новый тип документа
+		 		 
+			 		if (!window.toggleDocs[id]) { 
+			 			alert("Просмотр документов "+id+" в разработке"); return;
+			 		}
+			 		
+			 		$( window.DOCGRID ).jqGrid("GridUnload", window.DOCGRID); //сбрасываем настройки
+			 		window.toggleDocs[id](); //запускаем перезагрузку
+			 		
+		 	}
+	 }).jqGrid('navGrid',BAR, 
+       {add:false,edit:false,del:false,view:false,search:false}
+  );
+
+});
+</script>
+
+>
+
+	Q ""
+]]></Implementation>
+</Method>
+</Class>
+</Export>

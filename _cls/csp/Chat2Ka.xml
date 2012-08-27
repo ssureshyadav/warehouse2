@@ -1,0 +1,446 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.Chat2Ka">
+<Description>
+Общение с контрагентом
+Модернизация страницы KontrMeetingResult.csp</Description>
+<IncludeCode>csp,sklad2</IncludeCode>
+<Super>csp.Protected</Super>
+<TimeCreated>62683,61983.25184</TimeCreated>
+
+<Parameter name="DOMAIN">
+<Description>
+Локализация</Description>
+<Default>sklad2</Default>
+</Parameter>
+
+<Parameter name="RIGHTS">
+<Description><![CDATA[
+Дополнительные права на страницу
+<example>
+if '##class(Common.Rights).getrights(login,..#RIGHTS) s %response.ServerSideRedirect="norights.csp" 
+</example>]]></Description>
+<Default>3</Default>
+</Parameter>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ d ##super()
+ 
+ &html<<!doctype html><html lang="ru"><head>
+ <meta charset="windows-1251"/>
+ 
+<link rel='stylesheet' type='text/css' 
+ 	href='css/redmond/jquery-ui-1.8.22.custom.css'
+ 	class='ui-theme'
+ />
+<style type="text/css" media="all">
+	body {font:1em; }
+	h3 {text-align: center; font-size:110%; font-weight: normal}
+	h3 span {font-weight: bold;}
+	table {border-collapse:collapse;}
+	.ki {font-size: 90%;} /* таблица с данными контрагента */
+	.ki th { font-size: 100%; text-align: right; padding-right: .5em;} 
+	.ki td { padding: 0 1em;}
+	.history { border: 1px outset #ccc; } /*таблица переписки*/
+	.history td,.history th {border: 1px solid #ccc; padding: .3em;}
+	.history th {font-weight: normal; font-size: 90%;}
+	.from {background-color: #eee; }/*Сообщения от контрагента*/
+	.to {color: #333; }/*Сообщения для контрагента*/
+	.self { font-style: italic; color: #555; }/*Собственные сообщения*/
+	.c1 {font-size: 90%; vertical-align: top;} /*Колонка дата время*/
+	.eml {width: 16px; height: 16px; } /*Статус отправки письма*/
+	.ok {background: url("images/okay.png") no-repeat;} /*успешный*/
+	.err {background: url("images/fail.png") no-repeat;} /*неуспешный*/
+	.tac {text-align: center;} 
+	.ui-widget {font-size: .8em;}
+	#msg {width: 98%;}
+	.dAjax {text-align: center;}
+	.attachment { color: #000;}
+	label {font: 90%; color: #555;padding:0 1em;} /*подписи к кнопкам*/
+	p {padding:.3em;}
+	
+</style><style type="text/css" media="print">
+	p, .no-print {display:none}
+</style>
+
+<script type='text/javascript' src='js/jquery-1.7.2.min.js'></script>
+<script type='text/javascript' src='js/jquery-ui-1.8.22.custom.min.js'></script>
+<script type='text/javascript' src='js/ajaxfileupload4.min.js'></script>
+		
+<title>Результаты общения с контрагентом </title>
+</head><body>>
+ 
+ #; Выводим информацию о контрагенте 
+ s KontrId=$$$g("Kontr") d ..wKontrInfo(KontrId) 
+ 
+ &html<<br/>
+ <table id="ResTable" class='history'>
+ 	<col class='c1'/>
+ 	<thead><tr>
+ 		<th>Дата, время</th>
+ 		<th>Тип</th>
+ 		<th title='Статус доставки сообщения электронной почтой'>Ст.</th>
+ 		<th>Результат разговора</th>
+ 		<th>Отправил</th>
+ 		<th></th>
+ 	</tr></thead><tbody>>
+ 
+ #; Выводим список сообщений в порядке поступления
+ d ..wChatHistory(KontrId)
+ 
+ &html<</tbody></table>
+ 
+ <p><button id="bMsgNew">Добавить новое сообщение</button></p>	
+ <div id="dMsgNew" class="no-print">
+	
+	<p class='dErr ui-state-error' style="display: none">
+		При отправке сообщения произошла ошибка
+	</p>
+	
+	<div class='dForm'>
+	 <label>Дата: </label>
+	 <input id="d" value="#($tr($zd(+$H,4),"/","."))#" size="10" maxlength="10"/>
+	 <label>время: </label>
+	 <input id="t" value="#($ZT($P($H,",",2)))#" size="8" maxlength="8"/>
+	 <br/><br/>
+	 <label>Текст сообщения :</label><br/>
+	 <textarea id="msg" name="msg" cols=60 rows=5></textarea><br/>
+	 <label for="file">Файл:</label>
+	 <input type="file" id="file" name="file" size="50" enctype="multipart/form-data"/>
+	</div>
+	
+	<div class='dAjax' style="display: none">Пожалуйста подождите, идет отправка сообщения</div>
+	
+	
+ </div>
+<textarea id="TextAreaText" cols="1" rows="1" style="display:none"></textarea>
+<p class="tac">
+	<button id="bPrint" type="button">Печать</button>&nbsp;&nbsp;
+	<button id="bClose" type="button">Закрыть</button>
+</p>
+<script type="text/javascript"> 
+
+$(function(){
+	
+	var NOTE=0,MAIL=3; //Какой тип сообщения будем создавать
+	var RES=0,ERR=1,ID=2,JSON=3; //Позиции значений в ответе сервера после сохранения
+	var $msg = $( "#msg" );	// поле ввода текста сообщения
+	
+	//копировать в буфер обмена
+	function CopyInClipBoard(rid) {
+	   var msg = $("#"+rid).find(".txt").text()
+	   , $textarea = $("#TextAreaText").val(msg).show().focus()
+	   , textarea=$textarea.get(0); 
+	   textarea.select();
+	   var therange = textarea.createTextRange();
+	   therange.execCommand("Copy");
+	   $textarea.hide();
+	   alert("Данные успешно скопированы");
+	}
+	
+	// дописывает ноль в префикс, если необходимо 
+	function TwoDigits(num) { var str=""+num; return (str.length===1)?"0"+str:str; }
+	
+	// получили с сервера json добавленного сообщения, дорисовываем его в таблицу
+	// {id:"4622",d:"26.08.2012",t:"15:13:37"
+	// ,mt:"3",mtt:"Клиенту"
+	// ,ms:true,mst:"Уведомление успешно отправлено"
+	// ,msg:"Отрисовка добавленного сообщения 2"
+	// ,a:"%25CSP.StreamServer.cls?STREAMOID=J9/HVeE0coT9c2/ahJ6diWCdOeBJKYdFsiUfle9/0fs70o2gm0gomRQAfRdp0YgEdEiw_P3G2pKulgOE9OTVGQ--"
+	// ,at:"grid.base.js"
+	// ,u:"Тестовый пользователь"
+	// }
+	function AppendMessage(obj){
+		
+		var cls,tp;
+		switch(obj.mt) {
+			  	case "0": cls="self";tp="*";  break;
+			  	case "2": cls="from";tp="&lt;-"; break;
+			  	case "3": cls="to";tp="-&gt;"; break;
+			  	default: cls="";tp="&nbsp;"
+		};
+		var mss=(obj.ms)?"ok":"err";
+		var attHtml=(obj.a!="")?[
+			"<div class='attachment'><span>Приложение:</span>"
+			,"<a target='_blank' href='",obj.a,"'>",obj.at,"</a>"
+			,"</div>"
+		]:[];
+	    
+		var html=["<tr id='",obj.id,"' class='",cls,"'>"
+			,"<th>",obj.d,"<br/>",obj.t,"</th>"
+			,"<th title='",obj.mtt,"'>",tp,"</th>"
+			,"<td title='",obj.mst,"'>"
+				,"<div class='eml ",mss,"'>&nbsp;</div>"
+			,"</td>"
+			,"<td><div class='txt'>",obj.msg,"</div>"
+				,attHtml.join("")
+			,"</td>"
+			,"<td>",obj.u,"</td>"
+  			,"<td><img class='copy' src='images/txt.gif'/></td>"
+   			,"</tr>"
+		];
+		
+		$(html.join("")).appendTo("#ResTable");
+		
+	}
+		
+	// отправка данных нового сообщения на сервер
+	function fnSend(){
+		$(".dErr").hide(); //ждем новую ошибку
+		if ($("#msg").val()=="") {
+			alert('Не заполнен текст сообщения. Отправка невозможна');	
+			return;
+		}
+		
+		// собираем данные
+		var data={
+			kontr: '#(KontrId)#'
+			,msg: $("#msg").val()
+			,mt: $(this).attr("mt")  //какую кнопку нажали и какой тип сообщения хотим создать
+			,d: $("#d").val()
+			,t: $("#t").val()
+			,oper: 'add'
+		};
+		
+		$("#bNote,#bMail,.dForm").hide(); //прячем кнопки и поля ввода
+		$(".dAjax").show(); //показываем что начали отправку
+		
+		$.ajaxFileUpload({
+			url: '#(..Link("json.Kontragent.Meeting.cls"))#' 
+			,secureuri:false
+			,fileElementId:'file'
+			,data: data
+			,dataType: 'text'
+			,success: function(data){
+				var arr=eval(data); //массив [результат, ошибка, новыйИд]
+				if (!arr[RES]){ //не получилось
+					$(".dErr").html( arr[ERR] ).show();	return;
+				} else {
+					$("#dMsgNew").dialog("close");
+					var obj=(arr[JSON]); AppendMessage(obj)
+				} 
+			}
+			,error: function(){
+				$(".dErr").html("При отправке сообщения произошла ошибка").show();
+			}
+			,complete: function(){
+				$(".dAjax").hide(); $(".dForm,#bNote,#bMail").show();
+			}
+		});
+		
+	}
+	
+	
+	//объявляем диалог добавления новой записи
+	var $dlg=$("#dMsgNew").dialog({
+		modal: true, autoOpen: false
+		, title: 'Добавить новое сообщение'
+		, width: 640, height: 320
+		, buttons: [
+			{ id: 'bNote', text: 'Добавить пометку'
+			  , title: 'Добавляемая запись будет видна только сервис-менеджеру'
+			  , mt: NOTE //message type
+			  , click: function(){} //необходим диалогу
+			}
+			// { id: 'bMail', mt: MAIL }
+			#(..wEmailButton())#
+		]
+	});
+	
+	
+	
+	//доопределяем кнопки на диалоге
+	var $bNote = $("#bNote")
+			.button("option", "icons", {secondary: "ui-icon-comment"})
+			.click( fnSend )
+	  , $bMail = $("#bMail")
+	  		.button("option", "icons", {secondary: "ui-icon-mail-closed"})
+			.click( fnSend )
+	;
+	
+	//открываем диалог
+	var $bNewMsg = $( "#bMsgNew" ).button({icons: {primary: "ui-icon-plus"}})
+		// по клику открываем диалог
+		.click(function(){ $dlg.dialog('open'); });
+	
+	$dlg.bind('dialogopen', function(){ 
+			$bNewMsg.hide(); // при открытии диалога прячем кнопку 'Добавить сообщение' 
+			$(".dErr").hide(); //скрывает сообщение об ошибке
+			$(".dAjax").hide(); //сообщение о загрузке прячем
+			$("#msg").val(""); //очищаем сообщение
+		})
+		// при закрытии диалога возвращаем видимость кнопке 'Добавить сообщение'
+		.bind('dialogclose', function(){ $bNewMsg.show(); })
+	;
+			
+	$("#bPrint")
+		.button({icons:{secondary: "ui-icon-print"}})
+		.click(function(){ window.print() });	
+	
+	$("#bClose")
+		.button({icons:{secondary: "ui-icon-circle-close"}})
+		.click(function(){ window.close() });		
+	 
+	var $tim=$( "#t" ); 
+	setInterval( function() { /*счетчик секунд*/
+		var dateObj = new Date();
+		var m = TwoDigits(dateObj.getMinutes()), h = TwoDigits(dateObj.getHours())
+		, s = TwoDigits(dateObj.getSeconds())
+		;
+		$tim.val( h + ":" + m + ":" + s);
+	}, 1000);
+	
+	var copy=function(){
+		var id=$(this).closest("tr").attr("id"); CopyInClipBoard(id);
+	};
+	/*подсветка кнопки*/
+	var hover=function(){
+		var $this=$(this), src=$this.attr("src"); 
+		src=( src.indexOf("Ontxt")>-1 )?src.replace("Ontxt","txt"):src.replace("txt","Ontxt");
+		$this.attr("src",src);
+	}
+	
+	$(".txt").click(copy);
+	
+	$(".copy") /*кнопки копирования в буфер*/
+		.css("cursor","hand")
+		.mouseenter(hover).mouseleave(hover)
+		.click(copy)
+		.parent().attr("title","Копировать текст сообщения в буфер обмена")
+	;
+	
+	$("form").submit(function(){
+		var msg=$(this).find("textarea").val(); 
+		if (msg==="") {
+			alert("Не введен текст сообщения"); 
+			return false;
+		}
+	});
+	
+});</script>
+</body>
+</html>
+>
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="wKontrInfo">
+<Description>
+Выводит информацию о контрагенте</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>kid</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s kontr=##class(Common.Kontragent).%OpenId($g(kid)) Q:'$IsObject(kontr) "" 
+	&html<
+	<h3>Переписка с контрагентом: <span>#(kontr.Name)#</span></h3>
+	<table class='ki'>
+	<tr><th>Город: </th><td>#(kontr.City)#</td></tr>
+ 	<tr><th>Директор:</th><td>#(kontr.chief)#</td>
+ 	<th>Контактные лица:</th><td>#(kontr.ContPers)#</td></tr>
+ 	<tr><th>Контакты: </th><td>#(kontr.Phones)#</td>>
+ 	s email=kontr.EMail
+ 	if email'="" {
+	  &html<<th>email:</th><td>
+	  <a href='mailto:#($ZCVT(kontr.Name,"O","HTML"))# <#(email)#>?subject=sklad2'>#(email)#</a>
+	  </td>>
+	}
+ 	&html<</tr></table>>
+ 	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wChatHistory">
+<Description>
+Рисует таблицу переписки с контрагентом</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>kid:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s kid=$g(kid)
+ s (ID,Dat,Tim,Result,User1,MessageType,MessageTypeText
+ 	,SendMailLogResult,SendMailLog,SendMailLogResultCode
+ 	,AttachName,Attachment
+ )=""
+ 
+ &sql(DECLARE chat cursor for 
+
+ 	SELECT ID, Dat, Tim, Result, User1->Name, MessageType, %external(MessageType)
+ 			, SendMailLog->Result, SendMailLog, SendMailLog->ResultCode
+ 			, AttachName, Attachment
+	
+	into :ID, :Dat, :Tim, :Result, :User1, :MessageType, :MessageTypeText
+		 , :SendMailLogResult, :SendMailLog, :SendMailLogResultCode
+		 , :AttachName, :Attachment
+	
+	FROM Kontragent.Meeting 
+	WHERE Kontr = :kid
+	ORDER By Dat, Tim 
+	
+ ) &sql(OPEN chat)
+ 
+ for  { &sql(FETCH chat) Q:SQLCODE  
+ 
+  s cls=$CASE(MessageType,0:"self",2:"from",3:"to",:"") ;тип сообщения
+  s tp=$CASE(MessageType,0:"*",2:"&lt;-",3:"-&gt;",:"&nbsp;") ;тип сообщения символом
+  
+  &html<<tr id="#(ID)#" class='#(cls)#'><th>#($tr($zd(Dat,4),"/","."))#<br/>#($zt(Tim))#</th>
+  <th title='#(MessageTypeText)#'>#(tp)#</th>>
+   s sc=""  	
+   if SendMailLog {
+	if SendMailLogResultCode {
+	    s sc="ok", SendMailLogResult="Сообщение успешно доставлено"
+    } else {
+	    s sc="err"
+    }
+   }
+   &html<<td title='#(SendMailLogResult)#'><div class='eml #(sc)#'>&nbsp;</div></td>	
+   <td><div class='txt'>#(Result)#</div>>
+   
+   #; Обработка пустых значений (NULL)
+   #; Attachment - $lb("внутреннее имя файла","%Library.FileBinaryStream" )
+   #; в остальных случаях $c(0)
+   if $l(Attachment)'=0  {
+	&html<<div class="attachment"><span>Приложение:</span>
+		<a target="_blank" href="csp.StreamServer.cls?ID=#(..Encrypt(ID))#">
+			#(..EscapeHTML(AttachName))# 
+		</a>
+	</div>>   
+   }
+   
+   &html<</td>
+  	<td>#(User1)#</td>
+  	<td><img class="copy" src="images/txt.gif"/></td>
+   </tr>>
+  
+ } &sql(CLOSE chat)
+ 
+ Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wEmailButton">
+<Description>
+Проверяет права, выводит кнопку отправки сообщений по почте</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+  s HaveRightToWrite=##class(Common.Rights).getrights($$$user,19)
+  if HaveRightToWrite=1 { 	
+		&html<
+		,{ id: 'bMail', title: 'Эту запись контрагент сможет увидеть в МО в пункте Справка\\Обратиться в офис'
+			,text: 'Ответить клиенту' 
+			,mt: MAIL
+			,click: function(){}
+		}
+		>
+  }
+  Q ""
+]]></Implementation>
+</Method>
+</Class>
+</Export>

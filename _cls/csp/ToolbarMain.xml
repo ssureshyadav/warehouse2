@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.ToolbarMain">
+<Description>
+Главное меню приложения</Description>
+<IncludeCode>functions</IncludeCode>
+<Super>csp.Protected</Super>
+<TimeCreated>62345,32760.300061</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+ &html<<html><head></head>
+<body bgcolor="ButtonFace">
+<div style="white-space:nowrap;margin:1px 5px 5px 5px">>
+
+ s login=$G(%session.Data("user"))
+ #define check(%fn) ##class(Common.Rights).getrights(login,%fn)
+ s:$$$check($$$goods) i($i(i))="goods",i(i,"alt")="Товары"
+ s:$$$check($$$docs) i($i(i))="docs",i(i,"alt")="Документы"
+ s:$$$check($$$dicts) i($i(i))="dicts",i(i,"alt")="Справочники"
+ s:$$$check($$$store) i($i(i))="store",i(i,"alt")="Места хранения"
+ s:$$$check($$$tunes) i($i(i))="tunes",i(i,"alt")="Настройки"
+ s:$$$check($$$chief) i($i(i))="chief",i(i,"alt")="Рабочее место сервис менеджера"
+ s:$$$check($$$employee) i($i(i))="employee",i(i,"alt")="Рабочее место на складе"
+ s:$$$check($$$analyzis) i($i(i))="analyzis",i(i,"alt")="Аналитика"
+ s:$$$check($$$kontr) i($i(i))="kontr",i(i,"alt")="Учёт отгрузок и платежей"
+ s:$$$check($$$finance) i($i(i))="finance",i(i,"alt")="Финансы"
+ s:$$$check($$$director) i($i(i))="director",i(i,"alt")="Рабочее место директора"
+ s i($i(i))="login",i(i,"alt")="Вход в систему"
+ 
+ s name="" for { s name=$o(i(name)) q:name=""  
+    s text=$g(i(name,"alt"))
+    w "<button id='",name,"' title='",text,"'><img src='/images/",name,".gif'/></button>"
+ 	#;w "<img src=""images/big/on"_i(i)_".gif"" width=1 height=1 style=""display:none"">"
+ 	#;w "<img src=""images/big/"_i(i)_".gif"" alt="""_i(i,"alt")_"""onmouseover=""this.src='images/big/on"_i(i)_".gif'"" onmouseout=""this.src='images/big/"_i(i)_".gif'"" onclick=""ChangePage('"_i(i)_"');"" style=""cursor:hand"" width=30 height=30>&nbsp;",!
+ }
+
+ &html<
+<img src="images/big/onexit.gif" width=1 height=1 style="display:none">&nbsp;
+<img src="images/big/exit.gif" onmouseover="this.src='images/big/onexit.gif'" onmouseout="this.src='images/big/exit.gif'" onclick="ChangePage('exit');" style="cursor:hand" width=30 height=30>&nbsp;
+<img src="images/big/onhelp.gif" width=1 height=1 style="display:none">&nbsp;
+<img src="images/big/help.gif" onmouseover="this.src='images/big/onhelp.gif'" onmouseout="this.src='images/big/help.gif'" onclick="window.open('help/index.html');" style="cursor:hand" width=30 height=30>&nbsp;
+</div>
+
+<script type="text/javascript">
+gobo = Image('');
+function ChangePage(BtnKey){
+	///frames height
+	var fh=[37,0,0,0,0,0,0,0,0,0,0,0,0,20]; //размеры фреймов по умолчанию
+	///frames order
+	var fo={ /*порядок панелей*/
+		 goods:1,docs:2,dicts:3,store:4,tunes:5
+		 ,chief:6,employee:7,analyzis:8
+		,kontr:9,finance:10,director:11,login:12
+	};
+	///номер выбранной панели
+	var num=fo[BtnKey]; if (num) fo[num]="*";
+	///frames height string
+	var fhs=fh.join("px,")+"px"; //собираем строку размеров
+	window.RowStr=fhs.replace("*px","*"); //подправляем
+	if(BtnKey=="exit") btnExit_click();
+	frameElement.document.all.MainFrameSet.rows = RowsStr;
+}
+
+function btnExit_click(){
+	if(window.confirm("Выйти из программы?")){
+			var xmlhttp = eval('new Acti'+'veXO'+'bject("Msxml2.XMLHTTP");');
+			try{
+				xmlhttp.open("POST","CloseSession.csp",false)
+				xmlhttp.send()
+			} catch(e){ }
+			window.parent.close()
+	}
+}
+</script>
+</body></html>>
+	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

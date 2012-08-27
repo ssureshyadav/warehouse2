@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.reportShipmentGoods">
+<Description>
+report on the shipment of goods</Description>
+<Super>%CSP.Page</Super>
+<TimeCreated>62421,38564.045717</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	&html<<html><head><title>Склад2 :: Отчет об отгрузке товаров</title></head><body><form>
+	<fieldset><legend>Параметры отчета</legend>
+	<table>
+	<tr><td>Интервал дат <label for="d1">с:</label></td>
+		<td><input type="text" id="d1" title="Начало диапазона" />
+			<label for="d2">по:</label><input type="text" id="d2" title="Конец диапазона" />
+		</td></tr>
+	<tr><td><label for="kontr">Контрагент(ы):</label></td>
+		<td><input type="text" id="kontr" name="kontr" title="Контрагенты"/></td></tr>
+	<tr><td><label for="gg">Группа(ы) товаров:</label></td>
+		<td><input type="text" id="gg" name="gg" title="Группа(ы) товаров"/></td></tr>	
+	</table>
+	<input type="submit" id="btnRun" value="Сформировать" title="Запустить формирование отчета" />
+	</fieldset>
+	</form>
+	<div id="report">
+	
+	
+	</div></body></html>>
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="DetailByKontr">
+<Description>
+Запрос с группировкой по контрагенту, группе товара
+контрагент, общая сумма запчастей сгруппированная по товарной группе, которой принадлежит запчасть (товар)</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&Args:%String]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	s sql="Select Doc->Kontr as Kontr,csp.FirstGroup(Goods) as Group,Sum(quantreal)"
+		 _"From Docs.StorageOutItems Where Doc->Stat=2"
+	
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="FirstGroup">
+<Description>
+Определение группы товара по товару
+Товар входит в несколько групп, надо выбрать одну
+Пока берем первую</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>good:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<SqlName>GoodGroup</SqlName>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	s group=""
+	&sql(Select Top 1 "Groups" Into :group 
+		From Goods.GoodsGroup
+		Where goods=:good	
+	)
+	if SQLCODE=0 Q good
+	Q ""
+]]></Implementation>
+</Method>
+</Class>
+</Export>

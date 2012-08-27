@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="json.Kontragent.Meeting">
+<Description>
+Служба для работы с сообщениями контрагента</Description>
+<Super>json.service2</Super>
+<TimeCreated>62693,53213.762415</TimeCreated>
+
+<Parameter name="CLASSNAME">
+<Type>%String</Type>
+<Default>Kontragent.Meeting</Default>
+</Parameter>
+
+<Parameter name="FIELDS">
+<Type>%String</Type>
+<Default>Result as msg,MessageType as mt,Dat as d,Tim as t</Default>
+</Parameter>
+
+<Parameter name="FTYPES">
+<Type>%String</Type>
+<Default>%String,%Integer,%Date,%Time</Default>
+</Parameter>
+
+<Parameter name="PARENTFIELD">
+<Description><![CDATA[
+Поле (или его синоним), связанное с родительским объектом
+Например, поле документ для строк накладной
+Используется при отборе записей чтобы не показывать строки из всех накладных
+Используется в методе <method>GetWhere</method>
+Например Parameter PARENTFIELD = "doc"]]></Description>
+<Type>%String</Type>
+<Default>Kontr</Default>
+</Parameter>
+
+<Method name="Add">
+<Description>
+метод добавления</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&rq:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+
+ #define g(%name) $g(rq(%name,1))
+
+ s Message=$$$g("msg"), MessageType=$$$g("mt")
+ , Dat=$$$g("d") , Dat=$tr(Dat,".","/") //вернуть разделитель / вместо .
+ , Tim=$$$g("t") , Kontr=$$$g("kontr")	
+ 
+ s file="",status="", stream="" 
+ 
+ s:$d(%request.MimeData("file")) stream= %request.MimeData("file",1)
+ 
+ if $IsObject(stream) { ;сохраним файл на диск
+	 s dir=##class(Kontragent.Meeting).GetAttachmentDirectory() 
+	 s:dir="" dir=##class(%SYS.System).TempDirectory()
+	 #; во временной директории создадим каталог для файлов контрагента
+	 s dir=##class(%File).SubDirectoryName(dir,Kontr)
+	 s sc=##class(%File).CreateDirectoryChain(dir)
+	 s file=##class(%File).SubDirectoryName(dir,##class(%File).GetFilename(stream.FileName))
+	 o file:"WNU"
+	 u file d stream.OutputToDevice()
+	 c file
+ }
+ 
+ #; должны вернуть js-массив [actionResult,errorMessage,newId] 
+ s sc = ##class(Kontragent.Action).AddMeetingResult(.Message,Dat,Tim,Kontr,MessageType,file)
+ if +sc=1 {
+	w "[true,'',",$$$qt(Message),","
+	d ..wJson(Message)
+	w "]"	 
+ } else {
+	w "[false,",$$$qt(sc),",'']" 
+ }
+ Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="wJson">
+<Description>
+Вывести объект в формате json, например
+{id:"4622",d:"26.08.2012",t:"15:13:37",mt:"3",mtt:"Клиенту",ms:true,mst:"Уведомление успешно отправлено",msg:"Отрисовка добавленного сообщения 2",a:"%25CSP.StreamServer.cls?STREAMOID=J9/HVeE0coT9c2/ahJ6diWCdOeBJKYdFsiUfle9/0fs70o2gm0gomRQAfRdp0YgEdEiw_P3G2pKulgOE9OTVGQ--",at:"grid.base.js",u:"Тестовый пользователь"}</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ &sql(SELECT Dat, Tim, Result, User1->Name, MessageType, %external(MessageType)
+ 			, SendMailLog->Result, SendMailLog, SendMailLog->ResultCode
+ 			, AttachName, Attachment
+	into :Dat, :Tim, :Result, :User1, :MessageType, :MessageTypeText
+		 , :SendMailLogResult, :SendMailLog, :SendMailLogResultCode
+		 , :AttachName, :Attachment
+	
+	FROM Kontragent.Meeting 
+	WHERE ID=:id
+ )
+ 
+ #define SQLERROR (SQLCODE'=0)
+ if $$$SQLERROR { w "{}" Q $$$OK }
+ 
+ w "{id:",$$$qt(id),",d:",$$$qt($tr($zd(Dat,4),"/","."))
+ 	,",t:",$$$qt(($zt(Tim))) 
+  	,",mt:",$$$qt(MessageType)
+  	,",mtt:",$$$qt(MessageTypeText)
+ 	
+ if SendMailLog {
+	w ",ms:"
+	if SendMailLogResultCode {
+	    w "true"
+    } else {
+	    w "false"
+    }
+ }
+ 
+ w ",mst:",$$$qt(SendMailLogResult)
+ w ",msg:",$$$qt(..EscapeHTML(Result))
+   
+ #; Обработка пустых значений (NULL)
+ #; Attachment - $lb("внутреннее имя файла","%Library.FileBinaryStream" )
+ #; в остальных случаях $c(0)
+ if $l(Attachment)'=0  {
+	w ",a:",$$$qt("csp.StreamServer.cls?ID="_..Encrypt(id))
+	w ",at:",$$$qt(..EscapeHTML(AttachName))
+ }
+ 
+ w ",u:",$$$qt(User1)
+ w "}" 	
+ Q $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

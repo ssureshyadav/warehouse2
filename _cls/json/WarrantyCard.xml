@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="json.WarrantyCard">
+<Description>
+Гарантийные талоны</Description>
+<Super>json.service2</Super>
+<TimeCreated>62503,64888.503131</TimeCreated>
+
+<Parameter name="PRIVATE">
+<Description><![CDATA[
+Controls the access to the page, it can be set to one of the following:<br>
+<br><ul>
+<li><b>PRIVATE=0</b> - Page can be linked to/bookmarked</li>
+<li><b>PRIVATE=1</b> - Can only be referenced from another CSP page</li>
+</ul>
+The user needs initially to enter the site through a PUBLIC page.]]></Description>
+<Default>0</Default>
+</Parameter>
+
+<Parameter name="CLASSNAME">
+<Description>
+Имя Persistent класса для которого создается служба
+Соглашение: имя класса и имя таблицы совпадает
+Используйте Cache правильно!</Description>
+<Type>%String</Type>
+<Default>Common.Dictionary2</Default>
+</Parameter>
+
+<Parameter name="FIELDS">
+<Description><![CDATA[
+Список SQL полей, возможно с синонимами "Name As nm"
+ID можно не указывать, т.к. выбирается обязательно
+Внимание!, имена синонимов чувствительны к регистру (для javascript клиента)
+В отличие от имен полей (SQL на стороне сервера)
+Соглашение: синоним писать  через " as " - ",OBJ->name as oname "
+Раньше неправильно разбивал на поля ]]></Description>
+<Type>%String</Type>
+<Default>Name as sn,Property9194 as st,%external(Property9194) as stnm, json.WarrantyCard_first50(Comment) as cm</Default>
+</Parameter>
+
+<Parameter name="FTYPES">
+<Description>
+Типы полей, по умолчанию %String
+Используются при построении фильтра
+тип %String </Description>
+<Type>%String</Type>
+<Default>%String,%String,%String</Default>
+</Parameter>
+
+<Parameter name="OBJECTCONCURRENCY">
+<Description>
+Как открывать объект на редактирование</Description>
+</Parameter>
+
+<Method name="first50">
+<Description>
+Первые 50
+Обходим ограничения разбора параметра FIELDS 
+Не любит запятые :) </Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>str:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	s part=$e(str,1,50) Q:$e(part)="" ""
+	Q part_$S($e(part,50)'="":"...",1:"")
+]]></Implementation>
+</Method>
+</Class>
+</Export>

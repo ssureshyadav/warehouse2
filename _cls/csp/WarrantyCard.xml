@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.WarrantyCard">
+<Description>
+Управление гарантийными талонами
+</Description>
+<Super>csp.jqGrid</Super>
+<TimeCreated>62503,70781.543634</TimeCreated>
+
+<Method name="wPageHeader">
+<Description>
+write заголовок на странице</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	  Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wTitle">
+<Description>
+write заголовок страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	w "Склад2 :: Гарантийные талоны"
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wBody">
+<Description>
+write содержимое страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	&html<
+			
+	<a href="goods.csp">Товары</a>&nbsp;&nbsp;&nbsp;
+	<a href="serials.csp" >Управление серийными номерами</a>
+		<br><br>
+		<TABLE cellSpacing=0 width="100%" celpadding="0" >
+		<TR>
+		<td width=10%><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
+		<TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=2><strong>Проверка серийных номеров в текстовом файле</strong></TD>
+		<td  width=10% align=right><!--<a href="talk.csp" ><img src="images/BIGProp.gif" width="20" height=25 border=0></a>--></td>
+		</tr>
+		</TABLE>
+		<br><Br>
+	>
+	
+	d ##super()
+	
+	 
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wJs">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+  d ##super()
+  &html<<script type="text/javascript">
+	$(function(){
+		var GRID="#grid",BAR="#bar",URL="json.WarrantyCard.cls";
+		$(GRID).jqGrid({
+			caption: 'Гарантийные талоны'
+			,url: URL, editurl: URL
+			,datatype: "json",jsonReader : { repeatitems: false }
+			,colModel: [
+				{name:"id",hidden: true}
+				,{name:"sn",label:"Серийный",width:150}
+				,{name:"stnm",index: "st", label:"Статус",width:150, search: false}
+				,{name:"cm",label:"Прим.",width:300,search:false,sortable:false}
+			]
+				,pager:BAR 
+			,viewrecords:true
+			,height:300
+			,hidegrid: false
+			,gridview:true 
+			,rownumbers:true /*номера строк показывать*/
+			,rowNum: 30 /*больше запросов, меньше порции*/
+			,rownumWidth: 50
+			/*,viewrecords:true*/
+			/*,scrollrows:true*/,hoverrows:true ,scroll:1
+			,ondblClickRow: function(id){
+				
+			}
+ 		})
+ 		.jqGrid('navGrid',BAR, {
+	       	add: false
+       		, edit:false
+       		, del:false 
+       		, view: true, viewtext: "Просмотр"
+       		, search:false
+	       }
+	       ,{} //Параметры редактирования
+	       ,{} //Параметры добавления
+	       ,{} //Параметры удаления
+    
+	   )
+	   .jqGrid('navButtonAdd',BAR,{ 
+	   			caption:"Импортировать", buttonicon:"ui-icon-newwin"
+	   			, title:"Импортировать из файла и обновить состояние" 
+	   			, position: 'first'
+	   			, onClickButton: function(){
+	   				window.open("csp.WarrantyCardImport.cls");
+		   		}
+	   })
+	   .jqGrid('filterToolbar',{searchOnEnter:false})
+	   .jqGrid('gridResize',{});
+ 	$(BAR+"_center").remove(); //пагинатора не будет
+ 	$(BAR+"_left").css("width","70%"); //надпись о количестве записей на бОльшую часть футера
+ 	
+	
+
+});
+</script>>
+  Q ""
+]]></Implementation>
+</Method>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<Language>cache</Language>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	  q 1
+
+  s login=$G(%session.Data("user"))
+  i '+login s %response.ServerSideRedirect="norights.csp" 
+  i '##class(Common.Rights).getrights(login,1) s %response.ServerSideRedirect="norights.csp" 
+  s Access9func=##class(Common.Rights).getrights(login,9)
+  s GoodsGoodsVersion = ##class(Common.Common).GetCurrentDictVersion("Goods.Goods")
+  q 1
+]]></Implementation>
+</Method>
+</Class>
+</Export>

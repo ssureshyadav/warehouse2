@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="json.Docs.Inner">
+<Super>json.service2</Super>
+<TimeCreated>62568,42084.2956</TimeCreated>
+
+<Parameter name="CLASSNAME">
+<Type>%String</Type>
+<Default>Docs.Inner</Default>
+</Parameter>
+
+<Parameter name="FIELDS">
+<Type>%String</Type>
+<Default><![CDATA[Name as nm,CloseDate as cldt,CloseTime as cltm,CloseUser->Name as clnm,Comment as cm,Dat as dt,Kontr->Name as ktnm,Source->Name as srcnm,Stat as st,Summa as sum,Tim as tm,User1->Name as usnm]]></Default>
+</Parameter>
+
+<Parameter name="FTYPES">
+<Type>%String</Type>
+<Default>%String,%String,%String</Default>
+</Parameter>
+
+<Parameter name="OBJECTCONCURRENCY">
+</Parameter>
+</Class>
+</Export>

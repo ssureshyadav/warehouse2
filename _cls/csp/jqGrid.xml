@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.jqGrid">
+<Description>
+Базовая для списков</Description>
+<Super>csp.Design</Super>
+<TimeCreated>62503,71028.77827</TimeCreated>
+
+<Parameter name="CHARSET">
+<Description><![CDATA[
+Specifies the default character set for the page.  This can be overriden using the
+&lt;CSP:CONTENT CHARSET=&gt; tag, or by setting the <b>%response</b>.CharSet property
+in the <method>OnPreHTTP</method> method.  If this parameter is not specified, then
+for Unicode systems the default charset is utf-8 and for 8-bit systems it is the
+system default charset.]]></Description>
+<Default>utf-8</Default>
+</Parameter>
+
+<Method name="wTitle">
+<Description>
+write заголовок страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	w "Склад2 :: Список инструкций"
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wPageHeader">
+<Description>
+write заголовок на странице</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	  Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wCss">
+<Description>
+write заголовок страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ &html<<link type="text/css" rel="stylesheet" href="style.css" />
+ <link rel='stylesheet' type='text/css' href='css/redmond/jquery-ui-1.8.16.custom.css'/>
+ <link rel='stylesheet' type='text/css' href='css/ui.jqgrid.css'/>
+ <style type="text/css">
+ 	.ui-jqgrid {font-size:90%;}
+ 	.ui-widget {font-size:1.2em;}
+ 	input {width:auto}
+</style>
+ >
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wBody">
+<Description>
+write содержимое страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	 &html<<table id="grid"><tr><td></td></tr></table><div id="bar"></div>>
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wJs">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	&html<
+		<script type='text/javascript' src='js/jquery-1.6.4.min.js'></script>
+		<script type='text/javascript' src='js/jquery-ui-1.8.16.custom.min.js'></script>
+		<script type='text/javascript' src='js/i18n/grid.locale-ru.js'></script>
+		<script type='text/javascript' src='js/jquery.jqGrid-4.1.2.min.js'></script>
+	>
+  Q ""
+]]></Implementation>
+</Method>
+</Class>
+</Export>
