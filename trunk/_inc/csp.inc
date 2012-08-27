@@ -1,8 +1,15 @@
 ^INC^Save for Subversion^^~Format=Cache.S~
 %RO
 csp^INC^^^0
- #define qt(%str) $tr(##class(%CSP.Page).QuoteJS(%str),"'","""")
+ #define icon(%href) "<link rel=""shortcut icon"" href="""_%href_""" /><link rel=""icon"" href="""_%href_""" type=""image/x-icon"" />"
+ #define css(%href) "<link rel=""stylesheet"" href="""_%href_""" type=""text/css"" media=""all"" />" 
+ #define js(%src)  "<script src="""_%src_""" type=""text/javascript""></script>" 
+ #define jquery  "<script src=""js/jquery-1.7.2.min.js"" type=""text/javascript""></script>" 
+ #define meta(%cp) "<meta http-equiv=""Content-Language"" content=""ru"" /><meta http-equiv=""Content-Type"" content=""text/html; charset="_%cp_""">"   
+ #define qt(%str) """"_$zcvt(%str,"O","JS")_""""
  #define UNDERCONSTRUCTION &html<<div style="text-align:center;margin:10px 0px;padding:10px 0px;" class="ui-state-highlight"><img style="margin:0px auto" src="http://animatedgif.net/underconstruction/shhammer05_ss3_e0.gif" title="Страница на ремонте" alt="Страница на ремонте" /></div>>
+ #define DOCTYPE "<!doctype html>"
+ #define g(%nm) $g(%request.Data(%nm,1))
 
 
 

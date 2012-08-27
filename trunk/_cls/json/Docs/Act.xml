@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="json.Docs.Act">
+<Description>
+Выводит заголовки документов "Акт технического осмотра"
+Настройки сняты с имеющейся системы </Description>
+<Super>json.service2</Super>
+<TimeCreated>62556,78136.6595</TimeCreated>
+
+<Parameter name="CLASSNAME">
+<Description>
+Имя Persistent класса для которого создается служба
+Соглашение: имя класса и имя таблицы совпадает
+Используйте Cache правильно!</Description>
+<Type>%String</Type>
+<Default>Docs.Act</Default>
+</Parameter>
+
+<Parameter name="FIELDS">
+<Description>
+Список полей взят из действующей системы	 </Description>
+<Type>%String</Type>
+<Default><![CDATA[NameSorted as ns,Name as nm, Serial as sn,Paid as paid, Comment as cm, Garant as grn, ActDate as dt,	CustomerName as cst, DefectDescription as dfd, Kontr->Name as kn, NumbersHistory  as nmh,	PaidDate as pdt, RepairsQnt as rqnt, SellerName as sl, Source->Name as srcnm, SrvFIO as srvfio, SrvName as srvnm, User1->Name as usnm]]></Default>
+</Parameter>
+
+<Parameter name="FTYPES">
+<Description>
+Типы полей, по умолчанию %String
+Используются при построении фильтра
+тип %String </Description>
+<Type>%String</Type>
+<Default>%String,%String,%String</Default>
+</Parameter>
+</Class>
+</Export>

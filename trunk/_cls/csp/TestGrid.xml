@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.TestGrid">
+<Super>csp.GoodsRights</Super>
+<TimeCreated>62475,5217.496642</TimeCreated>
+
+<Method name="wBody">
+<Description>
+write содержимое страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	
+ &html<
+  	<table id="kontrGrid"><tr><td></td></tr></table><div id="kontrBar"></div>
+  
+ 
+
+
+ 
+<script type='text/javascript' src='js/jquery-1.6.4.min.js'></script>
+<script type='text/javascript' src='js/jquery-ui-1.8.16.custom.min.js'></script>
+<script type='text/javascript' src='js/i18n/grid.locale-ru.js'></script>
+<script type='text/javascript' src='js/jquery.jqGrid-4.1.2.src.js'></script>
+<script type="text/javascript">
+
+;
+var page={
+	groups: 
+	#(##class(json.GoodsGroup).wJSON(.args))#
+	,groupLoad: function(obj){
+		$("#group")[0].addJSONData(obj);
+	}
+	
+};
+
+
+$(function(){
+ function obj2str(obj){ //преобразование js объекта в строку
+  var arr=new Array();
+  for (var i in obj){ arr.push(i+"="+obj[i]); }
+  return arr.join("&");
+ }; 
+ 
+ 
+//Таблица с контрагентами
+
+$("#kontrGrid").jqGrid({
+	colModel: [
+		{name:"id",hidden:true}
+		,{name:"name",label:"Наименование",width:450}
+	]
+	,url: "json.Kontragent.cls"
+	,datatype: "json"
+	,jsonReader : { repeatitems: false }
+	
+	,idPrefix:"kt"
+ ,viewrecords:true
+ ,height:300
+ ,hidegrid: false
+ 
+ ,rownumbers:true, viewrecords:true
+ ,pager: $("#kontrBar"), rowNum: 100, rowList: [100]
+ ,gridview: true
+ ,scrollrows: true, scroll: 1
+ ,hoverrows:true
+ 
+ 
+}).jqGrid('navGrid',"#kontrBar", 
+       {add:false,edit:false,del:false,view:false,search:false}
+       ,{} //Параметры редактирования
+       ,{} //Параметры добавления
+       ,{}
+ );
+
+
+
+ });
+
+
+</script>>
+ Q ""
+]]></Implementation>
+</Method>
+</Class>
+</Export>

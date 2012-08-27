@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="json.Docs.Docs">
+<Description>
+Список типов документов системы</Description>
+<Super>json.service2</Super>
+<TimeCreated>62519,39346.029874</TimeCreated>
+
+<Parameter name="CHARSET">
+<Description><![CDATA[
+Specifies the default character set for the page.  This can be overriden using the
+&lt;CSP:CONTENT CHARSET=&gt; tag, or by setting the <b>%response</b>.CharSet property
+in the <method>OnPreHTTP</method> method.  If this parameter is not specified, then
+for Unicode systems the default charset is utf-8 and for 8-bit systems it is the
+system default charset.]]></Description>
+<Default>utf-8</Default>
+</Parameter>
+
+<Parameter name="CLASSNAME">
+<Description>
+Имя Persistent класса для которого создается служба
+Соглашение: имя класса и имя таблицы совпадает
+Используйте Cache правильно!</Description>
+<Type>%String</Type>
+<Default>Docs.Docs</Default>
+</Parameter>
+
+<Parameter name="FIELDS">
+<Description><![CDATA[
+Список SQL полей, возможно с синонимами "Name As nm"
+ID можно не указывать, т.к. выбирается обязательно
+Внимание!, имена синонимов чувствительны к регистру (для javascript клиента)
+В отличие от имен полей (SQL на стороне сервера)
+Соглашение: синоним писать  через " as " - ",OBJ->name as oname "
+Раньше неправильно разбивал на поля ]]></Description>
+<Type>%String</Type>
+<Default>Name as nm,OperType as ot</Default>
+</Parameter>
+
+<Parameter name="FTYPES">
+<Description>
+Типы полей, по умолчанию %String
+Используются при построении фильтра
+тип %String </Description>
+<Type>%String</Type>
+<Default>%String,%String</Default>
+</Parameter>
+</Class>
+</Export>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.test">
+<Super>%CSP.Page</Super>
+<TimeCreated>62521,43347.469488</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	w "<!DOCTYPE html>"
+	&html<<html><head></head>
+	<body><div style="white-space:pre">>
+	
+	s firstClass=1
+	s class="" for { s class=$o(^test(class)) Q:class=""
+		w:'firstClass "," s:firstClass firstClass=0
+		w !,"""",class,""": { colModel: ["
+		s list=$LFS(^test(class),"#@#")
+	
+		s k=0,a="",firstProp=1
+		while $LISTNEXT(list,k,a){
+			continue:a=""
+			w:'firstProp "," s:firstProp firstProp=0
+			s plist=$LFS(a,"~")
+			s prop=$LG(plist),lbl=$LG(plist,2)
+			w !,$c(9),"{name: """,prop,""", label: """,lbl,"""}"	
+		
+		}
+		w "]}"
+	}
+	
+	
+	&html<</div></body>
+	</html>>
+	Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

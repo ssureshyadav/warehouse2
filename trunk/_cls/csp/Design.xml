@@ -6,6 +6,12 @@
 <Super>%CSP.Page</Super>
 <TimeCreated>62334,84474.032358</TimeCreated>
 
+<Parameter name="DOMAIN">
+<Description>
+Узел крепления для текстовых ресурсов приложения</Description>
+<Default>sklad2</Default>
+</Parameter>
+
 <Method name="OnPage">
 <Description><![CDATA[
 Вывод тела страницы
@@ -15,9 +21,9 @@
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
  if $IsObject(%request) m args=%request.Data
- &html<<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html><head>>  d ..wMeta(.args) 
- &html<<head><title>> d ..wTitle(.args) &html<</title>>
+ &html<<!doctype html>
+<html lang="ru"><head>>  d ..wMeta(.args) 
+ &html<<title>> d ..wTitle(.args) &html<</title>>
  d ..wCss(.args)
  w ..HyperEventHead()
  &html<</head><body><div style="width:90%;margin-left:auto;margin-right:auto;">
@@ -49,7 +55,9 @@ write заголовок страницы</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
 <ReturnType>%String</ReturnType>
-<Implementation><![CDATA[	Q ""
+<Implementation><![CDATA[
+	w "Склад2 :: "
+	Q ""
 ]]></Implementation>
 </Method>
 

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="svn.export">
+<IncludeCode>svn</IncludeCode>
+<Super>%CSP.Page</Super>
+<TimeCreated>62302,103.122813</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	&html<<html><head><title>SVN: Экспорт</title>
+<style type="text/css">
+label {display:block;}
+button {height:32px;}
+span {font-weight:bold;}
+.note {font-style: italic; font-weight:normal;}
+</style>
+#(..HyperEventHead())#
+</head><body>
+<form>
+<fieldset><legend>Экспорт измененных</legend>
+<label><input type="checkbox" id="exportC" />классов</label>
+<label><input type="checkbox" id="exportR" />программ</label>
+<p>из области <span>#($zu(5))#</span> в директорию: <span>#($g($$$gSVN))#</span></p>
+<label><input type="checkbox" id="resetState" />Сброс информации о состоянии элементов перед экспортом.</label>
+<ul class='note'>Не будут экспортированы:
+<li>Сгенерированные классы (классы сгенерированные из csp файлов, ...)</li>
+<li>Сгенерированные программы (программы сгенерированные из классов, *.INT из *.MAC, ...)</li>
+<li>Объектный код</li>
+</ul>
+<button onclick="zenPage.doExport()" >Экспортировать</button>
+</fieldSet>
+</form>
+<script type="text/javascript">
+var $g=function(id){ return document.getElementById(id);}
+var zenPage={
+	doExport: function(){
+		var reset=$g("resetState").checked?1:0,
+		routine=$g("exportR").checked?1:0,
+		classes=$g("exportC").checked?1:0;
+		#call(..doExport(reset,routine,classes))#
+	}	
+}
+</script>
+#(..HyperEventFrame())#
+</body></html>>
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="doExport">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>reset,routine,classes</FormalSpec>
+<Implementation><![CDATA[
+ k:+reset $$$gSVN(2)
+ d ##class(operation).ExportSources(+classes,+routine)
+ &js<alert("Done.");>
+]]></Implementation>
+</Method>
+</Class>
+</Export>

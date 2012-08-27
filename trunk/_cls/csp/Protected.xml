@@ -7,16 +7,32 @@
 <Super>%CSP.Page</Super>
 <TimeCreated>62345,30872.045779</TimeCreated>
 
+<Parameter name="RIGHTS">
+<Description><![CDATA[
+Дополнительные права на страницу
+<example>
+if '##class(Common.Rights).getrights(login,..#RIGHTS) s %response.ServerSideRedirect="norights.csp" 
+</example>]]></Description>
+<Type>%String</Type>
+</Parameter>
+
 <Method name="OnPreHTTP">
 <Description>
-Проверка пра доступа к странице</Description>
+Проверка прав доступа к странице</Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Boolean</ReturnType>
 <ServerOnly>1</ServerOnly>
 <Implementation><![CDATA[
- s login=$G(%session.Data("user"))
- i '+login s %response.ServerSideRedirect="norights.csp" 
- q 1
+ s user=$G(%session.Data("user"))  
+ if '+user { 
+ 	s %response.ServerSideRedirect="norights.csp" 
+ 	Q 1
+ }
+ 
+ if ..#RIGHTS'="" && ('##class(Common.Rights).getrights(user,..#RIGHTS)) {
+	  s %response.ServerSideRedirect="norights.csp" 	 
+ }
+ Q 1
 ]]></Implementation>
 </Method>
 </Class>

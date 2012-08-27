@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.Serials2">
+<Description>
+Управление гарантийными талонами</Description>
+<Super>%CSP.Page</Super>
+<TimeCreated>62579,7426.049182</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ &html<<!DOCTYPE html>
+<html><head>
+<script type='text/javascript' src='js/jquery-1.6.4.min.js'></script>
+<script type='text/javascript' src='js/jquery-ui-1.8.16.custom.min.js'></script>
+<script type='text/javascript' src='js/i18n/grid.locale-ru_win1251.js'></script>
+<script type='text/javascript' src='js/jquery.jqGrid-4.1.2.min.js'></script>
+<link rel='stylesheet' type='text/css' href='css/redmond/jquery-ui-1.8.16.custom.css'/>
+<link rel='stylesheet' type='text/css' href='css/ui.jqgrid.css'/>
+<style type='text/css'>
+	.ui-widget {font-size:.8em;}
+	.ui-state-default {font-weight:normal}
+	caption {text-align: left; }
+	#edtSearch {font-size:24px;}
+</style>
+
+</head><body>
+<table class="ui-widget" style="width:98%;padding:0px;margin:0px;" >
+<tr><td style="white-space:nowrap">
+	<button id="bBack" type="button" title="Вернуться на страницу товаров"
+	>Товары</button>
+	<button id="bRefresh" title="Обновить раздел">&nbsp;</button>
+</td><td colspan="2" class="ui-widget-header" style="width:80%;text-align:center;font-size:18px;">
+	Управление серийными номерами
+</td><td style="width:15%">&nbsp;
+	<!--<a href="talk.csp" ><img src="images/BIGProp.gif" width="20" height=25 border=0></a>-->
+</td></tr></table>
+<p></p>
+<button id="check" type="button" name="check"
+	title="Проверка списка серийных номеров" >Проверка серийных номеров</button>
+<button id="create" type="button" name="create">Создание серийных номеров из файла</button>
+<p></p>
+
+<table class="ui-widget ui-widget-content ui-state-default" >
+<caption class="ui-widget-header">Поиск по первым символам номера</caption>
+<tr><td><label for="FieldToFind">Искать по:</label></td>
+	<td><select id="FieldToFind">
+		<option value="serialInd">серийному номеру</option>
+		<option value="garantInd">гарантийному номеру</option>
+	</select></td>
+</tr><tr class="ui-state-active">
+	<td><label for="edtSearch">Номер:</label></td>
+	<td>
+		<input type="text" id="edtSearch" value="" 
+			title="Введите минимум два первых символа номера"
+		/>
+		<button id="bFind">Искать</button>
+	</td>
+</tr><tr>
+		<td><label>Фильтр:</label></td>
+		<td>
+		 	<label><input type="checkbox" id="HasReqCB" checked="checked"
+		 		/><span>Есть заявка</span>
+		 	</label>
+		 	
+		 	<select id="and">
+		 	 	<option value="and">И</option>
+		 	 	<option value="or">ИЛИ</option>
+		 	</select>
+		 	
+		 	<label><input type="checkbox" id="HasCommentCB" checked="checked" 
+		 		/><span>Есть примечание</span>
+		 	</label>
+		</td>
+</tr><tr>
+	<td style="vertical-align: top"><label>Показать поля:<label></td>
+	<td>
+		<div>
+		 <label>
+		 	<input type="checkbox" id="Property9194CB" checked="checked"/>
+		 	<span>Актуальность</span>
+		 </label>
+		</div>
+		<div>
+		 <label>
+		 	<input type="checkbox" id="CommentCB" checked="checked"/>
+		 	<span>Комментарий</span>
+		 </label>
+		</div>
+	</td>
+ </tr>
+</table>
+
+<table id="resg"></table>
+<div id="resb"></div>
+	
+<div id="DivResult"></div>
+
+<script type="text/javascript" src="common.js"></script>
+<script type="text/javascript">
+
+var ColCode="";
+sessionid="#(%session.SessionId)#";
+var divObj;
+var FieldToFindObj;
+
+function Find()
+{
+	var ShowFields = "";
+	var Params = "";
+	
+	if (CommentCBObj.checked) ShowFields=ShowFields+"Comment;";
+	if (Property9194CBObj.checked) ShowFields=ShowFields+"Property9194;";
+	if (HasReqCBObj.checked) Params=Params+"HasReq;";
+	if (HasCommentCBObj.checked) Params=Params+"HasComment;";
+	
+	var SearchStr = edtSearch.value;
+	ok = #server(..Find(FieldToFindObj.value,SearchStr,ShowFields,Params))#;
+	ShowResult(ok);
+}
+
+function ShowResult(res)
+{
+	divObj.innerHTML = res;
+}
+
+function edtKeyUp()
+{
+	if(window.event.keyCode==13) Find();
+}
+
+function s(currentrecord)
+{
+	ok=window.showModalDialog("garant.csp?GarantId="+currentrecord,currentrecord+";Common.Dictionary2","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+}
+
+function load() {
+	divObj = document.getElementById("DivResult");
+	FieldToFindObj = document.getElementById("FieldToFind");
+	CommentCBObj = document.getElementById("CommentCB");
+	Property9194CBObj = document.getElementById("Property9194CB");
+	
+	HasReqCBObj = document.getElementById("HasReqCB");
+	HasReqCBObj.checked = ( GetCookie("HasReqCB")== 'true');
+	
+	HasCommentCBObj = document.getElementById("HasCommentCB");
+	HasCommentCBObj.checked = (GetCookie("HasCommentCB")== 'true');
+}
+
+function newitems() {
+	ok=window.showModalDialog("ManyGarants.csp",";Common.Dictionary2","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+}
+
+function newitem() {
+	ok=window.showModalDialog("garant.csp?sessionid="+sessionid,";Common.Dictionary2","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+}
+
+
+$(function(){
+	
+	$("#bBack").button({icons:{primary: "ui-icon-circle-arrow-w"}})
+		.click(function(){
+			window.location.href='goods.csp';		
+	});
+	$("#bRefresh").button({icons:{primary:"ui-icon-refresh"},text:false})
+		.click(function(){
+			window.location.reload();
+	});
+	$("#check").button({icons:{primary:"ui-icon-check"}})
+	.click(function(){
+			window.location.href='CheckSerial.csp';
+	});
+	$("#create").button({icons:{primary:"ui-icon-document"}})
+		.click(function(){
+			window.open('csp.WarrantyCardImport.cls');
+	});
+
+	$("#HasReqCB").click(function(){
+		SetCookie('HasReqCB',this.checked);
+	});
+	$("#HasCommentCB").click(function(){
+		SetCookie('HasCommentCB',this.checked);
+	});
+	$("#edtSearch")
+		.css("width","20em")
+		.keyup(edtKeyUp)
+	;
+	
+	
+	var GRID="#resg",BAR="#resb",JSON="json.serials.cls";
+	///Обработчик ответа сервера после удаления талона
+	var afterSubmit=function(query,qdata){ 	
+		var res=eval(query.responseText); 
+		return res;
+	};
+	$( GRID ).jqGrid({ //Таблица с типами  документов
+	 caption: "Результаты поиска"
+	 ,url: JSON, editurl: JSON, datatype: "json", jsonReader : { repeatitems: false }
+	 ,colModel: [
+	  {name:'id', hidden:true}
+      , {name:'sn',label:'Серийный', width:150}
+      , {name:'gn',label:'Гарантийный', width:150}
+      , {name:'st',label:'Актуальность', width:150}
+      , {name:'cm',label:'Комментарий', width:250}
+  	 ]
+  	 , postData: {}
+  	 , pager: BAR
+  	 , viewrecords:true
+  	 , height: 300
+  	 , width: 700, autowidth:true
+  	 , hidegrid: false
+     , gridview:true ,rownumbers:true,viewrecords:true,rowNum:30
+     , hoverrows:true ,scroll:1 
+     , ondblClickRow: function(rowid){
+	     s(rowid) //старый обработчик для просмотра
+     }  
+  	 
+	})
+	.jqGrid('navGrid',BAR, 
+       {add:false,edit:false
+       	,del: true
+       	,deltext: "Удалить"
+       	,deltitle:"Удалить серийный номер"
+       	,view:false,search:false}
+       ,{} //Параметры редактирования
+       ,{} //Параметры добавления
+       ,{afterSubmit: afterSubmit} //Удаления
+	).jqGrid('navButtonAdd',BAR,{
+		caption:"Просмотр"
+		, title:"Просмотр выбранного документа ( двойной клик )"
+		, buttonicon:"ui-icon-copy"
+		, onClickButton: function(){
+			var id=$( GRID ).jqGrid("getGridParam","selrow");
+			if (id) s(id);
+		}
+		, position: "first"
+	}).jqGrid('navButtonAdd',BAR,{
+		caption:"Новые"
+		, title:"Создать несколько серийных номеров"
+		, buttonicon:"ui-icon-copy"
+		, onClickButton: newitems
+		, position: "first"
+	}).jqGrid('navButtonAdd',BAR,{
+		caption:"Новая"
+		, title:"Создать один серийный номер"
+		, buttonicon:"ui-icon-plus"
+		, onClickButton: newitem
+		, position: "first"
+	})
+	;
+	
+	$( BAR +"_center").remove();
+	$( BAR +"_right").css("width","30%");
+	$( BAR +"_left").css("width","70%");
+	
+	
+	$("#CommentCB").click(function(){
+		SetCookie('SerialsCommentCB',this.checked);
+	}).change(function(){
+		$(this).prop("checked")?$(GRID).showCol("cm"):$(GRID).hideCol("cm");
+	});
+	
+	$("#Property9194CB").click(function(){
+		SetCookie('SerialsProperty9194CB',this.checked);
+	}).change(function(){
+		$(this).prop("checked")?$(GRID).showCol("st"):$(GRID).hideCol("st");
+	});
+	
+	load();
+	$(":checked").parent().addClass("ui-state-highlight");	
+	$(":checkbox").change(function(){
+		$(this).parent().toggleClass("ui-state-default ui-state-highlight");	
+	});
+	
+	/// Вариант поиска на гриде
+	var index="sn"; //индекс по которому будем искать, по умолчанию выбран серийный
+	$("#FieldToFind").change(function(){ //следим за выбранным полем для поиска
+		index=(index==="sn")?"gn":"sn";
+	});
+	
+	var gridSearch=function(){ //поиск с помощью grid
+		var query=$( GRID ).jqGrid("getGridParam","postData");
+		
+		//сбрасываем предыдущее значение
+		delete query.sn; delete query.gn; delete query.cm; 
+		delete query.rm; delete query.scm; delete query.sst;
+		
+		//устанавливаем актуальное
+		query._search="true"; //включили режим поиска
+		query[index]=$("#edtSearch").val(); //искомое значение
+		
+		if ( $("#HasReqCB").prop("checked") ) query.rm=1; 		//фильтр по наличию заявки
+		if ( $("#HasCommentCB").prop("checked") ) query.cm=1; 	//фильтр по наличию коммментария
+		query.and=$("#and").val(); //оператор группировки фильтров
+		
+		if ( $("#CommentCB").prop("checked") ) query.scm=1; //показывать комментарий
+		if ( $("#Property9194CB").prop("checked") ) query.sst=1; //показывать актуальность
+		
+		$( GRID ).jqGrid("setGridParam","postData",query); //устанавливаем параметры
+		$( GRID ).trigger("reloadGrid"); //перезагружаем грид
+	};
+	
+	$("#bFind").button({
+		icons: {primary: "ui-icon-search"}
+		,text: false
+		,title: "Нажмите кнопку для поиска"
+		
+	}).click( gridSearch ) // было Find
+	;
+});
+</script>
+</body></html>>
+	Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

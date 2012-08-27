@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="json.Docs.DocBrak">
+<Super>json.service2</Super>
+<TimeCreated>62568,5401.662328</TimeCreated>
+
+<Parameter name="CLASSNAME">
+<Type>%String</Type>
+<Default>Docs.DocBrak</Default>
+</Parameter>
+
+<Parameter name="FIELDS">
+<Type>%String</Type>
+<Default><![CDATA[Name as nm,CloseDate as cldt,CloseTime as cltm,CloseUser->Name as clusnm,Comment as cm,Dat as dt,datend as de,datpriem as dp,Kontr->Name as ktnm,Source->Name as srcnm,Stat as st,Summa as sum,Tim as tm,User1->Name as usnm]]></Default>
+</Parameter>
+
+<Parameter name="FTYPES">
+<Type>%String</Type>
+<Default>%String,%String,%String</Default>
+</Parameter>
+</Class>
+</Export>

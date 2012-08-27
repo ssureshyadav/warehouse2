@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="json.serials">
+<Description>
+Источник данных для страницы serials.csp 
+Поиск и удаление по серийному номеру гарантийных талонов
+Специализованный вариант JSON службы</Description>
+<Super>json.service2</Super>
+<TimeCreated>62576,85828.197879</TimeCreated>
+
+<Parameter name="CLASSNAME">
+<Type>%String</Type>
+<Default>Common.Dictionary2</Default>
+</Parameter>
+
+<Parameter name="FIELDS">
+<Description>
+Помним о путанице наименований серийный/гарантийный в целевом классе</Description>
+<Type>%String</Type>
+<Default>Name as sn,serial as gn,Comment as cm,remont1 as rm,Property9194 as st</Default>
+</Parameter>
+
+<Parameter name="FTYPES">
+<Type>%String</Type>
+<Default>%String,%String,%String</Default>
+</Parameter>
+
+<Parameter name="OBJECTCONCURRENCY">
+</Parameter>
+
+<Parameter name="PARENTFIELD">
+<Type>%String</Type>
+</Parameter>
+
+<Method name="OnPage">
+<Description>
+Вывод на страницу </Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+  m qa=%request.Data 
+  s oper=$G(qa("oper",1)) 
+  #;Q:oper="add" ..Add(.qa) 
+  #;Q:oper="edit" ..Edit(.qa) 
+  Q:oper="del" ..Delete(.qa)
+  q ..Out(.qa)
+  Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Delete">
+<Description>
+Удаление </Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&rq:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s id=$g(rq("id",1))
+	s sc=##class(Common.Dictionary2).Delete(id)
+	d ..wError(sc, id)
+	Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="GetCount">
+<Description><![CDATA[
+Вычисление количества записей в запросе
+В отличии от предыдущей версии используется 
+<class>%SQL.Statement</class>]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&rq:%String]]></FormalSpec>
+<ReturnType>%Integer</ReturnType>
+<Implementation><![CDATA[
+	 s sql="Select Count(*) as count1 From "_..#CLASSNAME
+	 k qp s qp=0  ;query parameters
+	 if $d(rq("where")) {
+		 s sql=sql_$g(rq("where")) m qp=rq("where","qp") ;забираем параметры
+	 }
+	 s count=0,sc=1, rs=##class(json.xvrs).GetResultSet(sql,.qp,.sc)
+	 If $$$ISERR(sc) {
+		 w !,$system.Status.GetOneErrorText(sc)
+		 Q 0
+	 }
+	 s sc=rs.Next(), count=rs.Get("count1")  d rs.Close()
+	 Q:sc count
+	 Q 0
+]]></Implementation>
+</Method>
+
+<Method name="Out">
+<Description><![CDATA[
+Вывод первой или указанной страницы
+<var>rq</var> %request.Data]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&rq:%String=""]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ s classname=..#CLASSNAME
+ 
+ #; ждем два параметра на входе серийный или гарантийный
+ #; невозможное значение ( я так думаю ) в индексе
+ #define UNDEFINED $c(2)
+ 
+ k arr
+ #; По умолчанию ищем по серийному
+ s arr("where")=" WHERE Name %STARTSWITH ? ", arr("where","qp")=1
+ s param=$g(rq("sn",1)) s:param="" param=$$$UNDEFINED
+ s arr("where","qp",1)=param
+ 
+ #; Но если указано, переключаемся на гарантийный
+ if $d(rq("gn")) {
+	s arr("where")=" WHERE serial %STARTSWITH ? ", arr("where","qp")=1
+	s param=$g(rq("gn",1)) s:param="" param=$$$UNDEFINED
+ 	s arr("where","qp",1)=param
+ }
+ 
+ #; блок с доп.условиями
+ s cm=$d(rq("cm")), rm=$d(rq("rm"))
+ if cm || rm {
+  s and=$g(rq("and",1)) s and=$S(and="and":" AND ",1:" OR ")
+		s wcm=" NVL(Comment,'')<>'' "  ; дополнительный фильтр - наличие комментария
+  s wrm=" NVL(remont1,'')<>'' "  ; дополнительный фильтр - наличие заявки
+  s additional=""
+	 if ( cm && rm ) { 
+	 	s additional="("_wcm_and_wrm_")" 
+	 } elseif cm {
+		 s additional=wcm
+		} else {
+			s additional=wrm
+		}
+ 	s arr("where")=$g(arr("where"))_" AND "_additional
+ }
+ 
+ s allrows=..GetCount(.arr)
+ s rows=30 ;количество строк на страницу жестко фиксировано
+ 
+ s page=+$G(rq("page",1),1) ;номер запрашиваемой страницы, по умолчанию первой
+ s:page<1 page=1 ;контроль номера страницы 
+ 
+ s pages=0 ;всего страниц данных
+ s:allrows>0 pages=allrows\rows ; если есть строки 
+ s:allrows#rows>0 pages=pages+1 ;непоместившиеся строки на след страницу
+ s:page>pages page=pages ;нельзя вывести страницу больше чем есть
+
+ #;диапазон выводимых строк
+ s lastRow=rows*page ;последняя запись которую надо вывести с записи
+ s firstRow=lastRow-rows ; начиная с записи
+ 
+ s sql="SELECT ID FROM Common.Dictionary2 "_$g(arr("where"))
+ k qp s qp=0 m qp=arr("where","qp")
+ 
+ 
+ #; Переходим на универсальный интерфейс к динамическим запросам
+ s sc=1, rs=##class(json.xvrs).GetResultSet(sql,.qp,.sc)
+ if 'sc {
+	 w sc Q $$$OK 
+ }
+ s first=1 
+ w "{"
+ w """page"":""",page,""""
+ #;w ",""userData"":""",sql,""""
+ w ",""total"":""",pages,""",""records"":""",allrows,""",""rows"":["
+
+ s:$d(rq("scm")) output("scm")=1 ;параметры вывода одной строки
+ s:$d(rq("sst")) output("sst")=1
+
+ while rs.Next() {
+   s i=$i(i) ;счетчик выведенных строк
+   if i<=firstRow continue ;Не дошли до первой записи
+   if i>lastRow quit  ;прошли последнюю запись
+   w:'first "," s:first first=0 ;запятая перед каждым объектом кроме первого
+   d ..Output(rs.Get("ID"),.output) ;вывод объекта 
+ }
+ d rs.Close() k rs
+ w "]}"
+ Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Output">
+<Description>
+Свой вывод объектов</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[id:%String,&params:%Boolean]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ w "{""id"":""",id,""""
+ 
+ s sn=##class(Common.Dictionary2).NameGetStored(id)
+ w ",""sn"":",$$qt(sn)
+ 
+ s gn=##class(Common.Dictionary2).serialGetStored(id)
+ w ",""gn"":",$$qt(gn)
+ 
+ if $g(params("scm"))=1 {
+	s cm=##class(Common.Dictionary2).CommentGetStored(id) 
+	w ",""cm"":",$$qt(cm)
+ }
+
+ if $g(params("sst"))=1 {
+	s st=##class(Common.Dictionary2).Property9194GetStored(id) 
+	s stnm=##class(Common.Dictionary2).Property9194LogicalToDisplay(st) 
+	w ",""st"":",$$qt(stnm)
+ }
+	 	
+ w "}"
+ Q $$$OK
+	
+qt(str)
+	s qstr=..QuoteJS(str), $e(qstr,1)="""",$e(qstr,$l(qstr))=""""
+	Q qstr
+]]></Implementation>
+</Method>
+</Class>
+</Export>

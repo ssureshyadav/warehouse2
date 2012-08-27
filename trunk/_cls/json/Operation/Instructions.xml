@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="json.Operation.Instructions">
+<Super>json.service2</Super>
+<TimeCreated>62568,54839.37425</TimeCreated>
+
+<Parameter name="CLASSNAME">
+<Type>%String</Type>
+<Default>Operation.Instructions</Default>
+</Parameter>
+
+<Parameter name="FIELDS">
+<Type>%String</Type>
+<Default><![CDATA[Name as nm,CloseDate as cldt,CloseTime as cltm,CloseUser->Name as clusnm,Comment as cm,Depot1->Name as dpnm,dostavka->Name as dsnm,HasBeenSent as hbs,InstDate as indt,Kontr->Name as ktnm,Oper->Name as opnm,RefuseReason as rr1,Source->Name as srcnm,State as st,User1->Name as usnm]]></Default>
+</Parameter>
+
+<Parameter name="FTYPES">
+<Type>%String</Type>
+<Default>%String,%String,%String</Default>
+</Parameter>
+
+<Parameter name="OBJECTCONCURRENCY">
+</Parameter>
+</Class>
+</Export>

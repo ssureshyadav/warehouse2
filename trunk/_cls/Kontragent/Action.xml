@@ -23,8 +23,8 @@
  i '$ISOBJECT(DocID) $$$WriteError("Не открылся документ DocID="_DocID)
  i MailAddress ="" s mail=..KontrMail(DocID.Kontr)
  e  s mail=MailAddress
- i mail="" s ok="Не удалось определить e-mail контрагента, укажите, пожалуйста e-mail вручную или заполните соответствующее поле контрагента" Goto LogResult
  s To=mail
+ i mail="" s ok="Не удалось определить e-mail контрагента, укажите, пожалуйста e-mail вручную или заполните соответствующее поле контрагента" Goto LogResult
  ///если не включена автоматическая отправка, то отправляем самим себе
  s:'+$$$TunesVariableGlobal("AutoSendMails") To=$$$TunesVariable("smtpfrom")
  //делаем word файл
@@ -35,8 +35,16 @@
  s ok=..SendMailNotification(To,exitfile)
 LogResult
  S Comment = DocID.Name_" "_DocID.DocumentClass.Name
- d ..LogResult(To,exitfile,Comment,ok)
-
+ d ..LogResult($G(To),$G(exitfile),Comment,$G(ok),.LogResultID)
+ 
+ //сохраним в документе привязку к логу отправки
+ if DocID.DocumentClass.%Id()="Docs.Rash"
+ {
+	 d DocID.SendMailLogSetObjectId(LogResultID)
+	 d DocID.%Save()
+ }
+ 
+ 
  q 
 SendMailErr
  $$$WriteError($ZE)
@@ -52,8 +60,11 @@ SendMailErr
  if '$ISOBJECT($G(log)) s log=##class(Kontragent.SendMailLog).%New()
  
  s log.Attach=$G(exitfile)
- i ok=1 s ok="Уведомление успешно отправлено"
- s log.Result=$G(ok)
+ //потом исказим ответ для чтения человеком
+ i ok=1 s Result="Уведомление успешно отправлено"
+ else  s Result=ok
+ s log.Result=Result
+ s log.ResultCode=+$G(ok)
  s log.MessageTo=$G(To)
  s log.Comment=Comment
  s ok=log.%Save()
@@ -91,50 +102,84 @@ E-mail контрагента
 <Implementation><![CDATA[
  s $ZT="MakeFileErr"
  q:Doc="" "Ошибка"
+ 
  n Variables,DocName,word,TemplateDir,WordDoc,f,t,wrap,filename,i,SearchStr,StartPosition,
  EndPosition,CurrentRow,MainRowCellsCount,RowNumber,CurrentGoodsStr,StrVariables,CellPos,
  CurrentCell,var,DestinationDirectory,waste,Values,Properties,replacement
+ 
  s:'$ISOBJECT(Doc) Doc=$ZOBJCLASSMETHOD(Class,"%OpenId",Doc)
+ 
  //извлекаем данные документа в массив Variables
  d ..FillObjValues(Class,Doc,.Variables)
  s Variables("DocTypeName")=$S($ISOBJECT(Doc.DocumentClass):Doc.DocumentClass.Name,1:"")
- //устанавливаем разные переменные
+ 
+ //подставим номер и дату заявки 
+ if Doc.DocumentClass.%Id()="Docs.StorageOut",$ISOBJECT(Doc.Source),$ISOBJECT(Doc.Source.Source) {
+	 s Variables("RequestName")=Doc.Source.Source.Name
+	 if Doc.Source.Source.Dat?5N s Variables("RequestDat")=$ZD(Doc.Source.Source.Dat,4)
+ }
+ 
+ if Doc.DocumentClass.%Id()="Docs.Rash",$ISOBJECT(Doc.Source) 
+ {
+	 s Variables("RequestName")=Doc.Source.Name
+	 s Variables("RequestDat")=$ZD(Doc.Source.Dat,4)
+ }
+ 
+ #;zw Variables
+ 
+ #; правило формирования имени нового файла
  s filename=$G(^Tunes(3,"filename","Value"),"<<Dat>> - <<Kontr>> <<Name>>")
+ #; из настроек - каталог шаблона
  s TemplateDir=$G(^Tunes(3,"TemplateDir","Value"))
+ #; из настроек - каталог нового файла
  s DestinationDirectory=$G(^Tunes(3,"WordDestinationDir","Value"))
+ 
  s DocName=##class(Docs.Action).GetDocNameFromClass(Class) 
- s f=##class(%Activate.Variant).FALSE()
- s t=##class(%Activate.Variant).TRUE()
- s wrap=##class(%Activate.Variant).%New()
- s wrap.Value="wdFindContinue"
+ 
+ s f=##class(%Activate.Variant).FALSE(), t=##class(%Activate.Variant).TRUE()
+ s wrap=##class(%Activate.Variant).%New(), wrap.Value="wdFindContinue"
+ 
  s filename=$G(^Tunes(3,"filename","Value"),"<<Dat>> - <<Kontr>> <<Name>>")
-  // инициализируем Word
+ 
+ #; инициализируем Word
  s word=##class(Activate.Word.Application).%New() 
+ #; открываем шаблон
  s WordDoc=word.Documents.Add(TemplateDir_"\"_WordTemplate_".doc")
+ 
  i 'word.Documents.Count d word.Quit() q "Не удалось открыть шаблон "_TemplateDir_"\"_WordTemplate_".doc"
- //сразу сохраняем под нужным именем
+ 
+ #; формируем имя нового файла по правилу
  s i="" f  s i=$O(Variables(i)) q:i=""  d
  . s SearchStr="<<"_i_">>"
  . s StartPosition=$F(filename,SearchStr)-$L(SearchStr)
  . s EndPosition=$F(filename,SearchStr)
  . q:StartPosition<=0
  . s $E(filename,StartPosition,EndPosition)=$G(Variables(i))
+ 
+ #; убираем запрещенные символы
  f i="\","/",":","*","?",":","<",">","|" d
  . s filename=$TR(filename,i,"-")
+ 
  s:$G(exitfile)="" exitfile=DestinationDirectory_"\"_filename_".doc"
+ 
+ #; сохраняем еще пустой шаблон
  d WordDoc.SaveAs(exitfile)
- //после сохранения проверяем есть ли такой файл
+ 
+ #; после сохранения проверяем есть ли такой файл
  i $ZU(140,4,exitfile) d  q "Не удалось сохранить файл "_exitfile_".doc"
  . d WordDoc.Close()
  . d word.Quit()
+ 
  //заменяем "общие" теги документа
  s i="" f  s i=$O(Variables(i)) q:i=""  d
  . d WordDoc.Select()
  . s SearchStr="<<"_i_">>"
  . d word.Selection.Find.Execute(SearchStr,f,f,f,f,f,t,wrap,f,$G(Variables(i)))
+ 
  //пошли по строкам документа
  s CurrentRow=WordDoc.Tables.Item(1).Rows.Item(2)
  s MainRowCellsCount=CurrentRow.Cells.Count
+ 
  f i=1:1:MainRowCellsCount d
  . s MainRowArray(i)=CurrentRow.Cells.Item(i).Range.Text
  d:$ISOBJECT(Doc.Items)
@@ -158,6 +203,7 @@ E-mail контрагента
  d WordDoc.Close()
  d word.Quit()
  q 1
+ 
 MakeFileErr
  d:$ISOBJECT($G(WordDoc)) WordDoc.Close()
  d:$ISOBJECT($G(word)) word.Quit()
@@ -175,6 +221,10 @@ FillVariableWithData(StrVariables,CurrentGoodsStr,RowNumber)
  s StrVariables(7)=CurrentGoodsStr.Goods.Property5300
  s StrVariables(8)=CurrentGoodsStr.Goods.Weight
  s StrVariables(9)=CurrentGoodsStr.Goods.Comment
+ // если это строчка расходной накладной и заполнено поле ZakazGoods, то 55 переменная - это название заказанного товара
+ s StrVariables(55)=""
+ s StrVariables(56)=""
+ if CurrentGoodsStr.%ClassName(1)="Docs.RashItems",$ISOBJECT(CurrentGoodsStr.ZakazGoods) s StrVariables(55)=CurrentGoodsStr.ZakazGoods.FullName
  q
 ]]></Implementation>
 </Method>
@@ -247,6 +297,7 @@ FillVariableWithData(StrVariables,CurrentGoodsStr,RowNumber)
 	f i=1:1:$L(MailDestination,",") d
 	. do m.To.Insert($P(MailDestination,",",i))
 	do m.Bcc.Insert(smtpfrom)
+	s m.ReplyTo="serviceman@aska-el.ru"
 
 	set m.Subject=MailSubject
 	set m.Charset="windows-1251"
@@ -292,46 +343,66 @@ FillVariableWithData(StrVariables,CurrentGoodsStr,RowNumber)
 <Method name="AddMeetingResult">
 <Description><![CDATA[
 Добавить результат разговора с контрагентом
-<br><var>Result</var> - текст результата беседы
-<br><var>Dat</var> - дата в формате дд/мм/гггг 
-<br><var>Tim</var> - время в формате чч/мм/сс
-<br><var>KontrId</var> - ID контрагента
-<br><var>MessageType</var> - тип сообщения (0, 2 или 3), см. свойство в классе]]></Description>
+<br/><var>Result</var> - текст результата беседы
+, в случае удачного завершения сюда будет записан идентификатор.
+<br/><var>Dat</var> - дата в формате дд/мм/гггг 
+<br/><var>Tim</var> - время в формате чч/мм/сс
+<br/><var>KontrId</var> - ID контрагента
+<br/><var>MessageType</var> - тип сообщения (0, 2 или 3), см. свойство в классе]]></Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>Result:%String="",Dat:%String="",Tim:%String="",KontrId:%String="",MessageType:%String=""</FormalSpec>
+<FormalSpec>*Result:%String="",Dat:%String="",Tim:%String="",KontrId:%String="",MessageType:%String="",FileName:%String=""</FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
  s $ZT="AddMeetingResultErr"
- s login = $$$SessionData("user")
+ s login = $$$SessionData("user"), FileName=$g(FileName)
  if '##class(Common.Rights).getrights(login,19) q "У вас нет прав на отправку сообщений контрагентам"
  if Dat'?1.2N1"/"2N1"/"4N q "Неверно указан формат даты. Дата должна быть в формате дд/мм/гггг"
  if Tim'?2N1":"2N1":"2N q "Неверно указан формат времени. Время должно быть в формате чч:мм:сс"
  if KontrId="" q "Не указан контрагент."
+ 
  s Obj=##class(Kontragent.Meeting).%New()
- s Obj.Result=Result
- s Obj.Dat=$ZDH(Dat,4)
- s Obj.Tim=$ZTH(Tim)
  d Obj.KontrSetObjectId(KontrId)
- s Obj.MessageType=+MessageType
- s ok=Obj.%Save()
+ s Obj.Result=Result, Obj.MessageType=+MessageType
+ s Obj.Dat=$ZDH(Dat,4), Obj.Tim=$ZTH(Tim)
+ 
+ if FileName'="" { //дополнительно сохраняем в объект
+	s AttachName=##class(%File).GetFilename(FileName)
+	s Obj.AttachName = AttachName 
+	s file=##class(%File).%New(FileName)
+	s sc=file.Open("RU")
+	if sc {
+		d Obj.Attachment.CopyFrom(file)	
+	}
+	d file.Close()
+ }
+  
+ s ok=Obj.%Save(),  mid=Obj.%Id()
  if '+ok q "Извините. Ошибка при записи."
  
- if +MessageType
- {
+ if +MessageType  {
 	 s KontrEMail = ..KontrMail(KontrId,.Code,.Name)
-	 if KontrEMail'=""
-	 {
+	 if KontrEMail'="" {
 	 	s TextMessage="Здравствуйте"_$C(13,10)_"Вам поступило новое сообщение от сервисной службы Aska Elc."_$C(13,10)_$C(13,10)
 	 	s TextMessage=TextMessage_Result_$C(13,10)_$C(13,10)
 	 	s TextMessage=TextMessage_"Наша с вами переписка доступна по адресу http://91.214.205.78/csp/sklad2/Support.csp?login="_Code_" пароль тот, который вы используете в Менеджере отчётов."_$C(13,10)
 	 	s TextMessage=TextMessage_"C уважением "_$$$TunesVariableGlobal("OurName")
 	 	d ..LogResult(KontrEMail,"","Сообщение контрагенту "_Name ,"Сообщение отправить не удалось",.ID)
-	 	s ok = ..SendMailNotification(KontrEMail,"",TextMessage,"Новое сообщение в программе Менеджер отчётов Aska Elc.")
+	 	s ok = ..SendMailNotification(KontrEMail,FileName,TextMessage,"Новое сообщение в программе Менеджер отчётов Aska Elc.")
 	 	s ok = ..LogResult(KontrEMail,"","Сообщение контрагенту "_Name ,ok,ID)
 	 }
  }
-
- q ok
+ 
+ //если сообщение отправляли на мыло, то поставим на него ссылку
+ if +$G(ID) {
+	 d Obj.SendMailLogSetObjectId(ID)
+	 s ok=Obj.%Save()
+	 if '+ok q "Извините. Ошибка при записи."
+ }
+ 
+ #; В случае удачного завершения записываем вместо текста идентификатор сообщения
+ s:+ok Result=mid 
+ Quit ok
+ 
 AddMeetingResultErr
  $$$WriteError($ZE)
  q "Извините. Ошибка при записи."
@@ -344,38 +415,69 @@ AddMeetingResultErr
 <ClassMethod>1</ClassMethod>
 <FormalSpec>Message</FormalSpec>
 <Implementation><![CDATA[
+	s $ZT="SendSpamErr"
 	s Message="Уважаемые клиенты."_$C(13,10)_$C(13,10)_
 	"Сервер Aska Elc поменял IP, к сожалению, мы не смогли заранее уведомить Вас. Поэтому мы просим Вас указать в менеджере отчётов новый IP адрес. Для этого необходимо сделать следующее:"_$C(13,10)_
 	"Запустить Менеджер отчётов, зайти во вкладку Параметры"_$C(13,10)_
 	"Отметить чекбокс ""Редактировать параметры"". В открывшихся полях необходимо заменить старый ip адрес 89.175.39.6 на новый 91.214.205.78 Сделать это необходимо в двух полях: URL и FTP host."_$C(13,10)_
 	"После замены необходимо сохранить изменения (кнопка Сохранить в верхней части программы)."_$C(13,10)_$C(13,10)_
 	"Ульянов В.Ф."_$c(13,10)_"P.S. Не отвечайте на это письмо."_$c(13,10)
-	s MailSubject="Уведомление о смене IP адреса сервера Aska Elc."
+
+	s MailSubject="Уведомление о смене номеров телефонов Aska Elc."
+	s Message="Уважаемые партнеры."_$C(13,10)_$C(13,10)_
+	"В Сервисной службе изменились телефоны."_$C(13,10)_
+ 	"Вопросы по запасным частям и заявкам - Кашменский Ю.Е. т. +7(967) 129-8201  "_$C(13,10)_
+	"zip@aska-el.ru."_$C(13,10)_
+ 	"Все вопросы и проблемы - Лопатин Ю.Е. т. +7 (967) 129-8148,"_$C(13,10)_
+	"serviceman@aska-el.ru."_$C(13,10)_
+ 	"Руководитель Сервисной службы - Ульянов В.Ф. +7 (967) 129-8101,"_$C(13,10)_
+	"serviceman@aska-el.ru."_$C(13,10)_$C(13,10)_
+ 	"Сервисная служба Viconte, Mastermax, Tull."
+	
+	Set file=##class(%File).%New("file.txt")
+	Do file.Open("WSN")
+	Do file.WriteLine("Отправка письма контарагентам:")
+	Do file.WriteLine(MailSubject)
+	Do file.WriteLine(Message)
+	Do file.WriteLine("")
+	Do file.WriteLine("")
+	
 	s smtpfrom=$$$TunesVariableGlobal("smtpfrom")
-	&sql(declare zzz cursor for 
-	select EMail into :EMail from Common.Kontragent)
+	&sql(DECLARE zzz CURSOR FOR 
+		SELECT ID,Name,EMail 
+		INTO :ID,:Name,:email 
+		FROM Common.Kontragent
+		)
 	&sql(open zzz)
 	f  &sql(fetch zzz) q:SQLCODE  d
-	. i $I(count)
-	. q:count<87
-	. s EMail=$TR(EMail," ","")
-	. q:EMail=""
-	. q:EMail'["@"
-	. if $G(MailCounter)<5 d
-	. . s currentMail=$G(currentMail)_EMail_","
-	. . i $i(MailCounter)
-	. else  d
-	. . s currentMail=$E(currentMail,1,$L(currentMail)-1)
-	. . s ok = ..SendMailNotification(currentMail,"",Message,MailSubject) 
-	. . h 301
-	. . s ^mtempArt("sendmail",count)=currentMail_" "_$G(ok)
-	. . s MailCounter=0
-	. . w count," ",currentMail,$C(9),$G(ok)
-	. . s currentMail=""
-	. . if $ISOBJECT($G(%session)) w "<br>"
-	. . else  w !!
+	. s EMail=$TR(email," ","")
+	. if (EMail="")||(email'["@") d  q
+	. . Do file.WriteLine($ZDT($H,4)_" контрагент "_Name_" ("_ID_"), e-mail """_email_""" невозможно отправить письмо.")
+	. s ok = ..SendMailNotification(email,"",Message,MailSubject) 
+	. Do file.WriteLine($ZDT($H,4)_" контрагент "_Name_" ("_ID_"), e-mail """_email)
+	. h 301
 	&sql(close zzz)
+	
+	d file.Close()
+	
 	q
+SendSpamErr
+ $$$WriteError($ZE)
+ if $ISOBJECT($G(file)) d file.Close()
+ q
+]]></Implementation>
+</Method>
+
+<Method name="KontragentCurrencyName">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>KontrId:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s obj = ##class(Common.Kontragent).%OpenId(KontrId)
+	Q:'$ISOBJECT(obj) ""
+	s CurrencyName = ##class(Common.Kontragent).CurrencyLogicalToDisplay(obj.Currency)
+	
+	q CurrencyName
 ]]></Implementation>
 </Method>
 </Class>
