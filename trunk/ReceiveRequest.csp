@@ -5,12 +5,14 @@
  //Passw - пароль сервисного центра
  //Data - файл заявки Request[...].req
  //Первая строка файла: Номер_$C(9)_(0:Платно;1:По гарантии)_$C(9)_Комментарий
- //Последующие строки:	ID@Goods.Goods_$C(9)_Количество_$C(9)_Гарантийный талон_$C(9)_серийный номер_$C(9)_Продавец_$C(9)_Описание поломки_$C(9)_Дата продажи_$C(9)_Комментарий к строке
+ //Последующие строки:  ID@Goods.Goods_$C(9)_Количество_$C(9)_Гарантийный талон_$C(9)_серийный номер_$C(9)_Продавец_$C(9)_Описание поломки_$C(9)_Дата продажи_$C(9)_Комментарий к строке
  s Passw=%request.Get("Pwd")
  if Passw="" w "Невозможно зарегистрировать заявку."_$C(13,10)_"Не указан пароль." q 1
  s Code=%request.Get("Code")
  s Data=%request.Get("Data")
- s ^Requests($I(^Requests),$zdt($H,4))="Код центра "_Code_"   REMOTE_ADDR="_%request.CgiEnvs("REMOTE_ADDR")_" CurrentVersion=? ""Заявка на запчасти"""
+ s GoodsVersion=%request.Get("GoodsVersion")        //версия товарного справочника
+ s CurrentVersion=%request.Get("CurrentVersion")    //версия программы
+ s ^Requests($I(^Requests),$zdt($H,4))="Код центра "_Code_"   IP="_%request.CgiEnvs("REMOTE_ADDR")_" программа="_CurrentVersion_" товарный справочник="_GoodsVersion_" ""Заявка на запчасти"""
  if ##class(Common.Common).GetPasswordFromCode(Code, .KontrId)'=Passw d  q 1
  . w "Невозможно зарегистрировать заявку."_$C(13,10)
  . w "В базе данных не существует клиент с кодом "_Code_" и паролем "_Passw_$C(13,10)
@@ -40,6 +42,7 @@
  . s garant = $P(CurrentFileString,$C(9),3)
  . s serial = $P(CurrentFileString,$C(9),4)
  . s quantity = +$TR($P(CurrentFileString,$C(9),2)," ","")
+ . if (quantity<1) s error=error_" в строке (серийный н. "_serial_", гарантийный н. "_garant_") количество меньше 1 штуки, что недопустимо."_$C(13,10)
  . if (RashOplatType=1)&&(quantity>1) s error=error_" в строке (серийный н. "_serial_", гарантийный н. "_garant_") указано более 1 штуки, что недопустимо для заявок по гарантии."_$C(13,10)
  . q:CurrentFileString=""
  . //проверка на соответствие серийного номера
@@ -53,9 +56,11 @@
  . //. if serial[$E(rus,zz) s error=error_" в серийном номере "_serial_" есть русская буква "_$E(rus,zz)
  . //. if garant[$E(rus,zz) s error=error_" в гарантийном номере "_garant_" есть русская буква "_$E(rus,zz)
  . s GoodsId = $P(CurrentFileString,$C(9),1)
- . &sql(Select ID from Goods.Goods where ID=:GoodsId)
+ . &sql(Select FullName into :FullName from Goods.Goods where ID=:GoodsId)
  . if SQLCODE = 100 d  q
  . . s error= error_" Так как в заявке обнаружен неизвестный код товара/запчасти "_GoodsId
+ . if +##class(Goods.Goods).kbanned(GoodsId,KontrId) d  q
+ . . s error= error_" "_FullName_" запрещено использовать в документах"
  . s ItemObj=##class(Operation.InstructionsItems).%New()
  . d ItemObj.DocTypeSetObjectId("Operation.Instructions")
  . d ItemObj.GoodsSetObjectId(GoodsId)
@@ -67,7 +72,8 @@
  . s ItemObj.seller=$P(CurrentFileString,$C(9),5)
  . s SellDate=$P(CurrentFileString,$C(9),7)
  . //если дата продажи подходит под шаблон 12.12.2002 то преобразуем в HOROLOG и пишем в базу
- . if SellDate?1.2N1"."1.2N1"."4N s ItemObj.SellDate=$ZDH($TR(SellDate,".","/"),4)
+ . //if SellDate?1.2N1"."1.2N1"."4N 
+ . s ItemObj.SellDate2=SellDate
  . s ItemObj.opispolomki=$P(CurrentFileString,$C(9),6)
  . s ItemObj.BrakComment=$P(CurrentFileString,$C(9),8)
  . d RequestObj.Items.Insert(ItemObj)
