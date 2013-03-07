@@ -1,131 +1,164 @@
 <!DOCTYPE html>
 <html><head>
-<script type='text/javascript' src='js/jquery-1.6.4.min.js'></script>
+<script src="js/jquery-1.8.2.min.js"></script>
 <link rel='stylesheet' type='text/css' href='css/redmond/jquery-ui-1.8.16.custom.css'/>
+<script src="js/jquery-ui-1.9.1.custom.min.js"></script>
+
+
 <style type='text/css'>
-	.ui-widget {font-size:.9em;color:black;font-family:Arial}
-	.ui-state-default {font-weight:normal}
-	caption {text-align: left; }
-	#DivResult {overflow: auto;}
+    .ui-widget {font-size:.9em;color:black;font-family:Arial}
+    .ui-state-default {font-weight:normal}
+    caption {text-align: left; }
+    #DivResult {overflow: auto;}
+    /*'LightGreen'*/
+    .lg {background-color: lightgreen; }
+    .ok {background: url('images/okay.png') center center no-repeat; width:14px;}
+    table.rs {border-collapse:collapse;}
+    table.rs, table.rs td { border:solid 1px #555;}
+    table.rs td {padding: .2em;}
+    
 </style>
-</head><body>
+</head><body onkeyup="Manage()"><a name="top"></a>
 <table class="ui-widget" style="width:98%;padding:0px;margin:0px;" >
 <tr><td style="white-space:nowrap">
-	
-	<button id="bBack" type="button"
-		class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" 
-		title="Вернуться на страницу товаров"
-	>
-	 <span class="ui-button-icon-primary ui-icon ui-icon-circle-arrow-w"></span>
-	 <span class="ui-button-text">Товары</span>
-	</button>
-	
-	<button id="bRefresh" title="Обновить раздел"
-		class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" 
-	>
-		<span class="ui-button-icon-primary ui-icon ui-icon-refresh"></span>
-		<span class="ui-button-text">&nbsp;</span>
-	</button>
+    
+    <button id="bBack" type="button"
+        class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" 
+        title="Вернуться на страницу товаров"
+    >
+     <span class="ui-button-icon-primary ui-icon ui-icon-circle-arrow-w"></span>
+     <span class="ui-button-text">Товары</span>
+    </button>
+    
+    <button id="bRefresh" title="Обновить раздел"
+        class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" 
+    >
+        <span class="ui-button-icon-primary ui-icon ui-icon-refresh"></span>
+        <span class="ui-button-text">&nbsp;</span>
+    </button>
 </td><td colspan="2" class="ui-widget-header" style="width:80%;text-align:center;font-size:18px;">
-	Управление серийными номерами
+    Управление серийными номерами
 </td><td style="width:15%">
-	<a href="csp.Serials2.cls" 
-		class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary ui-button-text-icon-secondary"
-		title="Новая версия для тестирования">
-		<span class="ui-button-text ui-state-highlight"	
-		>New *</span>
-	</a>
+    <a href="csp.Serials2.cls" 
+        class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary ui-button-text-icon-secondary"
+        title="Новая версия для тестирования">
+        <span class="ui-button-text ui-state-highlight" 
+        >New *</span>
+    </a>
 </td></tr></table>
-<div style="font-size:5px">&nbsp;</div>
+
 <button id="check" type="button" name="check"
-	title="Проверка списка серийных номеров" 
-	class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" 
+    title="Проверка списка серийных номеров" 
+    class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" 
 >
 <span class="ui-button-icon-primary ui-icon ui-icon-check"></span>
 <span class="ui-button-text">Проверка серийных номеров</span>
 </button>
+
 <button id="create" type="button" name="create"
-	class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" 
-	>
-	<span class="ui-button-icon-primary ui-icon ui-icon-document"></span>
-	<span class="ui-button-text">Создание серийных номеров из файла</span>
+    class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" 
+    >
+    <span class="ui-button-icon-primary ui-icon ui-icon-document"></span>
+    <span class="ui-button-text">Создание серийных номеров из файла</span>
 </button>
+
+<button id="create2" type="button" name="create2"
+    class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" 
+    >
+    <span class="ui-button-icon-primary ui-icon ui-icon-document"></span>
+    <span class="ui-button-text">Создание серийных номеров из файла <font size=-1>расширенная версия</font></span>
+</button>
+
 <div style="font-size:5px">&nbsp;</div>
 
 <table class="ui-widget ui-widget-content " > <!-- для синей подложки таблицы добавить ui-state-default -->
 <caption class="ui-widget-header">Поиск по первым символам номера</caption>
 <tr><td><label for="FieldToFind">Искать по:</label></td>
-	<td><select id="FieldToFind">
-		<option value="serialInd">серийному номеру</option>
-		<option value="garantInd">гарантийному номеру</option>
-	</select></td>
+    <td><select id="FieldToFind" onchange="SetNewAComplSource()">
+        <option value="serialInd">серийному номеру</option>
+        <option value="garantInd">гарантийному номеру</option>
+    </select></td>
 </tr><tr class="ui-state-active">
-	<td><label for="edtSearch">Номер:</label></td>
-	<td>
-		<input type="text" id="edtSearch" value="" 
-			title="Введите минимум два первых символа номера"
-			style="font-size:20pt"
-		/>
-		<button id="bFind"
-			title="Искать"
-			class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" 
-		>
-		<span class="ui-button-icon-primary ui-icon ui-icon-search"></span>
-		<span class="ui-button-text">&nbsp;</span>
-			
-		</button>
-	</td>
+    <td><label for="edtSearch">Номер:</label></td>
+    <td>
+        <input type="text" id="edtSearch" value="" 
+            title="Для подсказки введите минимум два первых символа номера. Можете использовать символ подстановки: *"
+            style="font-size:20pt"
+        />
+        <button id="bFind"
+            title="Искать"
+            class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" 
+        >
+        <span class="ui-button-icon-primary ui-icon ui-icon-search"></span>
+        <span class="ui-button-text">&nbsp;</span>
+            
+        </button>
+    </td>
 </tr><tr>
-		<td><label>Фильтр:</label></td>
-		<td>
-		 	<label><input type="checkbox" id="HasReqCB" checked="checked"
-		 		/><span>Есть заявка</span>
-		 	</label>
-		 	<label><input type="checkbox" id="HasCommentCB" checked="checked" 
-		 		/><span>Есть примечание</span>
-		 	</label>
-		</td>
+        <td><label>Фильтр:</label></td>
+        <td>
+            <label><input type="checkbox" id="HasReqCB" checked="checked"
+                /><span>Есть заявка</span>
+            </label>
+            <select id="ConditionSel">
+                <option value="and">и</option>
+                <option value="or">или</option>
+            </select>
+            <label><input type="checkbox" id="HasCommentCB" checked="checked" 
+                /><span>Есть примечание</span>
+            </label>
+        </td>
 </tr><tr>
-	<td style="vertical-align: top"><label>Показать поля:<label></td>
-	<td>
-		<div>
-		 <label>
-		 	<input type="checkbox" id="Property9194CB" checked="checked"/>
-		 	<span>Актуальность</span>
-		 </label>
-		</div>
-		<div>
-		 <label>
-		 	<input type="checkbox" id="CommentCB" checked="checked"/>
-		 	<span>Комментарий</span>
-		 </label>
-		</div>
-	</td>
+    <td style="vertical-align: top"><label>Показать поля:<label></td>
+    <td>
+        <div>
+         <label>
+            <input type="checkbox" id="Property9194CB" checked="checked"/>
+            <span>Актуальность</span>
+         </label>
+        </div>
+        <div>
+         <label>
+            <input type="checkbox" id="CommentCB" checked="checked"/>
+            <span>Комментарий</span>
+         </label>
+        </div>
+    </td>
  </tr>
 </table>
 <div style="font-size:5px">&nbsp;</div>
 <button onclick="newitem()" 
-	title="Создать один серийный номер"
-	class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" 
+    title="Создать один серийный номер"
+    class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" 
 >
-	<span class="ui-button-icon-primary ui-icon ui-icon-plus"></span>
-	<span class="ui-button-text">Новая</span>
+    <span class="ui-button-icon-primary ui-icon ui-icon-plus"></span>
+    <span class="ui-button-text">Новая</span>
 </button>
 
 <button onclick="newitems()" 
-	title="Создать несколько серийных номеров"
-	class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" 
+    title="Создать несколько серийных номеров"
+    class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" 
 >
-	<span class="ui-button-icon-primary ui-icon ui-icon-copy"></span>
-	<span class="ui-button-text">Новые</span>
+    <span class="ui-button-icon-primary ui-icon ui-icon-copy"></span>
+    <span class="ui-button-text">Новые</span>
 </button>
 <div style="font-size:5px">&nbsp;</div>
 
 <div id="MsgResult" class="ui-state-active"></div>
+
+<!-- легенда -->
+<table width=100% id="LegendTable" style="display:none">
+    <tr><td align="right">
+        <table style="border:1 solid black">
+            <tr><td align="left"><div style="padding:5px;border: 1px solid grey;"><img src="images/okay.png"> - есть заявка</div>
+            <tr><td align="left"><div style="padding:5px;border: 1px solid grey;background-color:LightGreen">серийный номер действительный</div>
+        </table>
+    </td></tr>
+</table>
 <div id="DivResult"></div>
 
 </div>
-	
+    
 
 
 <script type="text/javascript" src="common.js"></script>
@@ -136,110 +169,133 @@ sessionid="#(%session.SessionId)#";
 var divObj;
 var FieldToFindObj;
 
-function Find() {
-	var ShowFields = "";
-	var Params = "";
-	
-	if (CommentCBObj.checked) ShowFields=ShowFields+"Comment;";
-	if (Property9194CBObj.checked) ShowFields=ShowFields+"Property9194;";
-	if (HasReqCBObj.checked) Params=Params+"HasReq;";
-	if (HasCommentCBObj.checked) Params=Params+"HasComment;";
-	var SearchStr = edtSearch.value;
-	
-	$.get("serialsResult.csp",
+function Find(page) {
+    if (page==null)page=1;
+    
+    var ShowFields = "";
+    var Params = "";
+    
+    if (CommentCBObj.checked) ShowFields=ShowFields+"Comment;";
+    if (Property9194CBObj.checked) ShowFields=ShowFields+"Property9194;";
+    if (HasReqCBObj.checked) Params=Params+"HasReq;";
+    if (HasCommentCBObj.checked) Params=Params+"HasComment;";
+    var SearchStr = edtSearch.value;
+    var condition = $("#ConditionSel").val();
+    
+    $.get("serialsResult.csp",
       {
-	    "byf": FieldToFindObj.value
+        "byf": FieldToFindObj.value
         ,"q":  SearchStr
         ,"fs": ShowFields
         ,"qp": Params
+        ,"page": page
+        ,"cond": condition
       }
-      	,ShowResult
-	 );
+        ,ShowResult
+     );
 }
 ///Функция вызывается с сервера, не менять наименование
 function ShowResult(res,msg) {
-	divObj.innerHTML = res;
-	//if (!msg) msg=""; $("#MsgResult").text(msg);
-	$(divObj).find("a").click(function(){
-		var id=this.href.split("#")[1]; s(id);
-	});
+    divObj.innerHTML = res;
+    $("#LegendTable").css("display","inline");
+    //if (!msg) msg=""; $("#MsgResult").text(msg);
+    $(divObj).find("a:not(.zz)").click(function(){
+        var id=this.href.split("#")[1]; 
+        s(id);
+    });
 }
 
 function edtKeyUp() {
-	if(window.event.keyCode==13) Find();
+    if(window.event.keyCode==13) Find();
 }
 
 function s(currentrecord)
 {
-	ok=window.showModalDialog("garant.csp?GarantId="+currentrecord,currentrecord+";Common.Dictionary2","center:yes;status:no;dialogHeight:440px;dialogWidth:800px;resizable:yes;")
+    ok=window.showModalDialog("garant.csp?GarantId="+currentrecord,currentrecord+";Common.Dictionary2","center:yes;status:no;dialogHeight:440px;dialogWidth:800px;resizable:yes;")
 }
 
 function load() {
-	divObj = document.getElementById("DivResult");
-	FieldToFindObj = document.getElementById("FieldToFind");
-	CommentCBObj = document.getElementById("CommentCB");
-	Property9194CBObj = document.getElementById("Property9194CB");
-	
-	HasReqCBObj = document.getElementById("HasReqCB");
-	HasReqCBObj.checked = ( GetCookie("HasReqCB")== 'true');
-	
-	HasCommentCBObj = document.getElementById("HasCommentCB");
-	HasCommentCBObj.checked = (GetCookie("HasCommentCB")== 'true');
+    divObj = document.getElementById("DivResult");
+    FieldToFindObj = document.getElementById("FieldToFind");
+    CommentCBObj = document.getElementById("CommentCB");
+    Property9194CBObj = document.getElementById("Property9194CB");
+    
+    HasReqCBObj = document.getElementById("HasReqCB");
+    HasReqCBObj.checked = ( GetCookie("HasReqCB")== 'true');
+    
+    HasCommentCBObj = document.getElementById("HasCommentCB");
+    HasCommentCBObj.checked = (GetCookie("HasCommentCB")== 'true');
 }
 
 function newitems() {
-	ok=window.showModalDialog("ManyGarants.csp",";Common.Dictionary2","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+    ok=window.showModalDialog("ManyGarants.csp",";Common.Dictionary2","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
 }
 
 function newitem() {
-	ok=window.showModalDialog("garant.csp?sessionid="+sessionid,";Common.Dictionary2","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+    ok=window.showModalDialog("garant.csp?sessionid="+sessionid,";Common.Dictionary2","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
 }
 
 
 $(function(){
-		
-	$("#bBack").click(function(){
-			window.location.href='goods.csp';		
-	});
-	$("#bRefresh").click(function(){
-			window.location.reload();
-	});
-	$("#check").click(function(){
-			window.location.href='CheckSerial.csp';
-	});
-	$("#create").click(function(){
-			window.open('csp.WarrantyCardImport.cls');
-	});
-
-	$("#HasReqCB").click(function(){
-		SetCookie('HasReqCB',this.checked);
-	});
-	$("#HasCommentCB").click(function(){
-		SetCookie('HasCommentCB',this.checked);
-	});
-	$("#edtSearch")
-		.css("width","20em")
-		.keyup(edtKeyUp)
-	;
-	
-	$("#CommentCB").click(function(){
-		SetCookie('SerialsCommentCB',this.checked);
-	})
-	;
-	
-	$("#Property9194CB").click(function(){
-		SetCookie('SerialsProperty9194CB',this.checked);
-	})
-	;
-	load();
-	
-	$(":checked").parent().addClass("ui-state-highlight");	
-	$(":checkbox").change(function(){
-		$(this).parent().toggleClass("ui-state-default ui-state-highlight");	
-	});
-	$("#bFind").click( Find );
-	
-	
+        
+    $("#bBack").click(function(){
+            window.location.href='goods.csp';       
+    });
+    $("#bRefresh").click(function(){
+            window.location.reload();
+    });
+    $("#check").click(function(){
+            window.location.href='CheckSerial.csp';
+    });
+    $("#create").click(function(){
+            window.open('csp.WarrantyCardImport.cls');
+    });
+    $("#create2").click(function(){
+            window.open('csp.WarrantyCardImport2.cls');
+    });
+    
+    $("#HasReqCB").click(function(){
+        SetCookie('HasReqCB',this.checked);
+    });
+    $("#HasCommentCB").click(function(){
+        SetCookie('HasCommentCB',this.checked);
+    });
+    $("#edtSearch")
+        .css("width","20em")
+        .keyup(edtKeyUp)
+    ;
+    
+    $("#CommentCB").click(function(){
+        SetCookie('SerialsCommentCB',this.checked);
+    })
+    ;
+    
+    $("#Property9194CB").click(function(){
+        SetCookie('SerialsProperty9194CB',this.checked);
+    })
+    ;
+    load();
+    
+    $(":checked").parent().addClass("ui-state-highlight");  
+    $(":checkbox").change(function(){
+        $(this).parent().toggleClass("ui-state-default ui-state-highlight");    
+    });
+    $("#bFind").click( function(){ Find(1); } );
+    
+    $("#edtSearch").autocomplete({ 
+        source: "JQserials.csp?Command=Search&SMode="+$("#FieldToFind").val(),
+        select: function( event, ui ) {Find(1);}
+    });
 });
 
-</script></body></html>
+function Manage()
+{
+    if((window.event.keyCode=="34")&&window.event.ctrlKey) $("#ForwLink").trigger('click', 1);
+    if((window.event.keyCode=="33")&&window.event.ctrlKey) $("#PrevLink" ).trigger('click', 1);
+}
+
+function SetNewAComplSource()
+{
+    $( "#edtSearch" ).autocomplete( "option", "source", "JQserials.csp?Command=Search&SMode="+$("#FieldToFind").val() );
+}
+</script><a href="#top">Наверх </a></body></html>
