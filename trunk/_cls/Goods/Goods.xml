@@ -46,6 +46,18 @@ Kontragent ban list
 <ReturnType>%Boolean</ReturnType>
 <SqlProc>1</SqlProc>
 <Implementation><![CDATA[
+	//испльзовать ^GoodsKontrBan
+	q $D(^GoodsKontrBan("Goods",good,kontr))
+	
+	/*
+	//использовать SQL таблицу
+	&sql(select id from Goods.GoodsKontrBan where Goods=:good and Kontr=:kontr)
+	if 'SQLCODE q 1
+	q 0
+	*/
+	
+	
+	//старый код использующий битмап индекс
 	s part=good\64000+1 ;подиндекс в зависимости от кол-ва ид в классе
 	s offset=good#64000+1 ;смещение от начала строки
 	Q $bit($g(^Goods.GoodsI("kbanIDX"," "_kontr,part)),offset)
@@ -56,10 +68,28 @@ Kontragent ban list
 <Description>
 Добавление запрета на контрагента</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>good="",kontr="",err</FormalSpec>
+<FormalSpec>good="",kontr="",*err:%String=""</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <SqlProc>1</SqlProc>
 <Implementation><![CDATA[
+	if '..%ExistsId(good) s err="указан несуществующий товар "_good q 0
+	if '##class(Common.Kontragent).%ExistsId(kontr) s err="указан несуществующий контрагент "_kontr q 0
+	
+	if good'="",kontr'="" 	{
+		s ^GoodsKontrBan("Goods",good,kontr)=""
+		s ^GoodsKontrBan("Kontr",kontr,good)=""
+	}
+	q 1
+ /*
+ 	//использовать  SQL таблицу
+	if '..%ExistsId(good) s err="указан несуществующий товар "_goods q 0
+	if '##class(Common.Kontragent).%ExistsId(kontr) s err="указан несуществующий контрагент "_kontr q 0
+	if ..kbanned(good, kontr) q 1
+	&sql(insert into Goods.GoodsKontrBan (Goods,Kontr) VALUES (:good,:kontr) )
+	q 1
+ */	
+	
+	//старый код использующий битмап индекс
 	if '..%ExistsId(good) s err="указан несуществующий товар "_goods q 0
 	if '##class(Common.Kontragent).%ExistsId(kontr) s err="указан несуществующий контрагент "_kontr q 0
 	
@@ -85,6 +115,19 @@ Kontragent ban list
 <ReturnType>%Status</ReturnType>
 <SqlProc>1</SqlProc>
 <Implementation><![CDATA[
+	if good'="",kontr'=""
+	{
+		k ^GoodsKontrBan("Goods",good,kontr)
+		k ^GoodsKontrBan("Kontr",kontr,good)
+	}
+	
+	q 1
+	/*
+	&sql(delete from Goods.GoodsKontrBan where Goods=:good and Kontr=:kontr)
+	q 1
+	*/
+	
+	//старый код использующий битмап индекс
 	s good=$g(good) Q:'..%ExistsId(good) $$$OK	
 	s kontr=$g(kontr) Q:'##class(Common.Kontragent).%ExistsId(kontr)
 	s kban=..kbanGetStored(good)
@@ -257,6 +300,18 @@ ID в аспекте</Description>
 <SqlComputed>1</SqlComputed>
 <Parameter name="MAXLEN" value="100"/>
 </Property>
+
+<Method name="GetFullName">
+<Description>
+Один метод в одном месте д.б.</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	Q:'..%ExistsId($g(id)) ""
+	Q ..abbrGetStored(id)_"-"_..Property3609GetStored(id)_" "_..NameGetStored(id)
+]]></Implementation>
+</Method>
 
 <Property name="ModelNumber">
 <Description>
