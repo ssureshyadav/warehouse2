@@ -29,7 +29,15 @@
  
  #; Улучшение - Анализируем поисковую строку на наличие подстановочного символа *
  s pattern=$f(SearchString,"*")
- if 'pattern { ;режим обычного поиска
+ if ($F(SearchString,"*")||$F(SearchString,"?"))
+ {
+	 s MyPattern = ##class(csp.serialsresult).MakePattern(SearchString)	//сделаем из строки запроса Pattern Match
+	 k ^mtempArt("SerialsResult")
+	 s ^mtempArt("SerialsResult","MyPattern")=MyPattern
+	 s ^mtempArt("SerialsResult","SearchString")=SearchString
+ }
+ else
+ { ;режим обычного поиска
     #; частичное и полное соответствие по началу строки
     s i=SearchString 
     #; ускоряем режим поиска по началу строки
@@ -38,9 +46,13 @@
   
  for { s i=$O(^Common.Dictionary2I(indexName,i)) Q:i=""
     
-    if pattern { ; значение индекса не соответствует паттерну
-        if ..Match(i,SearchString)'=1 continue
-    } else { ; в индексном значении нет искомого
+    if $G(MyPattern)'="" 
+    { 
+    	; пользователь потребовал шаблоны
+        if i'?@MyPattern continue
+    } 
+    else 
+    { ; в индексном значении нет искомого
         Q:$f(i,SearchString)=0
     }
     
@@ -60,12 +72,6 @@
   s HasReq = (remont1'="")
   s MustBeComment = $LF(ParamsLB,"HasComment")
   s MustBeReq = $LF(ParamsLB,"HasReq")
-  
-  k ^mtempArt
-  s ^mtempArt(ID,"HasComment")=HasComment
-  s ^mtempArt(ID,"HasReq")=HasReq
-  s ^mtempArt(ID,"MustBeComment")=MustBeComment
-  s ^mtempArt(ID,"MustBeReq")=MustBeReq
   
   if MustBeComment || MustBeReq
   {
@@ -151,14 +157,44 @@
     . s ^mtempArt($I(^mtempArt),i)=@i
     d ..Find(byf,q,fs,qp,page,ParamsCondition)
 </server><script runat="server" language="cache" method="Match" arguments="str:%String,pattern:%String" returntype="%Boolean">
+    #; основное назначение функции - находить по концу строки!!!
     s sc=1, list=$LFS(pattern,"*") ;разобрали на составляющие
-    s p=0,part="",pos=0 while $LISTNEXT(list,p,part){
+    s part="",p=0,pos=1
+    While $LISTNEXT(list,p,part){
         if part="" continue ;пропускаем пустые части паттерна
-        s pos=$f(str,part,pos) 
+        s pos=$f(str,part,pos) ;функция $find указывает на след. символ после искомой части
         if pos=0 {
             s sc=0   ;часть паттерна не найдена
             Q  ;дальше можно не искать
         } 
     }
+    
+    #;последняя часть паттерна должна точно совпадать с остатком строки
+    #;т.е $find должен стать на (конец строки+1)
+    #;если поиск был удачным
+    #;и последняя часть паттерна не пустая строка
+    if sc && (part'=""){
+        Q pos>$l(str)    
+    }
+    
     Q sc
+</script><script runat="server" language="cache" method="MakePattern" arguments="UserPattern:%String" returntype="%String">
+ s res="1"""
+ 
+ for i=1:1:$Length(UserPattern)
+ {
+	 s currentSymbol=$E(UserPattern,i,i)
+	 if (currentSymbol="?")||(currentSymbol="*")
+	 {
+	 	if currentSymbol="*" s res=res_"""1.E"
+	 	if currentSymbol="?" s res=res_"""1E"
+	 	if i<$Length(UserPattern) s res=res_"1"""
+	 }
+	 else
+	 {
+		 s res = res_currentSymbol
+		 if i=$Length(UserPattern) s res=res_""""
+	 }
+ }
+ q res
 </script>

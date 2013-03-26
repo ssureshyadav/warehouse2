@@ -5,7 +5,7 @@
 Установка ограничений на экспорт справочника товаров
  </Description>
 <IncludeCode>csp</IncludeCode>
-<Super>csp.Protected,csp.Design</Super>
+<Super>csp.Design</Super>
 <TimeCreated>62462,61031.670471</TimeCreated>
 
 <Parameter name="CHARSET">
@@ -41,9 +41,9 @@ write заголовок страницы</Description>
  <link rel='stylesheet' type='text/css' href='css/redmond/jquery-ui-1.8.16.custom.css'/>
  <link rel='stylesheet' type='text/css' href='css/ui.jqgrid.css'/>
  <style type="text/css">
- 	body {margin:0px;padding:0px;}
- 	.ui-jqgrid {font-size:90%;}
- 	.ui-widget {font-size:12px;}
+    body {margin:0px;padding:0px;}
+    .ui-jqgrid {font-size:90%;}
+    .ui-widget {font-size:12px;}
 </style>
  >
  Q ""
@@ -73,34 +73,34 @@ write содержимое страницы</Description>
  s cat=$g(args("cat",1),1), catName=""
  s:##class(Goods.Catalogue).%ExistsId(cat) catName=##class(Goods.Catalogue).NameGetStored(cat)
  &html<<table >
- 	<tr><td colspan="2">>
+    <tr><td colspan="2">>
 
- 	&html<<div style="BACKGROUND: rgb(233,243,255); BORDER-BOTTOM: rgb(0,0,102) 1px solid">
- 	<button id="btnBack">Назад</button>
- 	<span style="FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102);padding-left:30px;padding:10px">
- 		<strong>Ограничение использования запчастей контрагентами</strong>
- 	</span>
- 	</div>
- 	</td></tr>
- 	<tr><td style="vertical-align:top;">
- 	<label for="catSel">Каталог:&nbsp;</label><input id="catId" type="hidden" value="#(cat)#"/>
- 	<input id="cat" value="#(catName)#" readonly="readonly"/><button id="catSel">...</button>
+    &html<<div style="BACKGROUND: rgb(233,243,255); BORDER-BOTTOM: rgb(0,0,102) 1px solid">
+    <button id="btnBack">Назад</button>
+    <span style="FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102);padding-left:30px;padding:10px">
+        <strong>Ограничение использования запчастей контрагентами</strong>
+    </span>
+    </div>
+    </td></tr>
+    <tr><td style="vertical-align:top;">
+    <label for="catSel">Каталог:&nbsp;</label><input id="catId" type="hidden" value="#(cat)#"/>
+    <input id="cat" value="#(catName)#" readonly="readonly"/><button id="catSel">...</button>
 
  <div id="catDlg">
   <table id="catGrid"><tr><td></td></tr></table><div id="catBar"></div>
  </div>
 
- 	<table id="group"><tr><td></td></tr></table><div id="groupBar"></div>
+    <table id="group"><tr><td></td></tr></table><div id="groupBar"></div>
  
  </td><td style="vertical-align:top;">
  
   <label for="kontrSel">Контрагент:&nbsp;</label><input id="kontrId" type="hidden" />
   <input id="kontr" readonly="readonly" /><button id="kontrSel">...</button>
   <div id="kontrDlg">
-  	<table id="kontrGrid"><tr><td></td></tr></table><div id="kontrBar"></div>
+    <table id="kontrGrid"><tr><td></td></tr></table><div id="kontrBar"></div>
   </div>
   <table id="good"><tr><td></td></tr></table><div id="goodBar"></div>
- 	<p style="color:darkgrey">Что бы выделить все товары - нажмите на заголовок колонки Запрет</p>
+    
  </td></tr></table>
  <div id="debug"></div>>
  Q ""
@@ -114,25 +114,25 @@ write содержимое страницы</Description>
 <FormalSpec><![CDATA[&Args:%String]]></FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
-	#define qt(%js) $tr(..QuoteJS(%js),"'","""")
-	
-	s depot=$g(Args("depot",1),1)
-	k cats s cats=""
-	&sql(Declare crs Cursor For
-		Select Id,Name Into :id,:name
-		From Goods.Catalogue
-		Where depot=:depot
-		Order By Name
-	) &sql(Open crs)
-	w "{rows:["
-	s first=1
-	for { &sql(Fetch crs) Q:SQLCODE'=0
-	 w:'first "," s:first first=0
-		w "{id:",id,",name:",$$$qt(name),"}"
-	} &sql(Close crs)
-	w "],page:1,records:",%ROWCOUNT,",total:1}"
-	
-	Q ""
+    #define qt(%js) $tr(..QuoteJS(%js),"'","""")
+    
+    s depot=$g(Args("depot",1),1)
+    k cats s cats=""
+    &sql(Declare crs Cursor For
+        Select Id,Name Into :id,:name
+        From Goods.Catalogue
+        Where depot=:depot
+        Order By Name
+    ) &sql(Open crs)
+    w "{rows:["
+    s first=1
+    for { &sql(Fetch crs) Q:SQLCODE'=0
+     w:'first "," s:first first=0
+        w "{id:",id,",name:",$$$qt(name),"}"
+    } &sql(Close crs)
+    w "],page:1,records:",%ROWCOUNT,",total:1}"
+    
+    Q ""
 ]]></Implementation>
 </Method>
 
@@ -141,14 +141,18 @@ write содержимое страницы</Description>
 <FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
-	
+    
  s depot=$g(%session.Data("depot"),1)
  s cat=$g(args("cat",1),1), catName=""
  s:##class(Goods.Catalogue).%ExistsId(cat) catName=##class(Goods.Catalogue).NameGetStored(cat)
-	
-	
+    
+    
  
  w "<script type='text/javascript'>",!
+ #; динамическое содержимое 
+ w "var page = page || {};"
+ w "page.goodjson='",..Link("json.GoodsRights.cls"),"';"
+
  w "var CatOpts = "
  d ..wCatOpts()
  w ";",!
@@ -163,8 +167,8 @@ write содержимое страницы</Description>
 <script type='text/javascript' src='js/i18n/grid.locale-ru_win1251.js'></script>
 <script type='text/javascript' src='js/jquery.jqGrid-4.1.2.min.js'></script>
 <script type="text/javascript" src='js/pages/GoodsRight4.js'></script>
-	>
-	Q ""
+    >
+    Q ""
 ]]></Implementation>
 </Method>
 </Class>

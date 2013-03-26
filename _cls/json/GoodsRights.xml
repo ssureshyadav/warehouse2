@@ -13,17 +13,19 @@
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	m args=%request.Data
-	#; модуль редактирования в ячейке не умеет отправлять postData
-	#; поэтому обновляем контрагента любым способом (например при загрузке товара)
-	if $d(args("kontr")) s %session.Data("kontr")=$g(args("kontr",1))
-	s oper=$g(args("oper",1))
-	Q:oper="add" $$$OK
-	Q:oper="edit" $$$OK
-	Q:oper="del" $$$OK
-	Q:oper="ban" ..Ban(.args)
-	d ..wOut(.args)
-	Quit $$$OK
+    m args=%request.Data
+    #; модуль редактирования в ячейке не умеет отправлять postData
+    #; поэтому обновляем контрагента любым способом (например при загрузке товара)
+    if $d(args("kontr")) s %session.Data("kontr")=$g(args("kontr",1))
+    s oper=$g(args("oper",1))
+    Q:oper="add" $$$OK
+    Q:oper="edit" $$$OK
+    Q:oper="del" $$$OK
+    Q:oper="ban" ..Ban(.args)
+    #;бан на список товаров
+    Q:oper="banlist" ..BanList(.args)
+    d ..wOut(.args)
+    Quit $$$OK
 ]]></Implementation>
 </Method>
 
@@ -41,7 +43,7 @@
  d ..BuildWhere(.args,.where,.qp)
 
  s total=..GetTotal(sql_where,.qp)  ;всего записей с такими параметрами будет ?
-	
+    
  #; проверяем корретность номера страницы
  s pages=total\rows ;целых страниц
  s:total#rows>0 pages=pages+1 ;учтем остаток
@@ -58,6 +60,7 @@
  s sql="Select ID From Goods.GoodsGroup "_where_order
  
  s rs=##class(%ResultSet).%New("%DynamicQuery:SQL")
+ #;w !,sql
  d rs.Prepare(sql)
  #; этот тип запроса только 16 параметров
  #; но используется только 2 - группа и, возможно, наименование
@@ -70,7 +73,7 @@
  #define qt(%str) $tr(..QuoteJS(%str),"'","""")
  s first=1
  while rs.Next() {
-	
+    
   s count=count+1 ;номер текущей строки
   if count<min continue   ;пропускаем
   if count>max Q  ;прекращаем
@@ -80,9 +83,9 @@
   k id s id=$g(rs.Data("ID"))
   d ..wJson(id,.args) 
  
-	}
-	d rs.Close(),rs.%Close() k rs
-	
+    }
+    d rs.Close(),rs.%Close() k rs
+    
  w "],""page"":""",page,""",""records"":""",total,""",""total"":""",pages,"""}"
  Q ""
 ]]></Implementation>
@@ -92,21 +95,21 @@
 <ClassMethod>1</ClassMethod>
 <FormalSpec><![CDATA[&args:%String,&where:%String,&qp:%String]]></FormalSpec>
 <Implementation><![CDATA[
-	#; обязательно группа
-	s group=$g(args("group",1)), where=where_" And Groups = ? ", qp($i(qp))=group
-	
-	s kontr=$g(args("kontr",1)), kontr=$zstrip(kontr,"<>W") ;обязательный параметр
-	if kontr="" {
-		s where=where_" And ID =-1 " ;невыполнимое условие или нарушение структуры
-	}
-	
-	if $d(args("_search")) { //в режиме поиска
-		if $d(args("name")) {
-			s where=where_" AND Goods->FullName Like ? "
-			s name=$g(args("name",1)),  qp($i(qp))="%"_$tr(name,"%")_"%"
-			
-		}	
-	}
+    #; обязательно группа
+    s group=$g(args("group",1)), where=where_" And Groups = ? ", qp($i(qp))=group
+    
+    s kontr=$g(args("kontr",1)), kontr=$zstrip(kontr,"<>W") ;обязательный параметр
+    if kontr="" {
+        s where=where_" And ID =-1 " ;невыполнимое условие или нарушение структуры
+    }
+    
+    if $d(args("_search")) { //в режиме поиска
+        if $d(args("name")) {
+            s where=where_" AND Goods->FullName Like ? "
+            s name=$g(args("name",1)),  qp($i(qp))="%"_$tr(name,"%")_"%"
+            
+        }   
+    }
 ]]></Implementation>
 </Method>
 
@@ -115,13 +118,13 @@
 <FormalSpec><![CDATA[&args:%String]]></FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
-	s order=""
-	if $d(args("sidx")){ //задана сортировка
-	 #;сортировка возможна по единственному полю - наименование
-		s sord=$g(args("sord",1)) //без проверки
-		s order=" ORDER BY Goods->FullName "_sord
-	}	
-	Q order
+    s order=""
+    if $d(args("sidx")){ //задана сортировка
+     #;сортировка возможна по единственному полю - наименование
+        s sord=$g(args("sord",1)) //без проверки
+        s order=" ORDER BY Goods->FullName "_sord
+    }   
+    Q order
 ]]></Implementation>
 </Method>
 
@@ -132,15 +135,15 @@
 <FormalSpec><![CDATA[sql:%String,&qp:%String]]></FormalSpec>
 <ReturnType>%Integer</ReturnType>
 <Implementation><![CDATA[
-	s total=0
-	s rs=##class(%ResultSet).%New("%DynamicQuery:SQL")	
-	d rs.Prepare(sql)
-	d rs.Execute($g(qp(1)),$g(qp(2)))
-	while rs.Next() {
-		s total=+$g(rs.Data("total"))
-	}
-	d rs.Close(),rs.%Close() k rs
-	Q total
+    s total=0
+    s rs=##class(%ResultSet).%New("%DynamicQuery:SQL")  
+    d rs.Prepare(sql)
+    d rs.Execute($g(qp(1)),$g(qp(2)))
+    while rs.Next() {
+        s total=+$g(rs.Data("total"))
+    }
+    d rs.Close(),rs.%Close() k rs
+    Q total
 ]]></Implementation>
 </Method>
 
@@ -153,9 +156,9 @@
   w "{""id"":",$$$qt(id)
   s (name,kban)="" 
   &sql(Select Goods->FullName, Goods.Goods_kbanned(Goods,:kontr) 
-  									Into :name, :kban 
-  									From Goods.GoodsGroup 
-  									Where ID=:id
+                                    Into :name, :kban 
+                                    From Goods.GoodsGroup 
+                                    Where ID=:id
   )
   w ",""name"":",$$$qt(name)
   w ",""kban"":",$$$qt(kban)
@@ -170,17 +173,54 @@
 <FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	
-	s gg=$g(args("gg",1)), kontr=$g(args("kontr",1)), unban=$g(args("unban",1))
-	s good=""
-	&sql(Select goods Into :good From Goods.GoodsGroup Where ID=:gg)
-	if unban {
-			d ##class(Goods.Goods).kbanDel(good,kontr)
-	} else {
-		 d ##class(Goods.Goods).kbanAdd(good,kontr)
-	}
-	w "true"
-	
+    
+    s gg=$g(args("gg",1)), kontr=$g(args("kontr",1)), unban=$g(args("unban",1))
+    s good=""
+    &sql(Select goods Into :good From Goods.GoodsGroup Where ID=:gg)
+    if unban {
+            d ##class(Goods.Goods).kbanDel(good,kontr)
+    } else {
+         d ##class(Goods.Goods).kbanAdd(good,kontr)
+    }
+    w "true"
+    
+ Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="BanList">
+<Description>
+Установка запрета на несколько идентификаторов товара сразу</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    s ids=$g(args("ids",1)), kontr=$g(args("kontr",1)), ban=+$g(args("ban",1))
+    i $i(^mtempAr("BanList"))
+    m ^mtempAr("BanList","ids")=ids
+    m ^mtempAr("BanList","kontr")=kontr
+    m ^mtempAr("BanList","ban")=ban
+    s ggs=$LFS(ids),p=0,gg="", err=""
+    s sc=1, err=""
+    #;TSTART
+    while $LISTNEXT(ggs,p,gg){
+        s good=""
+        if ##class(Goods.GoodsGroup).%ExistsId(gg){
+            s good=##class(Goods.GoodsGroup).GoodsGetStored(gg)
+        }
+        if ban {
+            s sc=sc & ##class(Goods.Goods).kbanAdd(good,kontr,.err) 
+        } else {
+            s sc=sc & ##class(Goods.Goods).kbanDel(good,kontr)
+        }
+        
+    }
+    #; if 'sc TROLLBACK  w "false" Q $$$OK
+    
+    #;TCOMMIT
+    w:sc "true"
+    w:'sc "false,",err
+    
  Q $$$OK
 ]]></Implementation>
 </Method>
@@ -193,8 +233,6 @@
 <IndexLocation>^json.GoodsRightsI</IndexLocation>
 <StreamLocation>^json.GoodsRightsS</StreamLocation>
 <Data name="GoodsRightsDefaultData">
-<Structure>listnode</Structure>
-<Subscript/>
 <Value name="1">
 <Value>%%CLASSNAME</Value>
 </Value>
