@@ -1,4 +1,10 @@
 <script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+/* СТРАНИЦА УСТАРЕЛА
+*
+*  ВМЕСТО НЕЕ ИСПОЛЬЗУЕТСЯ КЛАСС csp.screen.chet2
+*
+*/
+
 if %request.Get("word")="on"
 {
  set %response.ContentType = "application/msword"
@@ -82,96 +88,97 @@ if %request.Get("word")="on"
 
 <html>
 
-	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
-		<meta http-equiv="Content-Language" content="ru">
-		<style>
-			.xlsFont { font-family: Arial; font-size: 9pt }
-			td { font-family: Arial; font-size: 9pt }
-		</style>
-	<title>Счёт #($G(docname))#</title>
-	</head>
-	
-	<body>
-	<p class="xlsFont">
-		<b>ПОСТАВЩИК #($G(ppname))#<br />
-		Адрес: #($G(ppadress))#	
-	</b>	
-	</p>
-	<p style="margin: 40px">
-	<table><tr><td>
-	<p align="center" style="margin: 2px"><b>Образец заполнения платежного поручения</b></p>
-	<table cellpadding="2" cellspacing="0" border="1" style="border-collapse: collapse" bordercolor="#000000">
-		<tr>
-			<td style="border-bottom: 0px;"><b>Получатель:</b></td>
-			<td style="border-bottom: 0px;" width="80">&nbsp;</td>
-			<td style="border-bottom: 0px;">&nbsp;</td>
-		</tr>
-		<tr>
-			<td style="border-top: 0px"><b>#($G(ppname))# ИНН #($G(ppinn))# КПП #($G(ppkpp))#</b></td>
-			<td style="border-top: 0px"><b>Сч</b></td>
-			<td style="border-top: 0px"><b>
-			#($G(pprsch))#</b></td>
-		</tr>
-		<tr>
-			<td style="border-bottom: 0px">
-			<b>Банк получателя</b></td>
-			<td><b><span lang="ru">БИК</span></b></td>
-			<td style="border-bottom: 0px"><b>#($G(ppbik))#</b></td>
-		</tr>
-		<tr>
-			<td style="border-top: 0px"><b>#($G(ppbankname))# #($G(ppbankcity))#</b><br /><br /></td>
-			<td valign="top"><b><span lang="ru">Сч</span></b></td>
-			<td valign="top" style="border-top: 0px"><b>#($G(ppksch))#</b></td>
-		</tr>
-		<tr>
-			<td>&nbsp;</td>
-			<td>&nbsp;</td>
-			<td>&nbsp;</td>
-		</tr>
-	</table>
-	</td>
-	</tr></table>
-	</p>
-	
-	<p style="margin: 40px" class="xlsFont">
-		<b>Счет No #($G(docname))# ОТ #($G(docdate))#.</b>
-	</p>	
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+        <meta http-equiv="Content-Language" content="ru">
+        <style>
+            .xlsFont { font-family: Arial; font-size: 9pt }
+            td { font-family: Arial; font-size: 9pt }
+        </style>
+    <title>Счёт #($G(docname))#</title>
+    </head>
+    
+    <body>
+    <p class="xlsFont">
+        <b>ПОСТАВЩИК #($G(ppname))#<br />
+        Адрес: #($G(ppadress))# 
+    </b>    
+    </p>
+    <p style="margin: 40px">
+    <table><tr><td>
+    <p align="center" style="margin: 2px"><b>Образец заполнения платежного поручения</b></p>
+    <table cellpadding="2" cellspacing="0" border="1" style="border-collapse: collapse" bordercolor="#000000">
+        <tr>
+            <td style="border-bottom: 0px;"><b>Получатель:</b></td>
+            <td style="border-bottom: 0px;" width="80">&nbsp;</td>
+            <td style="border-bottom: 0px;">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="border-top: 0px"><b>#($G(ppname))# ИНН #($G(ppinn))# КПП #($G(ppkpp))#</b></td>
+            <td style="border-top: 0px"><b>Сч</b></td>
+            <td style="border-top: 0px"><b>
+            #($G(pprsch))#</b></td>
+        </tr>
+        <tr>
+            <td style="border-bottom: 0px">
+            <b>Банк получателя</b></td>
+            <td><b><span lang="ru">БИК</span></b></td>
+            <td style="border-bottom: 0px"><b>#($G(ppbik))#</b></td>
+        </tr>
+        <tr>
+            <td style="border-top: 0px"><b>#($G(ppbankname))# #($G(ppbankcity))#</b><br /><br /></td>
+            <td valign="top"><b><span lang="ru">Сч</span></b></td>
+            <td valign="top" style="border-top: 0px"><b>#($G(ppksch))#</b></td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+        </tr>
+    </table>
+    </td>
+    </tr></table>
+    </p>
+    
+    <p style="margin: 40px" class="xlsFont">
+        <b>Счет No #($G(docname))# ОТ #($G(docdate))#.</b>
+    </p>    
 
-	<p class="xlsFont">
-		<b>Заказчик: #($G(zpname))# АДРЕС: #($G(zpadress))#<br />
-		Плательщик: #($G(zpname))# АДРЕС: #($G(zpadress))#<br /><br />	
-		Договор N_______________от__________________<br /></b>	
-	</p>	
-		
-	<table cellpadding="2" style="border-collapse: collapse" border="1" bordercolor="#000000">
-		<tr>
-			<td><b>N п/п</b></td>
-			<td width="323"><b>Наименование</b></td>
-			<td><b>Ед.изм</b></td>
-			<td><b>Кол-во</b></td>
-			<td><b>Цена</b></td>
-			<td><b>Цена с НДС</b></td>
-			<td><b>Сумма</b></td>
-		</tr>
-		<tr>
-			<td>&nbsp;</td>
-			<td></td>
-			<td>&nbsp;</td>
-			<td>&nbsp;</td>
-			<td><b>(<span lang="ru">руб</span>)</b></td>
-			<td><b>(<span lang="ru">руб</span>)</b></td>
-			<td><b>(<span lang="ru">руб</span>)</b></td>
-		</tr>
+    <p class="xlsFont">
+        <b>Заказчик: #($G(zpname))# АДРЕС: #($G(zpadress))#<br />
+        Плательщик: #($G(zpname))# АДРЕС: #($G(zpadress))#<br /><br />  
+        Договор N_______________от__________________<br /></b>  
+    </p>    
+        
+    <table cellpadding="2" style="border-collapse: collapse" border="1" bordercolor="#000000">
+        <tr>
+            <td><b>N п/п</b></td>
+            <td width="323"><b>Наименование</b></td>
+            <td><b>Ед.изм</b></td>
+            <td><b>Кол-во</b></td>
+            <td><b>Цена</b></td>
+            <td><b>Цена с НДС</b></td>
+            <td><b>Сумма</b></td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td></td>
+            <td>&nbsp;</td>
+            <td>&nbsp;</td>
+            <td><b>(<span lang="ru">руб</span>)</b></td>
+            <td><b>(<span lang="ru">руб</span>)</b></td>
+            <td><b>(<span lang="ru">руб</span>)</b></td>
+        </tr>
 
  <script language="cache" runat="server">
+ s (summaotnds,summabeznds,price,NdsDescription)=""
  d:$ISOBJECT(doc.Items)
  . s tot=0,totquant=0
  . s i="" f  s i=doc.Items.Next(i) q:i=""  d
  . . s item=doc.Items.GetAt(i)
  . . s:$ISOBJECT(item.Goods) goods=item.Goods.FullName
  . . s quant=item.Quantity
- . . Q:quant=0	//ПРОПУСКАЕМ строки с нулевым количеством
+ . . Q:quant=0  //ПРОПУСКАЕМ строки с нулевым количеством
  . . i $I(count)
  . . s itempr=item.Price
  . . if NDSinside="false" d  //если НДС НЕ включён в цену товара
@@ -202,42 +209,42 @@ if %request.Get("word")="on"
  s VsegoKOplate=tot
  i NDSinside="false" s ItogoBezNDS=$J(VsegoKOplate*antinds,".",2),ItogoNDS=VsegoKOplate-ItogoBezNDS
 </script>
-		<tr>
-			<td colspan="6" align="right"><b>Итого без НДС:</b></td>
-			<td><b>#($G(ItogoBezNDS))#</b></td>
-		</tr>
-		<tr>
-			<td colspan="6" align="right"><b>Итого НДС:</b></td>
-			<td><b>#($G(ItogoNDS))#</b></td>
-		</tr>
-		<tr>
-			<td colspan="6" align="right"><b>Всего к оплате:</b></td>
-			<td><b>#($G(VsegoKOplate))#</b></td>
-		</tr>
-	</table>
-	
-	<p>#(NdsDescription)#</p>
-	<p class="xlsFont"><b>К оплате: 
-			<script src="./screen/ru_convert_moneyvalue.js" language="javascript"></script>
-			<script language="javascript">
-				document.write("<b>"+ru_convert_moneyvalue("#(+$G(VsegoKOplate))#")+"</b>");
-			</script>	
-	
+        <tr>
+            <td colspan="6" align="right"><b>Итого без НДС:</b></td>
+            <td><b>#($G(ItogoBezNDS))#</b></td>
+        </tr>
+        <tr>
+            <td colspan="6" align="right"><b>Итого НДС:</b></td>
+            <td><b>#($G(ItogoNDS))#</b></td>
+        </tr>
+        <tr>
+            <td colspan="6" align="right"><b>Всего к оплате:</b></td>
+            <td><b>#($G(VsegoKOplate))#</b></td>
+        </tr>
+    </table>
+    
+    <p>#(NdsDescription)#</p>
+    <p class="xlsFont"><b>К оплате: 
+            <script src="./screen/ru_convert_moneyvalue.js" language="javascript"></script>
+            <script language="javascript">
+                document.write("<b>"+ru_convert_moneyvalue("#(+$G(VsegoKOplate))#")+"</b>");
+            </script>   
+    
 <script language="cache" runat="server">
-	if +$G(ItogoNDS)
-	{
-		w "<br>В том числе НДС: "
-		w "<script language=""javascript"">",!
-		w "document.write('<b>'+ru_convert_moneyvalue('"_ItogoNDS_"')+'</b>');",!
-		w "</"_"script>",!
-	}
+    if +$G(ItogoNDS)
+    {
+        w "<br>В том числе НДС: "
+        w "<script language=""javascript"">",!
+        w "document.write('<b>'+ru_convert_moneyvalue('"_ItogoNDS_"')+'</b>');",!
+        w "</"_"script>",!
+    }
 
 </script>
-	</b></p>
-	<p class="xlsFont" style="margin: 40px;"><b>
-	Руководитель предприятия_____________________<br /><br />	
-	Главный бухгалтер____________________________
-	</b>
-	</p>	
-	</body>
+    </b></p>
+    <p class="xlsFont" style="margin: 40px;"><b>
+    Руководитель предприятия_____________________<br /><br />   
+    Главный бухгалтер____________________________
+    </b>
+    </p>    
+    </body>
 </html>
