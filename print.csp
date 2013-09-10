@@ -18,19 +18,23 @@
  Set:class="Docs.Rash" %response.ServerSideRedirect="screen/rash.csp?id="_id
  Set:class="Docs.Prih" %response.ServerSideRedirect="screen/prih.csp?id="_id
  Set:class="factura" %response.ServerSideRedirect="screen/factura.csp?id="_id_"&kontr="_kontr2_"&kontr2="_kontr
- Set:class="Docs.Chet" %response.ServerSideRedirect="screen/chet.csp?id="_id_"&kontr="_kontr_"&kontr2="_kontr2
+ if class="Docs.Chet" {
+  #;s %response.ServerSideRedirect="screen/chet.csp?id="_id_"&kontr="_kontr_"&kontr2="_kontr2
+  s %response.ServerSideRedirect="csp.screen.chet2.cls?id="_id_"&kontr="_kontr_"&kontr2="_kontr2
+ }
  Set:class="Docs.Inner" %response.ServerSideRedirect="screen/inner.csp?id="_id
  Set:class="Docs.Otchet" %response.ServerSideRedirect="screen/otchet2.csp?id="_id
  Set:class="Docs.PrihKassOrder" %response.ServerSideRedirect="screen/prihorder.csp?id="_id
  Set:class="Docs.StorageOut" %response.ServerSideRedirect="screen/instrotbor.csp?id="_id_"&class="_class
  Set:class="Docs.StorageIn" %response.ServerSideRedirect="screen/instrotbor.csp?id="_id_"&class="_class
- Set:class="tovnakladn" %response.ServerSideRedirect="screen/tovnakl.csp?id="_id_"&kontr="_kontr_"&kontr2="_kontr2_"&kontr3="_kontr3_"&kontr4="_kontr4_"&nomernakladnoy="_nomnaklad
+ Set:class="tovnakladn" %response.ServerSideRedirect="screen/torg12.csp?id="_id_"&kontr="_kontr_"&kontr2="_kontr2_"&kontr3="_kontr3_"&kontr4="_kontr4_"&nomernakladnoy="_nomnaklad
  Set:class="Docs.InnerDiff" %response.ServerSideRedirect="screen/InnerDiff.csp"
  Set:class="Docs.Invent" %response.ServerSideRedirect="screen/invent.csp"
  Set:class="Docs.Act" %response.ServerSideRedirect="screen/Act.csp"
  Set:class="Docs.ActNote" %response.ServerSideRedirect="screen/actnote.csp"
  Set:class="Docs.Brakremont" %response.ServerSideRedirect="screen/Brakremont.csp"
  Set:class="Docs.Platejka" %response.ServerSideRedirect="csp.PaymentOrderView.cls"
+ Set:class="Docs.Sluzap" %response.ServerSideRedirect="screen/sluzap.csp"
  
 Quit 1
 </script>
