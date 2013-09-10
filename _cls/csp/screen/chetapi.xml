@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.screen.chetapi">
+<Description>
+Повторяющиеся блоки кода при составления счета</Description>
+<Abstract>1</Abstract>
+<TimeCreated>63070,6845.006093</TimeCreated>
+
+<Method name="KontrLoad">
+<Description>
+"Безопасная" загрузка свойств контрагента в массив ключ-значение</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>kid:%String,*props:%String=""</FormalSpec>
+<Implementation><![CDATA[
+
+ s kontr=##class(Common.Kontragent).%OpenId(kid,,.sc) Q:'sc 
+ Q:'$Isobject(kontr)
+ s props("name")= kontr.Name
+ s props("shortname") = kontr.Pseudonym
+ s props("adress") = kontr.Address
+ s bank = kontr.bank Q:'$IsObject(bank)
+ s props("bankname") = bank.pbank
+ s props("bankcity") = bank.city
+ s props("kpp") = bank.kpp
+ s props("inn") = bank.inn
+ s props("bik") = bank.bik
+ s props("rsch") = bank.rsch
+ s props("ksch") = bank.ksch
+ s props("code") = bank.code
+ s props("okpo") = bank.okpo
+ s props("postalcodeur") = kontr.PostalcodeUr
+ s props("cityur") = kontr.CityUr
+ s props("addressur") = kontr.AddressUr
+ 
+ k bank, kontr
+]]></Implementation>
+</Method>
+
+<Method name="GetData">
+<Description>
+Собираем данные из запроса</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ProcedureBlock>0</ProcedureBlock>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ 
+ #define g(%name) $g(args(%name))
+
+ 
+ s docid=$$$g("id")
+ s DocDate=$$$g("DocDate")
+ s docname="Платежное поручение"
+ s NDSinside=$$$g("NDSinside")
+ s CalculateInRubles=$$$g("CalculateInRubles")
+ 
+ i NDSinside="true" s NdsDescription="НДС включен в цену товара"
+ i NDSinside="false" s NdsDescription="НДС не включен в цену товара"
+]]></Implementation>
+</Method>
+
+<Method name="wRows">
+<Description>
+Выводит строки и подсчитывает итого
+kurs - курс 
+NDSinside - включить ндс в стоимость товара
+total - итого (массив)</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>docid:%String,*total:%String="",incNDS:%Boolean=0</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+    
+ s (summaotnds,summabeznds,price,NdsDescription)=""
+  
+ s doc = ##class(Docs.Rash).%OpenId( docid ) Q:'$ISOBJECT(doc.Items) ""
+ 
+ #; всегда пересчитываем в рубли
+ #; взял из screen/chet.csp
+ s kurs=doc.kurs if '+kurs s kurs=doc.RubSumma/doc.Summa
+ s waste=##class(Goods.GoodsAction).kurs(.other) 
+ s:'+$G(kurs) kurs=waste
+ 
+ 
+
+ s totsum=0, totquant=0, count=0
+ s i="" for { s item=doc.Items.GetNext(.i) q:i=""  
+ 
+    s goods="" s:$IsObject(item.Goods) goods=item.Goods.FullName
+    s quant=item.Quantity if quant=0 continue  ;ПРОПУСКАЕМ строки с нулевым количеством
+    
+    s price = $J(( item.Price * kurs ),".",2) ;всегда переводим в рубли
+    , sum = price * quant
+    
+    s count = count + 1 ;порядковый номер строки
+    , totsum = totsum + sum ;итоговая сумма
+    , totquant = totquant + quant ;итоговое количество
+    
+    k row s row("count")=count, row("goods")=goods
+    , row("quant")=quant, row("price")=price
+    , row("sum")=sum
+    
+    #; для отладки
+    s row("kurs")=kurs, row("iprice") = item.Price
+    
+    d ..wRow(.row)
+
+ }
+ s total("summa")=totsum
+ s total("count")=count
+ s total("amount")=totquant
+  
+  Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wRow">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&row:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+
+ #define row(%name) $g(row(%name))
+
+ &html<<tr height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 class=xl1510184 style='height:11.85pt'></td>
+  <td colspan=2 class=xl8710184>#( $$$row("count") )#</td>
+  <td colspan=18 class=xl8810184 width=326 style='width:248pt'>
+  #( $zcvt( $$$row("goods"), "O", "HTML" ) )#
+  </td>
+  <td colspan=3 class=xl8910184>#( $$$row("quant") )#</td>
+  <td colspan=3 class=xl9010184>шт</td>
+  <td colspan=5 class=xl9210184>#( $$$row("price") )#</td>
+  <td colspan=6 class=xl9310184>#( $$$row("sum") )#</td>
+ </tr>>
+ 
+ #;<!--tr><td colspan=37>  #( $$$row("iprice"))# * #( $$$row("kurs") )#  </td></tr>
+ 
+ Q ""
+]]></Implementation>
+</Method>
+
+<Method name="GetStoredProperty">
+<Description>
+Вернет значение хранимого свойства хранимого класса для ид</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>class:%String="",prop:%String="",id:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ Q:$g(class)="" "" Q:$g(prop)="" "" Q:$g(id)="" "" 
+ s $zt="onGSPError"
+ s val = $zobjclassmethod(class, prop_"GetStored", id)
+ Q val     
+ 
+onGSPError
+    s $zt="", $ze=""
+    Q ""
+]]></Implementation>
+</Method>
+
+<Method name="GetObjectProperty">
+<Description>
+Разбирает цепочечный синтаксис и получает значение свойства</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>obj:%ObjectHandle,property:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s $zt="onGOPError" 
+ s val=obj
+ for i=1:1:$l(property,".") {
+    s val = $zobjproperty(val, $p(property,".",i))
+ }
+ Q val
+
+onGOPError
+   s $zt="", $ze=""
+   Q ""
+]]></Implementation>
+</Method>
+</Class>
+</Export>
