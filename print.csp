@@ -27,7 +27,16 @@
  Set:class="Docs.PrihKassOrder" %response.ServerSideRedirect="screen/prihorder.csp?id="_id
  Set:class="Docs.StorageOut" %response.ServerSideRedirect="screen/instrotbor.csp?id="_id_"&class="_class
  Set:class="Docs.StorageIn" %response.ServerSideRedirect="screen/instrotbor.csp?id="_id_"&class="_class
- Set:class="tovnakladn" %response.ServerSideRedirect="screen/torg12.csp?id="_id_"&kontr="_kontr_"&kontr2="_kontr2_"&kontr3="_kontr3_"&kontr4="_kontr4_"&nomernakladnoy="_nomnaklad
+ 
+ if class="tovnakladn" {
+    s args("id") = id, args("kontr") = kontr
+    , args("kontr2") = kontr2, args("kontr3") = kontr3
+    , args("kontr4") = kontr4, args("nomernakladnoy") = nomnaklad 
+    
+    s url = "csp.screen.torg12v2.cls" ;s url = "screen/torg12.csp"
+    s %response.ServerSideRedirect=..Link(url,.args)
+ }
+ 
  Set:class="Docs.InnerDiff" %response.ServerSideRedirect="screen/InnerDiff.csp"
  Set:class="Docs.Invent" %response.ServerSideRedirect="screen/invent.csp"
  Set:class="Docs.Act" %response.ServerSideRedirect="screen/Act.csp"
