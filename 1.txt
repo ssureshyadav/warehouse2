@@ -4,8 +4,8 @@ PKZIP Reg. U.S. Pat. and Tm. Off.  Patent No. 5,051,745
  
   Encrypting files
 
-Updating .ZIP: C:/SKLAD/RemCl/329/GoodsGr.zip
-Updating File: GoodsGr.txt  Deflating        (75.3%), Encrypting, done.
+Updating .ZIP: C:/SKLAD/RemCl/381/GoodsGr.zip
+Updating File: GoodsGr.txt  Deflating        (74.3%), Encrypting, done.
 
 Moving 1 files...
-Moved File: C:/SKLAD/RemCl/329/GoodsGr.txt , done.
+Moved File: C:/SKLAD/RemCl/381/GoodsGr.txt , done.

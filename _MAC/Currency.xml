@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Routine name="Currency" type="MAC" languagemode="0"><![CDATA[
+#include xmlmacros
+ 
+UpdateRatesFromRBC(Date)
+ n currcode,httprequest,scode,stream,url,Date,mm,yyyy,dd,ok,res,RateObj
+ s $zt="UpdateRatesFromRBCErr"
+ s currcode=840	//доллар. см http://www.forex4you.org/forex/currency/codes.html
+ s Date=$G(Date,+$H)
+ s yyyy=$P($ZD(Date,4),"/",3)
+ s mm=$P($ZD(Date,4),"/",2)
+ s dd=$P($ZD(Date,4),"/",1)
+ s httprequest=##class(%Net.HttpRequest).%New()
+ s stream=##class(%GlobalCharacterStream).%New()
+ s httprequest.Server="cbrates.rbc.ru"
+ //s httprequest.Server="80.68.240.120"
+ s httprequest.ResponseStream=stream
+ n res,Err
+ s url="/tsv/"_currcode_"/"_yyyy_"/"_mm_"/"_dd_".tsv"
+ s res=httprequest.Get(url)
+ //w "http://"_httprequest.Server_"/"_url,!
+ if '+res q $$GetOneErrorText^%apiOBJ(res,1)
+ ; RFC 2616, HTTP/1.1: Status Code Definitions
+ s scode=httprequest.HttpResponse.StatusCode
+ if scode'=200 d  b  q "Не удалось получить от сервера RBC. Курс для валюты не загружен."
+ ;
+ // Очищаем курсы валют за диапазон
+ n str,dt,rate
+ s stream.LineTerminator=$c(10)
+ d stream.Rewind()
+ s str=stream.ReadLine()
+ s rate=$tr($p(str,$c(9),2),",",".")
+ k stream
+ s RateObj=##class(Common.Dictionary16).%New()
+ s RateObj.Dat=Date
+ s RateObj.Name=rate
+ s ok= RateObj.%Save()
+ if '+ok $$$WriteObjError(ok) q
+ $$$SetTunesVariableGlobal("innerkurs",rate)
+ &sql(update Store.Measures set Factor=:rate where id=8)
+ q 1
+UpdateRatesFromRBCErr
+ $$$WriteError($ZE)
+ q $ZE
+]]></Routine>
+</Export>

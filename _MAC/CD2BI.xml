@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Routine name="CD2BI" type="MAC" languagemode="0"><![CDATA[
+ s sc=##class(Common.Dictionary2).%BuildIndices($LB("serialInd"),1)
+ s ^test=sc
+]]></Routine>
+</Export>
