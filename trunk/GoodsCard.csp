@@ -19,9 +19,11 @@ Quit 1
 <style>
 .sved.TD{border-left : 1 solid grey;border-top : 1 solid grey;}
 .sved{border-right : 1 solid grey;border-bottom : 1 solid grey;}
+.btn{font-family: tahoma; }
 </style>
-<script language="Jscript" src="common.js"></script>
-<script language="JScript">
+<script src="js/jquery-1.6.4.min.js" type="text/javascript"></script>
+<script language="Javascript" src="common.js"></script>
+<script language="JavaScript" type="text/javascript">
 var NodeData = new Array();
 sessionid="#(%session.SessionId)#";
 
@@ -34,10 +36,10 @@ window.close();
 
 function load(){
 TovName.innerText=GoodsName;
-Movement.AddColumns("docdata~Дата~~~@%String#@#doctype~Тип документа~~~@%String#@#Kontr~Контрагент~~~@%String#@#doc~Документ~~~@%String#@#prih~Приход~~~@%String#@#rash~Расход~~~@%String#@#kol~Количество~~~@%String#@#cena~Цена~~~@%String#@#");
+//Movement.AddColumns("docdata~Дата~~~@%String#@#doctype~Тип документа~~~@%String#@#Kontr~Контрагент~~~@%String#@#doc~Документ~~~@%String#@#prih~Приход~~~@%String#@#rash~Расход~~~@%String#@#kol~Количество~~~@%String#@#cena~Цена~~~@%String#@#");
 kontra.LoadHeaders();
 PropTable.DownLoadPairs('',GoodsId);
-GetDocsByTovar();
+//GetDocsByTovar();
 tovaddress.loadfrommethod("Store.Action.GetAddrByTovar",GoodsId,1,1)
 }
 
@@ -56,6 +58,21 @@ function RemoveFromGroup(Groups,Goods){
 	var ok=#server(Goods.GoodsAction.RemoveFromGroup(Goods,Groups))#
 	if(isNaN(ok)){alert(ok);}
 	else{document.getElementById("li"+Groups).style.display="none";}
+}
+
+//скрыть/показать таблицу свойств товара
+function ShowHideProps()
+{
+	if ( $("#PropTable").css("display")=="block" )
+	{
+		$("#PropTable").css("display","none");
+		$("#btnShowHide").val("показать");
+	}
+	else
+	{
+		$("#PropTable").css("display","block");
+		$("#btnShowHide").val("скрыть");
+	}
 }
 </script>
 </head>
@@ -94,20 +111,24 @@ function RemoveFromGroup(Groups,Goods){
 </table><br>
 <SKLADList:listview width=100% height=100 id="tovaddress" />
 <br>
-<input type="button" value="Изображения товара" onclick="showtovar('#(GoodsId)#')">
-</td><td>
-<fieldset><legend>Сведения о товаре</legend>
-<SKLAD2:table id="PropTable" width=250 />
+<input type="button" value="Изображения товара" onclick="showtovar('#(GoodsId)#')"><br><br>
+<input type="button" value="Движение товара" onclick="window.open('Reports/InOut.csp?GoodsId=#(GoodsId)#&sessionid=#(%session.SessionId)#')">
+</td><td valign="top">
+<fieldset><legend>Сведения о товаре <input type="button" value="скрыть" id="btnShowHide" onclick="ShowHideProps()"></legend>
+<SKLAD2:table id="PropTable" width=450 style="display:block;margin:5px"/>
 </fieldset>
 </td></tr>
 
 <tr><td width=100% align=center colspan=2 valign=top>
+<!--
 <fieldset><legend>Движение товара c <input type=text id="dat1" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"> по <input type=text id="dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar">
 <select id="selkont"><option value=1>Все контрагенты</option><option value=2>Выбранный контрагент</option></select>
 <sklad:LittleButton name="ok" id="okbut" onclick="GetDocsByTovar()" alt="Показать документы"><br>
 </legend>
 	<SKLADList:listview width=100% height=100 id="Movement" />
 </fieldset>
+-->
+
 </td></tr>
 <tr height=100%><td valign="top" colspan=2>
 <fieldset><legend>Контрагенты товара</legend>

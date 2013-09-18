@@ -15,6 +15,19 @@
 </csr:ACTION>
 </csr:RULE>
 
+<csr:RULE name="SkladButtonDiv" match="sklad:ButtonDiv" empty>
+<csr:ACTION>
+<script language="cache" runat="compiler">
+ s value=##this.GetAttribute("value")
+ s onclick=##this.GetAttribute("onclick")
+ s style=##this.GetAttribute("style")
+ s title=##this.GetAttribute("alt")
+ s ID=##this.GetAttribute("ID")
+</script>
+<div class=ButtonDiv ID="##($G(ID))##" style="cursor:pointer;text-align:center;display:inline;##($G(style))##" onmouseover="this.className='ButtonDivHover'" onmouseout="this.className='ButtonDiv'" onclick="##($G(onclick))##" TITLE="##($G(title))##">##($G(value))##</div>
+</csr:ACTION>
+</csr:RULE>
+
 <csr:RULE name="SkladButton" match="sklad:Button" empty>
 <csr:ACTION>
 <script language="cache" runat="compiler">
@@ -55,7 +68,7 @@
  s onclick=##this.GetAttribute("onclick")
  s alt=##this.GetAttribute("alt")
 </script>
-<img src="images/##($G(name,"brace"))##.gif" onmouseover="##($G(id))##.src='images/On##($G(name,"brace"))##.gif'" onmouseout="##($G(id))##.src='images/##($G(name,"brace"))##.gif'"  id="##($G(id))##" name="##($G(id))##" alt="##($G(alt))##" onclick="##($G(onclick))##" style="##($G(style))##">
+<img src="images/##($G(name,"brace"))##.gif" onmouseover="##($G(id))##.src='images/On##($G(name,"brace"))##.gif'" onmouseout="##($G(id))##.src='images/##($G(name,"brace"))##.gif'"  id="##($G(id))##" name="##($G(id))##" title="##($G(alt))##" alt="##($G(alt))##" title="##($G(alt))##" onclick="##($G(onclick))##" style="##($G(style))##">
 </csr:ACTION>
 </csr:Rule>
 <csr:Rule name="SkladImageList" match="sklad:ImageList" empty>

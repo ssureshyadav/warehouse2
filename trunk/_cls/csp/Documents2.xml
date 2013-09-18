@@ -112,12 +112,38 @@ write заголовок страницы</Description>
 		 	}
 	 }).jqGrid('navGrid',BAR, 
        {add:false,edit:false,del:false,view:false,search:false}
-  );
+  ).jqGrid('gridResize',{});
+  
+  	/**
+	 *Автоулучшение существующих и сформированных на странице гридов
+	 *Выбираем гриды на странице по классу ui-jqgrid-btable и цепляемся к ним  
+	 **/
+	var fn_improve=function(grid){ 		
+		var $grid=$(grid);
+		
+		/**
+		 * @opt - string - опция грида которую надо получить
+		 * */
+		var fn_goget=function(opt){
+			return $(this).jqGrid("getGridParam",opt);
+		};
+		
+		var fn_goset=function(key,opt){
+			return $(this).jqGrid("setGridParam",key,opt);
+		};
+		
+		//в зависимости от версии грида 
+		alert(fn_goget("pager"));
+			
+		
+	};		
+		
+	fn_improve("#dtg");	
+  
+  
 
 });
-</script>
-
->
+</script>>
 
 	Q ""
 ]]></Implementation>

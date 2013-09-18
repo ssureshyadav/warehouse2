@@ -53,7 +53,7 @@ not set is text/html.]]></Description>
 	s sc=rs.Prepare(sql)
 	s:sc sc=rs.Execute(depot,cat,node)
 	
-	#define qt(%js) $tr(..QuoteJS(%js),"'","""")
+	#define qt(%js) """"_$zcvt(%js,"O","JS")_""""
 	s count=0
 
 	w "{""rows"":["

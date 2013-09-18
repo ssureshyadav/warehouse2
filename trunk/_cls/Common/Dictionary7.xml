@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Export generator="Cache" version="20">
 <Class name="Common.Dictionary7">
+<Description>
+Как оплачено по гарантии или платно</Description>
 <ClassType>persistent</ClassType>
 <ProcedureBlock>0</ProcedureBlock>
 <Super>%Persistent</Super>

@@ -2,6 +2,7 @@
 <script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
  s login=$G(%session.Data("user"))
  i '+login s %response.ServerSideRedirect="norights.csp" 
+ 
  q 1
 </script>
 
@@ -40,6 +41,19 @@ function startFun()
 Акт сверки с 
 <script language="cache" runat="server">
  s Kontr=$$$TunesVariableGlobal("DefaultPoluh")
+ 
+ 
+ s KontrId=%request.Get("KontrId")
+ if +KontrId
+ {
+	 s obj = ##class(Common.Kontragent).%OpenId(KontrId)
+	 if ($ISOBJECT(obj)&&($ISOBJECT(obj.OurCompany)))
+	 {
+		 s Kontr=obj.OurCompany.%Id()
+	 }
+ }
+ 
+ 
  s:Kontr KontrName=##class(Common.Kontragent).GetPropertyValue(Kontr,"Name")
  w "<B><span title=""Для того что бы сменить контрагента по умолчанию см. Настройки -> Получатель платежа по умолчанию"" onmouseout=""UnPaint(this)"" onmouseover=""Paint(this)"" class=Kontragent onclick=""ChooseKonragent(this)"" oncontextmenu=""this.innerText='';this.Tag=''"" id=""Kontr"" Tag='"_$G(Kontr)_"'>"_$G(KontrName)_"</span></b>"
 </script><br>

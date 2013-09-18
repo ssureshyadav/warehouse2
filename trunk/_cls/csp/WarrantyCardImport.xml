@@ -82,6 +82,7 @@ write заголовок на странице</Description>
 				<td colspan="2"><button style="width:98%;height:48px" type="submit">Импорт</button></td>
 			</tr>
 			<table>
+			В каждой строке файла <font face="courier">серийный номер, комментарий</font> (разделитель - символ табуляции)
 		</form>
 		>
 		Q ""
@@ -128,7 +129,8 @@ write содержимое страницы</Description>
 	for { Q:stream.AtEnd
 	;для каждой строки файла импорта
 		k str s len=32000, str=stream.ReadLine(.len) Q:len<1
-		s serial=$p(str,tab),comment=$p(str,tab,2)
+		s serial=$p(str,tab)
+		s comment=$p(str,tab,2)
 		d ..wProcess(serial, comment,status,force)
 	} //for
 	&html<</table></div><button onclick="window.close()">Закрыть</button>>
@@ -189,9 +191,9 @@ write содержимое страницы</Description>
 			s oldStatus = ##class(Common.Dictionary2).Property9194GetStored(ID)
 			s oldStatusText = ##class(Common.Dictionary2).Property9194LogicalToDisplay(oldStatus)
 						
-			if ( oldStatus=status ) || ( force ) { ; текущее состояние= выбранному режиму или  
+			if ( oldStatus=$G(status) ) || ( force ) { ; текущее состояние= выбранному режиму или  
 				&sql(UPDATE Common.Dictionary2 
-						Set Property9194=:status 
+						Set Property9194=:status
 						Where ID=:ID
 				)
 				s error=$$ERR(SQLCODE)
@@ -217,8 +219,8 @@ ERR(sqlcode)
 <Implementation><![CDATA[
 			s error=""
 			&sql(
-				INSERT INTO Common.Dictionary2 (Name,serial,Property9194,Comment)
-				VALUES (:serial,:serial,:status,:comment)
+				INSERT INTO Common.Dictionary2 (Name,Property9194,Comment,serial)
+				VALUES (:serial,:status,:comment,:serial)
 			)
 			if ( SQLCODE'=0 ) s error="Извините, "_$system.SQL.SQLCODE(SQLCODE)
 			Q error

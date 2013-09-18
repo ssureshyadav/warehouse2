@@ -23,7 +23,15 @@
  //9Завершено
  s $ZT="changestatErr"
  s instr=##class(Operation.Instructions).%OpenId(instrid)
+ 
+ 
  i '$ISOBJECT(instr) $$$WriteError("changestat Не удалось открыть инструкцию ("_instrid_") класс Operation.Instructions") q "Невозможно извлечь информацию об указанном документе в базе данных."
+ 
+ i '$ISOBJECT(instr.Oper) q "Извините, эту операцию невозможно выполнить. Для инструкции не установлен шаблон операции, пожалуйста установите его перед завершением инструкции."
+ 
+ //30.11.2012 Запрещаем завершать инструкции без внутренних инструкций
+ if (instr.Oper.%Id()=10),newstat=9,'$ISOBJECT(instr.innerinstr) q "Извините, невозможно завершить инструкцию, так как к ней не привязана внутренняя инструкция. Пожалуйста, закройте внутреннюю инструкцию в разделе Рабочее место на складе."
+ 
  s oldstat=instr.State
  i newstat=2 d
  . i (oldstat'=1)&(oldstat'=9) s err="Инструкция уже утверждена" q
@@ -370,11 +378,11 @@ KillRashChild(ChildId)
 	s str="<table border=1>"
 	s DaysCount = $$$TunesVariableGlobal("ShowInstrReminder")
 	&sql(declare ReminderCr cursor for
-		select ID,dat,Name,Kontr->Name,%external(State)
-		into :ID,:dat,:Name,:KontrName,:StateName
+		select ID,dat,Name,Kontr->Name,%external(State),State
+		into :ID,:dat,:Name,:KontrName,:StateName,:State
 		from Operation.Instructions 
 		where ({fn CURDATE()}-dat>=:DaysCount) 
-			AND (not State in (4,9))
+			AND ( not State in (9,8.6) )
 		)
 	&sql(open ReminderCr)
 	f  &sql(fetch ReminderCr) q:SQLCODE  d

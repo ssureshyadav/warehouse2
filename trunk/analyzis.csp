@@ -20,6 +20,7 @@
 </style>
 
 <script language="Jscript" src="common.js"></script>
+<script language="JavaScript" type="text/javascript" src="js/jquery-1.8.2.min.js"></script>
 <script language="JScript">
 sessionid="#(%session.SessionId)#";
 login="#(%session.Data("login"))#";
@@ -260,14 +261,14 @@ function showReport15()
 <SKLADList:listview width=100% height=200 id="report" style="display:none" onMethodComplite="this.style.display=''" ClassName="Operation.Instructions" zonDblClick="ff()"/><br>
 
 
-<hr width=80%>
+<hr width=80%>1
 <table width=100%><tr><td><nobr>Текущий остаток </nobr><td><SKLAD2:table id="PropTable" width=260 ClassName="Docs.InventItems" /><td><sklad:LittleButton name="ok" id="okbut2" onclick="showost()" alt="Показать остатки">
 <td align="right" width=100%>скрыть <input type="checkbox" style="border:0;width:15" id="rep2" CHECKED onclick="showhide(this.id)">
 </table>
 <SKLADList:listview width=100% height=200 id="report2" style="display:none" onMethodComplite="this.style.display=''" zonDblClick="gcard(this.ItemID)"/><br>
 
 
-<hr width=80%>
+<hr width=80%>2
 <table width=100% ><tr><td align=left>Поиск 
 <select id="Rep4DocsSelector">
 <option value="">Всех документов</option>
@@ -280,13 +281,13 @@ function showReport15()
 <br><font size="3" color="lightgrey">Двойной клик откроет форму печати документа</font>
 </span>
 
-<hr width=80%>
+<hr width=80%>3
 <table width=100% ><tr><td align=left>Прогноз обнуления остатков на дату <input type=text id="dat3" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"><sklad:LittleButton name="ok" id="okbut3" onclick="shownull()" alt="Показать прогноз">
 <td align="right" >скрыть <input type="checkbox" style="border:0;width:15" id="rep3" CHECKED onclick="showhide(this.id)">
 </table>
 <SKLADList:listview width=100% height=200 id="report3" style="display:none" onMethodComplite="this.style.display=''" zonDblClick="gcard(this.ItemID)"/><br>
 
-<hr width=80%>
+<hr width=80%>4
 <table width=100% ><tr><td align=left>Поиск  за период c <input type=text id="rep5dat1" value="" onclick="fnCalendar(this)" class="datar"> по <input type=text id="rep5dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"> 
 <select id="typDocsSel" >
 <script language="cache" runat="server">
@@ -299,7 +300,7 @@ function showReport15()
 </table>
 <SKLADList:listview width=100% height=200 id="report5" style="display:none" onMethodComplite="this.style.display=''" /><br>
 
-<hr width=80%>
+<hr width=80%>5
 <table width=100% ><tr><td align=left>Отправка запчастей за период c <input type=text id="rep6dat1" value="" onclick="fnCalendar(this)" class="datar"> по <input type=text id="rep6dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar">  
 Объединять марки <input type="text" id="rep6models"> в название <input type="text" id="rep6group">
 <sklad:LittleButton name="ok" id="okbut6" onclick="showReport6()" alt="Вывести документы">
@@ -307,7 +308,7 @@ function showReport15()
 </table>
 <SKLADList:listview width=100% height=200 id="report6" style="display:none" onMethodComplite="this.style.display=''" /><br>
 
-<hr width=80%>
+<hr width=80%>6
 <table width=100% ><tr><td align=left>Отправка <span title="Указать запчасти отправку которых необходимо проследить" onmouseout="UnPaint(this)" onclick="GoodsForRep7()" onmouseover="Paint(this)" style="cursor:hand">запчастей</span>  за период c <input type=text id="rep7dat1" value="#($ZD($H,4))#" onmouseout="UnPaint(this)" onmouseover="Paint(this)" onclick="fnCalendar(this)" class="datar"> по <input type=text onmouseout="UnPaint(this)" onmouseover="Paint(this)" id="rep7dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar">  
 Клиенту <span onmouseout="UnPaint(this)" onmouseover="Paint(this)" class=Kontragent onclick="ChooseKonragent(this)" id="Kontr" Tag="" title="Указать клиента, что бы очистить поле нажмите правую кнопку мыши" oncontextmenu="this.innerText='';this.Tag=''"></span>
 <sklad:LittleButton name="ok" id="okbut7" onclick="showReport7()" alt="Вывести отчёт">
@@ -317,7 +318,7 @@ function showReport15()
 </table>
 <SKLADList:listview width=100% height=200 id="report7" style="display:none" onMethodComplite="this.style.display=''" /><br>
 
-<hr width=80%>
+<hr width=80%>7
 <table width=100% ><tr><td align=left>Список контрагентов которые не заказывали запчасти c <input type=text id="rep8dat1" value="#($ZD($H-30,4))#" onmouseout="UnPaint(this)" onmouseover="Paint(this)" onclick="fnCalendar(this)" class="datar"> по <input type=text onmouseout="UnPaint(this)" onmouseover="Paint(this)" id="rep8dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar">  
 <sklad:LittleButton name="ok" id="okbut8" onclick="showReport8()" alt="Вывести отчёт">
 <br>
@@ -325,7 +326,7 @@ function showReport15()
 </table>
 <SKLADList:listview width=100% height=200 id="report8" style="display:none" onMethodComplite="this.style.display=''" /><br>
 
-<hr width=80%>
+<hr width=80%>8
 <table width=100%><tr><td align=left>
 Прогноз обнуления остатков <br>
 <span id="Rep9Result"></span>
@@ -346,7 +347,7 @@ function showReport15()
 </table>
 <SKLADList:listview width=100% height=200 id="report9" style="display:none" onMethodComplite="this.style.display=''" /><br>
 
-<hr width=80%>
+<hr width=80%>9
 <table width=100%><tr><td align=left>
 Контроль сроков обработки заявки <sklad:LittleButton name="help2" id="help10" onclick="window.open('help/index.html?AnalyzSendTermControl.html')" alt="Помощь по отчёту"><br>
 <table class="ta" cellspacing=0>
@@ -385,7 +386,7 @@ function showReport15()
 </table>
 </span>
 
-<hr width=80%>
+<hr width=80%>10
 <table width=100%><tr><td align=left>
 Запчасти которые требовал клиент и которые не были отправлены<br>
 Период c <input type=text id="rep11dat1" value="#($ZD($H-30,4))#" onmouseout="UnPaint(this)" onmouseover="Paint(this)" onclick="fnCalendar(this)" class="datar"> по <input type=text onmouseout="UnPaint(this)" onmouseover="Paint(this)" id="rep11dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"> 
@@ -395,7 +396,7 @@ function showReport15()
 </table>
 <SKLADList:listview width=100% height=200 id="report11" style="display:none" onMethodComplite="this.style.display=''" /><br>
 
-<hr width=80%>
+<hr width=80%>11 
 Суммы отгрузок по брендам (MM,TL,VC)<br>
 <table class="ta" cellspacing=0>
 <tr><td class="td">Период c <input type=text id="rep12dat1" value="#($ZD($H-30,4))#" onmouseout="UnPaint(this)" onmouseover="Paint(this)" onclick="fnCalendar(this)" class="datar"> по <input type=text onmouseout="UnPaint(this)" onmouseover="Paint(this)" id="rep12dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"></td><td class="td" rowspan="3"><sklad:LittleButton name="ok" id="okbut12" onclick="showReport12()" alt="Вывести отчёт"></td></tr>
@@ -403,7 +404,7 @@ function showReport15()
 <!-- <tr><td class="td">Показывать документ и дату продажи <input type="checkbox" id="rep12cb" checked style="width:15;border:none"></td></tr> -->
 </table>
 
-<hr width=80%>
+<hr width=80%>12 
 Количество заявок в системе<br>
 <table class="ta" cellspacing=0>
 <tr><td class="td">Период c <input type=text id="rep13dat1" value="#($ZD($H-30,4))#" onmouseout="UnPaint(this)" onmouseover="Paint(this)" onclick="fnCalendar(this)" class="datar"> по <input type=text onmouseout="UnPaint(this)" onmouseover="Paint(this)" id="rep13dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"></td><td class="td" rowspan="3"><sklad:LittleButton name="ok" id="okbut13" onclick="showReport13()" alt="Вывести отчёт"></td></tr>
@@ -411,7 +412,7 @@ function showReport15()
 <!-- <tr><td class="td">Показывать документ и дату продажи <input type="checkbox" id="rep12cb" checked style="width:15;border:none"></td></tr> -->
 </table>
 
-<hr width=80%>
+<hr width=80%>13 
 Сумма остатка<br>
 <table class="ta" cellspacing=0>
 <tr>
@@ -428,7 +429,7 @@ function showReport15()
 </tr>
 </table>
 
-<hr width=80%>
+<hr width=80%>14 
 Статистика ремонта изделий<br>
 <table class="ta" cellspacing=0>
 <tr>
@@ -447,8 +448,13 @@ function showReport15()
 </tr>
 </table>
 
-<hr width=80%>
+<br><hr width=80%>15 <br>
+<a href="csp.repSO.cls" target="_blank">Статистика отправки запчастей контрагентам</a><br>
 
+<br><hr width=80%>16 <br>
+<a href="reports/InOut.csp?sessionid=#(%session.SessionId)#" target="_blank">Движение товара</a><br>
+<!--
 <a href="rrr.csp">расход по брендам</a>
+-->
 </body>
 </html>

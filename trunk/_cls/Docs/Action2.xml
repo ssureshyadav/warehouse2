@@ -46,6 +46,7 @@ InnerInstructNewStrErr
 <Implementation><![CDATA[
  s $ZT="ChiefInstructStrErr"
  if Class="undefined" s Class = "Operation.InstructionsItems"
+ 
  s Fields("Goods","ValueField")="Goods->FullName"
  s Fields("Goods","ValueAlias")="GoodsFullName"
  s Fields("Goods","IDField")="Goods"
@@ -54,9 +55,17 @@ InnerInstructNewStrErr
  s Fields("Quantity","ValueField")="Quantity"
  
  s Fields("Price","ValueField")="Price"
- 
  s Fields("Total","ValueField")="Total"
- s:Class="Operation.InstructionsItems" Fields("BrakComment","ValueField")="BrakComment"
+ 
+ if Class="Operation.InstructionsItems" 
+ {
+	s Fields("BrakComment","ValueField")="BrakComment"
+	s Fields("sn","ValueField")="sn"
+ 	s Fields("garant","ValueField")="garant"
+ 	s Fields("opispolomki","ValueField")="opispolomki"
+ 	s Fields("seller","ValueField")="seller"
+ 	s Fields("SellDate2","ValueField")="SellDate2"
+ }
 
  q ..SqlQuery(.Fields,Class,"Doc="_DocId)
 ChiefInstructStrErr
@@ -93,6 +102,7 @@ ChiefInstructStrErr
  s sql="select "_IdField_" as ID,"_Fields_" from "_ClassName
  i Where'="" s sql=sql_" where "_Where
  s result = ##class(%ResultSet).%New()
+ s ^mtempArt("Doc.Action2.SqlQuery.sql")=sql
  s ok=result.Prepare(sql)
  i '+ok $$$WriteObjError(ok) q 0
  s ok=result.Execute()
@@ -183,13 +193,14 @@ GetDisplaylistErr
 <br><val>OptionTextField</val> - Имя поля которое будет значением элемента OPTION (по умолчанию Name)
 <br><val>AddEmptyOption</val> - Добавить пустой элемент (по умолчанию да)]]></Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>DefaultValue:%String="",Classname:%String="",OptionValueField:%String="ID",OptionTextField:%String="Name",AddEmptyOption:%Boolean=1</FormalSpec>
+<FormalSpec>DefaultValue:%String="",Classname:%String="",OptionValueField:%String="ID",OptionTextField:%String="Name",AddEmptyOption:%Boolean=1,OrderBy:%String=""</FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
  s $ZT="GetClassValuesOptionsErr"
  i AddEmptyOption s result="<option></option>"
  if $ISOBJECT(DefaultValue) s DefaultValue=DefaultValue.%Id()
  s sql="select "_OptionValueField_","_OptionTextField_" from "_Classname
+ if OrderBy'="" s sql=sql_" order by "_OrderBy
  s rs = ##class(%ResultSet).%New()
  s ok=rs.Prepare(sql)
  i '+ok $$$WriteObjError(ok) q 0
@@ -700,7 +711,8 @@ CollectGoodFromCells(glob,StoreObj,GoodsId,Qnt,CreateRashItem=0,ZakazGood,RashOb
  s ^LogOfCreation(StoreObjId,GoodName,$I(^LogOfCreation(StoreObjId,GoodName)))= "  Собираем из разных ячеек, всего нужно набрать "_Qnt_" в переданном массиве: "_Found_" "_$S(CreateRashItem:"Необходимо создать строку в расходной накладной.",1:"")
  k Found
  m Found=@glob
- q:'+$G(Found)
+ if '+$G(Found) q 0
+ //. s ^LogOfCreation(StoreObjId,GoodName,$I(^LogOfCreation(StoreObjId,GoodName)))= "  не нашли вообще ни одной штуки "
  s AddressID="" f  s AddressID=$O(Found(0,AddressID)) q:(AddressID="")||('Qnt)  d
  . s StoreQntID = Found(0,AddressID,"ID")
  . s QntInCell = Found(0,AddressID)
@@ -1027,7 +1039,47 @@ GetSummsByBrandsErr
  $$$WriteObjError(ok)
  q "Извините, ошибка при формировании служебной записки."
 CreateActNoteErr
- q $ZE
+ $$$WriteError($ZE)
+ q "Извините, внутренняя ошибка при формировании служебной записки."
+]]></Implementation>
+</Method>
+
+<Method name="isDocCreditOrDebet">
+<Description>
+Проверить документ - кредит или дебет
+credit - кредит, debet - дебет</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DocId:%String</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	s $ZT="isDocCreditOrDebetErr"
+	
+	s (result,DocClass)=""
+	
+	//если объект, то из объекта, иначе по SQL запросу
+	if $ISOBJECT(DocId)
+	{
+		if $ISOBJECT(DocId.DocumentClass)
+		{
+			s DocClass=DocId.DocumentClass.%Id()
+		}
+	}
+	else
+	{
+		&sql(select DocumentClass into :DocClass from Docs.Super where ID=:DocId)
+		if SQLCODE s DocClass=""
+	}
+	
+	
+	
+	if DocClass="Docs.Rash" s result="credit"
+	
+	
+	
+	q result
+isDocCreditOrDebetErr
+ $$$WriteError($ZE)
+ q "Извините, внутренняя ошибка при проверке документа (кредит или дебет)."
 ]]></Implementation>
 </Method>
 </Class>

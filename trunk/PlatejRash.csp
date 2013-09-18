@@ -48,9 +48,9 @@ else{alert("Данные успешно зафиксированы. Документ необходимо обработать.");wind
  . w "<br>"
  . w "Контрагент "_PlatejkaObj.Kontr.Name
  . w "<br>"
- . w "Общая сумма: "_PlatejkaObj.Summa
+ . w "Общая сумма платёжного поручения: "_PlatejkaObj.Summa_"<br>"
  . s FreeSumma=PlatejkaObj.GetFreeSumma()
- . w "  Свободная сумма: "_FreeSumma
+ . w "Сумма платёжного поручения, которая не разнесена на расходные накладные: "_FreeSumma
  . w "<br>"
  . s next="" f  s next=PlatejkaObj.PlatejkaItems.Next(next) q:next=""  d
  . . s item=PlatejkaObj.PlatejkaItems.GetAt(next)
@@ -62,27 +62,32 @@ else{alert("Данные успешно зафиксированы. Документ необходимо обработать.");wind
  . . s @glob@(ID,"Name")=RashObj.Name
  . . s @glob@(ID,"Summa")=RashObj.Summa
  . . s @glob@(ID,"Dat")=RashObj.Dat
- . . s @glob@(ID,"OplSumma")=RashObj.OplSumma
+ . . s @glob@(ID,"OplSumma")=item.Summa
+ . //k ^mtempArt("glob")
+ . //m ^mtempArt("glob")=@glob
  . s KontrId=$S($ISOBJECT(PlatejkaObj.Kontr):PlatejkaObj.Kontr.%Id(),1:"")
- . &sql(declare jok cursor for select ID,Name,Summa,Dat into :ID,:Name,:Summa,:Dat from Docs.Rash where (OplatStatus<>2 or OplSumma is null) and Kontr=:KontrId)
+ . &sql(declare jok cursor for select ID,Name,Summa,Dat,Platej,Platej->Name into :ID,:Name,:Summa,:Dat,:Platej,:PlatejName from Docs.Rash where (OplatStatus<>2 or OplSumma is null) and Kontr=:KontrId)
  . &sql(open jok)
  . f  &sql(fetch jok) q:SQLCODE  d
  . . s @glob@(ID,"Name")=Name
  . . s @glob@(ID,"Summa")=Summa
  . . s @glob@(ID,"Dat")=Dat
+ . . s @glob@(ID,"PlatejName")=PlatejName
+ . . s @glob@(ID,"Platej")=Platej
  . . s OplSumma=0
  . . if FreeSumma-Summa>0 s OplSumma=Summa,FreeSumma=FreeSumma-Summa
- . . s @glob@(ID,"OplSumma")=OplSumma
+ . . //s @glob@(ID,"OplSumma")=OplSumma
  . &sql(close jok)
  . w "<form method=""POST"" id=""forma"">"
- . w "<table border=1><tr><td>Наименование<td>Дата<td>Сумма<td>Оплачено"
+ . w "<table border=1><tr><td>Наименование<td>Дата<td>Сумма<td>Оплачено<td>Последний документ"
  . s i="" f  s i=$O(@glob@(i)) q:i=""  d
  . . s dat=@glob@(i,"Dat")
  . . w "<tr>"
- . . w "<td>"_@glob@(i,"Name")
+ . . w "<td>"_"<span title="""_i_""">"_@glob@(i,"Name")_"</span>"
  . . w "<td>"_$S(+dat:$ZD(dat),1:"")
  . . w "<td>"_@glob@(i,"Summa")
  . . w "<td><input type=""text"" value="""_+$G(@glob@(i,"OplSumma"))_""" id=""RashID|"_i_""">"
+ . . w "<td><a href=""docplatej.csp?DocId="_$G(@glob@(i,"Platej"))_""">"_$G(@glob@(i,"PlatejName"))_"</a>"
  . w "</table>"
  . w "<input type=""button"" value=""Записать"" onclick=""SubmitForm()""><input type=""button"" value=""Отмена"" onclick=""WindowClose()"">"
  . w "</form>"

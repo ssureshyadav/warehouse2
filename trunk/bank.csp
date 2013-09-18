@@ -59,11 +59,9 @@ Quit 1
 <IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc">
 <IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
 <head>
-<style>
-input{border:solid 1 grey;width:250px}
-</style>
 <title>#($G(%session.Data("systemname")))#</title>
 <link href="style.css" type=text/css rel=stylesheet>
+
 <script language="Jscript" src="common.js"></script>
 <script language="JScript">
 
@@ -82,9 +80,10 @@ function load(){
 <body  onload="load();" onkeypress="ManageWindow();" >
 
 <center><font size=+1 color="#334455">#($G(kname))#</font></center>
-<table>
-<form name="ss"><input type="hidden" name="kontragent" value="#($G(Kontr))#">
-<tr><td>Банк получателя</td><td><input type="text" value="#($G(pbank))#" name="pbank"></td></tr>
+<form name="ss">
+<table width="100%">
+<input type="hidden" name="kontragent" value="#($G(Kontr))#">
+<tr><td>Банк получателя</td><td><input type="text" value="#($G(pbank))#" name="pbank" style="width:400px"></td></tr>
 <tr><td>Город банка получателя</td><td><input type="text" value="#($G(city))#" name="city"></td></tr>
 <tr><td>КПП</td><td><input type="text" value="#($G(kpp))#" name="kpp"></td></tr>
 <tr><td>ИНН</td><td><input type="text" value="#($G(inn))#" name="inn"></td></tr>
@@ -100,8 +99,7 @@ function load(){
 <tr><td>ОКАТО</td><td><input type="text" value="#($G(okato))#" name="okato"></td></tr>
 <tr><td>Свидетельство о регистрации</td><td><input type="text" value="#($G(regnumber))#" name="regnumber"></td></tr>
 <input type="hidden" value="#($G(sessionid))#" name="sessionid">
-</form>
-</table>
+</table></form>
 <center>
 <CSP:IF CONDITION="Access10func=1">	
 	<sklad:Button value="Да" onclick="startFun();">

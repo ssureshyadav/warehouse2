@@ -6,102 +6,109 @@
 <Super>%SerialObject</Super>
 <TimeCreated>60419,3535.784217</TimeCreated>
 
-<Parameter name="GUIDENABLED">
-<Default>1</Default>
-</Parameter>
-
-<Parameter name="OBJJOURNAL">
-<Default>1</Default>
-</Parameter>
-
 <Property name="kpp">
 <Description>
 КПП</Description>
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
 </Property>
 
 <Property name="bik">
 <Description>
 БИК</Description>
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
 </Property>
 
 <Property name="rsch">
 <Description>
 Расчетный счет</Description>
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
 </Property>
 
 <Property name="ksch">
 <Description>
 Корреспондетский счет</Description>
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
 </Property>
 
 <Property name="inn">
 <Description>
 ИНН</Description>
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
 </Property>
 
 <Property name="pbank">
 <Description>
 Банк</Description>
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
 </Property>
 
 <Property name="code">
 <Description>
 Банк</Description>
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
 </Property>
 
 <Property name="city">
 <Description>
 Город банка</Description>
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
 </Property>
 
 <Property name="okpo">
 <Description>
 ОКПО</Description>
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
 </Property>
 
 <Property name="okud">
 <Description>
 ОКУД</Description>
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
 </Property>
 
 <Property name="okdp">
 <Description>
 Деятельность по ОКДП</Description>
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
 </Property>
 
 <Property name="okonh">
 <Description>
 ОКОНХ</Description>
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
 </Property>
 
 <Property name="ogrn">
 <Description>
 ОГРН</Description>
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
 </Property>
 
 <Property name="okato">
 <Description>
 ОКАТО</Description>
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
 </Property>
 
 <Property name="regnumber">
 <Description>
 Свидетельство о регистрации</Description>
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="200"/>
 </Property>
 
 <Storage name="Default">

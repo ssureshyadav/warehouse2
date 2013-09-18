@@ -54,7 +54,7 @@ SendMailErr
 
 <Method name="LogResult">
 <ClassMethod>1</ClassMethod>
-<FormalSpec>To="",exitfile="",Comment="",ok="",ID=""</FormalSpec>
+<FormalSpec>To="",exitfile="",Comment="",ok="",ID="",Resend=""</FormalSpec>
 <Implementation><![CDATA[
  if +ID s log=##class(Kontragent.SendMailLog).%OpenId(ID)
  if '$ISOBJECT($G(log)) s log=##class(Kontragent.SendMailLog).%New()
@@ -67,6 +67,7 @@ SendMailErr
  s log.ResultCode=+$G(ok)
  s log.MessageTo=$G(To)
  s log.Comment=Comment
+ d:Resend'="" log.ResendSetObjectId(Resend)
  s ok=log.%Save()
  i '+ok $$$WriteObjError(ok)
  s ID = log.%Id()
@@ -302,7 +303,7 @@ FillVariableWithData(StrVariables,CurrentGoodsStr,RowNumber)
 	set m.Subject=MailSubject
 	set m.Charset="windows-1251"
 	set status=m.TextData.Write(MailText)
-	if '+status d  q "Ошибка отправки письма. "_$ZCVT(Err(Err),"O","HTML")
+	if '+status d  q "1 Ошибка отправки письма. "_$ZCVT(Err(Err),"O","HTML")
 	. $$$WriteObjError(status)
 	. Do DecomposeStatus^%apiOBJ(status,.Err) 
 	d:attachfile'="" 
@@ -316,11 +317,11 @@ FillVariableWithData(StrVariables,CurrentGoodsStr,RowNumber)
 	. s m.Parts.GetAt(1).Charset="windows-1251"
 	. s m.Parts.GetAt(1).MultiPartType=0
 	. s m.Parts.GetAt(1).ContentTransferEncoding="base64"
-	if '+status d  q "Ошибка отправки письма. "_$ZCVT(Err(Err),"O","HTML")
+	if '+status d  q "2 Ошибка отправки письма. "_$ZCVT(Err(Err),"O","HTML")
 	. $$$WriteObjError(status)
 	. Do DecomposeStatus^%apiOBJ(status,.Err) 
 	set status=s.Send(m)
-	if '+status d  q "Ошибка отправки письма. "_$ZCVT(Err(Err),"O","HTML")
+	if '+status d  q "3 Ошибка отправки письма. "_$ZCVT(Err(Err),"O","HTML")
 	. $$$WriteObjError(status)
 	. Do DecomposeStatus^%apiOBJ(status,.Err) 
 	q 1
@@ -384,7 +385,7 @@ FillVariableWithData(StrVariables,CurrentGoodsStr,RowNumber)
 	 if KontrEMail'="" {
 	 	s TextMessage="Здравствуйте"_$C(13,10)_"Вам поступило новое сообщение от сервисной службы Aska Elc."_$C(13,10)_$C(13,10)
 	 	s TextMessage=TextMessage_Result_$C(13,10)_$C(13,10)
-	 	s TextMessage=TextMessage_"Наша с вами переписка доступна по адресу http://91.214.205.78/csp/sklad2/Support.csp?login="_Code_" пароль тот, который вы используете в Менеджере отчётов."_$C(13,10)
+	 	s TextMessage=TextMessage_"Наша с вами переписка доступна по адресу http://213.128.198.234/csp/sklad2/Support.csp?login="_Code_" пароль тот, который вы используете в Менеджере отчётов."_$C(13,10)
 	 	s TextMessage=TextMessage_"C уважением "_$$$TunesVariableGlobal("OurName")
 	 	d ..LogResult(KontrEMail,"","Сообщение контрагенту "_Name ,"Сообщение отправить не удалось",.ID)
 	 	s ok = ..SendMailNotification(KontrEMail,FileName,TextMessage,"Новое сообщение в программе Менеджер отчётов Aska Elc.")
@@ -413,18 +414,20 @@ AddMeetingResultErr
 <Description>
 Разослать контрагентам спам</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>Message</FormalSpec>
+<FormalSpec>Message=""</FormalSpec>
 <Implementation><![CDATA[
 	s $ZT="SendSpamErr"
-	s Message="Уважаемые клиенты."_$C(13,10)_$C(13,10)_
+
+	s MailSubject="Уведомление о смене номеров телефонов Aska Elc."
+
+	s:Message="" Message="Уважаемые клиенты."_$C(13,10)_$C(13,10)_
 	"Сервер Aska Elc поменял IP, к сожалению, мы не смогли заранее уведомить Вас. Поэтому мы просим Вас указать в менеджере отчётов новый IP адрес. Для этого необходимо сделать следующее:"_$C(13,10)_
 	"Запустить Менеджер отчётов, зайти во вкладку Параметры"_$C(13,10)_
 	"Отметить чекбокс ""Редактировать параметры"". В открывшихся полях необходимо заменить старый ip адрес 89.175.39.6 на новый 91.214.205.78 Сделать это необходимо в двух полях: URL и FTP host."_$C(13,10)_
 	"После замены необходимо сохранить изменения (кнопка Сохранить в верхней части программы)."_$C(13,10)_$C(13,10)_
 	"Ульянов В.Ф."_$c(13,10)_"P.S. Не отвечайте на это письмо."_$c(13,10)
-
-	s MailSubject="Уведомление о смене номеров телефонов Aska Elc."
-	s Message="Уважаемые партнеры."_$C(13,10)_$C(13,10)_
+		
+	s:Message="" Message="Уважаемые партнеры."_$C(13,10)_$C(13,10)_
 	"В Сервисной службе изменились телефоны."_$C(13,10)_
  	"Вопросы по запасным частям и заявкам - Кашменский Ю.Е. т. +7(967) 129-8201  "_$C(13,10)_
 	"zip@aska-el.ru."_$C(13,10)_
@@ -434,8 +437,19 @@ AddMeetingResultErr
 	"serviceman@aska-el.ru."_$C(13,10)_$C(13,10)_
  	"Сервисная служба Viconte, Mastermax, Tull."
 	
+	s:Message="" Message = "Уважаемые партнёры."_$C(13,10)_$C(13,10)_
+		"У нас изменился фактический адрес местонахождения. Пожалуйста отправляйте корреспонденцию по адресам."_
+		"Почтовый адрес:"_$C(13,10)_
+ 		"121087, г. Москва"_$C(13,10)_
+		"Багратионовский проезд, д.1  а/я 28"_$C(13,10)_
+		"ИП Носач А.В."_$C(13,10)_
+		"Адрес для отравлений срочной (экспресс) почтой ЕМС, PONY EXPRESS, DHL и пр.:"_$C(13,10)_
+		"117152, г. Москва,  Загородное ш., д.1, кор.1"_$C(13,10)_
+ 		"Тел: (495)229 90 09"_$C(13,10)
+	
 	Set file=##class(%File).%New("file.txt")
 	Do file.Open("WSN")
+	
 	Do file.WriteLine("Отправка письма контарагентам:")
 	Do file.WriteLine(MailSubject)
 	Do file.WriteLine(Message)
@@ -447,6 +461,7 @@ AddMeetingResultErr
 		SELECT ID,Name,EMail 
 		INTO :ID,:Name,:email 
 		FROM Common.Kontragent
+		where Activity=1 and id>26
 		)
 	&sql(open zzz)
 	f  &sql(fetch zzz) q:SQLCODE  d
@@ -454,7 +469,7 @@ AddMeetingResultErr
 	. if (EMail="")||(email'["@") d  q
 	. . Do file.WriteLine($ZDT($H,4)_" контрагент "_Name_" ("_ID_"), e-mail """_email_""" невозможно отправить письмо.")
 	. s ok = ..SendMailNotification(email,"",Message,MailSubject) 
-	. Do file.WriteLine($ZDT($H,4)_" контрагент "_Name_" ("_ID_"), e-mail """_email)
+	. Do file.WriteLine($ZDT($H,4)_" контрагент "_Name_" ("_ID_"), e-mail """_email_" результат отправки:"_$S(ok=1:"ОК",1:ok))
 	. h 301
 	&sql(close zzz)
 	
@@ -478,6 +493,60 @@ SendSpamErr
 	s CurrencyName = ##class(Common.Kontragent).CurrencyLogicalToDisplay(obj.Currency)
 	
 	q CurrencyName
+]]></Implementation>
+</Method>
+
+<Method name="ResendList">
+<Description>
+Переотправить список из Kontragent.SendMailLog
+ListOfLogItems - список ID из Kontragent.SendMailLog (например "2145~2143~2147~2255"</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ListOfLogItems</FormalSpec>
+<Implementation><![CDATA[
+	//s $ZT="ResendListErr"
+	s sql = "SELECT ID,Attach,MessageTo FROM Kontragent.SendMailLog where ID in ("_$TR(ListOfLogItems,"~",",")_")"
+	s rs=##class(%ResultSet).%New()
+	s ok=rs.Prepare(sql)
+	if '+ok $$$WriteObjError(ok) q ok
+	s ok= rs.Execute()
+	if '+ok $$$WriteObjError(ok) q ok
+	
+	//перебираем логи отправки писем с целью отправить заново
+	while rs.Next()
+	{
+		s ID = rs.Data("ID")				
+		s MessageTo = rs.Data("MessageTo")
+		s Attach = rs.Data("Attach")
+		
+		//если аттача небыло - это сообщение сервисного центра
+		if Attach=""
+		{
+			&sql(SELECT AttachName,Result 
+				INTO :AttachName,:Result 
+				FROM Kontragent.Meeting 
+				WHERE SendMailLog=:ID)
+			if 'SQLCODE
+			{
+				s ok=..SendMailNotification(MessageTo,AttachName,Result,"Новое сообщение в программе Менеджер отчётов Aska Elc.")
+			}
+			else
+			{
+				s Error = $G(Error)_"Не удалось переслать сообщение №"_ID_" так как не найдено сообщение в Kontragent.Meeting\n"
+			}
+		}
+		else
+		{
+			//иначе это автоматическое уведомление
+			s ok=..SendMailNotification(MessageTo,Attach)
+		}
+		s ok = ..LogResult(MessageTo,"","Повторная пересылка уведомления ",ok,"",ID)
+		if '+ok s Error = $G(Error)_"Не удалось данные о повторной отправке сообщения "_ID_"\n"
+	}
+	
+	q $G(Error,1)
+ResendListErr
+ $$$WriteError($ZE)
+ q "Извините, ошибка при повторной отсылке писем, часть могла быть отправлена"
 ]]></Implementation>
 </Method>
 </Class>

@@ -108,6 +108,12 @@
 <Type>%Date</Type>
 </Property>
 
+<Property name="SellDate2">
+<Description>
+Дата продажи</Description>
+<Type>%String</Type>
+</Property>
+
 <Storage name="Default">
 <Type>%Library.CacheStorage</Type>
 <DefaultData>InstructionsItemsDefaultData</DefaultData>
@@ -149,6 +155,9 @@
 </Value>
 <Value name="12">
 <Value>SellDate</Value>
+</Value>
+<Value name="13">
+<Value>SellDate2</Value>
 </Value>
 </Data>
 </Storage>

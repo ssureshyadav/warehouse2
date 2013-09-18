@@ -20,6 +20,7 @@ Quit 1
 SELECT{width:170px}
 .Kontragent{width:170px;cursor:hand;}
 .ZakazInstr{display:inline;}
+BODY{margin: 20px}
 </style>
 <script language="jscript" src="common.js"></script>
 <title>Платёжное поручение</title>
@@ -35,32 +36,40 @@ function load(){
 }
 
 // сохранить
-function startFun(){
-if(!HiddenCurrencyReculc())return;
-var xmlDoc = new ActiveXObject("Msxml2.DOMDocument.3.0");
-var RootElement = xmlDoc.createElement("RootElement");
-xmlDoc.documentElement=RootElement;
-InsertXmlHeader(xmlDoc,"Summa",Summa.value,"%String")
-InsertXmlHeader(xmlDoc,"Name",Name.value,"%String")
-InsertXmlHeader(xmlDoc,"Kurs",Number(innerkurs),"%Numeric")
-InsertXmlHeader(xmlDoc,"Comment",Comment.value,"%String")
-InsertXmlHeader(xmlDoc,"RubSumma",RubSumma.value,"%String")
-InsertXmlHeader(xmlDoc,"Poluh",Poluh.Tag,"Store.Address")
-InsertXmlHeader(xmlDoc,"Kontr",Kontr.Tag,"Store.Address")
-InsertXmlHeader(xmlDoc,"Typeplatej",Typeplatej.value,"Store.Address")
-InsertXmlHeader(xmlDoc,"PlatejDate",PlatejDate.value,"%Date")
-//Cумма по брендам
-InsertXmlHeader(xmlDoc,"ViconteSummRub",ViconteSummRub.value,"%Numeric")
-InsertXmlHeader(xmlDoc,"ViconteSummCurr",ViconteSummCurr.value,"%Numeric")
-InsertXmlHeader(xmlDoc,"MastermaxSummRub",MastermaxSummRub.value,"%Numeric")
-InsertXmlHeader(xmlDoc,"MastermaxSummCurr",MastermaxSummCurr.value,"%Numeric")
-InsertXmlHeader(xmlDoc,"TullSummRub",TullSummRub.value,"%Numeric")
-InsertXmlHeader(xmlDoc,"TullSummCurr",TullSummCurr.value,"%Numeric")
-//alert(xmlDoc.xml)
-//
-var DocID=SendXml(DocId,"Docs.Platejka",xmlDoc,sessionid);
-if(isNaN(DocID)){alert(DocID)}
-else{returnValue=1;window.close();}
+function startFun()
+{
+	if(!HiddenCurrencyReculc())return;
+	
+	var xmlDoc = new ActiveXObject("Msxml2.DOMDocument.3.0");
+	var RootElement = xmlDoc.createElement("RootElement");
+	xmlDoc.documentElement=RootElement;
+	InsertXmlHeader(xmlDoc,"Summa",Summa.value,"%String")
+	InsertXmlHeader(xmlDoc,"Name",Name.value,"%String")
+	InsertXmlHeader(xmlDoc,"Kurs",Number(innerkurs),"%Numeric")
+	InsertXmlHeader(xmlDoc,"Comment",Comment.value,"%String")
+	InsertXmlHeader(xmlDoc,"RubSumma",RubSumma.value,"%String")
+	InsertXmlHeader(xmlDoc,"Poluh",Poluh.Tag,"Store.Address")
+	InsertXmlHeader(xmlDoc,"Kontr",Kontr.Tag,"Store.Address")
+	InsertXmlHeader(xmlDoc,"Typeplatej",Typeplatej.value,"Store.Address")
+	InsertXmlHeader(xmlDoc,"PlatejDate",PlatejDate.value,"%Date")
+	//Cумма по брендам
+	InsertXmlHeader(xmlDoc,"ViconteSummRub",ViconteSummRub.value,"%Numeric")
+	InsertXmlHeader(xmlDoc,"ViconteSummCurr",ViconteSummCurr.value,"%Numeric")
+	InsertXmlHeader(xmlDoc,"MastermaxSummRub",MastermaxSummRub.value,"%Numeric")
+	InsertXmlHeader(xmlDoc,"MastermaxSummCurr",MastermaxSummCurr.value,"%Numeric")
+	InsertXmlHeader(xmlDoc,"TullSummRub",TullSummRub.value,"%Numeric")
+	InsertXmlHeader(xmlDoc,"TullSummCurr",TullSummCurr.value,"%Numeric")
+	
+	InsertXmlHeader(xmlDoc,"ActNumber",ActNumber.value,"%String")
+	InsertXmlHeader(xmlDoc,"ActDate",ActDate.value,"%Date")
+	InsertXmlHeader(xmlDoc,"InvoiceNumber",InvoiceNumber.value,"%String")
+	InsertXmlHeader(xmlDoc,"InvoiceDate",InvoiceDate.value,"%Date")
+	
+	//alert(xmlDoc.xml)
+	//
+	var DocID=SendXml(DocId,"Docs.Platejka",xmlDoc,sessionid);
+	if(isNaN(DocID)){alert(DocID)}
+	else{returnValue=1;window.close();}
 }
 
 //функция выбора контрагента (подставит выбранного в innerText переданного объекта
@@ -131,8 +140,8 @@ Items.style.display="none";
 </head>
 
 <body onload="load()" onkeypress="ManageWindow();">
-<table width=100%><tr><td>
-<table class="LeftTop" cellspacing=0 width=100%>
+<table width=100% border=0><tr><td>
+<table class="LeftTop" cellspacing=0 cellpadding=5 width=100%>
 <script language="cache" runat="server">
  s DocId=%request.Get("DocId")
  i DocId {
@@ -141,7 +150,7 @@ Items.style.display="none";
  	//from Docs.Platejka where ID=:DocId)
  	s doc=##class(Docs.Platejka).%OpenId(DocId)
  	if $ISOBJECT(doc) {
- 		f i="Name","Comment","CloseDate","CloseTime","Stat","Summa","RubSumma","Typeplatej","ViconteSummRub","ViconteSummCurr","MastermaxSummRub","MastermaxSummCurr","TullSummRub","TullSummCurr","PlatejDate"
+ 		f i="Name","Comment","CloseDate","CloseTime","Stat","Summa","RubSumma","Typeplatej","ViconteSummRub","ViconteSummCurr","MastermaxSummRub","MastermaxSummCurr","TullSummRub","TullSummCurr","PlatejDate","ActNumber","ActDate","InvoiceNumber","InvoiceDate"
  		{
 	 		s @i=$ZOBJPROPERTY(doc,i)
  		}
@@ -157,6 +166,9 @@ Items.style.display="none";
  		s PoluhName=$S($ISOBJECT(doc.Poluh):doc.Poluh.Name,1:"")
  		s Kontr=$S($ISOBJECT(doc.Kontr):doc.Kontr.%Id(),1:"")
  		s KontrName=$S($ISOBJECT(doc.Kontr):doc.Kontr.Name,1:"")
+ 		s:+ActDate ActDate = $ZD(ActDate,4)
+ 		s:+InvoiceDate InvoiceDate = $ZD(InvoiceDate,4)
+ 		
  	}
  }
  else {
@@ -195,9 +207,23 @@ w "</tr>"
 
 
 w "<tr>"
-	w "<td class=RightBottom>Дата платёжного поручения"
-	w "<td class=RightBottom><input type=text id=""PlatejDate"" value='"_$S(+$G(PlatejDate):$ZD(PlatejDate,4),1:"")_"' onclick=""fnCalendar(this)"" class=""datar"" onmouseout=""UnPaint(this)"" onmouseover=""Paint(this)"">"
-	w "<td class=RightBottom colspan=2>&nbsp;"
+	w "<td class=RightBottom valign=top>Дата платёжного поручения"
+	w "<td class=RightBottom valign=top><input type=text id=""PlatejDate"" value='"_$S(+$G(PlatejDate):$ZD(PlatejDate,4),1:"")_"' onclick=""fnCalendar(this)"" class=""datar"" onmouseout=""UnPaint(this)"" onmouseover=""Paint(this)"" >"
+	w "<td class=RightBottom colspan=2>"
+	&html<
+		<table>
+			<tr>
+				<td>&nbsp;<td>Номер<td>Дата
+			<tr>
+				<td>Акт
+				<td><input type="text" id="ActNumber" value="#($G(ActNumber))#" style="width:90px">
+				<td><input type="text" class="datar" value="#($G(ActDate))#" id="ActDate" onclick="fnCalendar(this)" onmouseout="UnPaint(this)" onmouseover="Paint(this)" >
+			<tr>
+				<td>Счёт
+				<td><input type="text" id="InvoiceNumber" value="#($G(InvoiceNumber))#" style="width:90px">
+				<td><input type="text" class="datar" id="InvoiceDate" value="#($G(InvoiceDate))#" onclick="fnCalendar(this)" onmouseout="UnPaint(this)" onmouseover="Paint(this)" >	
+		</table>
+		>
 w "</tr>"
 
  w "<tr><td class=RightBottom colspan=4><br>Суммы по брендам"
@@ -206,8 +232,8 @@ w "</tr>"
  . w "<td class=RightBottom colspan=2>"_i_"</td>"
  . s RubName=i_"SummRub"
  . s CurrName=i_"SummCurr"
- . w "<td class=RightBottom><input type=""text"" id="""_RubName_""" value="""_$G(@RubName)_""" onkeyup=""CalcCurrency(this.value,'"_CurrName_"')""> руб.</td>"
- . w "<td class=RightBottom><input type=""text"" id="""_CurrName_""" value="""_$G(@CurrName)_""" onkeyup=""CalcRub(this.value,'"_RubName_"')""> у.е.</td>"
+ . w "<td class=RightBottom><input type=""text"" id="""_RubName_""" value="""_$G(@RubName)_""" onkeyup=""CalcCurrency(this.value,'"_CurrName_"')"" style=""width:90px""> руб.</td>"
+ . w "<td class=RightBottom><input type=""text"" id="""_CurrName_""" value="""_$G(@CurrName)_""" onkeyup=""CalcRub(this.value,'"_RubName_"')"" style=""width:90px""> у.е.</td>"
  . w "</tr>",!
 
 
@@ -228,7 +254,9 @@ w:$G(ClosedString)'="" "<tr><td colspan=4 class=RightBottom>Документ закрыт <i>"
  . . q:'$ISOBJECT(RashObj)
  . . s Summa=item.Summa
  . . s Name=RashObj.Name
+ . . s Itog=$G(Itog)+Summa
  . . w "<tr><td class=RightBottom>"_Name_"<td class=RightBottom>"_Summa
+ w "<tr><td class=RightBottom>Итого:<td class=RightBottom>"_$G(Itog)
 </script>
 </table>
 <tr><td>

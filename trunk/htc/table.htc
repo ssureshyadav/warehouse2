@@ -390,7 +390,8 @@ CurrentRow=curRow.rowIndex;
 var goodscol=Name2["Goods"];
 var goods=GetCellValue(goodscol,CurrentRow);
 if(CellClassName=="Store.Address"){
-	newItem=window.showModalDialog("storemodal2.csp?goods="+goods+"&depot="+depot,CellClassName,"center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;");
+	//меняем storemodal2.csp на Белорусскую версию csp.StoreSelect.cls
+	newItem=window.showModalDialog("csp.StoreSelect.cls?goods="+goods+"&depot="+depot,CellClassName,"center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;");
 	if(newItem!=null){if(newItem.split("~")[0]=="changedepot"){DictClick(tr,newItem.split("~")[1])}}
 var choice=true;
 }

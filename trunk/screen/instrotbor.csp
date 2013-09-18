@@ -1,4 +1,6 @@
+<CSP:CLASS INCLUDES="xmlmacros">
 <script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+s Start = $P($H,",",2)
 if %request.Get("word")="on"
 {
  set %response.ContentType = "application/msword"
@@ -16,6 +18,9 @@ if %request.Get("word")="on"
  d:$ISOBJECT(obj)
  . if class="Docs.StorageOut" d
  . . if obj.Brak s Brak="<br>Некондиционные товары"
+ . if obj.Images '= "" do
+ . . for i=1:1:$L(obj.Images,"\") do
+ . . . s:$P(obj.Images,"\",i)'="" ImagesString = $G(ImagesString)_"<a href=""SkladInstrImages/"_$P(obj.Images,"\",i)_""" target=_blank>***</a> "
  . s mn(1)="января",mn(2)="февраля",mn(3)="марта",mn(4)="апреля",mn(5)="мая",mn(6)="июня",mn(7)="июля",mn(8)="августа",mn(9)="сентября",mn(10)="октября",mn(11)="ноября",mn(12)="декабря"
  . s numb=obj.Name
  . s dat=obj.Dat
@@ -29,7 +34,11 @@ if %request.Get("word")="on"
  . s tim=$ZT(obj.Tim)
  . d:$ISOBJECT(obj.Source)
  . . d:$ISOBJECT(obj.Source.Kontr)
- . . . s kontr=obj.Source.Kontr.Name
+ . . . s kontr=obj.Source.Kontr.Name	//это имя контрагента из расходной накладной
+ . . if $ISOBJECT(obj.Source.Source) do
+ . . . s ChiefInstrId = obj.Source.Source.%Id()
+ . . . s ChiefInstrName = obj.Source.Source.Name
+ . . . s ChiefInstrDat = $ZD(obj.Source.Source.Dat,4)
 </script>
 
 <html xmlns:o="urn:schemas-microsoft-com:office:office"
@@ -143,10 +152,24 @@ table.MsoTableGrid
 	mso-bidi-language:#0400;}
 </style>
 <![endif]-->
+<script language="jscript" type="text/javascript">
+ var dateObj = new Date();
+ var StartDtString = dateObj.getHours() + ":" + dateObj.getMinutes() + ":" + dateObj.getSeconds() + "." + dateObj.getMilliseconds();
+ 
+function loaded()
+{
+	//alert("Форма печати успешно завершена");
+	var dateObj2 = new Date();
+ 	var StartDtString2 = dateObj2.getHours() + ":" + dateObj2.getMinutes() + ":" + dateObj2.getSeconds() + "." + dateObj2.getMilliseconds();
+ 
+	StartEnd.innerHTML = "<u>Время начала отрисовки " + StartDtString + "</u> <u>Время окончания отрисовки" + StartDtString2 + "</u>";
+}
+</script>
 </head>
 
-<body lang=RU style='tab-interval:35.4pt'>
-
+<body lang=RU style='tab-interval:35.4pt' onload="loaded()">
+<table height=100%>
+<tr><td valign=top>
 <div class=Section1>
 
 <p class=MsoNormal align=center style='text-align:center'>
@@ -194,6 +217,25 @@ table.MsoTableGrid
   style='mso-bidi-font-weight:normal'><span style='font-family:Arial'><o:p></o:p></span></b></p>
   </td>
  </tr>
+ <tr style='mso-yfti-irow:2;mso-yfti-lastrow:yes'>
+  <td width=103 valign=top style='width:77.4pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><span style='font-family:Arial'>Номер заявки</span></p>
+  </td>
+  <td width=554 valign=top style='width:415.3pt;padding:0cm 5.4pt 0cm 5.4pt'>
+  <p class=MsoNormal><b style='mso-bidi-font-weight:normal'><a href="screen/ChiefInstr.csp?docid=#($G(ChiefInstrId))#" target="_blank"><span lang=EN-US
+  style='font-family:Arial;mso-ansi-language:EN-US'>#($G(ChiefInstrName))# от #($G(ChiefInstrDat))#</span></a></b><b
+  style='mso-bidi-font-weight:normal'><span style='font-family:Arial'><o:p></o:p></span></b></p>
+  </td>
+ </tr>
+ <server>
+ if $G(ImagesString)'=""
+ {
+	 w "<tr>"
+	 w "<td colspan=2>"_ImagesString_"</td>"
+	 w "</tr>",!
+ }
+ </server>
+ 
 </table>
 
 <p class=MsoNormal><span lang=EN-US style='font-family:Arial;mso-ansi-language:
@@ -270,7 +312,26 @@ EN-US'><o:p>&nbsp;</o:p></span></p>
 -->
 
 </div>
-
+<tr><td valign=bottom align=right>
+<script language="cache" runat="Server">
+ s ClientTimeStart = %request.Get("TimeStart")
+ s Finish = $P($H,",",2)
+ if $$$TunesVariableGlobal("ShowCreationTimes")
+ {
+	 s StyleDisplay="block"
+ }
+ else
+ {
+	 s StyleDisplay="none"
+ }
+ 
+	 w "<font face=""Arial"" size=2 color=""Grey"" style=""display:"_StyleDisplay_""">"
+	 w "<span><b>Сервер:</b> Сформировано (по часам сервера) "_$ZT(Finish)_" Время формирования страницы на сервере "_$ZT(Finish-Start)_"</span>"
+	 w "<br><b>Клиент:</b> <u>Время старта "_ClientTimeStart_"</u> <span id=""StartEnd""></span>"
+	 w "</font>"
+ 
+</script>
+</table>
 </body>
 
 </html>

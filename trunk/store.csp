@@ -36,6 +36,7 @@ else{Trick=0;}
 CreateAddressLine();
 Clear();
 if(NodeCode==null)NodeCode=AddressTree.NodeCode;
+StoreID.innerText=AddressTree.NodeID;
 var childs=""
 if(NodeCode==""){var childs=sparents}
 else{var childs=ReturnSpace(parents[NodeCode])}
@@ -284,6 +285,7 @@ w "</script"_">"
 <div id="MoveField" CONTENTEDITABLE='false' >
 </div>
 <div id="tablefield" >
+<div id="StoreID"></div>
 <SKLAD2:table id="PropTable" width="400" ClassName="Store.Address" Silent="Currentsize,Currentweight"/>
  <SKLADList:listview width=100% height=150 id="goods" zonDblClick="OpenCard()"/><br>
 <br>

@@ -13,6 +13,7 @@ if %request.Get("word")="on"
  q 1
 
 </script>
+<csp:class includes="xmlmacros">
 
 <script language="cache" runat="server">
  s GroupCode=%request.Get("GroupCode")
@@ -110,14 +111,14 @@ div.Section1
  style='width:470.2pt;margin-left:4.65pt;border-collapse:collapse;mso-padding-alt:
  0cm 5.4pt 0cm 5.4pt;border-right:solid windowtext 1.0pt;'>
  <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:21.0pt'>
-  <td width=627 nowrap colspan=6 style='width:470.2pt;border:solid windowtext 1.0pt;
+  <td width=627 nowrap colspan=7 style='width:470.2pt;border:solid windowtext 1.0pt;
   border-right:solid black 1.0pt;padding:0cm 5.4pt 0cm 5.4pt;height:21.0pt'>
   <p class=MsoNormal align=center style='text-align:center'><b><span
   style='font-size:16.0pt;font-family:"Arial CYR"'>Остатки на складе</span></b></p>
   </td>
  </tr>
  <tr style='mso-yfti-irow:1;height:13.5pt'>
-  <td width=627 nowrap colspan=6 style='width:470.2pt;border-top:none;
+  <td width=627 nowrap colspan=7 style='width:470.2pt;border-top:none;
   border-left:solid windowtext 1.0pt;border-bottom:solid windowtext 1.0pt;
   border-right:solid black 1.0pt;mso-border-top-alt:solid windowtext 1.0pt;
   padding:0cm 5.4pt 0cm 5.4pt;height:13.5pt'>
@@ -127,7 +128,7 @@ div.Section1
   </td>
  </tr>
  <tr style='mso-yfti-irow:2;height:13.5pt'>
-  <td width=627 nowrap colspan=6 style='width:470.2pt;border:solid windowtext 1.0pt;
+  <td width=627 nowrap colspan=7 style='width:470.2pt;border:solid windowtext 1.0pt;
   border-top:none;mso-border-left-alt:solid windowtext 1.0pt;mso-border-bottom-alt:
   solid windowtext .5pt;mso-border-right-alt:solid windowtext 1.0pt;padding:
   0cm 5.4pt 0cm 5.4pt;height:20pt'>
@@ -176,16 +177,25 @@ div.Section1
   mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
   mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt;height:13.5pt'>
   <p class=MsoNormal align=center style='text-align:center'><b><span
-  style='font-size:8.0pt;font-family:"Arial CYR"'>Количество<o:p></o:p></span></b></p>
+  style='font-size:8.0pt;font-family:"Arial CYR"'>Количество</span></b></p>
+  </td>
+  <td width=59 nowrap style='width:44.0pt;border-top:none;border-left:none;
+  border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  mso-border-top-alt:solid windowtext .5pt;mso-border-left-alt:solid windowtext .5pt;
+  mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt;height:13.5pt'>
+  <p class=MsoNormal align=center style='text-align:center'><b><span
+  style='font-size:8.0pt;font-family:"Arial CYR"'>Сумма</span></b></p>
   </td>
  </tr>
  
  <script language="cache" runat="Server">
  s glob=$NA(^mtempReport("GetGoodsFromGroup",$I))
+ s DigitsDelimeter = $$$TunesVariableGlobal("DigitsDelimeter")
+ 
  s ok=##class(Reports.Analyzis).GetGoodsFromGroup(GroupCode,CatalogueID,glob)
  s GroupCode="" f  s GroupCode=$O(@glob@(GroupCode)) q:GroupCode=""  d
  . s GroupName=$G(@glob@(GroupCode,"GroupName"))
- . w "<tr style='mso-yfti-irow:4;mso-yfti-lastrow:yes;height:16pt'><td colspan=6 style=""border-left:solid windowtext 1.0pt;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;""><p class=MsoNormal ><b><span style='font-size:13.0pt;font-family:Arial CYR'>"_GroupName_"</b></span></td></tr>"
+ . w "<tr style='mso-yfti-irow:4;mso-yfti-lastrow:yes;height:16pt'><td colspan=7 style=""border-left:solid windowtext 1.0pt;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;""><p class=MsoNormal ><b><span style='font-size:13.0pt;font-family:Arial CYR'>"_GroupName_"</b></span></td></tr>"
  . s GoodsID="" f  s GoodsID=$O(@glob@(GroupCode,"Goods",GoodsID)) q:GoodsID=""  d
  . . i $I(count)
  . . s GroupID=$G(@glob@(GroupCode,"Goods",GoodsID,"GroupID"))
@@ -194,9 +204,12 @@ div.Section1
  . . s Goodsabbr=$G(@glob@(GroupCode,"Goods",GoodsID,"Goodsabbr"))
  . . s GoodsModel=$G(@glob@(GroupCode,"Goods",GoodsID,"GoodsModel"))
  . . s GoodsShemNumber=$G(@glob@(GroupCode,"Goods",GoodsID,"GoodsShemNumber"))
- . . k Quantity
+ . . s Quantity=0
  . . s ok=##class(Store.Action).GetQuantByGoods(GoodsID,.Quantity)
  . . i '+ok s Quantity=ok
+ . . s LastCena = ##class(Store.Action).getlastcena(GoodsID)
+ . . s SummaZ = LastCena*Quantity
+ . . s Summa = $TR(SummaZ,".",DigitsDelimeter)
  . . &html<<tr style='mso-yfti-irow:4;mso-yfti-lastrow:yes;height:12.75pt;'>
   <td width=43 nowrap valign=bottom style='width:32.45pt;border:solid windowtext 1.0pt;border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt;height:12.75pt'>
     <p class=MsoNormal align=center style='text-align:center'><span  style='font-size:10.0pt;font-family:"Arial CYR"'>#(count)#<o:p></o:p></span></p>
@@ -213,12 +226,15 @@ div.Section1
   <td width=69 nowrap valign=bottom style='width:52.1pt;border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;mso-border-top-alt:solid windowtext .5pt;mso-border-top-alt:solid windowtext .5pt;mso-border-bottom-alt:solid windowtext .5pt;mso-border-right-alt:solid windowtext 1.0pt;padding:0cm 5.4pt 0cm 5.4pt;height:12.75pt'>
     <p class=MsoNormal><span style='font-size:10.0pt;font-family:"Arial CYR"'>#(GoodsShemNumber)#<o:p></o:p></span></p>
   </td>
-  <td valign=bottom style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;height:12.75pt' >
+  <td valign=bottom style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;height:12.75pt' >
     <p class=MsoNormal align=right style='text-align:right'><span style='font-size:10.0pt;font-family:"Arial CYR"'>#(+$G(Quantity))#</span></p>
+  </td>
+  <td valign=bottom style='border-top:none;border-left:none;border-bottom:solid windowtext 1.0pt;height:12.75pt' x:num="#(SummaZ)#">
+    <p class=MsoNormal align=right style='text-align:right'><span style='font-size:10.0pt;font-family:"Arial CYR"'>#($G(Summa))#</span></p>
   </td>
  </tr>
  >
-</script>
+ </script>
 
 </table>
 

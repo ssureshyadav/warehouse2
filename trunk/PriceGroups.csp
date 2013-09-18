@@ -119,10 +119,11 @@ else{currentdict.DelItems()}
 
 	/// ФУНКЦИИ ДЛЯ ПРИВЯЗКИ И ОТВЯЗКИ ТОВАРОВ И ГРУПП
 //добавить товары в группу
-function AddGoodsToGroup(){
-if(currentdict.ItemID==""){alert("Не указана ценовая группа");return}
-maintable.style.display="none";
-AddTovarBlock.style.display="block";
+function AddGoodsToGroup()
+{
+	if(currentdict.ItemID==""){ alert("Не указана ценовая группа");return }
+	maintable.style.display="none";
+	AddTovarBlock.style.display="block";
 }
 
 //убрать товары из группы
@@ -153,16 +154,17 @@ AddTovarBlock.style.display="none";
 //клик на кнопке ДОБАВИТЬ ВЫБРАННЫЕ ТОВАРЫ
 function startFun(){
 if(!TurnOnGoodsForDoc_checkbox.checked)
-	{
+{
 	var SelectedGoodsIDs=TempGoods.GetAllItems("selected");
-	}
+}
 else
-	{
+{
 	var SelectedGoodsIDs=GoodsForDoc.GetAllItems();
-	}
+}
 if(SelectedGoodsIDs=="")return
 var PriceGroupID=currentdict.ItemID;	//ID отмеченной ценовой группы
 var ok=#server(Goods.GoodsAction.GoodsPriceGroup(SelectedGoodsIDs,PriceGroupID))#
+
 if(isNaN(ok)){alert(ok)}
 else{showgoods('izdelie='+PriceGroupID)}
 CloseSelectBlock();

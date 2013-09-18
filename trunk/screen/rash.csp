@@ -21,13 +21,23 @@ if %request.Get("word")="on"
  . s year=$P($ZD(obj.Dat,4),"/",3)
  . s docdat=day_"."_month_"."_year
  . s kurs=obj.kurs
+ . if $ISOBJECT(obj.Source) s SourceInstrName=obj.Source.Name,SourceInstrDat=$ZD(obj.Source.Dat,4)
  s cday=$P($ZD(+$H,4),"/",1)
  s cmonth=$P($ZD(+$H,4),"/",2)
  s cyear=$P($ZD(+$H,4),"/",3)
  s curdat=cday_"."_cmonth_"."_cyear
  s curtime=$ZT($P($H,",",2))
- s:'+kurs kurs=##class(Goods.GoodsAction).kurs()
+
  s docname=##class(Docs.Action).GetDocNameFromClass("Docs.Rash")
+ 
+ 
+ 
+ s waste=##class(Goods.GoodsAction).kurs(.other)
+ s:'+$G(kurs) kurs=waste
+ 
+ s nds=+$G(other("nds"))/100
+ s nsp=+$G(other("nsp"))/100
+ s antinds=1/(1+nds)
  </script>
 <html>
 <head>
@@ -552,35 +562,19 @@ if %request.Get("word")="on"
   <td class=xl1917352 colspan=3>№ #($G(numb))# от #(docdat)#</td>
   <td class=xl2117352></td>
  </tr>
- <tr height=9 style='mso-height-source:userset;height:6.75pt'>
-  <td height=9 class=xl1517352 style='height:6.75pt'></td>
-  <td class=xl1517352></td>
-  <td class=xl1517352></td>
-  <td class=xl1517352></td>
-  <td class=xl1517352></td>
-  <td class=xl1517352></td>
+ <tr height=17 style='mso-height-source:userset;height:12.75pt'>
+  <td height=17 class=xl1517352 style='height:12.75pt' colspan=6>Заявка #($G(SourceInstrName))# от #($G(SourceInstrDat))#</td>
   <td class=xl1517352></td>
   <td class=xl2017352>&nbsp;</td>
   <td class=xl1517352></td>
-  <td class=xl1517352></td>
-  <td class=xl1517352></td>
-  <td class=xl1517352></td>
-  <td class=xl1517352></td>
-  <td class=xl1517352></td>
-  <td class=xl1517352></td>
+  <td class=xl1517352 colspan=6>Заявка #($G(SourceInstrName))# от #($G(SourceInstrDat))#</td>
   <td class=xl1517352></td>
   <td class=xl2017352>&nbsp;</td>
   <td class=xl1517352></td>
-  <td class=xl1517352></td>
-  <td class=xl1517352></td>
-  <td class=xl1517352></td>
-  <td class=xl1517352></td>
-  <td class=xl1517352></td>
+  <td class=xl1517352 colspan=5>Заявка #($G(SourceInstrName))# от #($G(SourceInstrDat))#</td>
   <td class=xl2017352>&nbsp;</td>
   <td class=xl1517352></td>
-  <td class=xl1517352></td>
-  <td class=xl1517352></td>
-  <td class=xl1517352></td>
+  <td class=xl1517352 colspan=3>Заявка #($G(SourceInstrName))# от #($G(SourceInstrDat))#</td>
   <td class=xl1517352></td>
  </tr>
  <tr height=14 style='mso-height-source:userset;height:10.5pt'>
@@ -632,22 +626,24 @@ if %request.Get("word")="on"
  </tr>
  <tr height=14 style='mso-height-source:userset;height:11.1pt'>
   <td height=14 class=xl2317352 style='height:11.1pt'>№</td>
-  <td class=xl2317352 style='border-left:none' x:str="Наименование ">Наименование
-  </td>
+  <td class=xl2317352 style='border-left:none' x:str="Наименование " colspan=4>Наименование</td>
   <td class=xl2317352 style='border-left:none'>Кол</td>
+  <!--
   <td class=xl2317352 style='border-left:none'>Цена</td>
   <td class=xl2317352 style='border-left:none'>Цена(р)</td>
   <td class=xl2317352 style='border-left:none'>Сумма</td>
+  -->
   <td class=xl2417352></td>
   <td class=xl2517352>&nbsp;</td>
   <td class=xl2417352></td>
   <td class=xl2317352>№</td>
-  <td class=xl2317352 style='border-left:none' x:str="Наименование ">Наименование
-  </td>
+  <td class=xl2317352 style='border-left:none' x:str="Наименование " colspan=4>Наименование</td>
   <td class=xl2317352 style='border-left:none'>Кол</td>
+  <!--
   <td class=xl2317352 style='border-left:none'>Цена</td>
   <td class=xl2317352 style='border-left:none'>Цена(р<span style='display:none'>)</span></td>
   <td class=xl2317352 style='border-left:none'>Сумма</td>
+  -->
   <td class=xl2417352></td>
   <td class=xl2517352>&nbsp;</td>
   <td class=xl2417352></td>
@@ -671,6 +667,12 @@ if %request.Get("word")="on"
  . . i $I(count)
  . . s item=obj.Items.GetAt(i)
  . . s:$ISOBJECT(item.Goods) goods=item.Goods.FullName
+ . . if $ISOBJECT(item.ZakazGoods) s ZakazGoods=item.ZakazGoods.FullName
+ . . else  s ZakazGoods=""
+ . . 
+ . . if ZakazGoods'="",ZakazGoods'=goods s GoodsString=ZakazGoods_" ("_goods_")"
+ . . else  s GoodsString=goods
+ . . 
  . . s quant=item.Quantity
  . . s total=$J(item.Total,".",2)
  . . s price=$J(item.Price,".",2)
@@ -679,50 +681,62 @@ if %request.Get("word")="on"
  . . s pricechanged=$J(price*kurs,".",2)
  . . w "<tr class=xl1517352>"
  . . w "<td class=xl2617352>"_count_"</td>"
- . . w "<td class=xl2717352 width=107 style='border-left:none;width:80pt'>"_goods_"</td>"
+ . . w "<td class=xl2717352 width=107 style='border-left:none;width:80pt' colspan=4>"_GoodsString_"</td>"
  . . w "<td class=xl2817352 style='border-left:none'>"_quant_"</td>"
- . . w "<td class=xl2817352 style='border-left:none'>"_price_"</td>"
- . . w "<td class=xl2817352 style='border-left:none'>"_pricechanged_"</td>"
- . . w "<td class=xl2917352 style='border-left:none'>"_total_"</td>"
+ . . //w "<td class=xl2817352 style='border-left:none'>"_price_"</td>"
+ . . //w "<td class=xl2817352 style='border-left:none'>"_pricechanged_"</td>"
+ . . //w "<td class=xl2917352 style='border-left:none'>"_total_"</td>"
  . . w "<td class=xl3017352></td>"
  . . w "<td class=xl3117352>&nbsp;</td>"
  . . w "<td class=xl3017352></td>"
  . . w "<td class=xl2617352>"_count_"</td>"
- . . w "<td class=xl2717352 width=110 style='border-left:none;width:83pt'>"_goods_"</td>"
+ . . w "<td class=xl2717352 width=110 style='border-left:none;width:83pt' colspan=4>"_GoodsString_"</td>"
  . . w "<td class=xl2817352 style='border-left:none'>"_quant_"</td>"
- . . w "<td class=xl2817352 style='border-left:none'>"_price_"</td>"
- . . w "<td class=xl2817352 style='border-left:none'>"_pricechanged_"</td>"
- . . w "<td class=xl2917352 style='border-left:none'>"_total_"</td>"
+ . . //w "<td class=xl2817352 style='border-left:none'>"_price_"</td>"
+ . . //w "<td class=xl2817352 style='border-left:none'>"_pricechanged_"</td>"
+ . . //w "<td class=xl2917352 style='border-left:none'>"_total_"</td>"
  . . w "<td class=xl3017352></td>"
   . . w "<td class=xl3117352>&nbsp;</td>"
   . . w "<td class=xl3017352></td>"
   . . w "<td class=xl2617352>"_count_"</td>"
-  . . w "<td colspan=2 class=xl3517352 width=142 style='border-right:.5pt solid black;border-left:none;width:107pt'>"_goods_"</td>"
+  . . w "<td colspan=2 class=xl3517352 width=142 style='border-right:.5pt solid black;border-left:none;width:107pt'>"_GoodsString_"</td>"
   . . w "<td class=xl2917352 style='border-left:none'>"_quant_"</td>"
   . . w "<td class=xl3017352></td>"
   . . w "<td class=xl3117352>&nbsp;</td>"
   . . w "<td class=xl3017352></td>"
   . . w "<td class=xl2617352>"_count_"</td>"
-  . . w "<td colspan=2 class=xl3517352 width=137 style='border-right:.5pt solid black;border-left:none;width:103pt'>"_goods_"</td>"
+  . . w "<td colspan=2 class=xl3517352 width=137 style='border-right:.5pt solid black;border-left:none;width:103pt'>"_GoodsString_"</td>"
   . . w "<td class=xl2917352 style='border-left:none'>"_quant_"</td>"
  . . w "</tr>"
+ . . s summabeznds=$J(pricechanged*quant,".",2)
+ . . s summaotnds=$J(summabeznds-(summabeznds*antinds),".",2)
+ . . s ItogSumma=$G(ItogSumma)+(summaotnds+summabeznds)
+ . . //
+ . . //теперь тоже самое в валюте
+ . . s summaotndsCurrency= item.Total-(item.Total*antinds)
+ . . s ItogSummaCurrency = $G(ItogSummaCurrency) + (summaotndsCurrency + item.Total)
+ 
+ 
+ //s ItogoBezNDS=$J(ItogSumma*antinds,".",2),ItogoNDS=VsegoKOplate-ItogoBezNDS
 </script>
- <tr height=15 style='height:11.25pt'>
+ <tr height=30 style='height:22.5pt'>
   <td height=15 class=xl1517352 style='height:11.25pt'></td>
-  <td class=xl1517352></td>
+  <td class=xl1517352 colspan=4></td>
   <td class=xl1517352>#($J(totquant,".",2))#</td>
+  <!--
   <td class=xl1517352></td>
   <td class=xl1517352></td>
-  <td class=xl1517352>#($J(tot,".",2))#</td>
+  <td class=xl1517352>#($J($G(tot),".",2))#<br>#($J($G(ItogSummaCurrency),".",2))#</td>
+  -->
   <td class=xl1517352></td>
   <td class=xl2017352>&nbsp;</td>
-  <td class=xl1517352></td>
-  <td class=xl1517352></td>
-  <td class=xl1517352></td>
+  <td class=xl1517352 colspan=6></td>
   <td class=xl1517352>#($J(totquant,".",2))#</td>
+  <!--
   <td class=xl1517352></td>
   <td class=xl1517352></td>
-  <td class=xl1517352>#($J(tot,".",2))#</td>
+  <td class=xl1517352>#($J($G(tot),".",2))#<br>#($J($G(ItogSummaCurrency),".",2))#</td>
+  -->
   <td class=xl1517352></td>
   <td class=xl2017352>&nbsp;</td>
   <td class=xl1517352></td>
@@ -743,7 +757,7 @@ if %request.Get("word")="on"
   <td class=xl1517352></td>
   <td class=xl1517352>Итого</td>
   <td class=xl1517352></td>
-  <td class=xl1517352>#($J(kurs*tot,".",2))#</td>
+  <td class=xl1517352>#($J(ItogSumma,".",2))#</td>
   <td class=xl1517352></td>
   <td class=xl2017352>&nbsp;</td>
   <td class=xl1517352></td>
@@ -751,7 +765,7 @@ if %request.Get("word")="on"
   <td class=xl1517352></td>
   <td class=xl1517352>Итого</td>
   <td class=xl1517352></td>
-  <td class=xl1517352 colspan=2>#($J(kurs*tot,".",2))#</td>
+  <td class=xl1517352 colspan=2>#($J(ItogSumma,".",2))#</td>
   <td class=xl2017352>&nbsp;</td>
   <td class=xl1517352></td>
   <td class=xl1517352></td>

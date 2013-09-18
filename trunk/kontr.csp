@@ -69,7 +69,7 @@ function colclick()
 function addrecord(currentrecord)
 {
 	var currentrecord=ReturnSpace(currentrecord)
-	ok=window.showModalDialog("kontragent.csp?KontrId="+currentrecord,"","center:yes;status:no;dialogHeight:708px;dialogWidth:800px;resizable:yes;")
+	ok=window.showModalDialog("kontragent.csp?KontrId="+currentrecord,"","status:no;dialogHeight:708px;dialogWidth:800px;resizable:yes;")
 	if((ok!=null)&&(makeShowDict.checked)){showdictionary(where)}
 }
 
@@ -222,7 +222,7 @@ function fnMeetingResult()
 {
 	var KontrId=currentdict.ItemID;
 	if(KontrId=="")return;
-	var ok=window.showModalDialog("KontrMeetingResult.csp?Kontr="+KontrId,"","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+	var ok=window.showModalDialog("KontrMeetingResult.csp?Kontr="+KontrId,"","status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
 }
 
 function fnKontrList()
@@ -327,7 +327,7 @@ function ActSverki()
   <sklad:LittleButton name="user" id="btnUser" onclick="fnMeetingResult()" alt="История общения с контрагентом">
   
   <button id="bUser2" class="ui-button">
-  	 <span class='ui-icon ui-icon-comment'>&nbsp;</span>
+  	 <span class='ui-icon ui-icon-comment'>провести</span>
   </button>
   
   <sklad:LittleButton name="price" id="btnActSver" onclick="ActSverki()" alt="Акт сверки">

@@ -27,7 +27,7 @@ write заголовок страницы</Description>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
 	d ##super()
-	&html<<link type="text/css" rel="stylesheet" href="css/csp.EmpLight3.css"/>>
+	&html<<link type="text/css" rel="stylesheet" href="css/csp.EmpLight3_.css"/>>
 	Q ""
 ]]></Implementation>
 </Method>
@@ -147,7 +147,7 @@ write заголовок на странице</Description>
  	w "<td id=""Instr",DOCID,"Stat"">",ISTATENAME
  	s:IOPER'=10 IDOSTAVKANAME=IOPERNAME
  	w "<td>",IDOSTAVKANAME,"</td>"
- 	w "<td><nobr>"
+ 	w "<td style=""width:90px""><nobr>"
  	w "<button class='stateDoc' onclick='chstat(",IID,",",DOCID,")'></button>"
  	w "<button class='printDoc' onclick=""prnt('",DOCID,"@",DCLASS1,"')""></button>"
  	
@@ -161,7 +161,7 @@ write заголовок на странице</Description>
  		w "<button class='edit' onclick=""lookinnerinstr('",DOC2,"@",DCLASS2,"')""></button>"
  		w "<button class='print' onclick=""prnt('",DOC2,"@",DCLASS2,"')""></button>"
  		if DSTAT2=1 {
-	 		w "<button class='state' onclick=""savestore(",DOC2,",'",$ZCVT(DNAME2,"O","JS"),"')"" ></button>"
+	 		w "<button class='state' onclick=""savestore(",DOC2,",'",$ZCVT($TR(DNAME2,""""," "),"O","JS"),"')"" ></button>"
  		} else {
  			w "<button class='out'></button>"
  		}
@@ -169,7 +169,7 @@ write заголовок на странице</Description>
 	 }
 	w:ISTATE=8 "<button class='post' onclick=""post('",IID,"')""></button>"
  	w "</nobr></td>"
- 	w "</tr>"	
+ 	w "</tr>",!	
  }
  d rs.Close(), rs.%Close() k rs
  d SetDCFormat^%NLS("DateSeparator",odm) ;восстанавливаем разделитель в дате 
@@ -235,7 +235,7 @@ write содержимое страницы</Description>
 	w "<th><a href='?sort=IUSERNAME&dir=",$g(OperOrder,1),"'>Оператор ",$g(OperSign),"</a></th>"
 	w "<th><a href='?sort=ISTATE&dir=",$g(StateOrder,1),"'>Состояние ",$g(StateSign),"</a></th>"
 	w "<th><a href='?sort=IDOSTAVKA&dir=",$g(TaskOrder,1),"'>Задача<br>(Способ отправки) ",$g(TaskSign),"</a></th>"
-	w "<th style='font-weight:normal;font-size:12px;font-family:Arial'>Действия</th>"
+	w "<th style='font-weight:normal;font-size:12px;font-family:Arial;width:90px'>Действия</th>"
 	w "</thead></table>"
 	&html<<div id="TIBbox"><table id="TIB">>
 	f i=1:1:7 w "<col class='c",i,"'/>"
@@ -279,7 +279,7 @@ write содержимое страницы</Description>
 	}
 
    </script>
-	<script type='text/javascript' src='js/csp.EmpLight3.js'></script>
+	<script type='text/javascript' src='js/pages/csp.EmpLight3.js'></script>
 	>
 	s sess=%request.Get("sessionid")
 	s userid=$G(%session.Data("user"))

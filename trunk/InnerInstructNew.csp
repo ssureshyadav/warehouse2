@@ -3,9 +3,12 @@
  . s %session.EndSession=1
  . s sessionid=%request.Get("sessionid",1)
  . s %session=%session.GetSession(sessionid)
- .  s login=$G(%session.Data("user"))
+ . s login=$G(%session.Data("user"))
  . i '+login s %response.ServerSideRedirect="norights.csp" 
  e  s sessionid=%session.SessionId
+ 
+ s login=$G(%session.Data("user"))
+ 
  
 Quit 1
 </script>
@@ -47,6 +50,7 @@ Quit 1
 var DocId="#($G(DocId))#";
 var ClassName="#($G(ClassName))#";
 var sessionid="#($G(sessionid))#";
+var login = "#($G(login))#";
 
 function load(){
 var Captions = new Array(5);
@@ -77,6 +81,11 @@ docstr.loadfrommethod("Docs.Action2.InnerInstructNewStr",DocId,"",ClassName+"Ite
 function startFun() {
  var InnerSplitter="~";
  xmlDoc=docstr.GetXmlContentByRows();
+ if (login=7)
+ {
+	 //alert(xmlDoc.xml);
+	 CheckForEmptyCells();
+ }
  InsertXmlHeader(xmlDoc,"storeman",storeman.Tag,"Common.Dictionary5")
  var DocID=SendXml(DocId,ClassName,xmlDoc,sessionid);
  if(isNaN(DocID)){alert(DocID);return}
@@ -99,6 +108,25 @@ function startFun() {
  
  returnValue=1;
  window.close();
+}
+
+function CheckForEmptyCells()
+{
+	oNodeList = xmlDoc.selectNodes("//AllObjects/OneObject/*")
+	for (i=0;i<oNodeList.length;i++)
+	{
+		OneObject = oNodeList.item(i);		//“екущий узел (строка из базы)
+		//alert(oNodeList.item(i).text + " \n" +
+		//	"Name = " + OneObject.Name + "\n" + 
+		//	"LocalName = " + OneObject.LocalName + "\n" +
+		//	"Value = " + OneObject.Value + "\n" +
+		//	"BaseURI = " + OneObject.BaseURI + "\n" +
+		//	"NodeType = " + OneObject.NodeType + "\n" +
+		//	"className = " + OneObject.className + "\n" +
+		//	+ OneObject.selectSingleNode("text").text);
+		//RowId = OneObject.selectSingleNode("//text/*").text;		//ID строки в базе
+		//alert(RowId);
+	}
 }
 
 function SendXml(DocID,ClassName,xmlDoc,sessionid)

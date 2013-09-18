@@ -3,9 +3,12 @@
  . s %session.EndSession=1
  . s sessionid=%request.Get("sessionid",1)
  . s %session=%session.GetSession(sessionid)
- .  s login=$G(%session.Data("user"))
+ . s login=$G(%session.Data("user"))
  . i '+login s %response.ServerSideRedirect="norights.csp" 
  e  s sessionid=%session.SessionId
+
+ //s login=$G(%session.Data("user"))
+ //i '+login s %response.ServerSideRedirect="norights.csp" 
  
 Quit 1
 </script>
@@ -189,9 +192,9 @@ if(window.confirm("Вы уверены?")){
 <script language="cache" runat="server">
  s InstrID=%request.Get("source")
  i InstrID {
- 	&sql(select Oper,Name,Comment,InstDate,Kontr,imp,showcolor,Depot1,dostavka,RashOplatType,Kontr->Name,CloseDate,CloseTime,CloseUser->Name,Stat,postnumber,postdata,Summa,%external(HasBeenSent),BrakComment,PhotoFile 
+ 	&sql(select Oper,Name,Comment,InstDate,Kontr,imp,showcolor,Depot1,dostavka,RashOplatType,Kontr->Name,CloseDate,CloseTime,CloseUser->Name,Stat,postnumber,postdata,Summa,%external(HasBeenSent),BrakComment,PhotoFile,User1 
  	into 
- 	:Oper,:Name,:Comment,:InstDate,:Kontr,:imp,:showcolor,:Depot1,:dostavka,:RashOplatType,:KontrName,:CloseDate,:CloseTime,:CloseUserName,:Stat,:postnumber,:postdata,:Summa,:HasBeenSent,:BrakComment,:PhotoFile
+ 	:Oper,:Name,:Comment,:InstDate,:Kontr,:imp,:showcolor,:Depot1,:dostavka,:RashOplatType,:KontrName,:CloseDate,:CloseTime,:CloseUserName,:Stat,:postnumber,:postdata,:Summa,:HasBeenSent,:BrakComment,:PhotoFile,:User1
  	from Operation.Instructions where ID=:InstrID)
  	i SQLCODE w "<tr><td colspan=4>Ошибка при выводе инструкции "_InstrID_"<br>SQLCODE="_SQLCODE_"</td></tr>"
  	i Stat=2 d
@@ -265,9 +268,13 @@ w:$G(ClosedString)'="" "<tr><td colspan=4 class=RightBottom>Инструкция завершена
 </table>
 <tr height=100%><td>
 <SKLADiGrid:iGrid id="docstr" width="100%" height="300" Enabled="true" RowMode="true" /><br>
-<sklad:Button value="Добавить товар" onclick="AddGood();" style="width:150px">
-<sklad:Button value="Удалить строку" onclick="RemoveRow();" style="width:150px">
-<sklad:Button value="Очистить строки" onclick="ClearGrid();" style="width:150px">
+<CSP:IF CONDITION="(+$G(User1)||'+InstrID)">
+	<sklad:Button value="Добавить товар" onclick="AddGood();" style="width:150px">
+	<sklad:Button value="Удалить строку" onclick="RemoveRow();" style="width:150px">
+	<sklad:Button value="Очистить строки" onclick="ClearGrid();" style="width:150px">
+<CSP:ELSE>
+	<sklad:Button value="Добавить товар" onclick="AddGood();" style="width:150px">
+</CSP:IF>
 <tr><td>
 <center><br><sklad:Button value="Сохранить" onclick="startFun();" style="#($G(SaveButtonStyle))#"><sklad:Button onclick="windowclose();" value="Отмена"></center>
 </table>

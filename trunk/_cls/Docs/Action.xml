@@ -363,10 +363,10 @@ types(className_"Items",itemFieldName)=itemFieldType
  . i type["%" s $ZOBJPROPERTY(doc,field)=val
  . e  d $ZOBJMETHOD(doc,field_"SetObjectId",val)
  . //если запрещаем товар, то запрещаем его для всех
- . s ^mtempArt("z",DocClass,field)=val
- . if (DocClass="Goods.Goods") && (field="AllowToSend")&& (+val=0) d  
- .. s ^mtempArt("docid")=docid
- .. d ..BanGoodsForAll(docid)
+ . //s ^mtempArt("z",DocClass,field)=val
+ . //if (DocClass="Goods.Goods") && (field="AllowToSend")&& (+val=0) d  
+ . //. s ^mtempArt("docid")=docid
+ . //. d ..BanGoodsForAll(docid)
  
  q:'+err err
  s ItemsClass=DocClass_"Items"
@@ -643,7 +643,7 @@ SaveStorageDocErr
 <br>class - класс документа
 <br>docobj - объект документа]]></Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>class,docobj</FormalSpec>
+<FormalSpec>class,docobj,currentJob</FormalSpec>
 <Implementation><![CDATA[
  s $ZT="scriptErr"
  s ok=1
@@ -686,7 +686,7 @@ SaveStorageDocErr
      s goods=itemobj.Goods.%Id()
      d ..addTovarOnKontr(kontr,goods,itemobj.Quantity)
      //если есть гарантийный талон и если эта связка не фигурировала в этом документе
-     if itemobj.garant'="",'$D(NumbersInThisDoc(" "_itemobj.garant," "_itemobj.serial)) s ok=..setSerialGarant(itemobj.serial,itemobj.garant,itemobj.Goods,docid,class)
+     if itemobj.garant'="",'$D(NumbersInThisDoc(" "_itemobj.garant," "_itemobj.serial)) s ok=..setSerialGarant(itemobj.serial,itemobj.garant,itemobj.Goods,docid,class,$G(currentJob))
      s NumbersInThisDoc(" "_itemobj.garant," "_itemobj.serial)=""
   }
   } While ((key '= "")&&(ok)) q:'+ok ok
@@ -703,7 +703,7 @@ SaveStorageDocErr
      s:itemobj.goodssource=1 ok=..remTovarOnKontr(kontr,goods,itemobj.Quantity)
      q:'+ok
 	 i (itemobj.garant'="")&(itemobj.serial="")&(+demandserial) s ok="Не указан серийный номер изделия для гарантийного талона "_garant q
-     if itemobj.garant'="",'$D(NumbersInThisDoc(" "_itemobj.garant," "_itemobj.serial)) s ok=..setSerialGarant(itemobj.serial,itemobj.garant,itemobj.Goods,docid,class)
+     if itemobj.garant'="",'$D(NumbersInThisDoc(" "_itemobj.garant," "_itemobj.serial)) s ok=..setSerialGarant(itemobj.serial,itemobj.garant,itemobj.Goods,docid,class,$G(currentJob))
      s NumbersInThisDoc(" "_itemobj.garant," "_itemobj.serial)=""
   }
   } While (key '= "") q:'+ok ok
@@ -800,14 +800,18 @@ LookGarantDateErr
 
 <Method name="setSerialGarant">
 <ClassMethod>1</ClassMethod>
-<FormalSpec>serial="",garant="",goodsobj:Goods.Goods,docid,docclass</FormalSpec>
+<FormalSpec>serial="",garant="",goodsobj:Goods.Goods,docid,docclass,currentJob</FormalSpec>
 <Implementation><![CDATA[
+	s $ZT="setSerialGarantErr"
 	q:garant="" 1
 	i '$ISOBJECT(goodsobj) $$$WriteError("setSerialGarant не передали объект товара serial = "_serial_", garant ="_garant) q 1
 	i docclass="Docs.Otchet" s addition="otch"  //в гарантийном талоне заявки сохраняются в remont1 а отчеты в remont1otch
 	e  s addition=""
 	s remont=""
 	s ok=1
+	
+	s ^mtempArt("serial")=serial
+	s ^mtempArt("garant")=garant
 	
 	//ID талона найденный по имени
 	s garantID = ##class(Common.Common).GetGarantIdByName(garant)
@@ -835,12 +839,41 @@ LookGarantDateErr
 	d:remont'="" $ZOBJMETHOD(garantobj,remont_addition_"SetObjectId",docid)
 	q:'+ok ok
 	s garantobj.serial=serial
-	i $ISOBJECT(goodsobj.izdelie) s izdelie=goodsobj.izdelie.Name
-	e  s izdelie=""
-	s garantobj.tovar=izdelie_" "_goodsobj.Property3609
+	s izdelie=goodsobj.abbr
+	
+	//если товар в гарантийном талоне есть и он не соответствует товару в заявке
+	if (garantobj.tovar'=""),(garantobj.tovar'=izdelie_" "_goodsobj.Property3609) 
+	{
+		 /*
+		 if +$G(currentJob)
+		 {
+			 s ^temp(currentJob)=0
+			 	_$C(9)_"В серийном номере "_serial_" записана модель "_garantobj.tovar_", а в документе "_izdelie_" "_goodsobj.Property3609_". Заменить модель в серийном номере?"
+			 	_$C(9)_"Да"_$C(8)_"ok"
+			 	_$C(9)_"Нет"_$C(8)_"no"
+			 while ($G(^temp(currentJob,"answer"))="")
+			 {
+				 h 1
+			 }
+			 s ^mtempArt("currentJob")=currentJob
+			 s ^mtempArt("answer")=$G(^temp(currentJob,"answer"))
+			 //тут действие зависящее от ответа
+			 if ($G(^temp(currentJob,"answer")))="ok" s garantobj.tovar=izdelie_" "_goodsobj.Property3609
+		 }
+		 else
+		 {
+			 s garantobj.tovar=izdelie_" "_goodsobj.Property3609
+		 }
+		 */
+	}
+	if garantobj.tovar="" s garantobj.tovar=izdelie_" "_goodsobj.Property3609
+	
 	s ok=garantobj.%Save()
 	i '+ok $$$WriteObjError(ok) q "Извините, внутренняя ошибка при записи информации о гарантийном талоне "_garant
 	q 1
+setSerialGarantErr
+ $$$WriteError($ZE)
+ q "Извините, ошибка при привязке серийного номера"
 ]]></Implementation>
 </Method>
 
@@ -987,6 +1020,7 @@ PrihNeedsDiffErr
 	 i docclass="Docs.Otchet" s ok=..processotchet(doc),made=1
 	 i docclass="Docs.Brakremont" s ok=..processbrakremont(doc),made=1
 	 i docclass="Docs.Act" s ok=..processact(doc),made=1
+	 i docclass="Docs.Sluzap" s ok=..processSluZap(doc),made=1
 	 q:'+ok ok
 	 i 'made q "Данный тип документов не подлежит обработке."
 	 s doc.Stat=2
@@ -996,6 +1030,54 @@ PrihNeedsDiffErr
 processdocErr
 	 $$$WriteError($ZE)
 	 q "Извините, во время обработки документа произошла ошибка."
+]]></Implementation>
+</Method>
+
+<Method name="processSluZap">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>doc</FormalSpec>
+<Implementation><![CDATA[
+	s $ZT="processSluZapErr"
+	
+	if $ISOBJECT(doc) s docobj = doc
+	else  s docobj = ##class(Docs.Sluzap).%OpenId(doc)
+	
+	if '$ISOBJECT(docobj) q "Извините. Не удалось получить доступ к документу "_doc
+	s docid = docobj.%Id()
+	
+	&sql(declare sluzap cursor for
+		SELECT Otchet
+		INTO :Otchet
+		FROM Docs.sluzapItems 
+		WHERE Doc=:docid)
+	&sql(open sluzap)
+	f  &sql(fetch sluzap) q:SQLCODE  d
+	. if '+Otchet q
+	. s otch(Otchet)=""
+	&sql(close sluzap)
+	
+	//теперь всем отчётам пропишем эту служебную записку
+	TSTART
+	s OtchetId = ""
+ 	f  s OtchetId = $O(otch(OtchetId)) q:OtchetId=""  d
+ 	. &sql(update Docs.Otchet set Sluzap = :docid where ID=:OtchetId)
+ 	. if SQLCODE q
+ 	if SQLCODE 
+ 	{
+	 	TROLLBACK
+	 	q "Извините, ошибка при попытке закрыть служебную записку, не найден отчёт "_OtchetId
+ 	}
+ 	else
+ 	{
+		TCOMMIT
+ 	}
+	
+	
+	//соберём в массив все отчёты упоминающиеся в этой записке
+	q 1
+processSluZapErr
+ $$$WriteError($ZE)
+ q "Извините, во время обработки документа произошла ошибка"
 ]]></Implementation>
 </Method>
 
@@ -1306,7 +1388,9 @@ tovsforotchetErr
  e  d
  . s numb=+$G(^RashNumbers(DocType,year))+1
  . s ^RashNumbers(DocType,year)=numb
- q numb_"-"_year
+ s newNumber=numb_"-"_year
+ if DocType="Docs.Sluzap" s newNumber="C"_newNumber
+ q newNumber
 getRashNumbErr
  $$$WriteError($ZE)
  q "----"
@@ -1364,9 +1448,14 @@ LoadFreeDocsErr
 Создать документы на основании инструкции руководителя
 <br><var>id</var> - ID инструкции руководителя]]></Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>id</FormalSpec>
+<FormalSpec>id,currentJob</FormalSpec>
 <Implementation><![CDATA[
  s $ZT="DocFromInstrErr"
+ 
+ s ^mtempArt("docfrominstr",3,"InstrId")=id
+ s ^mtempArt("docfrominstr",3,"currentJob")=$G(currentJob)
+ 
+ 
  s err="Извините, внутренняя ошибка при создании документа"
  s ok=..ChildDocs(id,.Array)
  i $D(Array)>1 d  q "На основе этой инструкции уже созданы документы: "_$C(10)_$C(13)_Names
@@ -1431,7 +1520,7 @@ LoadFreeDocsErr
  . . i '+ok $$$WriteObjError(ok) q
  . q:'+ok
  . s doc.Summa=tot
- . s err=..script(class,doc)
+ . s err=..script(class,doc,$G(currentJob))
  . q:class="Docs.Remont"&'+err
  . s ok=doc.%Save()
  . q:'+ok
@@ -2300,23 +2389,27 @@ SaveListOfObjectsErr
 	&sql(DECLARE krs cursor for 
 		SELECT ID INTO :kontr FROM Common.Kontragent
 	) &sql(OPEN krs)
- TSTART
+ //TSTART
 	 s sc=0 ;status code
-	 for { &sql(FETCH krs) Q:SQLCODE'=0
+	 for { 
+	 		&sql(FETCH krs) 
+	 		Q:SQLCODE'=0
 	   
-	 		if ( SetBan ) {
+	 		if ( SetBan ) 
+	 		{
+		 		
 		 		d ##class(Goods.Goods).kbanAdd(goods, kontr)
-	 		} else {
+	 		} else 
+	 		{
 	 			d ##class(Goods.Goods).kbanDel(goods, kontr)
 	 		}
-	 		s ban=##class(Goods.Goods).kbanned(goods,kontr) //посмотрим что получилось
-	 		///действие совпало с результатом ?
-	 		k sc s sc= ( ban = SetBan ) Q:'sc  ;quit for
+	 		//s ban=##class(Goods.Goods).kbanned(goods,kontr) //посмотрим что получилось
+	 		//действие совпало с результатом ?
+	 		//k sc s sc= ( ban = SetBan ) Q:'sc  ;quit for
 	 }
 	 &sql(close krs)
-	 if 'sc TROLLBACK  Q 0 ;не получилось установить
-	 
- TCOMMIT
+ //if 'sc TROLLBACK  Q 0 ;не получилось установить
+ //TCOMMIT
  Q 1
 ]]></Implementation>
 </Method>

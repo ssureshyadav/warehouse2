@@ -126,7 +126,13 @@ function PrintZap(ItemID)
 	w ##class(Docs.Action2).GetClassValuesOptions("","Common.Dictionary18",,,0)
 	</script>
 	</select>
+	<script language="javascript">
+	//alert("#($ZD($H,4))#");
+	</script>
+	<!--
 	Период c <input type=text id="dat13" value="#("1/"_+$ZD($H,1)_"/"_+$ZD($H,3))#" onclick="fnCalendar(this)" class="datar"> по <input type=text id="dat23" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar">
+	-->
+	Период c <input type=text id="dat13" value="" onclick="fnCalendar(this)" class="datar"> по <input type=text id="dat23" value="" onclick="fnCalendar(this)" class="datar">
 	<sklad:LittleButton name="ok" id="okbut33" onclick="ShowZap()" alt="Показать записи"><br>
 	<SKLADList:listview width=100% height=350 id="zap" zonDblClick="PrintZap(zap.ItemID)" />
 	<sklad:LittleButton name="print" id="printZapBut" onclick="PrintZap(zap.ItemID)" alt="Печать инструкции">

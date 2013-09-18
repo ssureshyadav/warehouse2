@@ -35,6 +35,8 @@
 input{border:none;width:15px}
 </style>
 <script language="jscript" src="common.js"></script>
+<script language="javascript" type="text/javascript" src="js/jquery-1.8.2.min.js"></script>
+
 <script language="Jscript">
 var CardId=""; //условие для отбора товаров
 sessionid="#(%session.SessionId)#";
@@ -49,24 +51,39 @@ function load()
 		instr.LoadHeaders("Doc,DocType,Tim,Dat,Summa,Stat,Operation");
 	//docstr.LoadHeadersXML("Doc,DocType,quantplan,addr,addr2,spravka,Client,goodsdir,garant,sn,seller");
 	
-	var Captions = new Array(4);
-	var Keys = new Array(4);
-	var Tags = new Array(4);
+	var Captions = new Array(6);
+	var Keys = new Array(6);
+	var Tags = new Array(6);
 	
 	Captions[0]="Товар";
 	Captions[1]="Количество";
-	Captions[2]="Цена";
-	Captions[3]="Сумма";
+	Captions[2]="Серийный номер";
+	Captions[3]="Гарантийный талон";
+	Captions[4]="Поломка";
+	Captions[5]="Продавец";
+	Captions[6]="Дата";
+	Captions[7]="Комментарий";
+	
 	
 	Tags[0]="Goods.Goods";
 	Tags[1]="%Numeric";
-	Tags[2]="%Numeric";
-	Tags[3]="%Numeric";
+	Tags[2]="%String";
+	Tags[3]="%String";
+	Tags[4]="%String";
+	Tags[5]="%String";
+	Tags[6]="%String";
+	Tags[7]="%String";
 	
 	Keys[0]="Goods";
 	Keys[1]="Quantity";
-	Keys[2]="Price";
-	Keys[3]="Total";
+	Keys[3]="garant";
+	Keys[2]="sn";
+	Keys[4]="opispolomki";
+	Keys[5]="seller";
+	Keys[6]="SellDate2";
+	Keys[7]="BrakComment";
+	
+	
 	docstr.DrawHeaders(Captions,Keys,Tags);
 	
 	hideplanFn();
@@ -113,6 +130,9 @@ function ShowInstr()
 	var currentKontragent=ChooseKontragent.value;
 	if(currentKontragent!="all"){var variable=variable+" and Kontr="+currentKontragent}
 	
+	var varInstrSortField = InstrSortField.value;	//поле по которому сортируем
+	variable = variable+ " order by Operation.Instructions."+varInstrSortField;
+	
 	instr.DownLoad(variable);
 }
 
@@ -144,10 +164,12 @@ function DelInstrDocs(){
 }
 
 function showtovsins(){
-CardId=instr.ItemID+"@"+instr.ClassName;
-//tovars.LoadHeaders();
-docstr.Clear()
-loadgoods(instr.ItemID);
+	ItemID = instr.ItemID;
+	CardId=ItemID+"@"+instr.ClassName;
+	//tovars.LoadHeaders();
+	docstr.Clear()
+	loadgoods(ItemID);
+	$.get("Commands.csp?command=InstrData&ID="+ItemID,function(data){$("#InstrData").text(data);});
 }
 
 function LoadGoodsFromCard(){
@@ -208,10 +230,11 @@ if(!hideGoods.checked){
 }
 
 // создание дочерних документов от инструкции
-function doc(){
-ok=#server(Docs.Action.DocFromInstr(instr.ItemID))#
-if(isNaN(ok)){alert(ok)}
-else{alert("Документ успешно создан")}
+function doc()
+{
+	ok=#server(Docs.Action.DocFromInstr(instr.ItemID))#
+	if(isNaN(ok)){alert(ok)}
+	else{alert("Документ успешно создан")}
 }
 
 // при закрытии окна
@@ -302,7 +325,7 @@ function FillInstrReminder()
 	var str = #server(Operation.InstrActions.GetInstrReminderText())#;
 	if (str != "")
 	{
-		InstrReminder.innerHTML = "<p style='color:#de1111'>Внимание! Некоторые инструкции не укомплектованы или не завершены более #($G(DaysCount))# дней:</p>"
+		InstrReminder.innerHTML = "<p style='color:#de1111'>Внимание! Некоторые инструкции не завершены или не отклонены более #($G(DaysCount))# дней:</p>"
 		+	str 
 		+ ButtonString;
 	}
@@ -341,8 +364,9 @@ function ShowFoto()
 function ShowGarantsFromRequest()
 {
 	var iid=instr.ItemID; if (!iid) { alert("Выберите инструкцию!"); return; } 
-	window.showModelessDialog("csp.ReqWar.cls?id="+iid
-   	,iid+";Common.Dictionary2","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;");
+	//window.open("csp.ReqWar2.cls?id="+iid);
+	window.showModelessDialog("csp.ReqWar2.cls?id="+iid
+   	,iid+";Common.Dictionary2","center:yes;status:no;dialogHeight:600px;dialogWidth:1000px;resizable:yes;");
 }
 </script>
 <script language="VBScript">
@@ -449,6 +473,7 @@ End Sub
 	<td><b>Статус</b>
 	<td><b>Контрагент</b>
 	<td><b>Номер</b>
+	<td><b>Сортировка</b>
 	<td>&nbsp;
 </tr>
 <tr>
@@ -466,27 +491,32 @@ End Sub
 			<option value="choose">Выбрать контрагента...</option>
 		</select>
 	<td><input type=text id="InstrComment" name="InstrComment" style="border:solid 1 black;width:50px" title="Для поиска можно вводить лишь первые символы номера">
+	<td>
+	<select id="InstrSortField">
+		<option value="Name">Номер</option>
+		<option value="InstDate">Дата</option>
+	</select>
 	<td><sklad:LittleButton name="ok" id="okbut11" onclick="ShowInstr()" alt="Показать записи">
 </tr>
 </table>
-<SKLADList:listview width=100% height=100 id="instr" onAddColumns="ShowInstr()" ClassName="Operation.Instructions" zonDblClick="ItemInstr(instr.ItemID)" zClick="showtovsins()" Skip="Source->Name,child->Name"/>
+<SKLADList:listview width=100% height=300 id="instr" onAddColumns="ShowInstr()" ClassName="Operation.Instructions" zonDblClick="ItemInstr(instr.ItemID)" zClick="showtovsins()" Skip="Source->Name,child->Name" SaveSort="false"/>
   <table width=100%><tr><td width=80%>
 	  <sklad:LittleButton name="new" id="newtov" onclick="ItemInstr()" alt="Создать запись">
 	  <sklad:LittleButton name="edit" id="edittov" onclick="ItemInstr(instr.ItemID)" alt="Редактировать запись">
 	  <sklad:LittleButton name="ok2" id="approve" onclick="changestat('2')" alt="Утвердить">
 	  <sklad:LittleButton name="calendar" id="eltov" onclick="lookinnerinstr(instr.ItemID)" alt="Просмотр внутренней инструкции">
 	  <sklad:LittleButton name="history" id="lookhistory" onclick="lookhist(instr.ItemID)" alt="История инструкции">
-	  <sklad:LittleButton name="ok" id="fin" onclick="changestat('9')" alt="Завершить">
+	  <sklad:LittleButton name="ok" id="fin" onclick="if(window.confirm('Завершить заявку ?')){changestat('9')}" alt="Завершить">
 	  <sklad:LittleButton name="txt" id="tx" onclick="doc()" alt="Создать документ на основании инструкции">
 	  <sklad:LittleButton name="copy" id="copyInstr" onclick="CopyInstr(instr.ItemID)" alt="Копировать инстукцию">
 	  <sklad:LittleButton name="print" id="printInstr" onclick="PrintInstr(instr.ItemID)" alt="Печать инстукции">
 	  <sklad:LittleButton name="savestore" id="btnShowFoto" onclick="ShowFoto(instr.ItemID)" alt="Показать фотографии внутренней инструкции">
 	  
 	  <img src="images/VertDelimeter.gif">
-	  	<sklad:LittleButton name="txt" id="btnLookBrakComment" onclick="ShowFieldFn(instr.ItemID,'Operation.Instructions','BrakComment')" alt="Показать негативный отзыв контрагента">
+	  	<sklad:LittleButton name="info" id="btnLookBrakComment" onclick="ShowFieldFn(instr.ItemID,'Operation.Instructions','BrakComment')" alt="Показать негативный отзыв контрагента">
 		<sklad:LittleButton name="txt" id="btnSetBrakAnswer" onclick="SetInstrField(instr.ItemID,'SetBrakAnswer','Ответ на негативный отзыв','Ответ на негативный отзыв сохранён')" alt="Ответить на негативный отзыв">
 		<sklad:LittleButton name="txt" id="btnLookBrakCommentAnsw" onclick="ShowFieldFn(instr.ItemID,'Operation.Instructions','BrakCommentAnswer')" alt="Показать ответ на негативный отзыв контрагента">
-		<sklad:LittleButton name="txt" id="btnShowGarantsFromRequest" onclick="ShowGarantsFromRequest()" alt="Проверить серийные номера">
+		<sklad:LittleButton name="search" id="btnShowGarantsFromRequest" onclick="ShowGarantsFromRequest()" alt="Проверить серийные номера" >
 	  <img src="images/VertDelimeter.gif">
 	  	<sklad:LittleButton name="stop" id="btnStop" onclick="RefuseInstr(instr.ItemID)" alt="Отклонить заявку">
   </td><td width=20% align=right>
@@ -501,7 +531,7 @@ End Sub
 
 <!--  Таблица с товарами   -->
 <input type="checkbox" id="hideGoods" onclick="hideGoodsFn()"> Не выводить товары
-<fieldset id="GoodsField"><legend>Товары <span id="whostovar"></span></legend>
+<fieldset id="GoodsField"><legend>Товары инструкции <div id="InstrData" style="display:inline;color:darkblue"></div></legend>
 <!--
 <SKLADList:listview width=100% height=100 id="tovars" onAddColumns="LoadGoodsFromCard()" ClassName="Goods.Goods"/><br>
 <SKLAD2:table id="docstr" width=100% height=100 ClassName="Operation.InstructionsItems" />

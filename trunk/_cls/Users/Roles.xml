@@ -2,54 +2,32 @@
 <Export generator="Cache" version="20">
 <Class name="Users.Roles">
 <Description>
-Роли
-К сожалению это не роли, а Роли-Функции</Description>
-<IncludeCode>xmlmacros,functions</IncludeCode>
+Роли</Description>
+<IncludeCode>xmlmacros</IncludeCode>
 <Super>%Persistent</Super>
 <TimeCreated>60382,34466.269813</TimeCreated>
 
-<Property name="Name">
-<Description>
-Имя роли </Description>
-<Type>%String</Type>
-<Required>1</Required>
-</Property>
-
 <Property name="NameFunction">
 <Description>
-Имя функции </Description>
+Имя пользователя</Description>
 <Type>%String</Type>
 <Required>1</Required>
 </Property>
 
-<Method name="IsAdmin">
+<Property name="Name">
 <Description>
-Это роль администратора?</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>role:%String</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<SqlProc>1</SqlProc>
-<Implementation><![CDATA[
-	Q:$g(role)="" 0
-	s fnAdmin=$$$users
-	&sql(Select Count(ID) Into :count 
-		From Users.Roles 
-		Where Name=:role And NameFunction=:fnAdmin
-	)
-	Q:count>0 1
-	Q 0
-]]></Implementation>
-</Method>
+Имя роли</Description>
+<Type>%String</Type>
+<Required>1</Required>
+</Property>
 
 <Method name="SaveRole">
-<Description>
-Сохранение роли</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>role:%String,str:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
- 
-	for i=1:1 s func(i)=$P(str,"~",i+1) q:func(i)=""  d
+	
+	f i=1:1 s func(i)=$P(str,"~",i+1) q:func(i)=""  d
 	.s func=func(i)
 	.&sql(insert into Users.Roles (Name,NameFunction) values(:role,:func))
 	q

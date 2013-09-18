@@ -10,9 +10,16 @@
 <IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
 <head>
 <link href="style.css" type=text/css rel=stylesheet>
+ <link rel='stylesheet' type='text/css' href='css/redmond/jquery-ui-1.8.16.custom.css'/>
+ <link rel='stylesheet' type='text/css' href='css/ui.jqgrid.css'/>
+<style>
+ .ui-jqgrid {font-size:90%;}
+ .ui-widget {font-size:1.2em;}
+</style>
 <script language="jscript" src="common.js"></script>
 <script language="Jscript">
 GoodsWindow = "ok";
+CurrentDictionaryID = "";
 ColCode="";
 sessionid="#(%session.SessionId)#";
 var where="";
@@ -21,38 +28,36 @@ GoodsWindow = "";
 function load()
 {
 	//currentdict.attachEvent("onAddColumns", showdictionary)
-	dictionary.LoadHeaders();
+	//dictionary.LoadHeaders();
 }
 
-function Item(ItemID)
+function Item()
 {
-	ItemID=ReturnSpace(ItemID)
-	mok=window.showModalDialog("CreateNewDict.csp",ItemID+";"+dictionary.ClassName,"center:yes;status:no;dialogHeight:400px;dialogWidth:400px;resizable:yes;")
+	mok=window.showModalDialog("CreateNewDict.csp",CurrentDictionaryID+";Common.Dicts","center:yes;status:no;dialogHeight:400px;dialogWidth:400px;resizable:yes;")
 	if(mok==null)return false
 	if(mok==1){ShowList()}
 }
 
 function ShowList()
 {
-	dictionary.DownLoad();
+	//dictionary.DownLoad();
 }
 
 function AddProp()
 {
-	ItemID=ReturnSpace(dictionary.ItemID)
-	if(ItemID=="")return
-	ok=window.showModalDialog("AddGoodsProp2.csp?ItemID="+ItemID,ItemID,"center:yes;status:no;dialogHeight:330px;resizable:yes")
+	if(CurrentDictionaryID=="")return
+	ok=window.showModalDialog("AddGoodsProp2.csp?ItemID="+CurrentDictionaryID,CurrentDictionaryID,"center:yes;status:no;dialogHeight:330px;resizable:yes")
 	if(ok==1){ShowList();return false;}
 	if(ok==null){return false;}
 	alert(ok)
 }
 
-function ShowProps()
+function ShowProps(ItemID,ItemName)
 {
-	ItemID=ReturnSpace(dictionary.ItemID);
+	//ItemID=ReturnSpace(dictionary.ItemID);
 	//PropTable.ClearRows();
 	//PropTable.DownLoadPairs(ItemID,'');	
-	CurrentDictName.innerText=dictionary.ItemName;
+	CurrentDictName.innerText=ItemName;
 	currentdict.ClassName=ItemID;
 	var made=false;
 	if(ItemID=="Common.Dictionary4"){
@@ -126,6 +131,13 @@ function addrecord(currentrecord)
 		ok=window.showModalDialog("ManyGarants.csp",currentrecord+";"+currentclass,"center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
 		var made=true;
 	}
+	
+	if(currentclass=="Common.Dictionary4")
+	{
+		ok=window.showModalDialog("AnalogForm.csp?id="+currentrecord,currentrecord+";"+currentclass,"center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+		var made=true;
+	}
+	
 	if(!made){ok=window.showModalDialog("DictItem.csp",currentrecord+";"+currentclass,"center:yes;status:no;dialogHeight:350px;dialogWidth:400px;resizable:yes;")}
 	if(ok!=null)showdictionary()
 }
@@ -133,11 +145,7 @@ function addrecord(currentrecord)
 function gg()
 {
 	if(ColCode=="")return false;
-	var ItemID=ReturnSpace(dictionary.ItemID);
-	//if(ItemID=="Common.Dictionary2"){where = ColCode+" LIKE '%"+fldval.value+"%'";}
-	//else{where = ColCode+" %STARTSWITH '"+fldval.value+"'";}
 	where = ColCode+" %STARTSWITH '"+fldval.value+"'";
-	//alert("where = " + where);
 	if(fldval.value=="")where="";
 	showdictionary(where);
 }
@@ -207,7 +215,10 @@ function TestFastGoods()
 
 <br>
 <fieldset><legend>Справочники</legend>
- <SKLADList:listview width=100% height=150 id="dictionary" onAddColumns="ShowList()" ClassName="Common.Dicts" zonDblClick="Item()" zClick="ShowProps()"/><br>
+<!--
+ <SKLADList:listview width=100% height=150 id="dictionary" onAddColumns="ShowList()" ClassName="Common.Dicts" zonDblClick="Item()" zClick="ShowProps(dictionary.ItemID,dictionary.ItemName)"/><br>
+--> 
+ <table id="grid"><tr><td></td></tr></table><div id="bar"></div><br>
   <sklad:LittleButton name="new" id="newtov1" onclick="Item()" alt="Создать справочник">
   <!--
   <sklad:LittleButton name="edit" id="edititem" onclick="Item(dictionary.ItemID)" alt="Редактировать справочник">
@@ -247,5 +258,63 @@ function TestFastGoods()
 </td>
 </tr>
 </fieldset>
+		<script type='text/javascript' src='js/jquery-1.6.4.min.js'></script>
+		<script type='text/javascript' src='js/jquery-ui-1.8.16.custom.min.js'></script>
+		<script type='text/javascript' src='js/i18n/grid.locale-ru_win1251.js'></script>
+		<script type='text/javascript' src='js/jquery.jqGrid-4.1.2.min.js'></script>
+		<script type='text/javascript'>
+		
+		
+		$(function(){
+				var GRID="#grid",BAR="#bar",URL="json.CommonDicts.cls";
+
+				$(GRID).jqGrid({
+						caption: 'Cправочники'
+						,url: URL, editurl: URL
+						,datatype: "json"
+						,jsonReader : { repeatitems: false }
+						,colModel: [
+							{name:"gd",hidden: true}
+							,{name:"nm",label:"Наименование",width:350
+								, search:true
+							}
+							,{name:"cm",label:"Описание",width:250
+								, search:true
+							}
+						]
+						//,idPrefix:"kt"
+					 ,pager:BAR 
+					 ,viewrecords:true
+					 ,height:300
+					 ,hidegrid: false
+					 ,gridview:true ,rownumbers:true,viewrecords:true,rowNum:100
+					 ,/*scrollrows:true,*/hoverrows:true ,scroll:1
+					 ,ondblClickRow: function(id){addrecord(id);}
+					 ,onSelectRow: function(id) {ShowProps(id,$("#grid").getCell(id,2));CurrentDictionaryID=id;}
+ 		})
+ 		.jqGrid('navGrid',BAR, {
+	       	add: false
+       		, edit:false
+       		, del:false 
+       		, view:false
+       		, search:false
+       }
+       ,{} //Параметры редактирования
+       ,{} //Параметры добавления
+       ,{ //Параметры удаления
+	       afterSubmit: function(resp){
+		      var text=resp.responseText;
+		      var arr=eval(text); 
+		      return arr;
+		   }
+	   } 
+   ).jqGrid('filterToolbar',{searchOnEnter:false})
+   .jqGrid('gridResize',{});
+ 	$(BAR+"_center").remove(); //пагинатора не будет
+ 	$(BAR+"_left").css("width","70%"); //надпись о количестве записей на бОльшую часть футера
+});
+
+
+</script>
 </body>
 </html>

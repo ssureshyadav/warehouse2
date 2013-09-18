@@ -37,6 +37,7 @@ if %request.Get("word")="on"
  . . s postdata=InstrObj.postdata
  . . if +postdata s postdata=$ZD(postdata,4)
  . . s Additional="Доставка: "_$G(dostavka)_" "_$G(RashOplatType)_" <i>"_postnumber_" "_$G(postdata)_"</i>"
+ . if $ISOBJECT(InstrObj.innerinstr) s InnerInstrNumber=InstrObj.innerinstr.Name
 </script>
 <html xmlns:o="urn:schemas-microsoft-com:office:office"
 xmlns:w="urn:schemas-microsoft-com:office:word"
@@ -157,7 +158,7 @@ table.MsoTableGrid
 normal'><span style='font-family:Arial'>Инструкция руководителя </span></b><b
 style='mso-bidi-font-weight:normal'><span lang=EN-US style='font-family:Arial;
 mso-ansi-language:EN-US'>#($G(Name))#</span></b><b style='mso-bidi-font-weight:normal'><span
-style='font-family:Arial'><o:p></o:p></span></b></p>
+style='font-family:Arial'></span></b></p>
 
 <p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span
 style='font-family:Arial'><o:p>&nbsp;</o:p></span></b></p>
@@ -165,25 +166,29 @@ style='font-family:Arial'><o:p>&nbsp;</o:p></span></b></p>
 <p class=MsoNormal><span style='font-family:Arial'>Контрагент<span
 style='mso-tab-count:1'>   </span><span style='mso-tab-count:1'>            </span></span><span
 class=SpellE><span lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'>#($G(Kontr))#</span></span><span
-style='font-family:Arial'><o:p></o:p></span></p>
+style='font-family:Arial'></span></p>
 
 <p class=MsoNormal style="padding-top:5.4pt"><span style='font-family:Arial;'>Состояние<span
 style='mso-tab-count:1'>    </span><span style='mso-tab-count:1'>            </span></span><span
 lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'>#($G(State))#</span><span
-style='font-family:Arial'><o:p></o:p></span></p>
+style='font-family:Arial'></span></p>
 
 <p class=MsoNormal style="padding-top:5.4pt"><span style='font-family:Arial'>Шаблон<span
 style='mso-tab-count:1'>          </span><span style='mso-tab-count:1'>            </span></span><span
 lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'>#($G(Oper))#</span><span
-style='font-family:Arial'><o:p></o:p></span></p>
+style='font-family:Arial'></span></p>
 
 <p class=MsoNormal style="padding-top:5.4pt"><span style='font-family:Arial'>Комментарий</span><span
 lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'><span
-style='mso-tab-count:1'>           </span>#($G(Comment))#<o:p></o:p></span></p>
+style='mso-tab-count:1'>           </span>#($G(Comment))#</span></p>
+
+<p class=MsoNormal style="padding-top:5.4pt"><span style='font-family:Arial'>Внутренняя инструкция</span><span
+lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'><span
+style='mso-tab-count:1'>           </span><a href="../PrintInnerFromChief.csp?super=#(InstrId)#" target="_blank">#($G(InnerInstrNumber))#</a></span></p>
 
 <p class=MsoNormal style="padding-top:5.4pt"><span style='font-family:Arial'>Создал</span><span
 lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'><span
-style='mso-tab-count:2'>                      </span>#($G(Creator))#<o:p></o:p></span></p>
+style='mso-tab-count:2'>                      </span>#($G(Creator))#</span></p>
 
 <p class=MsoNormal style="padding-top:5.4pt"><span lang=EN-US style='font-family:Arial;mso-ansi-language:EN-US'>#($G(Additional))#</span></p>
 
@@ -196,50 +201,50 @@ style='mso-tab-count:2'>                      </span>#($G(Creator))#<o:p></o:p><
  <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
   <td width=378 valign=top style='width:10.0cm;border:solid windowtext 1.0pt;
   mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal><span style='font-family:Arial'>Товар<o:p></o:p></span></p>
+  <p class=MsoNormal><span style='font-family:Arial'>Товар</span></p>
   </td>
   <td width=378 valign=top style='width:10.0cm;border:solid windowtext 1.0pt;
   mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal><span style='font-family:Arial'>Гарантийный номер<o:p></o:p></span></p>
+  <p class=MsoNormal><span style='font-family:Arial'>Гарантийный номер</span></p>
   </td>
   <td width=378 valign=top style='width:10.0cm;border:solid windowtext 1.0pt;
   mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal><span style='font-family:Arial'>Серийный номер<o:p></o:p></span></p>
+  <p class=MsoNormal><span style='font-family:Arial'>Серийный номер</span></p>
   </td>
   <td width=113 valign=top style='width:3.0cm;border:solid windowtext 1.0pt;
   border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
   solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal><span style='font-family:Arial'>Количество<o:p></o:p></span></p>
+  <p class=MsoNormal><span style='font-family:Arial'>Количество</span></p>
   </td>
   <td width=113 valign=top style='width:3.0cm;border:solid windowtext 1.0pt;
   border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
   solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal><span style='font-family:Arial'>Цена<o:p></o:p></span></p>
+  <p class=MsoNormal><span style='font-family:Arial'>Цена</span></p>
   </td>
   <td width=113 valign=top style='width:3.0cm;border:solid windowtext 1.0pt;
   border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
   solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal><span style='font-family:Arial'>Сумма<o:p></o:p></span></p>
+  <p class=MsoNormal><span style='font-family:Arial'>Сумма</span></p>
   </td>
   <td width=113 valign=top style='width:3.0cm;border:solid windowtext 1.0pt;
   border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
   solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal><span style='font-family:Arial'>Описание поломки<o:p></o:p></span></p>
+  <p class=MsoNormal><span style='font-family:Arial'>Описание поломки</span></p>
   </td>
   <td width=113 valign=top style='width:3.0cm;border:solid windowtext 1.0pt;
   border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
   solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal><span style='font-family:Arial'>Продавец<o:p></o:p></span></p>
+  <p class=MsoNormal><span style='font-family:Arial'>Продавец</span></p>
   </td>
   <td width=113 valign=top style='width:3.0cm;border:solid windowtext 1.0pt;
   border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
   solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal><span style='font-family:Arial'>Дата продажи<o:p></o:p></span></p>
+  <p class=MsoNormal><span style='font-family:Arial'>Дата продажи</span></p>
   </td>
   <td width=113 valign=top style='width:3.0cm;border:solid windowtext 1.0pt;
   border-left:none;mso-border-left-alt:solid windowtext .5pt;mso-border-alt:
   solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'>
-  <p class=MsoNormal><span style='font-family:Arial'>Комментарий<o:p></o:p></span></p>
+  <p class=MsoNormal><span style='font-family:Arial'>Комментарий</span></p>
   </td>
  </tr>
  <script language="cache" runat="server">
@@ -255,7 +260,9 @@ style='mso-tab-count:2'>                      </span>#($G(Creator))#<o:p></o:p><
  . . s sn=item.sn
  . . s opispolomki=item.opispolomki
  . . s Seller=item.seller
- . . s SellDate=$S(+item.SellDate:$ZD(item.SellDate,4),1:"")
+ . . //s SellDate=$S(+item.SellDate:$ZD(item.SellDate,4),1:"")
+ . . s SellDate=item.SellDate2
+ . . if item.SellDate2?5N s SellDate=$ZD(item.SellDate2,4)
  . . s Comment=item.BrakComment
  . . w "<tr style='mso-yfti-irow:1;mso-yfti-lastrow:yes'>"
  . . w "<td width=378 valign=top style='width:10.0cm;border:solid windowtext 1.0pt;border-top:none;mso-border-top-alt:solid windowtext .5pt;mso-border-alt:solid windowtext .5pt;padding:0cm 5.4pt 0cm 5.4pt'><p class=MsoNormal><span style='font-family:Arial'><o:p>"_Goods_"</o:p></span></p></td>"
