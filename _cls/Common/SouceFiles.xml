@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Common.SouceFiles">
+<Description>
+Include %finstream</Description>
+<Super>%RegisteredObject</Super>
+<TimeCreated>63083,47110.922789</TimeCreated>
+
+<Method name="LoadAllFromDir">
+<Description>
+Загрузка содержимого папки в обход контроля версий
+d ##class(%Finstream.SourceControl.Files).LoadAllFromDir("\ensemble\mgr\AWLTDZH\stream\",1)
+d ##class(%Finstream.SourceControl.Files).LoadAllFromDir("C:\work\Sources\AWLS")
+compile=1 - после загрузки запустится компиляция всей области
+Ошибки экспорта логируются в ^%SourcesErrors("LoadAllFromDir",logDate,logTime)</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>Path,compile=0</FormalSpec>
+<Implementation><![CDATA[
+#define StartsWith(%str, %substr) ($E(%str, 1, $L(%substr))=%substr)
+	
+ s logTime=$p($zdt($H,4)," ",2),logDate=$p($zdt($H,4)," ")
+ S dir = $TR(Path,"\","/"), dir = $ZSTRIP(dir, ">", "/") // normalize the path
+ i (dir="")||('##class(%File).DirectoryExists(dir)) {
+	 w "Путь "_Path_" не найден ("_dir_")",!
+	 q
+ }
+ // check for directory name collisions on Windows
+ S existingDir = $ZSTRIP($TR($ZSE(dir), "\", "/"), ">", "/")
+ I existingDir'=dir {
+	 w "Directory name collision: '"_existingDir_"' <> '"_dir_"'",!
+	 q
+ }
+ // generate file index
+ D ..ScanDir(dir, .files)
+ ;m ^Ast("files")=files
+ s file=""
+ s i=0
+ f  {
+	 s file=$o(files(file))
+	 q:file=""
+	 CONTINUE:$$$StartsWith($zcvt(file,"u"),"/CSP/") ;!CSP папка неимпортится
+	 w "Loading "_dir_file,!
+	 s sc=$SYSTEM.OBJ.Load(dir_file, "fv-d-l")
+	 i $$$ISERR(sc) {
+		 s ErrText=$system.Status.GetErrorText(sc)
+		 w ErrText,!
+		 s ^%SourcesErrors("LoadAllFromDir",logDate,logTime,$i(^%SourcesErrors("LoadAllFromDir",logDate,logTime)))=ErrText
+	 }
+	 ;s ^Ast(dir_file)=sc
+	 s i=i+1
+ }
+ s sc=$$$OK
+ I (compile) {
+	d $system.OBJ.CompileAll() 
+	d $system.OBJ.CompileList("*.MAC","ckub /checkuptodate=expandedonly")
+	d $system.CSP.LoadPageDir($system.CSP.GetDefaultApp($zu(5)))
+ }
+ Q
+]]></Implementation>
+</Method>
+
+<Method name="ScanDir">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[dir:%String,&files,baseLen:%Integer=0]]></FormalSpec>
+<Implementation><![CDATA[
+	S dir = $ZSTRIP($TR(dir, "\", "/"), ">", "/")
+	I baseLen=0 { // initial call
+		K files
+		S baseLen = $L(dir) + 1
+	}
+	
+	S path = $ZSE(dir_"/*")
+	While path'="" {
+		S filename = ##class(%File).GetFilename(path)
+		I ($E(filename)=".") || ($E(filename)="_") G Next // skip ., .., .svn, _svn etc.
+		
+		I ##class(%File).DirectoryExists(path) { // subdir
+			S subdirs(path) = ""
+		} Else { // file
+			S path = $TR(path, "\", "/")
+			S files($E(path, baseLen, $L(path))) = ##class(%File).GetFileDateModified(path, 1)
+		}
+Next
+		S path = $ZSE("")
+	}
+	
+	S subdir = ""
+	F {
+		S subdir = $O(subdirs(subdir))
+		Q:subdir=""
+		D ..ScanDir(subdir, .files, baseLen)
+	}
+]]></Implementation>
+</Method>
+</Class>
+</Export>
