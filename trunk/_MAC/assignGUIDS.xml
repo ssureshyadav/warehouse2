@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Routine name="assignGUIDS" type="MAC" languagemode="0"><![CDATA[
+ n par1,par2,cl,i,Status,ID
+ /*
+ s i("Common.Dictionary1")=""
+ s i("Common.Dictionary4")=""
+ s i("Common.Dictionary5")=""
+ s i("Common.Dictionary6")=""
+ s i("Common.Dictionary7")=""
+ s i("Common.Dictionary8")=""
+ s i("Common.Dictionary9")=""
+ s i("Common.Dictionary10")="" 
+ s i("Common.Dictionary12")=""
+ s i("Common.Dictionary13")=""
+ s i("Common.Dictionary14")=""
+ s i("Common.Dictionary15")=""
+ s i("Common.Kontragent")=""
+ s i("User.REGION")=""
+ s i("Goods.Card")=""
+ s i("Goods.Catalogue")=""
+ s i("Store.Depot")=""
+ s i("Goods.Goods")=""
+ s i("Goods.GoodsParams")=""
+ s i("Goods.GoodsGroup")=""
+ s i("Goods.Group")=""
+ s i("Goods.Measure")=""
+ s i("Goods.Params")=""
+ s i("Store.Address")=""
+ s i("Store.Cell")=""
+ s i("Store.Depot")=""
+ s i("Store.Measures")=""
+ s i("Store.Params")=""
+ s i("Store.Price")=""
+ s i("Store.Quantity")=""
+ s i("User.REGION")=""
+ s i("Users.Dates")=""
+ s i("Users.Functions")=""
+ s i("Users.NameRoles")=""
+ s i("Users.OptionRoles")=""
+ s i("Users.Roles")=""
+ s i("Docs.Docs")=""
+ s i("Operation.OperTemplate")=""
+ s i("Operation.OperationHistory")=""
+ s i("Operation.InstructionsHist")=""
+ s i("Operation.Instructions")=""
+ */
+ 
+ 
+ //добавили всех потомков Docs.Super
+ &sql(declare dfg cursor for
+ select ID,Description into :ID,:Description from %Dictionary.ClassDefinition where (NOT ID %STARTSWITH '%') and (NOT ID %STARTSWITH 'Activate') and (Super %STARTSWITH '%Persistent' OR Super='Docs.Super' OR Super = 'Docs.DocItems'))
+ &sql(open dfg)
+ f  &sql(fetch dfg) q:SQLCODE  d
+ . s i(ID)=""	//добавили название класса в общий список
+ &sql(close dfg)
+ k i("Docs.Super")
+ k i("Docs.DocItems")
+ k i("Common.Boss")
+ k i("User.REGION")
+ k i("User.TOV")
+ k i("User.instument")
+ k i("User.valera")
+ k i("Common.Dictionary2")
+ k i("Docs.waste")
+ k i("Common.SqlProcs")
+ 
+ d RemoveParams("Docs.Super")
+ d RemoveParams("Docs.DocItems")
+ s i="" f  s i=$O(i(i)) q:i=""  d
+ . d RemoveParams(i)
+ q
+ 
+RemoveParams(ClassName)
+ n cl,Key
+ s cl=##class(%Dictionary.ClassDefinition).%OpenId(ClassName)
+ i '$ISOBJECT(cl) b ;не открылся класс
+ s Key=cl.Parameters.FindObjectId(ClassName_"||GUIDENABLED")
+ if Key d cl.Parameters.RemoveAt(Key)
+ s Key=cl.Parameters.FindObjectId(ClassName_"||OBJJOURNAL")
+ if Key d cl.Parameters.RemoveAt(Key)
+ 
+ s Key=cl.Methods.FindObjectId(ClassName_"||%ResolveConcurrencyConflict")
+ if Key d cl.Methods.RemoveAt(Key)
+ 
+ s ok=cl.%Save()
+ if '+ok b	;не удалось сохранить
+ Set ok = $System.OBJ.Compile(ClassName)
+ if '+ok b	;не удалось компилировать
+ q
+ 
+AddSuperIndices(cdef)
+ 
+ n ok,PropName,IndexObject,AssumedNewId
+ s ok=1
+ for PropName="CloseUser","CloseTime","CloseDate","Depot","User1","Source","DocumentClass","Name","Tim","Dat","kontr","Stat" q:'+ok  d
+ . s AssumedNewId=cdef.%Id()_"||"_PropName_"Ind"
+ . &sql(select id from %Dictionary.IndexDefinition where id=:AssumedNewId)
+ . q:'SQLCODE //выходим если что то найдено
+ . s IndexObject = ##class(%Dictionary.IndexDefinition).%New()
+ . s IndexObject.Name=PropName_"Ind"
+ . s IndexObject.Properties=PropName
+ . s ok=cdef.Indices.Insert(IndexObject)
+ . i '+ok b	;ошибка добавления индекса Docs
+ q
+ 
+AddItemsIndices(cdef)
+ n ok,PropName,IndexObject,AssumedNewId
+ s ok=1
+ for PropName="Goods","DocType" q:'+ok  d
+ . s AssumedNewId=cdef.%Id()_"||"_PropName_"Ind"
+ . &sql(select id from %Dictionary.IndexDefinition where id=:AssumedNewId)
+ . q:'SQLCODE //выходим если что то найдено
+ . s IndexObject = ##class(%Dictionary.IndexDefinition).%New()
+ . s IndexObject.Name=PropName_"Ind"
+ . s IndexObject.Properties=PropName
+ . s ok=cdef.Indices.Insert(IndexObject)
+ . i '+ok b	;ошибка добавления индекса Items
+ q
+ 
+AddResolveConflictMethod(cdef)
+ n MethodObject,AssumedNewId,ok
+ s AssumedNewId=cdef.%Id()_"||%ResolveConcurrencyConflict"
+ &sql(select id from %Dictionary.MethodDefinition where id=:AssumedNewId)
+ i 'SQLCODE d
+ . &sql(delete from %Dictionary.MethodDefinition where id=:AssumedNewId)
+ 
+ s MethodObject=##class(%Dictionary.MethodDefinition).%New()
+ s MethodObject.ClassMethod=1
+ s MethodObject.FormalSpec="oid:%ObjectIdentity,objSS:%SYNC.SyncSet,iPtr:%Integer,&bAcceptYours:%Boolean=1"
+ s MethodObject.Name="%ResolveConcurrencyConflict"
+ s MethodObject.ReturnType="%Status"
+ d MethodObject.Implementation.Rewind()
+ d MethodObject.Implementation.WriteLine(" s bAcceptYours=1")
+ d MethodObject.Implementation.WriteLine(" q 1")
+ s ok=cdef.Methods.Insert(MethodObject)
+ i '+ok b	;ошибка добавления метода
+ q 
+DoEverything(i)
+ s cl=##class(%Dictionary.ClassDefinition).%OpenId(i)
+ i '$ISOBJECT(cl) b ;не открылся класс
+ 
+ s par1=##class(%Dictionary.ParameterDefinition).%OpenId(i_"||OBJJOURNAL")
+ i '$ISOBJECT(par1) s par1=##class(%Dictionary.ParameterDefinition).%New()
+ s par1.Name="OBJJOURNAL"
+ s par1.Default=1
+ s par1.Final=0
+ s par1.Internal=0
+ s par1.Abstract=0
+ Set Status = cl.Parameters.Insert(par1)
+ i '+Status b ;ошибка вставки par1
+ 
+ s par2=##class(%Dictionary.ParameterDefinition).%OpenId(i_"||GUIDENABLED")
+ i '$ISOBJECT(par2) s par2=##class(%Dictionary.ParameterDefinition).%New()
+ s par2.Name="GUIDENABLED"
+ s par2.Default=1
+ s par2.Final=0
+ s par2.Internal=0
+ s par2.Abstract=0
+ Set Status = cl.Parameters.Insert(par2)
+ i '+Status b ;ошибка вставки par2
+ //i cl.Super="Docs.Super" d AddSuperIndices(cl)	//потомкам Docs.Super добавим свои индексы
+ //i cl.Super="Docs.DocItems" d AddItemsIndices(cl)	//потомкам Docs.Super добавим свои индексы
+ d AddResolveConflictMethod(cl)	//добавляем метод %ResolveConcurrencyConflict
+ s ok=cl.%Save()
+ i '+Status b	;ошибка компиляции
+ Set Status = $System.OBJ.Compile(i)
+ i '+Status b	;ошибка компиляции
+ Set Status = ##class(%Library.GUID).AssignGUID(i,0)
+ i '+Status b	;ошибка присвоения GUID
+ q
+]]></Routine>
+</Export>

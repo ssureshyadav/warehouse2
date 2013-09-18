@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Routine name="cmpl" type="MAC" languagemode="0"><![CDATA[
+Compile(class,result="")
+ s ok=$System.OBJ.Compile(class,.one,.err)
+ d:result'=""
+ . s @result=ok
+ . m @result@("one")=one
+ . m @result@("err")=err
+ q
+]]></Routine>
+</Export>

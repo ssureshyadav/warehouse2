@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Routine name="CompileDocsSuperChildren" type="MAC" languagemode="0"><![CDATA[
+ s SuperClass="Docs.DocItems"
+ d BuildIndices(SuperClass)
+ q 1
+BuildIndices(SuperClass)
+ n ID,Description,Classes,i
+ &sql(declare dfg cursor for
+ select ID,Description into :ID,:Description from %Dictionary.ClassDefinition where Super=:SuperClass)
+ &sql(open dfg)
+ f  &sql(fetch dfg) q:SQLCODE  d
+ . s Classes(ID)=Description
+ &sql(close dfg)
+ s i="" f  s i=$O(Classes(i)) q:i=""  d
+ . w i,"... "
+ . w $ZOBJCLASSMETHOD(i,"%PurgeIndices")
+ . w $ZOBJCLASSMETHOD(i,"%BuildIndices")
+ . w !
+ q 1
+]]></Routine>
+</Export>

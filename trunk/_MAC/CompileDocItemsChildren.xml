@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Routine name="CompileDocItemsChildren" type="MAC" languagemode="0"><![CDATA[
+#include xmlmacros
+ s ^ZT="Err"
+ s ^aaa="начался "_$ZDT($H,4)
+ &sql(declare gobo cursor for select ID into :ID from %Dictionary.ClassDefinition where (NOT ID %STARTSWITH '%') and (NOT ID %STARTSWITH 'Activate') and Super = 'Docs.DocItems')
+ &sql(open gobo)
+ f  &sql(fetch gobo) q:SQLCODE  d
+ . Set Status = $System.OBJ.Compile(ID)
+ . if '+Status $$$WriteObjError(Status)
+ &sql(close gobo)
+ s ^aaa="закончился "_$ZDT($H,4)
+ q
+Err
+ $$$WriteError($ZE)
+ q
+]]></Routine>
+</Export>

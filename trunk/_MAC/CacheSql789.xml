@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Routine name="CacheSql789" type="MAC" languagemode="0"><![CDATA[
+CacheSql789 ; Cache Dynamic SQL Query   Time: 2011-10-25 15:32:54
+#INCLUDE %occExtent
+#INCLUDE %occInclude
+#INCLUDE %systemInclude
+#INCLUDE xmlmacros
+#SQLCOMPILE SELECT=RUNTIME
+#EXECUTE s %msqlvar="%qsc(%qref"
+ &sql(DECLARE C CURSOR FOR
+       SELECT I . ID AS IID , I . Name AS INAME , I . InstDate AS IDATE , I . State AS ISTATE , %EXTERNAL ( I . State ) AS ISTATENAME , I . Depot1 AS IDEPOT1 , I . Kontr AS IKONTR , I . Kontr -> Name AS IKONTRNAME , I . Oper AS IOPER , I . Oper -> Name AS IOPERNAME , I . dostavka AS IDOSTAVKA , I . dostavka -> Name AS IDOSTAVKANAME , I . User1 AS IUSER , I . User1 -> Name AS IUSERNAME , I . postnumber AS IPOSTNUM , I . POSTDATA AS IPOSTDATE , I . RashOplatType -> Name AS IROTNAME , I . ShowColor AS ICOLOR , D . DocumentClass AS DCLASS , D . ID AS DOCID , D . Name AS DNAME 
+      INTO  :%d(%qref,1), :%d(%qref,2), :%d(%qref,3),
+       :%d(%qref,4), :%d(%qref,5), :%d(%qref,6),
+       :%d(%qref,7), :%d(%qref,8), :%d(%qref,9),
+       :%d(%qref,10), :%d(%qref,11), :%d(%qref,12),
+       :%d(%qref,13), :%d(%qref,14), :%d(%qref,15),
+       :%d(%qref,16), :%d(%qref,17), :%d(%qref,18),
+       :%d(%qref,19), :%d(%qref,20), :%d(%qref,21)
+      FROM Operation . Instructions AS I LEFT JOIN Docs . Super AS D ON ( $ PIECE ( I . Oper -> cl , ? ) = D . DocumentClass AND I . ID = D . Source ))
+Execute() n %parm,lsParameters,ptr,pVal,pValType,pQMC s lsParameters=$lg(qHandle,3) Quit:($ll(lsParameters)/2)'=1 $$$ERROR($$$InvalidNumberParmValues)
+ s pQMC=0 For ptr=1:1:1 Set pValType=$li(lsParameters,ptr*2-1),pVal=$li(lsParameters,ptr*2),%parm(ptr)=$s(pValType="c":pVal,pValType="v":@pVal,1:pVal)
+ &sql(OPEN C)
+ If 'SQLCODE { Set sc=$$$OK } Else { Set:$isobject($g(%sqlcontext)) %sqlcontext.SQLCode=SQLCODE,%sqlcontext.Message=$g(%msg) Set sc=$$$ERROR($$$QueryCannotInstantiate,"SQLCODE = "_SQLCODE) }
+ Quit sc
+Close() &sql(CLOSE C)
+ If SQLCODE { Set:$isobject($g(%sqlcontext)) %sqlcontext.SQLCode=SQLCODE,%sqlcontext.Message=$g(%msg) Set sc=$$$ERROR($$$SQLCode,SQLCODE,$get(%msg)) } Else { Set sc=$$$OK }
+ k %d(%qref),%qscc(%qref),%qscd(%qref),%qscp(%qref),%qscs(%qref),%qsct(%qref),%qscl(%qref),%qscR(%qref),%qscZ(%qref)
+ QUIT sc
+Fetch() s AtEnd=$g(AtEnd,0) n SQLCODE,sc s Row="" &sql(FETCH C)
+ i 'SQLCODE { s Row=$lb(%d(%qref,1))_$lb(%d(%qref,2))_$lb(%d(%qref,3))_$lb(%d(%qref,4))_$lb(%d(%qref,5))_$lb(%d(%qref,6))_$lb(%d(%qref,7))_$lb(%d(%qref,8))_$lb(%d(%qref,9))_$lb(%d(%qref,10))_$lb(%d(%qref,11))_$lb(%d(%qref,12))_$lb(%d(%qref,13))_$lb(%d(%qref,14))_$lb(%d(%qref,15))_$lb(%d(%qref,16))_$lb(%d(%qref,17))_$lb(%d(%qref,18))_$lb(%d(%qref,19))_$lb(%d(%qref,20))_$lb(%d(%qref,21)) } Else { s AtEnd=1 }
+ If 'SQLCODE { Set sc=$$$OK } ElseIf SQLCODE=100 { Set sc=$$$OK Set:$isobject($g(%sqlcontext)) %sqlcontext.SQLCode=SQLCODE,%sqlcontext.RowCount=$g(%ROWCOUNT) } Else { Set:$isobject($g(%sqlcontext)) %sqlcontext.SQLCode=SQLCODE,%sqlcontext.Message=$g(%msg) Set sc=$$$ERROR($$$SQLCode,SQLCODE,$get(%msg)) }
+ QUIT sc
+FetchRows() s FetchCount=$g(FetchCount,0) n done,i,SQLCODE s done=0,RowSet="",ReturnCount=0,AtEnd=0
+ f i=1:1 DO  q:done
+ . &sql(FETCH C)
+ . i 'SQLCODE s RowSet=RowSet_$lb(%d(%qref,1))_$lb(%d(%qref,2))_$lb(%d(%qref,3))_$lb(%d(%qref,4))_$lb(%d(%qref,5))_$lb(%d(%qref,6))_$lb(%d(%qref,7))_$lb(%d(%qref,8))_$lb(%d(%qref,9))_$lb(%d(%qref,10))_$lb(%d(%qref,11))_$lb(%d(%qref,12))_$lb(%d(%qref,13))_$lb(%d(%qref,14))_$lb(%d(%qref,15))_$lb(%d(%qref,16))_$lb(%d(%qref,17))_$lb(%d(%qref,18))_$lb(%d(%qref,19))_$lb(%d(%qref,20))_$lb(%d(%qref,21)),ReturnCount=ReturnCount+1 s:ReturnCount=FetchCount done=1 s:($l(RowSet)+($l(RowSet)\ReturnCount))>24000 done=1 i 1
+ . e  s done=1,AtEnd=1
+ If 'SQLCODE { Set sc=$$$OK } ElseIf SQLCODE=100 { Set sc=$$$OK Set:$isobject($g(%sqlcontext)) %sqlcontext.SQLCode=SQLCODE,%sqlcontext.RowCount=$g(%ROWCOUNT) } Else { Set:$isobject($g(%sqlcontext)) %sqlcontext.SQLCode=SQLCODE,%sqlcontext.Message=$g(%msg) Set sc=$$$ERROR($$$SQLCode,SQLCODE,$get(%msg)) }
+ QUIT sc
+GetInfo() n info,qhparms
+ s info=$$GetCQNode^%SYS.SQLSRV(7,"vvOgeP4e0K7CifMhzD5wBTx9MAQ=","CacheSql789",0) s colinfo=$lg(info,1),parminfo=$lg(info,2),idinfo=$lg(info,3) s:$g(extoption) extinfo=$$GetCQNode^%SYS.SQLSRV(7,"vvOgeP4e0K7CifMhzD5wBTx9MAQ=","CacheSql789",1)
+ Quit $$$OK
+GetODBCInfo() Set colinfo=$$GetCQNode^%SYS.SQLSRV(7,"vvOgeP4e0K7CifMhzD5wBTx9MAQ=","CacheSql789",2),parminfo="" Quit $$$OK
+]]></Routine>
+</Export>

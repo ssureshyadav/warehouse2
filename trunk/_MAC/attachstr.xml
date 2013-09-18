@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Routine name="attachstr" type="MAC" languagemode="0"><![CDATA[
+ //прицепить строку к документу
+create(docid,docclass,goods,quantity,addr)
+ s goods=+$g(goods)
+ s quantity=+$g(quantity)
+ s addr=+$g(addr)
+ TSTART
+ s docobj=$ZOBJCLASSMETHOD(docclass,"%OpenId",docid)
+ i '$ISOBJECT(docobj) w "Не откр "_docid_". В бабруйск, жывотнае!" TROLLBACK  q
+ s itemobj=$ZOBJCLASSMETHOD(docclass_"Items","%New")
+ i '$ISOBJECT(itemobj) w "Не создалась строка. В бабруйск, жывотнае!" TROLLBACK  q
+ d itemobj.GoodsSetObjectId(goods)
+ s itemobj.Quantity=quantity
+ d itemobj.addrSetObjectId(addr)
+ d itemobj.DocTypeSetObjectId(docclass)
+ s ok=itemobj.%Save()
+ i '+ok Do DecomposeStatus^%apiOBJ(ok,.Err) w 1_" "_$G(Err(Err)) TROLLBACK  q
+ s ok=docobj.Items.Insert(itemobj)
+ i '+ok Do DecomposeStatus^%apiOBJ(ok,.Err) w 2_" "_$G(Err(Err)) TROLLBACK  q
+ s ok=docobj.%Save()
+ i '+ok Do DecomposeStatus^%apiOBJ(ok,.Err) w 3_" "_$G(Err(Err)) TROLLBACK  q
+ TCOMMIT
+ w "<br>ok"
+ q
+]]></Routine>
+</Export>
