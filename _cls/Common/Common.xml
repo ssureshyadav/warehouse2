@@ -23,9 +23,13 @@
 <ClassMethod>1</ClassMethod>
 <FormalSpec>serial:%String,GarantID</FormalSpec>
 <Implementation><![CDATA[
+	s ^mtempArt("CheckSerialUnique",$I(^mtempArt("CheckSerialUnique")),"serial")=serial
+	s ^mtempArt("CheckSerialUnique",$I(^mtempArt("CheckSerialUnique")),"GarantID")=GarantID
+	
 	q:'$D(^Common.Dictionary2I("serialInd"," "_serial)) 1
 	s GarantID = $O(^Common.Dictionary2I("serialInd"," "_serial,""))
 	if GarantID="" q "Удивительная ошибка. Серийный номер "_serial_" есть в индексе, но нет записи о гарантийном номере."
+
 	q "Серийный номер "_serial_" уже существует, но принадлежит гарантийному талону "_$LG($G(^Common.Dictionary2I("serialInd"," "_serial,GarantID)),2)
 	//q $O(^Common.Dictionary2I("garantInd"," "_GarantName,""))
 ]]></Implementation>
@@ -610,8 +614,8 @@ SetDetailAnalogRelationErr
  s ClientUniqueCode=ClientFolder
  s KontrID=..GetKontrgentIdByCode(ClientUniqueCode)
  s ClientProperty2506=##class(Common.Kontragent).GetPropertyValue(KontrID,"Property2506")
- &sql(SELECT Property126->ActPriceInstrument,Property126->DiagPriceInstrument,Property127->ActPriceTechnic,Property127->DiagPriceTechnic,Property2506,Currency 
- 	INTO :ActPriceInstrument,:DiagPriceInstrument,:ActPriceTechnic,:DiagPriceTechnic,:Property2506,:Currency
+ &sql(SELECT Property126->ActPriceInstrument,Property126->DiagPriceInstrument,Property127->ActPriceTechnic,Property127->DiagPriceTechnic,Property2506,Currency,%external(Currency) 
+ 	INTO :ActPriceInstrument,:DiagPriceInstrument,:ActPriceTechnic,:DiagPriceTechnic,:Property2506,:Currency,:CurrencyName
  	FROM Common.Kontragent 
  	WHERE ID=:KontrID)
  i SQLCODE s (ActPriceInstrument,DiagPriceInstrument,ActPriceTechnic,DiagPriceTechnic)=""
@@ -634,7 +638,7 @@ SetDetailAnalogRelationErr
 	s CurrentGoodsVersion=..GetCurrentDictVersion("Goods.Goods")	//текущая версия справочника товаров
 	if Property2506'[2 s (ActPriceInstrument,DiagPriceInstrument)=""
 	if Property2506'[3 s (ActPriceTechnic,DiagPriceTechnic)=""
-	s FirstStringInFile=CurrentGoodsVersion_"^"_ActPriceTechnic_"^"_DiagPriceTechnic_"^"_ActPriceInstrument_"^"_DiagPriceInstrument_"^"_Currency
+	s FirstStringInFile=CurrentGoodsVersion_"^"_ActPriceTechnic_"^"_DiagPriceTechnic_"^"_ActPriceInstrument_"^"_DiagPriceInstrument_"^"_Currency_"^"_CurrencyName
 	Do file.WriteLine(FirstStringInFile)
  s i="" f  s i=$O(@glob@(i)) q:(i="")||('+ok)  d
  . s LBLine=@glob@(i)
@@ -649,7 +653,7 @@ SetDetailAnalogRelationErr
  . //раньше это поле брали просто из товара, а теперь берём с учётом контрагента
  . s kbanned='+##class(Goods.Goods).kbanned(i,KontrID)
  . //если товар запрещён к использованию, то его всё таки можно разрешить в интерфейсе "Ограничение использования запчастей контрагентами"
- . if 'AllowToSend s AllowToSend=kbanned
+ . s AllowToSend=kbanned
  . s (ShowPrice,ShowClients)=1
  . s Groups=$$Groups(i,.ShowPrice,.ShowClients)
  . //пропускаем товары которые низя показывать клиентам
@@ -921,24 +925,30 @@ CopyAndMountArchiveErr
 <FormalSpec>RequestIDs,KontrId</FormalSpec>
 <Implementation><![CDATA[
  s $ZT="GetRequestStatusErr"
+ 
+ //цикл по переданным ID заявок
  f i=1:1:$L(RequestIDs,",") d
- . s Request = $TR($P(RequestIDs,",",i),"'","")
- . s ReqsAgain=$G(ReqsAgain)_+Request_","
- . s ReqId = +Request
- . s ReqNumber = $P(Request,"#",2)
+ . s Request = $TR($P(RequestIDs,",",i),"'","")	//ID и номер заявки
+ . s ReqsAgain=$G(ReqsAgain)_+Request_","		//сливаем несколько ID в одну строку
+ . s ReqId = +Request							//ID заявки
+ . s ReqNumber = $P(Request,"#",2)				//номер заявки
  . if $G(st,"undefined")'="undefined" w ","
  . s (st,HasBeenSent,cnt)=""
  . //w i_" "_"ReqId="_ReqId_$C(9)_"ReqNumber="_ReqNumber,!
  . if +ReqId d
  . . //w $C(9)_"ID"
- . . &sql(select %External(State),%External(HasBeenSent) into :st,:HasBeenSent from Operation.Instructions where ID=:ReqId and Kontr=:KontrId)
+ . . &sql(select %External(State),%External(HasBeenSent),RefuseReason into :st,:HasBeenSent,:RefuseReason from Operation.Instructions where ID=:ReqId and Kontr=:KontrId)
  . else  if +ReqNumber d
- . . &sql(select %External(State),%External(HasBeenSent),count(id) into :st,:HasBeenSent,:cnt from Operation.Instructions where Kontr=:KontrId and Name=:ReqNumber)
+ . . &sql(select %External(State),%External(HasBeenSent),count(id),RefuseReason into :st,:HasBeenSent,:cnt,:RefuseReason from Operation.Instructions where Kontr=:KontrId and Name=:ReqNumber)
  . . //w $C(9)_"Name"_$C(9)_"cnt="_cnt
  . . if cnt>1 s st="Ошибка проверки."
  . if $G(SQLCODE) s (st,HasBeenSent,cnt)=""
  . w st
  . w:HasBeenSent'="" ". ("_HasBeenSent_")"
+ . s RR(i) = $G(RefuseReason)
+ w ","
+ f i=1:1:$L(RequestIDs,",") d
+ . w "^",RR(i)
  q
  // $G(answer)
  
@@ -1202,6 +1212,23 @@ AddGoodsToKontrErr
 RemoveGoodsFromKontrErr
  $$$WriteError($ZE)
  q "Извините, ошибка при попытке снять товары с баланса контрагента."
+]]></Implementation>
+</Method>
+
+<Method name="SaveDocsImage">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DocId,filename</FormalSpec>
+<Implementation><![CDATA[
+	s DocObj = ##class(Docs.Super).%OpenId(DocId)
+	if '$ISOBJECT(DocObj)
+	{
+		$$$WriteError("SaveDocsImage Не открылся документ "_DocId)
+		quit
+	}
+	s DocObj.Images=DocObj.Images_"\"_filename
+	s ok = DocObj.%Save()
+	if '+ok $$$WriteObjError(ok)
+	q
 ]]></Implementation>
 </Method>
 </Class>

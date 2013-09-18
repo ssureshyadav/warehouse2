@@ -3,7 +3,7 @@
 <Class name="Users.Dates">
 <Description>
 Данные пользователей</Description>
-<IncludeCode>xmlmacros,functions</IncludeCode>
+<IncludeCode>xmlmacros</IncludeCode>
 <Super>%Persistent</Super>
 <TimeCreated>60369,60019.41823</TimeCreated>
 
@@ -36,70 +36,54 @@
 </Property>
 
 <Method name="SaveUser">
-<Description>
-Сохраняем пользователя</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>famil:%String,logi:%String,passwor:%String,rol:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	s pass=$System.Encryption.MD5Hash(passwor)
-	&sql(
-		insert into Users.Dates (Name,Login,Password,Rol)
-		values (:famil,:logi,:pass,:rol)
-	)
-	Q:SQLCODE=0 $$$OK
-	Q $$$ERROR($$$GeneralError,$system.SQL.SQLCODE(SQLCODE))
+	&sql(insert into Users.Dates (Name,Login,Password,Rol)
+	values(:famil,:logi,:pass,:rol))
+	q
 ]]></Implementation>
 </Method>
 
 <Method name="DeleteUser">
-<Description>
-Удаление пользователя</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>iden:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
 	s qwer=0
-	#;роль пользователя
-	&sql(select Rol into :role from Users.Dates where ID=:iden)
-	#;это админ?
-	s isAdmin=##class(Users.Roles).IsAdmin(role) 
-	
-	if isAdmin { 
-	 #;это админ
-	 #;не является ли это попыткой удалить последнего администратора системы
-	 #; сколько других пользователей с функцией админа?
-	 s fnAdmin=$$$users ;код админской функции
-	 &sql(Select Count(ID) Into :count From Users.Dates 
-	 	Where ID <> :iden 
-	 		And Rol In (Select Distinct Name From Users.Roles Where NameFunction=:fnAdmin)
-	 )
-	 Q:count=0 "Нельзя удалить последнего администратора"	
-	} 
-		
-	#; просто удаляем пользователя
-	&sql(delete from Users.Dates Where ID=:iden) 
-	Q $$$OK
+	&sql(select Rol into:role from Users.Dates where ID=:iden)
+	&sql(select count(ID) into :count from Users.Dates Where Rol=:role)
+	if count>1 {&sql(delete from Users.Dates Where ID=:iden) q}else {&sql(select count(ID) into :countnum from Users.Roles where NameFunction=6)} 
+	if countnum=1	{q "Невозможно удалить данного пользователя"} else {&sql(declare curs cursor for select Name into :namerol from Users.Roles Where NameFunction=6)
+	&sql(open curs)
+	f  &sql(fetch curs) q:SQLCODE  d
+	.i $I(i)
+	.s namerol(i)=namerol
+	&sql(close curs)}
+	f j=1:1:i q:SQLCODE  d
+	.s param=namerol(j)
+	.&sql(select count(ID) into :counter from Users.Dates where Rol=:param)
+	.s qwer=qwer+counter
+	i qwer>1 {&sql(delete from Users.Dates Where ID=:iden) q} else {q "Невозможно удалить данного пользователя"}
+	q
 ]]></Implementation>
 </Method>
 
 <Method name="Input">
 <ClassMethod>1</ClassMethod>
 <FormalSpec>login1:%String,password:%String</FormalSpec>
-<ReturnType>%String</ReturnType>
+<ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	&sql( 
-    	SELECT Login into :logname
-    	FROM Users.Dates 
-    	WHERE Login=:login1 And Password=:pass
-    )
+	
+    &sql( select Login into:logname
+    from Users.Dates where Login=:login1&Password=:pass)
  	q logname
 ]]></Implementation>
 </Method>
 
 <Method name="check">
-<Description>
-Проверка</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>login,pass</FormalSpec>
 <Implementation><![CDATA[
@@ -114,8 +98,6 @@
 </Method>
 
 <Method name="UpdateUser">
-<Description>
-Обновление</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>famil="",log="",pas="",rol="",identificator=""</FormalSpec>
 <ReturnType>%Status</ReturnType>

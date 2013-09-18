@@ -1,4 +1,10 @@
 <script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ d:%session.NewSession 
+ . s %session.EndSession=1
+ . s ses=%request.Get("sessionid",1)
+ . s %session=%session.GetSession(ses)
+
+
 s AllColumns = %request.Get("AllColumns")
 
 if %request.Get("word")="on"
@@ -32,6 +38,11 @@ else
  . . s CurrencyName = ##class(Common.Kontragent).CurrencyLogicalToDisplay(obj.Kontr.Currency)
  . s summa = $J(obj.Summa,".",2)
  . s DocKurs = obj.Kurs
+ . s SluzapObj=obj.Sluzap	//документ "служебная записка"
+ . if $ISOBJECT(SluzapObj) d
+ . . s SluzapName=SluzapObj.Name
+ . . s SluzapId=SluzapObj.%Id()
+ . . s SluzapPrintUrl="screen/sluzap.csp?docid="_SluzapId_"&class=Docs.Sluzap"
  
 </script>
 <HTML>
@@ -44,7 +55,7 @@ else
 </H1>
 <DL>
 	<DT><BR>
-	<DT><FONT FACE="Arial">К ДОГОВОРУ НА ПРОВЕДЕНИЕ СЕРВИСНОГО
+	<DT><FONT FACE="Arial">К <span onclick="alert('ID сессии #(%session.SessionId)#')">ДОГОВОРУ</span> НА ПРОВЕДЕНИЕ СЕРВИСНОГО
 	ОБСЛУЖИВАНИЯ  №_____   от ______________20__ г.      </FONT>
 	<DT><BR>
 	<DT><FONT FACE="Arial"><B>Технический отчет за #($G(OtchetMonth))# #($G(OtchetYear))# г.</B></FONT><DT>
@@ -54,8 +65,8 @@ else
 	<DT><FONT FACE="Arial">Телефон: #($G(Phones))#;
 	Факс: #($G(fax))#; </FONT>
 	<DT>E-mail<FONT FACE="Arial">: #($G(EMail))#;</FONT><DT>
-	<FONT FACE="Arial">Ф.И.О.
-	директора: #($G(chief))#.</FONT><DT>
+	<FONT FACE="Arial">Ф.И.О. директора: #($G(chief))#</FONT><DT>
+	<FONT FACE="Arial">Служебная записка: <a href="#($G(SluzapPrintUrl))#" target=_blank>#($G(SluzapName))#</a></FONT><DT>
 	<BR>
 	<DT><BR>
 	<DT><FONT FACE="Arial">(Форма и образец заполнения</FONT>)<DT>
@@ -159,8 +170,8 @@ w "</TR>",!
  d:$ISOBJECT(obj.Items)
  . s i="" f  s i=obj.Items.Next(i) q:i=""  d
  . . s item=obj.Items.GetAt(i)
- . . s groups=+item.Groups
  . . q:'$ISOBJECT(item.Goods)
+ . . s groups=+item.Groups
  . . s GoodsId = item.Goods.%Id()
  . . &sql(select Groups->Catalogue->Name into :CatalogueName from Goods.GoodsGroup where Goods=:GoodsId)
  . . else  s CatalogueName="Каталог не найден"
@@ -176,15 +187,16 @@ w "</TR>",!
  . . . s @glob@(groups,"Garant")=item.garant
  . . . s @glob@(groups,"Talon")=item.talonLogicalToDisplay(item.talon)
  . . . s @glob@(groups,"Quantity")=item.Quantity
- . . . s @glob@(groups,"RemontCost")=item.remcost
+ . . . s @glob@(groups,"RemontCost")=$J(item.remcost,"",2)
  . . . s @glob@(groups,"RemType")=item.RemType
  . . . s @glob@(groups,"ActNumber")=item.ActNumber
+ . . . s @glob@(groups,"Number")= item.Number
  . . . s:AllColumns&WordFormat @glob@(groups,"Comment")=item.Comment
  . . . s:AllColumns&WordFormat @glob@(groups,"Dat")=$S(+item.Dat:$ZD(item.Dat,4),1:"")
  . . . //s:AllColumns&WordFormat @glob@(groups,"goodssource")= ##class(Docs.OtchetItems).goodssourceLogicalToDisplay(item.goodssource)
  . . . s:AllColumns&WordFormat @glob@(groups,"RemType")=##class(Docs.OtchetItems).RemTypeLogicalToDisplay(item.RemType)
  . . . //s @glob@(groups,"Total")=item.Total
- . . . s @glob@(groups,"Summa")=Summa
+ . . . s @glob@(groups,"Summa")=$J(Summa,"",2)
  . . else  d
  . . . //это запчасть
  . . . i $I(DetailCount)
@@ -199,6 +211,7 @@ w "</TR>",!
  . . . s @glob@(groups,DetailCount,"RemType")=##class(Docs.OtchetItems).RemTypeLogicalToDisplay(item.RemType)
  . . . s @glob@(groups,DetailCount,"Summa")=Summa
  . . . //s @glob@(groups,DetailCount,"Total")=item.Total
+ . . s Serials(item.serial_" ")=$I(Serials(item.serial_" "))
  . . s var=$S($D(MM(Abbr)):"MM",$D(VC(Abbr)):"VC",$D(TL(Abbr)):"TL",1:"untitled")
  . . s @var=+$G(@var)+Summa
  
@@ -219,21 +232,24 @@ w "</TR>",!
  . s ActNumber=$G(@glob@(i,"ActNumber"))
  . s ActNumberName=$S(ActNumber="":"",1:" Акт "_ActNumber)
  . s RemTypeName = ##class(Docs.OtchetItems).RemTypeLogicalToDisplay(RemType)
+ . s LineNumber = $G(@glob@(i,"Number"))
  . //s Total=$G(@glob@(i,"Total"))
  . s (DetailPrice,DetailName)="&nbsp;"
  . i $I(count)
+ . if '+RemontCost s color="red"
+ . else  s color="black"
  . w "<TR VALIGN=TOP>"
- . w "<TD WIDTH=21><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2 title="""_Comment_""">"_$G(count)_"</FONT></FONT></TD>"
+ . w "<TD WIDTH=21><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2 title="""_Comment_""">"_$G(LineNumber)_"&nbsp;</FONT></FONT></TD>"
  . w "<TD WIDTH=101 style=""word-break:break-all""><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(ModelName)_"</FONT></FONT></TD>"
  . w "<TD WIDTH=58><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(AbbrNumber)_"</FONT></FONT></TD>"
  . w "<TD WIDTH=106><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(Serial)_"</FONT></TD>"
  . w "<TD WIDTH=70><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(Garant)_"</FONT></FONT></TD>"
- . w "<TD WIDTH=46><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(Talon)_" ("_RemTypeName_ActNumberName_")"_"</FONT></FONT></TD>"
+ . w "<TD WIDTH=46><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_ActNumberName_" "_$G(Talon)_" ("_RemTypeName_")"_"</FONT></FONT></TD>"
  . w "<TD WIDTH=118><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(DetailName)_"</FONT></FONT></TD>"
  . w "<TD WIDTH=82><P ALIGN=JUSTIFY><BR></TD>"
  . w "<TD WIDTH=34><P ALIGN=JUSTIFY><FONT FACE=""Arial"">"_$G(Quantity)_"</FONT></TD>"
  . w "<TD WIDTH=70><P ALIGN=JUSTIFY><FONT FACE=""Arial"">-</FONT></TD>"
- . w "<TD WIDTH=58>"_$G(RemontCost)_"</TD>"
+ . w "<TD WIDTH=58 style=""color:"_color_""">"_$G(RemontCost)_"</TD>"
  . if WordFormat&AllColumns w "<td>"_$G(Comment)	//примечание
  . if WordFormat&AllColumns w "<td>"_$G(Dat)	//дата
  . if WordFormat&AllColumns w "<td>"_$G(goodssource)	//источник товара
@@ -258,8 +274,10 @@ w "</TR>",!
  . . if DetailPrice="" s DetailPrice="&nbsp;"
  . . if DetailName="" s DetailName="&nbsp;"
  . . s Summa = $G(@glob@(i,z,"Summa"))
+ . . if '+Summa s Summa="&nbsp;"
  . . w "<TR VALIGN=TOP>"
- . . w "<TD WIDTH=21><P ALIGN=JUSTIFY><FONT FACE=""Arial"" SIZE=2>"_$G(count)_"</FONT></TD>"
+ . . // c 1.12.2012 нумеруем строки согласно полю Number в базе $G(count)
+ . . w "<TD WIDTH=21><P ALIGN=JUSTIFY><FONT FACE=""Arial"" SIZE=2>"_"&nbsp;</FONT></TD>"	//номер строки с деталью
  . . w "<TD WIDTH=101 style=""word-break:break-all""><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(ModelName)_"</FONT></FONT></TD>"
  . . w "<TD WIDTH=58><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(AbbrNumber)_"</FONT></FONT></TD>"
  . . w "<TD WIDTH=106><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(Serial)_"</FONT></TD>"
@@ -268,7 +286,7 @@ w "</TR>",!
  . . w "<TD WIDTH=118><P ALIGN=JUSTIFY><FONT FACE=""Arial""><FONT SIZE=2>"_$G(DetailName)_"</FONT></FONT></TD>"
  . . w "<TD WIDTH=82><P ALIGN=JUSTIFY>"_$G(DetailBrand)_"</TD>"
  . . w "<TD WIDTH=34><P ALIGN=JUSTIFY><FONT FACE=""Arial"">"_$G(Quantity)_"</FONT></TD>"
- . . w "<TD WIDTH=70><P ALIGN=JUSTIFY><FONT FACE=""Arial"">"_$G(Summa)_"</FONT></TD>"
+ . . w "<TD WIDTH=70 style=""color:red""><P ALIGN=JUSTIFY><FONT FACE=""Arial"">"_$G(Summa)_"</FONT></TD>"
  . . w "<TD WIDTH=58>"_$G(RemontCost)_"</TD>"
  . . if WordFormat&AllColumns w "<td>"_$G(Comment)	//примечание
  . . if WordFormat&AllColumns w "<td>"_$G(Dat)	//дата
@@ -282,18 +300,33 @@ w "</TR>",!
 	<FONT FACE="Arial">Сумма отчёта #($G(summa))#
 >
  if +$G(DocKurs) w "Курс "_$G(DocKurs)
- w "<br><br>Сумма сгруппированная по классификаторам<table>"
- f i="" f  s i=$O(SumsArray(i)) q:i=""  d
- . w "<tr><td>"_i_"<td>"_$J($G(SumsArray(i)),"",2)
- w "</table>"
  
- w "<br>Сумма сгруппированная по брендам<table>"
- w "<tr><td>Mastermax<td>"_$J($G(MM),"",2)
- w "<tr><td>Viconte<td>"_$J($G(VC),"",2)
- w "<tr><td>Tull<td>"_$J($G(TL),"",2)
- w:+$G(untitled) "<tr><td>Товары с неизвестным брендом<td>"_$J($G(untitled),"",2)
- w "</table><br>" 
+ if ($G(%session.Data("login"))'="")
+ {
+	 w "<br><br>Сумма сгруппированная по классификаторам<table>"
+	 f i="" f  s i=$O(SumsArray(i)) q:i=""  d
+	 . w "<tr><td>"_i_"<td>"_$J($G(SumsArray(i)),"",2)
+	 w "</table>"
+	 
+	 w "<br>Сумма сгруппированная по брендам<table>"
+	 w "<tr><td>Mastermax<td>"_$J($G(MM),"",2)
+	 w "<tr><td>Viconte<td>"_$J($G(VC),"",2)
+	 w "<tr><td>Tull<td>"_$J($G(TL),"",2)
+	 w:+$G(untitled) "<tr><td>Товары с неизвестным брендом<td>"_$J($G(untitled),"",2)
+	 w "</table>",!
+ }
+ w "<br>" 
  w "Валюта расчётов с клиентом: "_$G(CurrencyName)
+ w "<br>"
+ w "Дублированные серийные номера: "
+ s serial=""
+ for  
+ {
+	 s serial = $O(Serials(serial))
+	 q:serial=""
+	 continue:+$G(Serials(serial))<=1
+	 w serial
+ }
 </script>
 </font>
 <DL>

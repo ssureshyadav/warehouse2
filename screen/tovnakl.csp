@@ -2177,9 +2177,7 @@ DIV будут заменены.-->
  . . w "<td class=xl8029490 align=right style='border-top:none;border-left:none' x:num>"_ndsotsumma_"</td>"
  . . w "<td class=xl8029490 align=right style='border-top:none;border-left:none' x:num>"_summasnds_"</td>"
  s vsegosummasnds=vsegosummabeznds+vsegondsotsumma
- </script>
-<script language="cache" runat="server">
-  f i=1:1:59 w "<td class=xl2229490></td>"
+ f i=1:1:59 w "<td class=xl2229490></td>"
  w "</tr>"
  </script>
  <tr class=xl7229490 height=16 style='height:12.0pt'>
@@ -2259,8 +2257,7 @@ DIV будут заменены.-->
   <td class=xl2229490></td>
   <td class=xl2229490></td>
  </tr>
- <tr class=xl7229490 height=7 style='page-break-before:always;mso-height-source:
-  userset;height:5.25pt'>
+ <tr class=xl7229490 height=7 style='page-break-before:always;mso-height-source:userset;height:5.25pt'>
   <td height=7 class=xl2429490 style='height:5.25pt'></td>
   <td class=xl2429490></td>
   <td class=xl2229490></td>
@@ -2339,8 +2336,7 @@ DIV будут заменены.-->
  </tr>
  <tr class=xl7229490 height=17 style='height:12.75pt'>
   <td height=17 class=xl1529490 style='height:12.75pt'></td>
-  <td class=xl8429490 colspan=2 x:str="“оварна€ накладна€ имеет приложение на ">
-	“оварна€ накладна€ имеет приложение на<span style='mso-spacerun:yes'>&nbsp;</span></td>
+  <td class=xl8429490 colspan=2 x:str="“оварна€ накладна€ имеет приложение на ">“оварна€ накладна€ имеет приложение на<span style='mso-spacerun:yes'>&nbsp;</span></td>
   <td class=xl8529490 colspan=2><span style='mso-spacerun:yes'>&nbsp; </span></td>
   <td class=xl8629490>&nbsp;</td>
   <td class=xl8629490>&nbsp;</td>

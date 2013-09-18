@@ -13,13 +13,16 @@
  
 Quit 1
 </script>
+<script language="Cache" method="SetPermission" arguments="Goods:%String,Ban:%String" returntype="%String">
+ d ##class(Docs.Action).BanGoodsForAll(Goods, Ban)
+</script>
 <script language="cache" runat="server">
  s GoodId=%request.Get("GoodId")
 </script>
 <html>
 <head>
 
-<title>Товар</title>
+<title>Товар #(GoodId)#</title>
 
 <link href="style.css" type=text/css rel=stylesheet>
 <script language="jscript" src="common.js"></script>
@@ -49,8 +52,12 @@ xmlDoc.documentElement=RootElement;
 var Properties= new Array("Name","Property5300","abbr","Property3609","EnglishName","codedetail","Size1","Weight","Property9469","Comment","Composition","Description","MaterialEng","CodeOKVED");
 for(var i=0;i<Properties.length;i++){
 	var elementValue=document.getElementById(Properties[i]).value;
+	
 	InsertXmlHeader(xmlDoc,Properties[i],elementValue,"%String");
 }
+
+var AllowToSendValue=document.getElementById("AllowToSend").checked ? "1":"0";	//значение чекбокса "отправлять контрагенту" 1-да, 2-нет
+InsertXmlHeader(xmlDoc,"AllowToSend",AllowToSendValue,"%String")
 InsertXmlHeader(xmlDoc,"Tovar",Tovar.Tag,"Goods.Goods")
 var DocID=SendXml(GoodId,"Goods.Goods",xmlDoc,sessionid,"Docs.Action.SaveSingleGood");
 if(isNaN(DocID)){alert(DocID)}
@@ -63,6 +70,34 @@ else{
 	window.close();
 	}
 }
+
+function SetPermission(Obj)
+{
+	if(GoodId=="")
+	{
+		alert("Пожалуйста, сохраните товар перед установкой ограничений");
+		return;
+	}
+	
+	if(Obj.checked) question="Установить всем контрагентам разрешение на использование ?";
+	else question="Установить всем контрагентам запрет на использование ?";
+	
+	if(!window.confirm(question)) 
+	{
+		Obj.checked = !Obj.checked;
+		return;
+	}
+	
+	if(Obj.checked)
+	{
+		#call(..SetPermission(GoodId,0))#
+	}
+	else
+	{
+		#call(..SetPermission(GoodId,1))#
+	}
+}
+
 </script>
 <style>
 .LeftTop{border-left : 1 solid black;border-top : 1 solid black;}
@@ -77,10 +112,15 @@ SELECT{width:170px}
 <Table width=100% height=100%><tr valign=top><td>
 <table width=100% class="LeftTop" cellspacing=0>
 <script language="cache" runat="server">
- d:GoodId
+ //значения по умолчанию
+ s AllowToSend=1
+ s GroupId = %request.Get("GroupId")
+ 
+ //если указан ID товара
+ if GoodId do
  . s GoodObj=##class(Goods.Goods).%OpenId(GoodId)
  . q:'$ISOBJECT(GoodObj)
- . f i="Name","Property5300","abbr","Property3609","EnglishName","codedetail","Size1","Weight","Property9469","Comment","ChangeDate","ChangeTime","Composition","Description","MaterialEng","CodeOKVED" d
+ . f i="Name","Property5300","abbr","Property3609","EnglishName","codedetail","Size1","Weight","Property9469","Comment","ChangeDate","ChangeTime","Composition","Description","MaterialEng","CodeOKVED","AllowToSend" d
  . . s @i=$ZOBJPROPERTY(GoodObj,i)
  . d:$ISOBJECT(GoodObj.Tovar)
  . . s Tovar=GoodObj.Tovar.%Id()
@@ -88,7 +128,13 @@ SELECT{width:170px}
  . if $ISOBJECT(GoodObj.ChangeUser) s ChangeUser=GoodObj.ChangeUser.Name
  . if ChangeDate s ChangeDate=$ZD(ChangeDate,4)
  . if ChangeTime s ChangeTime=$ZT(ChangeTime)
-&html<
+ else  do
+ . &sql(select top 1 Goods->abbr , Goods->Property3609 into :Goodsabbr,:GoodsProperty3609 from Goods.GoodsGroup where Groups=:GroupId )
+ . IF SQLCODE s (Goodsabbr,GoodsProperty3609)=""
+ . ELSE  s Property3609=GoodsProperty3609, abbr=Goodsabbr
+ 
+ if GoodId s LastSaveString= "<tr><td colspan=4 class=RightBottom>Последнее сохранение: <i>"_$G(ChangeUser)_" "_$G(ChangeDate)_" "_$G(ChangeTime)_"</i></td></tr>"
+</script>
 <tr>
 	<td class=RightBottom>Наименование</td>
 	<td class=RightBottom><input type=text id=Name MAXLENGTH=200 value="#($G(Name))#"></td>
@@ -121,9 +167,7 @@ SELECT{width:170px}
 <tr>
 	<td class=RightBottom>Категория</td>
 	<td class=RightBottom><select name="Property9469" id=Property9469>
->
-w ##class(Docs.Action2).GetDisplaylistOptions($G(Property9469),"Goods.Goods||Property9469")
-&html<
+		#(##class(Docs.Action2).GetDisplaylistOptions($G(Property9469),"Goods.Goods||Property9469"))#
 	</select></td>
 	<td class=RightBottom>Код ТНВЭД</td>
 	<td class=RightBottom><input type=text id="CodeOKVED" MAXLENGTH=50 value="#($G(CodeOKVED))#"></td>
@@ -133,6 +177,21 @@ w ##class(Docs.Action2).GetDisplaylistOptions($G(Property9469),"Goods.Goods||Pro
 	<td class=RightBottom><span onmouseout="UnPaint(this)" onmouseover="Paint(this)" class=Kontragent onclick="ChooseTovar(this)" oncontextmenu="this.innerText='';this.Tag=''" id="Tovar" Tag="#($G(Tovar))#">#($G(TovarName))#</span></td>
 	<td class=RightBottom>Материал (англ.)</td>
 	<td class=RightBottom><input type=text id="MaterialEng" MAXLENGTH=50 value="#($G(MaterialEng))#"></td>
+</tr>
+
+<!--
+<tr>
+	<td class=RightBottom colspan=4>8
+		<sklad:Button onclick="windowclose();" value="Отмена">
+		<sklad:ButtonDiv onclick="windowclose();" value="Отмена">
+	</td>
+</tr>
+-->
+
+<tr>
+	<td class=RightBottom>Разрешено использовать в заявках</td>
+	<td class=RightBottom><input type="checkbox" id="AllowToSend" #($S(+AllowToSend:"CHECKED",1:""))# style="border:none" onclick="SetPermission(this)"> </td>
+	<td class=RightBottom colspan=2><font color="darkgrey" size=-1>Внимание! Товар который запрещён к использованию, может быть разрешён в разделе "Ограничение использования запчастей контрагентами".</font></td>
 </tr>
 
 <tr>
@@ -153,12 +212,13 @@ w ##class(Docs.Action2).GetDisplaylistOptions($G(Property9469),"Goods.Goods||Pro
 		<textarea name="Description" id="Description" style="width:100%">#($G(Description))#</textarea>
 	</td>
 </tr>
->
-w:GoodId "<tr><td colspan=4 class=RightBottom>Последнее сохранение: <i>"_$G(ChangeUser)_" "_$G(ChangeDate)_" "_$G(ChangeTime)_"</i></td></tr>"
-</script>
+#($G(LastSaveString))#
+
 </table>
+<input type="button" value="Изображения товара" onclick="showtovar('#(GoodId)#')">
 </td></tr>
 <tr valign=bottom><td align=center>
+
 <CSP:IF CONDITION="Access9func=1">
 	<sklad:Button value="Сохранить" onclick="startFun();" style="#($G(SaveButtonStyle))#">
 </CSP:IF>

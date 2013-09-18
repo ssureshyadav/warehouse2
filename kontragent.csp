@@ -5,7 +5,7 @@
  . s %session=%session.GetSession(sessionid)
  e  s sessionid=%session.SessionId
  s login=$G(%session.Data("user"),0)
- i '+login s %response.ServerSideRedirect="norights.csp" 
+ //i '+login s %response.ServerSideRedirect="norights.csp" 
  s Access10func=##class(Common.Rights).getrights(+login,10)
  s Access11func=##class(Common.Rights).getrights(+login,11)
  if 'Access10func s Func10Refuse="return;"
@@ -17,7 +17,7 @@ Quit 1
 <html>
 <head>
 
-<title>Контрагент</title>
+<title>Контрагент #(KontrId)#</title>
 
 <link href="style.css" type=text/css rel=stylesheet>
 <script language="jscript" src="common.js"></script>
@@ -69,7 +69,7 @@ function startFun()
 }
 
 function showbank(){
-window.showModalDialog("bank.csp?Kontr="+KontrId,"","center:yes;status:no;dialogHeight:400px;dialogWidth:600px;resizable:yes;");
+window.showModalDialog("bank.csp?Kontr="+KontrId,"","center:yes;status:no;dialogHeight:550px;dialogWidth:600px;resizable:yes;");
 }
 
 function windowclose(KontrId)

@@ -1,4 +1,8 @@
 <script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ d:%session.NewSession 
+ . s %session.EndSession=1
+ . s ses=%request.Get("sessionid",1)
+ . s %session=%session.GetSession(ses)
  
  s ShowExcel= %request.Get("ShowExcel")
  s FormFilled = +%request.Get("FormFilled")
@@ -21,38 +25,69 @@
  s glob=$NA(^Common.Dictionary2I("serialInd"))
  s ListIndex("Property9194") = ##class(Common.Dictionary2).GetPropertyListIndex("Property9194",.DataLocation)
  s ListIndex("Comment") = ##class(Common.Dictionary2).GetPropertyListIndex("Comment",.DataLocation)
+ s ListIndex("tovar") = ##class(Common.Dictionary2).GetPropertyListIndex("tovar",.DataLocation)
+ s ListIndex("remont1") = ##class(Common.Dictionary2).GetPropertyListIndex("remont1",.DataLocation)
+ 
  s cl="Common.Dictionary2||Property9194"
  d ##class(Docs.Action2).GetDisplayListArray(cl,.Property9194Array)
 
- w "<table border=1>",!
- w "<tr><td>Серийный номер<td>Гарантийный номер<td>Актуальность<td>Примечание</tr>"
+ w "<br><br><table border=1 cellpadding=6 cellspacing=0>",!
+ w "<tr>"
+ 	_"<td>№ п/п"
+ 	_"<td>Серийный номер"
+ 	//_"<td>Гарантийный номер"
+ 	_"<td>Актуальность"
+ 	_"<td>Наличие заявки"
+ 	_"<td>Модель"
+ 	_"<td>Примечание"
+ 	_"<td>Дубль серийного номера"
+ 	_"</tr>"
  while ('obj.AtEnd)
  {
 	s serial=obj.ReadLine(32000)
-	s (garantStr,actual,comment)="Не найден"
+	if serial="" continue
+	s (garantStr,actual,comment,Model,HasRequest)="Не найден"
+	s ID=""
 	s color="#FFFFFF"
 	s SearchString = " "_$ZCVT(serial,"U")
-     
+	i $I(CountLines)     
+	
  	//если данные есть
  	if $D(@glob@(SearchString))
  	{
  		s ID = $O(@glob@(SearchString,""))
- 		s Property9194 = ##class(Common.Dictionary2).GetPropertyValue(ID,"Property9194",ListIndex("Property9194"),.DataLocation)
- 		s actual=$G(Property9194Array(Property9194))
- 		s garant=$LG(@glob@(SearchString,ID),2)
- 		s garantStr=$S('ShowExcel:"<a href=""javascript:s('"_ID_"')"">",1:"")
- 		s garantStr=garantStr_garant
- 		s garantStr=garantStr_$S('ShowExcel:"</a>",1:"")
- 		s comment=##class(Common.Dictionary2).GetPropertyValue(ID,"Comment",ListIndex("Comment"),.DataLocation)
- 		if Property9194=2 s color="#DEDEDE"
+ 		if ID'=""
+ 		{
+	 		s Property9194 = ##class(Common.Dictionary2).GetPropertyValue(ID,"Property9194",ListIndex("Property9194"),.DataLocation)
+	 		s actual=$G(Property9194Array(Property9194))
+	 		
+	 		s garant=$LG(@glob@(SearchString,ID),2)
+	 		s garantStr=$S('ShowExcel:"<a href=""javascript:s('"_ID_"')"">",1:"")
+	 		s garantStr=garantStr_garant
+	 		s garantStr=garantStr_$S('ShowExcel:"</a>",1:"")
+	 		
+	 		s comment=##class(Common.Dictionary2).GetPropertyValue(ID,"Comment",ListIndex("Comment"),.DataLocation)
+	 		if Property9194=2 s color="#DEDEDE"
+	 		s Model = ##class(Common.Dictionary2).GetPropertyValue(ID,"tovar",ListIndex("tovar"),.DataLocation)
+	 		s remont1 = ##class(Common.Dictionary2).GetPropertyValue(ID,"remont1",ListIndex("remont1"),.DataLocation)
+	 		if remont1'="" s HasRequest="есть"
+	 		else  s HasRequest="нет"
+ 		}
  	}
-	
  	w "<tr bgcolor="""_color_""">"
- 	w "<td>"_serial
- 	w "<td>"_garantStr
+ 	w "<td>"_CountLines
+ 	w "<td>"
+ 	if 'ShowExcel,$G(ID)'="" w $S('ShowExcel:"<a href=""javascript:s('"_$G(ID)_"')"">",1:"")
+ 	w serial
+ 	if 'ShowExcel,$G(ID)'="" w $S('ShowExcel:"</a>",1:"")
  	w "<td>"_actual
- 	w "<td>"_comment
+ 	w "<td>"_HasRequest
+ 	w "<td>"_Model
+ 	w "<td>"_comment_"&nbsp;"
+ 	w "<td>"_$G(Serials(SearchString))_"&nbsp;"
  	w "</tr>"
+ 	
+ 	if '$D(Serials(SearchString)) s Serials(SearchString)=+$G(CountLines)
  }
  w "</table>",!
  Quit ""

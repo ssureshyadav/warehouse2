@@ -11,8 +11,15 @@
 
 <Parameter name="FIELDS">
 <Type>%String</Type>
-<Default><![CDATA[NameSorted as nms,Name as nm,Dat as dt,Summa as sum,Stat as st,ErrorDescription as erd,GotPaperProve as gpp,CloseDate as cldt,CloseTime as cltm,CloseUser->Name as clusnm,Comment as cm,DatePaperProve as dtpp,Errors as err,Kontr->Name as ktnm,Kurs as cr,Rem->Name as rnm,Source->Name as srcnm,SummaCurrency as sumc,Tim as tm,User1->Name as usnm,UserPaperProve->Name as usnmpp]]></Default>
+<Default><![CDATA[NameSorted as nms,Name as nm,Dat as dt,Summa as sum,Stat as st,ErrorDescription as erd,GotPaperProve as gpp,CloseDate as cldt,CloseTime as cltm,CloseUser->Name as clusnm,Comment as cm,DatePaperProve as dtpp,Kontr->Name as ktnm,Kurs as cr,Rem->Name as rnm,Source->Name as srcnm,SummaCurrency as sumc,Tim as tm,User1->Name as usnm,UserPaperProve->Name as usnmpp]]></Default>
 </Parameter>
+
+<UDLText name="T">
+<Content><![CDATA[
+//Errors as err,
+
+]]></Content>
+</UDLText>
 
 <Parameter name="FTYPES">
 <Type>%String</Type>
@@ -21,5 +28,24 @@
 
 <Parameter name="OBJECTCONCURRENCY">
 </Parameter>
+
+<Method name="OnPage">
+<Description>
+Вывод на страницу </Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+  m qa=%request.Data 
+  
+  s oper=$G(qa("oper",1)) 
+  Q:oper="add" ..Add(.qa) 
+  Q:oper="edit" ..Edit(.qa) 
+  Q:oper="del" ..Delete(.qa)
+  
+  if %session.Data("Login")'="" s qa("where")=" where Kontr->Code='"_%session.Data("Login")_"'"
+  Q ..Out(.qa)
+  Quit $$$OK
+]]></Implementation>
+</Method>
 </Class>
 </Export>

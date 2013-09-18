@@ -1,4 +1,4 @@
-img{cursor:hand;border:none}
+img{cursor:pointer;border:none}
 
 input{border:solid 1 grey;width:150px}
 
@@ -62,7 +62,7 @@ padding:5px;
 margin:5px;
 }
 
-.datar {width:70;border:none;cursor:hand}
+.datar {width:70;border: solid 1 #004444;cursor:hand;}
 .datar:hover {width:70;border:none;cursor:hand;background-color: rgb(203,213,225);}
 
 .textlikelink2{

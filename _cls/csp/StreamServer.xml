@@ -5,25 +5,17 @@
 wrapper вокруг стандартного стрим-сервера
 Обслуживает имя выгружаемого файла
 переделан принимать ид Контрагент.Meeting для формирования правильных заголовков
-используется в классе json.Kontragent.Meeting</Description>
+используется в классе json.Kontragent.Meeting
+В HTA прилоржении стрим-сервер не справился, рвет сессию</Description>
 <Super>%CSP.StreamServer</Super>
 <TimeCreated>62696,77159.707457</TimeCreated>
 
 <Method name="OnPreHTTP">
-<Description><![CDATA[
-The <method>OnPostHTTP()</method> is called by the CSP dispatcher before the HTTP
-headers have been sent.  Here, we check that the incoming STREAMOID value is valid,
-then we set the appropriate content type and content length values into the %response
-object (see <class>%CSP.Request</class>), in preparation for sending the image data
-in the <method>OnPage()</method>.]]></Description>
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[
-	
-	s $ZT="errHandler"
-	
-	s ID=$g(%request.Data("ID",1)) if ID'="" {
-		s ID=..Decrypt(ID)
+	s ID=$g(%request.Data("ID",1)) 
+	if ID'="" {
 		s (STREAMOID,filename)=""
 		&sql(Select Attachment,AttachName Into :STREAMOID,:filename
 			From Kontragent.Meeting
@@ -33,15 +25,24 @@ in the <method>OnPage()</method>.]]></Description>
 			s filename=..EscapeURL($zcvt(filename,"O","UTF8"))
 			d %response.SetHeader("Content-Disposition","attachment; filename="_filename)
 		}
-		s %request.Data("STREAMOID",1)=..Encrypt(STREAMOID) ;для стандартного обработчика
+		s %request.Data("SOID")=STREAMOID 
 	}
-		
-	Q ##super()
-	
-errHandler
-	s $ZT=""
-	w "Error on file download:" ,..ShowError($ZE)	
 	Q 1
+]]></Implementation>
+</Method>
+
+<Method name="OnPage">
+<Description>
+Переопределяем под вывод определенного класса</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s soid=$g(%request.Data("SOID"))
+	s stream=##class(%FileBinaryStream).%Open(soid)
+	if stream'=$$$NULLOREF {
+		Do stream.OutputToDevice()
+	}
+	Quit $$$OK
 ]]></Implementation>
 </Method>
 </Class>

@@ -1,4 +1,9 @@
-<html>
+<script runat="server" language="cache" method="OnPreHTTP" returnType="%Boolean">
+	#; страница устарела, перенаправляем на сsp.KaAuth.cls
+	s login=$g(%request.Data("login",1)),args("login")=login
+	s %response.Redirect=##class(%CSP.Page).Link("csp.KaAuth.cls",.args)
+ Q 1
+</script><html>
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=windows-1251">
 <title>	Обращение в сервисный центр Asca Elc. </title>

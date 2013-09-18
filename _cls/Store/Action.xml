@@ -210,6 +210,7 @@ GetChildsErr
       }
         #;s ok=..remquant(itemGoods,item.addr,itemquantreal,item.StoreQntID,quantdefault,itemId)
         s ok=..RemoveQuantity(itemGoods,item.addr,itemquantreal,item.StoreQntID,quantdefault,itemId)
+        s ^mtempArt("rrr",itemId)=ok
        }
      }
      
@@ -600,24 +601,58 @@ remquantErr
    s amount=Portion.Value2
  } 
  
- if amount<Amount&&('allowMinus) { ;количества недостаточно и отрицательный остаток запрещен
+
+ s tempglob = $NA(^mtempArt("RemoveQuantity"))
+ k @tempglob
+ s countmtemp = $I(@tempglob)
+ s @tempglob@(countmtemp,Good.FullName,"Need")=Need
+ s @tempglob@(countmtemp,Good.FullName,"Amount")=Amount
+ s @tempglob@(countmtemp,Good.FullName,"amount")=amount
+ s @tempglob@(countmtemp,Good.FullName,"fromReserve")=fromReserve
+ s @tempglob@(countmtemp,Good.FullName,"RowId")=$G(RowId)
+ s @tempglob@(countmtemp,Good.FullName,"Адрес")=..AddressPath(Portion.Address)
+ s @tempglob@(countmtemp,Good.FullName,"Portion.%Id")=Portion.%Id()
+ 
+ if amount<Amount&&('allowMinus) { 
+  ;количества недостаточно и отрицательный остаток запрещен
   TROLLBACK
   Q "Попытка забрать товар "_Good.FullName_" в количестве "_Amount
    _" ед. из ячейки, в которой "_$S(fromReserve=1:" зарезервировано ",1:"")_amount_" ед."
    _" Выберите другую ячейку"
  }
 
+
  #;списать товар с основного или зарезервированного количества
  if 'fromReserve {
    s Portion.Value1=amount-Amount
+   s @tempglob@(countmtemp,Good.FullName,"списываем")="С основного"
+   
  } else {
    s Portion.Value2=amount-Amount
+   s @tempglob@(countmtemp,Good.FullName,"списываем")="С резерва"
+ }
+
+ 
+
+ 
+
+ if Portion.Value2<0
+ {
+	 TROLLBACK
+	 
+	 q "Извините, невозможно списать товар с резерва "_Good.FullName_" так как при количестве "_Amount_" ("_Need_") резерв может стать меньше нуля: "_Portion.Value2
+ }
+ 
+ if Portion.Value1<0
+ {
+	 TROLLBACK
+	 q "Извините, невозможно списать товар "_Good.FullName_" так как его количество может стать меньше нуля: "_Portion.Value1
  }
  
  s sc=Portion.%Save()
  if 'sc {
   TROLLBACK
-  Q "Ошибка при списании товара "_Good.FullName_": "_$system.Status.GetOneErrorText(sc)
+  Q "Ошибка при списании товара "_Good.FullName_": "_$system.Status.GetOneErrorText(sc)_" "_Portion.%Id()
  }
  
  #;уменьшить вес и объем ячейки на количество списанного товара

@@ -83,6 +83,21 @@
 <Type>Users.Dates</Type>
 </Property>
 
+<Property name="Sluzap">
+<Description>
+Служебная записка</Description>
+<Type>Sluzap</Type>
+</Property>
+
+<Index name="SluzapInd">
+<Properties>Sluzap</Properties>
+</Index>
+
+<Property name="MOVersion">
+<Description>
+Версия софта отправившего документ</Description>
+</Property>
+
 <Method name="GetOtchetDat">
 <Description>
 Вернуть дату отчёта</Description>
@@ -186,6 +201,17 @@ CreatePaperOthetErr
 ]]></Implementation>
 </Method>
 
+<Method name="Brand">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DocId:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s MM=$$$TunesVariableGlobal("MM")	//список аббревиатур мастермакс через запятую
+ 	s VC=$$$TunesVariableGlobal("VC")
+ 	s TL=$$$TunesVariableGlobal("TL")
+]]></Implementation>
+</Method>
+
 <Storage name="Default">
 <Type>%Library.CacheStorage</Type>
 <DefaultData>OtchetDefaultData</DefaultData>
@@ -215,6 +241,15 @@ CreatePaperOthetErr
 </Value>
 <Value name="8">
 <Value>UserPaperProve</Value>
+</Value>
+<Value name="9">
+<Value>ProvementDate</Value>
+</Value>
+<Value name="10">
+<Value>Sluzap</Value>
+</Value>
+<Value name="11">
+<Value>MOVersion</Value>
 </Value>
 </Data>
 </Storage>

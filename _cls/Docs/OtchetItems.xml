@@ -44,7 +44,7 @@
 <Description>
 Отрывной талон</Description>
 <Type>%String</Type>
-<Parameter name="DISPLAYLIST" value=",,А,Б,В,Предпрод."/>
+<Parameter name="DISPLAYLIST" value=",,A,B,C,Предпрод."/>
 <Parameter name="VALUELIST" value=",0,1,2,3,4"/>
 </Property>
 
@@ -132,6 +132,12 @@
 <Type>%String</Type>
 </Property>
 
+<Property name="Number">
+<Description>
+Номер строки</Description>
+<Type>%String</Type>
+</Property>
+
 <UDLText name="T">
 <Content><![CDATA[
 /*
@@ -215,6 +221,9 @@ Method CalculatedStringRubSumma()
 </Value>
 <Value name="14">
 <Value>Currency</Value>
+</Value>
+<Value name="15">
+<Value>Number</Value>
 </Value>
 </Data>
 </Storage>

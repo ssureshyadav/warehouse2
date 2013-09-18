@@ -73,6 +73,17 @@
 <Properties>Result</Properties>
 </Index>
 
+<Property name="ResultCode">
+<Description>
+Результат</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="500"/>
+</Property>
+
+<Index name="ResultCodeInd">
+<Properties>ResultCode</Properties>
+</Index>
+
 <Property name="Comment">
 <Description>
 Комментарий</Description>
@@ -83,6 +94,12 @@
 <Index name="CommentInd">
 <Properties>Comment</Properties>
 </Index>
+
+<Property name="Resend">
+<Description>
+Оригинал (при дубликате письма)</Description>
+<Type>SendMailLog</Type>
+</Property>
 
 <Storage name="Default">
 <Type>%Library.CacheStorage</Type>
@@ -115,6 +132,12 @@
 </Value>
 <Value name="8">
 <Value>Comment</Value>
+</Value>
+<Value name="9">
+<Value>ResultCode</Value>
+</Value>
+<Value name="10">
+<Value>Resend</Value>
 </Value>
 </Data>
 </Storage>

@@ -27,6 +27,7 @@
 <Description>
 Тип Операции</Description>
 <Type>%String</Type>
+<Parameter name="CAPTION" value=",display=none"/>
 </Property>
 
 <Index name="ClIndex">

@@ -56,6 +56,7 @@ Code родительcкой группы</Description>
 		s {*}=##class(Goods.Group).GetParentCode({Code})
 	</SqlComputeCode>
 <SqlComputed>1</SqlComputed>
+<SqlComputeOnChange>Code</SqlComputeOnChange>
 <Parameter name="CAPTION" value="Группа - родитель"/>
 </Property>
 
@@ -101,12 +102,23 @@ Code родительcкой группы</Description>
  Q:'..%ExistsId($g(id)) ""
  s depot= ..DepotGetStored(id), cat=..CatalogueGetStored(id), code=..CodeGetStored(id)
  s code=..GetParentCode(code)
- 
- s pid=""
- &sql( Select ID Into :pid From Goods."Group" 
+ Q ..GetParentIdBy(depot,cat,code)
+]]></Implementation>
+</Method>
+
+<Method name="GetParentIdBy">
+<Description>
+Расчет родителя по значениям</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>depot:%String,cat:%String,code:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+ s id=""
+ &sql( Select ID Into :id From Goods."Group" 
  		Where Depot=:depot And Catalogue=:cat And Code=:code 
  )
- Q:'SQLCODE pid
+ Q:'SQLCODE id
  Q ""
 ]]></Implementation>
 </Method>
@@ -189,6 +201,31 @@ where Catalogue=:Catalogue
 <Implementation><![CDATA[
  d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Group")
  Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="%OnBeforeSave">
+<Description>
+У группы есть два расчетных свойства (Parent,ParentGroup)
+которые по коду группы определяют код родительской группы
+а затем идентификатор родительской группы
+Эти свойства срабатывают при работе через sql
+Цель этого метода - рассчитывать их при работе через объекты</Description>
+<FormalSpec>insert:%Boolean</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	if ..Code'=""  {
+		s ..Parent=..GetParentCode(..Code)
+		#;s ^test($i(^test))=..Depot.%Id()
+		#;s ^test($i(^test))=..Catalogue.%Id()
+		#;s ^test($i(^test))=..Parent
+		
+		s ParentId=..GetParentIdBy(..Depot.%Id(),..Catalogue.%Id(),..Parent)
+		#;s ^test($i(^test))=ParentId
+		d ..ParentGroupSetObjectId(ParentId)	
+	}
+	Quit $$$OK
 ]]></Implementation>
 </Method>
 

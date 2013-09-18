@@ -48,6 +48,7 @@ xmlDoc.validateOnParse = false;
 xmlDoc.load("classmethod.csp?classmethod="+classmethod+"&param1="+param1+"&param2="+param2+"&param3="+param3);
 ok=lookError(xmlDoc);
 if(!ok)return false
+//alert(xmlDoc.xml);
 parseresult(xmlDoc);
 onLoadComplete.fire();
 }
@@ -260,7 +261,8 @@ Dim CellObject,goods,newItem
 		Set CellObject = iGrid.CellValue(y,x)
 		goods=CellObject.ObjectId 
 	End If
-	newItem=window.showModalDialog("storemodal2.csp?goods="&goods&"&depot="&depot,"Store.Address","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+	//меняем storemodal2.csp на Белорусскую csp.StoreSelect.cls 29.07.2011
+	newItem=window.showModalDialog("csp.StoreSelect.cls?goods="&goods&"&depot="&depot,"Store.Address","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
 	
 	If newItem<>"" Then
 		ItemArray=Split(newItem, "~")

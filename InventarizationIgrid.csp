@@ -27,11 +27,17 @@ SELECT{width:170px}
 var DocId='#(%request.Get("source"))#';
 var sessionid="#(sessionid)#";
 
-function ChooseAddress(Obj,depot){
-if(!window.confirm("Операция изменит все строки данной инвентаризации (если они есть). Продолжить?")){return }
-	docstr.Clear();
+function ChooseAddress(Obj,depot)
+{
+	//alert(1);
+	if(!window.confirm("Операция изменит все строки данной инвентаризации (если они есть). Продолжить?")){return }
+	//alert(2);
+	//docstr.Clear();
+	//alert(3);
 	var depot=ReturnSpace(depot);
+	//alert(4);
 	var newItem=window.showModalDialog("storemodal2.csp?depot="+depot,"","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;");
+	//alert(5);
 	if(newItem!=null){if(newItem.split("~")[0]=="changedepot"){DictClick(tr,newItem.split("~")[1])}}
 	if(newItem==null){return false;}
 	var newArr=newItem.split(InnerSplitter);

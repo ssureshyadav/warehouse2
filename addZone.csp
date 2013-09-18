@@ -10,19 +10,16 @@ sub=args[1];
 function startFun(){
 	if(!window.confirm("Создать?"))return false;
 	if(Name.value==""){alert("Не указано наименование");return false;}
-	//draw=Draw.checked;
 	quant=Quant.value;
 	name=Name.value;
 	comment=txtComments.value;
-	//var dd=0;
-	//if(rad[0].checked)var dd=1;
-	//if(rad[1].checked)var dd=2;
-	//if(rad[2].checked)var dd=3;
 	ok=#server(Store.Action.CreateLevel(name,quant,code,sub,comment,"",sta.value))#
 	if(ok!=1){alert(ok);}
-	else{
+	else
+	{
 		window.returnValue=1;
-		window.close();}
+		window.close();
+	}
 }
 </script>
 </head>
@@ -42,7 +39,7 @@ function startFun(){
 <INPUT type=radio name="rad" >не указывать
 </td></tr>
 -->
-<tr><td colspan=2 align="center"><br><sklad:Button value="Да" onclick="startFun();"><sklad:Button onclick="window.close()" value="Отмена"></td></tr>
+<tr><td colspan=2 align="center"><br><sklad:ButtonDiv value="Да" onclick="startFun();"><sklad:ButtonDiv onclick="window.close()" value="Отмена"></td></tr>
 </table>
 </body>
 </html>

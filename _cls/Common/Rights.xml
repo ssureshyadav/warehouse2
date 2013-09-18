@@ -92,13 +92,20 @@
 </Method>
 
 <Method name="CheckKontragentLoginPassword">
+<Description>
+Проверка логина и пароля 
+Используется в системе отправки сообщений - на странице Support.csp</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>Code:%String="",Password:%String=""</FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
- &sql(select id into :ID from Common.Kontragent where Code=:Code and Password=:Password)
- if SQLCODE q ""
- q +$G(ID)
+ s ID="", Code=$g(Code), Password=$g(Password) 
+ &sql(SELECT id into :ID 
+ 	FROM Common.Kontragent 
+ 	WHERE Code=:Code and Password=:Password
+ )
+ Q:'SQLCODE +ID
+ Q ""
 ]]></Implementation>
 </Method>
 </Class>

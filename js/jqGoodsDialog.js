@@ -1,40 +1,53 @@
-(function( $ ){ //регистрация плагина
+п»ї(function( $ ){ //СЂРµРіРёСЃС‚СЂР°С†РёСЏ РїР»Р°РіРёРЅР°
 
-	/* Константы */
-	var PLUGIN='jqGoodsDialog' //"уникальное" имя плагина
-	,GROUPURL="json.GoodsGroup2.cls" //адрес с которого забираем данные по дереву групп
-	,GOODURL="json.Goods.cls" //адрес с данными по товарам
-	/*Языковые ресурсы*/
+	/* РљРѕРЅСЃС‚Р°РЅС‚С‹ */
+	var PLUGIN='jqGoodsDialog'; //"СѓРЅРёРєР°Р»СЊРЅРѕРµ" РёРјСЏ РїР»Р°РіРёРЅР°
 	
-	/* Методы */
+	/* РњРµС‚РѕРґС‹ */
 	var methods = {
-	///Функция инициализации 
-	init: function(/*Объект(ы) */ params){	
-		var defaults=$.extend({onSelectGood: null},params);
-		var TXT={
-		 catInputLbl: 'Catalogue'
-		 ,catBtnTitle: 'Select catalogue'
-		 ,catGrdColNameLbl: 'Name'
-		 ,catDlgTitle: 'Select Catalogue'
-		 ,groupGrdCaption: 'Good groups'
-		};
-	
+	///Р¤СѓРЅРєС†РёСЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё 
+	init: function(/*Settings*/ s ){	
+		var sett=$.extend({
+				onSelect: null //РѕР±СЂР°Р±РѕС‚С‡РёРє РІС‹Р±РѕСЂР°
+				,urlCAT:   	 "json.Catalogue.cls"
+				,urlGROUP: 	 "json.GoodsGroup2.cls" //Р°РґСЂРµСЃ СЃ РєРѕС‚РѕСЂРѕРіРѕ Р·Р°Р±РёСЂР°РµРј РґР°РЅРЅС‹Рµ РїРѕ РґРµСЂРµРІСѓ РіСЂСѓРїРї
+				,urlGOOD:  	 "json.Goods.cls" //Р°РґСЂРµСЃ СЃ РґР°РЅРЅС‹РјРё РїРѕ С‚РѕРІР°СЂР°Рј
+				,title:		 'Р’С‹Р±РµСЂРёС‚Рµ С‚РѕРІР°СЂ'
+				,bSelect:    'Р’С‹Р±СЂР°С‚СЊ'
+				,bCancel:	 'РћС‚РјРµРЅРёС‚СЊ'
+				,width: 820
+				,height: 630
+				,tName:		 'РќР°РёРјРµРЅРѕРІР°РЅРёРµ'
+				,tCatLabel:  'РљР°С‚Р°Р»РѕРі'
+				,tCatButton: 'Р’С‹Р±РѕСЂ РєР°С‚Р°Р»РѕРіР°'
+				,tCatClmn:   'РќР°РёРјРµРЅРѕРІР°РЅРёРµ'
+				,tCatDlg:    'Р’С‹Р±РѕСЂ РєР°С‚Р°Р»РѕРіР°'
+				,tGrpGrd: 	 'Р“СЂСѓРїРїС‹ С‚РѕРІР°СЂРѕРІ'
+				,tGrpCollapse: 'РЎРІРµСЂРЅСѓС‚СЊ'
+				,tGrpExpand: 'Р Р°Р·РІРµСЂРЅСѓС‚СЊ'
+				,tGdGrd:  'РўРѕРІР°СЂС‹'
+				,tWarnTtl: 'Р’РЅРёРјР°РЅРёРµ!'
+				,tWarnMsg: 	'РџРѕР¶Р°Р»СѓР№СЃС‚Р°, РІС‹Р±РµСЂРёС‚Рµ С‚РѕРІР°СЂ!'
+			}
+			, s
+		);
+		
 	return this.each( function(){
 		
-		/*Исключение повторной инициализации*/	
-		var $this=$(this), flag=$this.data(PLUGIN); if (flag) return; //элемент уже инициализировался плагином
+		/*РСЃРєР»СЋС‡РµРЅРёРµ РїРѕРІС‚РѕСЂРЅРѕР№ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё*/	
+		var $this=$(this), flag=$this.data(PLUGIN); if (flag) return; //СЌР»РµРјРµРЅС‚ СѓР¶Рµ РёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°Р»СЃСЏ РїР»Р°РіРёРЅРѕРј
 		
-		/* Для уникальности на странице потребуется идентификатор */
+		/* Р”Р»СЏ СѓРЅРёРєР°Р»СЊРЅРѕСЃС‚Рё РЅР° СЃС‚СЂР°РЅРёС†Рµ РїРѕС‚СЂРµР±СѓРµС‚СЃСЏ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ */
 		var id=$this.attr("id"); if (!id) {alert("element without id"); return;}
-		var catid=id+"_cat" //селектор инпута с выбранным каталогом
-			,catBtn=catid+"Btn" // кнопка после инпута
-			,catDlg=catid+"Dlg" // диалог выбора каталога
-			,catGrd=catid+"Grd" // грид с каталогами
-			,catBar=catid+"Bar" // панель грида с каталогами
-			,groupid=id+"_Grp" //селектор дерева групп
+		var catid=id+"_cat" //СЃРµР»РµРєС‚РѕСЂ РёРЅРїСѓС‚Р° СЃ РІС‹Р±СЂР°РЅРЅС‹Рј РєР°С‚Р°Р»РѕРіРѕРј
+			,catBtn=catid+"Btn" // РєРЅРѕРїРєР° РїРѕСЃР»Рµ РёРЅРїСѓС‚Р°
+			,catDlg=catid+"Dlg" // РґРёР°Р»РѕРі РІС‹Р±РѕСЂР° РєР°С‚Р°Р»РѕРіР°
+			,catGrd=catid+"Grd" // РіСЂРёРґ СЃ РєР°С‚Р°Р»РѕРіР°РјРё
+			,catBar=catid+"Bar" // РїР°РЅРµР»СЊ РіСЂРёРґР° СЃ РєР°С‚Р°Р»РѕРіР°РјРё
+			,groupid=id+"_Grp" //СЃРµР»РµРєС‚РѕСЂ РґРµСЂРµРІР° РіСЂСѓРїРї
 			,groupGrd=groupid+"Grd"
 			,groupBar=groupid+"Bar"
-			,goodid=id+"_Good" //селектор таблицы с товарами
+			,goodid=id+"_Good" //СЃРµР»РµРєС‚РѕСЂ С‚Р°Р±Р»РёС†С‹ СЃ С‚РѕРІР°СЂР°РјРё
 			,goodGrd=goodid+"Grd"
 			,goodBar=goodid+"Bar"
 			,warning=catid+"Warn"
@@ -42,28 +55,28 @@
 		var warn=[
 		"<div id='",warning,"' style='margin-top: 20px; padding: 0 .7em;' class='ui-state-highlight ui-corner-all'>"
 		,"<p><span style='float: left; margin-right: .3em;' class='ui-icon ui-icon-info'></span>"
-		,"Please, select good item!</p>"
+		,sett.tWarnMsg,"</p>"
 		,"</div>"
 		];
 
-		$(warn.join("")).appendTo($this).dialog({title:'Warning!',autoOpen:false,modal:true});
+		$(warn.join("")).appendTo($this).dialog({title: sett.tWarnTtl, autoOpen: false, modal: true});
 		
-		var html=["<table><tr><td valign='top'>" //левая ячейка
-		//размещаем элементы, необходимые для создания дерева групп
+		var html=["<table><tr><td valign='top'>" //Р»РµРІР°СЏ СЏС‡РµР№РєР°
+		//СЂР°Р·РјРµС‰Р°РµРј СЌР»РµРјРµРЅС‚С‹, РЅРµРѕР±С…РѕРґРёРјС‹Рµ РґР»СЏ СЃРѕР·РґР°РЅРёСЏ РґРµСЂРµРІР° РіСЂСѓРїРї
 		,"<table id='",groupGrd,"'><tr><td></td></tr></table><div id='",groupBar,"'></div>"
 		,"</td><td valign='top'>" 
 		,"<table id='",goodGrd,"'><tr><td></td></tr></table><div id='",goodBar,"'></div>"
 		,"</td></tr></table>"];
 
 		
-		//добавляем структуру в указанный элемент
+		//РґРѕР±Р°РІР»СЏРµРј СЃС‚СЂСѓРєС‚СѓСЂСѓ РІ СѓРєР°Р·Р°РЅРЅС‹Р№ СЌР»РµРјРµРЅС‚
 		var content=$(html.join("")).appendTo($this);
-		var catsOpts=new Array(); //собрать опции выбора каталога
-		$.ajax({url: 'json.Catalogue.cls'
-			,async: false //ЛАГ !!!
+		var catsOpts=new Array(); //СЃРѕР±СЂР°С‚СЊ РѕРїС†РёРё РІС‹Р±РѕСЂР° РєР°С‚Р°Р»РѕРіР°
+		$.ajax({url: sett.urlCAT
+			,async: false //Р›РђР“ !!!
 			,data: { sidx:'nm', sord:''}
 			,dataType: 'json'
-			,success: function(data){ //из ответа собираем список
+			,success: function(data){ //РёР· РѕС‚РІРµС‚Р° СЃРѕР±РёСЂР°РµРј СЃРїРёСЃРѕРє
 				var len=0;  if (data.rows) len=data.rows.length;
 				for (var i=0;i<len;i++){
 					var obj=data.rows[i]; if (!obj) contniue;
@@ -73,21 +86,21 @@
 		});
 
   
- //Дерево групп
+ //Р”РµСЂРµРІРѕ РіСЂСѓРїРї
  $("#"+groupGrd).jqGrid({
-  caption: TXT["groupGrdCaption"]
+  caption: sett.tGrpGrd
   ,colModel: [
       {name:'id',hidden:true}
-      ,{name:'n',label:'Name', width:350,sortable:false
+      ,{name:'n',label: sett.tCatClmn, width:350,sortable:false
 		,search: true
 		,stype: 'select'
 		,searchoptions: {
-			value: catsOpts.join(";") //список групп, полученный ранее
+			value: catsOpts.join(";") //СЃРїРёСЃРѕРє РіСЂСѓРїРї, РїРѕР»СѓС‡РµРЅРЅС‹Р№ СЂР°РЅРµРµ
 		}
 	  }
   ]
   ,idPrefix:"gg"
-  ,url: GROUPURL
+  ,url: sett.urlGROUP
   ,datatype: "json"
   ,postData: {depot: 1,cat: $("#"+catid).val()}
   ,treeGrid: true
@@ -100,30 +113,25 @@
    	level_field: "level",
    	parent_id_field: "parent", // then why does your table use "parent_id"?
    	leaf_field: "leaf",
-   	expanded_field: "expanded" //не изменять, иначе компонент глючит!!!
+   	expanded_field: "expanded" //РЅРµ РёР·РјРµРЅСЏС‚СЊ, РёРЅР°С‡Рµ РєРѕРјРїРѕРЅРµРЅС‚ РіР»СЋС‡РёС‚!!!
   }
-  ,onSelectRow: function(id){  /// Выбрана группа в дереве групп
+  ,onSelectRow: function(id){  /// Р’С‹Р±СЂР°РЅР° РіСЂСѓРїРїР° РІ РґРµСЂРµРІРµ РіСЂСѓРїРї
 	var $gdg=$("#"+goodGrd), postData=$gdg.jqGrid("getGridParam","postData");
   	postData["gp"]=id;
 	$gdg.jqGrid("setGridParam","postData",postData)
 		.trigger("reloadGrid");
-	
   }
   ,pager:"#"+groupBar
   ,viewrecords:true
   ,height:400
   ,hidegrid: false
- }).jqGrid('navGrid',"#"+groupBar, 
-       {add:false,edit:false,del:false,view:false,search:false}
-       ,{} //Параметры редактирования
-       ,{} //Параметры добавления
-       ,{}
- ).jqGrid('gridResize',{minWidth:100,minHeight:100})
+ })
+  .jqGrid('navGrid',"#"+groupBar, {add:false,edit:false,del:false,view:false,search:false})
+  .jqGrid('gridResize',{minWidth:100,minHeight:100})
   .jqGrid('filterToolbar',{searchOnEnter:false})
   .jqGrid('navButtonAdd',"#"+groupBar,{
-    caption:""
+    caption:"", title: sett.tGrpExpand
     ,buttonicon: "ui-icon-circlesmall-plus"
-    ,title: "Expand"
     ,onClickButton : function (){
 		  var $gp=$( "#"+groupGrd )
 	      , record=$gp.jqGrid('getRowData')[0]
@@ -143,7 +151,7 @@
   .jqGrid('navButtonAdd',"#"+groupBar,{
     caption:""
     ,buttonicon: "ui-icon-circlesmall-minus"
-    ,title: "Collapse"
+    ,title: sett.tGrpCollapse
     ,onClickButton : function (){
 	    var $gp=$( "#"+ groupGrd)
        	, record=$gp.jqGrid('getRowData')[0]
@@ -160,17 +168,17 @@
 	    collapse(record);
  	}
   });
-  $("#"+groupBar+"_center").remove(); //упростили панель управления деревом (удалили пустую центральную часть)
+  $("#"+groupBar+"_center").remove(); //СѓРїСЂРѕСЃС‚РёР»Рё РїР°РЅРµР»СЊ СѓРїСЂР°РІР»РµРЅРёСЏ РґРµСЂРµРІРѕРј (СѓРґР°Р»РёР»Рё РїСѓСЃС‚СѓСЋ С†РµРЅС‚СЂР°Р»СЊРЅСѓСЋ С‡Р°СЃС‚СЊ)
 
-//Таблица с товарами
+//РўР°Р±Р»РёС†Р° СЃ С‚РѕРІР°СЂР°РјРё
 $("#"+goodGrd).jqGrid({
-	caption: "Goods"
+	caption: sett.tGdGrd
 	,colModel: [
 		{name:"id",hidden:true}
 		,{name:"gd",hidden:true}
-		,{name:"nm",label:"Name", width:350}
+		,{name:"nm",label: sett.tName, width:350}
 	]
-	,url: GOODURL
+	,url: sett.urlGOOD
 	,datatype: "json"
 	,jsonReader : { repeatitems: false }
 	,postData:{gp:''}
@@ -184,73 +192,66 @@ $("#"+goodGrd).jqGrid({
 	,gridview:true 
 	,ondblClickRow: function(id){
 		var rowData=$(this).jqGrid("getRowData",id);
-		var handler=defaults.onSelect;
+		var handler=sett.onSelect;
 		if (typeof(handler)=='function') {
 			handler({id:rowData.gd,nm:rowData.nm});
 		}
 		$this.jqGoodsDialog("close");
 	}
 })
-.jqGrid('navGrid',"#"+goodBar, 
-       {add:false,edit:false,del:false,view:false,search:false}
-       ,{} //Параметры редактирования
-       ,{} //Параметры добавления
-       ,{}
- )	
+ .jqGrid('navGrid',"#"+goodBar,{add:false,edit:false,del:false,view:false,search:false})	
  .jqGrid('gridResize',{minWidth:100,minHeight:100})
  .jqGrid('filterToolbar',{searchOnEnter:false});
- $("#"+goodBar+"_center").remove();
+  $("#"+goodBar+"_center").remove();
 
-	// убрали все обработчики событий от селекта с каталогами
-	// так как изначально он создан компонетом 
-	// и предназначен для фильтрации по наименованию
-	$("#gs_n","#gview_"+groupGrd).unbind().change(function(){ //смена каталога
-	var cat=$(this).val();
-	// код каталога передаем в качестве параметра гриду с группами
-	var $gpGrd=$("#"+groupGrd);
-	var postData=$gpGrd.jqGrid("getGridParam","postData");
-	postData.cat=cat; //изменили
-	$gpGrd.jqGrid("setGridParam","postData",postData);
-	$gpGrd.trigger("reloadGrid");
-	
-	var $gdg=$("#"+goodGrd), postData=$gdg.jqGrid("getGridParam","postData");
-  	postData["gp"]='';
-	$gdg.jqGrid("setGridParam","postData",postData)
-		.trigger("reloadGrid");
-	
+	// СѓР±СЂР°Р»Рё РІСЃРµ РѕР±СЂР°Р±РѕС‚С‡РёРєРё СЃРѕР±С‹С‚РёР№ РѕС‚ СЃРµР»РµРєС‚Р° СЃ РєР°С‚Р°Р»РѕРіР°РјРё
+	// С‚Р°Рє РєР°Рє РёР·РЅР°С‡Р°Р»СЊРЅРѕ РѕРЅ СЃРѕР·РґР°РЅ РєРѕРјРїРѕРЅРµС‚РѕРј 
+	// Рё РїСЂРµРґРЅР°Р·РЅР°С‡РµРЅ РґР»СЏ С„РёР»СЊС‚СЂР°С†РёРё РїРѕ РЅР°РёРјРµРЅРѕРІР°РЅРёСЋ
+	$("#gs_n","#gview_"+groupGrd).unbind().change(function(){ //СЃРјРµРЅР° РєР°С‚Р°Р»РѕРіР°
+		var cat=$(this).val();
+		// РєРѕРґ РєР°С‚Р°Р»РѕРіР° РїРµСЂРµРґР°РµРј РІ РєР°С‡РµСЃС‚РІРµ РїР°СЂР°РјРµС‚СЂР° РіСЂРёРґСѓ СЃ РіСЂСѓРїРїР°РјРё
+		var $gpGrd=$("#"+groupGrd);
+		var postData=$gpGrd.jqGrid("getGridParam","postData");
+		postData.cat=cat; //РёР·РјРµРЅРёР»Рё
+		$gpGrd.jqGrid("setGridParam","postData",postData);
+		$gpGrd.trigger("reloadGrid");
+		
+		var $gdg=$("#"+goodGrd), postData=$gdg.jqGrid("getGridParam","postData");
+		postData["gp"]='';
+		$gdg.jqGrid("setGridParam","postData",postData).trigger("reloadGrid");
 	});
 	
-	// А теперь все это счастье прячем в диалог
-	$this.dialog({title:'Select good', modal: true
-		, width: 820, height: 630
-		, autoOpen: false 
+	// Рђ С‚РµРїРµСЂСЊ РІСЃРµ СЌС‚Рѕ СЃС‡Р°СЃС‚СЊРµ РїСЂСЏС‡РµРј РІ РґРёР°Р»РѕРі
+	$this.dialog({title: sett.title, modal: true
+		, width: sett.width, height: sett.height, autoOpen: false 
 		, buttons:[
-			{ text: 'Select',click: function(){
+			{ text: sett.bSelect, click: function(){
 				var selrow=$("#"+goodGrd).jqGrid("getGridParam","selrow");
-				if (!selrow){
-					$("#"+warning).dialog("open");
+				if (!selrow){$("#"+warning).dialog("open");
 					return;
 				};
-				var handler=defaults.onSelect;
+				var handler=sett.onSelect;
 				if (typeof(handler)=="function"){
 					var rowData=$("#"+goodGrd).jqGrid("getRowData",selrow);
 					handler({id:rowData.gd,nm:rowData.nm});
 				}
 				$(this).dialog("close");
 			}}
-			,{ text: 'Cancel',click: function(){$(this).dialog("close");}}
+			,{ text: sett.bCancel, click: function(){$(this).dialog("close");}}
 		]
 	});
 	
-	// выставляем флаг инициализации
+	// РІС‹СЃС‚Р°РІР»СЏРµРј С„Р»Р°Рі РёРЅРёС†РёР°Р»РёР·Р°С†РёРё
 	$this.data(PLUGIN, { target : $this });	
 	
-		});	//end of return	
+	});	//end of return	
 	} //end init
+	
 	,open: function(){ return this.each( function(){
 			var $this=$(this); $this.dialog("open");
 		})
 	} //end of open
+
 	,close: function(){
 		return this.each( function(){
 			var $this=$(this); $this.dialog("close");
@@ -258,7 +259,7 @@ $("#"+goodGrd).jqGrid({
 	}
 	};//end of methods	
 	
-/*Собственно сам плагин - Диалог выбора товара */
+/*РЎРѕР±СЃС‚РІРµРЅРЅРѕ СЃР°Рј РїР»Р°РіРёРЅ - Р”РёР°Р»РѕРі РІС‹Р±РѕСЂР° С‚РѕРІР°СЂР° */
 $.fn[PLUGIN] = function(method){
     if ( methods[method] ) {
       return methods[method].apply( this, Array.prototype.slice.call( arguments, 1 ));

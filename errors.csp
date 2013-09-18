@@ -41,9 +41,9 @@ else{
  . q:+i'=datah
  . s f="" f  s f=$O(^Errors(i,f)) q:f=""  d
  . . s value=$G(^Errors(i,f))
- . . s value=$TR(value,"<","(")
- . . s value=$TR(value,">",")")
- . . w "<tr><td>"_$ZDT(i,4)_"<td>"_value_"<td>"_f
+ . . //s value=$TR(value,"<","(")
+ . . //s value=$TR(value,">",")")
+ . . w "<tr><td>"_$ZDT(i,4)_"<td>"_$ZCVT(value,"O","HTML")_"<td>"_$ZCVT(f,"O","HTML")
  
 </script>
 </table>

@@ -94,6 +94,32 @@
 <Properties>PlatejDate</Properties>
 </Index>
 
+<Property name="ActNumber">
+<Description>
+Акт выполненных работ</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="ActDate">
+<Description>
+Дата акта выполненных работ</Description>
+<Type>%Date</Type>
+<Parameter name="FORMAT" value="4"/>
+</Property>
+
+<Property name="InvoiceNumber">
+<Description>
+Номер счёта</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="InvoiceDate">
+<Description>
+Дата счёта</Description>
+<Type>%Date</Type>
+<Parameter name="FORMAT" value="4"/>
+</Property>
+
 <Method name="GetFreeSumma">
 <Description>
 Вернуть неизрасходованную сумму, т.е. сумму которую ещё не разнесли по расходным накладным</Description>
@@ -187,6 +213,18 @@
 </Value>
 <Value name="19">
 <Value>PlatejDate</Value>
+</Value>
+<Value name="20">
+<Value>ActDate</Value>
+</Value>
+<Value name="21">
+<Value>ActNumber</Value>
+</Value>
+<Value name="22">
+<Value>InvoiceDate</Value>
+</Value>
+<Value name="23">
+<Value>InvoiceNumber</Value>
 </Value>
 </Data>
 </Storage>

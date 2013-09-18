@@ -14,6 +14,8 @@
  s login=$G(%session.Data("user"))
  
  s Goods="goods.csp"
+ s DocsPage = ##class(User.Settings).GetSettingValue("DocsPage")
+ if DocsPage = "" s DocsPage="docs3.csp"
  //if (user="val") s Goods="goodsJQ.csp"
 </server>
 <html>
@@ -26,6 +28,7 @@
 <script language="jscript" src="common.js"></script>
 </head>
 <body onload="onload()" onkeypress="ManageWindow(this)" >
+#($G(%session.Data("user")))#
 <table width="100%"><tr><td align="center">
 
 <form name="forma" id="forma"><input type="hidden" id="SystemDrive" name="SystemDrive">
@@ -72,7 +75,7 @@ function hui() {
 	frameElement.document.all.statusFR.src='csp.StatusBar.cls';
 	frameElement.document.all.topFR.src='toolbar.csp';
 	frameElement.document.all.goods.src="#(Goods)#";
-	frameElement.document.all.docs.src="docs.csp";
+	frameElement.document.all.docs.src="#(DocsPage)#";
 	frameElement.document.all.dicts.src="dicts.csp";
 	frameElement.document.all.store.src="store.csp";
 	frameElement.document.all.tuneup.src="tuneup.csp";

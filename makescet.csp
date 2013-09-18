@@ -15,6 +15,7 @@
  . s DocDate=$ZD(DocObject.Dat,4)
  . s KontrID=DocObject.Kontr.%Id()
  . s KontrName=$ZCVT(DocObject.Kontr.Name,"O","JS")
+ . s DocName=DocObject.Name
 </script>
 <html XMLNS:SKLAD2>
 <IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc" >
@@ -76,7 +77,7 @@ function LoadProp2Complite(){
 <tr><td>Получатель платежа</td><td><SKLAD2:table id="PropTable2" width=260 ClassName="Docs.Super" onLoadComplete="LoadProp2Complite()"/></td></tr>
 
 <tr>
-	<td>К платежно расчетному документу №</td><td> <input type="text" name="cv1" size="20"></td>
+	<td>К платежно расчетному документу №</td><td> <input type="text" name="cv1" size="20" value="#($G(DocName))#"></td>
 </tr>
 
 <tr>

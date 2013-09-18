@@ -71,6 +71,7 @@
 <Property name="comment">
 <Type>%String</Type>
 <Parameter name="CAPTION" value=",display=none"/>
+<Parameter name="MAXLEN" value="500"/>
 </Property>
 
 <Storage name="Default">

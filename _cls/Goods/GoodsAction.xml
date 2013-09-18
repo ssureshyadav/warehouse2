@@ -1062,10 +1062,15 @@ MovePriceGroupErr
 <FormalSpec>SelectedGoodsIDs:%String="",ID:%String="",p2</FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
+	
+	k ^mtempArt
+	s ^mtempArt("SelectedGoodsIDs")=SelectedGoodsIDs
+	s ^mtempArt("ID")=ID
  s $ZT="GoodsPriceGroupErr"
  s SelectedGoodsIDs=$TR(SelectedGoodsIDs,"~",",")
  s rs=##class(%ResultSet).%New()
- s SqlQuery="update Goods.Goods set izdelie = "_ID_" where id in ("_SelectedGoodsIDs_")"
+ s SqlQuery="update Goods.Goods set izdelie = "_ID_" where ID in ("_SelectedGoodsIDs_")"
+ 	s ^mtempArt("SqlQuery")=SqlQuery
  s ok=rs.Prepare(SqlQuery)
  i '+ok $$$WriteObjError(ok) q "Извините. Ошибка при удалении товара из ценовой группы."
  s ok=rs.Execute()

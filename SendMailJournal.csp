@@ -7,9 +7,9 @@
 <script language="jscript">
 var ColCode="";
 var sessionid="#(%session.SessionId)#";
+
 function gg(){
 if(ColCode=="")return false;
-start();
 #server(Common.Rights.CloseDeadLogins())#
 Show(ColCode+" %STARTSWITH '"+fldval.value+"'")
 }
@@ -21,23 +21,34 @@ function colclick(){
 }
 
 function load(){
-start();
-Dictionary2.LoadHeaders();
+Dictionary2.LoadHeaders("ResultCode,Resend","","ID~№~~~@%String~~~~~#@#");
 }
 
 function Show(where){
 where=ReturnSpace(where);
 Dictionary2.DownLoad(where,"","","Dat desc,Tim desc");
-end()
 }
 
-function start(){
-MainNameCellText=MainNameCell.innerText;
-MainNameCell.innerText="...минуточку...";
+function ShowUndeliveredOnly()
+{
+	Show("ResultCode<>'1'");
 }
 
-function end(){
-MainNameCell.innerText=MainNameCellText;
+function ResendSelected()
+{
+	var SelectedItems = Dictionary2.GetAllItems('selected');
+	if( !window.confirm("Переотправить заново, выбранные письма (" + SelectedItems.split(InnerSplitter).length + " шт)?") ) return;
+	
+	var ok = #server(Kontragent.Action.ResendList(SelectedItems))#
+	if (ok=="1")
+	{
+		alert("Письма отправлены заново.");
+		Show();
+	}
+	else
+	{
+		alert(ok);
+	}
 }
 </script>
 
@@ -45,13 +56,17 @@ MainNameCell.innerText=MainNameCellText;
 <body onload="load()">
 <TABLE cellSpacing=0 width="100%" celpadding="0" >
 <TR>
-<td width=10%></td>
-<TD width=80% id="MainNameCell" align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" ><strong>Журнал отправки автоматических уведомлений</strong></TD>
-<td  width=10% align=right></td>
+<td width=30%><sklad:Button value="Назад" onclick="window.location.href='tuneup.csp'"></td>
+<TD width=40% id="MainNameCell" align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" ><strong>Журнал отправки автоматических уведомлений</strong></TD>
+<td  width=30% align=right></td>
 </tr>
 </table><br>
-<sklad:Button value="Назад" onclick="window.location.href='tuneup.csp'"><br>
+<br>
+<sklad:Button value="Недоставленные" onclick="ShowUndeliveredOnly()"> 
+<sklad:Button value="Все" onclick="Show()">
+<sklad:Button value="Заново отправить выбранные" onclick="ResendSelected()">
+<br><br>
 <span id="namfld"></span>&nbsp;<input type="text" id="fldval" onkeyup="gg();">
- <SKLADList:listview width=100% height=150 id="Dictionary2" zonColumnClick="colclick()" onAddColumns="Show('');" ClassName="Kontragent.SendMailLog" /><br>
+ <SKLADList:listview width=100% height=600 id="Dictionary2" zonColumnClick="colclick()" onAddColumns="Show('');" ClassName="Kontragent.SendMailLog" /><br>
 </body>
 </html>

@@ -71,60 +71,77 @@
 
 <div style="font-size:5px">&nbsp;</div>
 
-<table class="ui-widget ui-widget-content " > <!-- для синей подложки таблицы добавить ui-state-default -->
-<caption class="ui-widget-header">Поиск по первым символам номера</caption>
-<tr><td><label for="FieldToFind">Искать по:</label></td>
-    <td><select id="FieldToFind" onchange="SetNewAComplSource()">
-        <option value="serialInd">серийному номеру</option>
-        <option value="garantInd">гарантийному номеру</option>
-    </select></td>
-</tr><tr class="ui-state-active">
-    <td><label for="edtSearch">Номер:</label></td>
-    <td>
-        <input type="text" id="edtSearch" value="" 
-            title="Для подсказки введите минимум два первых символа номера. Можете использовать символ подстановки: *"
-            style="font-size:20pt"
-        />
-        <button id="bFind"
-            title="Искать"
-            class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" 
-        >
-        <span class="ui-button-icon-primary ui-icon ui-icon-search"></span>
-        <span class="ui-button-text">&nbsp;</span>
-            
-        </button>
-    </td>
-</tr><tr>
-        <td><label>Фильтр:</label></td>
-        <td>
-            <label><input type="checkbox" id="HasReqCB" checked="checked"
-                /><span>Есть заявка</span>
-            </label>
-            <select id="ConditionSel">
-                <option value="and">и</option>
-                <option value="or">или</option>
-            </select>
-            <label><input type="checkbox" id="HasCommentCB" checked="checked" 
-                /><span>Есть примечание</span>
-            </label>
-        </td>
-</tr><tr>
-    <td style="vertical-align: top"><label>Показать поля:<label></td>
-    <td>
-        <div>
-         <label>
-            <input type="checkbox" id="Property9194CB" checked="checked"/>
-            <span>Актуальность</span>
-         </label>
-        </div>
-        <div>
-         <label>
-            <input type="checkbox" id="CommentCB" checked="checked"/>
-            <span>Комментарий</span>
-         </label>
-        </div>
-    </td>
- </tr>
+<table cellpadding=7>
+<tr><Td valign=top>
+	<table class="ui-widget ui-widget-content " > <!-- для синей подложки таблицы добавить ui-state-default -->
+	<caption class="ui-widget-header">Поиск по первым символам номера</caption>
+	<tr><td><label for="FieldToFind">Искать по:</label></td>
+	    <td><select id="FieldToFind" onchange="SetNewAComplSource()">
+	        <option value="serialInd">серийному номеру</option>
+	        <option value="garantInd">гарантийному номеру</option>
+	    </select></td>
+	</tr><tr class="ui-state-active">
+	    <td><label for="edtSearch">Номер:</label></td>
+	    <td>
+	        <input type="text" id="edtSearch" value="" 
+	            title="Для подсказки введите минимум два первых символа номера. Можете использовать символ подстановки: *"
+	            style="font-size:20pt"
+	        />
+	        <button id="bFind"
+	            title="Искать"
+	            class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-icon-primary" 
+	        >
+	        <span class="ui-button-icon-primary ui-icon ui-icon-search"></span>
+	        <span class="ui-button-text">&nbsp;</span>
+	            
+	        </button>
+	    </td>
+	</tr><tr>
+	        <td><label>Фильтр:</label></td>
+	        <td>
+	            <label><input type="checkbox" id="HasReqCB" checked="checked"
+	                /><span>Есть заявка</span>
+	            </label>
+	            <select id="ConditionSel">
+	                <option value="and">и</option>
+	                <option value="or">или</option>
+	            </select>
+	            <label><input type="checkbox" id="HasCommentCB" checked="checked" 
+	                /><span>Есть примечание</span>
+	            </label>
+	        </td>
+	</tr><tr>
+	    <td style="vertical-align: top"><label>Показать поля:<label></td>
+	    <td>
+	        <div>
+	         <label>
+	            <input type="checkbox" id="Property9194CB" checked="checked"/>
+	            <span>Актуальность</span>
+	         </label>
+	        </div>
+	        <div>
+	         <label>
+	            <input type="checkbox" id="CommentCB" checked="checked"/>
+	            <span>Комментарий</span>
+	         </label>
+	        </div>
+	    </td>
+	 </tr>
+	</table>
+<td valign=top>
+	<table class="ui-widget ui-widget-content " > <!-- для синей подложки таблицы добавить ui-state-default -->
+	<caption class="ui-widget-header">Проверка серийных номеров из файла</caption>
+	<tr><td>
+	<form enctype="multipart/form-data" method="post" action="CheckSerial2.csp" target="_blank">
+	Укажите текстовый файл со списком серийных номеров <input type="file" name="file1">
+	<input type="hidden" name="FormFilled" value="1"><input type="hidden" name="sessionid" value="#(%session.SessionId)#">
+	<br><font size="-1" size="Grey">* Каждый серийный номер должен располагаться на новой строке</font>
+	<br>Открыть результат в Microsoft Excel <input type="checkbox" name="ShowExcel" value="1" style="border:none">
+	<br><br> <input type="submit" value="Проверить указанный файл" style="width:200px" >
+	</form>
+	</tr>
+	</table>
+</tr>
 </table>
 <div style="font-size:5px">&nbsp;</div>
 <button onclick="newitem()" 

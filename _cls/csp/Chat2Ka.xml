@@ -5,7 +5,7 @@
 Общение с контрагентом
 Модернизация страницы KontrMeetingResult.csp</Description>
 <IncludeCode>csp,sklad2</IncludeCode>
-<Super>csp.Protected</Super>
+<Super>%CSP.Page</Super>
 <TimeCreated>62683,61983.25184</TimeCreated>
 
 <Parameter name="DOMAIN">
@@ -154,7 +154,7 @@ $(function(){
 	// ,u:"Тестовый пользователь"
 	// }
 	function AppendMessage(obj){
-		
+
 		var cls,tp;
 		switch(obj.mt) {
 			  	case "0": cls="self";tp="*";  break;
@@ -163,7 +163,8 @@ $(function(){
 			  	default: cls="";tp="&nbsp;"
 		};
 		var mss=(obj.ms)?"ok":"err";
-		var attHtml=(obj.a!="")?[
+
+		var attHtml=(obj.a)?[
 			"<div class='attachment'><span>Приложение:</span>"
 			,"<a target='_blank' href='",obj.a,"'>",obj.at,"</a>"
 			,"</div>"
@@ -175,7 +176,7 @@ $(function(){
 			,"<td title='",obj.mst,"'>"
 				,"<div class='eml ",mss,"'>&nbsp;</div>"
 			,"</td>"
-			,"<td><div class='txt'>",obj.msg,"</div>"
+			,"<td><div class='txt'></div>"
 				,attHtml.join("")
 			,"</td>"
 			,"<td>",obj.u,"</td>"
@@ -183,8 +184,9 @@ $(function(){
    			,"</tr>"
 		];
 		
-		$(html.join("")).appendTo("#ResTable");
-		
+		$("#ResTable").append( $( html.join("") ) )
+			.find("tr:last").find(".txt").text(obj.msg) //боремся с двойными кавычками в тексте сообщения
+		;
 	}
 		
 	// отправка данных нового сообщения на сервер
@@ -223,8 +225,13 @@ $(function(){
 					var obj=(arr[JSON]); AppendMessage(obj)
 				} 
 			}
-			,error: function(){
-				$(".dErr").html("При отправке сообщения произошла ошибка").show();
+			,error: function(obj,err,httpErr){
+				var msg=[];
+				for (var i in httpErr){
+					msg.push(i+"="+httpErr[i])
+				}
+				
+				$(".dErr").html("Ошибка"+": "+msg).show();
 			}
 			,complete: function(){
 				$(".dAjax").hide(); $(".dForm,#bNote,#bMail").show();
@@ -392,7 +399,7 @@ $(function(){
   <th title='#(MessageTypeText)#'>#(tp)#</th>>
    s sc=""  	
    if SendMailLog {
-	if SendMailLogResultCode {
+	if SendMailLogResultCode=1 {
 	    s sc="ok", SendMailLogResult="Сообщение успешно доставлено"
     } else {
 	    s sc="err"
@@ -404,9 +411,10 @@ $(function(){
    #; Обработка пустых значений (NULL)
    #; Attachment - $lb("внутреннее имя файла","%Library.FileBinaryStream" )
    #; в остальных случаях $c(0)
+   #; убрал шифрование ID 4.09.2012 была строчка <a target="_blank" href="csp.StreamServer.cls?ID=#(..Encrypt(ID))#">
    if $l(Attachment)'=0  {
 	&html<<div class="attachment"><span>Приложение:</span>
-		<a target="_blank" href="csp.StreamServer.cls?ID=#(..Encrypt(ID))#">
+		<a target="_blank" href="csp.StreamServer.cls?ID=#(ID)#" test="#(..Encrypt(ID))#">
 			#(..EscapeHTML(AttachName))# 
 		</a>
 	</div>>   

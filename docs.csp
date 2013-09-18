@@ -1,9 +1,15 @@
-
 <script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
  s login=$G(%session.Data("user"))
  i '+login s %response.ServerSideRedirect="norights.csp" 
  i '##class(Common.Rights).getrights(login,3) s %response.ServerSideRedirect="norights.csp" 
  s ActRights = ##class(Common.Rights).getrights(login,12)
+  
+  s SaveChoice=%request.Get("SaveChoice") 
+  if %request.Get("SaveChoice") 
+  {
+	  d ##class(User.Settings).SetSettingValue("DocsPage",%request.PageName)
+  }
+  
  q 1
 </script>
 <script language="Cache" method="ShowDocItemsHeaders" arguments="Class:%String" returntype="%String">
@@ -41,14 +47,12 @@
 <title>#($G(%session.Data("systemname")))#</title>
 <link href="style.css" type=text/css rel=stylesheet>
 <style>
-html {margin:0px;padding:0px;}
-body {margin:0px;padding:0px 3px;font:normal Arial 11px;}
-* html button { overflow: visible; } /*тупой padding в кнопках IE*/
-.pageTitle {width:100%;border-collapse:collapse;border:0px;padding:0px;margin:0px;}
+#footer { position: absolute;	bottom: 0; width: 100%; }
 .datar{width:70;border:none;cursor:hand}
 </style>
 
 <script language="Jscript" src="common.js"></script>
+<script language="JavaScript" type="text/javascript" src="js/jquery-1.8.2.min.js"></script>
 <script language="JScript">
 var d1,d2;
 var ActRights = #(ActRights)#;
@@ -58,7 +62,7 @@ var ItemsClassName;
 sessionid="#(%session.SessionId)#";
 depot="#($G(%session.Data("depot")))#"
 docssame="#($G(%session.Data("docssame")))#";
-OurName="#($G(%session.Data("OurName")))#";
+
 var login = '#($G(login))#';
 
 function load(){
@@ -133,6 +137,7 @@ function okfunc()
 function showdocums()
 {
 	var order="";
+	var DocClass = doctypes.ItemID;
 	//if(doctypes.ItemID=="Docs.Otchet"){var order="NameSorted"}
 	dateArr=dat1.value.split("/")
 	Data1=dateArr[2]+"-"+dateArr[1]+"-"+dateArr[0]
@@ -141,7 +146,8 @@ function showdocums()
 	var request="Dat>=CAST('"+Data1+"' AS DATE) and Dat<=CAST('"+Data2+"' AS DATE)";
 	if(docssame==0){var requst=request+" and Depot="+depot;} //если  показ всех документов для всех складов то
 	var currentKontragent=ChooseKontragent.value;
-	if(currentKontragent!="all"){var request=request+" and Kontr="+currentKontragent}
+	if(currentKontragent!="all" && DocClass!="Docs.Sluzap"){var request=request+" and Kontr="+currentKontragent}
+	if(currentKontragent!="all" && DocClass=="Docs.Sluzap"){var request=request+" and Docs.Sluzap_IsKontrInDoc(ID  ,'"+currentKontragent+"')=1"}
 	if(DocName.value!=""){var request=request+" and Name %STARTSWITH '"+DocName.value+"'";}
 	var ShowUnpaidObject = document.getElementById("ShowUnpaid");
 	if(typeof(ShowUnpaid)=="object")
@@ -232,7 +238,8 @@ function CreateDocument(ItemID)
 	}
 	if((CurrentDocementClass=="Docs.StorageIn")||(CurrentDocementClass=="Docs.StorageOut")){alert("Внутренняя инструкция создается на рабочем месте кладовщика");return;}
 	if(CurrentDocementClass=="Operation.Instructions"){doccsp="createinstructIgrid.csp?source="+ItemID}
-	WinResult=window.showModalDialog(doccsp,CurrentDocementClass+InnerSplitter+ItemID+InnerSplitter+doctypes.ItemName,"center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+	if(CurrentDocementClass=="Docs.Sluzap"){doccsp="screen/sluzap.csp?docid="+ItemID}
+	WinResult=window.showModalDialog(doccsp,CurrentDocementClass+InnerSplitter+ItemID+InnerSplitter+doctypes.ItemName,"center:yes;status:no;dialogHeight:660px;dialogWidth:800px;resizable:yes;")
 	if(WinResult==1)showdocums();
 }
 	
@@ -244,6 +251,7 @@ function showitems()
 	if(currentdoc=="")return
 	docitems.DownLoad("Doc="+currentdoc,1)
 	var dd2 = new Date();
+	$("#CurrDocName").text(docums.ItemName);
 	//LoadIgridData(currentdoc);
 	//alert("вывод строк\n" + (dd2-dd1) + "\n" + dd1.toTimeString() + "\n" + dd2.toTimeString());	
 }
@@ -275,6 +283,7 @@ function printdoc()
 	if(CurrentDocementClass=="Docs.Invent")doccsp="docinvent.csp"
 	if(CurrentDocementClass=="Docs.Inner")doccsp="docinner.csp"
 	if(CurrentDocementClass=="Docs.Diff")doccsp="docdiff.csp"
+	
 	WinResult=window.showModalDialog(doccsp,CurrentDocementClass+InnerSplitter+ItemID+InnerSplitter+doctypes.ItemName,"center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
 	//window.open("print.csp?doc="+doc);
 }
@@ -291,18 +300,24 @@ if ((docclass=="Docs.Otchet")&&(param=="word"))
 	if(window.confirm("Печатать все поля документа?")){url=url+"&AllColumns=1"}
 	//window.prompt(url,url);
 }
+
+if (docclass=="Docs.Sluzap")
+{
+	url = "screen/sluzap.csp?docid="+docid;
+}
+
 window.open(url);
 }
 
 function makescet(cl){
 var doc=docums.ItemID;
 if(doc==""){alert("Не выбран документ - основание для формирования платежного поручения");return}
-WinResult=window.showModalDialog("makescet.csp?docid="+doc+"&class="+cl,"","cener:yes;status:no;dialogHeight:250px;dialogWidth:400px;resizable:yes;")
+WinResult=window.showModalDialog("makescet.csp?docid="+doc+"&class="+cl,"","center:yes;status:no;dialogHeight:250px;dialogWidth:400px;resizable:yes;")
 }
 function maketovnakl(tovnakladn){
 var doctov=docums.ItemID;
 if(doctov==""){alert("Не выбран документ - основание для формирования товарной накладной");return}
-WinResult=window.showModalDialog("maketovnakl.csp?docid="+doctov+"&class="+tovnakladn,"","cener:yes;status:no;dialogHeight:300px;dialogWidth:450px;resizable:yes;")
+WinResult=window.showModalDialog("maketovnakl.csp?docid="+doctov+"&class="+tovnakladn,"","center:yes;status:no;dialogHeight:400px;dialogWidth:450px;resizable:yes;")
 }
 
 function deldoc(){
@@ -332,6 +347,8 @@ function ChooseKontragentFunc(){
 }
 
 function EmailDocumentFn(ItemID,ItemClass){
+	alert("Функция отключена");
+	return;
 	var MailSetup=window.showModalDialog("MailSetup.csp","","center:yes;status:no;dialogHeight:200px;dialogWidth:500px;resizable:yes;");
 	//вернётся следующая строка
 	//Формировать DOC файл (false/true);Открывать Email программу (false/true);принудительный адрес отправки;Файл-шаблон
@@ -469,7 +486,7 @@ function MakeActNote()
 //пришло бумажное подтверждение отчёта
 function ProveOthet()
 {
-	if(!window.confirm("Указать, что к отчёту пришло бумажное подтверждение?"))return;
+	if(!window.confirm("Указать, что бумажный отчёт проверен?"))return;
 	var ok = #server(Docs.Otchet.SetParerProve(docums.ItemID))#
 	if(isNaN(ok)){alert(ok)}
 	else{okfunc()}
@@ -487,16 +504,17 @@ function SetBrakAnswer()
 }
 </script>
 </head>
-<body  onload="load()" ><table class="pageTitle">
-<TR style="background-color: rgb(233,243,255);">
-<td width="20px"><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
-<TD width=80% style="text-align:center; FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102);" >Документы</TD>
-<td width="20px"><a href="help/docs.htm" style="text-align:right"><img src="images/BIGHelp.bmp" width="20" height=25 border=0></a></td>
-</table>
+<body  onload="load()" >#(SaveChoice)#
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<td width=10%><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
+<TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" ><strong>Документы</strong></TD>
+<td width=10% align=right><a href="help/docs.htm"><img src="images/BIGHelp.bmp" width="20" height=25 border=0></a></td>
+</TABLE>
 
 <TABLE cellSpacing=0 width="100%" celpadding="0" >
 <td rowspan=99 valign=top>
-<fieldset><legend>Типы документов</legend>
+<fieldset><legend><span onclick="alert('ID сессии #(%session.SessionId)#')">Типы</span> документов</legend>
  <SKLADList:listview width=200 height=300 id="doctypes" ClassName="Docs.Docs" onAddColumns="show()" zClick="okfunc()" zonDblClick="CreateDocument()"/><br>
 </fieldset>
 </td></tr>
@@ -520,7 +538,9 @@ function SetBrakAnswer()
 <sklad:LittleButton name="ok" id="okbut2" onclick="processdoc()" alt="Обработать документ">
 <sklad:LittleButton name="print" id="okbwut2" onclick="prnt(docums.ItemID,docums.ClassName,'')" alt="Печать документа">
 <sklad:LittleButton name="printword" id="PrntButWord" onclick="prnt(docums.ItemID,docums.ClassName,'word')" alt="Печать документа Word">
+<!--
 <sklad:LittleButton name="mail" id="EmailDocument" onclick="EmailDocumentFn(docums.ItemID,docums.ClassName)" alt="Отправить по почте">
+-->
 
 <!-- кнопки кнопки инструкции по отгрузке -->
 <span style="display:none" id="StorageOutField">
@@ -540,7 +560,7 @@ function SetBrakAnswer()
 	<sklad:LittleButton name="txt" id="btnShowOtchetErrors" onclick="ShowOtchetErrorsFn('Errors')" alt="Показать ошибки отчёта">
 	<img src="images/red_stop.gif" alt="Отклонить отчёт" width="20px" height="20px" style="cursor:hand" onclick="setOtchetFailed()">
 	<img src="images/green_butt.gif" alt="Принять отчёт" width="20px" height="20px" style="cursor:hand" onclick="setOtchetAccepted()">
-	<sklad:LittleButton name="txtok" id="btnProveOthet" onclick="ProveOthet()" alt="Пришло бумажное подтверждение отчёта">
+	<sklad:LittleButton name="txtok" id="btnProveOthet" onclick="ProveOthet()" alt="Бумажный отчёт проверен">
 </span>
 
 <!-- кнопки инструкции руководителя -->
@@ -569,7 +589,7 @@ function SetBrakAnswer()
 <sklad:LittleButton name="ok" id="okbut3" onclick="printdoc()" alt="Распечатать документ">
 -->
 </fieldset>
-<fieldset><legend>Строки документа</legend>
+<fieldset><legend>Строки документа <div id="CurrDocName"></div></legend>
 <SKLADList:listview width=100% height=150 id="docitems" onAddColumns="showitems()"/><br>
 </fieldset>
 <!--
@@ -578,5 +598,9 @@ function SetBrakAnswer()
 -->
 </td></tr>
 </table>
+<br><br><br>
+<div id="footer"><p align="right">
+<a href="docs3.csp?SaveChoice=1" style="font-color:grey;font-size:12px">новая версия</a>
+</p></div>
 </body>
 </html>

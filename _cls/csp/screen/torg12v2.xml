@@ -52,7 +52,7 @@
  s k=##class(Common.Kontragent).%OpenId(kontr)
  d:$ISOBJECT(k)
  . s kname1=k.Name
- . s Address1=k.Address
+ . s Address1=k.AddressUr
  . s bank1=k.bank
  . s codecity1=k.CityCode
  . s namecity1=k.City
@@ -95,7 +95,7 @@
  s k=##class(Common.Kontragent).%OpenId(kontr3)
  d:$ISOBJECT(k)
  . s kname3=k.Name
- . s Address3=k.Address
+ . s Address3=k.AddressUr
  . s bank3=k.bank
  . s chief=k.chief
  . s buh=k.glavbuh
@@ -645,6 +645,8 @@ xmlns="http://www.w3.org/TR/REC-html40">
 <ClassMethod>1</ClassMethod>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
+ s DoverennNumber = %request.Get("DoverennNumber")		//номер доверенности
+ s DoverennDatValue = %request.Get("DoverennDatValue")	//дата доверенности
     
      &html<<tr class=xl24 height=16 style='mso-height-source:userset;height:12.0pt'>
   <td height=16 colspan=4 class=xl24 style='height:12.0pt;mso-ignore:colspan'></td>
@@ -842,7 +844,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
   <td class=xl28>&nbsp;</td>
   <td class=xl24></td>
   <td colspan=10 class=xl130 width=218 style='width:164pt'>Креймер А.Я. <font
-  class="font16">(по доверенности №Х от **.**.**** )</font></td>
+  class="font16">(доверенность №#(DoverennNumber)# от #(DoverennDatValue)#)</font></td>
   <td colspan=5 class=xl24 style='mso-ignore:colspan'></td>
   <td class=xl28>&nbsp;</td>
   <td class=xl28>&nbsp;</td>

@@ -3,6 +3,27 @@
  i '+login s %response.ServerSideRedirect="norights.csp" 
  q 1
 </script>
+<script language="Cache" method="MoveToArchive" arguments="" returntype="%String">
+ n i,dat
+ 
+ s lastyear = $ZD($H,3)-1
+ //убрать в архив прошлый год
+ s glob=$NA(^Requests)
+ s ArchiveGlob=$NA(^RequestsArchive) 
+
+ s i="" f  s i=$O(@glob@(i)) q:i=""  d
+ . s dat="" f  s dat=$O(@glob@(i,dat)) q:dat=""  d 
+ . . //год текущей записи
+ . . s currentyear=+$P(dat,"/",3)
+ . . //если текущая запись не прошлогодняя, то пропускаем итерацию
+ . . if currentyear'=lastyear q
+ . . //переносим прошлогоднюю операцию в архив
+ . . b	;1
+ . . m @ArchiveGlob@(i,dat)=@glob@(i,dat)
+ . . k @glob@(i,dat)
+ Quit ""
+</script>
+
 <html>
 <head>
 <link href="style.css" type=text/css rel=stylesheet>
@@ -14,7 +35,8 @@
 <body>
 
 <sklad:Button value="Назад" onclick="window.location.href='tuneup.csp'">&nbsp;&nbsp;&nbsp;
-<sklad:Button value="Архив" onclick="window.location.href='?Archive=1'"><br>
+<sklad:Button value="Убрать прошлогодние записи в архив" onclick="window.location.href='?MoveToArchive=1'">&nbsp;&nbsp;&nbsp;
+<sklad:Button value="Показать архив" onclick="window.location.href='?Archive=1'"><br>
 
 <TABLE cellSpacing=0 width="100%" celpadding="0" >
 <TR>
@@ -24,7 +46,13 @@
 <br><br>
 <script language="cache" runat="server">
  s glob=$NA(^Requests)
- if %request.Get("Archive")=1 s glob=$NA(^RequestsArchive)
+ 
+ //если попросили выводить архив
+ if %request.Get("Archive")=1 s glob=$NA(^RequestsArchive) 
+ 
+ //если попросили убрать в архив
+ if %request.Get("MoveToArchive")=1 d ..MoveToArchive()
+
  s i="" f  s i=$O(@glob@(i)) q:i=""  d
  . s z="" f  s z=$O(@glob@(i,z)) q:z=""  d
  . . s string=$G(@glob@(i,z))

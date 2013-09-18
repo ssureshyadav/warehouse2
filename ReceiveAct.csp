@@ -12,7 +12,10 @@
  if Passw="" w "Невозможно зарегистрировать акт технического ."_$C(13,10)_"Не указан пароль." q 1
  s Code=%request.Get("Code")
  s Data=%request.Get("Data")
- s ^Requests($I(^Requests),$zdt($H,4))="Код центра "_Code_"   REMOTE_ADDR="_%request.CgiEnvs("REMOTE_ADDR")_" CurrentVersion=? ""Создание акта"""
+ s GoodsVersion=%request.Get("GoodsVersion")		//версия товарного справочника
+ s CurrentVersion=%request.Get("CurrentVersion")	//версия программы
+ 
+ s ^Requests($I(^Requests),$zdt($H,4))="Код центра "_Code_"   IP="_%request.CgiEnvs("REMOTE_ADDR")_" программа="_CurrentVersion_" товарный справочник="_GoodsVersion_" ""Создание акта"""
  if ##class(Common.Common).GetPasswordFromCode(Code, .KontrId)'=Passw d  q 1
  . w "Невозможно зарегистрировать акт."_$C(13,10)
  . w "В базе данных не существует клиент с кодом "_Code_" и паролем "_Passw_$C(13,10)

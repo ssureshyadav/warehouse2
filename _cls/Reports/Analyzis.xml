@@ -440,6 +440,7 @@ docsbytovsErr
  . s quant=@tempglob@(i,"Quantity")
  . s d=quant/perd //это среднедневной расход товара за период который указан в общих настройках для прогноза обнуления
  . s curquant=##class(Goods.GoodsAction).getgoodquant(i,"")  //текущее количество
+ . q:(d=0)	//если расход нулевой то тоже выходим из цикла	18,05,2011
  . q:(curquant/d)<(dat1-$H) //если обнулится меньше чем за указанный период то выходим из цикла
  . s tov=##class(Goods.Goods).%OpenId(i)
  . i $ISOBJECT(tov) d
@@ -683,10 +684,12 @@ GetGoodsFromGroupErr
  f  &sql(fetch dfg33) q:SQLCODE  d
  . s:Abbr="" Abbr="Не указано"
  . i $D(ModelsToGroup(Abbr)) s Abbr=ModelsToGroup  //если модель содержится в списке замены то заменяем
+ . s:Abbr="" Abbr="Не указано"
  . s RashString=$G(^Docs.SuperD(Doc,"Rash")),opl=""
  . s:RashString'="" opl=$LIST(RashString,$$$RashOpl)
  . i opl="" s opl="Не указано"
  . e  s opl=$G(OplatNames(opl))
+ . i opl="" s opl="Не указано"
  . s Stoimost=Quant*Price
  . s Cena=Quant*Goodsprice
  . s @glob@(opl,Dat,Kontr,Abbr,"Cena")=$G(@glob@(opl,Dat,Kontr,Abbr,"Cena"))+Cena
@@ -724,11 +727,13 @@ SentZapchastiErr
  s sc=xmlstr.Element("AllObjects")
  s SqlQuery="select doc->Name as docname,doc->Dat as doctat,Goods->FullName as goodsname,Quantity,Total "
  s:Kontr="" SqlQuery=SqlQuery_", doc->Kontr->Name as Kontrname "
- s SqlQuery=SqlQuery_"from Docs.RashItems"
- s SqlQuery=SqlQuery_" where doc->Dat>="_Dat1_" and doc->Dat<="_Dat2
- s:Kontr'="" SqlQuery=SqlQuery_" and doc->Kontr="_Kontr
+ s SqlQuery=SqlQuery_"from Docs.StorageOutItems"
+ s SqlQuery=SqlQuery_" where doc->Source->Dat>="_Dat1_" and doc->Source->Dat<="_Dat2
+ s:Kontr'="" SqlQuery=SqlQuery_" and doc->Source->Kontr="_Kontr
  s SqlQuery=SqlQuery_" and doc->Stat=2"
  if Goods'="" s SqlQuery=SqlQuery_" and Goods in ("_Goods_") "
+ 
+ s ^mtempArt("OtpravkaKontragentu")=SqlQuery
  s rs=##class(%ResultSet).%New()
  s ok=rs.Prepare(SqlQuery) i '+ok $$$WriteObjError(ok) q "Ошибка"
  s ok=rs.Execute() i '+ok $$$WriteObjError(ok) q "Ошибка"

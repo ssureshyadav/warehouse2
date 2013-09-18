@@ -329,4 +329,17 @@ function ChooseKonragent(Obj)
 	var newArr=newItem.split(InnerSplitter);
 	Obj.innerText=newArr[1];
 	Obj.Tag=newArr[0];
+	return newArr;
+}
+
+function CreateXmlDoc()
+{
+	var xmlDoc = new ActiveXObject("Msxml2.DOMDocument.3.0");
+	var RootElement = xmlDoc.createElement("RootElement");
+	xmlDoc.documentElement=RootElement;
+	var AllObjects = xmlDoc.createElement("AllObjects");
+	var OneObject = xmlDoc.createElement("OneObject");
+	AllObjects.appendChild(OneObject);
+	RootElement.appendChild(AllObjects);
+	return xmlDoc;
 }

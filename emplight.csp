@@ -3,16 +3,80 @@
  i '+login s %response.ServerSideRedirect="norights.csp" 
  i '##class(Common.Rights).getrights(login,5) s %response.ServerSideRedirect="norights.csp" 
  q 1
-</script>
-
-<script language="cache" runat="server">
+</script><script language="cache" runat="server" method="wDocuments" arguments="depot:%String">
+ n sql s sql="select Oper->cl as mustbe,ID as DocId,Name,Kontr as KontrID,Kontr->Name as Kontr,User1->Name as User1,InstDate as InstDateHorolog"
+ s sql=sql_",%external(State) as State,dostavka->Name as dostavka,showcolor as showcolor,Oper as oper,Oper->Name as opername,postnumber,postdata,State as StateNumb,RashOplatType->Name as RashOplatTypeName"
+ s sql=sql_" from Operation.Instructions where (State Between 2 and 8) and (Depot1=?) "
+ s kontr1=$P(kontr,"~") if (kontr1'="all")&(kontr1'="") s sql=sql_" and Kontr="_kontr1
+ s instrtype1=$P(instrtype,"~")	i (instrtype1'="all")&(instrtype1'="") s sql=sql_" and Oper="_instrtype1
+ 
+ n rs s rs=##class(%ResultSet).%New()
+ s ok=rs.Prepare(sql) i '+ok q "Ошибка при формировании списка инструкций"
+ s ok=rs.Execute(depot) i '+ok q "Ошибка при формировании списка инструкций"
+ while rs.Next(){
+	 
+ 	f i="mustbe","DocId","Name","KontrID","Kontr","User1","InstDateHorolog","State","dostavka","showcolor","oper","opername","postnumber","postdata","StateNumb","RashOplatTypeName" d
+	. s @i=$G(rs.Data(i)) s:@i="" @i="&nbsp;"
+	 
+	s InstDate=$ZD(InstDateHorolog,4)
+ 	s innerbutton=""
+ 	s mustbe=$P($G(mustbe),",",1),NameRash=""
+ 	s (innerdoc,DocumentClass)=""
+ 	
+ 	#; найдем документы созданные от текущей инструкции
+ 	s ok=..wChildrenDocs(mustbe,DocId,.innerbutton) if 'ok continue
+	
+ 	s:StateNumb=8 innerbutton=innerbutton_"<img src=""images/post.gif"" onmouseover=""this.src='images/Onpost.gif'"" onmouseout=""this.src='images/post.gif'""  onclick=""post('"_DocId_"')"" alt=""Указать реквизиты почтового документа"" >"
+ 	s style="" s:showcolor'="" style="style=""color:"_showcolor_""""
+ 	w "<tr ",style,">"
+ 	w "<td>",Name," (",NameRash,") ",RashOplatTypeName,"</td>"
+ 	w "<td>",InstDate,"</td>"
+ 	w "<td style='cursor:hand' onclick=""ShowKontr('",KontrID,"')"">",Kontr,"</td>"
+ 	w "<td>",User1,"</td>"
+ 	w "<td id=""Instr",DocId,"Stat"">",State
+ 	s:oper'=10 dostavka=opername
+ 	w "<td>",dostavka,"</td>"
+ 	w "<td><nobr>"
+ 		,"<img src=""images/ok.gif"" onmouseover=""this.src='images/Onok.gif'"" onmouseout=""this.src='images/ok.gif'"" "
+ 		," onclick=""chstat(this.Tag,'",innerdoc,"')"" alt=""Изменить статус"" Tag=""",DocId,"""> "
+ 		,"<img src=""images/print.gif"" onmouseover=""this.src='images/Onprint.gif'"" onmouseout=""this.src='images/print.gif'"" "
+ 		," onclick=""prnt('",$G(childdoc),"@",$G(mustbe),"')"" alt=""Распечатать накладную"" Tag="""">"
+ 		,innerbutton
+ 		,"</nobr></td>"
+ 	w "</tr>"	
+ }
+ d rs.Close(), rs.%Close() k rs
+</script><script language="cache" method="wChildrenDocs" arguments="mustbe:%String,DocId:%String,&innerbutton:%String" returntype="%Status">
+	n AdditionalFields s AdditionalFields="" s:mustbe="Docs.Rash" AdditionalFields=",opl->Name as RashOplatTypeName"
+    n sqlDocsRash s sqlDocsRash="select id as childdoc,Name as NameRash"_AdditionalFields_" from "_mustbe_" where Source=?"
+    w "<!-- sqlDocsRash "_sqlDocsRash_"-->"
+ 	n rs s rs=##class(%ResultSet).%New()
+ 	n ok s ok=rs.Prepare(sqlDocsRash) if '+ok w "<tr><td colspan=7>Ошибка при формировании списка инструкций</td>" Q ok
+ 	s ok=rs.Execute(DocId) if '+ok w "<tr><td colspan=7>Ошибка при формировании списка инструкций</td>" Q ok
+	n RashOplatTypeName
+	while rs.Next() {
+		s childdoc=$G(rs.Data("childdoc")), NameRash=$G(rs.Data("NameRash")), RashOplatTypeName=$G(rs.Data("RashOplatTypeName"))
+ 		// есть документы  от инструкции, посмотрим есть ли внутренние инструкции от этих потомков
+ 		&sql(select id,DocumentClass,Name,stat into :innerdoc,:DocumentClass,:NameInner,:stat 
+ 			 From Docs.Super where Source=:childdoc
+ 		)
+ 		if SQLCODE {
+ 			s innerbutton="<img src=""images/new.gif"" onmouseover=""this.src='images/Onnew.gif'"" onmouseout=""this.src='images/new.gif'""  onclick=""create('"_mustbe_"','"_childdoc_"')"" alt=""Создать внутреннюю инструкцию"" >"
+ 		} else {
+ 			s innerbutton="<img src=""images/edit.gif"" onmouseover=""this.src='images/Onedit.gif'"" onmouseout=""this.src='images/edit.gif'""  onclick=""lookinnerinstr('"_innerdoc_"@"_DocumentClass_"')"" alt=""Редактировать внутреннюю инструкцию"" >"
+ 			s innerbutton=innerbutton_"<img src=""images/print.gif"" onmouseover=""this.src='images/Onprint.gif'"" onmouseout=""this.src='images/print.gif'""  onclick=""prnt('"_innerdoc_"@"_DocumentClass_"')"" alt=""Распечатать внутреннюю инструкцию"" >"
+ 			i stat=1 s innerbutton=innerbutton_"<img src=""images/ok.gif"" onmouseover=""this.src='images/Onok.gif'"" onmouseout=""this.src='images/ok.gif'""  onclick=""savestore(this.Tag,'"_NameInner_"')"" alt=""Обработать документ"" Tag="""_innerdoc_""">"
+ 			e  s innerbutton=innerbutton_"<img src=""images/Disabledok.gif"" alt=""Документ уже обработан"" style='cursor:no-drop'>"
+ 		}
+	}
+	d rs.Close(), rs.%Close() k rs
+	Q $$$OK
+</script><script language="cache" runat="server">
  s kontr=%request.Get("kontr")
  s instrtype=%request.Get("instrtype")
 </script>
-
 <html>
 <head>
-
 <title>Рабочее место кладовщика</title>
 <style>
 img{cursor:hand}
@@ -20,9 +84,18 @@ a:visited {color:#002277;text-decoration:none;}
 a:link {color:#002277;text-decoration:none;} 
 a:hover {color:#0044cc;text-decoration:underline;} 
 a:active {color:#CC3300;text-decoration:none;}
+.hover {background-color:#99bbdd}
+#tblInstructions {
+	border-collapse:collapse;
+	border:solid 1px silver;
+}
+#tblInstructions td, #tblInstructions th {
+	border-collapse:collapse;
+	border:solid 1px silver;
+	padding: 0px 2px;
+}
 </STYLE>
-
-
+<script type='text/javascript' src='js/m.js'></script>
 <script language="javascript">
 var sessionid="#(%session.SessionId)#";
 
@@ -37,10 +110,7 @@ var instrtypeArray=instrtype.split("~");
 if((kontrArray[0]!="all")&(kontrArray[0]!="")){SetSelectData("ChooseKontragent",kontr)}
 if((instrtypeArray[0]!="all")&(instrtypeArray[0]!="")){SetSelectData("ChooseInstrType",instrtype)}
 var d2=new Date();
-//joi.innerHTML=joi.innerHTML+"Начало формирования на сервере "+"#($G(^mtempTime(1)))#<br>"
-//joi.innerHTML=joi.innerHTML+"Окончание формирования на сервере "+"#($G(^mtempTime(2)))#<br>"
-//joi.innerHTML=joi.innerHTML+"Начало загрузки и отрисовки "+d1.getHours() +":"+ d1.getMinutes() +":"+ d1.getMilliseconds() + "<br>"
-//joi.innerHTML=joi.innerHTML+"Окончание загрузки и отрисовки "+ d2.getHours() +":"+ d2.getMinutes() +":"+ d2.getMilliseconds()
+
 }
 
 // печать документа созданного инструкцией
@@ -67,10 +137,6 @@ function chstat(docid,innerdoc){
 function lookinnerinstr(idclass){
 var docclass=idclass.split("@")[1]
 var docid=idclass.split("@")[0]
-//alert(docclass+"\n"+docid)
-//var ok=window.showModalDialog("createstorage.csp",docclass+InnerSplitter+docid+InnerSplitter+"","center:yes;status:no;dialogHeight:600px;dialogWidth:600px;resizable:yes;")
-//if(!OpenNewForm.checked){var ok=window.showModalDialog("createstorage.csp",docclass+InnerSplitter+docid+InnerSplitter+"","center:yes;status:no;dialogHeight:600px;dialogWidth:600px;resizable:yes;")}
-//else{var ok=window.showModalDialog("InnerInstructNew.csp?DocId="+docid+"&ClassName="+docclass+"&sessionid="+sessionid,"","center:yes;status:no;dialogHeight:600px;dialogWidth:600px;resizable:yes;")}
 var ok=window.showModalDialog("InnerInstructNew.csp?DocId="+docid+"&ClassName="+docclass+"&sessionid="+sessionid,"","center:yes;status:no;dialogHeight:600px;dialogWidth:600px;resizable:yes;");
 #server(Store.Action.KillTempAddress())#
 }
@@ -102,12 +168,12 @@ function ShowKontr(KontrID){
 }
 
 function SetSelectData(SelectObjID,newData){
-	if(document.getElementById(SelectObjID).options.length==2){
-		document.getElementById(SelectObjID).options.length=3
-		}
-	document.getElementById(SelectObjID).options(2).value=newData.split("~")[0];
-	document.getElementById(SelectObjID).options(2).text=newData.split("~")[1];
-	document.getElementById(SelectObjID).selectedIndex=2;
+	if($g(SelectObjID).options.length==2){
+		$g(SelectObjID).options.length=3
+	}
+	$g(SelectObjID).options(2).value=newData.split("~")[0];
+	$g(SelectObjID).options(2).text=newData.split("~")[1];
+	$g(SelectObjID).selectedIndex=2;
 }
 
 // Выбрать контрагента
@@ -173,7 +239,8 @@ var answer=window.showModalDialog("ChangeGoods.csp?DocId="+DocId,"","center:yes;
 <td align="right" width=100%>
 </table>
 <fieldset><legend>Инструкции</legend>
-<table border=1><b>
+
+<table border=1 id="tblInstructions">
 <script language="cache" runat="Server">
 s SignCode(-1)="&#9650;"
 s SignCode(1)="&#9660;"
@@ -202,14 +269,15 @@ i order="Kontr" s KontrOrder=dir*-1,KontrSign=SignCode(dir)
 i order="opername" s OperOrder=dir*-1,OperSign=SignCode(dir)
 i order="State" s StateOrder=dir*-1,StateSign=SignCode(dir)
 i order="dostavka" s TaskOrder=dir*-1,TaskSign=SignCode(dir)
-w "<tr>"
-w "<td><b><a href=""emplight.csp?order=NameRash&dir="_NumberOrder_""">Номер "_NumberSign_"</a>"
-w "<td><b><a href=""emplight.csp?order=InstDateHorolog&dir="_DateOrder_""">Дата "_DateSign_"</a>"
-w "<td><b><a href=""emplight.csp?order=Kontr&dir="_KontrOrder_""">Контрагент "_KontrSign_"</a>"
-w "<td><b><a href=""emplight.csp?order=opername&dir="_OperOrder_""">Оператор "_OperSign_"</a>"
-w "<td><b><a href=""emplight.csp?order=State&dir="_StateOrder_""">Состояние "_StateSign_"</a>"
-w "<td><b><a href=""emplight.csp?order=dostavka&dir="_TaskOrder_""">Задача<br>(Способ<br>отправки)</b> "_TaskSign_"</a>"
-w "<td>"
+w "<thead><tr>"
+w "<th><a href=""emplight.csp?order=NameRash&dir=",NumberOrder,""">Номер ",NumberSign,"</a></th>"
+w "<th><a href=""emplight.csp?order=InstDateHorolog&dir=",DateOrder,""">Дата ",DateSign,"</a></th>"
+w "<th><a href=""emplight.csp?order=Kontr&dir=",KontrOrder,""">Контрагент ",KontrSign,"</a></th>"
+w "<th><a href=""emplight.csp?order=opername&dir=",OperOrder,""">Оператор ",OperSign,"</a></th>"
+w "<th><a href=""emplight.csp?order=State&dir=",StateOrder,""">Состояние ",StateSign,"</a></th>"
+w "<th><a href=""emplight.csp?order=dostavka&dir=",TaskOrder,""">Задача<br>(Способ<br>отправки) ",TaskSign,"</a></th>"
+w "<th style='font-weight:normal;font-size:12px;font-family:Arial'>Действия</th>"
+w "</thead></tbody>"
  s sess=%request.Get("sessionid")
  s depot=$G(%session.Data("depot"))
  s userid=$G(%session.Data("user"))
@@ -219,85 +287,14 @@ w "<td>"
  i newstat'="" d
  . s ok=##class(Operation.InstrActions).changestat(instr,newstat)
  . i '+ok d
- . . w "<script language=""javascript"">alert('"_ok_"')</script"_">"
+ . . w "<script language=""javascript"">alert('",ok,"')</script",">"
  
- s sql="select Oper->cl as mustbe,ID as DocId,Name,Kontr as KontrID,Kontr->Name as Kontr,User1->Name as User1,InstDate as InstDateHorolog"
- s sql=sql_",%external(State) as State,dostavka->Name as dostavka,showcolor as showcolor,Oper as oper,Oper->Name as opername,postnumber,postdata,State as StateNumb,RashOplatType->Name as RashOplatTypeName"
- s sql=sql_" from Operation.Instructions where State>1 and State<9 and Depot1="_depot
- i ($P(kontr,"~",1)'="all")&($P(kontr,"~",1)'="") s sql=sql_" and Kontr="_$P(kontr,"~",1)
- i ($P(instrtype,"~",1)'="all")&($P(instrtype,"~",1)'="") s sql=sql_" and Oper="_$P(instrtype,"~",1)
- s rs=##class(%Library.ResultSet).%New()
+ d ..wDocuments(depot)
  
+  
  
- s ok=rs.Prepare(sql)
- i '+ok q "Ошибка при формировании списка инструкций"
- s ok=rs.Execute()
- i '+ok q "Ошибка при формировании списка инструкций"
- while rs.Next(){
- 	f i="mustbe","DocId","Name","KontrID","Kontr","User1","InstDateHorolog","State","dostavka","showcolor","oper","opername","postnumber","postdata","StateNumb","RashOplatTypeName" d
-	. s @i=$G(rs.Data(i))
-	
-	s InstDate=$ZD(InstDateHorolog,4)
- 	s innerbutton=""
- 	s mustbe=$P($G(mustbe),",",1),NameRash=""
- 	s (innerdoc,DocumentClass)=""
- 	// найдем документы созданные от текущей инструкции
- 	i mustbe="Docs.Rash" s AdditionalFields=",opl->Name as RashOplatTypeName"
- 	e  s AdditionalFields=""
- 	s sqlDocsRash="select id as childdoc,Name as NameRash"_AdditionalFields_" from "_mustbe_" where ISNULL(Source,'')='"_DocId_"'"
- 	s rs2=##class(%Library.ResultSet).%New()
- 	s ok=rs2.Prepare(sqlDocsRash)
- 	i '+ok w "<tr><td colspan=7>Ошибка при формировании списка инструкций" CONTINUE
- 	s ok=rs2.Execute()
- 	i '+ok w "<tr><td colspan=7>Ошибка при формировании списка инструкций" CONTINUE
-	while rs2.Next()
-		{
-		s childdoc=$G(rs2.Data("childdoc"))
-		s NameRash=$G(rs2.Data("NameRash"))
-		s RashOplatTypeName=$G(rs2.Data("RashOplatTypeName"))
- 		// есть документы  от инструкции, посмотрим есть ли внутренние инструкции от этих потомков
- 		&sql(select id,DocumentClass,Name,stat into :innerdoc,:DocumentClass,:NameInner,:stat from Docs.Super where Source=:childdoc)
- 		i SQLCODE 
- 			{
- 			s innerbutton="<img src=""images/new.gif"" onmouseover=""this.src='images/Onnew.gif'"" onmouseout=""this.src='images/new.gif'""  onclick=""create('"_mustbe_"','"_childdoc_"')"" alt=""Создать внутреннюю инструкцию"" >"
- 			//s innerbutton=innerbutton_"<img src=""images/change.gif"" onmouseover=""this.src='images/Onchange.gif'"" onmouseout=""this.src='images/change.gif'""  onclick=""ChangeFn('"_childdoc_"')"" alt=""Заменить товар в расходной накладной"" >"
- 			}
- 		else 
- 			{
- 			s innerbutton="<img src=""images/edit.gif"" onmouseover=""this.src='images/Onedit.gif'"" onmouseout=""this.src='images/edit.gif'""  onclick=""lookinnerinstr('"_innerdoc_"@"_DocumentClass_"')"" alt=""Редактировать внутреннюю инструкцию"" >"
- 			s innerbutton=innerbutton_"<img src=""images/print.gif"" onmouseover=""this.src='images/Onprint.gif'"" onmouseout=""this.src='images/print.gif'""  onclick=""prnt('"_innerdoc_"@"_DocumentClass_"')"" alt=""Распечатать внутреннюю инструкцию"" >"
- 			i stat=1 s innerbutton=innerbutton_"<img src=""images/ok.gif"" onmouseover=""this.src='images/Onok.gif'"" onmouseout=""this.src='images/ok.gif'""  onclick=""savestore(this.Tag,'"_NameInner_"')"" alt=""Обработать документ"" Tag="""_innerdoc_""">"
- 			e  s innerbutton=innerbutton_"<img src=""images/Disabledok.gif"" alt=""Документ уже обработан"" style='cursor:no-drop'>"
- 			}
-		}
- 	s:StateNumb=8 innerbutton=innerbutton_"<img src=""images/post.gif"" onmouseover=""this.src='images/Onpost.gif'"" onmouseout=""this.src='images/post.gif'""  onclick=""post('"_DocId_"')"" alt=""Указать реквизиты почтового документа"" >"
- 	s style=""
- 	i showcolor'="" s style="style=""color:"_showcolor_""""
- 	s tr="<tr  onmouseover=""this.style.backgroundColor='#7799bb'"" onmouseout=""this.style.backgroundColor='#ffffff'"" "_style_">"
- 	s first="<td>"_Name_" ("_NameRash_") "_RashOplatTypeName_"<td>"_InstDate_"<td style='cursor:hand' onclick=""ShowKontr('"_KontrID_"')"">"_Kontr_"<td>"_User1_"<td id=""Instr"_DocId_"Stat"">"_State
- 	i oper'=10 s dostavka=opername
-    s second="<td><nobr>"_"<img src=""images/ok.gif"" onmouseover=""this.src='images/Onok.gif'"" onmouseout=""this.src='images/ok.gif'""  onclick=""chstat(this.Tag,'"_innerdoc_"')"" alt=""Изменить статус"" Tag="""_DocId_"""><img src=""images/print.gif"" onmouseover=""this.src='images/Onprint.gif'"" onmouseout=""this.src='images/print.gif'""  onclick=""prnt('"_$G(childdoc)_"@"_$G(mustbe)_"')"" alt=""Распечатать накладную"" Tag="""">"
- 	i $i(RowsCount)
- 	s GroupPriznak=@order_RowsCount
- 	s temp(GroupPriznak,"tr")=tr
- 	s temp(GroupPriznak,"first")=first
- 	s temp(GroupPriznak,"dostavka")=dostavka
- 	s temp(GroupPriznak,"second")=second
- 	s temp(GroupPriznak,"innerbutton")=innerbutton
- }
- s i="" f  s i=$O(temp(i),dir) q:i=""  d
- . s tr=temp(i,"tr")
- . s first=temp(i,"first")
- . s dostavka=temp(i,"dostavka")
- . s second=temp(i,"second")
- . s innerbutton=temp(i,"innerbutton")
- . w tr,!
- . w first,!
- . w "<td>"_dostavka,!
- . w second_innerbutton,!
- . w "</nobr>",!
- . w "</tr>",!
 </script>
+</tbody>
 </table>
 </fieldset>
 <!--
@@ -306,5 +303,25 @@ w "<td>"
 <span id="joi"></span>
 </fieldset>
 -->
+<div id="debug"></div>
+<script type="text/javascript">
+	$bind(window,"load",function(){
+		var fr=function(o){ //ищем строку
+			var tr=null;
+			for (;o.tagName!=="TABLE";o=o.parentElement){
+				if (o.parentElement.tagName==="THEAD") break;
+				if (o.tagName==="TR"){ tr=o; break; }
+			}
+			return tr;
+		}
+		$bind($g("tblInstructions"),"mouseover",function(e){
+			if (!e) e=window.event; var tr=fr(e.srcElement); if (tr) tr.className="hover";
+		});
+		$bind($g("tblInstructions"),"mouseout",function(e){
+			if (!e) e=window.event; var tr=fr(e.srcElement); if (tr) tr.className="";
+		});
+	});
+</script>
+
 </body>
 </html>

@@ -5,12 +5,13 @@
  . s %session=%session.GetSession(sessionid)
  e  s sessionid=%session.SessionId
  s login=$G(%session.Data("user"))
- i '+login s %response.ServerSideRedirect="norights.csp" 
+ //i '+login s %response.ServerSideRedirect="norights.csp" 
 Quit 1
 </script>
 <script language="cache" runat="server">
  s GarantId=%request.Get("GarantId")
  s GarantName=%request.Get("GarantName")
+ s DeleteStyleDisplay="none"
  
  if (GarantId="")&&(GarantName'="")
  {
@@ -72,8 +73,13 @@ Quit 1
 		 
 		 if $ISOBJECT(GarantObj.Act) s Act="<a href=""print.csp?id="_GarantObj.Act.%Id()_"&class=Docs.Act"">"_GarantObj.Act.Name_"</a>"
 		 if $ISOBJECT(GarantObj.Utiliz) s Utiliz="<a href=""print.csp?id="_GarantObj.Utiliz.%Id()_"&class=Docs.Utiliz"">"_GarantObj.Utiliz.Name_"</a>"
+		 
+		 //Включаем видимость кнопки УДАЛИТЬ если нет ни заявок ни отчётов
+		 if '$ISOBJECT(GarantObj.remont1),'(GarantObj.remont1otch) s DeleteStyleDisplay="inline"
 	 }
  }
+ 
+ 
 </script>
 <html>
 <head>
@@ -81,6 +87,7 @@ Quit 1
 <link href="style.css" type=text/css rel=stylesheet>
 <script language="jscript" src="common.js"></script>
 <script language="jscript">
+
 var DocId="#($G(ID))#";
 var sessionid="#(sessionid)#";
 
@@ -136,6 +143,21 @@ function NameKeyPress()
 	if(cbNumbersEqual.checked)serial.value = Name.value;
 }
 
+// Удалить эту запись
+function Delete()
+{
+	if(!window.confirm("Вы действительно ходите удалить этот серийный номер?","Удаление серийного номера"))return;
+	var ok = #server(Common.Dictionary2.Delete(DocId))#
+	if(ok=="1")
+	{
+		alert("Запись успешно удалена.");
+		window.close();
+	}
+	else
+	{
+		alert(ok);
+	}
+}
 </script>
 <style>
 .LeftTop{border-left : 1 solid black;border-top : 1 solid black;}
@@ -207,14 +229,24 @@ SELECT{width:170px}
 	<td class=RightBottom colspan=2>&nbsp;</td>
 	<td class=RightBottom>4 отчет</td>
 	<td class=RightBottom>#($G(remont4otch))#&nbsp;</td>
-<tr><td colspan=4>Примечание к гарантийному талону:<br> <textarea id="Comment" rows=4 cols=50>#($G(Comment))#</textarea><br><br>
+<tr><td colspan=4>Примечание к гарантийному талону:<br> <textarea id="Comment" rows=4 cols=80>#($G(Comment))#</textarea><br><br>
 <script language="cache" runat="server">
 w:$G(ClosedString)'="" "<tr><td colspan=4 class=RightBottom>Документ закрыт <i>"_ClosedString_"</i>"
 </script>
 </table>
-<center>
-<sklad:Button onclick="Save();" value="Сохранить"> 
-<sklad:Button onclick="windowclose();" value="Отмена">
-</center>
+
+<Table border=0 width="100%">
+<tr>
+	<td width="20%"></td>
+	<td width="60%" align="center">
+		<sklad:Button onclick="Save();" value="Сохранить" alt="Сохранить в базе результаты редактирования">
+		<sklad:Button onclick="windowclose();" value="Отмена" alt="Отменить все изменения и закрыть окно">
+	</td>
+	<td width="20%" align="right">
+		<sklad:Button onclick="Delete();" style="display:#(DeleteStyleDisplay)#" value="Удалить" alt="Удалить этот серийный номер">
+	</td>
+</tr>
+</table>
+
 </body>
 </html>

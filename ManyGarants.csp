@@ -14,6 +14,12 @@ var ClassName=argArr[1];
 
 function startFun()
 {
+	var model = PropTable.GetCellValue(1,6);
+	if (model=="")
+	{
+		alert("Укажите, пожалуйста, модель.");
+		return;
+	}
 	if(ReturnSpace(ItemID)==""){question="Создать запись?"}
 	else{question="Изменить запись?"}
 	if(!window.confirm(question))return false;
@@ -51,7 +57,7 @@ function load()
 <tr><td colspan=2>Примечание к гарантийному талону:<br> <textarea id="comment" rows=4 cols=50></textarea><br><br>
 <tr><td>Префикс номера гарантийного талона <td><input id="prefix" type=text>
 <tr><td>Начальная цифра <td><input id="startnumb" type=text> количество разрядов номера <input type=text id="leng" style="width:40">
-<tr><td colspan=2>Серийный и гарантийный номера идентичны <input type="checkbox" value="1" id="SerialAsGarant" style="border:none;width:15">
+<tr><td colspan=2>Серийный и гарантийный номера идентичны <input type="checkbox" value="1" id="SerialAsGarant" style="border:none;width:15" CHECKED>
 <tr><td>Количество гарантийных талонов <td><input id="koli4est" type=text value=1>
 </table>
 <center><br><sklad:Button value="Да" onclick="startFun();"><sklad:Button onclick="window.close()" value="Отмена"></center>

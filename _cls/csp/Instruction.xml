@@ -3,18 +3,8 @@
 <Class name="csp.Instruction">
 <Description>
 Создание/редактирование экземпляра инструкции</Description>
-<Super>csp.Instructions</Super>
+<Super>csp.Design</Super>
 <TimeCreated>62486,72362.437478</TimeCreated>
-
-<Method name="wPageHeader">
-<Description>
-write заголовок на странице</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[	Q ""
-]]></Implementation>
-</Method>
 
 <Method name="wTitle">
 <Description>
@@ -23,7 +13,8 @@ write заголовок страницы</Description>
 <FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
-	w "Склад2 :: Инструкция"
+	d ##super()
+	w "Инструкция"
 	Q ""
 ]]></Implementation>
 </Method>

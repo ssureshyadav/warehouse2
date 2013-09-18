@@ -414,7 +414,7 @@ e-mail</Description>
 Валюта расчётов</Description>
 <Type>%String</Type>
 <InitialExpression>"1"</InitialExpression>
-<Parameter name="DISPLAYLIST" value=",Руб.,у.е."/>
+<Parameter name="DISPLAYLIST" value=",Руб.,Дол. США"/>
 <Parameter name="VALUELIST" value=",1,2"/>
 </Property>
 
@@ -562,19 +562,19 @@ e-mail</Description>
 <Trigger name="UpdTrigger">
 <Description>
 Набор триггеров и методов для поддержки версии справочника</Description>
-<Code> d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")</Code>
+<Code> d ##class(Common.Common).IncreaseCurrentDictVersion("Common.Kontragent")</Code>
 <Event>UPDATE</Event>
 <Time>AFTER</Time>
 </Trigger>
 
 <Trigger name="InsTrigger">
-<Code> d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")</Code>
+<Code> d ##class(Common.Common).IncreaseCurrentDictVersion("Common.Kontragent")</Code>
 <Event>INSERT</Event>
 <Time>AFTER</Time>
 </Trigger>
 
 <Trigger name="DelTrigger">
-<Code> d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")</Code>
+<Code> d ##class(Common.Common).IncreaseCurrentDictVersion("Common.Kontragent")</Code>
 <Event>DELETE</Event>
 <Time>AFTER</Time>
 </Trigger>
@@ -585,7 +585,7 @@ e-mail</Description>
 <Private>1</Private>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
- d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")
+ d ##class(Common.Common).IncreaseCurrentDictVersion("Common.Kontragent")
  Quit $$$OK
 ]]></Implementation>
 </Method>
@@ -595,7 +595,11 @@ e-mail</Description>
 <Private>1</Private>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	if (insert)||(%this.%IsModified()) d ##class(Common.Common).IncreaseCurrentDictVersion("Goods.Goods")
+	if (insert)||(%this.%IsModified()) d ##class(Common.Common).IncreaseCurrentDictVersion("Common.Kontragent")
+	if (insert)
+	{
+		d ..SetGoodsBan(%this.%Id())
+	}
 	Quit $$$OK
 ]]></Implementation>
 </Method>
@@ -616,6 +620,31 @@ e-mail</Description>
  Do %code.WriteLine(" Set Data(""Valuelist"")=$G(Prop(PropertyName,""Valuelist""))")
  Do %code.WriteLine(" Quit $G(Prop(PropertyName))")
  Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="SetGoodsBan">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>KontragentId</FormalSpec>
+<Implementation><![CDATA[
+	s ^mtempArt("newkontr")=KontragentId
+	&sql(DECLARE gc CURSOR FOR
+		SELECT ID
+		INTO :GoodsId
+		FROM Goods.Goods
+		where AllowToSend=0
+	)
+		
+	&sql(open gc)
+	for  
+	{
+		&sql(fetch gc)
+		q:SQLCODE
+		d ##class(Goods.Goods).kbanAdd(GoodsId, KontragentId)
+	}
+	&sql(close gc)
+	
+	q
 ]]></Implementation>
 </Method>
 
@@ -805,92 +834,6 @@ e-mail</Description>
 <Value>Holding</Value>
 </Value>
 </Data>
-<Property name="Activity">
-</Property>
-<Property name="AdPhone">
-</Property>
-<Property name="Address">
-</Property>
-<Property name="AddressUr">
-</Property>
-<Property name="Agree">
-</Property>
-<Property name="Balance">
-</Property>
-<Property name="ChangeDate">
-</Property>
-<Property name="ChangeTime">
-</Property>
-<Property name="ChangeUser">
-</Property>
-<Property name="City">
-</Property>
-<Property name="CityCode">
-</Property>
-<Property name="CityUr">
-</Property>
-<Property name="Code">
-</Property>
-<Property name="Comment">
-</Property>
-<Property name="ContPers">
-</Property>
-<Property name="Currency">
-</Property>
-<Property name="Discount">
-</Property>
-<Property name="EMail">
-</Property>
-<Property name="Federal">
-</Property>
-<Property name="IsWe">
-</Property>
-<Property name="Koeff">
-</Property>
-<Property name="Manager">
-</Property>
-<Property name="NDSPayment">
-</Property>
-<Property name="Name">
-</Property>
-<Property name="NotifyEmails">
-</Property>
-<Property name="OtgruzPrincip">
-</Property>
-<Property name="OurCompany">
-</Property>
-<Property name="Password">
-</Property>
-<Property name="Phones">
-</Property>
-<Property name="Postalcode">
-</Property>
-<Property name="PostalcodeUr">
-</Property>
-<Property name="Property126">
-</Property>
-<Property name="Property127">
-</Property>
-<Property name="Property2506">
-</Property>
-<Property name="Property831">
-</Property>
-<Property name="Pseudonym">
-</Property>
-<Property name="Status">
-</Property>
-<Property name="WCalc">
-</Property>
-<Property name="bank">
-</Property>
-<Property name="chief">
-</Property>
-<Property name="fax">
-</Property>
-<Property name="glavbuh">
-</Property>
-<Property name="region2">
-</Property>
 </Storage>
 </Class>
 </Export>

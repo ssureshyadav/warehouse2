@@ -36,9 +36,7 @@ function myOnSubmitEventHandler(){
  return true
 }
 
-function prnt(){
-window.print();
-}
+
 
 function displayMenu(dd) {
 currentimg=dd.src;
@@ -78,6 +76,10 @@ if(isNaN(ok))alert(ok);
 else{window.close();}
 }
 
+function prnt(){
+window.print();
+}
+
 function printimg(curimg){
 window.open("PrintImage.csp?ImageSrc=GoodsImages"+curimg);
 }
@@ -95,7 +97,7 @@ window.open("PrintImage.csp?ImageSrc=GoodsImages"+curimg);
  q:gid=""
  s gobj=##class(Goods.Goods).%OpenId(gid)
  s images=gobj.Images
- w "<center><font size=+2>"_gobj.Name_"</font></center>"
+ w "<center><font size=+2>"_gobj.FullName_"</font></center>"
  &html<
 <form enctype="multipart/form-data" method="post" onsubmit="return(myOnSubmitEventHandler());">
 <input type="hidden" name="GoodsId" value="#(gid)#" >

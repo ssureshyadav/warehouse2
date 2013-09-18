@@ -113,6 +113,12 @@ function CheckActs()
 {
 	window.open("/csp/user/act.csp");
 }
+
+//перейти к инструменту "массовая рассылка писем"
+function SendSpam()
+{
+	window.location.href='SendSpam.csp';
+}
 </script>
 </head>
 <body onkeypress="Replace126(this)" onload="load();">
@@ -145,6 +151,7 @@ function CheckActs()
 <sklad:Button onclick="location.href='RequestsLog.csp'" value="Журнал доступа региональных СЦ">
 <sklad:Button onclick="ExportImages()" value="Экспорт изображений" alt="Выгрузить изображения товаров в указанную папку на сервере" ID="btnExportImages">
 <sklad:Button onclick="CheckActs()" value="Проверка актов" alt="Открыть страницу проверки актов">
+<sklad:Button onclick="SendSpam()" value="Проверка актов" alt="Массовая рассылка">
 </fieldset>
 <br>
 
@@ -156,6 +163,7 @@ function CheckActs()
  . s @Tunes@(where,i,"Value")=value
  . if i="innerkurs" &sql(update Store.Measures set Factor=:value where id=8)
  s Tunes=$NA(^Tunes)
+
  s boo="" f  s boo=$O(@Tunes@(boo)) q:boo=""  d
  . q:'+boo
  . w "<fieldset width=100%><legend>"_$G(@Tunes@(boo))_"</legend><table>"
@@ -164,7 +172,7 @@ function CheckActs()
  . . w "<tr><td>"_@Tunes@(boo,i,"Caption")_"</td>"
  . . w "<td>&nbsp;&nbsp;&nbsp;</td>"
  . . w "<td>"
- . . s str="<input type=""text"" value="""_CurrentValue_""" name="""_i_""" >"
+ . . s str="<input type=""text"" value="""_$ZCVT(CurrentValue,"O","HTML")_""" name="""_i_""" >"
  . . d:(i="DefaultPoluh")
  . . . s str="<select name=""DefaultPoluh"" id=""ChooseKontragent"" onchange=""ChooseKontragentFunc()"">"
  . . . s str=str_"<option value=""0""> </option>"
@@ -185,8 +193,8 @@ function CheckActs()
  . . . s perepis=$S(CurrentValue="perepis":"SELECTED",1:"")
  . . . s skip=$S(CurrentValue="skip":"SELECTED",1:"")
  . . . s str="<select name="""_i_"""><option value=""perepis"" "_perepis_">Переписать последний ремонт<option value=""skip"" "_skip_">Не записывать</select>"
- . . d:(i="NotifyText")
- . . . s str="<textarea name="""_i_""" ondblclick='ShowBigTextWindow(this)'>"_CurrentValue_"</textarea>"
+ . . if (i="NotifyText")||(i="OurName") d
+ . . . s str="<textarea rows=""4"" name="""_i_""" ondblclick='ShowBigTextWindow(this)'>"_CurrentValue_"</textarea>"
  . . //d:(i="AutoTemplate")
  . . //. s str="<select id=""AutoTemplate"" name=""AutoTemplate"" style=""behavior:url('#default#download');""></select>"
  . . w str,!
@@ -197,6 +205,7 @@ function CheckActs()
 <br>
 <center><sklad:Button onclick="Tunes.submit()" value="Сохранить изменения"></center>
 </form>
-<a href="MainRequest.htm" target=_blank>Основные требования к системе</a>
-</body>
+<a href="MainRequest.htm" target=_blank>Основные требования к системе</a><br><br>
+Ваш браузер <div style="display:inline;border:1 solid gray;padding:5px">#(%request.UserAgent)#</div>
+</body> 
 </html>

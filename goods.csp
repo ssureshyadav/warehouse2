@@ -24,7 +24,6 @@
  Q ""
 
 </script><script language="Cache" method="StopGroupSend" arguments="GroupId:%String,AllowToSendValue:%String" returntype="%String">
- s ^mtempArt=GroupId
  
  //запретить отправку этой группы контрагентам
  if $G(GroupId)="" q "Укажите, пожалуйста, товарную группу"
@@ -34,62 +33,30 @@
  
  &sql( UPDATE Goods.Goods SET AllowToSend=:AllowToSendValue
 	WHERE ID IN (SELECT Goods FROM Goods.GoodsGroup WHERE Groups=:GroupId) )
- If SQLCODE {
-	 	Q "Извините, произошла ошибка при установки разрешения на отправку."
-	 			_" Сообщите разработчику csp.goods:StopGroupSend. "
-	 			_SQLCODE
- }
- 
- #; выставляем запрет на выбор контрагентам
- s goods="",sc="", tsc=1
- 
- s kontrs="" ;если снимаем бан
- if ban { ;если ставим бан
- 	#; Чтобы не мучаться по каждому контрагенту
- 	#; составляем их полный список
-	 &sql(declare kontrs cursor for 
-	 	select ID 
-	 	into :KontrId
-	 	from Common.Kontragent)
-	 &sql(open kontrs)
-	 
-	 f { &sql(fetch kontrs) q:SQLCODE  
-	   s kontrs=kontrs_KontrId_","
-	 }
-	 
-	 &sql(close kontrs)
-	 s kontrs=$E(kontrs,1,$L(kontrs)-1)
- }
  
  #; для каждого товара в группе
  &sql(Declare ggrs Cursor For 
  	Select Goods Into :goods 
  	FROM Goods.GoodsGroup 
  	WHERE Groups=:GroupId
- ) &sql(Open ggrs)
-  
- TSTART
- 
- for { &sql(FETCH ggrs) Q:SQLCODE'=0
-
-	s g= ##class(Goods.Goods).%OpenId(goods,,.sc) Q:'+sc
-	#; устанавливаем весь список
-	s g.kban=kontrs, sc=g.%Save() Q:'+sc
-
- } &sql(Close ggrs)
- 
- if 'sc {
-		TROLLBACK
-		Q "Ошибка при установке разрешений контрагентам на товар "_goods_ " из группы "_GroupId 
- }
- 
- TCOMMIT
-
+ ) 
+ &sql(Open ggrs)
+ for { 
+ 	&sql(FETCH ggrs) Q:SQLCODE'=0
+ 	d ##class(Docs.Action).BanGoodsForAll(goods, ban)
+ } 
+ &sql(Close ggrs)
  
  Quit 1
 </script><html XMLNS:SKLADz XMLNS:SKLAD2>
 <IMPORT NAMESPACE="SKLADz" IMPLEMENTATION="htc/treeview.htc">
 <head><title>Склад :: Товары</title>
+	<link href="js/css/cupertino/jquery-ui-1.10.3.custom.css" rel="stylesheet">
+	<script src="js/js/jquery-1.9.1.js"></script>
+	<script src="js/js/jquery-ui-1.10.3.custom.js"></script>
+	<script src="js/jquery.hotkeys.js"></script>
+
+    
 <link href="style.css" type="text/css" rel="stylesheet" />
 <style type="text/css">
 html {margin:0px;padding:0px;}
@@ -105,13 +72,21 @@ body {margin:0px;padding:2px 1px;}
 .actions a:visited {}
 label {color:#333;}
 
+    .ui-autocomplete {
+        max-height: 60px;
+        overflow-y: auto;
+        border: 1 solid black;
+        /* prevent horizontal scrollbar */
+        overflow-x: hidden;
+    }
 </style></head><body>
 <IE:DOWNLOAD id="downloader" STYLE="behavior:url(#default#download)" />
-<table class="pageTitle" style=""><tr>
-<td style="width:20px;"><img alt="Обновить раздел" src="images/refresh.png" onclick="window.location.reload()"></td>
-<td style="text-indent:40px;font:16px Arial;" >Товары</td>
+<br><br><TABLE cellSpacing=0 width="100%" celpadding="0">
+<TR>
+<td width=10%><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
+<TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" ><strong>Товары</strong></TD>
 <td style="width:80px;text-align:right;font-size:11px;color: #6e6e6e;" title="Текущая версия справочника товаров">v #(GoodsGoodsVersion)#</td>
-</table>
+</TABLE><br><br>
 <div class="actions">
 		<a href="PriceGroups.csp">Ценовые группы товаров</a>
 		<a href="Reserves2.csp">Резервы</a>
@@ -121,19 +96,26 @@ label {color:#333;}
 		<a href="csp.GoodsRights.cls" title="Страница позволяющая установить ограничение в использовании запчастей контрагентами в заявках">Ограничение использования запчастей контрагентами</a>
 </div>
 
-<table style="width:100%"><tr>
+<table style="width:100%" id="TopTable" ><tr>
  <td style="vertical-align:top;width:50%"> 
-  <label for="Catalogues" >Классификатор:</label>
+   <table cellpadding=3 cellspacing=0><tr><td>
+  <label for="Catalogues" >Классификатор:</label><br>
   <select id="Catalogues" onchange="LoadTree()">
-  <server>
-  s depot=$G(%session.Data("depot"))
-  s commonGroups=$G(%session.Data("commongroups"))
-  d ..wCatalogueOptions(commonGroups,depot)
-  </server>
-  
+	  <server>
+	  s depot=$G(%session.Data("depot"))
+	  s commonGroups=$G(%session.Data("commongroups"))
+	  d ..wCatalogueOptions(commonGroups,depot)
+	  </server>
   </select>
-  <br/>
-  <SKLADz:treeview id="GroupsTree" width=300 height=160 ImagesPath="#(%session.Data("ImagesPath"))#" onDownloadCmpl="GroupsTreeDnldCmpl()" />
+  <td valign="bottom">
+  	Поиск<br>
+  	<input id="tags" />
+<tr>
+  	<td valign="top">
+  		<SKLADz:treeview id="GroupsTree" width=300 height=160 ImagesPath="#(%session.Data("ImagesPath"))#" onDownloadCmpl="GroupsTreeDnldCmpl()" /> 
+  	<td valign="top">
+  		&nbsp;
+  </table>
   <table width="350"><tr><td>
   <sklad:LittleButton name="new" id="newgrup" onclick="addGroup(0)" alt="Новая группа">
   <sklad:LittleButton name="new+" id="newSubgrup" onclick="addGroup(1)" alt="Новая подгруппа">
@@ -149,17 +131,28 @@ label {color:#333;}
   <sklad:LittleButton name="del" id="delgrup" onclick="delGroup()" alt="Удалить группу"><br>
   </td></tr></table>
  </td>
- <td valign=top width=50%>
-  <fieldset style="width:200;"><legend id="TovarName"></legend>
-  <SKLADz:treeview id="PropsTree" width=300 height=160 ShowImages=0 ImagesPath="#(%session.Data("ImagesPath"))#" />
-  </fieldset>
-  <table width="350"><tr><td>
-  <sklad:LittleButton name="new" id="newprop" onclick="AddProp(0)" alt="Новое свойство">
-  <sklad:LittleButton name="new+" id="newSubprop" onclick="AddProp(1)" alt="Новое свойство в существующей группе">
-  </td><td>
-  <sklad:LittleButton name="del" id="delprop" onclick="DelDopProp();" alt="Удалить свойство">
-  </td></tr>
-  </table>
+ <td valign=top width=50% valign="middle" align="center">
+<!-- диалог установки новой цены -->
+<div id="NewGoodsPriceDialog" title="Установка новой цены" style="display:none">
+	<Table>
+		<tr><td colspan=2 id="NewGoodsPriceName">
+		</tr>
+		<tr>
+			<Td>Цена
+			<td><input type="text" size=5 id="GoodsPriceValue">
+		</tr>
+		<tr>
+			<td>Тип цены
+			<td><select id="GoodsPriceType">#(##class(Docs.Action2).GetClassValuesOptions("1","Common.Dictionary6",,,0))#</select>
+		</tr>
+		<tr>
+			<td colspan=2 aligh="right">
+				<button onclick="SaveGoodsPrice()">Сохранить</button>
+				<button onclick="CloseGoodsPriceDialog()">Отмена</button>
+				
+		</tr>
+	</table>
+</div>
   </td>
 </tr>
 <tr>
@@ -193,6 +186,7 @@ label {color:#333;}
   <sklad:LittleButton name="history" id="buf" onclick="tovbuf()" alt="Товары в буфере обмена">
 </CSP:IF>
   <sklad:LittleButton name="price" id="price" onclick="tovprice()" alt="Цены товара">
+  <sklad:LittleButton name="pricePlus" id="price2" onclick="OpenGoodsPriceDialog()" alt="Установить цену товара">
 <CSP:IF CONDITION="Access9func=1">
   <sklad:LittleButton name="goinside" id="btnMuiltipleEdit" onclick="fnMuiltipleEdit()" alt="Редактировать список товаров">
 </CSP:IF>
@@ -213,25 +207,29 @@ label {color:#333;}
 </tr>
 </table>
 <script language="jscript" src="common.js"></script>
+<script language="javascript" type="text/javascript" src="js/pages/goods.js"></script>
 <script language="jscript">
-var $=function(id){return document.getElementById(id);}
-var $bind=("v"=="\v")?function(o,e,h){o.attachEvent("on"+e,h);}:function(o,e,h){o.addEventListener(e,h,false);}
+//var $=function(id){ return document.getElementById(id); }
 
 var depot="#($G(%session.Data("depot")))#"
 ;var commongroups="#($G(%session.Data("commongroups")))#"
-;var sessionid="#(%session.SessionId)#";
+var sessionid="#(%session.SessionId)#";
 var SelectedGroupCode="";
 var GoodsListView="LV";  //id элемента ListView с товарами
 var ColCode="";
 var where="";
+var CurrentDate = "#($ZD($H,4))#";
 
 function putCatalogue(text){
 addOptions(text,"Catalogues");
 LoadTree();
 }
 
-function LoadTree(){
-GroupsTree.DownLoad('Data.csp?class=Goods.Group&fields=Parent,Code,Name,ID&params="'+#(%session.Data("depot"))#+'","'+Catalogues.value+'"')	
+function LoadTree()
+{
+	var CurrentCatalogueId = $("#Catalogues").val();
+	GroupsTree.DownLoad('Data.csp?class=Goods.Group&fields=Parent,Code,Name,ID&params="'+#(%session.Data("depot"))#+'","'+CurrentCatalogueId+'"');
+	$( "#tags" ).autocomplete( "option", "source", "JQGoods.csp?Command=Groups&Cat="+CurrentCatalogueId );
 }
 
 //Показать товары в ListView
@@ -247,13 +245,12 @@ LV.startDownload('Data.csp?class=Goods.GoodsGroup&fields=Goods->ID,'+fields+"&wh
 }
 function ShowTovars1(text){
 ListViewAddItems(GoodsListView,text);
-LoadPropTree();
+
 //wind.close();
 }
 
 //Обработка клика на ListView
 function LVItemClick(Item){
-LoadPropTree();
 }
 
 //Обработка клика на узле дерева товарных групп
@@ -271,13 +268,6 @@ LVAddColumns(text,GoodsListView);
 ShowTovars();
 }
 
-//Заполнить дерево дополнительных свойств товара
-function LoadPropTree(){
-TovarName.innerText=SelectedItemProperty(GoodsListView,'Text')
-Goods=SelectedItemProperty(GoodsListView,'Tag')
-Group=GroupsTree.NodeCode;
-LoadPropTree2("PropsTree",Goods,Group,Catalogues.value)
-}
 
 //Добавить группу
 function addGroup(Sub){
@@ -302,32 +292,6 @@ if(ok==false)return false;
 ok=#server(Goods.GroupAction.DelGroup(Catalogues.value,Code,GroupId))#
 if (ok!=1){alert(ok);return false;}
 LoadTree();
-}
-
-//Добавить свойство к дереву дополнительных свойств
-function AddProp(Sub){
-PropName=window.showModalDialog("AddGoodsProp.csp","Наименование свойства","cener:yes;status:no;dialogHeight:200px")
-if(PropName==null)return false;
-Code=PropsTree.NodeCode;
-if((Sub==1)&(Code=="")){alert("Не указано свойство-родитель");return false;}
-  if(window.confirm("Общее свойство")){GroupCode=""}
-  else{
-     GroupCode=GroupsTree.NodeCode;
-     if(GroupCode==""){alert("Не выбрана группа");return false;}
-  }
-ok=#server(Goods.GoodsAction.CreateProp(Catalogues.value,GroupCode,PropName,Code,Sub))#
-if (ok==1){LoadPropTree();}
-else {alert(ok);}
-}
-
-//Удалить дополнительное свойство
-function DelDopProp(){
-	ParamID=PropsTree.NodeID;
-	if(ParamID=="")return false;
-	if(!window.confirm("Внимание!\nУдаление свойства приведёт к потере данных хранящихся в этом свойстве у ВСЕХ товаров склада #(%session.Data("depotName"))#. \nВы хотите удалить?"))return false;
-	ok=#server(Goods.GoodsAction.DeleteGoodsParam(ParamID))#
-	if (ok==1){LoadPropTree();}
-	else {alert(ok);}
 }
 
 //Создать основное свойство
@@ -372,19 +336,21 @@ function addTovar(Goods,CspFile)
 }
 
 //Удалить товар
-function DelTovar(){
-GoodsId=SelectedItemProperty(GoodsListView,"Tag")
-if(GoodsId==""){alert("Не выбран товар");return false;}
-if(!window.confirm("Удалить "+document.getElementById(GoodsListView).SelectedItem+"?"))return false;
-ok=#server(Goods.GoodsAction.DeleteGoods(GoodsId))#
-if(ok==1){ShowTovars()}
-else{alert(ok)}
+function DelTovar()
+{
+	GoodsId=SelectedItemProperty(GoodsListView,"Tag")
+	if(GoodsId==""){alert("Не выбран товар");return false;}
+	if(!window.confirm("Удалить "+document.getElementById(GoodsListView).SelectedItem+"?"))return false;
+	ok=#server(Goods.GoodsAction.DeleteGoods(GoodsId))#
+	if(ok==1){ShowTovars()}
+	else{alert(ok)}
 }
 
 //Редактировать товар
-function editTovar(){
-GoodsId=SelectedItemProperty(GoodsListView,'Tag');
-addTovar(GoodsId,"AddTovar.csp");
+function editTovar()
+{
+	GoodsId=SelectedItemProperty(GoodsListView,'Tag');
+	addTovar(GoodsId,"AddTovar.csp");
 }
 
 //Редактировать товар в новой форме
@@ -399,7 +365,11 @@ function OpenCard(){
 GoodsId=SelectedItemProperty(GoodsListView,"Tag");
 GoodsName=SelectedItemProperty(GoodsListView,'Text');
 if(GoodsId=="")return
-ok=window.showModalDialog("GoodsCard.csp?GoodsId="+GoodsId+"&groupspath="+GroupsTree.ParentNames,GoodsId+InnerSplitter+GoodsName,"center:yes;status:no;dialogHeight:600px;dialogWidth:650px;resizable:yes")
+
+ok=window.showModelessDialog("GoodsCard.csp?GoodsId="+GoodsId+"&groupspath="+GroupsTree.ParentNames,GoodsId+InnerSplitter+GoodsName,"center:yes;status:no;dialogHeight:600px;dialogWidth:"+($(document).width())+"px;dialogLeft:0;resizable:yes");
+
+
+
 if(ok==1){ShowTovars()}
 }
 
@@ -436,15 +406,33 @@ if(isNaN(ok)){alert(ok)}
 else{ShowTovars();}
 }
 
-function getselected(){
-textString=""
-count=LV.ListItems.Count;
+//получить ID и (опционально) текст выбранных строк
+function getselected(Text)
+{
+	var textString=""
+	var count=LV.ListItems.Count;
+	var subitemsCount=LV.ListItems.Item(1).ListSubItems.Count;
+	var SubItemsString="";	//текст в SubItems
+	
 	for (i = 1; i <= count; i++){
 	string = "";
-	if(LV.ListItems.Item(i).selected){
-	string=LV.ListItems.Item(i).Tag;
-	textString=textString+string+InnerSplitter;
-}}
+	if(LV.ListItems.Item(i).selected)
+	{
+		SubItemsString = "";
+		
+		
+		if (Text && (subitemsCount>1))
+		{
+			for (z = 1; z <= subitemsCount; z++)
+			{
+				SubItemsString = SubItemsString + LV.ListItems.Item(i).ListSubItems.Item(z).Text+InnerSplitter;
+			}
+		}
+
+		
+		string=LV.ListItems.Item(i).Tag;
+		textString=textString+string+InnerSplitter + SubItemsString;
+	}}
 return textString;
 }
 
@@ -453,95 +441,15 @@ function tovbuf(){
 window.showModalDialog("tovbuf.csp","","center:yes;status:no;dialogHeight:430px;dialogWidth:700px;resizable:yes")
 }
 
-//Открыть окно с ценами товара
-function tovprice(){
-var goodsid=SelectedItemProperty(GoodsListView,"Tag");
-if(goodsid=="")return
-window.showModalDialog("tovprice.csp?goodsid="+goodsid,"","center:yes;status:no;dialogHeight:520px;dialogWidth:700px;resizable:yes")
-}
+$(document).ready(function () {
+	
+	$("#GoodsPriceValue").bind('keydown', 'return',function (evt){ SaveGoodsPrice(); return false; });
+    $("#GoodsPriceValue").bind('keydown', 'esc',function (evt){ CloseGoodsPriceDialog(); return false; });
 
-//очистить группу
-function cleargrup(){
-if(window.confirm("Вы уверены?")){
-	var GroupId=GroupsTree.NodeID;
-	var ok=#server(Goods.GoodsAction.cleargrup(GroupId))#;
-	if(isNaN(ok)){alert(ok);}
-	else{ShowTovars();}
-}
-}
- 
-//вставить в группу все бесхозные товары
-function fillgrup(){
-	var GroupId=GroupsTree.NodeID;
-	var ok=#server(Goods.GoodsAction.fillgrup(GroupId))#;
-	if(isNaN(ok)){alert(ok);}
-	else{ShowTovars();}	
-}
-
-// распечатать прайслист
-function PrintPriceFunc(Suffix){
-	var GroupCode=GroupsTree.NodeCode;
-	if(GroupCode==""){alert("Выберете пожалуйста товарную группу");return;}
-	var CatalogueID=Catalogues.value;
-	var GroupName=GroupsTree.NodeCaption;
-	var url = "pricelist"+Suffix+".csp?GroupCode="+GroupCode+"&CatalogueID="+CatalogueID+"&GroupName="+GroupName+"&sessionid="+sessionid;
-	window.open(url);
-}
-
-function EditGroupNameFn()
-{
-	var GroupId=GroupsTree.NodeID;
-	var GroupCode=GroupsTree.NodeCode;
-	if(GroupCode==""){alert("Выберете пожалуйста товарную группу");return;}
-	var NewName=window.prompt("Введите новое название группы",GroupsTree.NodeCaption);
-	if(!NewName)return;
-	if(NewName==""){alert("Пустные имена группа не допустимы.");return false;}
-	var ok=#server(Goods.GroupAction.RenameGroup(GroupId,NewName))#
-	if(isNaN(ok)){alert(ok)}
-	else{LoadTree();SelectedGroupCode=GroupCode;}
-}
-
-// функция после полной загрузки дерева товарных групп
-function GroupsTreeDnldCmpl()
-{
-	GroupsTree.SelectedItem=SelectedGroupCode;
-}
-
-/// Вывести остатки
-function PrintStorageFn()
-{
-	var GroupCode=GroupsTree.NodeCode;
-	if(GroupCode==""){alert("Выберете пожалуйста товарную группу");return;}
-	var CatalogueID=Catalogues.value;
-	var GroupName=GroupsTree.NodeCaption;
-	window.open("screen/OstatkiExcel.csp?excel=1&GroupCode="+GroupCode+"&CatalogueID="+CatalogueID+"&GroupName="+GroupName)	
-}
-
-function KeyPress(Obj){
-var KeyCode=Obj.toString();
-if(KeyCode==17)editTovar2();
-}
-
-function fnMuiltipleEdit(){
-var ok=window.showModalDialog("GoodsListEdit.csp?Where="+where,"","center:yes;status:no;dialogHeight:650px;dialogWidth:1000px;resizable:yes;")
-if(ok!=null)ShowTovars();
-}
-
-function fnFindGood(){
-var ok=window.showModalDialog("FindGood.csp","","center:yes;status:no;dialogHeight:650px;dialogWidth:800px;resizable:yes;")
-}
-
-$bind(window,"load",function(){ //при загрузке заполнить комбобокс Каталогов
-	LV.AllowColumnReorder=true;
-	//downloader.startDownload(strForGroups(depot,commongroups), putCatalogue);
-	LoadTree(); //инициализация дерева выбранного пункта каталога
-	LoadList1();
-	document.getElementById(GoodsListView).attachEvent("ItemClick",LVItemClick);
-	GroupsTree.onClick="Click()";
-	LV.attachEvent("DblClick",OpenCard);
-	LV.attachEvent("ColumnClick",colclick);
-	LV.attachEvent("KeyPress",KeyPress);
-	LV.Sorted =false;
+	$("#GoodsPriceType").bind('keydown', 'return',function (evt){ SaveGoodsPrice(); return false; });
+    $("#GoodsPriceType").bind('keydown', 'esc',function (evt){ CloseGoodsPriceDialog(); return false; });
+	
+	Init();
 });
 
 // запретить отправку этой группы контрагенту
@@ -553,11 +461,43 @@ function AllowToSendFn(Allow,message)
 	if (!window.confirm(GroupName + "\n" + message + " ?"))return;
 	if(GroupId==""){ alert("Выберете, пожалуйста группу"); return;}
 	if(GroupsTree.ChildIDs!=""){ alert("Данная группа не содержит товары/запчасти, выберете группу, которая содержит товары/запчасти"); return; }
-
 	var ok=#server(..StopGroupSend(GroupId,Allow))#
 	if (isNaN(ok)) { alert(ok); }
 	else { alert(message); }
 }
+
+//очистить группу
+function cleargrup(){
+if(window.confirm("Вы уверены?")){
+	var GroupId=GroupsTree.NodeID;
+	//var ok=#server(Goods.GoodsAction.cleargrup(GroupId))#;
+	if(isNaN(ok)){alert(ok);}
+	else{ShowTovars();}
+}
+}
+ 
+//вставить в группу все бесхозные товары
+function fillgrup(){
+	var GroupId=GroupsTree.NodeID;
+	//var ok=#server(Goods.GoodsAction.fillgrup(GroupId))#;
+	if(isNaN(ok)){alert(ok);}
+	else{ShowTovars();}	
+}
+
+function EditGroupNameFn()
+{
+	var GroupId=GroupsTree.NodeID;
+	var GroupCode=GroupsTree.NodeCode;
+	if(GroupCode==""){alert("Выберете пожалуйста товарную группу");return;}
+	var NewName=window.prompt("Введите новое название группы",GroupsTree.NodeCaption);
+	if(!NewName)return;
+	if(NewName==""){alert("Пустные имена группа не допустимы.");return false;}
+	//var ok=#server(Goods.GroupAction.RenameGroup(GroupId,NewName))#
+	if(isNaN(ok)){alert(ok)}
+	else{LoadTree();SelectedGroupCode=GroupCode;}
+}
+
 </script>
+
 </body>
 </html>
