@@ -1,0 +1,199 @@
+<server>
+
+//операции поиска
+ s Operations("bw")=" %STARTSWITH "
+ s Operations("eq")="="
+ s Operations("ne")="<>"
+ s Operations("lt")="<"
+ s Operations("le")="<="
+ s Operations("gt")=">"
+ s Operations("ge")=">="
+ s Operations("ew")=" LIKE "
+ s Operations("cn")=" LIKE "
+ /*
+ bw - begins with ( LIKE val% )
+eq - equal ( = )
+ne - not equal ( <> )
+lt - little ( < )
+le - little or equal ( <= )
+gt - greater ( > )
+ge - greater or equal ( >= )
+ew - ends with (LIKE %val )
+cn - contain (LIKE %val% )
+ */
+ 
+ //временный глобал в котором будет лежать результат выборки
+ s glob = $NA(^TempGlob($J))
+ k @glob
+ 
+// параметры запроса 	
+ s page = %request.Get("page")
+ s rows = %request.Get("rows")
+ s sidx = %request.Get("sidx")
+ s sord = %request.Get("sord")
+ s cl = %request.Get("cl")
+ 
+ //запишем в glob значения объектов
+ d ..SelectClassData(cl,glob)
+	
+ s TotalPages = +$G(@glob@("TotalPages"))
+ s TotalCount = +$G(@glob@("TotalCount"))
+ 
+ //выведем в формате JSON
+ //
+ //заголовок справочника
+ &html<{"page":"#(page)#","total":#(TotalPages)#,"records":"#(TotalCount)#","rows":[
+	>
+ 
+ //тело
+ d ..Show(glob)
+ w "]}"
+ 
+k @glob
+</server>
+
+<script language="Cache" method="SelectClassData" arguments="ClassName:%String,glob:%String" returntype="%String">
+ //выбрать данные класса ClassName, записать в глобал glob
+ 	
+ n Description,Array,i,rs,ok,obj,ID,rownumber,PropertyName,PropertyType,SqlRequest,Properties,count
+ 	
+ s $ZT="error^error"
+ 	
+ 
+ s SqlRequest = "select TOP "_(page*rows)_" ID from "_ClassName
+ s CountSqlRequest = "select count(*) as countRows from "_ClassName
+ 
+ //если был затребован поиск
+	if %request.Get("_search")="true"
+	{
+		s Operation = Operations(%request.Get("searchOper"))
+		s value=$ZCVT(%request.Get("searchString"),"U")
+		if %request.Get("searchOper")="ew" s value=value_"%"
+		if %request.Get("searchOper")="cn" s value="%"_value_"%"
+		
+		s SearchField = %request.Get("searchField")
+		
+		//если был WHERE, добавим его
+		s SqlRequest=SqlRequest_" where {fn UCASE("_SearchField_")} "_Operation_"'"_value_"'"
+		s CountSqlRequest=CountSqlRequest_" where {fn UCASE("_SearchField_")} "_Operation_"'"_value_"'"
+	}
+ s SqlRequest=SqlRequest_" order by "_sidx_" "_sord	
+ 
+ //количество строк
+ s @glob@("TotalCount") = +$LG(..SingleRowSqlRequest(CountSqlRequest))
+ //количество страниц
+ s:rows>0 @glob@("TotalPages") = $NORMALIZE(@glob@("TotalCount")/rows,0)
+ 
+ //получить метаданные (список полей)	
+ d ..GetClassMetadata(ClassName,.Description,.Array)
+ 	
+    //запрос
+	s rs = ##class(%ResultSet).%New()
+	s ok=rs.Prepare(SqlRequest)
+	s LastNumber = $O(Array(""),-1)
+	s ok=rs.Execute()
+	
+	//бежим по указанному справочнику, извлекаем ID
+	while rs.Next()
+	{
+		if $i(count)
+		if count<(((page-1)*rows)+1) continue
+		
+		s ID = rs.Data("ID")
+	   //для каждого ID открываем объект и пишем в глобальку, в формате JSON
+		s obj = $ZOBJCLASSMETHOD(cl,"%OpenId",ID)
+		s rownumber = $I(@glob)
+		
+		s @glob@("data",rownumber) = "{""id"":"""_ID_""","
+	   //бежим по свойствам объекта и выводим их в формате JSON
+		s i=""
+		for  
+		{
+			s i = $O(Array(i))
+			q:i=""
+			s PropertyName = $G(Array(i,"Name"))	//название свойства объекта
+			s PropertyType = $G(Array(i,"Type"))	//тип свойства объекта
+			
+			s PropertyValue = ..GetPropertyValue(obj,PropertyName,PropertyType)
+			
+			s @glob@("data",rownumber) = @glob@("data",rownumber)_""""_PropertyName_""":"_""""_$ZCVT(PropertyValue,"O","JS")_""""
+			
+			//если это не последнее, добавим запятую
+			if i'=LastNumber s @glob@("data",rownumber) = @glob@("data",rownumber)_","
+		}
+		s @glob@("data",rownumber) = @glob@("data",rownumber)_"}"
+	}
+	
+	q
+</script>
+<script language="Cache" method="GetPropertyValue" arguments="obj:%String,PropertyName:%String,PropertyType:%String" returntype="%String">
+ //получить значение свойства объекта
+ 
+ n (obj,PropertyName,PropertyType)
+ s $ZT="error^error"
+ 
+ s PropertyValue = $ZOBJPROPERTY(obj,PropertyName)	//значение этого свойства
+			
+//если значение свойства - объект (небольшая условность, каждый справочник имеет поле Name)
+if $ISOBJECT(PropertyValue) s PropertyValue = $ZOBJPROPERTY(PropertyValue,"Name")
+if PropertyType="%Date" s PropertyValue=$P($ZD(PropertyValue,4),"/",1,2)_"/"_+$ZD(PropertyValue,3)
+ 
+Quit PropertyValue
+</script>
+<script language="Cache" method="Show" arguments="glob:%String" returntype="%String">
+//выводим строки справочника
+ s i="" for  
+ {
+	 s i = $O(@glob@("data",i),1,data)
+	 q:i=""
+	 
+	 w data
+	 
+	 //если это не последний 
+	 if $O(@glob@("data",i))'="" w ","
+ }
+
+ Quit ""
+</script>
+<script language="Cache" method="SingleRowSqlRequest" arguments="SqlRequest:%String" returntype="%String">
+ // выполнить единичный запрос к базе
+
+ n rs,ok,i,result
+ 
+ s $ZT="error^error" 
+ 
+ s rs = ##class(%ResultSet).%New()
+ s ok=rs.Prepare(SqlRequest)
+ s ok=rs.Execute()
+ d rs.Next()
+ 
+ s result=$LB("")
+ for i=1:1:rs.GetColumnCount() 
+ {
+	 s $LIST(result,i)=rs.GetData(i)
+ }
+ 
+ Quit result
+</script>
+<script language="Cache" method="GetClassMetadata" arguments="ClassName:%String,Description:%String,Array:%String" returntype="%String">
+ n Number,i,PropertiesCount,classobj,PropertyObj
+ k Array
+ 
+ q:$G(ClassName)=""
+ s classobj = ##class(%Dictionary.ClassDefinition).%OpenId(ClassName)
+ q:'$ISOBJECT(classobj)
+ 
+ s Description = classobj.Description
+ s PropertiesCount = classobj.Properties.Count()
+ 
+ for i=1:1:PropertiesCount
+ {
+	 s Array=i
+	 s PropertyObj = classobj.Properties.GetAt(i)
+	 
+	 s Array(i,"Name") = PropertyObj.Name
+	 s Array(i,"Description") = PropertyObj.Description
+	 s Array(i,"Type") = PropertyObj.Type
+ } 
+ Quit ""
+</script>

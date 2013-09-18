@@ -1,0 +1,27 @@
+<html>
+<head>
+
+<title>	Cache Server Page </title>
+
+	<link href="js/css/cupertino/jquery-ui-1.10.3.custom.css" rel="stylesheet">
+	<script src="js/js/jquery-1.9.1.js"></script>
+	<script src="js/js/jquery-ui-1.10.3.custom.js"></script>
+	<script src="js/jquery.hotkeys.js"></script>
+
+<script language="javascript">
+$(document).ready(function () 
+{
+	jQuery(document).bind('keydown', 'esc',function (evt){alert('esc'); });
+    jQuery(document).bind('keydown', 'tab',function (evt){alert('tab'); });
+    jQuery(document).bind('keydown', 'space',function (evt){alert('space'); });
+	jQuery(document).bind('keydown', 'return',function (evt){alert('return'); });
+});
+
+</script>
+</head>
+
+<body>
+
+</body>
+</html>
+

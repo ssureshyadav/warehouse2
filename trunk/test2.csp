@@ -1,0 +1,16 @@
+<server>
+ s currentJob = %request.Get("currentJob")
+ s command = %request.Get("command")
+ 
+ if command=""
+ {
+ 	w $G(^temp(currentJob))
+ }
+ 
+ if command="answer"
+ {
+	 s answer=%request.Get("answer")
+	 s ^temp(currentJob,"answer")=answer
+ }
+ 
+</server>

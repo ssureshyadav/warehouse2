@@ -1,0 +1,72 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ 
+ s file=%request.Get("file")
+ s pwd =%request.Get("pwd")
+ s FileAsHeader =%request.Get("FileAsHeader")
+ 
+ if file'=""
+ {
+	 s fileExists=##class(%File).Exists(file)
+ }
+ 
+ if $G(fileExists),FileAsHeader
+ {
+ 	set filename=$P(file,"\",$L(file,"\"))
+ 	set %response.ContentType = "application/text"
+ 	do %response.SetHeader("Content-Disposition","attachment; filename="_filename)
+ 	set %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+ }
+ q 1
+</script><script language="cache" runat="server">
+ s Dat=$TR($ZD($H,3),"-",".")
+ if (file="")||('fileExists)
+ {
+	s showForm=1
+ }
+ else
+ {
+	s showForm=0
+ }
+</script><CSP:IF Condition="showForm">
+<html>
+<head>
+	 <script language="javascript" type="text/javascript">
+	 function MakeFileName()
+	 {
+		 var FileFieldObj = document.getElementById("fileField");
+		 var FolderFieldObj = document.getElementById("FolderField");
+		 var DateFieldObj = document.getElementById("DateField");
+		 var LogTypeObj = document.getElementById("LogType");
+		 
+		 FileFieldObj.value = FolderFieldObj.value + "Term-TERMINAL---" + DateFieldObj.value + "---" + LogTypeObj.value + "-.log";
+		 //Term-TERMINAL---2011.12.01---CL-.log
+	 }
+	 </script>
+</head>
+<body>
+	<h1>Терминал #($G(^RTSPR(1,"From")))#</h1>
+	 <form>
+	 Папка <input type="text" value="D:\BPS_FR_110502_R\Logs\" id="FolderField" size=30 onkeyup="MakeFileName()"> 
+	 	дата <input type="text" value="#(Dat)#" id="DateField" onkeyup="MakeFileName()"> 
+	 	устройство <select id="LogType" onchange="MakeFileName()">
+	 		<option value="CL">Cache (CL)</option>
+	 		<option value="CR">Card reader (CR)</option>
+	 		<option value="FR">Фискальник (FR)</option>
+	 		<option value="KS">Купюроприёмник (KS)</option>
+	 		</select><br><br>
+	 Файл <input type="text" name="file" id="fileField" size=100><br>
+	 <input type="hidden" name="FileAsHeader" value="1">	
+	 <input type="submit" value="Получить файл"> 
+	 </form>
+</body>
+</html>
+<CSP:ELSE><script language="cache" runat="server">
+	 s len=30000
+	 Set oFile = ##class(%File).%New(file)
+	 Do oFile.Open("R")
+	 f i=1:1 d  q:len<0
+	 . s len=30000,str=oFile.Read(.len) 
+	 . q:len<0
+	 . w str,!
+	 d oFile.Close()
+</script></CSP:IF>

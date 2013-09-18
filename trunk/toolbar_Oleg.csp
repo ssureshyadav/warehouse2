@@ -1,0 +1,100 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ s login=$G(%session.Data("user"))
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ q 1
+</script><html><head><style type="text/css">
+html {margin:0px;padding:0px;}
+body {margin:0px; padding:0px;}
+.toolbar  {margin:0px; background-color: buttonface;padding:0px 0px 2px 2px; height:38px;}
+.toolbar a { /*кнопки*/
+	margin:0px 1px;
+	display:block;height:36px; width:36px; float:left; /*обтекание слева*/
+	background: buttonface url('images/big/toolbar-4ec975f804781.png') no-repeat; 
+	text-decoration:none;
+}
+.toolbar a:hover {background-color:#fefefe;} /*кнопки под мышкой*/
+.toolbar a.selected {background-color:#ffffff;} /*нажатая кнопка*/
+#analyzis{ background-position: 2px 2px; } 
+#chief{ background-position: -35px 2px; } 
+#dicts{ background-position: -72px 2px;  } 
+#director{ background-position: -109px 2px;  } 
+#docs{ background-position: -145px 2px;  } 
+#employee{ background-position: -182px 2px; } 
+#help{ background-position: -330px 2px; float:right;} 
+#exit{ background-position: -220px 2px; float:right;} /*крайний правый*/
+#finance{ background-position: -257px 2px; } 
+#goods{ background-position: -294px 2px; } 
+#kontr{ background-position: -368px 2px; } 
+#login{ background-position: -405px 2px; } 
+#store{ background-position: -442px 2px; } 
+#tunes{ background-position: -479px 2px; }
+.clear {font-size:0px;line-height:0px;clear:both;border:0px none;margin:0px;padding:0px;outline:0px none;} /* выключаем обтекание*/
+
+
+</style></head><body><div id="toolbar" class="toolbar"><server>
+ s login=$G(%session.Data("user"))
+ s menu(1)=$lb(1,"goods","Товары") ;код функции, имя фрейма, подпись кнопки
+ s menu(2)=$lb(3,"docs","Документы")
+ s menu(3)=$lb(4,"dicts","Справочники")
+ s menu(4)=$lb(15,"store","Места хранения")
+ s menu(5)=$lb(16,"tunes","Настройки")
+ s menu(6)=$lb(2,"chief","Рабочее место сервис менеджера")
+ s menu(7)=$lb(5,"employee","Рабочее место на складе")
+ s menu(8)=$lb(17,"analyzis","Аналитика")
+ s menu(9)=$lb(18,"kontr","Учёт отгрузок и платежей")
+ s menu(10)=$lb(14,"finance","Финансы")
+ s menu(11)=$lb(13,"director","Рабочее место директора")
+  
+ #define access(%func, %login) ##class(Common.Rights).getrights(%login,%func)
+ s i="" for { s i=$o(menu(i)) q:i=""  
+ 	k list s list=$g(menu(i)) 
+ 	k func s func=$lg(list,1)
+ 	k frame s frame=$lg(list,2) 
+ 	k title s title=$lg(list,3)
+ 	if '$$$access(func,login) continue
+ 	w "<a id='",frame,"' href='#",frame,"' title='",title,"'>&nbsp;</a>"
+ }
+</server><a id='login' href='#login' title='Вход в систему'>&nbsp;
+</a><a id='help' href='#help' title='Справка'>&nbsp;
+</a><a id='exit' href='#exit' title='Выйти и Закрыть'>&nbsp;
+</a><div class="clear">&nbsp;</div></div><script type="text/javascript">
+gobo = Image(''); // зачем?
+function ChangePage(BtnKey){
+	if(BtnKey==="help"){
+		window.open('help/index.html'); return;
+	}
+	if(BtnKey==="exit"){
+		if(window.confirm("Выйти из программы?")){
+			#server(csp.closesession.OnPage())#
+			;window.parent.close(); return;
+		}
+	}
+	//Высота фреймов на index.csp	
+    var hof={ //heights of the frames, начальная инициализация
+		toolbar:"35"
+		,goods:"0",docs:"0",dicts:"0",store:"0",tunes:"0"
+		,chief:"0",employee:"0",analyzis:"0",kontr:"0",finance:"0"
+		,director:"0",login:"0",select:"*",status:"20"
+	};
+    if (hof[BtnKey]){
+	 	hof[BtnKey]="*"; //раскрываем указанный фрейм
+	 	hof["select"]="0"; //закрываем фрейм по умолчанию
+	}
+    var arr=new Array(); for (var i in hof) { arr.push(hof[i]);}
+    frameElement.document.all.MainFrameSet.rows = arr.join(",");
+}
+var $=function(id){return document.getElementById(id);}
+var $bind=("v"=="\v")?function(o,e,h){o.attachEvent("on"+e,h);}:function(o,e,h){o.addEventListener(e,h,false);}
+var $addClass=function(obj,className){
+	if(!obj) return; obj.className=obj.className+className;
+};
+
+$bind(window,"load",function(){
+	var lastTab=null;
+	$bind($("toolbar"),"click",function(e){ e=e?e:window.event; e.target=e.target||e.srcElement;
+		var obj=e.target || null; if (!obj) return; if (obj.tagName!=="A") return;
+		ChangePage(obj.getAttribute("id"));
+		if (lastTab) lastTab.className="";
+		obj.className="selected"; lastTab=obj;
+	});
+});</script></body></html>
