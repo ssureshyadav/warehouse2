@@ -1,0 +1,196 @@
+<script language="Cache" method="Find" arguments="WhereToFind:%String,SearchString:%String,ShowFields:%String,Params:%String,Page:%String,ParamsCondition:%String" returntype="%String">
+ 
+ n ParamsLB s ParamsLB=$LFS(Params,";")
+ n ShowFieldsLB s ShowFieldsLB=$LFS(ShowFields,";")
+
+ n cl s cl="Common.Dictionary2||Property9194"
+ k Property9194Array s Property9194Array=""
+ #; загружаем список отображаемых значений свойства
+ #;d ##class(Docs.Action2).GetDisplayListArray(cl,.Property9194Array)
+ 
+ n res s res=""
+ 
+ #; проверяем входной параметр 
+ s WhereToFind=$g(WhereToFind,"serialInd")
+ n indexName s indexName=$CASE(WhereToFind
+    ,"serialInd":"serialInd"
+    ,"garantInd":"garantInd"
+    ,:"serialInd"
+ )
+ 
+ n glob s glob=$NA(^Common.Dictionary2I(indexName)) ; по какой глобали будем искать 
+ , SearchString=$g(SearchString) ;что будем искать
+ , SearchString = " "_$ZCVT(SearchString,"U") ;приводим к индексному виду 
+ , count=0
+ w "<p>стр. ",Page,"</p>"
+ w "<table class='rs'>"
+ 
+ s i="" // для прохода по индексу
+ 
+ #; Улучшение - Анализируем поисковую строку на наличие подстановочного символа *
+ s pattern=$f(SearchString,"*")
+ if ($F(SearchString,"*")||$F(SearchString,"?"))
+ {
+	 s MyPattern = ##class(csp.serialsresult).MakePattern(SearchString)	//сделаем из строки запроса Pattern Match
+ }
+ else
+ { ;режим обычного поиска
+    #; частичное и полное соответствие по началу строки
+    s i=SearchString 
+    #; ускоряем режим поиска по началу строки
+    s i=$O(^Common.Dictionary2I(indexName,i),-1) ;шаг назад
+ }
+  
+ for { s i=$O(^Common.Dictionary2I(indexName,i)) Q:i=""
+    
+    if $G(MyPattern)'="" 
+    { 
+    	; пользователь потребовал шаблоны
+        if i'?@MyPattern continue
+    } 
+    else 
+    { ; в индексном значении нет искомого
+        Q:$f(i,SearchString)=0
+    }
+    
+  #; превышен объем ответа
+  Q:count>(Page*1000)
+  
+  k ID,GarantName,serial,Comment,remont1,Property9194
+  s (GarantName,serial,Comment,remont1,Property9194)=""
+  s ID = $O(^Common.Dictionary2I(indexName,i,""))
+  s GarantName=$LG(^Common.Dictionary2I(indexName,i,ID),2) s:GarantName="" GarantName="(не заполнен)"
+  s serial = ##class(Common.Dictionary2).serialGetStored(ID)
+  s Comment = ##class(Common.Dictionary2).CommentGetStored(ID)
+  s remont1 = ##class(Common.Dictionary2).remont1GetStored(ID)
+  s Property9194 = ##class(Common.Dictionary2).Property9194GetStored(ID)
+  
+  s HasComment = (Comment'="")
+  s HasReq = (remont1'="")
+  s MustBeComment = $LF(ParamsLB,"HasComment")
+  s MustBeReq = $LF(ParamsLB,"HasReq")
+  
+  if MustBeComment || MustBeReq
+  {
+          if ParamsCondition="and"
+          {
+              if ( ((MustBeComment && HasComment) || 'MustBeComment) && ( (MustBeReq && HasReq) || 'MustBeReq) )
+              {
+                  //всё отлично, такую запись показываем
+              }
+              else
+              {
+                  //в этой записи нет коммента или заявки
+                  continue
+              }
+          }
+          else
+          {
+              if ( ((MustBeComment && HasComment) || 'MustBeComment) || ( (MustBeReq && HasReq) || 'MustBeReq) )
+              {
+                  //всё отлично, такую запись показываем
+              }
+              else
+              {
+                  //в этой записи нет ни коммента, ни заявки
+                  continue
+              }   
+          }
+  }
+  if Property9194=1 s bgcolor="class='lg'" //"bgcolor=""LightGreen"""
+  else  s bgcolor=""
+  
+  if serial="" s serial="___"
+  
+  s count=count+1 //количество выводимых строк
+  continue:count<(Page*1000-1000)  
+  
+  w "<tr "_bgcolor_">"
+  
+  #;вывод поля СЕРИЙНЫЙ НОМЕР
+  w "<td><a href='#",ID,"'>",..EscapeHTML(serial),"</a>"   //"</td>" - можно не указывать 
+
+  //вывод поля ДЕЙСТВИТЕЛЕН/НЕ ДЕЙСТВИТЕЛЕН
+  if $LF(ShowFieldsLB,"Property9194")&&(Property9194'="")
+  {
+      s Property9194Display=##class(Common.Dictionary2).Property9194LogicalToDisplay(Property9194)
+      w "<td>",..EscapeHTML(" "_Property9194Display) //,"</td>"
+  }
+  
+  //вывод поля МОДЕЛЬ
+  if 1  //если просили вывести модель
+  {
+      s tovar = ##class(Common.Dictionary2).tovarGetStored(ID)
+      w "<td>",..EscapeHTML(" "_tovar) //,"</td>"
+  }
+
+  //вывод поля ПЕРВАЯ ЗАЯВКА
+  if 1 { //если просили вывести первую заявку
+    s img="" s:(remont1'="") img="class='ok'"  
+    w "<td ",img," >&nbsp;"
+  }
+  
+  //вывод поля КОММЕНТАРИЙ
+  if $LF(ShowFieldsLB,"Comment") w "<td>",..EscapeHTML(Comment) //,"</td>"
+  
+  //w "</tr>"
+ }
+ w "</table><p></p>"
+ if count>1000 w "<h2>Стр. "_Page_". Найдено более 1000 записей. Уточните запрос.</h2>"
+ if Page>1 w " <a href=""#"" onclick=""javascript:Find('"_(Page-1)_"')"" class=""zz"" id=""PrevLink"">пред.</a> "
+ if count>1000 w " <a href=""#"" onclick=""javascript:Find('"_(Page+1)_"')"" class=""zz"" id=""ForwLink"">след.</a>"
+ if count=0  w "<h2>",$ZDT($H)," не найдено ни одной записи.</h2>" Q ""
+ else  w $ZDT($H),"<br>найдено "_count_" записей" 
+ 
+ Q ""
+</script><server>
+    s byf=$g(%request.Data("byf",1))
+    s q=$g(%request.Data("q",1))
+    s fs=$g(%request.Data("fs",1))
+    s qp=$g(%request.Data("qp",1))                  //параметры выборки HasReq и/или HasComment
+    s page=$g(%request.Data("page",1))
+    s ParamsCondition=$g(%request.Data("cond",1))   //условие параметров and или or
+    f i="byf","q","fs","qp","page","ParamsCondition" d
+    . s ^mtempArt($I(^mtempArt),i)=@i
+    d ..Find(byf,q,fs,qp,page,ParamsCondition)
+</server><script runat="server" language="cache" method="Match" arguments="str:%String,pattern:%String" returntype="%Boolean">
+    #; основное назначение функции - находить по концу строки!!!
+    s sc=1, list=$LFS(pattern,"*") ;разобрали на составляющие
+    s part="",p=0,pos=1
+    While $LISTNEXT(list,p,part){
+        if part="" continue ;пропускаем пустые части паттерна
+        s pos=$f(str,part,pos) ;функция $find указывает на след. символ после искомой части
+        if pos=0 {
+            s sc=0   ;часть паттерна не найдена
+            Q  ;дальше можно не искать
+        } 
+    }
+    
+    #;последняя часть паттерна должна точно совпадать с остатком строки
+    #;т.е $find должен стать на (конец строки+1)
+    #;если поиск был удачным
+    #;и последняя часть паттерна не пустая строка
+    if sc && (part'=""){
+        Q pos>$l(str)    
+    }
+    
+    Q sc
+</script><script runat="server" language="cache" method="MakePattern" arguments="UserPattern:%String" returntype="%String">
+ s res="1"""
+ 
+ for i=1:1:$Length(UserPattern)
+ {
+	 s currentSymbol=$E(UserPattern,i,i)
+	 if (currentSymbol="?")||(currentSymbol="*")
+	 {
+	 	if currentSymbol="*" s res=res_"""1.E1"""
+	 	if currentSymbol="?" s res=res_"""1E1"""
+	 }
+	 else
+	 {
+		 s res = res_currentSymbol
+		 if i=$Length(UserPattern) s res=res_""""
+	 }
+ }
+ q res
+</script>

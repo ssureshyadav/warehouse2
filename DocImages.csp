@@ -1,0 +1,42 @@
+<html>
+<head>
+
+<!-- Put your page Title here -->
+<title>	Фотографии документа </title>
+<script language="javascript" type="text/javascript">
+function delimg(curimg){
+
+if(isNaN(ok))alert(ok);
+else{window.close();}
+}
+
+function prnt(){
+window.print();
+}
+
+function printimg(curimg){
+//window.open("PrintImage.csp?ImageSrc=GoodsImages"+curimg);
+}
+</script>
+</head>
+
+<body>
+<script language="cache" runat="server">
+
+ s DocId=%request.Get("DocId")
+ q:DocId=""
+ s docobj=##class(Docs.Super).%OpenId(DocId)
+ s images=docobj.Images
+ w "<center><font size=+2>"_docobj.Name_"</font></center>"
+ 
+ f i=1:1:$L(images,"\") d
+ . s currentimg=$P(images,"\",i)
+ . d:$L(currentimg)>2 
+ . . //w "<img src=""images/del.gif"" style='cursor:hand' onmouseover=""this.src='images/Ondel.gif'"" onmouseout=""this.src='images/del.gif'""  id=""delbut"_i_""" alt=""Удалить"" onclick=""delimg('/"_currentimg_"')"">"
+ . . //w "<img src=""images/print.gif"" style='cursor:hand' onmouseover=""this.src='images/Onprint.gif'"" onmouseout=""this.src='images/print.gif'""  id=""printbut"_i_""" alt=""Печать"" onclick=""printimg('/"_currentimg_"')"">"
+ . . //w "<br>"
+ . . w "<img src=""SkladInstrImages/"_currentimg_""" ><hr width=80%>"
+
+</script>
+</body>
+</html>

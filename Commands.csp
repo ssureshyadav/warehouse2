@@ -1,0 +1,39 @@
+<server>
+ s command=%request.Get("command")
+ s depot=$G(%session.Data("depot"))
+ s depot=1
+ 
+ if command="CellStorage"
+ {
+	 s id=%request.Get("id")
+	 
+	 &sql(declare zz cursor for select
+	 	Goods,Value1,Value2,Goods->FullName
+	 	into :Goods,:Value1,:Value2,:GoodsFullName
+	 	from Store.Quantity
+	 	where Address=:id)
+	 
+	 &sql(open zz)
+	 for  
+	 {
+		 &sql(fetch zz)
+		 q:SQLCODE
+		 w "<tr>"
+		 	_"<td>"_GoodsFullName
+		 	_"<td>"_(Value1+Value2)
+		 _"</tr>"
+	 }
+ }
+ 
+ if command="InstrData"
+ {
+	 s ID= %request.Get("ID")
+	 
+	 &sql(select Kontr->Name,%external(Dat),Name
+	 	into :KontrName,:Dat,:Name
+	 	from Operation.Instructions 
+	 	where ID=:ID)
+	 
+	 w "№ "_Name_" "_KontrName_" от "_Dat
+ }
+</server>

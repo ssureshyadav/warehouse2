@@ -1,0 +1,26 @@
+<server>
+ s Command=%request.Get("Command")
+ 
+ if Command="Search"
+ {
+	 s indexName=%request.Get("SMode")
+	 s SearchString=%request.Get("term")
+
+	 s glob=$NA(^Common.Dictionary2I(indexName)) ; по какой глобали будем искать 
+ 	 , SearchString = " "_$ZCVT(SearchString,"U") ;приводим к индексному виду 
+	 s i=SearchString s i=$O(^Common.Dictionary2I(indexName,i),-1) ;шаг назад
+	 s count=0
+	 w "["
+		 
+ 	for { 
+ 		s i=$O(^Common.Dictionary2I(indexName,i)) 
+ 		Q:(i="")||($f(i,SearchString)=0)||(count>10) 
+  		i $i(count)
+  		w """"_$E(i,2,$L(i))_""""
+  		s next=$O(^Common.Dictionary2I(indexName,i)) 
+  		if '(next=""),'($f(next,SearchString)=0),'(count>10) w ","
+ 	}
+ 	
+	 w "]"
+ }
+</server>

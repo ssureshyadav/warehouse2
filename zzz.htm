@@ -1,0 +1,26 @@
+<html>
+<body>
+<table CELLPADDING=0 CELLSPACING=0 border=0><tr><td rowspan=2>
+	<img src="images/excel.gif" onmouseover="this.src='images/Onexcel.gif'" onmouseout="this.src='images/excel.gif'" onclick="copyclip()" style="cursor:hand" alt="Открыть в Excel">
+	<img src="images/mail.gif" onmouseover="this.src='images/Onmail.gif'" onmouseout="this.src='images/mail.gif'" onclick="saveColunmsSettings()" style="cursor:hand" alt="Сохранить положение и размер колонок">
+	<span id="PagesControl" style="display:none"><input type="button" value="<<" style="width:20px" disabled onclick="fullleft();" id="fullleftbut"><input id="leftbut" type="button" value="<" onclick="moveleft();" style="width:20px" disabled> стр. <span id="strrr"></span> из <span id="vsegostrok"></span> <input type="button" value=">" style="width:20px" onclick="moveright()" id="rightbut" disabled><input type="button" id="fullrightbut" value=">>" style="width:20px" disabled onclick="fullright()"> строк на странице 
+	<input type=text style="width:40" id="stroknastr" value="100"></span> <span id="tempForNothing"></span>
+	&nbsp;&nbsp;&nbsp;&nbsp;
+</td><td>
+	<img src="images/UpSmall.gif" style="cursor:hand" onmouseover="this.src='images/onUpSmall.gif'" onmouseout="this.src='images/UpSmall.gif'" onclick="ListViewID.style.posHeight=ListViewID.style.posHeight+20" alt="Увеличить размер таблицы">
+</td></tr>
+<tr><td>
+	<img src="images/DownSmall.gif" style="cursor:hand" onmouseover="this.src='images/onDownSmall.gif'" onmouseout="this.src='images/DownSmall.gif'" onclick="ListViewID.style.posHeight=ListViewID.style.posHeight-20" alt="Уменьшить размер таблицы">
+</td></tr>
+</table>
+<OBJECT id="ListViewID" classid="clsid:BDD1F04B-858B-11D1-B16A-00C0F0283628" style="width:500px;height:350px;border:none;behavior:url('#default#download')" codebase="Cab\MSComCtl.CAB#Version=6,0,88,62">
+<PARAM NAME="View" VALUE="3">
+<PARAM NAME="Appearance" VALUE="1">
+<PARAM NAME="FullRowSelect" VALUE="True">
+<PARAM NAME="MultiSelect" VALUE="True">
+<PARAM NAME="GridLines" VALUE="True">
+<PARAM NAME="LabelEdit" VALUE="1">
+</OBJECT>
+<span id="joka"></span>
+</body>
+</html>

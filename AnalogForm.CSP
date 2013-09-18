@@ -1,0 +1,112 @@
+<csp:class includes="xmlmacros">
+<script language="Cache" runat="server">
+ s id=%request.Get("id")
+ 
+ if (id'="")
+ {
+	 s newObj = ##class(Common.Dictionary4).%OpenId(id)
+	 
+	 if $ISOBJECT(newObj)
+	 {
+		 if $ISOBJECT(newObj.Name)
+		 {
+			 s Name=newObj.Name.FullName
+			 s NameId=newObj.Name.%Id()
+		 }
+		 
+		 if $ISOBJECT(newObj.Name)
+		 {
+			 s Property6625=newObj.Property6625.FullName
+			 s Property6625Id=newObj.Property6625.%Id()
+		 }
+		 k newObj
+	 }
+	 else
+	 {
+		 s Property6625="Ошибка при извлечении значения"
+		 s Name="Ошибка при извлечении значения"
+	 }
+ }
+</script>
+<script language="Cache" method="SetAnalog" arguments="id,Tovar,Analog" returntype="%String">
+ if (id'="") s newObj = ##class(Common.Dictionary4).%OpenId(id)
+ else  s newObj = ##class(Common.Dictionary4).%New()
+ 
+ if (id'=""),'$ISOBJECT(newObj) q "Извините, не удалось получить данные по объекту "_id
+ 
+ d newObj.NameSetObjectId(Tovar)
+ d newObj.Property6625SetObjectId(Analog)
+ 
+ s ok = newObj.%Save()
+ if '+ok $$$WriteObjError(ok)
+ Quit ok
+</script>
+<html>
+<head>
+
+<title>	Аналоги </title>
+<script language="jscript" src="common.js"></script>
+<script language="javascript" type="text/javascript">
+var TovarId="#($G(NameId))#";		//ID товара
+var AnalogId="#($G(Property6625Id))#";	//ID аналога
+var id="#(id)#";
+
+//функция выбора товара
+function AddGoods()
+{
+	newItem=window.showModalDialog("selectgoods2.csp","","center:yes;status:no;dialogHeight:700px;dialogWidth:800px;resizable:yes;");
+	if (ReturnSpace(newItem)=="")return;
+	newItemArray = newItem.split("~");
+	document.getElementById("tbGoods").value=newItemArray[10];
+	TovarId = newItemArray[0];
+}
+
+//функция выбора аналога
+function AddAnalog()
+{
+	newItem=window.showModalDialog("selectgoods2.csp","","center:yes;status:no;dialogHeight:700px;dialogWidth:800px;resizable:yes;");
+	if (ReturnSpace(newItem)=="")return;
+	newItemArray = newItem.split("~");
+	document.getElementById("tbAnalog").value=newItemArray[10];
+	AnalogId = newItemArray[0];
+}
+
+//обработка кнопки записать - установить соответствие в базе товара и его аналога
+function SetAnalog()
+{
+	if (TovarId==""){alert("Пожалуйста, укажите товар (запчасть)");return;}
+	if (AnalogId==""){alert("Пожалуйста, укажите аналог");return;}
+	var ok = #server(..SetAnalog(id,TovarId,AnalogId))#
+	
+	if (isNaN(ok))
+	{
+		alert(ok);
+	}
+	else
+	{
+		alert("Аналог успешно записан.");
+		window.close();
+	}
+}
+</script>
+<link href="style.css" type=text/css rel=stylesheet>
+</head>
+
+<body>
+<center><h2>Аналоги</h2></center>
+
+<table>
+<tr>
+	<td>Товар (запчасть)
+	<td><input type="text" size="200" id="tbGoods" onclick="AddGoods()" style="width=300;cursor=hand;" value="#($G(Name))#" onmouseover="this.style.background='#dedece';" onmouseout="this.style.background='#ffffff';">
+<tr>
+	<td>Аналог
+	<td><input type="text" id="tbAnalog" onclick="AddAnalog()" style="width=300;cursor=hand;" value="#($G(Property6625))#" onmouseover="this.style.background='#dedece';" onmouseout="this.style.background='#ffffff';">
+<tr>
+	<td colspan=2><bR><bR>
+		<input type="button" value="Записать" onclick="SetAnalog()">
+		<input type="button" value="Отмена" onclick="windowclose()">
+</table>
+
+</body>
+</html>

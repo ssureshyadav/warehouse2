@@ -1,0 +1,462 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ s login=$G(%session.Data("user"))
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ i '##class(Common.Rights).getrights(login,1) s %response.ServerSideRedirect="norights.csp" 
+ s Access9func=##class(Common.Rights).getrights(login,9)
+ s GoodsGoodsVersion = ##class(Common.Common).GetCurrentDictVersion("Goods.Goods")
+ s GoodsCatalogue = ##class(Docs.Action2).GetClassValuesOptions("","Goods.Catalogue",,,0,"Main desc")
+ q 1
+</script>
+<script language="Cache" method="StopGroupSend" arguments="GroupId:%String,AllowToSendValue:%String" returntype="%String">
+ //запретить отправку этой группы контрагентам
+ if $G(GroupId)="" q "Укажите, пожалуйста, товарную группу"
+ &sql( UPDATE Goods.Goods SET AllowToSend=:AllowToSendValue
+WHERE ID IN (SELECT Goods FROM Goods.GoodsGroup WHERE Groups=:GroupId) )
+ IF SQLCODE q "Извините. Ошибка при выполнении запроса SQLCODE="_SQLCODE
+ Quit 1
+</script><html XMLNS:SKLADz XMLNS:SKLAD2>
+<IMPORT NAMESPACE="SKLADz" IMPLEMENTATION="htc/treeview.htc">
+<head><title>Склад :: Товары</title>
+<link href="style.css" type="text/css" rel="stylesheet" />
+ <link rel='stylesheet' type='text/css' href='css/redmond/jquery-ui-1.8.16.custom.css'/>
+ <link rel='stylesheet' type='text/css' href='css/ui.jqgrid.css'/>
+
+<style type="text/css">
+html {margin:0px;padding:0px;}
+body {margin:0px;padding:2px 1px;}
+* html button { overflow: visible; } /*тупой padding в кнопках IE*/
+.pageTitle {width:100%;border-collapse:collapse;border:0px;padding:0px;margin:0px;border:0px;}
+.pageTitle tr {background: #e9f3ff;}
+.pageTitle tr td {border-bottom:1px #000066;}
+.actions a { display:inline-block; padding:10px; margin: 1px; 
+	border:1px solid #ccc; background:#eee; 
+}
+.actions a:hover { text-decoration:none;background:#fcfcfc;}
+.actions a:visited {}
+label {color:#333;}
+ 	.ui-jqgrid {font-size:90%;}
+ 	.ui-widget {font-size:1.2em;}
+</style></head><body>
+
+<table class="pageTitle" style=""><tr>
+<td style="width:20px;"><img alt="Обновить раздел" src="images/refresh.png" onclick="window.location.reload()"></td>
+<td style="text-indent:40px;font:16px Arial;" >Товары</td>
+<td style="width:80px;text-align:right;font-size:11px;color: #6e6e6e;" title="Текущая версия справочника товаров">v #(GoodsGoodsVersion)#</td>
+</table>
+<div class="actions">
+		<a href="PriceGroups.csp">Ценовые группы товаров</a>
+		<a href="Reserves2.csp">Резервы</a>
+		<a href="Brak.csp">Некондиция</a>
+		<a title="Привязать запчасть к модели" href="Attach2Model.csp">Запчасти и их модели</a>
+		<a href="Serials.csp" title="Открыть страницу управления серийными номерами">Cерийные номера</a>
+		<a href="csp.GoodsRights.cls" title="Страница позволяющая установить ограничение в использовании запчастей контрагентами в заявках">Ограничение использования запчастей контрагентами</a>
+</div>
+
+<table style="width:100%"><tr>
+ <td style="vertical-align:top;width:50%"> 
+  <label for="Catalogues" >Классификатор:</label>
+  <select id="Catalogues" onchange="LoadTree()">#(GoodsCatalogue)#</select>
+  <br/>
+  <SKLADz:treeview id="GroupsTree" width=300 height=160 ImagesPath="#(%session.Data("ImagesPath"))#" onDownloadCmpl="GroupsTreeDnldCmpl()" />
+  <table width="350"><tr><td>
+  <sklad:LittleButton name="new" id="newgrup" onclick="addGroup(0)" alt="Новая группа">
+  <sklad:LittleButton name="new+" id="newSubgrup" onclick="addGroup(1)" alt="Новая подгруппа">
+  <sklad:LittleButton name="edit" id="EditGroupName" onclick="EditGroupNameFn()" alt="Редактирование названия группы">
+  <sklad:LittleButton name="del+" id="del22" onclick="cleargrup()" alt="Очистить группу">
+  <sklad:LittleButton name="history" id="hist22" onclick="fillgrup()" alt="Заполнить группу">
+  <sklad:LittleButton name="PrintPrice" id="PrintPriceImg" onclick="PrintPriceFunc('')" alt="Вывести прайслист">
+  <sklad:LittleButton name="PrintPriceColor" id="PrintPriceImg2" onclick="PrintPriceFunc('Images')" alt="Вывести прайслист c изображениями">
+  <sklad:LittleButton name="ostatki" id="PrintStorage" onclick="PrintStorageFn()" alt="Вывести остатки">
+  <sklad:LittleButton name="StopSend" id="StopAllowToSend" onclick="AllowToSendFn(0,'Группа больше не будет использоваться в заявках')" alt="Не использовать группу в заявках">
+  <sklad:LittleButton name="OkSend" id="OkAllowToSend" onclick="AllowToSendFn(1,'Группа будет использоваться в заявках')" alt="Использовать группу в заявках">
+  </td><td>
+  <sklad:LittleButton name="del" id="delgrup" onclick="delGroup()" alt="Удалить группу"><br>
+  </td></tr></table>
+ </td>
+ <td valign=top width=50%>
+ <!--
+  <fieldset style="width:200;"><legend id="TovarName"></legend>
+  <SKLADz:treeview id="PropsTree" width=300 height=160 ShowImages=0 ImagesPath="#(%session.Data("ImagesPath"))#" />
+  </fieldset>
+  <table width="350"><tr><td>
+  <sklad:LittleButton name="new" id="newprop" onclick="AddProp(0)" alt="Новое свойство">
+  <sklad:LittleButton name="new+" id="newSubprop" onclick="AddProp(1)" alt="Новое свойство в существующей группе">
+  </td><td>
+  <sklad:LittleButton name="del" id="delprop" onclick="DelDopProp();" alt="Удалить свойство">
+  </td></tr>
+  </table>
+-->
+  </td>
+</tr>
+  <!--
+<tr>
+ <td colspan=2>
+<span id="namfld"></span>&nbsp;<input type="text" id="fldval" onkeyup="gg();">
+   <fieldset style=""><legend>Товары</legend>
+  <sklad:ListView id="LV" style="width:100%;height:200;"  >
+
+ <OBJECT id="LV" classid=clsid:BDD1F04B-858B-11D1-B16A-00C0F0283628 style="width:100%;height:200;behavior:url('#default#download')" codebase="Cab\MSComCtl.CAB" >
+<PARAM NAME="View" VALUE="3">
+<PARAM NAME="Appearance" VALUE="1">
+<PARAM NAME="FullRowSelect" VALUE="True">
+<PARAM NAME="MultiSelect" VALUE="True">
+<PARAM NAME="GridLines" VALUE="True">
+<PARAM NAME="LabelEdit" VALUE="1">
+</OBJECT>
+
+</fieldset></td>
+</tr>   -->
+
+</table>
+<script language="jscript" src="common.js"></script>
+<script language="jscript">
+var $=function(id){return document.getElementById(id);}
+var $bind=("v"=="\v")?function(o,e,h){o.attachEvent("on"+e,h);}:function(o,e,h){o.addEventListener(e,h,false);}
+
+var depot="#($G(%session.Data("depot")))#"
+;var commongroups="#($G(%session.Data("commongroups")))#"
+;var sessionid="#(%session.SessionId)#";
+var SelectedGroupCode="";
+var GoodsListView="LV";  //id элемента ListView с товарами
+var ColCode="";
+var where="";
+var CurrentGoodsID = "";	//id выбранного товара в таблице товаров
+
+function putCatalogue(text){
+addOptions(text,"Catalogues");
+LoadTree();
+}
+
+function LoadTree(){
+GroupsTree.DownLoad('Data.csp?class=Goods.Group&fields=Parent,Code,Name,ID&params="'+#(%session.Data("depot"))#+'","'+Catalogues.value+'"')	
+}
+
+//Обработка клика на узле дерева товарных групп
+function Click(){
+test();
+}
+
+//Добавить группу
+function addGroup(Sub){
+//Sub=1 означает что желаем создать подгруппу
+Code=GroupsTree.NodeCode;
+if(Code==""&Sub==1){alert("Не выбрана группа для создания подгруппы");return}
+Catalogue=Catalogues.value;
+Name=window.showModalDialog("AddGoodsProp.csp","Наименование группы","center:yes;status:no;dialogHeight:200px")
+if(Name==null)return false;
+ok=#server(Goods.GroupAction.createGroup(Catalogue,Name,Code,Sub))#
+if (!isNaN(ok)){LoadTree();}
+else {alert(ok);}
+}
+
+//Удалить группу
+function delGroup(){
+Code=GroupsTree.NodeCode;
+if(Code==""){alert("Не выбрана группа");return false;}
+GroupId=GroupsTree.NodeID;
+ok=window.confirm("Удалить группу ?")
+if(ok==false)return false;
+ok=#server(Goods.GroupAction.DelGroup(Catalogues.value,Code,GroupId))#
+if (ok!=1){alert(ok);return false;}
+LoadTree();
+}
+
+//Добавить товар
+function addTovar(Goods,CspFile)
+{
+	//установим переменные
+	Goods=ReturnSpace(Goods);
+	GroupId=GroupsTree.NodeID;
+	GroupCode=GroupsTree.NodeCode;
+	if(GroupId==""){alert("Не выбрана группа");return false;}
+	Name=GroupsTree.NodeCaption;
+	var dialogHeight=600;
+	
+	//проверим логическую возможность создавать товар	
+	if(GroupsTree.ChildIDs!=""){ alert("Данная группа содержит подгруппы, она не может содержать товары. Выберете группу, которая не содержит подгрупп."); return; }
+	
+	//если это создание нового товара
+	if(ReturnSpace(Goods)=="")
+	{
+		if(window.confirm("Использовать новую форму?")){var CspFile="GoodCard.csp?GroupId="+GroupId;var dialogHeight=400;}
+		else{var CspFile="AddTovar.csp"}
+	}
+	
+	ok=window.showModalDialog(CspFile,Catalogues.value+InnerSplitter+GroupId+InnerSplitter+GroupCode+InnerSplitter+Goods+InnerSplitter+Name,"center:yes;status:no;dialogHeight:"+dialogHeight+"px;dialogWidth:800px;resizable:yes")
+	if(ok==1){test()}
+}
+
+//Удалить товар
+function DelTovar()
+{
+	GoodsId=CurrentGoodsID;
+	if(GoodsId==""){alert("Не выбран товар");return false;}
+	if(!window.confirm("Удалить "+$("#grid").getCell(GoodsId,2)+"?"))return false;
+	ok=#server(Goods.GoodsAction.DeleteGoods(GoodsId))#
+	if(ok==1){test()}
+	else{alert(ok)}
+}
+
+//Редактировать товар
+function editTovar(){
+GoodsId=CurrentGoodsID;
+addTovar(GoodsId,"AddTovar.csp");
+}
+
+//Редактировать товар в новой форме
+function editTovar2(){
+var GoodsId=CurrentGoodsID;
+addTovar(GoodsId,"GoodCard.csp?GoodId="+GoodsId);
+}
+
+
+//Открыть карточку товара
+function OpenCard(){
+//GoodsId=CurrentGoodsID;
+GoodsName=SelectedItemProperty(GoodsListView,'Text');
+if(CurrentGoodsID=="")return
+ok=window.showModalDialog("GoodsCard.csp?GoodsId="+CurrentGoodsID+"&groupspath="+GroupsTree.ParentNames,GoodsId+InnerSplitter+GoodsName,"center:yes;status:no;dialogHeight:600px;dialogWidth:650px;resizable:yes")
+if(ok==1){test()}
+}
+
+// вырезать товары в буфер обмена
+function cuttov(){
+var tovs=getselected();
+//alert(tovs)
+if(tovs==""){alert("Ничего не выбрано");return false;}
+ok=#server(Goods.CardAction.SaveCard2('#(%session.Data("user"))#',tovs,"Goods.Goods"))#
+if(isNaN(ok))alert(ok);
+else(alert("Выбранные товары помечены для перемещения"))
+}
+
+ // вставить товары из буфера обмена
+function pastetov(){
+if(!window.confirm("Вставить товары из буфера в группу "+GroupsTree.NodeCaption+"?"))return false;
+ok=#server(Goods.GoodsAction.FromCardInGroup('#(%session.Data("user"))#',GroupsTree.NodeID))#
+if(isNaN(ok)){alert(ok)}
+else{test();}
+}
+
+//открыть окно с товарами в буфере обмена
+function tovbuf(){
+window.showModalDialog("tovbuf.csp","","center:yes;status:no;dialogHeight:430px;dialogWidth:700px;resizable:yes")
+}
+
+//Открыть окно с ценами товара
+function tovprice(){
+var goodsid=CurrentGoodsID;
+if(goodsid=="")return
+window.showModalDialog("tovprice.csp?goodsid="+goodsid,"","center:yes;status:no;dialogHeight:520px;dialogWidth:700px;resizable:yes")
+}
+
+//очистить группу
+function cleargrup(){
+if(window.confirm("Вы уверены?")){
+	var GroupId=GroupsTree.NodeID;
+	var ok=#server(Goods.GoodsAction.cleargrup(GroupId))#;
+	if(isNaN(ok)){alert(ok);}
+	else{test();}
+}
+}
+ 
+//вставить в группу все бесхозные товары
+function fillgrup(){
+	var GroupId=GroupsTree.NodeID;
+	var ok=#server(Goods.GoodsAction.fillgrup(GroupId))#;
+	if(isNaN(ok)){alert(ok);}
+	else{test();}	
+}
+
+// распечатать прайслист
+function PrintPriceFunc(Suffix){
+	var GroupCode=GroupsTree.NodeCode;
+	if(GroupCode==""){alert("Выберете пожалуйста товарную группу");return;}
+	var CatalogueID=Catalogues.value;
+	var GroupName=GroupsTree.NodeCaption;
+	var url = "pricelist"+Suffix+".csp?GroupCode="+GroupCode+"&CatalogueID="+CatalogueID+"&GroupName="+GroupName+"&sessionid="+sessionid;
+	window.open(url);
+}
+
+// редактировать название группы товаров
+function EditGroupNameFn()
+{
+	var GroupId=GroupsTree.NodeID;
+	var GroupCode=GroupsTree.NodeCode;
+	if(GroupCode==""){alert("Выберете пожалуйста товарную группу");return;}
+	var NewName=window.prompt("Введите новое название группы",GroupsTree.NodeCaption);
+	if(!NewName)return;
+	if(NewName==""){alert("Пустные имена группа не допустимы.");return false;}
+	var ok=#server(Goods.GroupAction.RenameGroup(GroupId,NewName))#
+	if(isNaN(ok)){alert(ok)}
+	else{LoadTree();SelectedGroupCode=GroupCode;}
+}
+
+// функция после полной загрузки дерева товарных групп
+function GroupsTreeDnldCmpl()
+{
+	GroupsTree.SelectedItem=SelectedGroupCode;
+}
+
+/// Вывести остатки
+function PrintStorageFn()
+{
+	var GroupCode=GroupsTree.NodeCode;
+	if(GroupCode==""){alert("Выберете пожалуйста товарную группу");return;}
+	var CatalogueID=Catalogues.value;
+	var GroupName=GroupsTree.NodeCaption;
+	window.open("screen/OstatkiExcel.csp?excel=1&GroupCode="+GroupCode+"&CatalogueID="+CatalogueID+"&GroupName="+GroupName)	
+}
+
+function KeyPress(Obj){
+var KeyCode=Obj.toString();
+if(KeyCode==17)editTovar2();
+}
+
+// клик на кнопку "множественное редактирование"
+function fnMuiltipleEdit(){
+var ok=window.showModalDialog("GoodsListEdit.csp?Where="+where,"","center:yes;status:no;dialogHeight:650px;dialogWidth:1000px;resizable:yes;")
+if(ok!=null)test();
+}
+
+// клик на кнопку "найти товары"
+function fnFindGood(){
+var ok=window.showModalDialog("FindGood.csp","","center:yes;status:no;dialogHeight:650px;dialogWidth:800px;resizable:yes;")
+}
+
+$bind(window,"load",function(){ //при загрузке заполнить комбобокс Каталогов
+	//downloader.startDownload(strForGroups(depot,commongroups), putCatalogue);
+	LoadTree(); //инициализация дерева выбранного пункта каталога
+	GroupsTree.onClick="Click()";
+});
+
+// запретить отправку этой группы контрагенту
+function AllowToSendFn(AllowToSendParam,message)
+{	
+	var GroupName=GroupsTree.NodeCaption;	//название текущей группы
+	var GroupId=GroupsTree.NodeID;			//код текущей группы
+	
+	if (!window.confirm(GroupName + "\n" + message + " ?"))return;
+	if(GroupId==""){ alert("Выберете, пожалуйста группу"); return;}
+	if(GroupsTree.ChildIDs!=""){ alert("Данная группа не содержит товары/запчасти, выберете группу, которая содержит товары/запчасти"); return; }
+
+	var ok=#server(..StopGroupSend(GroupId,AllowToSendParam))#
+	if (isNaN(ok)) { alert(ok); }
+	else { alert(message); }
+}
+
+function test()
+{
+	var GroupId = GroupsTree.NodeID;
+	
+	/// Получить отправляемые на сервер дополнительные данные
+	var postData=$("#grid").jqGrid("getGridParam","postData");
+	/// Дополнить их своими параметрами
+	$.extend(postData,{ Groups: GroupId }); //добавляем свойство со значением
+	/// Устанавливаем новые доп.данные
+	$("#grid").jqGrid("setGridParam","postData",postData);
+	/// Обновляем таблицу
+	$("#grid").trigger("reloadGrid");
+}
+</script>
+
+<table id="grid"><tr><td></td></tr></table><div id="bar"></div>
+ <Table width=100%><tr><td width="60%" >
+<CSP:IF CONDITION="Access9func=1">
+  <sklad:LittleButton name="new" id="newtov" onclick="addTovar()" alt="Новый товар">
+  <sklad:LittleButton name="edit" id="edittov" onclick="editTovar()" alt="Редактировать товар">
+  <sklad:LittleButton name="edit" id="edittov2" onclick="editTovar2()" alt="Редактировать товар в новой форме ( CTRL+q )">
+</CSP:IF>
+  <sklad:LittleButton name="card" id="cardtov" onclick="OpenCard()" alt="Карточка товара">
+  <sklad:LittleButton name="new+" id="newGprop" onclick="AddProp2()" alt="Новое основное свойство">
+  <sklad:LittleButton name="del+" id="delGprop" onclick="DelProp()" alt="Удалить основное свойство">
+<CSP:IF CONDITION="Access9func=1">
+  <sklad:LittleButton name="copy" id="copy" onclick="cuttov()" alt="Пометить для копирования">
+  <sklad:LittleButton name="paste" id="paste" onclick="pastetov()" alt="Вставить товары из буфера">
+  <sklad:LittleButton name="history" id="buf" onclick="tovbuf()" alt="Товары в буфере обмена">
+</CSP:IF>
+  <sklad:LittleButton name="price" id="price" onclick="tovprice()" alt="Цены товара">
+<CSP:IF CONDITION="Access9func=1">
+  <sklad:LittleButton name="goinside" id="btnMuiltipleEdit" onclick="fnMuiltipleEdit()" alt="Редактировать список товаров">
+</CSP:IF>
+  <sklad:LittleButton name="find" id="btnFindGood" onclick="fnFindGood()" alt="Поиск товаров">
+  </td>
+  <td align=right width="40%">
+  
+<CSP:IF CONDITION="Access9func=1">
+  <sklad:LittleButton name="del" id="deltov" onclick="DelTovar()" alt="Удалить товар">
+</CSP:IF>
+  <!--
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <span title="Обновление таблицы после каждого сохранения товара (если отключить, то редактировать товары можно будет быстрее)">
+  	<label for="makeShowDict">Поддерживать таблицу в актуальном состоянии</label>
+  	<input type=checkbox id="makeShowDict" checked style="width:20pt;border:none;">
+  </span>
+  -->
+  </td></tr></table>
+		<script type='text/javascript' src='js/jquery-1.6.4.min.js'></script>
+		<script type='text/javascript' src='js/jquery-ui-1.8.16.custom.min.js'></script>
+		<script type='text/javascript' src='js/i18n/grid.locale-ru_win1251.js'></script>
+		<script type='text/javascript' src='js/jquery.jqGrid-4.1.2.min.js'></script>
+		<script type='text/javascript'>
+		
+		
+		$(function(){
+				var GRID="#grid",BAR="#bar",URL="json.GoodsJQ.cls";
+
+				$(GRID).jqGrid({
+						caption: 'Товары / запчасти'
+						,url: URL, editurl: URL
+						,datatype: "json"
+						,jsonReader : { repeatitems: false }
+						,colModel: [
+							{name:"gd",hidden: true}
+							,{name:"nm",label:"Наименование",width:350
+								, search:true
+							}
+							,{name:"P5300",label:"Номер по схеме",width:150
+								, search:true
+							}
+							,{name:"EN",label:"Английское наименование",width:210
+								, search:true
+							}
+							,{name:"ats",label:"Использовать в заявках",width:200
+								, search:true
+							}	
+						]
+						//,idPrefix:"kt"
+					 ,pager:BAR 
+					 ,viewrecords:true
+					 ,height:300
+					 ,hidegrid: false
+					 ,gridview:true ,rownumbers:true,viewrecords:true,rowNum:100
+					 ,/*scrollrows:true,*/hoverrows:true ,scroll:1
+					 ,ondblClickRow: function(id){editTovar2();}
+					 ,onSelectRow: function(id) {CurrentGoodsID = id;}
+ 		})
+ 		.jqGrid('navGrid',BAR, {
+	       	add: false
+       		, edit:false
+       		, del:false 
+       		, view:false
+       		, search:false
+       }
+       ,{} //Параметры редактирования
+       ,{} //Параметры добавления
+       ,{ //Параметры удаления
+	       afterSubmit: function(resp){
+		      var text=resp.responseText;
+		      var arr=eval(text); 
+		      return arr;
+		   }
+	   } 
+   ).jqGrid('filterToolbar',{searchOnEnter:false})
+   .jqGrid('gridResize',{});
+ 	$(BAR+"_center").remove(); //пагинатора не будет
+ 	$(BAR+"_left").css("width","70%"); //надпись о количестве записей на бОльшую часть футера
+});
+
+
+</script>
+
+</body>
+</html>

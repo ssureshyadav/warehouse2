@@ -1,0 +1,40 @@
+<server>
+ s Command=%request.Get("Command")
+
+ if Command="Groups"
+ {
+	 s count=0
+	 s Catalogue=%request.Get("Cat")
+	 s term = $Zcvt(%request.Get("term"),"i","UTF8")
+	
+	 s term = "%"_$ZCVT(term,"U")_"%"
+
+	 &sql(select count(ID) into :RowsCount from Goods.Group 
+	 	where Catalogue=:Catalogue
+	 	and 
+	 	{fn UCASE(Name)} Like :term
+	 	)
+	 
+	 &sql(declare gr cursor for 
+	 	select ID,Name,Code
+	 	into :ID,:Name,:Code
+	 	from Goods.Group
+	 	where Catalogue=:Catalogue
+	 	and 
+	 	{fn UCASE(Name)} Like :term
+		)
+	 	
+	 &sql(open gr)
+	 w "["
+	 for  
+	 {
+		 &sql(fetch gr)
+		 Q:SQLCODE
+		 i $I(count)
+		 w "{""label"":"""_Name_""",""id"":"""_Code_"""}"
+		 if (count<RowsCount) w ","
+	 }
+	 w "]"
+	 &sql(close gr)
+ }
+</server>		 

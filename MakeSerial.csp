@@ -1,0 +1,95 @@
+<script language="Cache" method="ShowFileData" arguments="" returntype="%String">
+ if %request.ContentType'="multipart/form-data" q ""
+ s obj=$G(%request.MimeData("file1",1))
+ q:'$ISOBJECT(obj) ""
+ 
+ s glob=$NA(^Common.Dictionary2I("serialInd"))
+ s ListIndex("Property9194") = ##class(Common.Dictionary2).GetPropertyListIndex("Property9194",.DataLocation)
+ s ListIndex("Comment") = ##class(Common.Dictionary2).GetPropertyListIndex("Comment",.DataLocation)
+ s cl="Common.Dictionary2||Property9194"
+ d ##class(Docs.Action2).GetDisplayListArray(cl,.Property9194Array)
+
+ w "<table border=1>",!
+ w "<tr><td>Серийный номер<td>Гарантийный номер<td>Актуальность<td>Примечание</tr>"
+ while ('obj.AtEnd)
+ {
+	s serial=obj.ReadLine(32000)
+	s (garantStr,actual,comment)="Не найден"
+	s color="#FFFFFF"
+	s SearchString = " "_$ZCVT(serial,"U")
+     
+ 	//если данные есть
+ 	if $D(@glob@(SearchString))
+ 	{
+ 		s ID = $O(@glob@(SearchString,""))
+ 		s Property9194 = ##class(Common.Dictionary2).GetPropertyValue(ID,"Property9194",ListIndex("Property9194"),.DataLocation)
+ 		s actual=$G(Property9194Array(Property9194))
+ 		s garant=$LG(@glob@(SearchString,ID),2)
+ 		s garantStr=$S('ShowExcel:"<a href=""javascript:s('"_ID_"')"">",1:"")
+ 		s garantStr=garantStr_garant
+ 		s garantStr=garantStr_$S('ShowExcel:"</a>",1:"")
+ 		s comment=##class(Common.Dictionary2).GetPropertyValue(ID,"Comment",ListIndex("Comment"),.DataLocation)
+ 		if Property9194=2 s color="#DEDEDE"
+ 	}
+	
+ 	w "<tr bgcolor="""_color_""">"
+ 	w "<td>"_serial
+ 	w "<td>"_garantStr
+ 	w "<td>"_actual
+ 	w "<td>"_comment
+ 	w "</tr>"
+ }
+ w "</table>",!
+ Quit ""
+</script>
+
+<html>
+<head>
+<CSP:IF CONDITION="'ShowExcel">	
+	<link href="style.css" type=text/css rel=stylesheet>
+</CSP:IF>	
+<!-- Put your page Title here -->
+<title>	Проверка действительности серийных номеров </title>
+<script language="javascript" type="text/javascript">
+
+function s(currentrecord)
+{
+	ok=window.showModalDialog("garant.csp?GarantId="+currentrecord,currentrecord+";Common.Dictionary2","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+}
+</script>
+</head>
+
+<body TOPMARGIN=25 LEFTMARGIN=25>
+<CSP:IF CONDITION="'ShowExcel">
+	<sklad:Button value="Товары" onclick="window.location.href='goods.csp'">
+	<sklad:Button value="Управление серийными номерами" onclick="window.location.href='serials.csp'" style="width:250px"><br>
+	<br><br>
+	<TABLE cellSpacing=0 width="100%" celpadding="0" >
+	<TR>
+	<td width=10%><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
+	<TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=2><strong>Проверка серийных номеров в текстовом файле</strong></TD>
+	<td  width=10% align=right><!--<a href="talk.csp" ><img src="images/BIGProp.gif" width="20" height=25 border=0></a>--></td>
+	</tr>
+	</TABLE>
+</CSP:IF>
+
+<CSP:IF CONDITION="FormFilled=0">
+	<form enctype="multipart/form-data" method="post">
+	Укажите текстовый файл со списком серийных номеров <input type="file" name="file1">
+	<input type="hidden" name="FormFilled" value="1">
+	<br><font size="-1" size="Grey">* Каждый серийный номер должен располагаться на новой строке</font>
+	<br>Открыть результат в Microsoft Excel <input type="checkbox" name="ShowExcel" value="1" style="border:none">
+	<br><br> <input type="submit" value="Проверить указанный файл" style="width:200px">
+	</form>
+<CSP:ELSE>
+	<script language="cache" runat="server">
+	d ..ShowFileData()
+	
+	</script>
+	 <CSP:IF CONDITION="'ShowExcel">	
+		 <br><br>
+		 <a href="?">Вернуться к выбору файла</a>
+	 </CSP:IF>
+</CSP:IF>
+</body>
+</html>

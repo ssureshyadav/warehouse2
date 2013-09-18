@@ -1,0 +1,222 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ s login=$G(%session.Data("user"))
+ //i '+login s %response.ServerSideRedirect="norights.csp" 
+ q 1
+</script>
+<script language="cache" runat="server">
+ s Tunes=$NA(^Tunes(2))
+ s i="" f  s i=$O(@Tunes@(i)) q:i=""  d
+ . s CommonVars=$G(CommonVars)_"var "_i_"="""_$G(@Tunes@(i,"Value"),"undefined")_""";"
+</script>
+<html>
+
+<head>
+<script type="text/javascript" src="js/dtree/dtree.js"></script>
+<link href="style.css" type=text/css rel=stylesheet>
+<link rel="StyleSheet" href="js/dtree/dtree.css" type="text/css" />
+<script language="javascript" type="text/javascript" src="js/jquery-1.8.2.min.js"></script>
+<script language="javascript" type="text/javascript" src="common.js"></script>
+<script language="Javascript" type="text/javascript">
+var Trick=0;
+sessionid="#(%session.SessionId)#";
+var code="";	//код текущей ветки дерева
+var id="";	//ID текущей ветки дерева
+
+var ItemsPercents = new Array();
+depot='#($G(%session.Data("depot")))#'
+#(CommonVars)#
+var CurrentElement="";
+
+function TreeClick(NodeCode,currentid)
+{
+	code = NodeCode;
+	id = currentid;
+	if(NodeCode==""){Trick=1;}
+	else{Trick=0;}
+	//CreateAddressLine();
+	//Clear();
+	var childs=""
+	if(NodeCode==""){var childs=sparents}
+	else{var childs=ReturnSpace(parents[NodeCode])}
+
+
+	if(childs!="")
+	{
+		tablefield.style.display="none";
+		var strings = childs.split(InnerSplitter);
+		if (strings.length!=1)
+		{
+			for (var i = 0; i < strings.length-1; i++)
+			{
+				var id1=strings[i]
+				ElemId=id1
+				ElemCode=code[id1]
+				ElemName=name[id1]
+				ElemComment=comment[id1]
+				elemtempstore=tempstore[id1]
+				elempercent=percent[id1]
+				ElementStr="<div ondblclick='HandleClick(this)' onmouseover=\"Comment.innerText='"+ElemComment+"'\" onmouseout=\"Comment.innerText=''\" style='margin:6;height:"+BlockHeight+";width:"+BlockWidth+";border:1 solid;display:inline' id='"+ElemId+"'></div>";
+				aElement=document.createElement(ElementStr);
+				if(elemtempstore=="1"){aElement.style.backgroundColor="#efefef"}
+				var littlecols=CreateChQuant(ReturnSpace(parents[ElemCode]))
+				aElement.innerHTML="<center>"+ElemName+"<font color=gray> ("+elempercent+"%) </font>"+littlecols+"</center>";
+				aElement.tag=ElemCode;
+				MoveField.appendChild(aElement);
+			}
+		}
+		else{alert(ok);}
+	}
+	else
+	{
+		var currentpercent=ItemsPercents[currentid];
+		$("#tablefield").css("display","block");
+		$.get('Commands.csp?command=CellStorage&id='+currentid, function(data) {
+		  $('#PropTable').html(data);
+		});
+		//PropTable.ClearRows();
+		//PropTable.DownLoadPairs("",currentid,"Depot,Code,Parent");
+		//goods.loadfrommethod("Goods.GoodsAction.goodsfromstore",currentid,2,3)
+	}
+}
+
+//создать уровень
+function CreateSub(sublevel)
+{
+	if((sublevel==1)&(code=="")){return false;}
+	ok=window.showModalDialog("addZone.csp",code+";"+sublevel,"center:yes;status:no;dialogHeight:250px;dialogWidth:600px;resizable:yes")
+	if(ok==null)return false;
+	if(ok==1)
+	{
+		window.location.reload();
+	}
+	else
+	{
+		alert(ok)
+	}
+}
+
+//редактировать название
+function editname()
+{
+	var Name=window.prompt("Новое наименование",$("#sd"+d.selectedNode).text())
+	if(Name==null)return false;
+	#server(Store.Action.changename(id,Name))#
+	$("#sd"+d.selectedNode).text(Name);
+}
+</script>
+<style>
+
+ 
+  ::-webkit-scrollbar {
+    width: 12px;
+}
+ 
+::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3); 
+    border-radius: 10px;
+}
+ 
+::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+	background-image: url(scrollbar/vertical-increment-arrow-active.png);
+}
+</style>
+</head>
+<body >
+
+
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<td width=10%><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
+<TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=2><strong>Структура хранения</strong></TD>
+<td width=10% align=right><a href="help/store.htm"><img src="images/BIGHelp.bmp" width="20" height=25 border=0></a></td>
+</TABLE>
+
+<br>
+<a href="javascript:TreeClick('')" >#($G(%session.Data("depotName")))#</a> > <span id="addresspath"></span>
+<table cellspacing=0 cellpadding=0 width=100% height=100% border=0 id="TableMoveField"><tr>
+<td valign=top>
+
+<div class="dtree" style="width:200px;height:500px;overflow:auto">
+
+	<p><a href="javascript: d.openAll();">open all</a> | <a href="javascript: d.closeAll();">close all</a></p>
+
+<script language="cache" runat="server">
+ w "<script language=""javascript"" type=""text/javascript"">",!
+ w "d = new dTree('d');",!
+ w "d.add('0','-1','ntcn');",!
+ f var="ids","percent","code","name","comment","tempstore","parents" d
+ . w "var "_var_"=new Array();",!
+
+ s depot=$G(%session.Data("depot"))
+ s depot=1
+ s sql="select ID,Code,Name,Comment,tempstore,Currentsize,Size1,Parent from Store.Address where depot="_depot_" order by Code"
+ s result=##class(%ResultSet).%New()
+ d result.Prepare(sql)
+ s result.RuntimeMode=2
+ s ok=result.Execute()
+ s res=""
+ While result.Next() {
+  s OutString=""
+  s id=result.Get("ID")
+  s code=result.Get("Code")
+  s name=result.Get("Name")
+  s comment=result.Get("Comment")
+  s tempstore=result.Get("tempstore")
+  s percent=0
+  s Currentsize=+result.Get("Currentsize")
+  s Maxsize=+result.Get("Size1")
+  s str2(code)=id
+  s parent=result.Get("Parent")
+  i parent'="" s str(parent)=$G(str(parent))_id_"~"
+  e  s str=$G(str)_id_"~"
+  i Maxsize>0 s percent=$J((Currentsize/Maxsize)*100,".",0)
+  w "var icon = 'js/dtree/img/folder.gif';"
+  w "var iconopen = 'js/dtree/img/folderopen.gif';"
+  if parent="" s parent="0"
+
+  w "d.add('"_code_"','"_parent_"','"_name_"','javascript:TreeClick(\'"_code_"\',\'"_id_"\')','"_comment_"');",!
+  //f var="percent","code","name","comment","tempstore" d
+  //. w var_"["_id_"]="""_@var_""";",!
+  //w "ids["""_code_"""]="_id_";"
+ }
+ 
+
+  s i=""
+  w "",!
+  f  s i=$O(str(i)) q:i=""  d
+  . q:str2(i)=""
+  . w "parents["""_i_"""]="""_$G(str(i))_""";",!
+  w "sparents="""_$G(str)_""";",!
+  
+w "document.write(d);",!
+w "</script"_">",!
+</script>
+</div>
+
+<table><tr><td width=100%><sklad:LittleButton name="new" id="newsub" onclick="CreateSub(0)" alt="Новый элемент">
+<sklad:LittleButton name="new+" id="newsub1" onclick="CreateSub(1)" alt="Новый подэлемент">
+<sklad:LittleButton name="history" id="multed" onclick="multiedit()" alt="Множественное редактирование">
+<sklad:LittleButton name="edit" id="smulted" onclick="editname()" alt="Изменить наименование">
+<sklad:LittleButton name="del+" id="shmulted" onclick="clearcell()" alt="Очистить"></td>
+
+<td><sklad:LittleButton name="del" id="deletesub1" onclick="DelSub()" alt="Удалить элемент"></td>
+</tr></table>
+<br><br><span id="Comment" style="color:darkgrey"></span>
+</td>
+<td width=100% style="border-left:1 solid black;border-top:1 solid black" valign=top id="MoveField2">
+<div id="MoveField" CONTENTEDITABLE='false' >
+</div>
+<div id="tablefield" style="display:none;padding:10px">
+<table id="PropTable" width="400" cellpadding=7 cellspacing=0 ></table>
+ 
+<br>
+<!--
+<center><sklad:ButtonDiv value="Да" onclick="startFun();" ></center>
+-->
+</div></td>
+
+</table>
+</body>
+</html>
