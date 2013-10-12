@@ -220,7 +220,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
  #; ******************************
  #; Вывод строк  
  k total               
- d ..wRows( docid, .total )         
+ d ..wRows( docid, .total, incNDS )         
  #define total(%name) $g(total(%name))
  
  #; ******************************
