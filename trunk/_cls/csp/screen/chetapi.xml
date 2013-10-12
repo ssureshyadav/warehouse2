@@ -60,13 +60,13 @@
 </Method>
 
 <Method name="wRows">
-<Description>
+<Description><![CDATA[
 Выводит строки и подсчитывает итого
-kurs - курс 
-NDSinside - включить ндс в стоимость товара
-total - итого (массив)</Description>
+<var>kurs</var> - курс рубля к доллару
+<var>total</var> - итого (массив) по строкам
+<var>incNDS</var> - включать ндс в стоимость ]]></Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>docid:%String,*total:%String="",incNDS:%Boolean=0</FormalSpec>
+<FormalSpec>docid:%String,*total:%String="",incnds:%Boolean=0</FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
     
@@ -80,27 +80,29 @@ total - итого (массив)</Description>
  s waste=##class(Goods.GoodsAction).kurs(.other) 
  s:'+$G(kurs) kurs=waste
  
+ s knds=+$G(other("nds"))/100 ;например, 0.18
  
-
  s totsum=0, totquant=0, count=0
  s i="" for { s item=doc.Items.GetNext(.i) q:i=""  
  
     s goods="" s:$IsObject(item.Goods) goods=item.Goods.FullName
     s quant=item.Quantity if quant=0 continue  ;ПРОПУСКАЕМ строки с нулевым количеством
     
-    s price = $J(( item.Price * kurs ),".",2) ;всегда переводим в рубли
-    , sum = price * quant
+    s price = $j( item.Price * kurs, ".", 2 ) ;всегда переводим в рубли
+    
+    k ctx 
+    s ctx("price")=price, ctx("count")=quant, ctx("knds")=knds, ctx("incnds")=incnds
+    , sum = ..getSum( .ctx ) ; сумма с единообразным округлением
+    , price = $g(ctx("price")) ;при вычислении суммы могли включить ндс в стоимость
     
     s count = count + 1 ;порядковый номер строки
     , totsum = totsum + sum ;итоговая сумма
     , totquant = totquant + quant ;итоговое количество
     
-    k row s row("count")=count, row("goods")=goods
+    k row 
+    s row("count")=count, row("goods")=goods
     , row("quant")=quant, row("price")=price
     , row("sum")=sum
-    
-    #; для отладки
-    s row("kurs")=kurs, row("iprice") = item.Price
     
     d ..wRow(.row)
 
@@ -113,7 +115,49 @@ total - итого (массив)</Description>
 ]]></Implementation>
 </Method>
 
+<Method name="getSum">
+<Description><![CDATA[
+Нельзя просто так взять и рассчитать сумму по товарной строке
+( количество умножить на цену - частный случай рассчета суммы без НДС ). 
+При расчете с НДС начинаются расхождения из-за округлений
+Для введения единообразного расчета используем этот метод 
+За основу взят кусок кода из csp.screen.torg12v2:wRows
+<var>context("price")</var> - цена товара в рублях, копейках 
+<var>context("count")</var> - количество товара
+ВАЖНО!!! <var>context("knds")</var> в формате .21, не как процент!!!
+<var>context("incnds")</var> Boolean Включить nds в цену товара?]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&context:%String=""]]></FormalSpec>
+<ReturnType>%Currency</ReturnType>
+<Implementation><![CDATA[
+   /// извлечение из контекста 
+   #define g(%name) s %name=+$g(context("%name"))
+   $$$g(price) $$$g(count) $$$g(knds) $$$g(incnds)
+   
+   s antinds = 1 / ( 1 + knds ) ;избегаем деления на ноль
+   
+   i incnds { ;включить ндс в стоимость товара
+        s price=$J( price * antinds, ".", 2 ) ;стоимость единицы товара без ндс
+        s summabeznds = $J( count * price, ".", 2 ) 
+        s ndsotsumma = $J( summabeznds * knds, ".", 2 ) ;
+        s summasnds = summabeznds + ndsotsumma
+   } else { 
+        s summabeznds=$J( count * price, ".", 2 ) ;округление
+        s ndsotsumma=$J( summabeznds - (summabeznds * antinds), ".", 2 ) 
+        s summasnds=$J( summabeznds + ndsotsumma, ".", 2 ) 
+   }
+   
+   #; сохраняем изменненные и рассчитанные значения
+   #define s(%name) s context("%name")=%name
+   $$$s(antinds) $$$s(price) $$$s(summabeznds) $$$s(ndsotsumma) $$$s(summasnds)
+   
+   Q summasnds ;для удобства
+]]></Implementation>
+</Method>
+
 <Method name="wRow">
+<Description>
+Вывод товарной строки</Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec><![CDATA[&row:%String=""]]></FormalSpec>
 <ReturnType>%String</ReturnType>
@@ -133,7 +177,10 @@ total - итого (массив)</Description>
   <td colspan=6 class=xl9310184>#( $$$row("sum") )#</td>
  </tr>>
  
- #;<!--tr><td colspan=37>  #( $$$row("iprice"))# * #( $$$row("kurs") )#  </td></tr>
+  #; debug
+  #;&html<<tr><td colspan=37><pre>>
+  #;  zw row
+  #;&html<</pre></td></tr>>
  
  Q ""
 ]]></Implementation>
