@@ -62,8 +62,14 @@ ID можно не указывать, т.к. выбирается обязат�
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-  m qa=%request.Data 
-  s oper=$G(qa("oper",1)) 
+  k qa s qa="" 
+  if $g(%request)'="" && $IsObject(%request) {
+      m qa=%request.Data 
+  }
+  
+  #;s ^mtempArt2("qa")=qa
+  
+  s oper=$g(qa("oper",1)) 
   Q:oper="add" ..Add(.qa) 
   Q:oper="edit" ..Edit(.qa) 
   Q:oper="del" ..Delete(.qa)
@@ -80,7 +86,7 @@ ID можно не указывать, т.к. выбирается обязат�
 <FormalSpec>Dat:%Date</FormalSpec>
 <ReturnType>%String</ReturnType>
 <SqlProc>1</SqlProc>
-<Implementation><![CDATA[		Q $zd(Dat,3,,,,,,,"")
+<Implementation><![CDATA[        Q $zd(Dat,3,,,,,,,"")
 ]]></Implementation>
 </Method>
 
@@ -92,30 +98,30 @@ ID можно не указывать, т.к. выбирается обязат�
 <FormalSpec>caption:%String</FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
-	
-	#;первая строчка кода
-	s %code=0 ;начиная с первой строки
-	#; принимаем и проверяем параметр
-	$$$GENERATE("  s caption=$g(caption) Q:caption="""" """" ") 
-	
-	s fields=%parameter("FIELDS"), fields=$zstrip(fields,"<>W")
-	s fieldList=$LFS(fields,",")
-	
-	#; проходим по списку полей с синонимами, выделяем поле и его синоним
-	w !,!,"Cоответствие синонимов и полей"
-	s key=0,pair="" while $LISTNEXT(fieldList,key,pair){ 
-		s field=$zstrip($P(pair," as "),"<>W"), syn=$zstrip($P(pair," as ",2),"<>W")
-		if field'="" && (syn'="") { ;выделили и имя и синоним
-			w !,syn," = ",field  ;отладка
-			#; нашли соответствие вернули значение
-			$$$GENERATE("  Q:caption="""_syn_""" """_field_"""")			
-		}
-	}
-	
-	#; по умолчанию возвращаем принятое значение
-	$$$GENERATE("  Q caption ")
-	w ! ;форматирование отладочных сообщений
-	Q $$$OK
+    
+    #;первая строчка кода
+    s %code=0 ;начиная с первой строки
+    #; принимаем и проверяем параметр
+    $$$GENERATE("  s caption=$g(caption) Q:caption="""" """" ") 
+    
+    s fields=%parameter("FIELDS"), fields=$zstrip(fields,"<>W")
+    s fieldList=$LFS(fields,",")
+    
+    #; проходим по списку полей с синонимами, выделяем поле и его синоним
+    w !,!,"Cоответствие синонимов и полей"
+    s key=0,pair="" while $LISTNEXT(fieldList,key,pair){ 
+        s field=$zstrip($P(pair," as "),"<>W"), syn=$zstrip($P(pair," as ",2),"<>W")
+        if field'="" && (syn'="") { ;выделили и имя и синоним
+            w !,syn," = ",field  ;отладка
+            #; нашли соответствие вернули значение
+            $$$GENERATE("  Q:caption="""_syn_""" """_field_"""")            
+        }
+    }
+    
+    #; по умолчанию возвращаем принятое значение
+    $$$GENERATE("  Q caption ")
+    w ! ;форматирование отладочных сообщений
+    Q $$$OK
 ]]></Implementation>
 </Method>
 
@@ -141,19 +147,19 @@ ID можно не указывать, т.к. выбирается обязат�
  
  s parentField=%parameter("PARENTFIELD")
  if parentField '="" { ;если параметр был определен, то условие обязательно должно попасть в запрос
- 	 $$$GENERATE("  s parentValue=$g(rq("""_parentField_""",1)) ") 
- 	 $$$GENERATE("  s syn=..GetFieldName("""_parentField_""") ") 
-	 $$$GENERATE("  s where=where_"" and ""_syn_""=?"", qp($i(qp))=parentValue ") 
+     $$$GENERATE("  s parentValue=$g(rq("""_parentField_""",1)) ") 
+     $$$GENERATE("  s syn=..GetFieldName("""_parentField_""") ") 
+     $$$GENERATE("  s where=where_"" and ""_syn_""=?"", qp($i(qp))=parentValue ") 
  }
  
  #; выбрать список синонимов, которые могут быть в параметрах запроса
  #; так как служба предназначена для компонента jqgrid
  #; должен быть установлен параметр _search=true без него where не строится
  $$$GENERATE("  if $g(rq(""_search"",1))'=""true"" { ")
- $$$GENERATE("  	s rq(""where"")= where ")
- $$$GENERATE("  	if '$f($zcvt(where,""U""),""WHERE"") s rq(""where"")="" WHERE 1=1 ""_where ")
- $$$GENERATE("  	m rq(""where"",""qp"")=qp ")
- $$$GENERATE("  	Q $g(rq(""where"")) ")
+ $$$GENERATE("      s rq(""where"")= where ")
+ $$$GENERATE("      if '$f($zcvt(where,""U""),""WHERE"") s rq(""where"")="" WHERE 1=1 ""_where ")
+ $$$GENERATE("      m rq(""where"",""qp"")=qp ")
+ $$$GENERATE("      Q $g(rq(""where"")) ")
  $$$GENERATE(" } ")
  
  #; со стороны клиента на сервер фильтр будет приходить в виде пар
@@ -164,38 +170,38 @@ ID можно не указывать, т.к. выбирается обязат�
  s ftypes=$LFS(%parameter("FTYPES"),",")
  w !,!,"Условия фильтров"
  for i=1:1:flen {
-	 	s pair=$LG(fields,i), type=$LG(ftypes,i,"%String")
-	 	s field=$P(pair," as "), syn=$P(pair," as ",2) 
-	 	s:syn="" syn=field
-	  
-	    s cmd=""  
-	 	
-	 	#; Для поля c типом %String "обычно" требуется регистро-независимый поиск по вхождению
-	 	#; что приводит к переводу в верхний регистр как значения запроса, так и поля
-	 	if type="%String" {
-		 
-		 	s cmd="  if $d(rq("""_syn_"""))  s where=where_"" and "
-				s cmd=cmd_" %UPPER("_field_") LIKE %UPPER(?) "" "	 	
-				#; избавляемся от проблемных символов в значении параметра
-				s cmd=cmd_", qp($i(qp))=""%""_$tr($g(rq("""_syn_""",1)),""%"")_""%"" "
-	 	
-	 	} else {
-	 	
-	 		#; для остальных типов полей - поиск на соответствие 
-	 		s cmd="  if $d(rq("""_syn_"""))  s where=where_"" and "_field_"=?"" , qp($i(qp))=$g(rq("""_syn_""",1)) "
-	 	
-	 	}
-	 	w !,cmd  ;отладка генерации
-	 	$$$GENERATE(cmd)
-	 	
-	}
-	
-	#; возвращаем собранное выражение 
-	$$$GENERATE("  	s rq(""where"")= where ")
- 	$$$GENERATE("  	if '$f($zcvt(where,""U""),""WHERE"") s rq(""where"")="" WHERE 1=1 ""_where ")
- 	$$$GENERATE("  	m rq(""where"",""qp"")=qp ")
-	$$$GENERATE(" Q $g(rq(""where"")) ") 	
-	
+        s pair=$LG(fields,i), type=$LG(ftypes,i,"%String")
+        s field=$P(pair," as "), syn=$P(pair," as ",2) 
+        s:syn="" syn=field
+      
+        s cmd=""  
+        
+        #; Для поля c типом %String "обычно" требуется регистро-независимый поиск по вхождению
+        #; что приводит к переводу в верхний регистр как значения запроса, так и поля
+        if type="%String" {
+         
+            s cmd="  if $d(rq("""_syn_"""))  s where=where_"" and "
+                s cmd=cmd_" %UPPER("_field_") LIKE %UPPER(?) "" "       
+                #; избавляемся от проблемных символов в значении параметра
+                s cmd=cmd_", qp($i(qp))=""%""_$tr($g(rq("""_syn_""",1)),""%"")_""%"" "
+        
+        } else {
+        
+            #; для остальных типов полей - поиск на соответствие 
+            s cmd="  if $d(rq("""_syn_"""))  s where=where_"" and "_field_"=?"" , qp($i(qp))=$g(rq("""_syn_""",1)) "
+        
+        }
+        w !,cmd  ;отладка генерации
+        $$$GENERATE(cmd)
+        
+    }
+    
+    #; возвращаем собранное выражение 
+    $$$GENERATE("   s rq(""where"")= where ")
+    $$$GENERATE("   if '$f($zcvt(where,""U""),""WHERE"") s rq(""where"")="" WHERE 1=1 ""_where ")
+    $$$GENERATE("   m rq(""where"",""qp"")=qp ")
+    $$$GENERATE(" Q $g(rq(""where"")) ")    
+    
  Q $$$OK
 ]]></Implementation>
 </Method>
@@ -209,19 +215,19 @@ ID можно не указывать, т.к. выбирается обязат�
 <FormalSpec><![CDATA[&rq:%String]]></FormalSpec>
 <ReturnType>%Integer</ReturnType>
 <Implementation><![CDATA[
-	 s sql="Select Count(*) as count1 From "_..#CLASSNAME
-	 k qp s qp=0  ;query parameters
-	 if $d(rq("where")) {
-		 s sql=sql_$g(rq("where")) m qp=rq("where","qp") ;забираем параметры
-	 }
-	 s count=0,sc=1, rs=##class(json.xvrs).GetResultSet(sql,.qp,.sc)
-	 If $$$ISERR(sc) {
-		 w !,$system.Status.GetOneErrorText(sc)
-		 Q 0
-	 }
-	 s sc=rs.Next(), count=rs.Get("count1")  d rs.Close()
-	 Q:sc count
-	 Q 0
+     s sql="Select Count(*) as count1 From "_..#CLASSNAME
+     k qp s qp=0  ;query parameters
+     if $d(rq("where")) {
+         s sql=sql_$g(rq("where")) m qp=rq("where","qp") ;забираем параметры
+     }
+     s count=0,sc=1, rs=##class(json.xvrs).GetResultSet(sql,.qp,.sc)
+     If $$$ISERR(sc) {
+         w !,$system.Status.GetOneErrorText(sc)
+         Q 0
+     }
+     s sc=rs.Next(), count=rs.Get("count1")  d rs.Close()
+     Q:sc count
+     Q 0
 ]]></Implementation>
 </Method>
 
@@ -243,15 +249,15 @@ ID можно не указывать, т.к. выбирается обязат�
  s fields=$LFS($zcvt(%parameter("FIELDS"),"U"),","), flen=$LL(fields), key=0, pair=""
  k list s list=""
  while $LISTNEXT(fields,key,pair){
-	 s field=$zstrip($p(pair," AS "),"<>W"), syn=$zstrip($p(pair," AS ",2),"<>W")
-	 s:syn="" syn=field ;предпочтение синониму, но если нет - берем поле
-	 s:syn'="" list(syn)="" 
+     s field=$zstrip($p(pair," AS "),"<>W"), syn=$zstrip($p(pair," AS ",2),"<>W")
+     s:syn="" syn=field ;предпочтение синониму, но если нет - берем поле
+     s:syn'="" list(syn)="" 
  }
  
  #;Разворачиваем массив в список
  s name="" for { s name=$o(list(name)) Q:name="" 
-	s:list'="" list=list_","
-	s list=list_name
+    s:list'="" list=list_","
+    s list=list_name
  }
  
  #;выходим если имя сортировки не соответствует указанным полям и/или их синониму
@@ -319,8 +325,8 @@ ID можно не указывать, т.к. выбирается обязат�
  #; Переходим на универсальный интерфейс к динамическим запросам
  s sc=1, rs=##class(json.xvrs).GetResultSet(sql,.qp,.sc)
  if 'sc {
-	 w sc Q $$$OK 
-	}
+     w sc Q $$$OK 
+    }
  s first=1 
  w "{"
  #; w """userData"":",..QuoteJS(sql),","
@@ -371,15 +377,15 @@ ID можно не указывать, т.к. выбирается обязат�
  $$$GENERATE(" w ""{""""id"""":"",jsid ")
  
  for i=1:1:len {
-		s pair=$LG(list,i), field=$P(pair," as "), syn=$P(pair," as ",2)
-		s field=$zstrip(field,"<>W"), syn=$zstrip(syn,"<>W") s:syn="" syn=field
-		if i<=len $$$GENERATE(" w "","" ")
-		$$$GENERATE(" s val"_i_"=..QuoteJS(var"_i_"),len"_i_"=$l(val"_i_") ")
-		$$$GENERATE(" s $e(val"_i_",1)=$c(34),$e(val"_i_",len"_i_")=$c(34) ")
-		$$$GENERATE(" w """""""_syn_""""":"",val"_i_" ")
-	}
-	$$$GENERATE(" w ""}""  ")
-	$$$GENERATE("  Q $$$OK ")
+        s pair=$LG(list,i), field=$P(pair," as "), syn=$P(pair," as ",2)
+        s field=$zstrip(field,"<>W"), syn=$zstrip(syn,"<>W") s:syn="" syn=field
+        if i<=len $$$GENERATE(" w "","" ")
+        $$$GENERATE(" s val"_i_"=..QuoteJS(var"_i_"),len"_i_"=$l(val"_i_") ")
+        $$$GENERATE(" s $e(val"_i_",1)=$c(34),$e(val"_i_",len"_i_")=$c(34) ")
+        $$$GENERATE(" w """""""_syn_""""":"",val"_i_" ")
+    }
+    $$$GENERATE(" w ""}""  ")
+    $$$GENERATE("  Q $$$OK ")
  Q $$$OK
 ]]></Implementation>
 </Method>
@@ -427,9 +433,9 @@ ID можно не указывать, т.к. выбирается обязат�
 <FormalSpec><![CDATA[obj,&rq:%String]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	#; Примерный код
-	#define g(%name) $g(rq(%name,1))
-	#; Q:'$IsObject(obj) $$$OK	;если не удалось создать новый объект ?!
+    #; Примерный код
+    #define g(%name) $g(rq(%name,1))
+    #; Q:'$IsObject(obj) $$$OK  ;если не удалось создать новый объект ?!
  #; s obj.field=$$$g("field")
  #; s sc=obj.%Save(),id=obj.%Id()
  #; d ..wError(sc,id)

@@ -36,10 +36,11 @@
 <Description>
 метод добавления</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec><![CDATA[&rq:%String]]></FormalSpec>
+<FormalSpec><![CDATA[&rq:%String=""]]></FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-
+ s ^mtempArt2("meeting")=2
+ 
  #define g(%name) $g(rq(%name,1))
 
  s Message=$$$g("msg"), MessageType=$$$g("mt")
@@ -64,6 +65,7 @@
  
  #; должны вернуть js-массив [actionResult,errorMessage,newId] 
  s sc = ##class(Kontragent.Action).AddMeetingResult(.Message,Dat,Tim,Kontr,MessageType,file)
+ s ^mtempArt("meeting")=sc
  if +sc=1 {
 	w "[true,'',",$$$qt(Message),","
 	d ..wJson(Message)
@@ -83,6 +85,8 @@
 <FormalSpec>id:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
+ s ^mtempArt2("meeting")=1
+	
  &sql(SELECT Dat, Tim, Result, User1->Name, MessageType, %external(MessageType)
  			, SendMailLog->Result, SendMailLog, SendMailLog->ResultCode
  			, AttachName, Attachment
