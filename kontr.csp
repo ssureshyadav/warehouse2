@@ -9,8 +9,8 @@
 <head>
 <link href="style.css" type='text/css' rel=stylesheet />
 <link rel='stylesheet' type='text/css' 
-	href='css/redmond/jquery-ui-1.8.16.custom.css'
-	class='ui-theme'
+    href='css/redmond/jquery-ui-1.8.16.custom.css'
+    class='ui-theme'
 />
 <script language="jscript" src="common.js"></script>
 <script language="Jscript">
@@ -22,279 +22,286 @@ var currentKontragent="";
 
 function load()
 {
-	currentdict.LoadHeaders();
-	dfdf.attachEvent("onAddColumns", showgoods)
-	dfdf.LoadHeaders("izdelie");
-	docums.LoadHeaders();
-	docums2.LoadHeaders();
-	Otchets.LoadHeaders();
+    currentdict.LoadHeaders();
+    dfdf.attachEvent("onAddColumns", showgoods)
+    dfdf.LoadHeaders("izdelie");
+    docums.LoadHeaders();
+    docums2.LoadHeaders();
+    Otchets.LoadHeaders();
+}
+
+//работа в режиме одной страницы 
+function wStatus( msg ){
+    if (parent && (parent.statusFR)){
+         parent.statusFR.WriteStatus( msg );
+    }
 }
 
 //вывод отчетов
 function showOtchet(where)
 {
-	parent.statusFR.WriteStatus("Идёт вывод списка отчётов...")
-	var where=ReturnSpace(where);
-	Otchets.DownLoad(where);
-	parent.statusFR.WriteStatus("")
+    wStatus("Идёт вывод списка отчётов...");
+    var where=ReturnSpace(where);
+    Otchets.DownLoad(where);
+    wStatus("");
 }
 
 //вывод контрагентов
 function showdictionary(where)
 {
-	parent.statusFR.WriteStatus("Идёт вывод списка контрагентов...")
-	var where=ReturnSpace(where);
-	var made=false;
-	currentdict.DownLoad(where);
-	parent.statusFR.WriteStatus("")
+    wStatus("Идёт вывод списка контрагентов...");
+    var where=ReturnSpace(where);
+    var made=false;
+    currentdict.DownLoad(where);
+    wStatus("");
 }
 
 function gg()
 {
-	if(ColCode=="")return false;
-	where = ColCode+" %STARTSWITH '"+fldval.value+"'";
-	if(fldval.value=="")where="";
-	showdictionary(where);
+    if(ColCode=="")return false;
+    where = ColCode+" %STARTSWITH '"+fldval.value+"'";
+    if(fldval.value=="")where="";
+    showdictionary(where);
 }
 
 //клик на колонке в таблице контрагентов
 function colclick()
 {
-	if(currentdict.ColType=="%Date"){alert("Поля с датами не обрабатываются");return false;}
-	namfld.innerText=currentdict.ColName;
-	ColCode=currentdict.ColCode;
+    if(currentdict.ColType=="%Date"){alert("Поля с датами не обрабатываются");return false;}
+    namfld.innerText=currentdict.ColName;
+    ColCode=currentdict.ColCode;
 }
 
 // 
 function addrecord(currentrecord)
 {
-	var currentrecord=ReturnSpace(currentrecord)
-	ok=window.showModalDialog("kontragent.csp?KontrId="+currentrecord,"","status:no;dialogHeight:708px;dialogWidth:800px;resizable:yes;")
-	if((ok!=null)&&(makeShowDict.checked)){showdictionary(where)}
+    var currentrecord=ReturnSpace(currentrecord)
+    ok=window.showModalDialog("kontragent.csp?KontrId="+currentrecord,"","status:no;dialogHeight:708px;dialogWidth:800px;resizable:yes;")
+    if((ok!=null)&&(makeShowDict.checked)){showdictionary(where)}
 }
 
 //показать запчасти на балансе контрагента
 function showgoods()
 {
-	dfdf.detachEvent("onAddColumns", showgoods);
-	if(currentKontragent=="")return;
-	parent.statusFR.WriteStatus("Идёт вывод списка запчастей на балансе...");
-	dfdf.loadfrommethod("Reports.Analyzis.GoodsOnKontr",currentKontragent);
-	parent.statusFR.WriteStatus("");
-	KontrNameSpan.innerText=currentdict.ItemName
+    dfdf.detachEvent("onAddColumns", showgoods);
+    if(currentKontragent=="")return;
+    parent.statusFR.WriteStatus("Идёт вывод списка запчастей на балансе...");
+    dfdf.loadfrommethod("Reports.Analyzis.GoodsOnKontr",currentKontragent);
+    parent.statusFR.WriteStatus("");
+    KontrNameSpan.innerText=currentdict.ItemName
 }
 
 function showdocums()
 {
-	currentKontragent=currentdict.ItemID;
-	if(currentKontragent=="")return
-	parent.statusFR.WriteStatus("Идёт вывод списка поставок...")
-	dateArr=dat1.value.split("/")
-	Data1=dateArr[2]+"-"+dateArr[1]+"-"+dateArr[0]
-	dateArr=dat2.value.split("/")
-	Data2=dateArr[2]+"-"+dateArr[1]+"-"+dateArr[0]
-	var request="Dat>=CAST('"+Data1+"' AS DATE) and Dat<=CAST('"+Data2+"' AS DATE)";
-	if(currentKontragent!="all"){var request=request+" and Kontr="+currentKontragent}
-	if(DocName.value!=""){var request=request+" and Name %STARTSWITH '"+DocName.value+"'";}
-	if(RashTypes.value!=0)
-	{
-		if(RashTypes.value==1)var request=request+" and Summa=OplSumma"
-		if(RashTypes.value==2)var request=request+" and (Summa<>OplSumma and OplSumma>0)"
-		if(RashTypes.value==3)var request=request+" and (OplSumma=0 or OplSumma='' or OplSumma is Null)"
-	}
-	docums.DownLoad(request);
-	parent.statusFR.WriteStatus("")
+    currentKontragent=currentdict.ItemID;
+    if(currentKontragent=="")return
+    wStatus("Идёт вывод списка поставок...");
+    dateArr=dat1.value.split("/")
+    Data1=dateArr[2]+"-"+dateArr[1]+"-"+dateArr[0]
+    dateArr=dat2.value.split("/")
+    Data2=dateArr[2]+"-"+dateArr[1]+"-"+dateArr[0]
+    var request="Dat>=CAST('"+Data1+"' AS DATE) and Dat<=CAST('"+Data2+"' AS DATE)";
+    if(currentKontragent!="all"){var request=request+" and Kontr="+currentKontragent}
+    if(DocName.value!=""){var request=request+" and Name %STARTSWITH '"+DocName.value+"'";}
+    if(RashTypes.value!=0)
+    {
+        if(RashTypes.value==1)var request=request+" and Summa=OplSumma"
+        if(RashTypes.value==2)var request=request+" and (Summa<>OplSumma and OplSumma>0)"
+        if(RashTypes.value==3)var request=request+" and (OplSumma=0 or OplSumma='' or OplSumma is Null)"
+    }
+    docums.DownLoad(request);
+    wStatus("");
 }
 
 function showdocums2()
 {
-	var currentKontragent=currentdict.ItemID;
-	if(currentKontragent=="")return
-	parent.statusFR.WriteStatus("Идёт вывод списка платежей...")
-	dateArr=dat11.value.split("/")
-	Data1=dateArr[2]+"-"+dateArr[1]+"-"+dateArr[0]
-	dateArr=dat22.value.split("/")
-	Data2=dateArr[2]+"-"+dateArr[1]+"-"+dateArr[0]
-	var request="Dat>=CAST('"+Data1+"' AS DATE) and Dat<=CAST('"+Data2+"' AS DATE)";
-	if(currentKontragent!="all"){var request=request+" and Kontr="+currentKontragent}
-	if(DocName.value!=""){var request=request+" and Name %STARTSWITH '"+DocName.value+"'";}
-	if(PlatejTypes.value!=0)
-	{
-		if(PlatejTypes.value==1)var request=request+" and (not Rash is null or Rash<>'')";
-		if(PlatejTypes.value==2)var request=request+" and (Rash is null or Rash='')";
-	}
-	docums2.DownLoad(request);
-	parent.statusFR.WriteStatus("")
+    var currentKontragent=currentdict.ItemID;
+    if(currentKontragent=="")return
+    wStatus("Идёт вывод списка платежей...");
+    dateArr=dat11.value.split("/")
+    Data1=dateArr[2]+"-"+dateArr[1]+"-"+dateArr[0]
+    dateArr=dat22.value.split("/")
+    Data2=dateArr[2]+"-"+dateArr[1]+"-"+dateArr[0]
+    var request="Dat>=CAST('"+Data1+"' AS DATE) and Dat<=CAST('"+Data2+"' AS DATE)";
+    if(currentKontragent!="all"){var request=request+" and Kontr="+currentKontragent}
+    if(DocName.value!=""){var request=request+" and Name %STARTSWITH '"+DocName.value+"'";}
+    if(PlatejTypes.value!=0)
+    {
+        if(PlatejTypes.value==1)var request=request+" and (not Rash is null or Rash<>'')";
+        if(PlatejTypes.value==2)var request=request+" and (Rash is null or Rash='')";
+    }
+    docums2.DownLoad(request);
+    wStatus("");
 }
 
 //показать данные по контрагенту
 function ShowKontrData()
 {
-	currentKontragent=currentdict.ItemID;
-	showdocums();
-	showdocums2();
-	showgoods();
-	CurrentKontrShown = true;
-	showOtchet("Kontr="+currentKontragent+" and GotPaperProve=1");
+    currentKontragent=currentdict.ItemID;
+    showdocums();
+    showdocums2();
+    showgoods();
+    CurrentKontrShown = true;
+    showOtchet("Kontr="+currentKontragent+" and GotPaperProve=1");
 }
 
 //клик по контрагенту
 function KontrClick()
 {
-	CurrentKontrShown = false;
-	KontrName.innerText=currentdict.ItemName
-	KontrBalance.innerText=currentdict.item("Balance")
+    CurrentKontrShown = false;
+    KontrName.innerText=currentdict.ItemName
+    KontrBalance.innerText=currentdict.item("Balance")
 }
 
 function processdoc(ItemID)
 {
-	if(ReturnSpace(ItemID)=="")return
-	var doc=ItemID+"@Docs.Platejka";
-	var ok=#server(Docs.Action.processdoc(doc))#
-	if(isNaN(ok))
-	{
-		alert(ok);
-	}
-	else
-	{
-		showdocums2();
-		if(KontrBalance.innerText!=""){var OldBalance=parseInt(KontrBalance.innerText);}
-		else{var OldBalance=0;}
-		var NewBalance=parseInt(docums2.item("Summa"));
-		KontrBalance.innerText=OldBalance+NewBalance;
-		alert("Документ успешно обработан");
-	}
-	return ok;
+    if(ReturnSpace(ItemID)=="")return
+    var doc=ItemID+"@Docs.Platejka";
+    var ok=#server(Docs.Action.processdoc(doc))#
+    if(isNaN(ok))
+    {
+        alert(ok);
+    }
+    else
+    {
+        showdocums2();
+        if(KontrBalance.innerText!=""){var OldBalance=parseInt(KontrBalance.innerText);}
+        else{var OldBalance=0;}
+        var NewBalance=parseInt(docums2.item("Summa"));
+        KontrBalance.innerText=OldBalance+NewBalance;
+        alert("Документ успешно обработан");
+    }
+    return ok;
 }
 
 function CreateDocument(ItemID,CurrentDocementClass)
 {
-	var doccsp="document.csp";
-	if(CurrentDocementClass=="Docs.Platejka")doccsp="docplatej.csp?DocId="+ReturnSpace(ItemID)
-	WinResult=window.showModalDialog(doccsp,CurrentDocementClass+InnerSplitter+ItemID+InnerSplitter+"","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
-	if(WinResult==1)
-	{
-		if(CurrentDocementClass=="Docs.Rash")showdocums();
-		if(CurrentDocementClass=="Docs.Platejka")showdocums2();
-	}
+    var doccsp="document.csp";
+    if(CurrentDocementClass=="Docs.Platejka")doccsp="docplatej.csp?DocId="+ReturnSpace(ItemID)
+    WinResult=window.showModalDialog(doccsp,CurrentDocementClass+InnerSplitter+ItemID+InnerSplitter+"","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+    if(WinResult==1)
+    {
+        if(CurrentDocementClass=="Docs.Rash")showdocums();
+        if(CurrentDocementClass=="Docs.Platejka")showdocums2();
+    }
 }
 
 //открыть окно для разноски платёжки по расходным накладным
 function OpenPlatejWindow(ItemID)
 {
-	if(ReturnSpace(ItemID)=="")return
-	WinResult=window.showModalDialog("PlatejRash.csp?DocId="+ItemID,"","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+    if(ReturnSpace(ItemID)=="")return
+    WinResult=window.showModalDialog("PlatejRash.csp?DocId="+ItemID,"","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
 }
 
 function ClearPlatejkaItems()
 {
-	if(!window.confirm("Очистить привязку платёжного поручения к отгрузкам?"))return
-	var ok=#server(Docs.Action.ClearPlatejkaItems(docums2.ItemID))#
-	if(isNaN(ok)){alert(ok)}
-	else{alert("Привязка платёжного поручения к отгрузкам очищена. Укажите на какие отгрузки следует разнести платёж.")}
+    if(!window.confirm("Очистить привязку платёжного поручения к отгрузкам?"))return
+    var ok=#server(Docs.Action.ClearPlatejkaItems(docums2.ItemID))#
+    if(isNaN(ok)){alert(ok)}
+    else{alert("Привязка платёжного поручения к отгрузкам очищена. Укажите на какие отгрузки следует разнести платёж.")}
 }
 
 function PayRashFn(DocId)
 {
-	if(ReturnSpace(DocId)=="")return;
-	var DocId=#server(Docs.Action.CreatePlatejForRash(DocId))#
-	if(isNaN(DocId)){ alert(DocId); }
-	else
-	{
-		if(window.confirm(("Платёжный документ успешно создан. Открыть для редактирования?")))CreateDocument(DocId,'Docs.Platejka')
-		if(window.confirm(("Обработать документ?")))
-		{
-			var ok=processdoc(DocId);
-			if(isNaN(ok))
-			{
-				alert(ok);
-			}
-			else
-			{
-				showdocums2();
-				showdocums();
-			}
-		}
-	}
+    if(ReturnSpace(DocId)=="")return;
+    var DocId=#server(Docs.Action.CreatePlatejForRash(DocId))#
+    if(isNaN(DocId)){ alert(DocId); }
+    else
+    {
+        if(window.confirm(("Платёжный документ успешно создан. Открыть для редактирования?")))CreateDocument(DocId,'Docs.Platejka')
+        if(window.confirm(("Обработать документ?")))
+        {
+            var ok=processdoc(DocId);
+            if(isNaN(ok))
+            {
+                alert(ok);
+            }
+            else
+            {
+                showdocums2();
+                showdocums();
+            }
+        }
+    }
 }
 
 function fnMeetingResult()
 {
-	var KontrId=currentdict.ItemID;
-	if(KontrId=="")return;
-	var ok=window.showModalDialog("KontrMeetingResult.csp?Kontr="+KontrId,"","status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
+    var KontrId=currentdict.ItemID;
+    if(KontrId=="")return;
+    var ok=window.showModalDialog("KontrMeetingResult.csp?Kontr="+KontrId,"","status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;")
 }
 
 function fnKontrList()
 {
-	var ok=window.showModalDialog("KontragentsListEdit.csp?Where="+where,"","center:yes;status:no;dialogHeight:650px;dialogWidth:1000px;resizable:yes;")
-	if((ok!=null)&&(makeShowDict.checked)){showdictionary(where)}
+    var ok=window.showModalDialog("KontragentsListEdit.csp?Where="+where,"","center:yes;status:no;dialogHeight:650px;dialogWidth:1000px;resizable:yes;")
+    if((ok!=null)&&(makeShowDict.checked)){showdictionary(where)}
 }
 
 // добавить запчасть на баланс контрагенту
 function AddGoodsToKontr()
 {
-	if(!CurrentKontrShown)
-	{
-		alert("Что бы зачислить товары или запчасти на баланс контрагента, пожалуйста выберете контрагента и нажмите кнопку 'Вывести информацию по контрагенту'");
-		return;
-	}
-	WinResult=window.showModalDialog("selectgoods2.csp?OnlyID=1","","center:yes;status:no;dialogHeight:700px;dialogWidth:800px;resizable:yes;")
-	if(WinResult==null)return
-	var quant=window.prompt("Укажите количество для каждой запчасти","1");
-	if (quant==null) return;
-	ok = #server(Common.Common.AddGoodsToKontr(currentKontragent,WinResult,quant))#
-	if(isNaN(ok)){alert(ok);}
-	else{showgoods();}
+    if(!CurrentKontrShown)
+    {
+        alert("Что бы зачислить товары или запчасти на баланс контрагента, пожалуйста выберете контрагента и нажмите кнопку 'Вывести информацию по контрагенту'");
+        return;
+    }
+    WinResult=window.showModalDialog("selectgoods2.csp?OnlyID=1","","center:yes;status:no;dialogHeight:700px;dialogWidth:800px;resizable:yes;")
+    if(WinResult==null)return
+    var quant=window.prompt("Укажите количество для каждой запчасти","1");
+    if (quant==null) return;
+    ok = #server(Common.Common.AddGoodsToKontr(currentKontragent,WinResult,quant))#
+    if(isNaN(ok)){alert(ok);}
+    else{showgoods();}
 }
 
 // снять запчасти с баланса контрагента
 function MoveGoodsFromKontr()
 {
-	var quant=0;
-	if(!CurrentKontrShown)
-	{
-		alert("Что бы снять товары или запчасти с баланса контрагента, пожалуйста выберете контрагента и нажмите кнопку 'Вывести информацию по контрагенту'");
-		return;
-	}
-	if(!window.confirm("Снять отмеченные запчасти с баланса контрагента?"))return;
-	ResultArray=dfdf.ListViewGetItems("selected",1);
-	if(ResultArray.split("#@#").length==2)
-	{
-		quant = window.prompt("Введите количество которое спишется с контрагента",1);
-		if (quant==null) return
-	}
-	else
-	{
-		if(!window.confirm("Внимание! Указано несколько строк. Все указанные позиции спишутся с контрагента полностью. Чтобы списывать поштучно, указывайте только одну строку. Продолжить списание позиций полностью?"))return;	
-	}
+    var quant=0;
+    if(!CurrentKontrShown)
+    {
+        alert("Что бы снять товары или запчасти с баланса контрагента, пожалуйста выберете контрагента и нажмите кнопку 'Вывести информацию по контрагенту'");
+        return;
+    }
+    if(!window.confirm("Снять отмеченные запчасти с баланса контрагента?"))return;
+    ResultArray=dfdf.ListViewGetItems("selected",1);
+    if(ResultArray.split("#@#").length==2)
+    {
+        quant = window.prompt("Введите количество которое спишется с контрагента",1);
+        if (quant==null) return
+    }
+    else
+    {
+        if(!window.confirm("Внимание! Указано несколько строк. Все указанные позиции спишутся с контрагента полностью. Чтобы списывать поштучно, указывайте только одну строку. Продолжить списание позиций полностью?"))return;    
+    }
 
-	ok = #server(Common.Common.RemoveGoodsFromKontr(currentKontragent,ResultArray,quant))#
-	if(isNaN(ok)){alert(ok);}
-	else{showgoods();}	
+    ok = #server(Common.Common.RemoveGoodsFromKontr(currentKontragent,ResultArray,quant))#
+    if(isNaN(ok)){alert(ok);}
+    else{showgoods();}  
 }
 
 /// Открыть акт сверки
 function ActSverki()
 {
-	var SelectedKontr = currentdict.ItemID
-	if(SelectedKontr=="")
-	{
-		alert("Выберете, пожалуйста, контрагента.");
-		return;
-	}
-	
-	var WinResult=window.showModalDialog("SverkaParams.csp?KontrId="+SelectedKontr,"","center:yes;status:no;dialogHeight:200px;dialogWidth:400px;resizable:yes;")
-	if(WinResult==null){return;}
+    var SelectedKontr = currentdict.ItemID
+    if(SelectedKontr=="")
+    {
+        alert("Выберете, пожалуйста, контрагента.");
+        return;
+    }
+    
+    var WinResult=window.showModalDialog("SverkaParams.csp?KontrId="+SelectedKontr,"","center:yes;status:no;dialogHeight:200px;dialogWidth:400px;resizable:yes;")
+    if(WinResult==null){return;}
 
-	var kontr1id=WinResult.split("@")[2];
-	
-	var dat1=WinResult.split("@")[0];
-	var dat2=WinResult.split("@")[1];
-	
-	//window.open("screen/Sverka.csp?Kontr1Id="+kontr1id+"&Kontr2Id="+kontr2id+"&dat1="+dat1+"&dat2="+dat2);
-	
-	window.open("screen/ActSverki.csp?kontr="+SelectedKontr+"&dat1="+dat1+"&dat2="+dat2+"&OurCompany="+kontr1id);
+    var kontr1id=WinResult.split("@")[2];
+    
+    var dat1=WinResult.split("@")[0];
+    var dat2=WinResult.split("@")[1];
+    
+    //window.open("screen/Sverka.csp?Kontr1Id="+kontr1id+"&Kontr2Id="+kontr2id+"&dat1="+dat1+"&dat2="+dat2);
+    
+    window.open("screen/ActSverki.csp?kontr="+SelectedKontr+"&dat1="+dat1+"&dat2="+dat2+"&OurCompany="+kontr1id);
 }
 </script>
 </head>
@@ -309,11 +316,11 @@ function ActSverki()
 <fieldset><legend>Контрагенты</legend>
 
 <table>
-	<tr>
-		<td>
-			<img src="images/big/Money.gif" onmouseover="this.src='images/big/OnMoney.gif'" onmouseout="this.src='images/big/Money.gif'" alt="Взаиморасчёт" onclick="showdictionary('WCalc2=2');">
-			<img src="images/big/Book.gif" onmouseover="this.src='images/big/OnBook.gif'" onmouseout="this.src='images/big/Book.gif'" alt="Безналичные расчёты" onclick="showdictionary('WCalc2=1');">
-		<td>
+    <tr>
+        <td>
+            <img src="images/big/Money.gif" onmouseover="this.src='images/big/OnMoney.gif'" onmouseout="this.src='images/big/Money.gif'" alt="Взаиморасчёт" onclick="showdictionary('WCalc2=2');">
+            <img src="images/big/Book.gif" onmouseover="this.src='images/big/OnBook.gif'" onmouseout="this.src='images/big/Book.gif'" alt="Безналичные расчёты" onclick="showdictionary('WCalc2=1');">
+        <td>
 Поиск:
 <span id="namfld"></span>&nbsp;<input type="text" id="fldval" onkeyup="gg();">
 </table>
@@ -327,14 +334,14 @@ function ActSverki()
   <sklad:LittleButton name="user" id="btnUser" onclick="fnMeetingResult()" alt="История общения с контрагентом">
   
   <button id="bUser2" class="ui-button">
-  	 <span class='ui-icon ui-icon-comment'>провести</span>
+     <span class='ui-icon ui-icon-comment'>провести</span>
   </button>
   
   <sklad:LittleButton name="price" id="btnActSver" onclick="ActSverki()" alt="Акт сверки">
   <sklad:LittleButton name="goinside" id="btnBalance" onclick="window.open('csp.KontragentAccount.cls?id='+currentdict.ItemID)" alt="История баланса">
 </td><td align=right>
-	Поддерживать таблицу в актуальном состоянии
-	<input type=checkbox id="makeShowDict" checked style="width:20pt;border:none;">
+    Поддерживать таблицу в актуальном состоянии
+    <input type=checkbox id="makeShowDict" checked style="width:20pt;border:none;">
 </td>
 </tr>
 </table>
@@ -355,10 +362,10 @@ function ActSverki()
 Период c <input type=text id="dat1" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"> по <input type=text id="dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar">
  <input type="text" id="DocName"> 
 <select id="RashTypes">
-	<option value=0>Все</option>
-	<option value=1>Полностью оплаченные</option>
-	<option value=2>Частично оплаченные</option>
-	<option value=3>Не оплаченные</option>
+    <option value=0>Все</option>
+    <option value=1>Полностью оплаченные</option>
+    <option value=2>Частично оплаченные</option>
+    <option value=3>Не оплаченные</option>
 </select>
 <sklad:LittleButton name="ok" id="okbut" onclick="showdocums()" alt="Показать документы"><br>
 <!-- Таблица отгрузок -->
@@ -372,9 +379,9 @@ function ActSverki()
 Период c <input type=text id="dat11" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"> по <input type=text id="dat22" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar">
  <input type="text" id="DocName2"> 
 <select id="PlatejTypes">
-	<option value=0>Все</option>
-	<option value=1>Зачисленные</option>
-	<option value=2>Не зачисленные</option>
+    <option value=0>Все</option>
+    <option value=1>Зачисленные</option>
+    <option value=2>Не зачисленные</option>
 </select>
 <sklad:LittleButton name="ok" id="okbut2" onclick="showdocums2()" alt="Показать документы"><br>
 <!-- Таблица платежей -->
@@ -395,31 +402,31 @@ function ActSverki()
 <sklad:LittleButton name="history" id="HistoryDetail" onclick="alert('Функция не реализована')" alt="История этой детали на балансе контрагента">
 </fieldset>
 <script type="text/javascript">
-	var $on=("v"=="\v")?function(o,e,h){
-		o.attachEvent("on"+e,h);
-					  }:function(o,e,h){
-		o.addEventListener(e,h,false);				  
-	}; 
-	
-	$on(window,"load",function(){
-		var $g=function(id){return document.getElementById(id);};
-		var bUser2=$g("bUser2");  
-		bUser2.setAttribute("title","*New: Переписка с контрагентом+отправка файла");
-		$on(bUser2,"click",function(){
-			var k=currentdict.ItemID; if(k=="")return;
+    var $on=("v"=="\v")?function(o,e,h){
+        o.attachEvent("on"+e,h);
+                      }:function(o,e,h){
+        o.addEventListener(e,h,false);                
+    }; 
+    
+    $on(window,"load",function(){
+        var $g=function(id){return document.getElementById(id);};
+        var bUser2=$g("bUser2");  
+        bUser2.setAttribute("title","*New: Переписка с контрагентом+отправка файла");
+        $on(bUser2,"click",function(){
+            var k=currentdict.ItemID; if(k=="")return;
 
-			var ok= window.showModalDialog(
-				"csp.Chat2Ka.cls?Kontr="+k
-				,""
-				,"center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;"
-			); 
+            var ok= window.showModalDialog(
+                "csp.Chat2Ka.cls?Kontr="+k
+                ,""
+                ,"center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;"
+            ); 
 
-			/*var ok= window.open(
-				"csp.Chat2Ka.cls?Kontr="+k
-			);*/
+            /*var ok= window.open(
+                "csp.Chat2Ka.cls?Kontr="+k
+            );*/
 
-		});
-	});
+        });
+    });
 
 
 </script>
