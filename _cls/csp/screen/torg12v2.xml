@@ -11,12 +11,14 @@
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[
- if %request.Get("word")="on" {
-     set %response.ContentType = "application/msword"
-     do %response.SetHeader("Content-Disposition","attachment;word.doc")
-     set %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
- }
- q 1
+    s contentType = "application/vnd.ms-excel", attachment="torg12.xls"
+    if %request.Get("word")="on" {
+     s contentType = "application/msword", attachment="word.doc"
+    }
+    s %response.ContentType = contentType
+    d %response.SetHeader("Content-Disposition","attachment; filename="""_attachment_"""")
+    s %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+ Q 1
 ]]></Implementation>
 </Method>
 
@@ -55,8 +57,8 @@
  . s Address1=k.AddressUr
  . s bank1=k.bank
  . s codecity1=k.CityCode
- . s namecity1=k.City
- . s Postalcode1=k.Postalcode
+ . s namecity1=k.CityUr
+ . s Postalcode1=k.PostalcodeUr
  . d:$ISOBJECT(bank1)
  . . s pbank1=bank1.pbank
  . . s city1=bank1.city
@@ -77,7 +79,7 @@
  . s Address2=k.AddressUr
  . s bank2=k.bank
  . s codecity2=k.CityCode
- . s namecity2=k.City
+ . s namecity2=k.CityUr
  . s contract = k.Agree
  . s Postalcode2=k.PostalcodeUr
  . d:$ISOBJECT(bank2)
@@ -100,8 +102,8 @@
  . s chief=k.chief
  . s buh=k.glavbuh
  . s codecity3=k.CityCode
- . s namecity3=k.City
- . s Postalcode3=k.Postalcode
+ . s namecity3=k.CityUr
+ . s Postalcode3=k.PostalcodeUr
  . d:$ISOBJECT(bank3)
  . . s pbank3=bank3.pbank
  . . s city3=bank3.city
@@ -140,20 +142,40 @@
  s nds=+$G(other("nds"))/100
  s nsp=+$G(other("nsp"))/100
  s antinds=1/(1+nds)
-
     
-    &html<<html xmlns:o="urn:schemas-microsoft-com:office:office"
+ &html<<html xmlns:o="urn:schemas-microsoft-com:office:office"
 xmlns:x="urn:schemas-microsoft-com:office:excel"
 xmlns="http://www.w3.org/TR/REC-html40">
-
 <head>
-
 <meta http-equiv=Content-Type content="text/html; charset=windows-1251">
+<meta name=ProgId content=Excel.Sheet>
+<meta name=Generator content="Microsoft Excel 11">
 <title>Товарная накладная #(nomnakl)#</title>
-<link rel="stylesheet" href="css/torg12.css" >
+
+<style>
+#(..wCss())#
+</style>
+<!--[if gte mso 9]><xml>
+ <x:ExcelWorkbook>
+  <x:ExcelWorksheets>
+   <x:ExcelWorksheet>
+   <x:Name>torg12</x:Name>
+    <x:WorksheetOptions>
+     <x:Print>
+      <x:ValidPrinterInfo/>
+      <x:PaperSizeIndex>9</x:PaperSizeIndex>
+     </x:Print>
+     <x:DoNotDisplayGridlines/>
+    </x:WorksheetOptions>
+   </x:ExcelWorksheet>
+  </x:ExcelWorksheets>
+ </x:ExcelWorkbook>
+</xml><![endif]-->
 </head>
 
-<body link=blue vlink=purple><table border=0 cellpadding=0 cellspacing=0 width=1066 style='border-collapse:collapse;table-layout:fixed;width:804pt'>>
+<body>
+
+<table x:str border=0 cellpadding=0 cellspacing=0 width=1066 style='border-collapse:collapse;table-layout:fixed;width:804pt'>>
 
  d ..wCols() ;выводит колонки  (cols) таблицы
  
@@ -171,7 +193,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
  </tr>
  <tr height=16 style='mso-height-source:userset;height:12.0pt'>
   <td height=16 class=xl24 style='height:12.0pt'></td>
-  <td colspan=28 rowspan=2 class=xl125 width=818 style='width:617pt'>#($G(kname1))#, 
+  <td colspan=28 rowspan=2 class=xl125 width=818 style='width:617pt'>#($G(kname1))#, ИНН #($G(inn1))#, КПП #($G(kpp1))#, 
     #($G(Postalcode1))#, #($G(namecity1))#, #($G(Address1))#, Р/C #($G(rsch1))#, 
     #($G(pbank1))#, #($G(city1))#; БИК #($G(bik1))#, К/С #($G(ksch1))#</td>
   <td colspan=3 class=xl24 style='mso-ignore:colspan'></td>
@@ -217,7 +239,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
  <tr height=29 style='mso-height-source:userset;height:22.35pt'>
   <td height=29 class=xl24 style='height:22.35pt'></td>
   <td colspan=2 class=xl99 width=108 style='width:82pt'>Грузополучатель</td>
-  <td colspan=31 class=xl100 width=806 style='width:608pt'>#($G(kname2))#, 
+  <td colspan=31 class=xl100 width=806 style='width:608pt'>#($G(kname2))#,  ИНН #($G(inn2))#, КПП #($G(kpp2))#,
     #($G(Postalcode2))#, #($G(namecity2))#,&nbsp; #($G(Address2))#, P/C #($G(rsch2))#, 
     #($G(pbank2))#, #($G(city2))#; БИК #($G(bik2))#, K/C #($G(ksch2))#</td>
   <td colspan=3 class=xl118 style='border-right:1.0pt solid black'>по ОКПО</td>
@@ -236,7 +258,8 @@ xmlns="http://www.w3.org/TR/REC-html40">
   <td height=29 class=xl24 style='height:22.35pt'></td>
   <td class=xl29></td>
   <td class=xl29>Поставщик</td>
-  <td colspan=31 class=xl125 width=806 style='width:608pt'>#($G(kname3))#, #($G(Postalcode3))#, 
+  <td colspan=31 class=xl125 width=806 style='width:608pt'>#($G(kname3))#,  ИНН #($G(inn3))#, КПП #($G(kpp3))#,
+    #($G(Postalcode3))#, 
     #($G(namecity3))#,&nbsp; #($G(Address3))#, P/C #($G(rsch3))#, #($G(pbank3))#, 
     #($G(city3))#; БИК #($G(bik3))#, K/C #($G(ksch3))#</td>
   <td colspan=3 class=xl118 style='border-right:1.0pt solid black'>по ОКПО</td>
@@ -255,9 +278,10 @@ xmlns="http://www.w3.org/TR/REC-html40">
   <td height=29 class=xl24 style='height:22.35pt'></td>
   <td class=xl29></td>
   <td class=xl29>Плательщик</td>
-  <td colspan=31 class=xl100 width=806 style='width:608pt'>#($G(kname4))#, #($G(Postalcode4))#, 
-    #($G(namecity4))#,&nbsp; #($G(Address4))#, #($G(rsch4))#, #($G(pbank2))#, 
-    #($G(city4))#; #($G(bik4))#, #($G(ksch4))#</td>
+  <td colspan=31 class=xl100 width=806 style='width:608pt'>#($G(kname4))#,  ИНН #($G(inn4))#, КПП #($G(kpp4))#,
+    #($G(Postalcode4))#, 
+    #($G(namecity4))#,&nbsp; #($G(Address4))#, P/C #($G(rsch4))#, #($G(pbank2))#, 
+    #($G(city4))#; БИК #($G(bik4))#, К/С #($G(ksch4))#</td>
   <td colspan=3 class=xl118 style='border-right:1.0pt solid black'>по ОКПО</td>
   <td colspan=2 class=xl24 style='mso-ignore:colspan'></td>
  </tr>
@@ -274,7 +298,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
   <td height=16 class=xl24 style='height:12.6pt'></td>
   <td class=xl29></td>
   <td class=xl29>Основание</td>
-  <td colspan=31 class=xl126><!--Счет № *** от **.**.**** г.--></td>
+  <td colspan=31 class=xl126><!--Счет № *** от **.**.**** г.-->Счёт № #(nomnakl)#</td>
   <td class=xl24></td>
   <td colspan=2 class=xl24 style='mso-ignore:colspan'></td>
  </tr>
@@ -385,7 +409,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
 
  d ..wSummary( .summary )  
   
- d ..wFooter() ;разбито из-за ограничений в 32к на размер программы
+ d ..wFooter(.summary) ;разбито из-за ограничений в 32к на размер программы
 
  &html<</table></body></html>>
     Quit $$$OK
@@ -485,10 +509,10 @@ xmlns="http://www.w3.org/TR/REC-html40">
     s quant=item.Quantity
     
     i NDSinside="false" {
-        s price=$J(kurs*itempr,".",2)
-        s summabeznds=$J(price*quant,".",2)
-        s ndsotsumma=$J(summabeznds-(summabeznds*antinds),".",2)
-        s summasnds=$J(summabeznds+ndsotsumma,".",2)
+        s price=$J(kurs*itempr,".",2) ;так же как и в счете
+        s summabeznds=$J(price*quant,".",2) ;округление
+        s ndsotsumma=$J(summabeznds-(summabeznds*antinds),".",2) ;округление
+        s summasnds=$J(summabeznds+ndsotsumma,".",2) ;!!! сумма округлений
     } else {
         s price=$J(kurs*itempr*antinds,".",2)
         s summabeznds=$J(quant*price,".",2)
@@ -502,9 +526,15 @@ xmlns="http://www.w3.org/TR/REC-html40">
     , vsegosummabeznds=vsegosummabeznds+summabeznds
     
     k row 
-    s row("count") = count, row("goods") = goods, row("quant") = quant, row("price") = price
-    s row("summabeznds") = summabeznds, row("ndsprocent") = ndsprocent, row("ndsotsumma") = ndsotsumma
+    s row("count") = count, row("goods") = goods
+    , row("quant") = quant, row("price") = price
+    s row("summabeznds") = summabeznds, row("ndsprocent") = ndsprocent
+    , row("ndsotsumma") = ndsotsumma
     s row("summasnds") = summasnds
+    
+    #;debug
+    s row("iprice") = item.Price, row("kurs") = kurs
+    s row("nds") = nds, row("NDSinside")=NDSinside
     
     d ..wRow(.row) 
     
@@ -515,7 +545,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
  s summary("vsegondsotsumma") = vsegondsotsumma
  s summary("vsegosummabeznds") = vsegosummabeznds
  s summary("vsegosummasnds") = vsegosummasnds
- 
+ s summary("rowcount") = count
  
  Q ""
 ]]></Implementation>
@@ -563,6 +593,11 @@ xmlns="http://www.w3.org/TR/REC-html40">
     #( $$$g("summasnds") )#
  </td><td class=xl40></td>
  </tr>>
+    
+    #; debug
+    #;&html<<tr><td colspan=37><pre>>
+    #;zw row
+    #;&html<</td></tr>>
    
    Q ""
 ]]></Implementation>
@@ -592,21 +627,20 @@ xmlns="http://www.w3.org/TR/REC-html40">
   <td class=xl58>&nbsp;</td>
   <td class=xl62>&nbsp;</td>
   <td class=xl62>&nbsp;</td>
-  <td colspan=3 class=xl121 style='border-right:.5pt solid black' >Итого<span
-  style='mso-spacerun:yes'> </span></td>
+  <td colspan=3 class=xl121 style='border-right:.5pt solid black' >Итого<span style='mso-spacerun:yes'> </span></td>
   <td class=xl63 style='border-left:none'>&nbsp;</td>
   <td class=xl65>&nbsp;</td>
   <td class=xl64>&nbsp;</td>
   <td class=xl64>&nbsp;</td>
   <td class=xl66>&nbsp;</td>
   <td colspan=2 class=xl88 width=61 style='width:46pt'>
-    #($J( $$$g("vsegoquant"), ".", 0) )#
+    #( $J( $$$g("vsegoquant"), ".", 0) )#
   </td><td colspan=2 class=xl89>Х</td>
   <td colspan=5 class=xl108 width=88 style='width:66pt'>
-    #($J( $$$g("vsegosummabeznds"), ".", 2) )#
+    #( $J( $$$g("vsegosummabeznds"), ".", 2) )#
   </td><td colspan=3 class=xl109>Х</td>
   <td class=xl68 width=43 style='width:33pt' colspan=2>
-    #($J( $$$g("vsegondsotsumma"), ".", 2) )#
+    #( $J( $$$g("vsegondsotsumma"), ".", 2) )#
   </td><td class=xl69 width=36 style='width:27pt'>&nbsp;</td>
   <td colspan=3 class=xl93 width=89 style='width:67pt'>
     #($J( $$$g("vsegosummasnds"), ".", 2) )#
@@ -615,26 +649,26 @@ xmlns="http://www.w3.org/TR/REC-html40">
  <tr height=15 style='mso-height-source:userset;height:11.85pt'>
   <td height=15 class=xl58 style='height:11.85pt'>&nbsp;</td>
   <td colspan=10 style='mso-ignore:colspan'></td>
-  <td colspan=5 class=xl123 style='border-right:.5pt solid black'>Всего по накладной<span
-  style='mso-spacerun:yes'> </span></td>
+  <td colspan=5 class=xl123 style='border-right:.5pt solid black'>Всего по накладной<span style='mso-spacerun:yes'> </span></td>
   <td class=xl71 style='border-top:none;border-left:none'>&nbsp;</td>
   <td class=xl73 style='border-top:none;border-left:none'>&nbsp;</td>
   <td class=xl72 style='border-top:none'>&nbsp;</td>
   <td class=xl72 style='border-top:none'>&nbsp;</td>
   <td class=xl74 style='border-top:none'>&nbsp;</td>
   <td colspan=2 class=xl94 width=61 style='border-left:none;width:46pt'>
-    #($J( $$$g("vsegoquant"),".",0))#
+    #( $J( $$$g("vsegoquant"),".",0) )#
   </td><td colspan=2 class=xl50 style='border-left:none'>Х</td>
   <td colspan=5 class=xl87 width=88 style='border-left:none;width:66pt'>
-    #($J( $$$g("vsegosummabeznds"),".",2))#
-  </td>0<td colspan=3 class=xl50 style='border-left:none'>Х</td>
+    #( $J( $$$g("vsegosummabeznds"),".",2) )#
+  </td><td colspan=3 class=xl50 style='border-left:none'>Х</td>
   <td class=xl75 width=26 style='border-top:none;border-left:none;width:20pt'>&nbsp;</td>
   <td class=xl55 width=17 style='border-top:none;width:13pt'>&nbsp;</td>
   <td class=xl57 width=36 style='border-top:none;width:27pt'>&nbsp;</td>
   <td colspan=3 class=xl87 width=89 style='border-left:none;width:67pt'>
-    #($J( $$$g("vsegosummasnds"),".",2))#
+    #( $J( $$$g("vsegosummasnds"),".",2) )#
   </td><td></td>
- </tr>>    
+ </tr>
+>    
  Q ""
 ]]></Implementation>
 </Method>
@@ -643,11 +677,14 @@ xmlns="http://www.w3.org/TR/REC-html40">
 <Description>
 Выводим подвал формы </Description>
 <ClassMethod>1</ClassMethod>
+<FormalSpec>summary</FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
- s DoverennNumber = %request.Get("DoverennNumber")		//номер доверенности
- s DoverennDatValue = %request.Get("DoverennDatValue")	//дата доверенности
-    
+ s DoverennNumber = %request.Get("DoverennNumber")      //номер доверенности
+ s DoverennDatValue = %request.Get("DoverennDatValue")  //дата доверенности
+ s CountWords = 1
+ s (CountWords(10),CountWords(5),CountWords(2),CountWords(1),CountWords(-1)) = ""
+   
      &html<<tr class=xl24 height=16 style='mso-height-source:userset;height:12.0pt'>
   <td height=16 colspan=4 class=xl24 style='height:12.0pt;mso-ignore:colspan'></td>
   <td class=xl24 colspan=4 style='mso-ignore:colspan'>Товарная накладная имеет
@@ -671,7 +708,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
  <tr class=xl24 height=14 style='mso-height-source:userset;height:11.1pt'>
   <td height=14 colspan=4 class=xl24 style='height:11.1pt;mso-ignore:colspan'></td>
   <td class=xl24>и содержит</td>
-  <td class=xl78 colspan=2 style='mso-ignore:colspan'><!-- Три --></td>
+  <td class=xl78 colspan=2 style='mso-ignore:colspan'>#(##class(Utils.Propis).Write($G(summary("rowcount")),.CountWords))#<!-- Три --></td>
   <td class=xl78>&nbsp;</td>
   <td class=xl78>&nbsp;</td>
   <td class=xl78>&nbsp;</td>
@@ -811,7 +848,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
  </tr>
  <tr height=15 style='mso-height-source:userset;height:11.85pt'>
   <td height=15 style='height:11.85pt'></td>
-  <td colspan=18 class=xl112 width=575 style='width:434pt'><!-- Пятьдесят один рубль 00 копеек --></td>
+  <td colspan=18 class=xl112 width=575 style='width:434pt'>#(##class(Utils.Propis).Write(summary("vsegosummasnds")))#<!-- Пятьдесят один рубль 00 копеек --></td>
   <td colspan=5 style='mso-ignore:colspan'></td>
   <td colspan=2 class=xl80 align=center style='mso-ignore:colspan'>кем, кому (организация, должность, фамилия, и. о.)</td>
   <td colspan=14 style='mso-ignore:colspan'></td>
@@ -1011,6 +1048,976 @@ xmlns="http://www.w3.org/TR/REC-html40">
  </tr>
  <![endif]>>
   
+ Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wCss">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+    &html<<!--table
+    {mso-displayed-decimal-separator:"\,";
+    mso-displayed-thousand-separator:" ";}
+@page
+    {margin:.16in .2in .16in .2in;
+    mso-header-margin:.16in;
+    mso-footer-margin:.16in;
+    mso-page-orientation:landscape;}
+.font16
+    {color:windowtext;
+    font-size:6.0pt;
+    font-weight:700;
+    font-style:normal;
+    text-decoration:none;
+    font-family:Arial, sans-serif;
+    mso-font-charset:0;}
+tr
+    {mso-height-source:auto;}
+col
+    {mso-width-source:auto;}
+br
+    {mso-data-placement:same-cell;}
+.style0
+    {mso-number-format:General;
+    text-align:general;
+    vertical-align:bottom;
+    white-space:nowrap;
+    mso-rotate:0;
+    mso-background-source:auto;
+    mso-pattern:auto;
+    color:windowtext;
+    font-size:8.0pt;
+    font-weight:400;
+    font-style:normal;
+    text-decoration:none;
+    font-family:Arial, sans-serif;
+    mso-font-charset:0;
+    border:none;
+    mso-protection:locked visible;
+    mso-style-name:Обычный;
+    mso-style-id:0;}
+td
+    {mso-style-parent:style0;
+    padding-top:1px;
+    padding-right:1px;
+    padding-left:1px;
+    mso-ignore:padding;
+    color:windowtext;
+    font-size:8.0pt;
+    font-weight:400;
+    font-style:normal;
+    text-decoration:none;
+    font-family:Arial, sans-serif;
+    mso-font-charset:0;
+    mso-number-format:General;
+    text-align:general;
+    vertical-align:bottom;
+    border:none;
+    mso-background-source:auto;
+    mso-pattern:auto;
+    mso-protection:locked visible;
+    white-space:nowrap;
+    mso-rotate:0;}
+.xl24
+    {mso-style-parent:style0;
+    text-align:left;}
+.xl25
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-weight:0;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:right;
+    vertical-align:middle;}
+.xl26
+    {mso-style-parent:style0;
+    text-align:center;
+    vertical-align:middle;
+    border:.5pt solid windowtext;}
+.xl27
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    mso-number-format:0000000;
+    text-align:center;
+    vertical-align:middle;
+    border-top:1.0pt solid windowtext;
+    border-right:1.0pt solid windowtext;
+    border-bottom:none;
+    border-left:1.0pt solid windowtext;}
+.xl28
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl29
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:right;}
+.xl30
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    mso-number-format:0000000000;
+    text-align:center;
+    border-top:.5pt solid windowtext;
+    border-right:1.0pt solid windowtext;
+    border-bottom:none;
+    border-left:1.0pt solid windowtext;}
+.xl31
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    font-weight:0;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center-across;
+    vertical-align:top;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl32
+    {mso-style-parent:style0;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:left;}
+.xl33
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    border-top:.5pt solid windowtext;
+    border-right:1.0pt solid windowtext;
+    border-bottom:.5pt solid windowtext;
+    border-left:1.0pt solid windowtext;}
+.xl34
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    border-top:none;
+    border-right:1.0pt solid windowtext;
+    border-bottom:none;
+    border-left:1.0pt solid windowtext;}
+.xl35
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center-across;
+    vertical-align:top;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl36
+    {mso-style-parent:style0;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center-across;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl37
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    border-top:.5pt solid windowtext;
+    border-right:1.0pt solid windowtext;
+    border-bottom:none;
+    border-left:1.0pt solid windowtext;}
+.xl38
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:right;
+    vertical-align:middle;}
+.xl39
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    border-top:.5pt solid windowtext;
+    border-right:1.0pt solid windowtext;
+    border-bottom:1.0pt solid windowtext;
+    border-left:1.0pt solid windowtext;}
+.xl40
+    {mso-style-parent:style0;
+    text-align:left;
+    vertical-align:top;}
+.xl41
+    {mso-style-parent:style0;
+    font-style:italic;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:right;
+    vertical-align:top;}
+.xl42
+    {mso-style-parent:style0;
+    text-align:left;
+    vertical-align:top;
+    border:none;}
+.xl43
+    {mso-style-parent:style0;
+    text-align:center;
+    vertical-align:middle;
+    border:.5pt solid windowtext;
+    white-space:normal;}
+.xl44
+    {mso-style-parent:style0;
+    text-align:left;
+    vertical-align:middle;}
+.xl45
+    {mso-style-parent:style0;
+    text-align:left;
+    vertical-align:middle;
+    border:none;}
+.xl46
+    {mso-style-parent:style0;
+    font-size:7.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    mso-number-format:0;
+    text-align:center;
+    vertical-align:middle;
+    border:.5pt solid windowtext;}
+.xl47
+    {mso-style-parent:style0;
+    font-size:7.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    mso-number-format:0;
+    text-align:center;
+    vertical-align:middle;
+    border-top:.5pt solid windowtext;
+    border-right:.5pt solid windowtext;
+    border-bottom:1.0pt solid windowtext;
+    border-left:.5pt solid windowtext;}
+.xl48
+    {mso-style-parent:style0;
+    mso-number-format:00000000000;
+    text-align:right;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:1.0pt solid windowtext;
+    white-space:normal;}
+.xl49
+    {mso-style-parent:style0;
+    mso-number-format:0;
+    text-align:center;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:1.0pt solid windowtext;
+    white-space:normal;}
+.xl50
+    {mso-style-parent:style0;
+    text-align:center;
+    vertical-align:top;
+    border:.5pt solid windowtext;}
+.xl51
+    {mso-style-parent:style0;
+    text-align:right;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl52
+    {mso-style-parent:style0;
+    text-align:right;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;}
+.xl53
+    {mso-style-parent:style0;
+    text-align:right;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:.5pt solid windowtext;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl54
+    {mso-style-parent:style0;
+    text-align:right;
+    vertical-align:top;
+    border:.5pt solid windowtext;}
+.xl55
+    {mso-style-parent:style0;
+    text-align:right;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;
+    white-space:normal;}
+.xl56
+    {mso-style-parent:style0;
+    text-align:right;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:1.0pt solid windowtext;
+    white-space:normal;}
+.xl57
+    {mso-style-parent:style0;
+    text-align:right;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:.5pt solid windowtext;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;
+    white-space:normal;}
+.xl58
+    {mso-style-parent:style0;
+    text-align:left;
+    border:none;}
+.xl59
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl60
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl61
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl62
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:1.0pt solid windowtext;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl63
+    {mso-style-parent:style0;
+    text-align:right;
+    border-top:1.0pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;}
+.xl64
+    {mso-style-parent:style0;
+    text-align:right;
+    border-top:1.0pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl65
+    {mso-style-parent:style0;
+    text-align:right;
+    border-top:1.0pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;}
+.xl66
+    {mso-style-parent:style0;
+    text-align:right;
+    border-top:1.0pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl67
+    {mso-style-parent:style0;
+    text-align:right;
+    vertical-align:top;
+    border-top:1.0pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;
+    white-space:normal;}
+.xl68
+    {mso-style-parent:style0;
+    text-align:right;
+    vertical-align:top;
+    border-top:1.0pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;
+    white-space:normal;}
+.xl69
+    {mso-style-parent:style0;
+    text-align:right;
+    vertical-align:top;
+    border-top:1.0pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;
+    white-space:normal;}
+.xl70
+    {mso-style-parent:style0;
+    text-align:right;}
+.xl71
+    {mso-style-parent:style0;
+    text-align:right;
+    border:.5pt solid windowtext;}
+.xl72
+    {mso-style-parent:style0;
+    text-align:right;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl73
+    {mso-style-parent:style0;
+    text-align:right;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;}
+.xl74
+    {mso-style-parent:style0;
+    text-align:right;
+    border-top:.5pt solid windowtext;
+    border-right:.5pt solid windowtext;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl75
+    {mso-style-parent:style0;
+    text-align:right;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;
+    white-space:normal;}
+.xl76
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl77
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl78
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl79
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl80
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center-across;
+    vertical-align:top;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl81
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl82
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center-across;
+    vertical-align:top;
+    border-top:none;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl83
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    vertical-align:top;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl84
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:none;
+    border-right:.5pt solid windowtext;
+    border-bottom:none;
+    border-left:none;}
+.xl85
+    {mso-style-parent:style0;
+    text-align:center-across;}
+.xl86
+    {mso-style-parent:style0;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:left;}
+.xl87
+    {mso-style-parent:style0;
+    mso-number-format:Standard;
+    text-align:right;
+    vertical-align:top;
+    border:.5pt solid windowtext;
+    white-space:normal;}
+.xl88
+    {mso-style-parent:style0;
+    mso-number-format:"0\.000";
+    text-align:right;
+    border-top:1.0pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;
+    white-space:normal;}
+.xl89
+    {mso-style-parent:style0;
+    text-align:center;
+    vertical-align:top;
+    border-top:1.0pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;}
+.xl90
+    {mso-style-parent:style0;
+    mso-number-format:Standard;
+    text-align:right;
+    vertical-align:top;
+    border:.5pt solid windowtext;}
+.xl91
+    {mso-style-parent:style0;
+    mso-number-format:Standard;
+    text-align:right;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;
+    white-space:normal;}
+.xl92
+    {mso-style-parent:style0;
+    mso-number-format:Standard;
+    text-align:right;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:1.0pt solid windowtext;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;
+    white-space:normal;}
+.xl93
+    {mso-style-parent:style0;
+    mso-number-format:Standard;
+    text-align:right;
+    vertical-align:top;
+    border-top:1.0pt solid windowtext;
+    border-right:.5pt solid windowtext;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;
+    white-space:normal;}
+.xl94
+    {mso-style-parent:style0;
+    mso-number-format:"0\.000";
+    text-align:right;
+    border:.5pt solid windowtext;
+    white-space:normal;}
+.xl95
+    {mso-style-parent:style0;
+    mso-number-format:0;
+    text-align:center;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;}
+.xl96
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:right;
+    white-space:normal;}
+.xl97
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    text-align:left;
+    border-top:.5pt solid windowtext;
+    border-right:1.0pt solid windowtext;
+    border-bottom:.5pt solid windowtext;
+    border-left:1.0pt solid windowtext;}
+.xl98
+    {mso-style-parent:style0;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl99
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:right;
+    white-space:normal;}
+.xl100
+    {mso-style-parent:style0;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;
+    white-space:normal;}
+.xl101
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:right;
+    border:.5pt solid windowtext;}
+.xl102
+    {mso-style-parent:style0;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    vertical-align:middle;
+    border:.5pt solid windowtext;}
+.xl103
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    mso-number-format:0;
+    text-align:center;
+    vertical-align:middle;
+    border-top:1.0pt solid windowtext;
+    border-right:.5pt solid windowtext;
+    border-bottom:1.0pt solid windowtext;
+    border-left:1.0pt solid windowtext;}
+.xl104
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    text-align:center;
+    vertical-align:middle;
+    border-top:1.0pt solid windowtext;
+    border-right:1.0pt solid windowtext;
+    border-bottom:1.0pt solid windowtext;
+    border-left:.5pt solid windowtext;}
+.xl105
+    {mso-style-parent:style0;
+    text-align:left;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;
+    white-space:normal;}
+.xl106
+    {mso-style-parent:style0;
+    text-align:center;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:1.0pt solid windowtext;}
+.xl107
+    {mso-style-parent:style0;
+    mso-number-format:"0\.000";
+    text-align:right;
+    vertical-align:top;
+    border:.5pt solid windowtext;
+    white-space:normal;}
+.xl108
+    {mso-style-parent:style0;
+    mso-number-format:Standard;
+    text-align:right;
+    vertical-align:top;
+    border-top:1.0pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;
+    white-space:normal;}
+.xl109
+    {mso-style-parent:style0;
+    text-align:center;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;}
+.xl110
+    {mso-style-parent:style0;
+    text-align:left;
+    border:1.0pt solid windowtext;}
+.xl111
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    vertical-align:top;
+    border-top:none;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl112
+    {mso-style-parent:style0;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:left;
+    border-top:none;
+    border-right:.5pt solid windowtext;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;
+    white-space:normal;}
+.xl113
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    vertical-align:top;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl114
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    vertical-align:top;
+    border-top:none;
+    border-right:.5pt solid windowtext;
+    border-bottom:none;
+    border-left:none;}
+.xl115
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    vertical-align:middle;}
+.xl116
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    vertical-align:middle;}
+.xl117
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    vertical-align:middle;
+    border-top:none;
+    border-right:1.0pt solid windowtext;
+    border-bottom:none;
+    border-left:none;}
+.xl118
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;}
+.xl119
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    border-top:none;
+    border-right:1.0pt solid windowtext;
+    border-bottom:none;
+    border-left:none;}
+.xl120
+    {mso-style-parent:style0;
+    border-top:none;
+    border-right:1.0pt solid windowtext;
+    border-bottom:none;
+    border-left:none;}
+.xl121
+    {mso-style-parent:style0;
+    text-align:center;
+    border-top:1.0pt solid windowtext;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl122
+    {mso-style-parent:style0;
+    text-align:center;
+    border-top:1.0pt solid windowtext;
+    border-right:.5pt solid windowtext;
+    border-bottom:none;
+    border-left:none;}
+.xl123
+    {mso-style-parent:style0;
+    text-align:center;}
+.xl124
+    {mso-style-parent:style0;
+    text-align:center;
+    border-top:none;
+    border-right:.5pt solid windowtext;
+    border-bottom:none;
+    border-left:none;}
+.xl125
+    {mso-style-parent:style0;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;
+    white-space:normal;}
+.xl126
+    {mso-style-parent:style0;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl127
+    {mso-style-parent:style0;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:1.0pt solid windowtext;}
+.xl128
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;
+    white-space:normal;}
+.xl129
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;
+    white-space:normal;}
+.xl130
+    {mso-style-parent:style0;
+    font-weight:700;
+    text-align:left;
+    border-top:none;
+    border-right:.5pt solid windowtext;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;
+    white-space:normal;}
+.xl131
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    text-align:center;
+    vertical-align:top;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl132
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    text-align:center-across;
+    vertical-align:top;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl133
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    text-align:center;
+    vertical-align:top;
+    border-top:none;
+    border-right:.5pt solid windowtext;
+    border-bottom:none;
+    border-left:none;}
+.xl134
+    {mso-style-parent:style0;
+    text-align:left;
+    white-space:normal;}
+.xl135
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    text-align:center-across;
+    vertical-align:top;}
+.xl136
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    text-align:center;
+    vertical-align:top;
+    border-top:none;
+    border-right:.5pt solid windowtext;
+    border-bottom:none;
+    border-left:none;}
+ -->>
+    
  Q ""
 ]]></Implementation>
 </Method>
