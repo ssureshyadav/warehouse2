@@ -1,3 +1,4 @@
+<CSP:PARAMETER name="DOMAIN" value="SKLAD2"/>
 <script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
  s login=$G(%session.Data("user"))
  i '+login s %response.ServerSideRedirect="norights.csp" 
@@ -47,17 +48,26 @@
 <link href="style.css" type=text/css rel=stylesheet>
 <style>
 #footer { position: absolute;   bottom: 0; width: 100%; }
-.datar{width:70;border:none;cursor:hand}
+.datar{width:70;border:none;cursor:hand; }
+
+/*маленькая функциональная кнопка на панели управления под гридом */ 
+.btn { 
+    overflow: visible; /*ie btn padding*/ 
+} 
+
 </style>
 
 <script language="Jscript" src="common.js"></script>
     <link href="js/css/cupertino/jquery-ui-1.10.3.custom.css" rel="stylesheet">
     <script src="js/js/jquery-1.9.1.js"></script>
     <script src="js/js/jquery-ui-1.10.3.custom.js"></script>
-    
     <link href="js/css/ui.jqgrid.css" rel="stylesheet">
     <script src="js/js/grid.locale-ru.js"></script>
     <script src="js/js/jquery.jqGrid.min.js"></script>
+    
+    <!-- Добавляет функционал проверки серийных номеров для отчета о ремонте -->
+    <script src="docs3.js"></script>
+    
     
 <script language="JScript">
 var d1,d2;
@@ -118,11 +128,11 @@ function okfunc()
     if(doctypesItemID=="Docs.Rash"){okbwut3.style.display="inline";}
     else{okbwut3.style.display="none";}
     
-    if(doctypesItemID=="Docs.Otchet")
-    {
+    if(doctypesItemID=="Docs.Otchet") {
         OtchetSpecButton.style.display="inline";
+    } else {
+        OtchetSpecButton.style.display="none";
     }
-    else{OtchetSpecButton.style.display="none";}
 
     if(doctypesItemID=="Operation.Instructions")
     {
@@ -536,6 +546,14 @@ function SetBrakAnswer()
     <img src="images/red_stop.gif" alt="Отклонить отчёт" width="20px" height="20px" style="cursor:hand" onclick="setOtchetFailed()">
     <img src="images/green_butt.gif" alt="Принять отчёт" width="20px" height="20px" style="cursor:hand" onclick="setOtchetAccepted()">
     <sklad:LittleButton name="txtok" id="btnProveOthet" onclick="ProveOthet()" alt="Бумажный отчёт проверен">
+    <!--Проверка серийных номеров ON-->
+<button id='bCheckSerial' class='btn' type='button' 
+    data-url='#(..Link("csp.CheckSerial3.cls",,1))#'
+    title='#($$$Text("Перейти на страницу проверки серийных номеров"))#'
+ >
+    #($$$Text("Проверка серийных"))#
+</button>
+ 
 </span>
 
 <!-- кнопки инструкции руководителя -->
@@ -553,11 +571,12 @@ function SetBrakAnswer()
         <img src="images/red_stop.gif" alt="Отклонить акт" width="20px" height="20px" style="cursor:hand" onclick="setActFailed()">
         <img src="images/green_butt.gif" alt="Принять акт" width="20px" height="20px" style="cursor:hand" onclick="setActAccepted()">
         <img src="images/print.gif" onmouseout="this.src='images/print.gif'" onmouseover="this.src='images/Onprint.gif'" alt="Сформировать служебную записку" width="20px" height="20px" style="cursor:hand" onclick="MakeActNote()">
-    >
+   >
 </script>
 <sklad:LittleButton name="txt" id="btnShowOtchetErrors" onclick="ShowOtchetErrorsFn('Comment')" alt="Показать комментарии к акту">
 </span>
-</td><td>
+</td>
+<td>
 <sklad:LittleButton name="del" id="dk2fi" onclick="deldoc()" alt="Удалить документ">
 </td></tr></table>
 
