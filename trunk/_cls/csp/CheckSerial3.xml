@@ -66,18 +66,10 @@ function s( currentrecord ) {
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
  
- /// Common.Dictionary2 - Справочник гарантийных талонов
+ #; Common.Dictionary2 - Справочник гарантийных талонов
  s glob=$NA(^Common.Dictionary2I("serialInd")) ;прямой доступ к глобали индекса по серийному номеру
  
- #; извлечение сгенерированной информации 
- #; порядок хранения свойств в глобали данных 
- /*
- s ListIndex("Property9194") = ##class(Common.Dictionary2).GetPropertyListIndex("Property9194",.DataLocation)
- s ListIndex("Comment") = ##class(Common.Dictionary2).GetPropertyListIndex("Comment",.DataLocation)
- s ListIndex("tovar") = ##class(Common.Dictionary2).GetPropertyListIndex("tovar",.DataLocation)
- s ListIndex("remont1") = ##class(Common.Dictionary2).GetPropertyListIndex("remont1",.DataLocation)
- */
- 
+
  #; DISPLAYLIST для свойства актуальность (Property9194)
  s pid="Common.Dictionary2||Property9194" 
  d ##class(Docs.Action2).GetDisplayListArray(pid,.Property9194Array)
