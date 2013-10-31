@@ -16,7 +16,8 @@ $(function(){
     };
     
     var url = $( this ).data( 'url' ) + "id="+docid;
-    window.open( url );
+    var woo = "center:yes;status:no;dialogHeight:660px;dialogWidth:800px;resizable:yes;"
+    window.open( url,"Проверка серийных", woo );
     
     
             
