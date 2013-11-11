@@ -6,6 +6,10 @@
 <Super>%CSP.Page</Super>
 <TimeCreated>63125,11046.00817</TimeCreated>
 
+<Parameter name="DOMAIN">
+<Default>csp</Default>
+</Parameter>
+
 <Method name="OnPreHTTP">
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Boolean</ReturnType>
@@ -33,14 +37,31 @@
 <Implementation><![CDATA[
  
  #define g(%name) $g(%request.Data(%name,1))
- 
- 
- &html<<html>
+  
+ &html<<!doctype html><html lang="ru">
  <head>
     <meta http-equiv="content-type" content="text/html; charset=windows-1251" />
  <title> Проверка действительности серийных номеров </title>
  <link href="style.css" type=text/css rel=stylesheet>
-<script language="javascript" type="text/javascript">
+</head><body>
+<table border=1 cellpadding=6 cellspacing=0>
+ <thead><tr>
+    <td>№ п/п
+    <td>Серийный номер
+    <td>Актуальность
+    <td>Наличие заявки
+    <td>Модель
+    <td>Примечание
+    <td>Дубль серийного номера
+ </tr></thead><tbody>>
+ 
+     s doccls = $$$g("cls"), docid= $$$g("id")
+     d ..ShowDocData( doccls, docid )
+     
+ &html<</tbody>
+ </table>
+ 
+ <script type="text/javascript">
 var sessionid="#(%session.SessionId)#";
 
 function s( currentrecord ) {
@@ -49,11 +70,8 @@ function s( currentrecord ) {
     ok=window.showModalDialog( url, currentrecord+";Common.Dictionary2", mdo );
 }
 </script>
-</head><body>>
-     s docid= $g( %request.Data("id",1) )
-     d ..ShowDocData( docid )
- 
- &html<</body></html>>
+
+ </body></html>>
  Quit $$$OK
 ]]></Implementation>
 </Method>
@@ -62,65 +80,64 @@ function s( currentrecord ) {
 <Description>
 Получение проверяемого списка из документа</Description>
 <ClassMethod>1</ClassMethod>
-<FormalSpec>docid:%String=""</FormalSpec>
+<FormalSpec>doccls:%String,docid:%String</FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
  
+ s doccls=$g( doccls ), docid = $g( docid )
+ s allow = $lb("Docs.Act","Docs.Otchet")
+ if '$lf( allow, doccls ) {
+     w "<h2>",$$$Text("Неправильный тип документа. Обратитесь к разработчику"),"</h2>"
+     Q ""
+ }
+
+ #; ПОДГОТОВКА ЗАПРОСА
+ if doccls = "Docs.Otchet" {
+   s sql="Select serial From Docs.OtchetItems Where Doc = ?"
+ } else {
+   s sql="Select Serial as serial From Docs.Act Where ID = ?"  
+ }
+ 
+ s rs=##class(%ResultSet).%New()
+ s sc=rs.Prepare(sql) ;w "Prepare: ",sc
+ s sc=rs.Execute( docid ) ;w "Execute: ",sc
+  
+ #; Вспомогательные данные для отображения 
+ s CountLines = 0 ;количество строк
  #; Common.Dictionary2 - Справочник гарантийных талонов
  s glob=$NA(^Common.Dictionary2I("serialInd")) ;прямой доступ к глобали индекса по серийному номеру
  
-
  #; DISPLAYLIST для свойства актуальность (Property9194)
  s pid="Common.Dictionary2||Property9194" 
  d ##class(Docs.Action2).GetDisplayListArray(pid,.Property9194Array)
-
- &html<<br><br><table border=1 cellpadding=6 cellspacing=0>
- <tr><td>№ п/п
-     <td>Серийный номер
-     <td>Актуальность
-     <td>Наличие заявки
-     <td>Модель
-     <td>Примечание
-     <td>Дубль серийного номера
- </tr>>
- 
- s sql="Select serial From Docs.OtchetItems Where Doc = ?"
- s rs=##class(%ResultSet).%New()
- s sc=rs.Prepare(sql)
- s sc=rs.Execute( docid )
- s CountLines = 0 ;количество строк
  
  for { Q:'rs.Next()
- 
-    s serial= $g( rs.Data("serial") )  if serial="" continue
-    s (garantStr,actual,comment,Model,HasRequest)="Не найден"
+
+    s serial= $g( rs.Data( "serial" ) )  if serial="" continue
+    s shtml = serial ;выводим просто как текст
+    s (Property9194, actual, garant, comment, Model, remont1, HasRequest)="Не найден" ;значения по умолчанию
     s ID="", color="#FFFFFF", SearchString = " "_$ZCVT(serial,"U")
     i $I(CountLines)    ;плюс строка
     
-    //если в индексе справочника гарантийных есть такой серийный
-    if '$D(@glob@( SearchString )) continue 
+    #;если в индексе справочника гарантийных есть такой серийный
     s ID = $O(@glob@( SearchString, "" )) ;id гарантийного талона
-    if ( ID = "" ) continue
     
-    #;= ##class(Common.Dictionary2).GetPropertyValue(ID,"Property9194",ListIndex("Property9194"),.DataLocation)
-    s Property9194 = ##class(Common.Dictionary2).Property9194GetStored( ID )
-    s:Property9194=2 color="#DEDEDE"
-    s actual=$G( Property9194Array( Property9194 ) ) ;display value
+    if ( ID '= "" )  { ;серийный номер есть в индексе
+        
+        s Property9194 = ##class(Common.Dictionary2).Property9194GetStored( ID )
+        s:Property9194=2 color="#DEDEDE"
+        s actual=$G( Property9194Array( Property9194 ) ) ;display value
     
-    s garant=$LG( @glob@(SearchString,ID),2 ) ;в индексе сразу хранится номер гарантийного талона
+        s garant=$LG( @glob@(SearchString,ID),2 ) ;в индексе сразу хранится номер гарантийного талона
+        , garant="<a href=""javascript:s('"_ID_"')"">"_garant_"</a>" ;оформляем
     
-    s garant="<a href=""javascript:s('"_ID_"')"">"_garant_"</a>"
-    
-    
-    s comment = ##class(Common.Dictionary2).CommentGetStored( ID )
-    s Model = ##class(Common.Dictionary2).tovarGetStored( ID ) 
-    s remont1 = ##class(Common.Dictionary2).remont1GetStored(  ID  )
-    s HasRequest="нет" s:remont1'="" HasRequest="<b>есть</b>"
-    
-    s shtml = serial 
-    if $G(ID)'="" {
-         s shtml = "<a href=""javascript:s('"_$G(ID)_"')"">"_serial_"</a>"
-    }     
+        s comment = ##class(Common.Dictionary2).CommentGetStored( ID )
+        s Model = ##class(Common.Dictionary2).tovarGetStored( ID ) 
+        s remont1 = ##class(Common.Dictionary2).remont1GetStored(  ID  )
+        s HasRequest="нет" s:remont1'="" HasRequest="<b>есть</b>"
+        s shtml = "<a href=""javascript:s('"_$G(ID)_"')"">"_serial_"</a>"
+        
+    }
     
     &html<<tr bgcolor='#(color)#'>
     <td>#(CountLines)#
@@ -137,7 +154,7 @@ function s( currentrecord ) {
     
  } d rs.Close() k rs
  
- &html<</table>>
+ 
  
  Quit ""
 ]]></Implementation>
