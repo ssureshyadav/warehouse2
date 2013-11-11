@@ -1,46 +1,3 @@
-<CSP:PARAMETER name="DOMAIN" value="SKLAD2"/>
-<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
- s login=$G(%session.Data("user"))
- i '+login s %response.ServerSideRedirect="norights.csp" 
- i '##class(Common.Rights).getrights(login,3) s %response.ServerSideRedirect="norights.csp" 
- s ActRights = ##class(Common.Rights).getrights(login,12)
-
-  s SaveChoice=%request.Get("SaveChoice") 
-  if %request.Get("SaveChoice") 
-  {
-      d ##class(User.Settings).SetSettingValue("DocsPage",%request.PageName)
-  }
-  
- q 1
-</script>
-<script language="Cache" method="ShowDocItemsHeaders" arguments="Class:%String" returntype="%String">
- Quit ##class(Common.Common).showheaders(Class)
-</script>
-<script language="Cache" method="SetBrakAnswer" arguments="ID:%String,Answer:%String" returntype="%String">
- if ID="" q "Не указана инструкция."
- s obj = ##class(Operation.Instructions).%OpenId(ID)
- if '$ISOBJECT(obj) q "Невозможно найти инструкцию "_ID
- s obj.BrakCommentAnswer = Answer
- s obj.BrakCommentAnswerUser = $G(%session.Data("user"))
- s obj.BrakCommentAnswerDat = +$H
- s ok=obj.%Save()
- if ok q 1
- else  q "Извините. Ошибка при сохранении ответа."
-</script>
-<script language="Cache" method="ShowDocItems" arguments="Class:%String,DocId:%String" returntype="%String">
- n str,i,fields
- s str=##class(Common.Common).showheaders(Class,,,1)
- for i=1:1:$L(str,"#@#")
- {
-    s header=$P(str,"#@#",i) 
-    s headerKey = $P(header,"~")
-    s fields=$G(fields)_headerKey_","
- }
- s fields=$E(fields,1,$L(fields)-2)
-
- q ##class(Common.Common).showdata(Class,fields,,"doc="_DocId,,1)
-</script>
-
 <html XMLNS:SKLADz XMLNS:SKLAD2 XMLNS:SKLADList >
 <IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
 <head>
@@ -56,20 +13,128 @@
 } 
 
 </style>
+<link href="js/css/cupertino/jquery-ui-1.10.3.custom.css" rel="stylesheet">
+<link href="js/css/ui.jqgrid.css" rel="stylesheet">
 
-<script language="Jscript" src="common.js"></script>
-    <link href="js/css/cupertino/jquery-ui-1.10.3.custom.css" rel="stylesheet">
-    <script src="js/js/jquery-1.9.1.js"></script>
-    <script src="js/js/jquery-ui-1.10.3.custom.js"></script>
-    <link href="js/css/ui.jqgrid.css" rel="stylesheet">
-    <script src="js/js/grid.locale-ru.js"></script>
-    <script src="js/js/jquery.jqGrid.min.js"></script>
-    
-    <!-- Добавляет функционал проверки серийных номеров для отчета о ремонте -->
-    <script src="docs3.js"></script>
-    
-    
-<script language="JScript">
+</head>
+<body  onload="load()" >
+<table cellSpacing=0 width="100%" celpadding="0" >
+<tr>
+<td width=10%><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
+<TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" ><strong>Документы</strong></TD>
+<td width=10% align=right><a href="help/docs.htm"><img src="images/BIGHelp.bmp" width="20" height=25 border=0></a></td>
+</table>
+
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<td rowspan=99 valign=top>
+ <table id="DocTypesTable"></table>
+</td></tr>
+<tr>
+<td width=10>&nbsp;</td>
+<td width=100% valign=top>
+<fieldset><legend id="TypDocument"></legend>
+Период c <input type=text id="dat1" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"> по <input type=text id="dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar">
+<select id="ChooseKontragent" onchange="ChooseKontragentFunc()">
+<option value="all">Все</option>
+<option value="choose">Выбрать контрагента...</option>
+</select> <input type="text" id="DocName" title="Начальные цифры номера" style="width:100px">
+ <span id="ActAddFields" style="display:none;border:solid black 1">
+    Неоплаченные <input type="checkbox" style="border:none;width:15px" id="ShowUnpaid" title="Выводить только неоплаченные акты">
+ </span>
+<sklad:LittleButton name="ok" id="okbut" onclick="okfunc()" alt="Показать документы"><br>
+<SKLADList:listview width=100% height=150 id="docums" onAddColumns="showdocums()" zClick="showitems()" zonDblClick="CreateDocument(docums.ItemID)" />
+  <Table width=100%><tr><td width=100%>
+<sklad:LittleButton name="new" id="newbut" onclick="CreateDocument('')" alt="Создать документ">
+<sklad:LittleButton name="edit" id="editbut" onclick="CreateDocument(docums.ItemID)" alt="Редактировать документ">
+<sklad:LittleButton name="ok" id="okbut2" onclick="processdoc()" alt="Обработать документ">
+<sklad:LittleButton name="print" id="okbwut2" onclick="prnt(docums.ItemID,docums.ClassName,'')" alt="Печать документа">
+<sklad:LittleButton name="printword" id="PrntButWord" onclick="prnt(docums.ItemID,docums.ClassName,'word')" alt="Печать документа Word">
+<!--
+<sklad:LittleButton name="mail" id="EmailDocument" onclick="EmailDocumentFn(docums.ItemID,docums.ClassName)" alt="Отправить по почте">
+-->
+
+<!-- кнопки кнопки инструкции по отгрузке -->
+<span style="display:none" id="StorageOutField">
+    <sklad:LittleButton name="goinside" id="goinside" onclick="ShowLogOfCreation()" alt="Протокол сборки инструкции по отбору">
+</span>
+
+<!-- кнопки расходной накладной -->
+<span style="display:none" id="okbwut3"> 
+    <sklad:LittleButton name="change" id="ChangeTovInDoc" onclick="ChangeTovInDocFn()" alt="Заменить товар в расходной накладной">
+    <sklad:LittleButton name="card" id="dkfi" onclick="makescet('Docs.Chet')" alt="Сформировать счет на оплату">
+    <sklad:LittleButton name="card" id="okbwut4" onclick="makescet('factura')" alt="Сформировать счет-фактуру">
+    <sklad:LittleButton name="card" id="hernya" onclick="maketovnakl('tovnakladn')" alt="Сформировать товарную накладную">
+</span>
+
+<!-- кнопки отчёта контрагента -->
+<span style="display:none" id="OtchetSpecButton"> 
+    <sklad:LittleButton name="txt" id="btnShowOtchetErrors" onclick="ShowOtchetErrorsFn('Errors')" alt="Показать ошибки отчёта">
+    <img src="images/red_stop.gif" alt="Отклонить отчёт" width="20px" height="20px" style="cursor:hand" onclick="setOtchetFailed()">
+    <img src="images/green_butt.gif" alt="Принять отчёт" width="20px" height="20px" style="cursor:hand" onclick="setOtchetAccepted()">
+    <sklad:LittleButton name="txtok" id="btnProveOthet" onclick="ProveOthet()" alt="Бумажный отчёт проверен">
+<server>
+#;Кнопка проверки серийных номеров для отчета о ремонте
+k urlargs s urlargs("cls")="Docs.Otchet"
+d ..wCheckSerialButton( "bCheckSerialOtchet"
+    , ..Link("csp.CheckSerial3.cls",.urlargs,1)
+    , $$$Text("Проверка серийных")
+    , $$$Text("Перейти на страницу проверки серийных номеров")
+)
+</server>
+ 
+</span>
+
+<!-- кнопки инструкции руководителя -->
+<span style="display:none" id="InstrSpecButton">
+    <sklad:LittleButton name="txt" id="btnLookBrakComment" onclick="ShowOtchetErrorsFn('BrakComment')" alt="Показать негативный отзыв контрагента">
+    <sklad:LittleButton name="txt" id="btnSetBrakAnswer" onclick="SetBrakAnswer()" alt="Ответить на негативный отзыв">
+    <sklad:LittleButton name="txt" id="btnLookBrakCommentAnsw" onclick="ShowOtchetErrorsFn('BrakCommentAnswer')" alt="Показать ответ на негативный отзыв контрагента">
+</span>
+
+<!-- кнопки акта технического осмотра -->
+<span style="display:none" id="ActSpecButton"> 
+    <img src="images/txt.gif" onmouseover="btnShowReqsFromAct.src='images/Ontxt.gif'" onmouseout="btnShowReqsFromAct.src='images/txt.gif'"  id="btnShowReqsFromAct" name="btnShowReqsFromAct" alt="Показать заявки этого акта" onclick="ShowReqsFromActFn()">
+    <img src="images/red_stop.gif" alt="Отклонить акт" width="20px" height="20px" style="cursor:hand" onclick="setActFailed()">
+    <img src="images/green_butt.gif" alt="Принять акт" width="20px" height="20px" style="cursor:hand" onclick="setActAccepted()">
+    <img src="images/print.gif" onmouseout="this.src='images/print.gif'" onmouseover="this.src='images/Onprint.gif'" alt="Сформировать служебную записку" width="20px" height="20px" style="cursor:hand" onclick="MakeActNote()">
+    <sklad:LittleButton name="txt" id="btnShowOtchetErrors" onclick="ShowOtchetErrorsFn('Comment')" alt="Показать комментарии к акту" />
+<server>
+#; выводим кнопку проверки серийных для акта тех осмотра
+k urlargs s urlargs("cls")="Docs.Act"
+d ..wCheckSerialButton( "bCheckSerialAct"
+    , ..Link("csp.CheckSerial3.cls",.urlargs,1)
+    , $$$Text("Проверка серийных")
+    , $$$Text("Перейти на страницу проверки серийных номеров")
+)
+</server>
+
+</span>
+</td>
+<td>
+<sklad:LittleButton name="del" id="dk2fi" onclick="deldoc()" alt="Удалить документ">
+</td></tr></table>
+
+</fieldset>
+<fieldset><legend>Строки документа <div id="CurrDocName"></div></legend>
+<SKLADList:listview width=100% height=150 id="docitems" onAddColumns="showitems()"/><br>
+</fieldset>
+
+</td></tr>
+</table>
+<br/><br/><br/>
+<div id="footer"><p align="right">
+<a href="docs.csp?SaveChoice=1" style="font-color:grey;font-size:12px">старая версия</a>
+</p></div>
+
+
+<script src="common.js" type='text/javascript'></script>
+<script src="js/js/jquery-1.9.1.js" type='text/javascript'></script>
+<script src="js/js/jquery-ui-1.10.3.custom.js" type='text/javascript'></script>
+<script src="js/js/grid.locale-ru.js"  type='text/javascript'></script>
+<script src="js/js/jquery.jqGrid.min.js"  type='text/javascript'></script>
+<!-- Добавляет функционал проверки серийных номеров для отчета о ремонте -->
+<script src="js/pages/docs3.js"  type='text/javascript'></script>
+<script language="JScript" type="text/javascript">
 var d1,d2;
 var ActRights = "#($G(ActRights))#";
 var ItemsClassName;
@@ -84,31 +149,34 @@ docssame="#($G(%session.Data("docssame")))#";
 var login = '#($G(login))#';
 
 function load(){
-docums.login=login;
-docitems.login=login;
+    
+    docums.login=login;
+    docitems.login=login;
 
-$("#DocTypesTable").jqGrid({
-    url:'JQGridData.csp?cl=Docs.Docs',
-    datatype: "json",
-    colNames:['Документы'],
-    colModel:[{name:'Name'}],
-    sortname: 'id',
-    sortorder: "asc",
-    height: 450,
-    width:250,
-    onSelectRow: function(RowId){ 
-        doctypesItemID = RowId; 
-        var RowData = $(this).getRowData(RowId);
-        doctypesItemName = RowData.Name;
-        okfunc(); 
-        
+    $("#DocTypesTable").jqGrid({
+        url:'JQGridData.csp?cl=Docs.Docs',
+        datatype: "json",
+        colNames:['Документы'],
+        colModel:[{name:'Name'}],
+        sortname: 'id', sortorder: "asc",
+        height: 450, width:250,
+        onSelectRow: function( RowId ){ 
+            
+            doctypesItemID = RowId; 
+            var RowData = $(this).getRowData(RowId);
+            doctypesItemName = RowData.Name;
+            okfunc(); 
+            
         }
-});
-$("#DocTypesTable").jqGrid('gridResize',{minWidth:30,maxWidth:800,minHeight:80, maxHeight:750});
+    });
+
+    $("#DocTypesTable").jqGrid('gridResize',{minWidth:30,maxWidth:800,minHeight:80, maxHeight:750});
+    
 }
 
-function okfunc()
-{
+/// выбран тип документа в списке типов
+function okfunc() {
+    
     var AdditionalFieldsDocs="";
     StorageOutField.style.display="none";
     TypDocument.innerText=doctypesItemName;
@@ -119,8 +187,7 @@ function okfunc()
     var AdditionalFields="";
     if(doctypesItemID!="Docs.Platejka")var AdditionalFields="Goods->FullName~Наименование~~~@%String~~~~~#@#";
     
-    if(docitems.ClassName=="Docs.RashItems")
-    {
+    if(docitems.ClassName=="Docs.RashItems") {
         var ExcludeFields=ExcludeFields+",ZakazGoods";
         var AdditionalFields=AdditionalFields+"ZakazGoods->FullName~Заказанный товар~~~@%String~~~~~#@#";
     }
@@ -128,31 +195,32 @@ function okfunc()
     if(doctypesItemID=="Docs.Rash"){okbwut3.style.display="inline";}
     else{okbwut3.style.display="none";}
     
-    if(doctypesItemID=="Docs.Otchet") {
+    if(doctypesItemID=="Docs.Otchet") { //отчет о ремонте
         OtchetSpecButton.style.display="inline";
     } else {
         OtchetSpecButton.style.display="none";
     }
 
-    if(doctypesItemID=="Operation.Instructions")
-    {
+    if(doctypesItemID=="Operation.Instructions") {
         InstrSpecButton.style.display="inline";
-    }
-    else{InstrSpecButton.style.display="none";} 
+    } else {
+        InstrSpecButton.style.display="none";
+    } 
     
-    if(ActRights==1)
-    {
-        if(doctypesItemID=="Docs.Act")
-        {
+    if ( ActRights==1 ) {
+        
+        if ( doctypesItemID=="Docs.Act" ) { //акт технического осмотра
+            
             ActSpecButton.style.display="inline";
             ActAddFields.style.display="inline";
-        }
-        else
-        {
+            
+        } else {
             ActSpecButton.style.display="none";
             ActAddFields.style.display="none";
         }
+        
     }
+    
     if(doctypesItemID=="Docs.StorageOut"){StorageOutField.style.display="inline";}
     
     d1 = new Date();
@@ -490,105 +558,59 @@ function SetBrakAnswer()
     else{alert('Ответ на негативный отзыв сохранён');}
 }
 </script>
-</head>
-<body  onload="load()" >
-<TABLE cellSpacing=0 width="100%" celpadding="0" >
-<TR>
-<td width=10%><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
-<TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" ><strong>Документы</strong></TD>
-<td width=10% align=right><a href="help/docs.htm"><img src="images/BIGHelp.bmp" width="20" height=25 border=0></a></td>
-</TABLE>
 
-<TABLE cellSpacing=0 width="100%" celpadding="0" >
-<td rowspan=99 valign=top>
- <table id="DocTypesTable"></table>
-</td></tr>
-<tr>
-<td width=10>&nbsp;</td>
-<td width=100% valign=top>
-<fieldset><legend id="TypDocument"></legend>
-Период c <input type=text id="dat1" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar"> по <input type=text id="dat2" value="#($ZD($H,4))#" onclick="fnCalendar(this)" class="datar">
-<select id="ChooseKontragent" onchange="ChooseKontragentFunc()">
-<option value="all">Все</option>
-<option value="choose">Выбрать контрагента...</option>
-</select> <input type="text" id="DocName" title="Начальные цифры номера" style="width:30px">
- <span id="ActAddFields" style="display:none;border:solid black 1">
-    Неоплаченные <input type="checkbox" style="border:none;width:15px" id="ShowUnpaid" title="Выводить только неоплаченные акты">
- </span>
-<sklad:LittleButton name="ok" id="okbut" onclick="okfunc()" alt="Показать документы"><br>
-<SKLADList:listview width=100% height=150 id="docums" onAddColumns="showdocums()" zClick="showitems()" zonDblClick="CreateDocument(docums.ItemID)" />
-  <Table width=100%><tr><td width=100%>
-<sklad:LittleButton name="new" id="newbut" onclick="CreateDocument('')" alt="Создать документ">
-<sklad:LittleButton name="edit" id="editbut" onclick="CreateDocument(docums.ItemID)" alt="Редактировать документ">
-<sklad:LittleButton name="ok" id="okbut2" onclick="processdoc()" alt="Обработать документ">
-<sklad:LittleButton name="print" id="okbwut2" onclick="prnt(docums.ItemID,docums.ClassName,'')" alt="Печать документа">
-<sklad:LittleButton name="printword" id="PrntButWord" onclick="prnt(docums.ItemID,docums.ClassName,'word')" alt="Печать документа Word">
-<!--
-<sklad:LittleButton name="mail" id="EmailDocument" onclick="EmailDocumentFn(docums.ItemID,docums.ClassName)" alt="Отправить по почте">
--->
 
-<!-- кнопки кнопки инструкции по отгрузке -->
-<span style="display:none" id="StorageOutField">
-    <sklad:LittleButton name="goinside" id="goinside" onclick="ShowLogOfCreation()" alt="Протокол сборки инструкции по отбору">
-</span>
-
-<!-- кнопки расходной накладной -->
-<span style="display:none" id="okbwut3"> 
-    <sklad:LittleButton name="change" id="ChangeTovInDoc" onclick="ChangeTovInDocFn()" alt="Заменить товар в расходной накладной">
-    <sklad:LittleButton name="card" id="dkfi" onclick="makescet('Docs.Chet')" alt="Сформировать счет на оплату">
-    <sklad:LittleButton name="card" id="okbwut4" onclick="makescet('factura')" alt="Сформировать счет-фактуру">
-    <sklad:LittleButton name="card" id="hernya" onclick="maketovnakl('tovnakladn')" alt="Сформировать товарную накладную">
-</span>
-
-<!-- кнопки отчёта контрагента -->
-<span style="display:none" id="OtchetSpecButton"> 
-    <sklad:LittleButton name="txt" id="btnShowOtchetErrors" onclick="ShowOtchetErrorsFn('Errors')" alt="Показать ошибки отчёта">
-    <img src="images/red_stop.gif" alt="Отклонить отчёт" width="20px" height="20px" style="cursor:hand" onclick="setOtchetFailed()">
-    <img src="images/green_butt.gif" alt="Принять отчёт" width="20px" height="20px" style="cursor:hand" onclick="setOtchetAccepted()">
-    <sklad:LittleButton name="txtok" id="btnProveOthet" onclick="ProveOthet()" alt="Бумажный отчёт проверен">
-    <!--Проверка серийных номеров ON-->
-<button id='bCheckSerial' class='btn' type='button' 
-    data-url='#(..Link("csp.CheckSerial3.cls",,1))#'
-    title='#($$$Text("Перейти на страницу проверки серийных номеров"))#'
- >
-    #($$$Text("Проверка серийных"))#
-</button>
- 
-</span>
-
-<!-- кнопки инструкции руководителя -->
-<span style="display:none" id="InstrSpecButton">
-    <sklad:LittleButton name="txt" id="btnLookBrakComment" onclick="ShowOtchetErrorsFn('BrakComment')" alt="Показать негативный отзыв контрагента">
-    <sklad:LittleButton name="txt" id="btnSetBrakAnswer" onclick="SetBrakAnswer()" alt="Ответить на негативный отзыв">
-    <sklad:LittleButton name="txt" id="btnLookBrakCommentAnsw" onclick="ShowOtchetErrorsFn('BrakCommentAnswer')" alt="Показать ответ на негативный отзыв контрагента">
-</span>
-
-<!-- кнопки акта технического осмотра -->
-<span style="display:none" id="ActSpecButton"> 
-<script language="cache" runat="server">
- if  &html<
-        <img src="images/txt.gif" onmouseover="btnShowReqsFromAct.src='images/Ontxt.gif'" onmouseout="btnShowReqsFromAct.src='images/txt.gif'"  id="btnShowReqsFromAct" name="btnShowReqsFromAct" alt="Показать заявки этого акта" onclick="ShowReqsFromActFn()">
-        <img src="images/red_stop.gif" alt="Отклонить акт" width="20px" height="20px" style="cursor:hand" onclick="setActFailed()">
-        <img src="images/green_butt.gif" alt="Принять акт" width="20px" height="20px" style="cursor:hand" onclick="setActAccepted()">
-        <img src="images/print.gif" onmouseout="this.src='images/print.gif'" onmouseover="this.src='images/Onprint.gif'" alt="Сформировать служебную записку" width="20px" height="20px" style="cursor:hand" onclick="MakeActNote()">
-   >
-</script>
-<sklad:LittleButton name="txt" id="btnShowOtchetErrors" onclick="ShowOtchetErrorsFn('Comment')" alt="Показать комментарии к акту">
-</span>
-</td>
-<td>
-<sklad:LittleButton name="del" id="dk2fi" onclick="deldoc()" alt="Удалить документ">
-</td></tr></table>
-
-</fieldset>
-<fieldset><legend>Строки документа <div id="CurrDocName"></div></legend>
-<SKLADList:listview width=100% height=150 id="docitems" onAddColumns="showitems()"/><br>
-</fieldset>
-
-</td></tr>
-</table><bR><Br><br>
-<div id="footer"><p align="right">
-<a href="docs.csp?SaveChoice=1" style="font-color:grey;font-size:12px">старая версия</a>
-</p></div>
 </body>
 </html>
+
+<!-- ******************* СЕРВЕР ****************** -->
+
+<CSP:PARAMETER name="DOMAIN" value="SKLAD2"/>
+<script method="OnPreHTTP" arguments="" returntype="%Boolean" language="Cache">
+ s login=$G(%session.Data("user"))
+ i '+login s %response.ServerSideRedirect="norights.csp" 
+ i '##class(Common.Rights).getrights(login,3) s %response.ServerSideRedirect="norights.csp" 
+ s ActRights = ##class(Common.Rights).getrights(login,12)
+
+  s SaveChoice=%request.Get("SaveChoice") 
+  if %request.Get("SaveChoice") 
+  {
+      d ##class(User.Settings).SetSettingValue("DocsPage",%request.PageName)
+  }
+  
+ q 1
+</script>
+<script method="ShowDocItemsHeaders" arguments="Class:%String" returntype="%String" language="Cache" >
+ Quit ##class(Common.Common).showheaders(Class)
+</script>
+<script method="SetBrakAnswer" arguments="ID:%String,Answer:%String" returntype="%String" language="Cache">
+ if ID="" q "Не указана инструкция."
+ s obj = ##class(Operation.Instructions).%OpenId(ID)
+ if '$ISOBJECT(obj) q "Невозможно найти инструкцию "_ID
+ s obj.BrakCommentAnswer = Answer
+ s obj.BrakCommentAnswerUser = $G(%session.Data("user"))
+ s obj.BrakCommentAnswerDat = +$H
+ s ok=obj.%Save()
+ if ok q 1
+ else  q "Извините. Ошибка при сохранении ответа."
+</script>
+<script method="ShowDocItems" arguments="Class:%String,DocId:%String" returntype="%String" language="Cache">
+ n str,i,fields
+ s str=##class(Common.Common).showheaders(Class,,,1)
+ for i=1:1:$L(str,"#@#")  {
+    s header=$P(str,"#@#",i) 
+    s headerKey = $P(header,"~")
+    s fields=$G(fields)_headerKey_","
+ }
+ s fields=$E(fields,1,$L(fields)-2)
+
+ q ##class(Common.Common).showdata(Class,fields,,"doc="_DocId,,1)
+</script>
+<script method="wCheckSerialButton" description="Выводит кнопку запуска проверки серийных"
+    arguments="id:%String,url:%String,label:%String,title:%String" returntype="%String" 
+    ProcedureBlock=1 language="Cache">
+  
+  &html<<button id='#(id)#' data-url='#(url)#' class='bCheckSerial btn' title='#(title)#' type='button'> #(label)# </button>>
+  
+  Q ""
+</script>
