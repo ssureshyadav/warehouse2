@@ -28,6 +28,7 @@ if '##class(Common.Rights).getrights(login,..#RIGHTS) s %response.ServerSideRedi
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
  d ##super()
+ s KontrId=$$$g("Kontr") 
  
  &html<<!doctype html><html lang="ru"><head>
  <meta charset="windows-1251"/>
@@ -69,14 +70,26 @@ if '##class(Common.Rights).getrights(login,..#RIGHTS) s %response.ServerSideRedi
 <script type='text/javascript' src='js/jquery-1.7.2.min.js'></script>
 <script type='text/javascript' src='js/jquery-ui-1.8.22.custom.min.js'></script>
 <script type='text/javascript' src='js/ajaxfileupload4.min.js'></script>
-        
+<script type="text/javascript">
+var NOTE=0,MAIL=3; //Какой тип сообщения будем создавать
+var RES=0,ERR=1,ID=2,JSON=3; //Позиции значений в ответе сервера после сохранения
+
+var AjaxFileUploadURL = '#(..Link("json.Kontragent.Meeting.cls"))#' ;
+var CurrentKontrId = '#(KontrId)#';
+
+function SetwEmailButtonFN()
+{
+	return #(..wEmailButton())# ;
+}
+</script>
+<script type="text/javascript" src="js/pages/chat2ka4.js"></script>
 <title>Результаты общения с контрагентом </title>
 </head><body>>
- 
  #; Выводим информацию о контрагенте 
- s KontrId=$$$g("Kontr") d ..wKontrInfo(KontrId) 
+ d ..wKontrInfo(KontrId) 
  
  &html<<br/>
+ <p><button id="bMsgNew">Добавить новое сообщение</button></p>  
  <table id="ResTable" class='history'>
     <col class='c1'/>
     <thead><tr>
@@ -92,8 +105,7 @@ if '##class(Common.Rights).getrights(login,..#RIGHTS) s %response.ServerSideRedi
  d ..wChatHistory(KontrId)
  
  &html<</tbody></table>
- 
- <p><button id="bMsgNew">Добавить новое сообщение</button></p>  
+
  <div id="dMsgNew" class="no-print">
     
     <p class='dErr ui-state-error' style="display: none">
@@ -121,216 +133,6 @@ if '##class(Common.Rights).getrights(login,..#RIGHTS) s %response.ServerSideRedi
     <button id="bPrint" type="button">Печать</button>&nbsp;&nbsp;
     <button id="bClose" type="button">Закрыть</button>
 </p>
-<script type="text/javascript"> 
-
-$(function(){
-    
-    var NOTE=0,MAIL=3; //Какой тип сообщения будем создавать
-    var RES=0,ERR=1,ID=2,JSON=3; //Позиции значений в ответе сервера после сохранения
-    var $msg = $( "#msg" ); // поле ввода текста сообщения
-    
-    //копировать в буфер обмена
-    function CopyInClipBoard(rid) {
-       var msg = $("#"+rid).find(".txt").text()
-       , $textarea = $("#TextAreaText").val(msg).show().focus()
-       , textarea=$textarea.get(0); 
-       textarea.select();
-       var therange = textarea.createTextRange();
-       therange.execCommand("Copy");
-       $textarea.hide();
-       alert("Данные успешно скопированы");
-    }
-    
-    // дописывает ноль в префикс, если необходимо 
-    function TwoDigits(num) { var str=""+num; return (str.length===1)?"0"+str:str; }
-    
-    // получили с сервера json добавленного сообщения, дорисовываем его в таблицу
-    // {id:"4622",d:"26.08.2012",t:"15:13:37"
-    // ,mt:"3",mtt:"Клиенту"
-    // ,ms:true,mst:"Уведомление успешно отправлено"
-    // ,msg:"Отрисовка добавленного сообщения 2"
-    // ,a:"%25CSP.StreamServer.cls?STREAMOID=J9/HVeE0coT9c2/ahJ6diWCdOeBJKYdFsiUfle9/0fs70o2gm0gomRQAfRdp0YgEdEiw_P3G2pKulgOE9OTVGQ--"
-    // ,at:"grid.base.js"
-    // ,u:"Тестовый пользователь"
-    // }
-    function AppendMessage(obj){
-
-        var cls,tp;
-        switch(obj.mt) {
-                case "0": cls="self";tp="*";  break;
-                case "2": cls="from";tp="&lt;-"; break;
-                case "3": cls="to";tp="-&gt;"; break;
-                default: cls="";tp="&nbsp;"
-        };
-        var mss=(obj.ms)?"ok":"err";
-
-        var attHtml=(obj.a)?[
-            "<div class='attachment'><span>Приложение:</span>"
-            ,"<a target='_blank' href='",obj.a,"'>",obj.at,"</a>"
-            ,"</div>"
-        ]:[];
-        
-        var html=["<tr id='",obj.id,"' class='",cls,"'>"
-            ,"<th>",obj.d,"<br/>",obj.t,"</th>"
-            ,"<th title='",obj.mtt,"'>",tp,"</th>"
-            ,"<td title='",obj.mst,"'>"
-                ,"<div class='eml ",mss,"'>&nbsp;</div>"
-            ,"</td>"
-            ,"<td><div class='txt'></div>"
-                ,attHtml.join("")
-            ,"</td>"
-            ,"<td>",obj.u,"</td>"
-            ,"<td><img class='copy' src='images/txt.gif'/></td>"
-            ,"</tr>"
-        ];
-        
-        $("#ResTable").append( $( html.join("") ) )
-            .find("tr:last").find(".txt").text(obj.msg) //боремся с двойными кавычками в тексте сообщения
-        ;
-    }
-        
-    // отправка данных нового сообщения на сервер
-    function fnSend(){
-        $(".dErr").hide(); //ждем новую ошибку
-        if ($("#msg").val()=="") {
-            alert('Не заполнен текст сообщения. Отправка невозможна');  
-            return;
-        }
-        
-        // собираем данные
-        var data={
-            kontr: '#(KontrId)#'
-            ,msg: $("#msg").val()
-            ,mt: $(this).attr("mt")  //какую кнопку нажали и какой тип сообщения хотим создать
-            ,d: $("#d").val()
-            ,t: $("#t").val()
-            ,oper: 'add'
-        };
-        
-        $("#bNote,#bMail,.dForm").hide(); //прячем кнопки и поля ввода
-        $(".dAjax").show(); //показываем что начали отправку
-        
-        //alert("fnSend");
-        
-        $.ajaxFileUpload({
-            url: '#(..Link("json.Kontragent.Meeting.cls"))#' 
-            ,secureuri:false
-            ,fileElementId:'file'
-            ,data: data
-            ,dataType: 'text'
-            ,success: function(data){
-                var arr=eval(data); //массив [результат, ошибка, новыйИд]
-                if (!arr[RES]){ //не получилось
-                    $(".dErr").html( arr[ERR] ).show(); return;
-                } else {
-                    $("#dMsgNew").dialog("close");
-                    var obj=(arr[JSON]); AppendMessage(obj)
-                } 
-            }
-            ,error: function(obj,err,httpErr){
-                var msg=[];
-                for (var i in httpErr){
-                    msg.push(i+"="+httpErr[i])
-                }
-                
-                $(".dErr").html("Ошибка"+": "+msg).show();
-            }
-            ,complete: function(){
-                $(".dAjax").hide(); $(".dForm,#bNote,#bMail").show();
-            }
-        });
-        
-    }
-    
-    
-    //объявляем диалог добавления новой записи
-    var $dlg=$("#dMsgNew").dialog({
-        modal: true, autoOpen: false
-        , title: 'Добавить новое сообщение'
-        , width: 640, height: 320
-        , buttons: [
-            { id: 'bNote', text: 'Добавить пометку'
-              , title: 'Добавляемая запись будет видна только сервис-менеджеру'
-              , mt: NOTE //message type
-              , click: function(){} //необходим диалогу
-            }
-            ,
-            // { id: 'bMail', mt: MAIL }
-            #(..wEmailButton())#
-        ]
-    });
-    
-    
-    
-    //доопределяем кнопки на диалоге
-    var $bNote = $("#bNote")
-            .button("option", "icons", {secondary: "ui-icon-comment"})
-            .click( fnSend )
-      , $bMail = $("#bMail")
-            .button("option", "icons", {secondary: "ui-icon-mail-closed"})
-            .click( fnSend )
-    ;
-    
-    //открываем диалог
-    var $bNewMsg = $( "#bMsgNew" ).button({icons: {primary: "ui-icon-plus"}})
-        // по клику открываем диалог
-        .click(function(){ $dlg.dialog('open'); });
-    
-    $dlg.bind('dialogopen', function(){ 
-            $bNewMsg.hide(); // при открытии диалога прячем кнопку 'Добавить сообщение' 
-            $(".dErr").hide(); //скрывает сообщение об ошибке
-            $(".dAjax").hide(); //сообщение о загрузке прячем
-            $("#msg").val(""); //очищаем сообщение
-        })
-        // при закрытии диалога возвращаем видимость кнопке 'Добавить сообщение'
-        .bind('dialogclose', function(){ $bNewMsg.show(); })
-    ;
-            
-    $("#bPrint")
-        .button({icons:{secondary: "ui-icon-print"}})
-        .click(function(){ window.print() });   
-    
-    $("#bClose")
-        .button({icons:{secondary: "ui-icon-circle-close"}})
-        .click(function(){ window.close() });       
-     
-    var $tim=$( "#t" ); 
-    setInterval( function() { /*счетчик секунд*/
-        var dateObj = new Date();
-        var m = TwoDigits(dateObj.getMinutes()), h = TwoDigits(dateObj.getHours())
-        , s = TwoDigits(dateObj.getSeconds())
-        ;
-        $tim.val( h + ":" + m + ":" + s);
-    }, 1000);
-    
-    var copy=function(){
-        var id=$(this).closest("tr").attr("id"); CopyInClipBoard(id);
-    };
-    /*подсветка кнопки*/
-    var hover=function(){
-        var $this=$(this), src=$this.attr("src"); 
-        src=( src.indexOf("Ontxt")>-1 )?src.replace("Ontxt","txt"):src.replace("txt","Ontxt");
-        $this.attr("src",src);
-    }
-    
-    $(".txt").click(copy);
-    
-    $(".copy") /*кнопки копирования в буфер*/
-        .css("cursor","hand")
-        .mouseenter(hover).mouseleave(hover)
-        .click(copy)
-        .parent().attr("title","Копировать текст сообщения в буфер обмена")
-    ;
-    
-    $("form").submit(function(){
-        var msg=$(this).find("textarea").val(); 
-        if (msg==="") {
-            alert("Не введен текст сообщения"); 
-            return false;
-        }
-    });
-    
-});</script>
 </body>
 </html>
 >
@@ -389,7 +191,7 @@ $(function(){
     
     FROM Kontragent.Meeting 
     WHERE Kontr = :kid
-    ORDER By Dat, Tim 
+    ORDER By Dat desc, Tim desc
     
  ) &sql(OPEN chat)
  
@@ -440,19 +242,16 @@ $(function(){
 <ClassMethod>1</ClassMethod>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
-  s HaveRightToWrite=##class(Common.Rights).getrights($$$user,19)
+  //set HaveRightToWrite=##class(Common.Rights).getrights($$$user,19)
+  set HaveRightToWrite=1
+  
   if HaveRightToWrite=1 {   
-        &html<
-        { id: 'bMail', title: 'Эту запись контрагент сможет увидеть в МО в пункте Справка\\Обратиться в офис'
-            ,text: 'Ответить клиенту' 
-            ,mt: MAIL
-            ,click: function(){}
-        }
-        >
+        s str = "{ id: 'bMail', title: 'Эту запись контрагент сможет увидеть в МО в пункте Справка\\Обратиться в офис',mt: MAIL ,text: 'Ответить клиенту' ,click: function(){} }"
+        //
   } else {
-        &html<{}>
+        s str = ""
   }
-  Q ""
+  Q str
 ]]></Implementation>
 </Method>
 </Class>

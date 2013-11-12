@@ -415,15 +415,11 @@ function ActSverki()
         $on(bUser2,"click",function(){
             var k=currentdict.ItemID; if(k=="")return;
 
-            var ok= window.showModalDialog(
+            var ok= window.showModalDialog( 
                 "csp.Chat2Ka.cls?Kontr="+k
                 ,""
                 ,"center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;"
             ); 
-
-            /*var ok= window.open(
-                "csp.Chat2Ka.cls?Kontr="+k
-            );*/
 
         });
     });
