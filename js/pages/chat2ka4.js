@@ -2,18 +2,6 @@ $(function(){
     
     var $msg = $( "#msg" ); // поле ввода текста сообщения
     
-    //копировать в буфер обмена
-    function CopyInClipBoard(rid) {
-       var msg = $("#"+rid).find(".txt").text()
-       , $textarea = $("#TextAreaText").val(msg).show() //.focus()
-       , textarea=$textarea.get(0); 
-       textarea.select();
-       var therange = textarea.createTextRange();
-       therange.execCommand("Copy");
-       $textarea.hide();
-       alert("Данные успешно скопированы");
-    }
-    
     // дописывает ноль в префикс, если необходимо 
     function TwoDigits(num) { var str=""+num; return (str.length===1)?"0"+str:str; }
     
@@ -57,13 +45,13 @@ $(function(){
             ,"</tr>"
         ];
         
-		
-		var firstRow = $("#ResTable tr:first");
+        
+        var firstRow = $("#ResTable tr:first");
 
 
-		var newrow = $( html.join('') ).find(".txt").text(obj.msg).end();
-		firstRow.after( newrow );
-		
+        var newrow = $( html.join('') ).find(".txt").text(obj.msg).end();
+        firstRow.after( newrow );
+        
     }
         
     // отправка данных нового сообщения на сервер
@@ -179,9 +167,21 @@ $(function(){
         $tim.val( h + ":" + m + ":" + s);
     }, 1000);
     
-    var copy=function(){
-        var id=$(this).closest("tr").attr("id"); 
-        CopyInClipBoard(id);
+    //var textarea = $('<textarea id="TextAreaText" cols="1" rows="1" style="display:none"></textarea>')
+    
+    var copy=function(){ // копировать в буфер обмена
+        var rid=$(this).closest("tr").attr("id"); 
+        
+        var msg = $("#"+rid).find(".txt").text()
+        , $textarea = $("#TextAreaText").val(msg) 
+        , textarea=$textarea.get(0); 
+        
+        var therange = textarea.createTextRange();
+        therange.execCommand("Copy");
+        
+        alert("Данные успешно скопированы");
+    
+        
     };
     
     /*подсветка кнопки*/
