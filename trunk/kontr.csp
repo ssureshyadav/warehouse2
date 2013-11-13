@@ -418,7 +418,7 @@ function ActSverki()
             var ok= window.showModalDialog( 
                 "csp.Chat2Ka.cls?Kontr="+k
                 ,""
-                ,"center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;"
+                ,"center:yes;status:no;dialogWidth:800px;dialogHeight:600px;resizable:yes;"
             ); 
 
         });
