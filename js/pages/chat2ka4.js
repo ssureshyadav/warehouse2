@@ -5,7 +5,7 @@ $(function(){
     //копировать в буфер обмена
     function CopyInClipBoard(rid) {
        var msg = $("#"+rid).find(".txt").text()
-       , $textarea = $("#TextAreaText").val(msg).show().focus()
+       , $textarea = $("#TextAreaText").val(msg).show() //.focus()
        , textarea=$textarea.get(0); 
        textarea.select();
        var therange = textarea.createTextRange();
@@ -57,10 +57,6 @@ $(function(){
             ,"</tr>"
         ];
         
-		//var firstRow = $("#ResTable tr:first");
-		//firstRow.before( $( html.join("") ) );
-		//var newrow = $( html.join('') ).find(".txt").text(obj.msg).end();
-		//firstRow.before( newrow );
 		
 		var firstRow = $("#ResTable tr:first");
 
@@ -68,11 +64,6 @@ $(function(){
 		var newrow = $( html.join('') ).find(".txt").text(obj.msg).end();
 		firstRow.after( newrow );
 		
-        //$("#ResTable").append( $( html.join("") ) )
-        //    .find("tr:last").find(".txt").text(obj.msg) //боремся с двойными кавычками в тексте сообщения
-		
-        //var newrow = $( html.join('') ).find(".txt").text(obj.msg).end();
-		//firstRow.before( newrow );
     }
         
     // отправка данных нового сообщения на сервер
@@ -145,7 +136,6 @@ $(function(){
             wEmailButton
         ]
     });
-    
     
     
     //доопределяем кнопки на диалоге
