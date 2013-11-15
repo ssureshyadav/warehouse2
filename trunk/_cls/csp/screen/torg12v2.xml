@@ -3,7 +3,9 @@
 <Class name="csp.screen.torg12v2">
 <Description>
 Измененная сsp/screen/torg12:
-Выставляется нулевая цена для товаров по гарантии </Description>
+Выставляется нулевая цена для товаров по гарантии 
+ПРОМЕЖУТОЧНЫЙ ВАРИАНТ НАКЛАДНОЙ
+НЕ УДАЛЯТЬ - используется как основа для csp.screen.torg12v3</Description>
 <Super>%CSP.Page</Super>
 <TimeCreated>63075,60506.96248</TimeCreated>
 
@@ -11,13 +13,27 @@
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[
-    s contentType = "application/vnd.ms-excel", attachment="torg12.xls"
-    if %request.Get("word")="on" {
-     s contentType = "application/msword", attachment="word.doc"
+	s login=$G(%session.Data("user"))
+ 	//i '+login s %response.ServerSideRedirect="norights.csp" 
+	
+    s OpenWith = %request.Get("OpenWith")   //чем открыть этот файл
+    s allowformats = $lb("word","excel")
+    
+    if $lf(allowformats , OpenWith ) {
+        
+        #; excel for default
+        s contentType = "application/vnd.ms-excel", attachment="torg12.xls"
+        
+        if OpenWith="word" {
+            s contentType = "application/msword", attachment="word.doc"
+        }
+    
+        s %response.ContentType = contentType
+        d %response.SetHeader("Content-Disposition","attachment; filename="""_attachment_"""")
+        s %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+     
     }
-    s %response.ContentType = contentType
-    d %response.SetHeader("Content-Disposition","attachment; filename="""_attachment_"""")
-    s %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+    
  Q 1
 ]]></Implementation>
 </Method>
@@ -142,7 +158,7 @@
  s nds=+$G(other("nds"))/100
  s nsp=+$G(other("nsp"))/100
  s antinds=1/(1+nds)
-    
+ s antinds=1
  &html<<html xmlns:o="urn:schemas-microsoft-com:office:office"
 xmlns:x="urn:schemas-microsoft-com:office:excel"
 xmlns="http://www.w3.org/TR/REC-html40">
@@ -174,7 +190,6 @@ xmlns="http://www.w3.org/TR/REC-html40">
 </head>
 
 <body>
-
 <table x:str border=0 cellpadding=0 cellspacing=0 width=1066 style='border-collapse:collapse;table-layout:fixed;width:804pt'>>
 
  d ..wCols() ;выводит колонки  (cols) таблицы
@@ -339,14 +354,50 @@ xmlns="http://www.w3.org/TR/REC-html40">
   <td class=xl29>Вид операции</td>
   <td class=xl39>&nbsp;</td>
   <td colspan=2 class=xl24 style='mso-ignore:colspan'></td>
- </tr>
- <tr class=xl40 height=15 style='mso-height-source:userset;height:11.25pt'>
+ </tr>>
+ 
+ d ..wPageNumber()
+  
+ d ..wTablePageHeader()
+ 
+ k summary 
+ 
+ d ..wRows( doc, NDSinside, nds, antinds, kurs, .summary )
+ 
+ d ..wSummary( .summary )  
+  
+ d ..wFooter(.summary) ;разбито из-за ограничений в 32к на размер программы
+
+ &html<</table></body></html>>
+    Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="wPageNumber">
+<Description><![CDATA[
+Выводит номер страницы
+<var>page</var> - номер страницы]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>page=1</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+    
+    &html<<tr class=xl40 height=15 style='mso-height-source:userset;height:11.25pt;page-break-before:always;'>
   <td height=15 colspan=36 class=xl40 style='height:11.25pt;mso-ignore:colspan'></td>
   <td colspan=2 class=xl41 style='mso-ignore:colspan'></td>
-  <td class=xl41>Страница 1</td>
+  <td class=xl41>Страница #(page)#</td>
   <td class=xl40></td>
- </tr>
- <tr class=xl40 height=14 style='mso-height-source:userset;height:11.1pt'>
+ </tr>>
+]]></Implementation>
+</Method>
+
+<Method name="wTablePageHeader">
+<Description>
+Выводит заголовок таблицы с товарными строками на каждой странице</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+     &html<<tr class=xl40 height=14 style='mso-height-source:userset;height:11.1pt'>
   <td height=14 class=xl42 style='height:11.1pt'>&nbsp;</td>
   <td rowspan=2 class=xl43 width=34 style='width:26pt'>Но-<br>мер<br> по по-<br>рядку</td>
   <td colspan=5 class=xl26 style='border-left:none'>Товар</td>
@@ -402,17 +453,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
   <td colspan=3 class=xl47 style='border-left:none' >15</td>
   <td class=xl44></td>
  </tr>>
- 
- k summary 
- 
- d ..wRows( doc, NDSinside, nds, antinds, kurs, .summary )
-
- d ..wSummary( .summary )  
-  
- d ..wFooter(.summary) ;разбито из-за ограничений в 32к на размер программы
-
- &html<</table></body></html>>
-    Quit $$$OK
+    Q ""
 ]]></Implementation>
 </Method>
 
@@ -508,12 +549,18 @@ xmlns="http://www.w3.org/TR/REC-html40">
     
     s quant=item.Quantity
     
+    k ^mtempArt
+    s ^mtempArt("NDSinside")=NDSinside
+    s ^mtempArt("antinds")=antinds
+    s ^mtempArt("nds")=nds
+    
     i NDSinside="false" {
         s price=$J(kurs*itempr,".",2) ;так же как и в счете
         s summabeznds=$J(price*quant,".",2) ;округление
         s ndsotsumma=$J(summabeznds-(summabeznds*antinds),".",2) ;округление
         s summasnds=$J(summabeznds+ndsotsumma,".",2) ;!!! сумма округлений
     } else {
+        s nds=0
         s price=$J(kurs*itempr*antinds,".",2)
         s summabeznds=$J(quant*price,".",2)
         s ndsotsumma=$J(summabeznds*nds,".",2)
@@ -528,7 +575,8 @@ xmlns="http://www.w3.org/TR/REC-html40">
     k row 
     s row("count") = count, row("goods") = goods
     , row("quant") = quant, row("price") = price
-    s row("summabeznds") = summabeznds, row("ndsprocent") = ndsprocent
+    s row("summabeznds") = summabeznds
+    s row("ndsprocent") = ndsprocent
     , row("ndsotsumma") = ndsotsumma
     s row("summasnds") = summasnds
     
@@ -546,6 +594,8 @@ xmlns="http://www.w3.org/TR/REC-html40">
  s summary("vsegosummabeznds") = vsegosummabeznds
  s summary("vsegosummasnds") = vsegosummasnds
  s summary("rowcount") = count
+ 
+ d ..wPageSummary( .summary )  ;последняя страница
  
  Q ""
 ]]></Implementation>
@@ -603,7 +653,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
 ]]></Implementation>
 </Method>
 
-<Method name="wSummary">
+<Method name="wPageSummary">
 <Description>
 Строка итого после товарных строк</Description>
 <ClassMethod>1</ClassMethod>
@@ -645,8 +695,21 @@ xmlns="http://www.w3.org/TR/REC-html40">
   <td colspan=3 class=xl93 width=89 style='width:67pt'>
     #($J( $$$g("vsegosummasnds"), ".", 2) )#
   </td><td></td>
- </tr>
- <tr height=15 style='mso-height-source:userset;height:11.85pt'>
+ </tr>>
+]]></Implementation>
+</Method>
+
+<Method name="wSummary">
+<Description>
+Строка итого после товарных строк</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&summary:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+   
+  #define g(%name) $g(summary(%name))
+  
+  &html<<tr height=15 style='mso-height-source:userset;height:11.85pt'>
   <td height=15 class=xl58 style='height:11.85pt'>&nbsp;</td>
   <td colspan=10 style='mso-ignore:colspan'></td>
   <td colspan=5 class=xl123 style='border-right:.5pt solid black'>Всего по накладной<span style='mso-spacerun:yes'> </span></td>
