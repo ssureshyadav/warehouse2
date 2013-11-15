@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.screen.torg12v3">
+<Description><![CDATA[
+Переопределенная сsp.screen.torg12v2 - :
+На каждой странице печатается  итоговая строка по странице
+Задача - определять количество строк на странице и формировать итоговую
+При этом учитывать, что на первой странице строк меньше (из-за шапки)
+Отладка на сервере - накладная в 200 строк:
+http://localhost/csp/sklad2/csp.screen.torg12v3.cls?id=7132&class=tovnakladn&kontr=4&kontr2=242&kontr3=5&kontr4=242&nomernakl=710-2007&DoverennNumber=&DoverennDatValue=05/09/2013&NDSinside=true&DocDate=06/12/2007&sessionid=1e3RXyxw00&OpenWith=excel]]></Description>
+<Super>csp.screen.torg12v2</Super>
+<TimeCreated>63075,60506.96248</TimeCreated>
+
+<Parameter name="FIRSTPAGEROWS">
+<Description>
+Максимальное количество товарных строк
+размещаемых на первой странице </Description>
+<Default>12</Default>
+</Parameter>
+
+<Parameter name="OTHERPAGEROWS">
+<Description>
+Максимальное количество товарных строк
+размещаемых на последующих страницах </Description>
+<Default>24</Default>
+</Parameter>
+
+<Parameter name="GOODNAMELIMIT">
+<Description>
+Максимальная количество символов в наимен. товара 
+Остальное не отображается при печати, но остается
+Пока не используется</Description>
+<Default>42</Default>
+</Parameter>
+
+<Method name="wRows">
+<Description>
+Вывод строк накладной</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>doc:Docs.Rash,NDSinside,nds,antinds,kurs,*summary:%String=""</FormalSpec>
+<ProcedureBlock>0</ProcedureBlock>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ 
+ Q:'$ISOBJECT(doc) ""  Q:'$IsObject(doc.Items) ""
+ 
+ s ndsprocent=nds*100 if NDSinside="true" s ndsprocent=0
+ 
+ #; основание - документ по гарантии?
+ #define BYGARANT 1
+ s docid = doc.%Id(), oplid = ##class(Docs.Rash).oplGetStored( docid ) ; Common.Dictionary7 
+ s isByGarant = ( oplid = $$$BYGARANT )
+ 
+ s count=0, page=1
+ 
+ s i="" for {  s item=doc.Items.GetNext(.i) Q:i=""  
+    
+    s count = count + 1 
+    
+    s:$IsObject(item.Goods) goods=item.Goods.FullName
+    
+    s itempr=item.Price 
+    
+    #;Документ по гарантии - цену убираем
+    s:isByGarant itempr=0  
+    
+    s quant=item.Quantity
+    
+    i NDSinside="false" {
+        s price=$J(kurs*itempr,".",2) ;так же как и в счете
+        s summabeznds=$J(price*quant,".",2) ;округление
+        s ndsotsumma=$J(summabeznds-(summabeznds*antinds),".",2) ;округление
+        s summasnds=$J(summabeznds+ndsotsumma,".",2) ;!!! сумма округлений
+    } else {
+        s nds=0
+        s price=$J(kurs*itempr*antinds,".",2)
+        s summabeznds=$J(quant*price,".",2)
+        s ndsotsumma=$J(summabeznds*nds,".",2)
+        s summasnds=summabeznds+ndsotsumma
+    }
+ 
+    k row s row("count") = count, row("goods") = goods
+    , row("quant") = quant, row("price") = price
+    , row("summabeznds") = summabeznds, row("ndsprocent") = ndsprocent
+    , row("ndsotsumma") = ndsotsumma,  row("summasnds") = summasnds
+    
+    d ..wRow(.row) 
+    
+    #; итого по странице    
+    #define pagesum(%name,%val) s page(%name)=$g(page(%name))+%val
+    
+    $$$pagesum("rowcount",1)    
+    $$$pagesum("vsegoquant",quant)
+    $$$pagesum("vsegondsotsumma",ndsotsumma)
+    $$$pagesum("vsegosummabeznds",summabeznds)
+    s vsegosummasnds = $g(page("vsegosummabeznds")) + $g(page("vsegondsotsumma"))
+    $$$pagesum("vsegosummasnds", vsegosummasnds)
+    
+    #; подсчёт итогов по колонкам
+    #define summary(%name,%val) s summary(%name)=$g(summary(%name))+%val
+    
+    $$$summary("rowcount",1)
+    $$$summary("vsegoquant",quant)
+    $$$summary("vsegondsotsumma",ndsotsumma)
+    $$$summary("vsegosummabeznds",summabeznds)
+    s vsegosummasnds = $g(summary("vsegosummabeznds")) + $g(summary("vsegondsotsumma"))
+    $$$summary("vsegosummasnds", vsegosummasnds)
+    
+    #; cчитаем сколько строк вывели
+    s currpage = ..gPage(count)
+    if currpage '= page { ;page break detected
+             s page = currpage ;выставляем перед печатью
+             d ..OnPageBreak(.page)
+             k page ;очистка
+             s page = currpage ;восстановление
+    } 
+    
+ } //закончили вывод строк 
+ 
+ d ..wPageSummary(.page) ;строка итого на последней странице, перед подвалом
+ 
+  
+ Q ""
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBreak">
+<Description>
+Вывод итоговой по странице, номера следующей, и шапки таблицы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&page:%String]]></FormalSpec>
+<Implementation><![CDATA[
+  d ..wPageSummary( .page )  ;выводим итого по странице
+  //if page > 2 d ..wSpace() ;добираем до полной страницы
+  d ..wPageNumber( page ) ;выводим номер новой страницы
+  d ..wTablePageHeader() ;и заголовок таблицы
+]]></Implementation>
+</Method>
+
+<Method name="gPage">
+<Description>
+Вернет номер страницы по номеру строки</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>row:%Integer</FormalSpec>
+<ReturnType>%Integer</ReturnType>
+<Implementation><![CDATA[
+   s fpr = ..#FIRSTPAGEROWS
+   if row <= fpr Q 1 ;первую легко
+   s opr = ..#OTHERPAGEROWS
+   s page = row \ opr  ;целых страниц, +1 так как первую уже отдали
+   #; разбираемся с остатком, учитываем неполную первую страницу
+   s diff = row - (page * opr) s:diff<0 diff=diff*-1 ;беззнаковый остаток
+   if diff > fpr s page=page+1 ;остаток превышает размер первой страницы
+   #; w  w ! ;отдладка
+   Q page + 1 ;всегда добаляем еще одну, так как первую уже отдали
+]]></Implementation>
+</Method>
+
+<Method name="wSpace">
+<Description><![CDATA[
+Выводит номер страницы
+<var>page</var> - номер страницы]]></Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+    
+  &html<<tr class=xl40 height=15 style='mso-height-source:userset;height:11.25pt'>
+  <td height=19 colspan=36 class=xl40 style='height:11.25pt;mso-ignore:colspan'></td>
+  </tr><tr class=xl40 height=15 style='mso-height-source:userset;height:11.25pt'>
+  <td height=19 colspan=36 class=xl40 style='height:11.25pt;mso-ignore:colspan'></td>
+  </tr>>
+]]></Implementation>
+</Method>
+</Class>
+</Export>
