@@ -372,7 +372,11 @@ function makescet(cl){
 function maketovnakl(tovnakladn){
     var doctov=docums.ItemID;
     if(doctov==""){alert("Не выбран документ - основание для формирования товарной накладной");return}
-    WinResult=window.showModalDialog("maketovnakl.csp?docid="+doctov+"&class="+tovnakladn,"","center:yes;status:no;dialogHeight:400px;dialogWidth:450px;resizable:yes;")
+    
+    var url = "csp.makeTovNaklV2.cls" //"maketovnakl.csp"
+    WinResult=window.showModalDialog(url+"?docid="+doctov+"&class="+tovnakladn,""
+    	,"dialogWidth:640px;dialogHeight:480px;center:yes;status:no;resizable:yes;")
+    
 }
 
 function deldoc(){
