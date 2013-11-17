@@ -13,12 +13,17 @@
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Boolean</ReturnType>
 <Implementation><![CDATA[
-	s login=$G(%session.Data("user"))
- 	//i '+login s %response.ServerSideRedirect="norights.csp" 
-	
-    s OpenWith = %request.Get("OpenWith")   //чем открыть этот файл
-    s allowformats = $lb("word","excel")
     
+    s login=$G(%session.Data("user"))
+    //i '+login s %response.ServerSideRedirect="norights.csp" 
+    
+    s OpenWith = $g(args("OpenWith",1))   //чем открыть этот файл
+    if OpenWith="" { //альтернативный вариант передачи типа вывода
+        s:$d(%request.Data("excel")) OpenWith="excel" 
+        s:$d(%request.Data("word")) OpenWith="word" 
+    }
+    
+    s allowformats = $lb("word","excel")
     if $lf(allowformats , OpenWith ) {
         
         #; excel for default
@@ -549,10 +554,12 @@ xmlns="http://www.w3.org/TR/REC-html40">
     
     s quant=item.Quantity
     
+    /*
     k ^mtempArt
     s ^mtempArt("NDSinside")=NDSinside
     s ^mtempArt("antinds")=antinds
     s ^mtempArt("nds")=nds
+    */
     
     i NDSinside="false" {
         s price=$J(kurs*itempr,".",2) ;так же как и в счете
@@ -747,6 +754,9 @@ xmlns="http://www.w3.org/TR/REC-html40">
  s DoverennDatValue = %request.Get("DoverennDatValue")  //дата доверенности
  s CountWords = 1
  s (CountWords(10),CountWords(5),CountWords(2),CountWords(1),CountWords(-1)) = ""
+ 
+ s permitter = ##class(csp.makeTovNaklV2).get("permitter") s:permitter="" permitter="Креймер А.Я." 
+ s executor = ##class(csp.makeTovNaklV2).get("executor") s:executor="" executor="Кашменский Ю.Е."
    
      &html<<tr class=xl24 height=16 style='mso-height-source:userset;height:12.0pt'>
   <td height=16 colspan=4 class=xl24 style='height:12.0pt;mso-ignore:colspan'></td>
@@ -943,7 +953,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
   <td class=xl28>&nbsp;</td>
   <td class=xl28>&nbsp;</td>
   <td class=xl24></td>
-  <td colspan=10 class=xl130 width=218 style='width:164pt'>Креймер А.Я. <font
+  <td colspan=10 class=xl130 width=218 style='width:164pt'>#(permitter)#<font
   class="font16">(доверенность №#(DoverennNumber)# от #(DoverennDatValue)#)</font></td>
   <td colspan=5 class=xl24 style='mso-ignore:colspan'></td>
   <td class=xl28>&nbsp;</td>

@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.makeTovNaklV2">
+<Description>
+Страница выбора параметров печати товарной накладной
+с настройкой фамилий в подвале</Description>
+<Super>%Persistent,%CSP.Page</Super>
+<TimeCreated>63141,56816.607642</TimeCreated>
+
+<Property name="key">
+<Description>
+Хранение настроек</Description>
+<Type>%String</Type>
+<Required>1</Required>
+</Property>
+
+<Index name="key">
+<IdKey>1</IdKey>
+<Properties>key</Properties>
+</Index>
+
+<Property name="val">
+<Description>
+Значение настройки</Description>
+<Type>%String</Type>
+</Property>
+
+<Method name="set">
+<Description>
+Сохранить настройку</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>key,val</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+    s key=$g(key), val = $g(val)        
+    if ..%ExistsId( key ) {
+        s sett =..%OpenId( key )    
+    } else {
+        s sett = ..%New()    
+    }
+    s sett.key = key, sett.val = val
+    s sc = +sett.%Save()
+    Q sc
+]]></Implementation>
+</Method>
+
+<Method name="get">
+<Description>
+Получить настройку</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>key</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+    s key=$g(key) Q:'..%ExistsId(key) ""
+    Q ..valGetStored(key)
+]]></Implementation>
+</Method>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ 
+ s oper = $g(%request.Data("oper",1))
+ , key=$g(%request.Data("key",1)), val=$g(%request.Data("val",1))
+ 
+ if oper="get" { w ..get(key) Q 1 } 
+ if oper="set" { 
+    #; если запрос через ajax - val в UTF8
+    s val=$zcvt(val,"I","UTF8") 
+    w ..set(key, val) Q 1 
+ } 
+ 
+ /*Вывод страницы*/   
+ s id=%request.Get("docid"), cls = %request.Get("class","tovnakladn")
+ s (nm,dt,k,knm)=""
+ s (gzo,gzonm,pst,pstnm)=""
+ s executor = ..get("executor"), permitter=..get("permitter")
+  
+ if ##class(Docs.Rash).%ExistsId(id){
+    s nm = ##class(Docs.Rash).NameGetStored(id)
+    , dt = ##class(Docs.Rash).DatGetStored(id), dt=$zd(dt,4), dt=$tr(dt,"/",".")
+    s k = ##class(Docs.Rash).KontrGetStored(id) if ##class(Common.Kontragent).%ExistsId(k) {
+     s knm = ##class(Common.Kontragent).NameGetStored(k)
+    }
+ }
+ 
+ #; Грузоотправитель
+ s gzo=%request.GetCookie("GruzootpravitelID") if ##class(Common.Kontragent).%ExistsId(gzo) { 
+    s gzonm=##class(Common.Kontragent).NameGetStored(gzo)
+ }
+
+ s pst=%request.GetCookie("PostavchikID") if ##class(Common.Kontragent).%ExistsId(pst) {
+    s pstnm=##class(Common.Kontragent).NameGetStored(pst)
+ } 
+   
+ &html<<!doctype html><html><head><title> #($G(%session.Data("systemname")))# </title>
+<link rel='stylesheet' type='text/css' href='css/redmond/jquery-ui-1.8.22.custom.css'/>
+<link rel='stylesheet' type='text/css' href='css/ui.jqgrid-4.4.0.css'/>
+<style type='text/css'>
+    
+html,body {margin:0,padding:0}
+.fieldset { padding: .3em;}
+#send {margin:1em auto 0 auto;text-align:center;}
+#close {margin:0 0 0 1em;}
+.input { cursor:hand; }
+.datepicker {width:8em;}
+
+/*уменьшим гигантские отступы на кнопках*/
+.ui-button-text-only .ui-button-text { padding: .1em .5em .1em .5em }
+
+/*и закладках*/
+.ui-tabs .ui-tabs-nav LI A { padding: .2em .5em .2em .5em }
+
+/*Больше шрифт в гриде*/
+.ui-jqgrid .ui-jqgrid-view { font-size: 1em; }
+        
+    </style>
+</head><body>
+<div id='tabs'>
+<ul>
+    <li><a href='#params'>Формирование товарной накладной</a></li>
+    <li><a href='#settings'>Настройка</a></li>
+</ul>
+
+<div id='params'>
+<table>
+<tr>
+    <td>Накладная №:</td>
+    <td>
+        <input id="nm" value='#(nm)#' class='input'/>
+    </td>
+    <td>дата: </td>
+    <td>
+        <input id="dt" value='#(dt)#' class='input datepicker'/>
+    </td>
+</tr>
+<tr>
+    <td>Доверенность №:</td>
+    <td><input id="dv" name="dv" class='input'></td>
+    <td>дата: </td>
+    <td><input id="dvdt" name="dvdt" class='input datepicker'></td>
+</tr>
+<tr>
+    <td>Грузоотправитель</td>
+    <td colspan='3'>
+        <input id="gzo" data-id='#(gzo)#' value='#(gzonm)#' class='refinp' 
+            data-dlgtitle='Выбор грузоотправителя' 
+        />
+    </td>
+</tr>
+<tr>
+    <td>Грузополучатель</td>
+    <td colspan='3'>
+        <input id="gzp" data-id='#(k)#' value='#(knm)#' class='refinp'
+            data-dlgtitle='Выбор грузополучателя' 
+         />
+    </td>
+ </tr>
+<tr>
+    <td>Поставщик</td>
+    <td colspan='3'>
+        <input id='pst' data-id='#(pst)#' value='#(pstnm)#' class='refinp'
+            data-dlgtitle='Выбор поставщика' 
+        >
+    </td>
+</tr>
+<tr>
+    <td>Плательщик</td>
+    <td colspan='3'>
+        <input id='plt' data-id='#(k)#' value='#(knm)#' class='refinp'
+            data-dlgtitle='Выбор плательщика' 
+        >
+     </td>
+</tr>
+<tr>
+    <td colspan='4'>
+    <div class='ui-widget-content fieldset'>
+        <input id="ndsi" type="checkbox" name="ndsi" checked="checked">
+        <label for="ndsi" >НДС включён в цену товара</label>
+    </div>
+    </td>
+</tr>
+</table>
+
+<form id='send' action='#(..Link("print.csp"))#'>
+    <input type='hidden' id='sessionid' name='sessionid'  value='#(%session.SessionId)#'/>
+    <input type='hidden' id="class" name='class' value='#(cls)#' />
+    <input type='hidden' id='id' name='id' value='#(id)#' />
+    <input type='hidden' id='nomernakl' name='nomernakl' />
+    <input type='hidden' id='DocDate' name='DocDate' />
+    <input type='hidden' id='DoverennNumber' name='DoverennNumber'>
+    <input type='hidden' id='DoverennDatValue' name='DoverennDatValue'>
+    <input type='hidden' id='kontr' name='kontr'>
+    <input type='hidden' id='kontr2' name='kontr2'>
+    <input type='hidden' id='kontr3' name='kontr3'>
+    <input type='hidden' id='kontr4' name='kontr4'>
+    <input type='hidden' id='NDSinside' name='NDSinside'>
+    <button id='open'>Открыть</button>
+    <button id="excel" name='excel' >MS Excel</button>
+    <button id="word" name='word' >MS Word</button>
+    <button id='close' type='button'>Отмена</button>
+</form>
+
+</div>
+
+<div id='settings'>
+<table><tr>
+    <td>Отпуск груза разрешил:</td>
+    <td><input id='permitter' value='#(permitter)#' class='settings' ></td>
+</tr><tr> 
+    <td>Отпуск груза произвел:</td>
+    <td><input id='executor' value='#(executor)#' class='settings' ></td>
+</tr>   
+</table>
+</div>
+
+</div><!--tabs-->
+
+<div id='kdlg'>
+    <table id='kgrid'></table>
+    <div id='kbar'></div>
+</div>
+
+<script type='text/javascript' src="common.js"></script>
+<script type='text/javascript' src='js/jquery-1.7.2.min.js'></script>
+<script type='text/javascript' src='js/jquery-ui-1.8.22.custom.min.js'></script>
+<script type='text/javascript' src='js/i18n/jquery-ui.datepicker-ru.min.js'></script>
+<script type='text/javascript' src='js/i18n/grid.locale-ru_win1251.js'></script>
+<script type='text/javascript' src='js/jquery.jqGrid-4.4.0.min.js'></script>
+
+<script type='text/javascript'>
+
+$(function(){
+
+ $('#tabs').tabs({}) //две закладки
+ $('input').addClass('ui-widget-content'); //плоская граница
+ $('.datepicker').datepicker( $.datepicker.regional[ 'ru' ]); //календарик
+ $('#open,#excel,#word,#close').button({}); //кнопки отправки
+ $('#close').on('click', function(){ window.close(); });
+ 
+ //форма отправки перед отправкой данных
+ $('#send').on('submit', function (){
+   
+    var gzo=$('#gzo'); if ( !gzo.val() ) { alert( "Не заполнено поле Грузоотправитель" ); return false; }
+    var gzp=$('#gzp'); if ( !gzp.val() ) { alert( "Не заполнено поле Грузополучатель" ); return false; }
+    var pst=$('#pst'); if ( !pst.val() ) { alert( "Не заполнено поле Поставщик" ); return false; }
+    var plt=$('#plt'); if ( !plt.val() ) { alert("Не заполнено поле Плательщик"); return false; }
+    var nm=$('#nm'); if ( !nm.val() ) { alert( "Не заполнен номер накладной" ); return false; }
+   
+    SetCookie("GruzootpravitelID", gzo.data('id')); 
+    SetCookie("PostavchikID",pst.data('id'));
+
+    /// копирование
+    $('#kontr').val( gzo.data('id') ); $('#kontr2').val( gzp.data('id') );
+    $('#kontr3').val( pst.data('id') ); $( '#kontr4' ).val( plt.data('id') );
+    $('#nomernakl').val( nm.val() );
+    $('#DocDate').val( $('#dt').val().split('.').join('/') )
+    $('#DoverennNumber').val( $('#dv').val() );
+    $('#DoverennDatValue').val( $('#dvdt').val().split('.').join('/') );
+    $('#NDSinside').val( $('#ndsi').prop('checked') );
+   
+ })
+ 
+ $('.settings').on('change', function(){
+       var inp = $(this);
+       var key = inp.attr('id'), val=inp.val();
+       $.ajax({ url: window.location+'', dataType: 'text'
+          ,data: { oper:'set', 'key': key, 'val': val } 
+       }).done(function( data ){
+          console.log( data ) 
+       })
+ });
+ 
+ /// ********* Диалог выбора контрагента ************
+ 
+ /// грид 
+ var kgrid = $('#kgrid').jqGrid({
+     url: '#(..Link("json.Kontragent.cls"))#'
+     ,datatype: "json", jsonReader : { repeatitems: false }
+     ,colModel: [
+        {name:'name', label:'Наименование', width: 300}
+        ,{name:'city', label:'Город'}
+     ]
+     , scroll:1, gridview: true
+     , rows: 100
+     , height: 280, pager: '#kbar'
+ })
+ .jqGrid('navGrid','#kbar', { add: false, edit:false, del:false, view: false, search:false })
+ .jqGrid('filterToolbar',{searchOnEnter:false}) 
+ 
+
+ //диалог выбора контрагента
+ var kdlg = $('#kdlg');
+ kdlg.dialog({ 
+    title: 'Выбор контрагента'
+    , modal: true, autoOpen: false
+    , width: 580, height: 420
+    , buttons: [
+        { text:'Выбрать', click: OnSelectRow }
+        , { text:'Отмена', click: function(){ $(this).dialog('close') }}
+    ]
+ });
+ 
+ /// обработчик при выборе строки
+ var OnSelectRow = function(){ 
+     var id = kgrid.jqGrid('getGridParam','selrow')
+     , data = kgrid.jqGrid('getRowData',id);
+     kdlg.trigger('dialogselect', [id, data["name"] ]);
+ } 
+ 
+ /// двойной клик на строке 
+ kgrid.on('jqGridDblClickRow', OnSelectRow)
+ 
+ ///При изменении размеров диалога меняем размер грида
+ kdlg.on('dialogresize', function(){
+    var dlg = $(this), width = dlg.width(), height = dlg.height(); 
+    kgrid
+     .jqGrid('setGridWidth', width-20 )
+     .jqGrid('setGridHeight', height-80 )
+    ;
+ })
+ 
+ ///При открытии диалога, обновляем грид и его размеры
+ kdlg.on('dialogopen', function(){
+    kgrid.trigger('reloadGrid');
+    kdlg.trigger('dialogresize');
+ });
+ 
+///дополняем инпуты кнопками для выбора контрагента
+ $('.refinp').each(function ( ){
+     
+    var inp=$( this ), box = inp.parent()
+    , select = $( '<button type="button"></button>' )
+      .appendTo( box )
+      .button({text:false, icons: {primary: 'ui-icon-newwin' }})
+    ;
+    
+    /// обработчик выбора
+    var onselect = function(e, id, name ){
+       inp.data( 'id', id ).val( name );
+       $(this).dialog('close');
+    }
+    
+    select.on('click', function(){
+        kdlg.dialog('option','title', inp.data('dlgtitle'))
+            .on('dialogselect', onselect)
+            .one('dialogclose', function(){ $(this).off('dialogselect')}) //закроется - отключимся и концы в воду
+            .dialog('open');    
+    });
+    
+    inp.attr('readonly', 'readonly').on('click', function(){ select.click(); })
+    
+ }); 
+ 
+ $("body").bind('keypress', ManageWindow ); //esc - close, enter - submit
+     
+})
+</script>
+</body>
+</html>> 
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^csp.makeTovNaklV2D</DataLocation>
+<DefaultData>makeTovNaklV2DefaultData</DefaultData>
+<IdLocation>^csp.makeTovNaklV2D</IdLocation>
+<IndexLocation>^csp.makeTovNaklV2I</IndexLocation>
+<StreamLocation>^csp.makeTovNaklV2S</StreamLocation>
+<Data name="makeTovNaklV2DefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>val</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>
