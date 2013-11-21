@@ -52,16 +52,14 @@
     
  #; Разбираем аргументы
  s mn(1)="января",mn(2)="февраля",mn(3)="марта",mn(4)="апреля",mn(5)="мая",mn(6)="июня",mn(7)="июля",mn(8)="августа",mn(9)="сентября",mn(10)="октября",mn(11)="ноября",mn(12)="декабря"
- s kontr2=%request.Get("kontr2")
- s kontr=%request.Get("kontr")
- s kontr3=%request.Get("kontr3")
- s kontr4=%request.Get("kontr4")
- s docid=%request.Get("id")
- s docname="Платежное поручение"
+ s kontr2=%request.Get("kontr2"), kontr=%request.Get("kontr")
+ s kontr3=%request.Get("kontr3"), kontr4=%request.Get("kontr4")
+ s docid=%request.Get("id"), docname="Платежное поручение"
+ , DocDate=%request.Get("DocDate")
+ 
  s nomnakl=%request.Get("nomernakladnoy")
  s NDSinside=%request.Get("NDSinside")
- s DocDate=%request.Get("DocDate")
-
+ 
  s doc=##class(Docs.Rash).%OpenId(docid)
  d:$ISOBJECT(doc)
  . s docname=doc.Name_"-П"
@@ -750,13 +748,14 @@ xmlns="http://www.w3.org/TR/REC-html40">
 <FormalSpec>summary</FormalSpec>
 <ReturnType>%String</ReturnType>
 <Implementation><![CDATA[
- s DoverennNumber = %request.Get("DoverennNumber")      //номер доверенности
- s DoverennDatValue = %request.Get("DoverennDatValue")  //дата доверенности
+ s DoverennNumber = %request.GetCookie("dv")      //номер доверенности
+ s DoverennDatValue = %request.GetCookie("dvdt")  //дата доверенности
+ s permitter = %request.Get("otpr") ;s permitter="Креймер А.Я." 
+ s executor = %request.Get("otpp") ;s executor="Кашменский Ю.Е."
+ 
  s CountWords = 1
  s (CountWords(10),CountWords(5),CountWords(2),CountWords(1),CountWords(-1)) = ""
  
- s permitter = ##class(csp.makeTovNaklV2).get("permitter") s:permitter="" permitter="Креймер А.Я." 
- s executor = ##class(csp.makeTovNaklV2).get("executor") s:executor="" executor="Кашменский Ю.Е."
    
      &html<<tr class=xl24 height=16 style='mso-height-source:userset;height:12.0pt'>
   <td height=16 colspan=4 class=xl24 style='height:12.0pt;mso-ignore:colspan'></td>
@@ -871,7 +870,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
   <td class=xl84>&nbsp;</td>
   <td colspan=3 class=xl24 style='mso-ignore:colspan'></td>
   <td class=xl70></td>
-  <td class=xl70>По доверенности №</td>
+  <td class=xl70>По доверенности </td>
   <td class=xl28>&nbsp;</td>
   <td class=xl28>&nbsp;</td>
   <td class=xl28>&nbsp;</td>
@@ -954,7 +953,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
   <td class=xl28>&nbsp;</td>
   <td class=xl24></td>
   <td colspan=10 class=xl130 width=218 style='width:164pt'>#(permitter)#<font
-  class="font16">(доверенность №#(DoverennNumber)# от #(DoverennDatValue)#)</font></td>
+  class="font16">(доверенность #(DoverennNumber)# от #(DoverennDatValue)#)</font></td>
   <td colspan=5 class=xl24 style='mso-ignore:colspan'></td>
   <td class=xl28>&nbsp;</td>
   <td class=xl28>&nbsp;</td>
@@ -1023,7 +1022,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
   <td class=xl28>&nbsp;</td>
   <td class=xl28>&nbsp;</td>
   <td class=xl24></td>
-  <td colspan=10 class=xl130 width=218 style='width:164pt'>Кашменский Ю.Е.</td>
+  <td colspan=10 class=xl130 width=218 style='width:164pt'>#(executor)#</td>
   <td class=xl24></td>
   <td class=xl24 colspan=4 style='mso-ignore:colspan' >Груз получил</td>
   <td class=xl28>&nbsp;</td>

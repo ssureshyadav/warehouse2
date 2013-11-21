@@ -4,78 +4,19 @@
 <Description>
 Страница выбора параметров печати товарной накладной
 с настройкой фамилий в подвале</Description>
-<Super>%Persistent,%CSP.Page</Super>
+<Super>%CSP.Page</Super>
 <TimeCreated>63141,56816.607642</TimeCreated>
-
-<Property name="key">
-<Description>
-Хранение настроек</Description>
-<Type>%String</Type>
-<Required>1</Required>
-</Property>
-
-<Index name="key">
-<IdKey>1</IdKey>
-<Properties>key</Properties>
-</Index>
-
-<Property name="val">
-<Description>
-Значение настройки</Description>
-<Type>%String</Type>
-</Property>
-
-<Method name="set">
-<Description>
-Сохранить настройку</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>key,val</FormalSpec>
-<ReturnType>%Boolean</ReturnType>
-<Implementation><![CDATA[
-    s key=$g(key), val = $g(val)        
-    if ..%ExistsId( key ) {
-        s sett =..%OpenId( key )    
-    } else {
-        s sett = ..%New()    
-    }
-    s sett.key = key, sett.val = val
-    s sc = +sett.%Save()
-    Q sc
-]]></Implementation>
-</Method>
-
-<Method name="get">
-<Description>
-Получить настройку</Description>
-<ClassMethod>1</ClassMethod>
-<FormalSpec>key</FormalSpec>
-<ReturnType>%String</ReturnType>
-<Implementation><![CDATA[
-    s key=$g(key) Q:'..%ExistsId(key) ""
-    Q ..valGetStored(key)
-]]></Implementation>
-</Method>
 
 <Method name="OnPage">
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
  
- s oper = $g(%request.Data("oper",1))
- , key=$g(%request.Data("key",1)), val=$g(%request.Data("val",1))
- 
- if oper="get" { w ..get(key) Q 1 } 
- if oper="set" { 
-    #; если запрос через ajax - val в UTF8
-    s val=$zcvt(val,"I","UTF8") 
-    w ..set(key, val) Q 1 
- } 
- 
  /*Вывод страницы*/   
  s id=%request.Get("docid"), cls = %request.Get("class","tovnakladn")
  s (nm,dt,k,knm)=""
  s (gzo,gzonm,pst,pstnm)=""
- s executor = ..get("executor"), permitter=..get("permitter")
+ 
   
  if ##class(Docs.Rash).%ExistsId(id){
     s nm = ##class(Docs.Rash).NameGetStored(id)
@@ -120,7 +61,6 @@ html,body {margin:0,padding:0}
 <div id='tabs'>
 <ul>
     <li><a href='#params'>Формирование товарной накладной</a></li>
-    <li><a href='#settings'>Настройка</a></li>
 </ul>
 
 <div id='params'>
@@ -134,12 +74,6 @@ html,body {margin:0,padding:0}
     <td>
         <input id="dt" value='#(dt)#' class='input datepicker'/>
     </td>
-</tr>
-<tr>
-    <td>Доверенность №:</td>
-    <td><input id="dv" name="dv" class='input'></td>
-    <td>дата: </td>
-    <td><input id="dvdt" name="dvdt" class='input datepicker'></td>
 </tr>
 <tr>
     <td>Грузоотправитель</td>
@@ -182,37 +116,44 @@ html,body {margin:0,padding:0}
     </td>
 </tr>
 </table>
+<table>
+<tr>
+    <td >Отпуск груза разрешил:</td>
+    <td><input id='permitter' ></td>
+</tr>
+<tr>
+    <td>Доверенность №:</td>
+    <td><input id="dv" name="dv" size='5' class='input' ><span> от: </span><input id="dvdt" name="dvdt" class='input datepicker'></td>
+</tr>
+<tr> 
+    <td>Отпуск груза произвел:</td>
+    <td><input id='executor' ></td>
+</tr>   
+</table>
 
-<form id='send' action='#(..Link("print.csp"))#'>
+<form id='send' action='#(..Link("print.csp"))#' target='_blank'>
     <input type='hidden' id='sessionid' name='sessionid'  value='#(%session.SessionId)#'/>
     <input type='hidden' id="class" name='class' value='#(cls)#' />
     <input type='hidden' id='id' name='id' value='#(id)#' />
     <input type='hidden' id='nomernakl' name='nomernakl' />
     <input type='hidden' id='DocDate' name='DocDate' />
-    <input type='hidden' id='DoverennNumber' name='DoverennNumber'>
-    <input type='hidden' id='DoverennDatValue' name='DoverennDatValue'>
     <input type='hidden' id='kontr' name='kontr'>
     <input type='hidden' id='kontr2' name='kontr2'>
     <input type='hidden' id='kontr3' name='kontr3'>
     <input type='hidden' id='kontr4' name='kontr4'>
+    <input type='hidden' id='otpr' name='otpr'>
+    <input type='hidden' id='otpp' name='otpp'>
+    
+    
     <input type='hidden' id='NDSinside' name='NDSinside'>
-    <button id='open'>Открыть</button>
-    <button id="excel" name='excel' >MS Excel</button>
-    <button id="word" name='word' >MS Word</button>
-    <button id='close' type='button'>Отмена</button>
+    <button type='submit' id='open'>Открыть</button>
+    <button type='submit' id="excel" name='excel' >MS Excel</button>
+    <button type='submit' id="word" name='word' >MS Word</button>
+    
+    <button type='button' id='close' >Отмена</button>
+    <!--button type='submit' id="debug" >dbg</button-->
 </form>
 
-</div>
-
-<div id='settings'>
-<table><tr>
-    <td>Отпуск груза разрешил:</td>
-    <td><input id='permitter' value='#(permitter)#' class='settings' ></td>
-</tr><tr> 
-    <td>Отпуск груза произвел:</td>
-    <td><input id='executor' value='#(executor)#' class='settings' ></td>
-</tr>   
-</table>
 </div>
 
 </div><!--tabs-->
@@ -232,45 +173,59 @@ html,body {margin:0,padding:0}
 <script type='text/javascript'>
 
 $(function(){
+ 
+ /// обертка для учета кодировки
+ function fnCookie( key, val ){
+     if (val === undefined){
+        return unescape( GetCookie( key ) || "" );
+     } else {
+        SetCookie( key, escape( val ) )  
+     }
+ }
+ 
+ 
+ $('#permitter').val( fnCookie('permitter') ); //отпуск разрешил
+  $('#executor').val( fnCookie('executor') ); //отпуск произвел
+ 
+ $('#dv').val( GetCookie('dv') ); //номер доверенности
+ $('#dvdt').val( GetCookie('dvdt') ); //дата доверенности 
 
  $('#tabs').tabs({}) //две закладки
  $('input').addClass('ui-widget-content'); //плоская граница
  $('.datepicker').datepicker( $.datepicker.regional[ 'ru' ]); //календарик
- $('#open,#excel,#word,#close').button({}); //кнопки отправки
- $('#close').on('click', function(){ window.close(); });
+ $('#open,#excel,#word,#close,#debug').button({}); //кнопки 
  
- //форма отправки перед отправкой данных
- $('#send').on('submit', function (){
+ $('#debug').on('click', function(){
+    $('#send').attr('action','csp.screen.torg12v2Debug.cls') 
+ });
+ 
+ $('#close').on('click', function(){ window.close(); });
+  
+ $('#send').on('submit', function(){ 
    
     var gzo=$('#gzo'); if ( !gzo.val() ) { alert( "Не заполнено поле Грузоотправитель" ); return false; }
     var gzp=$('#gzp'); if ( !gzp.val() ) { alert( "Не заполнено поле Грузополучатель" ); return false; }
     var pst=$('#pst'); if ( !pst.val() ) { alert( "Не заполнено поле Поставщик" ); return false; }
     var plt=$('#plt'); if ( !plt.val() ) { alert("Не заполнено поле Плательщик"); return false; }
     var nm=$('#nm'); if ( !nm.val() ) { alert( "Не заполнен номер накладной" ); return false; }
-   
-    SetCookie("GruzootpravitelID", gzo.data('id')); 
-    SetCookie("PostavchikID",pst.data('id'));
-
-    /// копирование
-    $('#kontr').val( gzo.data('id') ); $('#kontr2').val( gzp.data('id') );
-    $('#kontr3').val( pst.data('id') ); $( '#kontr4' ).val( plt.data('id') );
-    $('#nomernakl').val( nm.val() );
-    $('#DocDate').val( $('#dt').val().split('.').join('/') )
-    $('#DoverennNumber').val( $('#dv').val() );
-    $('#DoverennDatValue').val( $('#dvdt').val().split('.').join('/') );
-    $('#NDSinside').val( $('#ndsi').prop('checked') );
+    
+    /// это передаем через куки
+    SetCookie("GruzootpravitelID", gzo.data('id')); SetCookie("PostavchikID",pst.data('id'));
+    SetCookie("dv", $('#dv').val());  SetCookie("dvdt", $('#dvdt').val()); //номер и дата доверенности 
+    
+    //отпуск груза разрешил и произвел
+    fnCookie("permitter", $('#permitter').val() ); 
+    fnCookie("executor", $('#executor').val() ); 
+    
+    /// это через запрос
+    $( "#kontr").val( gzo.data('id') ); $("#kontr2").val( gzp.data('id') );
+    $( "#kontr3" ).val( pst.data('id') ); $("#kontr4").val(plt.data('id'));
+    $( "#nomernakl").val( nm.val() ); $( "#DocDate" ).val( $('#dt').val().split('.').join('/') );
+    $( "#NDSinside" ).val( $('#ndsi').prop('checked') );
+    $( "#otpr" ).val( $('#permitter').val() )
+    $( "#otpp" ).val( $('#executor').val() ) 
    
  })
- 
- $('.settings').on('change', function(){
-       var inp = $(this);
-       var key = inp.attr('id'), val=inp.val();
-       $.ajax({ url: window.location+'', dataType: 'text'
-          ,data: { oper:'set', 'key': key, 'val': val } 
-       }).done(function( data ){
-          console.log( data ) 
-       })
- });
  
  /// ********* Диалог выбора контрагента ************
  
@@ -362,22 +317,5 @@ $(function(){
  Quit $$$OK
 ]]></Implementation>
 </Method>
-
-<Storage name="Default">
-<Type>%Library.CacheStorage</Type>
-<DataLocation>^csp.makeTovNaklV2D</DataLocation>
-<DefaultData>makeTovNaklV2DefaultData</DefaultData>
-<IdLocation>^csp.makeTovNaklV2D</IdLocation>
-<IndexLocation>^csp.makeTovNaklV2I</IndexLocation>
-<StreamLocation>^csp.makeTovNaklV2S</StreamLocation>
-<Data name="makeTovNaklV2DefaultData">
-<Value name="1">
-<Value>%%CLASSNAME</Value>
-</Value>
-<Value name="2">
-<Value>val</Value>
-</Value>
-</Data>
-</Storage>
 </Class>
 </Export>
