@@ -982,37 +982,33 @@ xmlns="http://www.w3.org/TR/REC-html40">
  </tr>>
  
  #;строка с доверенностью
- &html<<tr class=xl24 height=15 style='mso-height-source:userset;height:11.85pt'>
-  <td height=15 class=xl24 style='height:11.85pt'></td>
-  <td class=xl24 colspan=3 style='mso-ignore:colspan'>Отпуск груза разрешил</td>
-  <td class=xl128 width=109 style='width:82pt'>&nbsp;</td>
-  <td class=xl129></td>
-  <td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td>
-  <td class=xl24></td>
-  <td colspan=10 class=xl130 width=218 style='width:164pt'>#(permitter)#<font
+ &html<<tr class=xl24 height=20 style='mso-height-source:userset;height:16pt'>
+  
+  <td rowspan=2 height=20 class=xl24 style='height:16pt'></td>
+  <td rowspan=2 class=xl24 colspan=3 style='mso-ignore:colspan'>Отпуск груза разрешил</td>
+  <td rowspan=2 class=xl128 width=109 style='width:82pt'>&nbsp;</td>
+  <td rowspan=2 class=xl129></td>
+  <td rowspan=2 class=xl28>&nbsp;</td>
+  <td rowspan=2 class=xl28>&nbsp;</td>
+  <td rowspan=2 class=xl24></td>
+  <td rowspan=2 colspan=10 class=xl130 width=218 style='width:164pt'>#(permitter)# <font
   class="font16">(доверенность #(DoverennNumber)# от #(DoverennDatValue)#)</font></td>
+  
   <td colspan=5 class=xl24 style='mso-ignore:colspan'></td>
-  <td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td>
-  <td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td>
-  <td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td>
-  <td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td>
+  <td colspan=16 class=xl28>&nbsp;</td>
  </tr>>
  
  &html<<tr class=xl24 height=12 style='mso-height-source:userset;height:9.0pt'>
-  <td height=12 colspan=4 class=xl24 style='height:9.0pt;mso-ignore:colspan'></td>
+  <td colspan=21 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>>
+ 
+ &html<<tr class=xl24 height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 colspan=4 class=xl24 style='height:11.85pt;mso-ignore:colspan'></td>
   <td class=xl131>должность</td>
   <td class=xl24></td>
   <td colspan=2 class=xl132 align=center style='mso-ignore:colspan'>подпись</td>
   <td class=xl24></td>
   <td colspan=10 class=xl133>расшифровка подписи</td>
-  <td colspan=21 class=xl24 style='mso-ignore:colspan'></td>
- </tr>>
- 
- &html<<tr class=xl24 height=15 style='mso-height-source:userset;height:11.85pt'>
-  <td height=15 class=xl24 style='height:11.85pt'></td>
-  <td colspan=3 class=xl86 style='mso-ignore:colspan'></td>
-  <td colspan=5 class=xl24 style='mso-ignore:colspan'></td>
-  <td colspan=10 class=xl134 width=218 style='width:164pt'></td>
   <td class=xl24></td>
   <td class=xl24 colspan=3 style='mso-ignore:colspan'>Груз принял</td>
   <td class=xl24></td>
@@ -1084,12 +1080,6 @@ xmlns="http://www.w3.org/TR/REC-html40">
   <td colspan=7 class=xl80 align=center style='mso-ignore:colspan'>расшифровка подписи</td>
  </tr>>
  
- &html<<tr class=xl24 height=6 style='mso-height-source:userset;height:5.1pt'>
-  <td height=6 colspan=18 class=xl24 style='height:5.1pt;mso-ignore:colspan'></td>
-  <td class=xl84>&nbsp;</td>
-  <td colspan=21 class=xl24 style='mso-ignore:colspan'></td>
- </tr>>
- 
  &html<<tr class=xl24 height=15 style='mso-height-source:userset;height:11.25pt'>
   <td height=15 class=xl24 style='height:11.25pt'></td>
   <td colspan=2 class=xl70 style='mso-ignore:colspan'></td>
@@ -1107,51 +1097,6 @@ xmlns="http://www.w3.org/TR/REC-html40">
   <td class=xl24 colspan=10 style='mso-ignore:colspan'>&quot;_____&quot; _____________ 20__ г</td>
   <td colspan=4 class=xl24 style='mso-ignore:colspan'></td>
  </tr>>
- 
- &html<<![if supportMisalignedColumns]>
- <tr height=0 style='display:none'>
-  <td width=7 style='width:5pt'></td>
-  <td width=34 style='width:26pt'></td>
-  <td width=74 style='width:56pt'></td>
-  <td width=14 style='width:11pt'></td>
-  <td width=109 style='width:82pt'></td>
-  <td width=12 style='width:9pt'></td>
-  <td width=71 style='width:53pt'></td>
-  <td width=30 style='width:23pt'></td>
-  <td width=13 style='width:10pt'></td>
-  <td width=9 style='width:7pt'></td>
-  <td width=3 style='width:2pt'></td>
-  <td width=44 style='width:33pt'></td>
-  <td width=41 style='width:31pt'></td>
-  <td width=9 style='width:7pt'></td>
-  <td width=30 style='width:23pt'></td>
-  <td width=3 style='width:2pt'></td>
-  <td width=55 style='width:41pt'></td>
-  <td width=9 style='width:7pt'></td>
-  <td width=15 style='width:11pt'></td>
-  <td width=15 style='width:11pt'></td>
-  <td width=9 style='width:7pt'></td>
-  <td width=46 style='width:35pt'></td>
-  <td width=15 style='width:11pt'></td>
-  <td width=26 style='width:20pt'></td>
-  <td width=53 style='width:40pt'></td>
-  <td width=37 style='width:28pt'></td>
-  <td width=11 style='width:8pt'></td>
-  <td width=27 style='width:20pt'></td>
-  <td width=4 style='width:3pt'></td>
-  <td width=9 style='width:7pt'></td>
-  <td width=7 style='width:5pt'></td>
-  <td width=42 style='width:32pt'></td>
-  <td width=12 style='width:9pt'></td>
-  <td width=26 style='width:20pt'></td>
-  <td width=17 style='width:13pt'></td>
-  <td width=36 style='width:27pt'></td>
-  <td width=12 style='width:9pt'></td>
-  <td width=76 style='width:57pt'></td>
-  <td width=1 style='width:1pt'></td>
-  <td width=3 style='width:2pt'></td>
- </tr>
- <![endif]>>
   
  Q ""
 ]]></Implementation>
