@@ -4,14 +4,16 @@
  . s ses=%request.Get("sessionid",1)
  . s %session=%session.GetSession(ses)
  
- s class=%request.Get("class")
- s kontr=%request.Get("kontr")
- s kontr2=%request.Get("kontr2")
- s kontr3=%request.Get("kontr3")
- s kontr4=%request.Get("kontr4")
- s DocDate=%request.Get("DocDate")
- s id=%request.Get("id")
- s nomnaklad=%request.Get("nomernakl")
+ s class=%request.Get("class"), id=%request.Get("id")
+ s kontr=%request.Get("kontr"), kontr2=%request.Get("kontr2")
+ s kontr3=%request.Get("kontr3"), kontr4=%request.Get("kontr4")
+ s DocDate=%request.Get("DocDate") 
+ , nomnaklad=%request.Get("nomernakl")
+ 
+ if class="torg12fromotchet"
+ {
+     
+ }
  
  Set:class="Docs.Remont" %response.ServerSideRedirect="screen/zayavka.csp?id="_id
  Set:class="Docs.Utiliz" %response.ServerSideRedirect="screen/actutil.csp?id="_id
@@ -28,12 +30,11 @@
  Set:class="Docs.StorageOut" %response.ServerSideRedirect="screen/instrotbor.csp?id="_id_"&class="_class
  Set:class="Docs.StorageIn" %response.ServerSideRedirect="screen/instrotbor.csp?id="_id_"&class="_class
  
- if class="tovnakladn" {
+ if class="tovnakladn" { //расходную накладную в торг12
     s args("id") = id, args("kontr") = kontr
     , args("kontr2") = kontr2, args("kontr3") = kontr3
     , args("kontr4") = kontr4, args("nomernakladnoy") = nomnaklad 
-    
-    s url = "csp.screen.torg12v2.cls" ;s url = "screen/torg12.csp"
+    s url = "csp.screen.torg12v4.cls" ;"csp.screen.torg12v3.cls";"csp.screen.torg12v2.cls";"screen/torg12.csp"
     s %response.ServerSideRedirect=..Link(url,.args)
  }
  

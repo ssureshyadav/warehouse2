@@ -1,0 +1,2154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.screen.torg12v4">
+<Description><![CDATA[
+Модернизированный вариант torg12v2, torg12v3
+Печатает подвал накладной без отрыва от товарных строк
+Общая идея: 
+на первой странице (т.е с шапкой) помещается 4 строки (И подвал)
+на первой странице (т.е с шапкой) помещается 12 строк БЕЗ подвала
+На других страницах (без шапки) помещается 15 строк (И подвал)
+На других страницах (без шапки) помещается 24 строк (БЕЗ подвал)
+В методе <method>wRows</method> выводится товарная строка
+, затем вызывается метод <method>gPage</method> 
+и если номер страницы изменился
+печается итоговая строка по страницы и разрыв страницы
+
+Отладочные накладные: 
+1. 3 строки ( одна полная страница )
+id=83911&nomernakl=1565-2013&DocDate=09%2F12%2F2013&kontr=4&kontr2=411&kontr3=5&kontr4=411&otpr=%CA%F0%E5%E9%EC%E5%F0+%C0.%DF.&otpp=%CA%E0%F8%EC%E5%ED%F1%EA%E8%E9+%DE.%C5.&NDSinside=true
+2. 6 строк ( две неполные страницы )
+id=83913&nomernakl=2013-11+868&DocDate=09%2F12%2F2013&kontr=4&kontr2=868&kontr3=5&kontr4=868&otpr=%CA%F0%E5%E9%EC%E5%F0+%C0.%DF.&otpp=%CA%E0%F8%EC%E5%ED%F1%EA%E8%E9+%DE.%C5.&NDSinside=true]]></Description>
+<Super>%CSP.Page</Super>
+<TimeCreated>63164,40452.491173</TimeCreated>
+
+<Parameter name="P1MIN">
+<Description>
+Количество строк на ПЕРВОЙ странице с шапкой и подвалом</Description>
+<Default>4</Default>
+</Parameter>
+
+<Parameter name="P1MAX">
+<Description>
+Макс. кол-во строк на ПЕРВОЙ странице с шапкой и БЕЗ подвала</Description>
+<Default>13</Default>
+</Parameter>
+
+<Parameter name="P2MIN">
+<Description>
+Количество строк на ДРУГИХ страницах С подвалом</Description>
+<Default>15</Default>
+</Parameter>
+
+<Parameter name="P2MAX">
+<Description>
+Макс. кол-во строк на ДРУГИХ страницах БЕЗ подвала</Description>
+<Default>24</Default>
+</Parameter>
+
+<Parameter name="GOODNAMELIMIT">
+<Description>
+Максимальная количество символов в наимен.товара 
+Остальное не отображается при печати, но остается
+Пока не используется</Description>
+<Default>42</Default>
+</Parameter>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+    
+    s login=$G(%session.Data("user"))
+    //i '+login s %response.ServerSideRedirect="norights.csp" 
+    
+    s OpenWith = $g(args("OpenWith",1))   //чем открыть этот файл
+    if OpenWith="" { //альтернативный вариант передачи типа вывода
+        s:$d(%request.Data("excel")) OpenWith="excel" 
+        s:$d(%request.Data("word")) OpenWith="word" 
+    }
+    
+    s allowformats = $lb("word","excel")
+    if $lf(allowformats , OpenWith ) {
+        
+        #; excel for default
+        s contentType = "application/vnd.ms-excel", attachment="torg12.xls"
+        
+        if OpenWith="word" {
+            s contentType = "application/msword", attachment="word.doc"
+        }
+    
+        s %response.ContentType = contentType
+        d %response.SetHeader("Content-Disposition","attachment; filename="""_attachment_"""")
+        s %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+     
+    }
+    
+ Q 1
+]]></Implementation>
+</Method>
+
+<Method name="OnPage">
+<Description>
+Вывод страницы</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    
+ #; Разбираем аргументы
+ s mn(1)="января",mn(2)="февраля",mn(3)="марта",mn(4)="апреля",mn(5)="мая",mn(6)="июня",mn(7)="июля",mn(8)="августа",mn(9)="сентября",mn(10)="октября",mn(11)="ноября",mn(12)="декабря"
+ 
+ s docid=%request.Get("id"), docname="Платежное поручение"
+ , DocDate=%request.Get("DocDate")
+ 
+ s nomnakl=%request.Get("nomernakladnoy")
+ s NDSinside=%request.Get("NDSinside")
+ 
+ s doc=##class(Docs.Rash).%OpenId(docid)
+ d:$ISOBJECT(doc)
+ .s docname=doc.Name_"-П"
+ .s:doc.Dat'="" docdate=$ZD(doc.Dat,4)
+ .s:DocDate'="" docdate=DocDate
+ .q:$G(docdate)=""
+ .s docdate=$TR(docdate,"/",".")
+ .s kurs=doc.kurs
+ .if '+kurs,+doc.Summa s kurs=doc.RubSumma/doc.Summa
+
+ s kontr1=%request.Get("kontr"), kontr2=%request.Get("kontr2")
+ s kontr3=%request.Get("kontr3"), kontr4=%request.Get("kontr4")
+ #;w !,kontr1,!, kontr2,!, kontr3,!, kontr4
+ 
+
+ #define set(%n) s (kname%n, Address%n, codecity%n, namecity%n, Postalcode%n, pbank%n, city%n, kpp%n, inn%n, bik%n, rsch%n, ksch%n, code%n, okpo%n, okud%n, okdp%n)=""
+ 
+ $$$set(1) $$$set(2) $$$set(3) $$$set(4)
+ 
+ #define loadkontr(%n) ..LoadKontr(kontr%n,.kname%n,.Address%n,.codecity%n,.namecity%n,.Postalcode%n,.pbank%n,.city%n,.kpp%n,.inn%n,.bik%n,.rsch%n,.ksch%n,.code%n,.okpo%n,.okud%n,.okdp%n)
+ 
+ d $$$loadkontr(1), $$$loadkontr(2), $$$loadkontr(3), $$$loadkontr(4)
+ 
+ s waste=##class(Goods.GoodsAction).kurs(.other)
+ s:'+$G(kurs) kurs=waste
+ s kurs2=$J(kurs,".",2)
+ s nds=+$G(other("nds"))/100
+ s nsp=+$G(other("nsp"))/100
+ s antinds=1/(1+nds)
+ s antinds=1
+ &html<<html xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:x="urn:schemas-microsoft-com:office:excel"
+xmlns="http://www.w3.org/TR/REC-html40">
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1251">
+<meta name=ProgId content=Excel.Sheet>
+<meta name=Generator content="Microsoft Excel 11">
+<title>Товарная накладная #(nomnakl)#</title>
+
+<style>
+#(..wCss())#
+</style>
+<!--[if gte mso 9]><xml>
+ <x:ExcelWorkbook>
+  <x:ExcelWorksheets>
+   <x:ExcelWorksheet>
+   <x:Name>torg12</x:Name>
+    <x:WorksheetOptions>
+     <x:Print>
+      <x:ValidPrinterInfo/>
+      <x:PaperSizeIndex>9</x:PaperSizeIndex>
+     </x:Print>
+     <x:DoNotDisplayGridlines/>
+    </x:WorksheetOptions>
+   </x:ExcelWorksheet>
+  </x:ExcelWorksheets>
+ </x:ExcelWorkbook>
+</xml><![endif]-->
+</head>
+
+<body>
+<table x:str border=0 cellpadding=0 cellspacing=0 width=1066 style='border-collapse:collapse;table-layout:fixed;width:804pt'>>
+
+ d ..wCols() ;выводит колонки  (cols) таблицы
+ 
+ &html<<tr height=22 style='mso-height-source:userset;height:17.1pt'>
+  <td colspan=38 height=22 class=xl96 width=1062 style='height:17.1pt;width:801pt'>Унифицированная форма № ТОРГ-12<br>
+    Утверждена постановлением Госкомстата России от 25.12.98 № 132</td>
+  <td class=xl24 width=1 style='width:1pt'></td>
+  <td class=xl24 width=3 style='width:2pt'></td>
+ </tr>
+ <tr height=17 style='mso-height-source:userset;height:12.75pt'>
+  <td height=17 colspan=35 class=xl24 style='height:12.75pt;mso-ignore:colspan'></td>
+  <td colspan=2 class=xl25 style='mso-ignore:colspan'></td>
+  <td class=xl26>Коды</td>
+  <td colspan=2 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=16 style='mso-height-source:userset;height:12.0pt'>
+  <td height=16 class=xl24 style='height:12.0pt'></td>
+  <td colspan=28 rowspan=2 class=xl125 width=818 style='width:617pt'>#($G(kname1))#, ИНН #($G(inn1))#, КПП #($G(kpp1))#, 
+    #($G(Postalcode1))#, #($G(namecity1))#, #($G(Address1))#, Р/C #($G(rsch1))#, 
+    #($G(pbank1))#, #($G(city1))#; БИК #($G(bik1))#, К/С #($G(ksch1))#</td>
+  <td colspan=3 class=xl24 style='mso-ignore:colspan'></td>
+  <td colspan=5 class=xl116 style='border-right:1.0pt solid black'>Форма по ОКУД</td>
+  <td class=xl27 style='border-left:none'>#($G(okud1))#</td>
+  <td colspan=2 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=16 style='mso-height-source:userset;height:12.6pt'>
+  <td height=16 class=xl24 style='height:12.6pt'></td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td colspan=3 class=xl118 style='border-right:1.0pt solid black'>по ОКПО</td>
+  <td class=xl30 style='border-left:none' >#($G(okpo4))#</td>
+  <td colspan=2 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=10 style='mso-height-source:userset;height:8.1pt'>
+  <td height=10 colspan=3 class=xl24 style='height:8.1pt;mso-ignore:colspan'></td>
+  <td colspan=26 class=xl31 align=center style='mso-ignore:colspan'>организация-грузоотправитель,
+  адрес, телефон, факс, банковские реквизиты</td>
+  <td colspan=6 class=xl24 style='mso-ignore:colspan'></td>
+  <td colspan=2 class=xl32 style='mso-ignore:colspan'></td>
+  <td rowspan=2 class=xl97>&nbsp;</td>
+  <td colspan=2 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=16 style='mso-height-source:userset;height:12.0pt'>
+  <td height=16 class=xl24 style='height:12.0pt'></td>
+  <td colspan=33 class=xl98>&nbsp;</td>
+  <td colspan=3 class=xl24 style='mso-ignore:colspan'></td>
+  <td colspan=2 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=19 style='mso-height-source:userset;height:14.65pt'>
+  <td height=19 colspan=3 class=xl24 style='height:14.65pt;mso-ignore:colspan'></td>
+  <td colspan=26 class=xl31 align=center style='mso-ignore:colspan'>структурное
+  подразделение</td>
+  <td colspan=8 class=xl118 style='border-right:1.0pt solid black'>Вид
+  деятельности по ОКДП</td>
+  <td class=xl33 style='border-top:none;border-left:none'>&nbsp;</td>
+  <td colspan=2 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=29 style='mso-height-source:userset;height:22.35pt'>
+  <td height=29 class=xl24 style='height:22.35pt'></td>
+  <td colspan=2 class=xl99 width=108 style='width:82pt'>Грузополучатель</td>
+  <td colspan=31 class=xl100 width=806 style='width:608pt'>#($G(kname2))#,  ИНН #($G(inn2))#, КПП #($G(kpp2))#,
+    #($G(Postalcode2))#, #($G(namecity2))#,&nbsp; #($G(Address2))#, P/C #($G(rsch2))#, 
+    #($G(pbank2))#, #($G(city2))#; БИК #($G(bik2))#, K/C #($G(ksch2))#</td>
+  <td colspan=3 class=xl118 style='border-right:1.0pt solid black'>по ОКПО</td>
+  <td class=xl34 style='border-left:none'>&nbsp;</td>
+  <td colspan=2 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=10 style='mso-height-source:userset;height:8.1pt'>
+  <td height=10 colspan=3 class=xl24 style='height:8.1pt;mso-ignore:colspan'></td>
+  <td colspan=26 class=xl35 align=center style='mso-ignore:colspan'>организация, адрес, телефон, факс, банковские реквизиты</td>
+  <td colspan=6 class=xl24 style='mso-ignore:colspan'></td>
+  <td colspan=2 class=xl29 style='mso-ignore:colspan'></td>
+  <td rowspan=2 class=xl30 >#($G(okpo4))#</td>
+  <td colspan=2 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=29 style='mso-height-source:userset;height:22.35pt'>
+  <td height=29 class=xl24 style='height:22.35pt'></td>
+  <td class=xl29></td>
+  <td class=xl29>Поставщик</td>
+  <td colspan=31 class=xl125 width=806 style='width:608pt'>#($G(kname3))#,  ИНН #($G(inn3))#, КПП #($G(kpp3))#,
+    #($G(Postalcode3))#, 
+    #($G(namecity3))#,&nbsp; #($G(Address3))#, P/C #($G(rsch3))#, #($G(pbank3))#, 
+    #($G(city3))#; БИК #($G(bik3))#, K/C #($G(ksch3))#</td>
+  <td colspan=3 class=xl118 style='border-right:1.0pt solid black'>по ОКПО</td>
+  <td colspan=2 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=10 style='mso-height-source:userset;height:8.1pt'>
+  <td height=10 colspan=3 class=xl24 style='height:8.1pt;mso-ignore:colspan'></td>
+  <td colspan=26 class=xl35 align=center style='mso-ignore:colspan'>организация,
+  адрес, телефон, факс, банковские реквизиты</td>
+  <td colspan=6 class=xl24 style='mso-ignore:colspan'></td>
+  <td colspan=2 class=xl29 style='mso-ignore:colspan'></td>
+  <td rowspan=2 class=xl37>&nbsp;</td>
+  <td colspan=2 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=29 style='mso-height-source:userset;height:22.35pt'>
+  <td height=29 class=xl24 style='height:22.35pt'></td>
+  <td class=xl29></td>
+  <td class=xl29>Плательщик</td>
+  <td colspan=31 class=xl100 width=806 style='width:608pt'>#($G(kname4))#,  ИНН #($G(inn4))#, КПП #($G(kpp4))#,
+    #($G(Postalcode4))#, 
+    #($G(namecity4))#,&nbsp; #($G(Address4))#, P/C #($G(rsch4))#, #($G(pbank2))#, 
+    #($G(city4))#; БИК #($G(bik4))#, К/С #($G(ksch4))#</td>
+  <td colspan=3 class=xl118 style='border-right:1.0pt solid black'>по ОКПО</td>
+  <td colspan=2 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=10 style='mso-height-source:userset;height:8.1pt'>
+  <td height=10 colspan=3 class=xl24 style='height:8.1pt;mso-ignore:colspan'></td>
+  <td colspan=26 class=xl35 align=center style='mso-ignore:colspan'>организация,
+  адрес, телефон, факс, банковские реквизиты</td>
+  <td colspan=6 class=xl24 style='mso-ignore:colspan'></td>
+  <td colspan=2 rowspan=2 class=xl101>номер</td>
+  <td rowspan=2 class=xl37>&nbsp;</td>
+  <td colspan=2 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=16 style='mso-height-source:userset;height:12.6pt'>
+  <td height=16 class=xl24 style='height:12.6pt'></td>
+  <td class=xl29></td>
+  <td class=xl29>Основание</td>
+  <td colspan=31 class=xl126><!--Счет № *** от **.**.**** г.-->Счёт № #(nomnakl)#</td>
+  <td class=xl24></td>
+  <td colspan=2 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=16 style='mso-height-source:userset;height:12.6pt'>
+  <td height=16 colspan=3 class=xl24 style='height:12.6pt;mso-ignore:colspan'></td>
+  <td colspan=26 class=xl35 align=center style='mso-ignore:colspan'>договор, заказ-наряд</td>
+  <td colspan=6 class=xl24 style='mso-ignore:colspan'></td>
+  <td colspan=2 class=xl101>дата</td>
+  <td class=xl37>&nbsp;</td>
+  <td colspan=2 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr height=16 style='mso-height-source:userset;height:12.6pt'>
+  <td height=16 colspan=10 class=xl24 style='height:12.6pt;mso-ignore:colspan'></td>
+  <td colspan=4 class=xl102>Номер документа</td>
+  <td colspan=4 class=xl102 style='border-left:none'>Дата составления</td>
+  <td colspan=7 class=xl24 style='mso-ignore:colspan'></td>
+  <td colspan=9 class=xl118>Транспортная накладная</td>
+  <td class=xl24></td>
+  <td colspan=2 class=xl101>номер</td>
+  <td class=xl37>&nbsp;</td>
+  <td colspan=2 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>>
+ 
+ &html<<tr class=xl24 height=16 style='mso-height-source:userset;height:12.6pt'>
+  <td height=16 colspan=3 class=xl24 style='height:12.6pt;mso-ignore:colspan'></td>
+  <td class=xl38></td>
+  <td colspan=6 class=xl115 style='border-right:1.0pt solid black'>ТОВАРНАЯ НАКЛАДНАЯ<span style='mso-spacerun:yes'>  </span></td>
+  <td colspan=4 class=xl103 style='border-left:none'>#(nomnakl)#</td>
+  <td colspan=4 class=xl104 style='border-left:none'>#($G(docdate))#</td>
+  <td colspan=17 class=xl24 style='mso-ignore:colspan'></td>
+  <td colspan=2 class=xl101>дата</td>
+  <td class=xl37>&nbsp;</td>
+  <td colspan=2 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr class=xl24 height=16 style='mso-height-source:userset;height:12.6pt'>
+  <td height=16 colspan=35 class=xl24 style='height:12.6pt;mso-ignore:colspan'></td>
+  <td class=xl29></td>
+  <td class=xl29>Вид операции</td>
+  <td class=xl39>&nbsp;</td>
+  <td colspan=2 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>>
+ 
+ d ..wPageNumber()
+  
+ d ..wTablePageHeader()
+ 
+ k summary 
+ 
+ d ..wRows( doc, NDSinside, nds, antinds, kurs, .summary )
+ 
+ d ..wSummary( .summary )  
+  
+ d ..wFooter(.summary) ;разбито из-за ограничений в 32к на размер программы
+
+ &html<</table></body></html>>
+    Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="wPageNumber">
+<Description><![CDATA[
+Выводит номер страницы
+<var>page</var> - номер страницы]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>page=1</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+  s pagebreak = $s(page=1:"",1:"page-break-before:always;") 
+  &html<<tr class=xl40 height=15 style='mso-height-source:userset;height:11.25pt;#(pagebreak)#'>
+  <td height=15 colspan=36 class=xl40 style='height:11.25pt;mso-ignore:colspan'></td>
+  <td colspan=2 class=xl41 style='mso-ignore:colspan'></td>
+  <td class=xl41>Страница #(page)#</td>
+  <td class=xl40></td>
+ </tr>>
+]]></Implementation>
+</Method>
+
+<Method name="wTablePageHeader">
+<Description>
+Выводит заголовок таблицы с товарными строками на каждой странице</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+     &html<<tr class=xl40 height=14 style='mso-height-source:userset;height:11.1pt'>
+  <td height=14 class=xl42 style='height:11.1pt'>&nbsp;</td>
+  <td rowspan=2 class=xl43 width=34 style='width:26pt'>Но-<br>мер<br> по по-<br>рядку</td>
+  <td colspan=5 class=xl26 style='border-left:none'>Товар</td>
+  <td colspan=5 class=xl26 style='border-left:none'>Единица измерения</td>
+  <td rowspan=2 class=xl43 width=41 style='width:31pt'>Вид упаковки</td>
+  <td colspan=4 class=xl26 style='border-left:none'>Количество</td>
+  <td colspan=4 rowspan=2 class=xl43 width=48 style='width:36pt'>Масса брутто</td>
+  <td colspan=2 rowspan=2 class=xl43 width=61 style='width:46pt'>Коли-<br>
+    чество <br>
+    (масса <br>
+    нетто)</td>
+  <td colspan=2 rowspan=2 class=xl43 width=79 style='width:60pt'>Цена,<br>
+    руб.коп.</td>
+  <td colspan=5 rowspan=2 class=xl43 width=88 style='width:66pt'>Сумма
+  без<br>
+    учета НДС,<br>
+    руб.коп.</td>
+  <td colspan=6 class=xl26 style='border-left:none'>НДС</td>
+  <td colspan=3 rowspan=2 class=xl43 width=89 style='width:67pt'>Сумма с<br>
+    учетом <br>
+    НДС, <br>
+    руб.коп.</td>
+  <td class=xl40></td>
+ </tr>
+ <tr class=xl40 height=57 style='mso-height-source:userset;height:43.35pt'>
+  <td height=57 class=xl42 style='height:43.35pt'>&nbsp;</td>
+  <td colspan=4 class=xl43 width=209 style='border-left:none;width:158pt'>наименование, характеристика, сорт, артикул товара</td>
+  <td class=xl26 style='border-top:none;border-left:none'>код</td>
+  <td colspan=4 class=xl43 width=55 style='border-left:none;width:42pt'>наиме-нование</td>
+  <td class=xl43 width=44 style='border-top:none;border-left:none;width:33pt'>код по ОКЕИ</td>
+  <td colspan=3 class=xl43 width=42 style='border-left:none;width:32pt'>в одном месте</td>
+  <td class=xl43 width=55 style='border-top:none;border-left:none;width:41pt'>мест,<br> штук</td>
+  <td colspan=3 class=xl43 width=61 style='border-left:none;width:46pt'>ставка, %</td>
+  <td colspan=3 class=xl43 width=79 style='border-left:none;width:60pt'>сумма, <br>руб.коп.</td>
+  <td class=xl40></td>
+ </tr>
+ <tr class=xl44 height=15 style='mso-height-source:userset;height:11.25pt'>
+  <td height=15 class=xl45 style='height:11.25pt'>&nbsp;</td>
+  <td class=xl46 style='border-top:none' >1</td>
+  <td colspan=4 class=xl46 style='border-left:none' >2</td>
+  <td class=xl47 style='border-top:none;border-left:none' >3</td>
+  <td colspan=4 class=xl46 style='border-left:none' >4</td>
+  <td class=xl47 style='border-top:none;border-left:none' >5</td>
+  <td class=xl47 style='border-top:none;border-left:none' >6</td>
+  <td colspan=3 class=xl47 style='border-left:none' >7</td>
+  <td class=xl47 style='border-top:none;border-left:none' >8</td>
+  <td colspan=4 class=xl47 style='border-left:none' >9</td>
+  <td colspan=2 class=xl47 style='border-left:none' >10</td>
+  <td colspan=2 class=xl47 style='border-left:none' >11</td>
+  <td colspan=5 class=xl47 style='border-left:none' >12</td>
+  <td colspan=3 class=xl46 style='border-left:none' >13</td>
+  <td colspan=3 class=xl47 style='border-left:none' >14</td>
+  <td colspan=3 class=xl47 style='border-left:none' >15</td>
+  <td class=xl44></td>
+ </tr>>
+    Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wCols">
+<Description>
+Вывод колонок </Description>
+<ClassMethod>1</ClassMethod>
+<ProcedureBlock>0</ProcedureBlock>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ 
+  &html<<col class=xl24 width=7 style='mso-width-source:userset;mso-width-alt:298;width:5pt'>
+ <col class=xl24 width=34 style='mso-width-source:userset;mso-width-alt:1450;width:26pt'>
+ <col class=xl24 width=74 style='mso-width-source:userset;mso-width-alt:3157;width:56pt'>
+ <col class=xl24 width=14 style='mso-width-source:userset;mso-width-alt:597;width:11pt'>
+ <col class=xl24 width=109 style='mso-width-source:userset;mso-width-alt:4650;width:82pt'>
+ <col class=xl24 width=12 style='mso-width-source:userset;mso-width-alt:512;width:9pt'>
+ <col class=xl24 width=71 style='mso-width-source:userset;mso-width-alt:3029;width:53pt'>
+ <col class=xl24 width=30 style='mso-width-source:userset;mso-width-alt:1280;width:23pt'>
+ <col class=xl24 width=13 style='mso-width-source:userset;mso-width-alt:554;width:10pt'>
+ <col class=xl24 width=9 style='mso-width-source:userset;mso-width-alt:384;width:7pt'>
+ <col class=xl24 width=3 style='mso-width-source:userset;mso-width-alt:128;width:2pt'>
+ <col class=xl24 width=44 style='mso-width-source:userset;mso-width-alt:1877;width:33pt'>
+ <col class=xl24 width=41 style='mso-width-source:userset;mso-width-alt:1749;width:31pt'>
+ <col class=xl24 width=9 style='mso-width-source:userset;mso-width-alt:384;width:7pt'>
+ <col class=xl24 width=30 style='mso-width-source:userset;mso-width-alt:1280;width:23pt'>
+ <col class=xl24 width=3 style='mso-width-source:userset;mso-width-alt:128;width:2pt'>
+ <col class=xl24 width=55 style='mso-width-source:userset;mso-width-alt:2346;width:41pt'>
+ <col class=xl24 width=9 style='mso-width-source:userset;mso-width-alt:384;width:7pt'>
+ <col class=xl24 width=15 span=2 style='mso-width-source:userset;mso-width-alt:640;width:11pt'>
+ <col class=xl24 width=9 style='mso-width-source:userset;mso-width-alt:384;width:7pt'>
+ <col class=xl24 width=46 style='mso-width-source:userset;mso-width-alt:1962;width:35pt'>
+ <col class=xl24 width=15 style='mso-width-source:userset;mso-width-alt:640;width:11pt'>
+ <col class=xl24 width=26 style='mso-width-source:userset;mso-width-alt:1109;width:20pt'>
+ <col class=xl24 width=53 style='mso-width-source:userset;mso-width-alt:2261;width:40pt'>
+ <col class=xl24 width=37 style='mso-width-source:userset;mso-width-alt:1578;width:28pt'>
+ <col class=xl24 width=11 style='mso-width-source:userset;mso-width-alt:469;width:8pt'>
+ <col class=xl24 width=27 style='mso-width-source:userset;mso-width-alt:1152;width:20pt'>
+ <col class=xl24 width=4 style='mso-width-source:userset;mso-width-alt:170;width:3pt'>
+ <col class=xl24 width=9 style='mso-width-source:userset;mso-width-alt:384;width:7pt'>
+ <col class=xl24 width=7 style='mso-width-source:userset;mso-width-alt:298;width:5pt'>
+ <col class=xl24 width=42 style='mso-width-source:userset;mso-width-alt:1792;width:32pt'>
+ <col class=xl24 width=12 style='mso-width-source:userset;mso-width-alt:512;width:9pt'>
+ <col class=xl24 width=26 style='mso-width-source:userset;mso-width-alt:1109;width:20pt'>
+ <col class=xl24 width=17 style='mso-width-source:userset;mso-width-alt:725;width:13pt'>
+ <col class=xl24 width=36 style='mso-width-source:userset;mso-width-alt:1536;width:27pt'>
+ <col class=xl24 width=12 style='mso-width-source:userset;mso-width-alt:512;width:9pt'>
+ <col class=xl24 width=76 style='mso-width-source:userset;mso-width-alt:3242;width:57pt'>
+ <col class=xl24 width=1 style='mso-width-source:userset;mso-width-alt:42;width:1pt'>
+ <col class=xl24 width=3 style='mso-width-source:userset;mso-width-alt:128;width:2pt'>
+ <col width=64 span=216 style='mso-width-source:userset;mso-width-alt:2730;width:48pt'>>
+  Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wRows">
+<Description>
+Вывод строк накладной</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>doc:Docs.Rash,NDSinside,nds,antinds,kurs,*summary:%String=""</FormalSpec>
+<ProcedureBlock>0</ProcedureBlock>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ 
+ Q:'$ISOBJECT(doc) ""  Q:'$IsObject(doc.Items) ""
+ 
+ s ndsprocent=nds*100 if NDSinside="true" s ndsprocent=0
+ 
+ #; основание - документ по гарантии?
+ #define BYGARANT 1
+ s docid = doc.%Id(), oplid = ##class(Docs.Rash).oplGetStored( docid ) ; Common.Dictionary7 
+ s isByGarant = ( oplid = $$$BYGARANT )
+ 
+ s count=0, page=1
+ #; для печати корректных разрывов страниц важно знать сколько строк всего
+ , allrows = doc.Items.Count() 
+ 
+ s i="" for {  s item=doc.Items.GetNext(.i) Q:i=""  
+    
+    s count = count + 1 
+    
+    s:$IsObject(item.Goods) goods=item.Goods.FullName
+    
+    s itempr=item.Price 
+    
+    #;Документ по гарантии - цену убираем
+    s:isByGarant itempr=0  
+    
+    s quant=item.Quantity
+    
+    i NDSinside="false" {
+        s price=$J(kurs*itempr,".",2) ;так же как и в счете
+        s summabeznds=$J(price*quant,".",2) ;округление
+        s ndsotsumma=$J(summabeznds-(summabeznds*antinds),".",2) ;округление
+        s summasnds=$J(summabeznds+ndsotsumma,".",2) ;!!! сумма округлений
+    } else {
+        s nds=0
+        s price=$J(kurs*itempr*antinds,".",2)
+        s summabeznds=$J(quant*price,".",2)
+        s ndsotsumma=$J(summabeznds*nds,".",2)
+        s summasnds=summabeznds+ndsotsumma
+    }
+ 
+    k row s row("count") = count, row("goods") = goods
+    , row("quant") = quant, row("price") = price
+    , row("summabeznds") = summabeznds, row("ndsprocent") = ndsprocent
+    , row("ndsotsumma") = ndsotsumma,  row("summasnds") = summasnds
+    
+    d ..wRow(.row) ;сначала выводится строка
+    
+    #; итого по странице    
+    #define pagesum(%name,%val) s page(%name)=$g(page(%name))+%val
+    
+    $$$pagesum("rowcount",1)    
+    $$$pagesum("vsegoquant",quant)
+    $$$pagesum("vsegondsotsumma",ndsotsumma)
+    $$$pagesum("vsegosummabeznds",summabeznds)
+    s vsegosummasnds = $g(page("vsegosummabeznds")) + $g(page("vsegondsotsumma"))
+    $$$pagesum("vsegosummasnds", vsegosummasnds)
+    
+    #; подсчёт итогов по колонкам
+    #define summary(%name,%val) s summary(%name)=$g(summary(%name))+%val
+    
+    $$$summary("rowcount",1)
+    $$$summary("vsegoquant",quant)
+    $$$summary("vsegondsotsumma",ndsotsumma)
+    $$$summary("vsegosummabeznds",summabeznds)
+    s vsegosummasnds = $g(summary("vsegosummabeznds")) + $g(summary("vsegondsotsumma"))
+    $$$summary("vsegosummasnds", vsegosummasnds)
+    
+    
+    s nextpage = ..gPageAfter(count, allrows)
+    
+    if nextpage '= page { ;page break detected
+             s page = nextpage ;выставляем перед печатью
+             d ..OnPageBreak(.page)
+             k page ;очистка
+             s page = nextpage ;восстановление
+    } 
+    
+ } //закончили вывод строк 
+ 
+ d ..wPageSummary(.page) ;строка итого на последней странице, перед подвалом
+ 
+  
+ Q ""
+]]></Implementation>
+</Method>
+
+<Method name="gPageAfter">
+<Description><![CDATA[
+Вернет номер страницы после печати строки
+<var>row</var> - номер строки, которую уже НАПЕЧАТАЛИ
+<var>rows</var> - количество строк в документе.]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>row:%Integer,rows:%Integer</FormalSpec>
+<ReturnType>%Integer</ReturnType>
+<Implementation><![CDATA[
+   
+    
+   #;1. Номер строки меньше первой минимальной. Просто возвращаем 1-цу
+   if row < ..#P1MIN Q 1 ;это первая страница
+   
+   #;2. номер строки больше #P1MIN, но меньше #P1MAX
+   #; fp - после какой строки печатать разрыв
+   if rows <=..#P1MAX { ;общее количество строк меньше максимума строк для первой без футера 
+       s fp = rows-1 ;одну товарную строку отдаем на вторую страницу и печатаем с футером
+   } else {
+       s fp = ..#P1MAX ;перенос сделаем после максимума первой   
+   }
+   if row < fp Q 1 ;еще не вышли за границы первой
+   
+   #;3 Однозначно уже не на первой. Но где?   
+   #; Остаток от первой страницы разбиваем на целые последующие страницы
+   #; номер страницы после первой: 0 - вторая страница, 1 - третья
+   s page = (row - fp)\..#P2MAX 
+   
+   #;относительно порядковый номер строки внутри этой страницы
+   s pn = row - fp - (page * ..#P2MAX) 
+   
+   #; можно печатать в рамках текущей 
+   if pn < ..#P2MIN Q page + 2 ;
+   
+   #; здесь надо думать 
+   s canPrintAtThisPage = ..#P2MAX-pn ;столько строк еще поместится на этой странице
+   s hasRowsForPrint = rows-row ; сколько строк осталось печатать до конца документа
+   
+   if hasRowsForPrint > canPrintAtThisPage {
+       Q page + 2 ;продолжаем на этой
+   } 
+   
+   Q page +3 ;пора переходить
+]]></Implementation>
+</Method>
+
+<Method name="testgPageAfter">
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+    s page = "", rows=211
+    for i=1:1:rows {
+     s nextpage =  ..gPageAfter(i,rows) 
+     s:page="" page=nextpage
+     w !,page,": ",i," -> ",nextpage
+     if page'=nextpage w !,"************",nextpage,"***************"
+     s page=nextpage
+    }
+]]></Implementation>
+</Method>
+
+<Method name="OnPageBreak">
+<Description>
+Вывод итоговой по странице, номера следующей, и шапки таблицы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&page:%String]]></FormalSpec>
+<Implementation><![CDATA[
+  d ..wPageSummary( .page )  ;выводим итого по странице
+  if page > 2 d ..wSpace() ;добираем до полной страницы
+  d ..wPageNumber( page ) ;выводим номер новой страницы
+  d ..wTablePageHeader() ;и заголовок таблицы
+]]></Implementation>
+</Method>
+
+<Method name="wSpace">
+<Description><![CDATA[
+Выводит номер страницы
+<var>page</var> - номер страницы]]></Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+    
+  &html<<tr class=xl40 height=15 style='mso-height-source:userset;height:11.25pt'>
+  <td height=19 colspan=36 class=xl40 style='height:11.25pt;mso-ignore:colspan'></td>
+  </tr><tr class=xl40 height=15 style='mso-height-source:userset;height:11.25pt'>
+  <td height=19 colspan=36 class=xl40 style='height:11.25pt;mso-ignore:colspan'></td>
+  </tr>>
+]]></Implementation>
+</Method>
+
+<Method name="wRow">
+<Description>
+Вывод одной строки накладной </Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&row:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+    
+ #define g(%name) $g(row(%name))   
+    
+ &html<<tr class=xl40 height=29 style='mso-height-source:userset;height:22.35pt'>
+ <td height=29 class=xl42 style='height:22.35pt'>&nbsp;</td>
+ <td class=xl95 style='border-top:none'>
+    #( $$$g("count") )#
+ </td><td colspan=4 class=xl105 width=209 style='width:158pt'>
+    #( $$$g("goods") )#
+ </td><td class=xl48 width=71 style='border-top:none;width:53pt'>&nbsp;</td>
+ <td colspan=4 class=xl106>шт</td>
+ <td class=xl49 width=44 style='border-top:none;width:33pt'>&nbsp;</td>
+ <td class=xl50 style='border-top:none'>&nbsp;</td>
+ <td class=xl52 style='border-top:none;border-left:none'>&nbsp;</td>
+ <td class=xl51 style='border-top:none'>&nbsp;</td>
+ <td class=xl53 style='border-top:none'>&nbsp;</td>
+ <td class=xl54 style='border-top:none;border-left:none'>&nbsp;</td>
+ <td class=xl52 style='border-top:none;border-left:none'>&nbsp;</td>
+ <td class=xl51 style='border-top:none'>&nbsp;</td>
+ <td class=xl51 style='border-top:none'>&nbsp;</td>
+ <td class=xl53 style='border-top:none'>&nbsp;</td>
+ <td colspan=2 class=xl107 width=61 style='border-left:none;width:46pt' >
+    #( $$$g("quant") )#
+ </td><td colspan=2 class=xl90 style='border-left:none'>
+    #( $$$g("price") )#
+ </td><td colspan=5 class=xl91 width=88 style='border-left:none;width:66pt'>
+    #( $$$g("summabeznds") )#
+ </td><td colspan=3 class=xl127>
+    #( $$$g("ndsprocent") )#
+ </td><td class="xl57" width=26 style='border-top:none;width:20pt;border-left:.5pt solid windowtext;' colspan=3>
+    #( $$$g("ndsotsumma") )#
+ </td><td colspan=3 class=xl92 width=89 style='border-left:none;width:67pt'>
+    #( $$$g("summasnds") )#
+ </td><td class=xl40></td>
+ </tr>>
+    
+    #; debug
+    #;&html<<tr><td colspan=37><pre>>
+    #;zw row
+    #;&html<</td></tr>>
+   
+   Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wPageSummary">
+<Description>
+Строка итого после товарных строк</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&summary:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+   
+  #define g(%name) $g(summary(%name))
+  
+  &html<<tr height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 class=xl58 style='height:11.85pt'>&nbsp;</td>
+  <td class=xl59>&nbsp;</td>
+  <td class=xl61></td>
+  <td class=xl60>&nbsp;</td>
+  <td class=xl60>&nbsp;</td>
+  <td class=xl60>&nbsp;</td>
+  <td class=xl62>&nbsp;</td>
+  <td class=xl59>&nbsp;</td>
+  <td class=xl58>&nbsp;</td>
+  <td class=xl58>&nbsp;</td>
+  <td class=xl58>&nbsp;</td>
+  <td class=xl62>&nbsp;</td>
+  <td class=xl62>&nbsp;</td>
+  <td colspan=3 class=xl121 style='border-right:.5pt solid black' >Итого<span style='mso-spacerun:yes'> </span></td>
+  <td class=xl63 style='border-left:none'>&nbsp;</td>
+  <td class=xl65>&nbsp;</td>
+  <td class=xl64>&nbsp;</td>
+  <td class=xl64>&nbsp;</td>
+  <td class=xl66>&nbsp;</td>
+  <td colspan=2 class=xl88 width=61 style='width:46pt'>
+    #( $J( $$$g("vsegoquant"), ".", 0) )#
+  </td><td colspan=2 class=xl89>Х</td>
+  <td colspan=5 class=xl108 width=88 style='width:66pt'>
+    #( $J( $$$g("vsegosummabeznds"), ".", 2) )#
+  </td><td colspan=3 class=xl109>Х</td>
+  <td class=xl68 width=43 style='width:33pt' colspan=2>
+    #( $J( $$$g("vsegondsotsumma"), ".", 2) )#
+  </td><td class=xl69 width=36 style='width:27pt'>&nbsp;</td>
+  <td colspan=3 class=xl93 width=89 style='width:67pt'>
+    #($J( $$$g("vsegosummasnds"), ".", 2) )#
+  </td><td></td>
+ </tr>>
+]]></Implementation>
+</Method>
+
+<Method name="wSummary">
+<Description>
+Строка итого после товарных строк</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&summary:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+   
+  #define g(%name) $g(summary(%name))
+  
+  &html<<tr height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 class=xl58 style='height:11.85pt'>&nbsp;</td>
+  <td colspan=10 style='mso-ignore:colspan'></td>
+  <td colspan=5 class=xl123 style='border-right:.5pt solid black'>Всего по накладной<span style='mso-spacerun:yes'> </span></td>
+  <td class=xl71 style='border-top:none;border-left:none'>&nbsp;</td>
+  <td class=xl73 style='border-top:none;border-left:none'>&nbsp;</td>
+  <td class=xl72 style='border-top:none'>&nbsp;</td>
+  <td class=xl72 style='border-top:none'>&nbsp;</td>
+  <td class=xl74 style='border-top:none'>&nbsp;</td>
+  <td colspan=2 class=xl94 width=61 style='border-left:none;width:46pt'>
+    #( $J( $$$g("vsegoquant"),".",0) )#
+  </td><td colspan=2 class=xl50 style='border-left:none'>Х</td>
+  <td colspan=5 class=xl87 width=88 style='border-left:none;width:66pt'>
+    #( $J( $$$g("vsegosummabeznds"),".",2) )#
+  </td><td colspan=3 class=xl50 style='border-left:none'>Х</td>
+  <td class=xl75 width=26 style='border-top:none;border-left:none;width:20pt'>&nbsp;</td>
+  <td class=xl55 width=17 style='border-top:none;width:13pt'>&nbsp;</td>
+  <td class=xl57 width=36 style='border-top:none;width:27pt'>&nbsp;</td>
+  <td colspan=3 class=xl87 width=89 style='border-left:none;width:67pt'>
+    #( $J( $$$g("vsegosummasnds"),".",2) )#
+  </td><td></td>
+ </tr>
+>    
+ Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wFooter">
+<Description>
+Выводим подвал формы </Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>summary</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ s DoverennNumber = %request.GetCookie("dv")      //номер доверенности
+ s DoverennDatValue = %request.GetCookie("dvdt")  //дата доверенности
+ s permitter = %request.Get("otpr") ;s permitter="Креймер А.Я." 
+ s executor = %request.Get("otpp") ;s executor="Кашменский Ю.Е."
+ 
+ s CountWords = 1
+ s (CountWords(10),CountWords(5),CountWords(2),CountWords(1),CountWords(-1)) = ""
+ 
+   
+     &html<<tr class=xl24 height=16 style='mso-height-source:userset;height:12.0pt'>
+  <td height=16 colspan=4 class=xl24 style='height:12.0pt;mso-ignore:colspan'></td>
+  <td class=xl24 colspan=4 style='mso-ignore:colspan'>Товарная накладная имеет
+  приложение на</td>
+  <td class=xl76></td>
+  <td class=xl77>&nbsp;</td><td class=xl77>&nbsp;</td><td class=xl77>&nbsp;</td><td class=xl77>&nbsp;</td><td class=xl77>&nbsp;</td><td class=xl77>&nbsp;</td>
+  <td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td>
+  <td colspan=18 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr class=xl24 height=14 style='mso-height-source:userset;height:11.1pt'>
+  <td height=14 colspan=4 class=xl24 style='height:11.1pt;mso-ignore:colspan'></td>
+  <td class=xl24>и содержит</td>
+  <td class=xl78 colspan=2 style='mso-ignore:colspan'>#(##class(Utils.Propis).Write($G(summary("rowcount")),.CountWords))#<!-- Три --></td>
+  <td class=xl78>&nbsp;</td><td class=xl78>&nbsp;</td><td class=xl78>&nbsp;</td><td class=xl78>&nbsp;</td><td class=xl78>&nbsp;</td><td class=xl78>&nbsp;</td><td class=xl78>&nbsp;</td><td class=xl78>&nbsp;</td>
+  <td class=xl79 style='border-top:none'>&nbsp;</td><td class=xl79 style='border-top:none'>&nbsp;</td><td class=xl79 style='border-top:none'>&nbsp;</td><td class=xl79 style='border-top:none'>&nbsp;</td>
+  <td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td>
+  <td class=xl24 colspan=8 style='mso-ignore:colspan'>порядковых номеров записей</td>
+  <td colspan=8 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr class=xl24 height=10 style='mso-height-source:userset;height:8.1pt'>
+  <td height=10 colspan=5 class=xl24 style='height:8.1pt;mso-ignore:colspan'></td>
+  <td class=xl80 align=center>прописью</td>
+  <td colspan=27 class=xl24 style='mso-ignore:colspan'></td>
+  <td colspan=7 rowspan=2 class=xl110>&nbsp;</td>
+ </tr>
+ <tr class=xl24 height=15 style='mso-height-source:userset;height:11.25pt'>
+  <td height=15 colspan=5 class=xl24 style='height:11.25pt;mso-ignore:colspan'></td>
+  <td colspan=3 rowspan=3 class=xl78>&nbsp;</td>
+  <td class=xl24></td>
+  <td class=xl24 colspan=6 style='mso-ignore:colspan'><span style='mso-spacerun:yes'>     </span>Масса груза (нетто)</td>
+  <td colspan=4 class=xl24 style='mso-ignore:colspan'></td>
+  <td class=xl81>&nbsp;</td>
+  <td class=xl77>&nbsp;</td>
+  <td class=xl81>&nbsp;</td>
+  <td class=xl77>&nbsp;</td>
+  <td class=xl81>&nbsp;</td>
+  <td class=xl77>&nbsp;</td>
+  <td class=xl81>&nbsp;</td>
+  <td class=xl81>&nbsp;</td>
+  <td colspan=5 class=xl81>&nbsp;</td>
+  <td class=xl24></td>
+ </tr>
+ <tr class=xl24 height=10 style='mso-height-source:userset;height:8.1pt'>
+  <td height=10 colspan=5 class=xl24 style='height:8.1pt;mso-ignore:colspan'></td>
+  <td colspan=11 class=xl24 style='mso-ignore:colspan'></td>
+  <td class=xl80 align=center>прописью</td>
+  <td colspan=13 class=xl24 style='mso-ignore:colspan'></td>
+  <td colspan=7 rowspan=2 class=xl110>&nbsp;</td>
+ </tr>
+ <tr class=xl24 height=15 style='mso-height-source:userset;height:11.25pt'>
+  <td height=15 colspan=4 class=xl24 style='height:11.25pt;mso-ignore:colspan'></td>
+  <td class=xl24>Всего мест</td>
+  <td class=xl24></td>
+  <td class=xl24 colspan=6 style='mso-ignore:colspan'><span
+  style='mso-spacerun:yes'>     </span>Масса груза (брутто)</td>
+  <td colspan=4 class=xl24 style='mso-ignore:colspan'></td>
+  <td class=xl78>&nbsp;</td>
+  <td class=xl82>&nbsp;</td>
+  <td class=xl82>&nbsp;</td>
+  <td class=xl82>&nbsp;</td>
+  <td class=xl82>&nbsp;</td>
+  <td class=xl82>&nbsp;</td>
+  <td class=xl82>&nbsp;</td>
+  <td class=xl82>&nbsp;</td>
+  <td colspan=5 class=xl111>&nbsp;</td>
+  <td class=xl24></td>
+ </tr>
+ <tr class=xl24 height=10 style='mso-height-source:userset;height:8.1pt'>
+  <td height=10 colspan=5 class=xl24 style='height:8.1pt;mso-ignore:colspan'></td>
+  <td colspan=3 class=xl83>прописью</td>
+  <td colspan=11 class=xl24 style='mso-ignore:colspan'></td>
+  <td class=xl80 align=center>прописью</td>
+  <td colspan=20 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr class=xl24 height=6 style='mso-height-source:userset;height:5.1pt'>
+  <td height=6 colspan=40 class=xl24 style='height:5.1pt;mso-ignore:colspan'></td>
+ </tr>
+ <tr class=xl24 height=13 style='mso-height-source:userset;height:9.75pt'>
+  <td height=13 class=xl24 style='height:9.75pt'></td>
+  <td class=xl24 colspan=5 style='mso-ignore:colspan'>Приложение (паспорта, сертификаты и т.п.) на</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl24></td>
+  <td class=xl24 colspan=3 style='mso-ignore:colspan'>листах</td>
+  <td colspan=6 class=xl24 style='mso-ignore:colspan'></td>
+  <td class=xl84>&nbsp;</td>
+  <td colspan=3 class=xl24 style='mso-ignore:colspan'></td>
+  <td class=xl70></td>
+  <td class=xl70>По доверенности </td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td colspan=3 class=xl85 align=center style='mso-ignore:colspan'>от</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+ </tr>
+ <tr class=xl24 height=14 style='mso-height-source:userset;height:10.5pt'>
+  <td height=14 colspan=6 class=xl24 style='height:10.5pt;mso-ignore:colspan'></td>
+  <td colspan=3 class=xl83>прописью</td>
+  <td colspan=9 class=xl24 style='mso-ignore:colspan'></td>
+  <td class=xl84>&nbsp;</td>
+  <td colspan=21 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr class=xl24 height=13 style='mso-height-source:userset;height:10.35pt'>
+  <td height=13 class=xl24 style='height:10.35pt'></td>
+  <td class=xl86 colspan=4 style='mso-ignore:colspan'>Всего отпущено на сумму</td>
+  <td colspan=10 class=xl24 style='mso-ignore:colspan'></td>
+  <td colspan=4 class=xl84>&nbsp;</td>
+  <td class=xl24></td>
+  <td class=xl24 colspan=3 style='mso-ignore:colspan'>выданной</td>
+  <td class=xl24></td>
+  <td class=xl78>&nbsp;</td>
+  <td class=xl78>&nbsp;</td>
+  <td class=xl78>&nbsp;</td>
+  <td class=xl78>&nbsp;</td>
+  <td class=xl78>&nbsp;</td>
+  <td class=xl78>&nbsp;</td>
+  <td class=xl78>&nbsp;</td>
+  <td class=xl78>&nbsp;</td>
+  <td class=xl78>&nbsp;</td>
+  <td class=xl78>&nbsp;</td>
+  <td class=xl78>&nbsp;</td>
+  <td class=xl78>&nbsp;</td>
+  <td class=xl78>&nbsp;</td>
+  <td class=xl78>&nbsp;</td>
+  <td class=xl78>&nbsp;</td>
+  <td class=xl78>&nbsp;</td>
+ </tr>
+ <tr height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 style='height:11.85pt'></td>
+  <td colspan=18 class=xl112 width=575 style='width:434pt'>#(##class(Utils.Propis).Write(summary("vsegosummasnds")))#<!-- Пятьдесят один рубль 00 копеек --></td>
+  <td colspan=5 style='mso-ignore:colspan'></td>
+  <td colspan=2 class=xl80 align=center style='mso-ignore:colspan'>кем, кому (организация, должность, фамилия, и.о.)</td>
+  <td colspan=14 style='mso-ignore:colspan'></td>
+ </tr>
+ <tr class=xl24 height=10 style='mso-height-source:userset;height:8.1pt'>
+  <td height=10 class=xl24 style='height:8.1pt'></td>
+  <td colspan=14 class=xl113>прописью</td>
+  <td colspan=3 class=xl24 style='mso-ignore:colspan'></td>
+  <td class=xl84>&nbsp;</td>
+  <td colspan=5 class=xl24 style='mso-ignore:colspan'></td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td colspan=5 class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+ </tr>>
+ 
+ #;строка с доверенностью
+ &html<<tr class=xl24 height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 class=xl24 style='height:11.85pt'></td>
+  <td class=xl24 colspan=3 style='mso-ignore:colspan'>Отпуск груза разрешил</td>
+  <td class=xl128 width=109 style='width:82pt'>&nbsp;</td>
+  <td class=xl129></td>
+  <td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td>
+  <td class=xl24></td>
+  <td colspan=10 class=xl130 width=218 style='width:164pt'>#(permitter)#<font
+  class="font16">(доверенность #(DoverennNumber)# от #(DoverennDatValue)#)</font></td>
+  <td colspan=5 class=xl24 style='mso-ignore:colspan'></td>
+  <td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td><td class=xl28>&nbsp;</td>
+ </tr>>
+ 
+ &html<<tr class=xl24 height=12 style='mso-height-source:userset;height:9.0pt'>
+  <td height=12 colspan=4 class=xl24 style='height:9.0pt;mso-ignore:colspan'></td>
+  <td class=xl131>должность</td>
+  <td class=xl24></td>
+  <td colspan=2 class=xl132 align=center style='mso-ignore:colspan'>подпись</td>
+  <td class=xl24></td>
+  <td colspan=10 class=xl133>расшифровка подписи</td>
+  <td colspan=21 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>>
+ 
+ &html<<tr class=xl24 height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 class=xl24 style='height:11.85pt'></td>
+  <td colspan=3 class=xl86 style='mso-ignore:colspan'></td>
+  <td colspan=5 class=xl24 style='mso-ignore:colspan'></td>
+  <td colspan=10 class=xl134 width=218 style='width:164pt'></td>
+  <td class=xl24></td>
+  <td class=xl24 colspan=3 style='mso-ignore:colspan'>Груз принял</td>
+  <td class=xl24></td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl24></td>
+  <td colspan=5 class=xl28>&nbsp;</td>
+  <td class=xl24></td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+ </tr>>
+ 
+ &html<<tr height=15 style='height:11.25pt'>
+  <td height=15 colspan=6 class=xl24 style='height:11.25pt;mso-ignore:colspan'></td>
+  <td colspan=2 class=xl135 style='mso-ignore:colspan'></td>
+  <td class=xl24></td>
+  <td colspan=10 class=xl136>&nbsp;</td>
+  <td colspan=5 class=xl24 style='mso-ignore:colspan'></td>
+  <td colspan=2 class=xl80 align=center style='mso-ignore:colspan'>должность</td>
+  <td class=xl24></td>
+  <td colspan=5 class=xl83>подпись</td>
+  <td class=xl24></td>
+  <td colspan=7 class=xl80 align=center style='mso-ignore:colspan'>расшифровка подписи</td>
+ </tr>>
+ 
+ &html<<tr class=xl24 height=15 style='mso-height-source:userset;height:11.85pt'>
+  <td height=15 class=xl24 style='height:11.85pt'></td>
+  <td class=xl24 colspan=3 style='mso-ignore:colspan'>Отпуск груза произвел</td>
+  <td class=xl128 width=109 style='width:82pt'>&nbsp;</td>
+  <td class=xl129></td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl24></td>
+  <td colspan=10 class=xl130 width=218 style='width:164pt'>#(executor)#</td>
+  <td class=xl24></td>
+  <td class=xl24 colspan=4 style='mso-ignore:colspan' >Груз получил</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl24></td>
+  <td colspan=5 class=xl28>&nbsp;</td>
+  <td class=xl24></td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl28>&nbsp;</td>
+ </tr>>
+ 
+ &html<<tr height=15 style='height:11.25pt'>
+  <td height=15 colspan=4 class=xl24 style='height:11.25pt;mso-ignore:colspan'></td>
+  <td class=xl83>должность</td>
+  <td class=xl24></td>
+  <td colspan=2 class=xl80 align=center style='mso-ignore:colspan'>подпись</td>
+  <td class=xl24></td>
+  <td colspan=10 class=xl114>расшифровка подписи</td>
+  <td class=xl24></td>
+  <td class=xl40 colspan=4 style='mso-ignore:colspan'>грузополучатель</td>
+  <td colspan=2 class=xl80 align=center style='mso-ignore:colspan'>должность</td>
+  <td class=xl24></td>
+  <td colspan=5 class=xl83>подпись</td>
+  <td class=xl24></td>
+  <td colspan=7 class=xl80 align=center style='mso-ignore:colspan'>расшифровка подписи</td>
+ </tr>>
+ 
+ &html<<tr class=xl24 height=6 style='mso-height-source:userset;height:5.1pt'>
+  <td height=6 colspan=18 class=xl24 style='height:5.1pt;mso-ignore:colspan'></td>
+  <td class=xl84>&nbsp;</td>
+  <td colspan=21 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>>
+ 
+ &html<<tr class=xl24 height=15 style='mso-height-source:userset;height:11.25pt'>
+  <td height=15 class=xl24 style='height:11.25pt'></td>
+  <td colspan=2 class=xl70 style='mso-ignore:colspan'></td>
+  <td class=xl70>М.П.</td>
+  <td class=xl24></td>
+  <td class=xl70><!-- &quot;15&quot; --></td>
+  <td class=xl28><!-- августа --></td>
+  <td class=xl28>&nbsp;</td>
+  <td class=xl24 colspan=4 style='mso-ignore:colspan'>20___ г</td>
+  <td colspan=6 class=xl24 style='mso-ignore:colspan'></td>
+  <td class=xl84>&nbsp;</td>
+  <td colspan=3 class=xl24 style='mso-ignore:colspan'></td>
+  <td colspan=2 class=xl85 align=center style='mso-ignore:colspan'>М.П.</td>
+  <td colspan=2 class=xl24 style='mso-ignore:colspan'></td>
+  <td class=xl24 colspan=10 style='mso-ignore:colspan'>&quot;_____&quot; _____________ 20__ г</td>
+  <td colspan=4 class=xl24 style='mso-ignore:colspan'></td>
+ </tr>>
+ 
+ &html<<![if supportMisalignedColumns]>
+ <tr height=0 style='display:none'>
+  <td width=7 style='width:5pt'></td>
+  <td width=34 style='width:26pt'></td>
+  <td width=74 style='width:56pt'></td>
+  <td width=14 style='width:11pt'></td>
+  <td width=109 style='width:82pt'></td>
+  <td width=12 style='width:9pt'></td>
+  <td width=71 style='width:53pt'></td>
+  <td width=30 style='width:23pt'></td>
+  <td width=13 style='width:10pt'></td>
+  <td width=9 style='width:7pt'></td>
+  <td width=3 style='width:2pt'></td>
+  <td width=44 style='width:33pt'></td>
+  <td width=41 style='width:31pt'></td>
+  <td width=9 style='width:7pt'></td>
+  <td width=30 style='width:23pt'></td>
+  <td width=3 style='width:2pt'></td>
+  <td width=55 style='width:41pt'></td>
+  <td width=9 style='width:7pt'></td>
+  <td width=15 style='width:11pt'></td>
+  <td width=15 style='width:11pt'></td>
+  <td width=9 style='width:7pt'></td>
+  <td width=46 style='width:35pt'></td>
+  <td width=15 style='width:11pt'></td>
+  <td width=26 style='width:20pt'></td>
+  <td width=53 style='width:40pt'></td>
+  <td width=37 style='width:28pt'></td>
+  <td width=11 style='width:8pt'></td>
+  <td width=27 style='width:20pt'></td>
+  <td width=4 style='width:3pt'></td>
+  <td width=9 style='width:7pt'></td>
+  <td width=7 style='width:5pt'></td>
+  <td width=42 style='width:32pt'></td>
+  <td width=12 style='width:9pt'></td>
+  <td width=26 style='width:20pt'></td>
+  <td width=17 style='width:13pt'></td>
+  <td width=36 style='width:27pt'></td>
+  <td width=12 style='width:9pt'></td>
+  <td width=76 style='width:57pt'></td>
+  <td width=1 style='width:1pt'></td>
+  <td width=3 style='width:2pt'></td>
+ </tr>
+ <![endif]>>
+  
+ Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wCss">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+    &html<<!--table
+    {mso-displayed-decimal-separator:"\,";
+    mso-displayed-thousand-separator:" ";}
+@page
+    {margin:.16in .2in .16in .2in;
+    mso-header-margin:.16in;
+    mso-footer-margin:.16in;
+    mso-page-orientation:landscape;}
+.font16
+    {color:windowtext;
+    font-size:6.0pt;
+    font-weight:700;
+    font-style:normal;
+    text-decoration:none;
+    font-family:Arial, sans-serif;
+    mso-font-charset:0;}
+tr
+    {mso-height-source:auto;}
+col
+    {mso-width-source:auto;}
+br
+    {mso-data-placement:same-cell;}
+.style0
+    {mso-number-format:General;
+    text-align:general;
+    vertical-align:bottom;
+    white-space:nowrap;
+    mso-rotate:0;
+    mso-background-source:auto;
+    mso-pattern:auto;
+    color:windowtext;
+    font-size:8.0pt;
+    font-weight:400;
+    font-style:normal;
+    text-decoration:none;
+    font-family:Arial, sans-serif;
+    mso-font-charset:0;
+    border:none;
+    mso-protection:locked visible;
+    mso-style-name:Обычный;
+    mso-style-id:0;}
+td
+    {mso-style-parent:style0;
+    padding-top:1px;
+    padding-right:1px;
+    padding-left:1px;
+    mso-ignore:padding;
+    color:windowtext;
+    font-size:8.0pt;
+    font-weight:400;
+    font-style:normal;
+    text-decoration:none;
+    font-family:Arial, sans-serif;
+    mso-font-charset:0;
+    mso-number-format:General;
+    text-align:general;
+    vertical-align:bottom;
+    border:none;
+    mso-background-source:auto;
+    mso-pattern:auto;
+    mso-protection:locked visible;
+    white-space:nowrap;
+    mso-rotate:0;}
+.xl24
+    {mso-style-parent:style0;
+    text-align:left;}
+.xl25
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-weight:0;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:right;
+    vertical-align:middle;}
+.xl26
+    {mso-style-parent:style0;
+    text-align:center;
+    vertical-align:middle;
+    border:.5pt solid windowtext;}
+.xl27
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    mso-number-format:0000000;
+    text-align:center;
+    vertical-align:middle;
+    border-top:1.0pt solid windowtext;
+    border-right:1.0pt solid windowtext;
+    border-bottom:none;
+    border-left:1.0pt solid windowtext;}
+.xl28
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl29
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:right;}
+.xl30
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    mso-number-format:0000000000;
+    text-align:center;
+    border-top:.5pt solid windowtext;
+    border-right:1.0pt solid windowtext;
+    border-bottom:none;
+    border-left:1.0pt solid windowtext;}
+.xl31
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    font-weight:0;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center-across;
+    vertical-align:top;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl32
+    {mso-style-parent:style0;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:left;}
+.xl33
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    border-top:.5pt solid windowtext;
+    border-right:1.0pt solid windowtext;
+    border-bottom:.5pt solid windowtext;
+    border-left:1.0pt solid windowtext;}
+.xl34
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    border-top:none;
+    border-right:1.0pt solid windowtext;
+    border-bottom:none;
+    border-left:1.0pt solid windowtext;}
+.xl35
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center-across;
+    vertical-align:top;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl36
+    {mso-style-parent:style0;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center-across;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl37
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    border-top:.5pt solid windowtext;
+    border-right:1.0pt solid windowtext;
+    border-bottom:none;
+    border-left:1.0pt solid windowtext;}
+.xl38
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:right;
+    vertical-align:middle;}
+.xl39
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    border-top:.5pt solid windowtext;
+    border-right:1.0pt solid windowtext;
+    border-bottom:1.0pt solid windowtext;
+    border-left:1.0pt solid windowtext;}
+.xl40
+    {mso-style-parent:style0;
+    text-align:left;
+    vertical-align:top;}
+.xl41
+    {mso-style-parent:style0;
+    font-style:italic;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:right;
+    vertical-align:top;}
+.xl42
+    {mso-style-parent:style0;
+    text-align:left;
+    vertical-align:top;
+    border:none;}
+.xl43
+    {mso-style-parent:style0;
+    text-align:center;
+    vertical-align:middle;
+    border:.5pt solid windowtext;
+    white-space:normal;}
+.xl44
+    {mso-style-parent:style0;
+    text-align:left;
+    vertical-align:middle;}
+.xl45
+    {mso-style-parent:style0;
+    text-align:left;
+    vertical-align:middle;
+    border:none;}
+.xl46
+    {mso-style-parent:style0;
+    font-size:7.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    mso-number-format:0;
+    text-align:center;
+    vertical-align:middle;
+    border:.5pt solid windowtext;}
+.xl47
+    {mso-style-parent:style0;
+    font-size:7.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    mso-number-format:0;
+    text-align:center;
+    vertical-align:middle;
+    border-top:.5pt solid windowtext;
+    border-right:.5pt solid windowtext;
+    border-bottom:1.0pt solid windowtext;
+    border-left:.5pt solid windowtext;}
+.xl48
+    {mso-style-parent:style0;
+    mso-number-format:00000000000;
+    text-align:right;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:1.0pt solid windowtext;
+    white-space:normal;}
+.xl49
+    {mso-style-parent:style0;
+    mso-number-format:0;
+    text-align:center;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:1.0pt solid windowtext;
+    white-space:normal;}
+.xl50
+    {mso-style-parent:style0;
+    text-align:center;
+    vertical-align:top;
+    border:.5pt solid windowtext;}
+.xl51
+    {mso-style-parent:style0;
+    text-align:right;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl52
+    {mso-style-parent:style0;
+    text-align:right;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;}
+.xl53
+    {mso-style-parent:style0;
+    text-align:right;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:.5pt solid windowtext;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl54
+    {mso-style-parent:style0;
+    text-align:right;
+    vertical-align:top;
+    border:.5pt solid windowtext;}
+.xl55
+    {mso-style-parent:style0;
+    text-align:right;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;
+    white-space:normal;}
+.xl56
+    {mso-style-parent:style0;
+    text-align:right;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:1.0pt solid windowtext;
+    white-space:normal;}
+.xl57
+    {mso-style-parent:style0;
+    text-align:right;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:.5pt solid windowtext;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;
+    white-space:normal;}
+.xl58
+    {mso-style-parent:style0;
+    text-align:left;
+    border:none;}
+.xl59
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl60
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl61
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl62
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:1.0pt solid windowtext;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl63
+    {mso-style-parent:style0;
+    text-align:right;
+    border-top:1.0pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;}
+.xl64
+    {mso-style-parent:style0;
+    text-align:right;
+    border-top:1.0pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl65
+    {mso-style-parent:style0;
+    text-align:right;
+    border-top:1.0pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;}
+.xl66
+    {mso-style-parent:style0;
+    text-align:right;
+    border-top:1.0pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl67
+    {mso-style-parent:style0;
+    text-align:right;
+    vertical-align:top;
+    border-top:1.0pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;
+    white-space:normal;}
+.xl68
+    {mso-style-parent:style0;
+    text-align:right;
+    vertical-align:top;
+    border-top:1.0pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;
+    white-space:normal;}
+.xl69
+    {mso-style-parent:style0;
+    text-align:right;
+    vertical-align:top;
+    border-top:1.0pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;
+    white-space:normal;}
+.xl70
+    {mso-style-parent:style0;
+    text-align:right;}
+.xl71
+    {mso-style-parent:style0;
+    text-align:right;
+    border:.5pt solid windowtext;}
+.xl72
+    {mso-style-parent:style0;
+    text-align:right;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl73
+    {mso-style-parent:style0;
+    text-align:right;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;}
+.xl74
+    {mso-style-parent:style0;
+    text-align:right;
+    border-top:.5pt solid windowtext;
+    border-right:.5pt solid windowtext;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl75
+    {mso-style-parent:style0;
+    text-align:right;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;
+    white-space:normal;}
+.xl76
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl77
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl78
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl79
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl80
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center-across;
+    vertical-align:top;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl81
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl82
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center-across;
+    vertical-align:top;
+    border-top:none;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl83
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    vertical-align:top;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl84
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:none;
+    border-right:.5pt solid windowtext;
+    border-bottom:none;
+    border-left:none;}
+.xl85
+    {mso-style-parent:style0;
+    text-align:center-across;}
+.xl86
+    {mso-style-parent:style0;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:left;}
+.xl87
+    {mso-style-parent:style0;
+    mso-number-format:Standard;
+    text-align:right;
+    vertical-align:top;
+    border:.5pt solid windowtext;
+    white-space:normal;}
+.xl88
+    {mso-style-parent:style0;
+    mso-number-format:"0\.000";
+    text-align:right;
+    border-top:1.0pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;
+    white-space:normal;}
+.xl89
+    {mso-style-parent:style0;
+    text-align:center;
+    vertical-align:top;
+    border-top:1.0pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;}
+.xl90
+    {mso-style-parent:style0;
+    mso-number-format:Standard;
+    text-align:right;
+    vertical-align:top;
+    border:.5pt solid windowtext;}
+.xl91
+    {mso-style-parent:style0;
+    mso-number-format:Standard;
+    text-align:right;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;
+    white-space:normal;}
+.xl92
+    {mso-style-parent:style0;
+    mso-number-format:Standard;
+    text-align:right;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:1.0pt solid windowtext;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;
+    white-space:normal;}
+.xl93
+    {mso-style-parent:style0;
+    mso-number-format:Standard;
+    text-align:right;
+    vertical-align:top;
+    border-top:1.0pt solid windowtext;
+    border-right:.5pt solid windowtext;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;
+    white-space:normal;}
+.xl94
+    {mso-style-parent:style0;
+    mso-number-format:"0\.000";
+    text-align:right;
+    border:.5pt solid windowtext;
+    white-space:normal;}
+.xl95
+    {mso-style-parent:style0;
+    mso-number-format:0;
+    text-align:center;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;}
+.xl96
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:right;
+    white-space:normal;}
+.xl97
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    text-align:left;
+    border-top:.5pt solid windowtext;
+    border-right:1.0pt solid windowtext;
+    border-bottom:.5pt solid windowtext;
+    border-left:1.0pt solid windowtext;}
+.xl98
+    {mso-style-parent:style0;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl99
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:right;
+    white-space:normal;}
+.xl100
+    {mso-style-parent:style0;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;
+    white-space:normal;}
+.xl101
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:right;
+    border:.5pt solid windowtext;}
+.xl102
+    {mso-style-parent:style0;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    vertical-align:middle;
+    border:.5pt solid windowtext;}
+.xl103
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    mso-number-format:0;
+    text-align:center;
+    vertical-align:middle;
+    border-top:1.0pt solid windowtext;
+    border-right:.5pt solid windowtext;
+    border-bottom:1.0pt solid windowtext;
+    border-left:1.0pt solid windowtext;}
+.xl104
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    text-align:center;
+    vertical-align:middle;
+    border-top:1.0pt solid windowtext;
+    border-right:1.0pt solid windowtext;
+    border-bottom:1.0pt solid windowtext;
+    border-left:.5pt solid windowtext;}
+.xl105
+    {mso-style-parent:style0;
+    text-align:left;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;
+    white-space:normal;}
+.xl106
+    {mso-style-parent:style0;
+    text-align:center;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:1.0pt solid windowtext;}
+.xl107
+    {mso-style-parent:style0;
+    mso-number-format:"0\.000";
+    text-align:right;
+    vertical-align:top;
+    border:.5pt solid windowtext;
+    white-space:normal;}
+.xl108
+    {mso-style-parent:style0;
+    mso-number-format:Standard;
+    text-align:right;
+    vertical-align:top;
+    border-top:1.0pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;
+    white-space:normal;}
+.xl109
+    {mso-style-parent:style0;
+    text-align:center;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:.5pt solid windowtext;}
+.xl110
+    {mso-style-parent:style0;
+    text-align:left;
+    border:1.0pt solid windowtext;}
+.xl111
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    vertical-align:top;
+    border-top:none;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl112
+    {mso-style-parent:style0;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:left;
+    border-top:none;
+    border-right:.5pt solid windowtext;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;
+    white-space:normal;}
+.xl113
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    vertical-align:top;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl114
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    vertical-align:top;
+    border-top:none;
+    border-right:.5pt solid windowtext;
+    border-bottom:none;
+    border-left:none;}
+.xl115
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    vertical-align:middle;}
+.xl116
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    vertical-align:middle;}
+.xl117
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    vertical-align:middle;
+    border-top:none;
+    border-right:1.0pt solid windowtext;
+    border-bottom:none;
+    border-left:none;}
+.xl118
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;}
+.xl119
+    {mso-style-parent:style0;
+    font-size:9.0pt;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    border-top:none;
+    border-right:1.0pt solid windowtext;
+    border-bottom:none;
+    border-left:none;}
+.xl120
+    {mso-style-parent:style0;
+    border-top:none;
+    border-right:1.0pt solid windowtext;
+    border-bottom:none;
+    border-left:none;}
+.xl121
+    {mso-style-parent:style0;
+    text-align:center;
+    border-top:1.0pt solid windowtext;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl122
+    {mso-style-parent:style0;
+    text-align:center;
+    border-top:1.0pt solid windowtext;
+    border-right:.5pt solid windowtext;
+    border-bottom:none;
+    border-left:none;}
+.xl123
+    {mso-style-parent:style0;
+    text-align:center;}
+.xl124
+    {mso-style-parent:style0;
+    text-align:center;
+    border-top:none;
+    border-right:.5pt solid windowtext;
+    border-bottom:none;
+    border-left:none;}
+.xl125
+    {mso-style-parent:style0;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;
+    white-space:normal;}
+.xl126
+    {mso-style-parent:style0;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;}
+.xl127
+    {mso-style-parent:style0;
+    font-weight:700;
+    font-family:Arial, sans-serif;
+    mso-font-charset:204;
+    text-align:center;
+    vertical-align:top;
+    border-top:.5pt solid windowtext;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:1.0pt solid windowtext;}
+.xl128
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;
+    white-space:normal;}
+.xl129
+    {mso-style-parent:style0;
+    text-align:left;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;
+    white-space:normal;}
+.xl130
+    {mso-style-parent:style0;
+    font-weight:700;
+    text-align:left;
+    border-top:none;
+    border-right:.5pt solid windowtext;
+    border-bottom:.5pt solid windowtext;
+    border-left:none;
+    white-space:normal;}
+.xl131
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    text-align:center;
+    vertical-align:top;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl132
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    text-align:center-across;
+    vertical-align:top;
+    border-top:none;
+    border-right:none;
+    border-bottom:none;
+    border-left:none;}
+.xl133
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    text-align:center;
+    vertical-align:top;
+    border-top:none;
+    border-right:.5pt solid windowtext;
+    border-bottom:none;
+    border-left:none;}
+.xl134
+    {mso-style-parent:style0;
+    text-align:left;
+    white-space:normal;}
+.xl135
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    text-align:center-across;
+    vertical-align:top;}
+.xl136
+    {mso-style-parent:style0;
+    font-size:6.0pt;
+    text-align:center;
+    vertical-align:top;
+    border-top:none;
+    border-right:.5pt solid windowtext;
+    border-bottom:none;
+    border-left:none;}
+ -->>
+    
+ Q ""
+]]></Implementation>
+</Method>
+
+<Method name="LoadKontr">
+<Description>
+Загрузка необходимых данных по контрагенту</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[id:%String,&name:%String="",&addr:%String="",&citycode:%String="",&cityname:%String="",&zip:%String="",&pbank,&city,&kpp,&inn,&bik,&rsch,&ksch,&code,&okpo,&okud,&okdp]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+  
+    #define kontr ##class(Common.Kontragent)
+    if '$$$kontr.%ExistsId( id ) Q 1
+    s name=$$$kontr.NameGetStored(id), addr=$$$kontr.AddressUrGetStored(id)
+    , citycode=$$$kontr.CityCodeGetStored(id), cityname=$$$kontr.CityUrGetStored(id)
+    , zip=$$$kontr.PostalcodeUrGetStored(id)
+    
+    s bankdata=$$$kontr.bankGetStored(id) ;serial object
+    s bank = ##class(Common.Bank).%Open($lb(bankdata,"Common.Bank"))
+    
+    s pbank = bank.pbank, city  = bank.city    , kpp   = bank.kpp,   inn   = bank.inn
+    , bik   = bank.bik,   rsch  = bank.rsch    , ksch  = bank.ksch,  code  = bank.code
+    , okpo  = bank.okpo,  okud  = bank.okud    , okdp  = bank.okdp
+    Q 1
+]]></Implementation>
+</Method>
+</Class>
+</Export>
