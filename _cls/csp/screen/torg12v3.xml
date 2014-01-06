@@ -15,7 +15,7 @@ http://localhost/csp/sklad2/csp.screen.torg12v3.cls?id=7132&class=tovnakladn&kon
 <Description>
 Максимальное количество товарных строк
 размещаемых на первой странице </Description>
-<Default>12</Default>
+<Default>3</Default>
 </Parameter>
 
 <Parameter name="OTHERPAGEROWS">
