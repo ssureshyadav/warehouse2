@@ -116,11 +116,25 @@
 <Description>
 Имя индекса используется в коде serials.csp !!!
 Используется для прямого доступа в csp.WarrantyCardImport
+csp.CheckSerial3
 ВНИМАНИЕ!!! Путаница в наименованиях</Description>
 <Data>Name</Data>
 <Properties>serial</Properties>
 <Unique>1</Unique>
 </Index>
+
+<Method name="DirectGetIdBySerial">
+<Description>
+Пример получения ид гарантийного (csp.CheckSerial3.cls)</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>serial:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+    s serial = " "_$ZCVT(serial,"U")
+    s id = $o(^Common.Dictionary2I("serialInd", serial, ""))
+    Q id
+]]></Implementation>
+</Method>
 
 <Property name="tovar">
 <Description>
@@ -198,15 +212,15 @@
 <FormalSpec>id:%String</FormalSpec>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	 if '..%ExistsId(id) Q $$$ERROR($$$GeneralError,"Нет такого гарантийного талона")
-	 #;проверки
-	 s inInstructions=##class(Operation.InstructionsItems).HasGarant(id)
-	 Q:inInstructions $$$ERROR($$$GeneralError,"Гарантийный талон используется в заявках")
-	 s inOtchetItems=##class(Docs.OtchetItems).HasGarant(id)
-	 Q:inOtchetItems $$$ERROR($$$GeneralError,"Гарантийный талон используется в отчетах")
-	 s inActs=##class(Docs.Act).HasGarant(id)
-	 Q:inActs $$$ERROR($$$GeneralError,"Гарантийный талон используется в актах")
-	 Q ..%DeleteId(id)
+     if '..%ExistsId(id) Q $$$ERROR($$$GeneralError,"Нет такого гарантийного талона")
+     #;проверки
+     s inInstructions=##class(Operation.InstructionsItems).HasGarant(id)
+     Q:inInstructions $$$ERROR($$$GeneralError,"Гарантийный талон используется в заявках")
+     s inOtchetItems=##class(Docs.OtchetItems).HasGarant(id)
+     Q:inOtchetItems $$$ERROR($$$GeneralError,"Гарантийный талон используется в отчетах")
+     s inActs=##class(Docs.Act).HasGarant(id)
+     Q:inActs $$$ERROR($$$GeneralError,"Гарантийный талон используется в актах")
+     Q ..%DeleteId(id)
 ]]></Implementation>
 </Method>
 
@@ -225,11 +239,11 @@
  . s StorageData=StorageStrategy.Data.GetAt(i)
  s data=StorageData.Values.GetNext(.number)
  while $ISOBJECT(data) {
- 	s PropertyName=data.Value
- 	s ListIndex=data.Name
- 	Do %code.WriteLine(" s Prop( """ _ PropertyName _ """)="_ListIndex)
- 	s data=StorageData.Values.GetNext(.number)
- 	} 	
+    s PropertyName=data.Value
+    s ListIndex=data.Name
+    Do %code.WriteLine(" s Prop( """ _ PropertyName _ """)="_ListIndex)
+    s data=StorageData.Values.GetNext(.number)
+    }   
  Do %code.WriteLine(" Quit $G(Prop(PropertyName))")
  Quit $$$OK
 ]]></Implementation>
@@ -262,16 +276,16 @@ any data is written to disk.
 <Private>1</Private>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-	if ##this.Property9194=2,'+##this.CloseDat
-	{
-		s ##this.CloseDat=+$H
-		s ##this.CloseTime=$P($H,",",2)
-		if $ISOBJECT($G(%session)) 
-		{
-			//d ##this.CloseUserSetObjectId($G(%session.Data("user")))
-		}
-	}
-	Quit $$$OK
+    if ##this.Property9194=2,'+##this.CloseDat
+    {
+        s ##this.CloseDat=+$H
+        s ##this.CloseTime=$P($H,",",2)
+        if $ISOBJECT($G(%session)) 
+        {
+            //d ##this.CloseUserSetObjectId($G(%session.Data("user")))
+        }
+    }
+    Quit $$$OK
 ]]></Implementation>
 </Method>
 
