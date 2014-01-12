@@ -73,7 +73,7 @@
     <img src="images/green_butt.gif" alt="Принять отчёт" width="20px" height="20px" style="cursor:hand" onclick="setOtchetAccepted()">
     <sklad:LittleButton name="txtok" id="btnProveOthet" onclick="ProveOthet()" alt="Бумажный отчёт проверен">
 <server>
-#;Кнопка проверки серийных номеров для отчета о ремонте
+#;Кнопка ПРОВЕРКИ серийных номеров для отчета о ремонте
 k urlargs s urlargs("cls")="Docs.Otchet"
 d ..wCheckSerialButton( "bCheckSerialOtchet"
     , ..Link("csp.CheckSerial3.cls",.urlargs,1)
@@ -91,7 +91,7 @@ d ..wCheckSerialButton( "bCheckSerialOtchet"
     <sklad:LittleButton name="txt" id="btnLookBrakCommentAnsw" onclick="ShowOtchetErrorsFn('BrakCommentAnswer')" alt="Показать ответ на негативный отзыв контрагента">
 </span>
 
-<!-- кнопки акта технического осмотра -->
+<!-- кнопки АКТ ТЕХОСМОТРА -->
 <span style="display:none" id="ActSpecButton"> 
     <img src="images/txt.gif" onmouseover="btnShowReqsFromAct.src='images/Ontxt.gif'" onmouseout="btnShowReqsFromAct.src='images/txt.gif'"  id="btnShowReqsFromAct" name="btnShowReqsFromAct" alt="Показать заявки этого акта" onclick="ShowReqsFromActFn()">
     <img src="images/red_stop.gif" alt="Отклонить акт" width="20px" height="20px" style="cursor:hand" onclick="setActFailed()">
@@ -103,9 +103,18 @@ d ..wCheckSerialButton( "bCheckSerialOtchet"
 k urlargs s urlargs("cls")="Docs.Act"
 d ..wCheckSerialButton( "bCheckSerialAct"
     , ..Link("csp.CheckSerial3.cls",.urlargs,1)
-    , $$$Text("Проверка серийных")
-    , $$$Text("Перейти на страницу проверки серийных номеров")
+    , $$$Text("Проверка серийного")
+    , $$$Text("Проверить серийный номер")
 )
+
+#; Кнопка ПРОСМОТРА серийного номера
+
+s urlargs("sessionid")=%session.SessionId ;дополнительно нуждается в ид сессии
+
+&html<<button id='bOpenSerialAct' class='btn bOpenSerial' title='#($$$Text("Просмотр серийного номера"))#'
+    data-url='#(..Link("garant.csp",.urlargs,1))#'
+>#($$$Text("Открыть серийный"))#</button>>
+
 </server>
 
 </span>
@@ -375,7 +384,7 @@ function maketovnakl(tovnakladn){
     
     var url = "csp.makeTovNaklV2.cls" //"maketovnakl.csp"
     WinResult=window.showModalDialog(url+"?docid="+doctov+"&class="+tovnakladn,""
-    	,"dialogWidth:640px;dialogHeight:480px;center:yes;status:no;resizable:yes;")
+        ,"dialogWidth:640px;dialogHeight:480px;center:yes;status:no;resizable:yes;")
     
 }
 
@@ -613,7 +622,7 @@ function SetBrakAnswer()
 <script method="wCheckSerialButton" description="Выводит кнопку запуска проверки серийных"
     arguments="id:%String,url:%String,label:%String,title:%String" returntype="%String" 
     ProcedureBlock=1 language="Cache">
-  
+  #; особенность в классе кнопки "bCheckSerial" - по нему срабатывает обработчик js
   &html<<button id='#(id)#' data-url='#(url)#' class='bCheckSerial btn' title='#(title)#' type='button'> #(label)# </button>>
   
   Q ""

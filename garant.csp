@@ -9,81 +9,94 @@
 Quit 1
 </script>
 <script language="cache" runat="server">
+ 
+ #; 2014-01-12
+ #; если передан ид документа и класс - переход по кнопке с doc3.csp, обработчик в docs3.js
+ if $d(%request.Data("doc")) && $d(%request.Data("cls"))  {
+   s cls=$g(%request.Data("cls",1)) //ожидаем Docs.Act
+   if cls="Docs.Act" {
+    s doc=$g(%request.Data("doc",1)) // id 
+    s serial = $zobjclassmethod(cls,"SerialGetStored",doc) ; возможна ошибка
+    s garantId = ##class(Common.Dictionary2).DirectGetIdBySerial( serial )
+    s %request.Data("GarantId",1) = garantId ;для стандартной обработки
+   }
+ }
+ 
  s GarantId=%request.Get("GarantId")
  s GarantName=%request.Get("GarantName")
  s DeleteStyleDisplay="none"
  
  if (GarantId="")&&(GarantName'="")
  {
-	 s GarantId = $O(^Common.Dictionary2I("garantInd"," "_GarantName,""))
+     s GarantId = $O(^Common.Dictionary2I("garantInd"," "_GarantName,""))
  }
  
  if (GarantId="") 
  {
-	s displaycheckbox="block"
-	s displaycheckboxCHECKED="CHECKED"
+    s displaycheckbox="block"
+    s displaycheckboxCHECKED="CHECKED"
  }
  else
  {
-	s displaycheckbox="none"
-	s displaycheckboxCHECKED=""
+    s displaycheckbox="none"
+    s displaycheckboxCHECKED=""
  }
  
- //s Property9194 = 2 	//по умолчанию гар талон недействительный
+ //s Property9194 = 2   //по умолчанию гар талон недействительный
  if $G(GarantId)'=""
  {
-	// s ID = $O(^Common.Dictionary2I("garantInd"," "_GarantId,""))
-	 s ID=GarantId
-	 s GarantObj = ##class(Common.Dictionary2).%OpenId(ID)
-	 if $ISOBJECT(GarantObj)
-	 {
-		 
- 		i GarantObj.Property9194=2 
- 		{
-	 		if (GarantObj.CloseUser) s CloseUserName=GarantObj.CloseUser.Name
-	 		e  s CloseUserName=""
-	 		
- 			s ClosedString=CloseUserName_" "_$S(GarantObj.CloseDat:$ZD(GarantObj.CloseDat,4),1:"")_" "_$S(GarantObj.CloseTime:$ZT(GarantObj.CloseTime),1:"")
- 			s SaveButtonStyle="display:none"
- 		}
-		 
-		 s Name=GarantObj.Name
-		 if $ISOBJECT(GarantObj.Property5330)
-		 {
-		 	s Kontr=GarantObj.Property5330.%Id()
-		 	s KontrName=GarantObj.Property5330.Name
-		 }
-		 s:+GarantObj.Dat Dat=$ZD(GarantObj.Dat,4)
-		 s:+GarantObj.Property8550 Property8550=$ZD(GarantObj.Property8550,4)
-		 s:+GarantObj.SaleDate SaleDate=$ZD(GarantObj.SaleDate,4)
-		 
-		 s serial=GarantObj.serial
-		 s tovar=GarantObj.tovar
-		 s Property9194=GarantObj.Property9194
-		 s Comment=GarantObj.Comment
-		 
-		 s Tim = $ZT(GarantObj.Tim)
-		 if $ISOBJECT(GarantObj.remont1),$ISOBJECT(GarantObj.remont1.Source) s remont1="<a href=""screen/ChiefInstr.csp?docid="_GarantObj.remont1.Source.%Id()_""">"_GarantObj.remont1.Source.Name_"</a>"
-		 if $ISOBJECT(GarantObj.remont2),$ISOBJECT(GarantObj.remont2.Source) s remont2="<a href=""screen/ChiefInstr.csp?docid="_GarantObj.remont2.Source.%Id()_""">"_GarantObj.remont2.Source.Name_"</a>"
-		 if $ISOBJECT(GarantObj.remont3),$ISOBJECT(GarantObj.remont3.Source) s remont3="<a href=""screen/ChiefInstr.csp?docid="_GarantObj.remont3.Source.%Id()_""">"_GarantObj.remont3.Source.Name_"</a>"
-		 if $ISOBJECT(GarantObj.remont1otch) s remont1="<a href=""screen/otchet2.csp?id="_GarantObj.remont1otch.%Id()_""">"_GarantObj.remont1otch.Name_"</a>"
-		 if $ISOBJECT(GarantObj.remont2otch) s remont2="<a href=""screen/otchet2.csp?id="_GarantObj.remont2otch.%Id()_""">"_GarantObj.remont2otch.Name_"</a>"
-		 if $ISOBJECT(GarantObj.remont3otch) s remont3="<a href=""screen/otchet2.csp?id="_GarantObj.remont3otch.%Id()_""">"_GarantObj.remont3otch.Name_"</a>"
-		 if $ISOBJECT(GarantObj.remont4otch) s remont4="<a href=""screen/otchet2.csp?id="_GarantObj.remont4otch.%Id()_""">"_GarantObj.remont4otch.Name_"</a>"
-		 
-		 if $ISOBJECT(GarantObj.Act) s Act="<a href=""print.csp?id="_GarantObj.Act.%Id()_"&class=Docs.Act"">"_GarantObj.Act.Name_"</a>"
-		 if $ISOBJECT(GarantObj.Utiliz) s Utiliz="<a href=""print.csp?id="_GarantObj.Utiliz.%Id()_"&class=Docs.Utiliz"">"_GarantObj.Utiliz.Name_"</a>"
-		 
-		 //Включаем видимость кнопки УДАЛИТЬ если нет ни заявок ни отчётов
-		 if '$ISOBJECT(GarantObj.remont1),'(GarantObj.remont1otch) s DeleteStyleDisplay="inline"
-	 }
+    // s ID = $O(^Common.Dictionary2I("garantInd"," "_GarantId,""))
+     s ID=GarantId
+     s GarantObj = ##class(Common.Dictionary2).%OpenId(ID)
+     if $ISOBJECT(GarantObj)
+     {
+         
+        i GarantObj.Property9194=2 
+        {
+            if (GarantObj.CloseUser) s CloseUserName=GarantObj.CloseUser.Name
+            e  s CloseUserName=""
+            
+            s ClosedString=CloseUserName_" "_$S(GarantObj.CloseDat:$ZD(GarantObj.CloseDat,4),1:"")_" "_$S(GarantObj.CloseTime:$ZT(GarantObj.CloseTime),1:"")
+            s SaveButtonStyle="display:none"
+        }
+         
+         s Name=GarantObj.Name
+         if $ISOBJECT(GarantObj.Property5330)
+         {
+            s Kontr=GarantObj.Property5330.%Id()
+            s KontrName=GarantObj.Property5330.Name
+         }
+         s:+GarantObj.Dat Dat=$ZD(GarantObj.Dat,4)
+         s:+GarantObj.Property8550 Property8550=$ZD(GarantObj.Property8550,4)
+         s:+GarantObj.SaleDate SaleDate=$ZD(GarantObj.SaleDate,4)
+         
+         s serial=GarantObj.serial
+         s tovar=GarantObj.tovar
+         s Property9194=GarantObj.Property9194
+         s Comment=GarantObj.Comment
+         
+         s Tim = $ZT(GarantObj.Tim)
+         if $ISOBJECT(GarantObj.remont1),$ISOBJECT(GarantObj.remont1.Source) s remont1="<a href=""screen/ChiefInstr.csp?docid="_GarantObj.remont1.Source.%Id()_""">"_GarantObj.remont1.Source.Name_"</a>"
+         if $ISOBJECT(GarantObj.remont2),$ISOBJECT(GarantObj.remont2.Source) s remont2="<a href=""screen/ChiefInstr.csp?docid="_GarantObj.remont2.Source.%Id()_""">"_GarantObj.remont2.Source.Name_"</a>"
+         if $ISOBJECT(GarantObj.remont3),$ISOBJECT(GarantObj.remont3.Source) s remont3="<a href=""screen/ChiefInstr.csp?docid="_GarantObj.remont3.Source.%Id()_""">"_GarantObj.remont3.Source.Name_"</a>"
+         if $ISOBJECT(GarantObj.remont1otch) s remont1="<a href=""screen/otchet2.csp?id="_GarantObj.remont1otch.%Id()_""">"_GarantObj.remont1otch.Name_"</a>"
+         if $ISOBJECT(GarantObj.remont2otch) s remont2="<a href=""screen/otchet2.csp?id="_GarantObj.remont2otch.%Id()_""">"_GarantObj.remont2otch.Name_"</a>"
+         if $ISOBJECT(GarantObj.remont3otch) s remont3="<a href=""screen/otchet2.csp?id="_GarantObj.remont3otch.%Id()_""">"_GarantObj.remont3otch.Name_"</a>"
+         if $ISOBJECT(GarantObj.remont4otch) s remont4="<a href=""screen/otchet2.csp?id="_GarantObj.remont4otch.%Id()_""">"_GarantObj.remont4otch.Name_"</a>"
+         
+         if $ISOBJECT(GarantObj.Act) s Act="<a href=""print.csp?id="_GarantObj.Act.%Id()_"&class=Docs.Act"">"_GarantObj.Act.Name_"</a>"
+         if $ISOBJECT(GarantObj.Utiliz) s Utiliz="<a href=""print.csp?id="_GarantObj.Utiliz.%Id()_"&class=Docs.Utiliz"">"_GarantObj.Utiliz.Name_"</a>"
+         
+         //Включаем видимость кнопки УДАЛИТЬ если нет ни заявок ни отчётов
+         if '$ISOBJECT(GarantObj.remont1),'(GarantObj.remont1otch) s DeleteStyleDisplay="inline"
+     }
  }
  
  
 </script>
 <html>
 <head>
-<title>	Гарантийный талон </title>
+<title> Гарантийный талон </title>
 <link href="style.css" type=text/css rel=stylesheet>
 <script language="jscript" src="common.js"></script>
 <script language="jscript">
@@ -93,70 +106,70 @@ var sessionid="#(sessionid)#";
 
 function windowclose(KontrId)
 {
-	if(window.confirm("Вы уверены?"))window.close();
+    if(window.confirm("Вы уверены?"))window.close();
 }
 
 function ChooseKonragent(Obj)
 {
-	newItem=window.showModalDialog("Dictionary.csp","Common.Kontragent","center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");
-	if(newItem==null){return false;}
-	var newArr=newItem.split(InnerSplitter);
-	Obj.innerText=newArr[1];
-	Obj.Tag=newArr[0];
+    newItem=window.showModalDialog("Dictionary.csp","Common.Kontragent","center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");
+    if(newItem==null){return false;}
+    var newArr=newItem.split(InnerSplitter);
+    Obj.innerText=newArr[1];
+    Obj.Tag=newArr[0];
 }
 
 function Save()
 {
-	var xmlDoc = new ActiveXObject("Msxml2.DOMDocument.3.0");
-	xmlDoc.documentElement= xmlDoc.createElement("RootElement");
-	
-	InsertXmlHeader(xmlDoc,"serial",serial.value,"%String")
-	InsertXmlHeader(xmlDoc,"Dat",Dat.value,"%Date")
-	InsertXmlHeader(xmlDoc,"SaleDate",SaleDate.value,"%Date")
-	InsertXmlHeader(xmlDoc,"Property8550",Property8550.value,"%Date")
-	InsertXmlHeader(xmlDoc,"Property5330",Kontr.Tag,"Common.Kontragent")
-	InsertXmlHeader(xmlDoc,"tovar",tovar.value,"%String")
-	InsertXmlHeader(xmlDoc,"Property9194",Property9194.value,"%String")
-	InsertXmlHeader(xmlDoc,"Comment",Comment.value,"%String")
-	InsertXmlHeader(xmlDoc,"Name",Name.value,"%String")
-	
-	var Answer=SendXml(DocId,"Common.Dictionary2",xmlDoc,sessionid);
-	
-	if((isNaN(Answer))||(Answer==""))
-	{
-		if (Answer=="") var Answer="Ошибка при сохранении гарантийного талона. Но ошибка не указана."
-		alert(Answer)
-	}
-	else
-	{
-		window.close();
-	}
+    var xmlDoc = new ActiveXObject("Msxml2.DOMDocument.3.0");
+    xmlDoc.documentElement= xmlDoc.createElement("RootElement");
+    
+    InsertXmlHeader(xmlDoc,"serial",serial.value,"%String")
+    InsertXmlHeader(xmlDoc,"Dat",Dat.value,"%Date")
+    InsertXmlHeader(xmlDoc,"SaleDate",SaleDate.value,"%Date")
+    InsertXmlHeader(xmlDoc,"Property8550",Property8550.value,"%Date")
+    InsertXmlHeader(xmlDoc,"Property5330",Kontr.Tag,"Common.Kontragent")
+    InsertXmlHeader(xmlDoc,"tovar",tovar.value,"%String")
+    InsertXmlHeader(xmlDoc,"Property9194",Property9194.value,"%String")
+    InsertXmlHeader(xmlDoc,"Comment",Comment.value,"%String")
+    InsertXmlHeader(xmlDoc,"Name",Name.value,"%String")
+    
+    var Answer=SendXml(DocId,"Common.Dictionary2",xmlDoc,sessionid);
+    
+    if((isNaN(Answer))||(Answer==""))
+    {
+        if (Answer=="") var Answer="Ошибка при сохранении гарантийного талона. Но ошибка не указана."
+        alert(Answer)
+    }
+    else
+    {
+        window.close();
+    }
 }
 
 function SerialKeyPress()
 {
-	if(cbNumbersEqual.checked)Name.value = serial.value;
+    if(cbNumbersEqual.checked)Name.value = serial.value;
 }
 
 function NameKeyPress()
 {
-	if(cbNumbersEqual.checked)serial.value = Name.value;
+    if(cbNumbersEqual.checked)serial.value = Name.value;
 }
 
 // Удалить эту запись
 function Delete()
 {
-	if(!window.confirm("Вы действительно ходите удалить этот серийный номер?","Удаление серийного номера"))return;
-	var ok = #server(Common.Dictionary2.Delete(DocId))#
-	if(ok=="1")
-	{
-		alert("Запись успешно удалена.");
-		window.close();
-	}
-	else
-	{
-		alert(ok);
-	}
+    if(!window.confirm("Вы действительно ходите удалить этот серийный номер?","Удаление серийного номера"))return;
+    var ok = #server(Common.Dictionary2.Delete(DocId))#
+    if(ok=="1")
+    {
+        alert("Запись успешно удалена.");
+        window.close();
+    }
+    else
+    {
+        alert(ok);
+    }
 }
 </script>
 <style>
@@ -172,63 +185,63 @@ SELECT{width:170px}
 <body>
 <table width=100% class="LeftTop" cellspacing=0>
 <tr>
-	<td class=RightBottom colspan=4>
-	<table cellspacing=0><tr>
-		<td width="23%" class=RightBottom>Серийный номер</td>
-		<td width="23%" class=RightBottom><input type=text id="serial" value="#($G(serial))#" onkeyup="SerialKeyPress()"></td>
-		<td width="8%" class=RightBottom>&nbsp;<span style="display:#(displaycheckbox)#">
-			<input type="checkbox" id="cbNumbersEqual" style="border:none;width:15px" #(displaycheckboxCHECKED)#> номера идентичны</span></td>
-		<td width="23%" class=RightBottom>Гарантийный номер</td>
-		<td width="23%" class=RightBottom><input type=text id=Name MAXLENGTH=50 value="#($G(Name))#" onkeyup="NameKeyPress()"></td>
-	</table>
+    <td class=RightBottom colspan=4>
+    <table cellspacing=0><tr>
+        <td width="23%" class=RightBottom>Серийный номер</td>
+        <td width="23%" class=RightBottom><input type=text id="serial" value="#($G(serial))#" onkeyup="SerialKeyPress()"></td>
+        <td width="8%" class=RightBottom>&nbsp;<span style="display:#(displaycheckbox)#">
+            <input type="checkbox" id="cbNumbersEqual" style="border:none;width:15px" #(displaycheckboxCHECKED)#> номера идентичны</span></td>
+        <td width="23%" class=RightBottom>Гарантийный номер</td>
+        <td width="23%" class=RightBottom><input type=text id=Name MAXLENGTH=50 value="#($G(Name))#" onkeyup="NameKeyPress()"></td>
+    </table>
 <tr>
-	<td class=RightBottom>Дата создания</td>
-	<td class=RightBottom><input type=text id="Dat" value="#($G(Dat,$ZD($H,4)))#" onclick="fnCalendar(this)" class="datar" onmouseout="UnPaint(this)" onmouseover="Paint(this)"> #($G(Tim))#</td>
-	<td class=RightBottom>Дата выдачи</td>
-	<td class=RightBottom><input type=text id="Property8550" value="#($G(Property8550))#" onclick="fnCalendar(this)" class="datar" onmouseout="UnPaint(this)" onmouseover="Paint(this)"></td>
+    <td class=RightBottom>Дата создания</td>
+    <td class=RightBottom><input type=text id="Dat" value="#($G(Dat,$ZD($H,4)))#" onclick="fnCalendar(this)" class="datar" onmouseout="UnPaint(this)" onmouseover="Paint(this)"> #($G(Tim))#</td>
+    <td class=RightBottom>Дата выдачи</td>
+    <td class=RightBottom><input type=text id="Property8550" value="#($G(Property8550))#" onclick="fnCalendar(this)" class="datar" onmouseout="UnPaint(this)" onmouseover="Paint(this)"></td>
 <tr>
-	<td class=RightBottom>Дата продажи</td>
-	<td class=RightBottom><input type=text id="SaleDate" value="#($G(SaleDate))#" onclick="fnCalendar(this)" class="datar" onmouseout="UnPaint(this)" onmouseover="Paint(this)"> </td>
-	<td class=RightBottom>&nbsp;</td>
-	<td class=RightBottom>&nbsp;</td>
+    <td class=RightBottom>Дата продажи</td>
+    <td class=RightBottom><input type=text id="SaleDate" value="#($G(SaleDate))#" onclick="fnCalendar(this)" class="datar" onmouseout="UnPaint(this)" onmouseover="Paint(this)"> </td>
+    <td class=RightBottom>&nbsp;</td>
+    <td class=RightBottom>&nbsp;</td>
 <tr>
-	<td class=RightBottom>Контрагент</td>
-	<td class=RightBottom><span onmouseout="UnPaint(this)" onmouseover="Paint(this)" class=Kontragent onclick="ChooseKonragent(this)" oncontextmenu="this.innerText='';this.Tag=''" id="Kontr" Tag='#($G(Kontr))#'>#($G(KontrName))#</span></td>
-	<td class=RightBottom>Модель изделия</td>
-	<td class=RightBottom><input type=text id="tovar" value="#($G(tovar))#" ></td>
+    <td class=RightBottom>Контрагент</td>
+    <td class=RightBottom><span onmouseout="UnPaint(this)" onmouseover="Paint(this)" class=Kontragent onclick="ChooseKonragent(this)" oncontextmenu="this.innerText='';this.Tag=''" id="Kontr" Tag='#($G(Kontr))#'>#($G(KontrName))#</span></td>
+    <td class=RightBottom>Модель изделия</td>
+    <td class=RightBottom><input type=text id="tovar" value="#($G(tovar))#" ></td>
 <tr>
-	<td class=RightBottom>Актуальность</td>
-	<td class=RightBottom colspan=3>
-		<script language="cache" runat="server">
-		w "<select id=""Property9194"">"
-		w ##class(Docs.Action2).GetDisplaylistOptions($G(Property9194,2),"Common.Dictionary2||Property9194")
-		w "</select>&nbsp;",!
-		</script>
-		</td>
+    <td class=RightBottom>Актуальность</td>
+    <td class=RightBottom colspan=3>
+        <script language="cache" runat="server">
+        w "<select id=""Property9194"">"
+        w ##class(Docs.Action2).GetDisplaylistOptions($G(Property9194,2),"Common.Dictionary2||Property9194")
+        w "</select>&nbsp;",!
+        </script>
+        </td>
 <tr>
-	<td class=RightBottom>Акт утилизации</td>
-	<td class=RightBottom>#($G(Utiliz))#&nbsp;</td>
-	<td class=RightBottom>Акт технического состояния</td>
-	<td class=RightBottom>#($G(Act))#&nbsp;</td>
+    <td class=RightBottom>Акт утилизации</td>
+    <td class=RightBottom>#($G(Utiliz))#&nbsp;</td>
+    <td class=RightBottom>Акт технического состояния</td>
+    <td class=RightBottom>#($G(Act))#&nbsp;</td>
 <tr>
-	<td class=RightBottom>1 заявка</td>
-	<td class=RightBottom>#($G(remont1))#&nbsp;</td>
-	<td class=RightBottom>1 отчет</td>
-	<td class=RightBottom>#($G(remont1otch))#&nbsp;</td>
+    <td class=RightBottom>1 заявка</td>
+    <td class=RightBottom>#($G(remont1))#&nbsp;</td>
+    <td class=RightBottom>1 отчет</td>
+    <td class=RightBottom>#($G(remont1otch))#&nbsp;</td>
 <tr>
-	<td class=RightBottom>2 заявка</td>
-	<td class=RightBottom>#($G(remont2))#&nbsp;</td>
-	<td class=RightBottom>2 отчет</td>
-	<td class=RightBottom>#($G(remont2otch))#&nbsp;</td>
+    <td class=RightBottom>2 заявка</td>
+    <td class=RightBottom>#($G(remont2))#&nbsp;</td>
+    <td class=RightBottom>2 отчет</td>
+    <td class=RightBottom>#($G(remont2otch))#&nbsp;</td>
 <tr>
-	<td class=RightBottom>3 заявка</td>
-	<td class=RightBottom>#($G(remont3))#&nbsp;</td>
-	<td class=RightBottom>3 отчет</td>
-	<td class=RightBottom>#($G(remont3otch))#&nbsp;</td>
+    <td class=RightBottom>3 заявка</td>
+    <td class=RightBottom>#($G(remont3))#&nbsp;</td>
+    <td class=RightBottom>3 отчет</td>
+    <td class=RightBottom>#($G(remont3otch))#&nbsp;</td>
 <tr>
-	<td class=RightBottom colspan=2>&nbsp;</td>
-	<td class=RightBottom>4 отчет</td>
-	<td class=RightBottom>#($G(remont4otch))#&nbsp;</td>
+    <td class=RightBottom colspan=2>&nbsp;</td>
+    <td class=RightBottom>4 отчет</td>
+    <td class=RightBottom>#($G(remont4otch))#&nbsp;</td>
 <tr><td colspan=4>Примечание к гарантийному талону:<br> <textarea id="Comment" rows=4 cols=80>#($G(Comment))#</textarea><br><br>
 <script language="cache" runat="server">
 w:$G(ClosedString)'="" "<tr><td colspan=4 class=RightBottom>Документ закрыт <i>"_ClosedString_"</i>"
@@ -237,14 +250,14 @@ w:$G(ClosedString)'="" "<tr><td colspan=4 class=RightBottom>Документ закрыт <i>"
 
 <Table border=0 width="100%">
 <tr>
-	<td width="20%"></td>
-	<td width="60%" align="center">
-		<sklad:Button onclick="Save();" value="Сохранить" alt="Сохранить в базе результаты редактирования">
-		<sklad:Button onclick="windowclose();" value="Отмена" alt="Отменить все изменения и закрыть окно">
-	</td>
-	<td width="20%" align="right">
-		<sklad:Button onclick="Delete();" style="display:#(DeleteStyleDisplay)#" value="Удалить" alt="Удалить этот серийный номер">
-	</td>
+    <td width="20%"></td>
+    <td width="60%" align="center">
+        <sklad:Button onclick="Save();" value="Сохранить" alt="Сохранить в базе результаты редактирования">
+        <sklad:Button onclick="windowclose();" value="Отмена" alt="Отменить все изменения и закрыть окно">
+    </td>
+    <td width="20%" align="right">
+        <sklad:Button onclick="Delete();" style="display:#(DeleteStyleDisplay)#" value="Удалить" alt="Удалить этот серийный номер">
+    </td>
 </tr>
 </table>
 
