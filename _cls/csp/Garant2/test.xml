@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.Garant2.test">
+<Description>
+Отладка сохранения csp.Garant2</Description>
+<Super>%CSP.Page</Super>
+<TimeCreated>63213,55259.540224</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    s xml = %request.Content, reader=""
+    s sc=##class(%XML.TextReader).ParseStream(xml,.reader)
+    d:'sc ..ShowError(sc)
+    w sc
+    Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

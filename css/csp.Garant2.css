@@ -1,0 +1,59 @@
+* { /*размер по границам элементов*/
+    -webkit-box-sizing: border-box; -moz-box-sizing: border-box; -ms-box-sizing: border-box; box-sizing: border-box;
+}
+
+html, body { font-size:14px; font-family: Tahoma; }
+
+div,span,label,input,select, option, textarea { /*очистка*/
+    margin: 0; padding: 0; outline: 0; border:0; vertical-align: baseline; font-size:100%; 
+}
+
+.form {width:600px; position: relative;}
+
+.property { clear:both; width:270px; margin: 1px 0; overflow: hidden;}
+.label, .value { display: block; float:left;  padding:0 3px; height: 18px; }
+.value { border:1px solid #ddd; }
+.label { width:100px; white-space:nowrap; overflow: hidden; margin: 0;
+    text-align: right; padding-right: .5em; color: #555; 
+}
+select.value, span.value { width:150px; } /*like inpute in style.css*/
+.datepicker { width: 85px; }
+
+.clear:after { content:'.'; display: block; clear: both; height:0; visibility: hidden; }
+
+#equal { position: absolute; left:255px; top:8px; width:15em; }
+#equal .label { width: 10em; }
+#equal .value { width: 16px; margin-top: 3px; }
+
+#created, #delivered { clear: none; float:left;  } 
+#created-time-value { width: 60px; border:0 none; }
+#contragent { width: 520px; }
+#contragent-value {width:260px;}
+
+#utilization, #condition { clear:none; float:left; }
+
+#repair1,#repair1act 
+ , #repair2,#repair2act 
+ , #repair3,#repair3act { clear:none; float:left;}
+
+#repair4act { margin-left: 270px;}
+#comment { width: 540px;}
+#comment .label {width: 18em; clear:both;}
+#comment-value {width:520px;height:60px;}
+
+/*меньше жирного для компонентов jqQuery ui*/
+.ui-state-default, 
+.ui-widget-header,
+.ui-widget-content .ui-state-default,
+.ui-widget-header .ui-state-default
+{ font-weight: normal;}
+#file {width: 300px; }/*переопределяем ширину из style.css*/
+
+
+#bar { display: block; width:300px; margin: 5px auto; padding:5px;}
+
+#bDelete { margin-left:20px; }
+
+
+
+    

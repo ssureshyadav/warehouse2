@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="json.CommonDictionary2FileTest">
+<Description><![CDATA[
+тестирование заливки для <class>CommonDictionary2File</class>]]></Description>
+<Super>%CSP.Page</Super>
+<TimeCreated>63215,80704.912991</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    &html<<html><head></head><body>
+        <form         
+            enctype="multipart/form-data"
+            action="http://213.128.198.234/csp/sklad2/json.CommonDictionary2File.cls?dictionary2=2521914&oper=add&"
+            method="POST">
+            
+<input type='file' name='file' /><br/>   
+        
+<button type='submit'>Send</button>   
+        
+        </form>
+    </body></html>>
+    Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

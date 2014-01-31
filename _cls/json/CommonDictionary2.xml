@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="json.CommonDictionary2">
+<Description>
+json сервис для работы со справочником серийных</Description>
+<Super>%CSP.Page</Super>
+<TimeCreated>63212,10995.733604</TimeCreated>
+
+<Parameter name="CONTENTTYPE">
+<Default>application/json</Default>
+</Parameter>
+
+<Parameter name="PRIVATE">
+<Description><![CDATA[
+Controls the access to the page, it can be set to one of the following:<br>
+<br><ul>
+<li><b>PRIVATE=0</b> - Page can be linked to/bookmarked</li>
+<li><b>PRIVATE=1</b> - Can only be referenced from another CSP page</li>
+</ul>
+The user needs initially to enter the site through a PUBLIC page.]]></Description>
+<Default>1</Default>
+</Parameter>
+
+<Parameter name="ENCODED">
+<Description><![CDATA[
+Controls how the query parameters for this page are passed, it can 
+be set to one of the following:<br>
+<br><ul>
+<li><b>ENCODED=0</b> - Query parameters are not encrypted</li>
+<li><b>ENCODED=1</b> - Query parameters are encrypted and passed within CSPToken</li>
+<li><b>ENCODED=2</b> - Same as '1' except any unencrypted parameters
+are removed from the %request object before calling the <method>Page</method>
+method. This ensures that only encrypted parameter are available in the
+<class>%CSP.Request</class> object.</li>
+</ul>]]></Description>
+<Default>1</Default>
+</Parameter>
+
+<Method name="OnPage">
+<Description>
+Разбираем параметры</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    k args s args="" m args=%request.Data
+    s oper = $g(args("oper",1))
+    if oper="del" Q ..Delete(.args)
+    w "{}"
+    Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Delete">
+<Description>
+Удалить серийный</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    s id=$g(args("id",1)) Q:'##class(Common.Dictionary2).%ExistsId(id) 1
+    s sc =##class(Common.Dictionary2).Delete(id)
+    w "[",+sc,"]"
+    Q 1
+]]></Implementation>
+</Method>
+</Class>
+</Export>

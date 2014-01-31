@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Common.Dictionary2File">
+<Description>
+Аттачи к серийному номеру (Common.Dictionary2)</Description>
+<Super>%Persistent</Super>
+<TimeCreated>63209,58564.943256</TimeCreated>
+
+<Property name="dictionary2">
+<Description>
+Простая ссылка на серийный номер</Description>
+<Type>Common.Dictionary2</Type>
+<Required>1</Required>
+</Property>
+
+<Index name="dictionary2">
+<Properties>dictionary2</Properties>
+</Index>
+
+<Property name="mime">
+<Description>
+тип содержимого</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="1000"/>
+</Property>
+
+<Property name="name">
+<Description>
+полученное имя файла</Description>
+<Type>%String</Type>
+<Required>1</Required>
+<Parameter name="MAXLEN" value="255"/>
+</Property>
+
+<Property name="createdAt">
+<Description>
+отметка времени </Description>
+<Type>%String</Type>
+<InitialExpression>$zdt($zu(188),3)</InitialExpression>
+<ReadOnly>1</ReadOnly>
+</Property>
+
+<Property name="file">
+<Description>
+Сам файл (Содержимое аттача)</Description>
+<Type>%FileBinaryStream</Type>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Common.Dictionary2FileD</DataLocation>
+<DefaultData>Dictionary2FileDefaultData</DefaultData>
+<IdLocation>^Common.Dictionary2FileD</IdLocation>
+<IndexLocation>^Common.Dictionary2FileI</IndexLocation>
+<StreamLocation>^Common.Dictionary2FileS</StreamLocation>
+<Data name="Dictionary2FileDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>created</Value>
+</Value>
+<Value name="3">
+<Value>mime</Value>
+</Value>
+<Value name="4">
+<Value>name</Value>
+</Value>
+<Value name="5">
+<Value>dictionary2</Value>
+</Value>
+<Value name="6">
+<Value>createdAt</Value>
+</Value>
+<Value name="7">
+<Value>file</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>
