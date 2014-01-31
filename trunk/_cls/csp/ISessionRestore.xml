@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.ISessionRestore">
+<Description>
+Препятствует созданию новой сессии
+пытается открыть предыдущую по переданному sessionId</Description>
+<Abstract>1</Abstract>
+<TimeCreated>63209,64362.96972</TimeCreated>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+ 
+ if %session.NewSession {
+    s %session.EndSession=1
+    s sessionid=%request.Get("sessionid",1)
+    s %session=%session.GetSession(sessionid)
+ } else {
+    s sessionid=%session.SessionId
+    s login=$G(%session.Data("user"))
+    //i '+login s %response.ServerSideRedirect="norights.csp" 
+ } 
+
+ Quit 1
+]]></Implementation>
+</Method>
+</Class>
+</Export>

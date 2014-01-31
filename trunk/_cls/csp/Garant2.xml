@@ -1,0 +1,780 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.Garant2">
+<Description>
+версия интерфейса для работы с гарантийным (серийным) номером 
++ добавляет возможность подгрузки файлов
+, csp.ISessionRestore)</Description>
+<Super>%CSP.Page</Super>
+<TimeCreated>63209,60698.465388</TimeCreated>
+
+<Parameter name="DOMAIN">
+<Default>csp.Garant2</Default>
+</Parameter>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ &html<<!DOCTYPE html><html><head><title>#($$$Text("Гарантийный талон"))#</title>
+<link href="style.css" type='text/css' rel='stylesheet'>
+<link rel='stylesheet' type='text/css' href='css/redmond/jquery-ui-1.8.22.custom.css'/>
+<link rel='stylesheet' type='text/css' href='js/css/ui.jqgrid.css'/>
+<link href="css/csp.Garant2.css" type='text/css' rel='stylesheet'>
+<!--[if IE 7]>
+    <link href="css/csp.Garant2.IE7.css" type='text/css' rel='stylesheet'>
+<![endif]-->
+<script type='text/javascript' src="js/js/jquery-1.9.0.min.js"></script>
+<script type='text/javascript' src='js/js/jquery-ui-1.10.3.custom.min.js'></script>
+<script type='text/javascript' src='js/i18n/jquery-ui.datepicker-ru.min.js'></script>
+<script type='text/javascript' src='js/i18n/grid.locale-ru_win1251.js'></script>
+<script type='text/javascript' src='js/js/jquery.jqGrid.min.js'></script>
+<script type='text/javascript' src="common.js"></script>
+<script type='text/javascript' src='js/ajaxfileupload4.min.js'></script>
+</head><body>>
+ d ..wHtml() ;статический html, можно загрузить с клиента ajax-ом
+    
+ #; 2014-01-12
+ #; если передан ид документа и класс - переход по кнопке с doc3.csp, обработчик в docs3.js
+ #; d ..garantByDoc() ;не понадобился
+ 
+ k args, data s (args,data)="" m args=%request.Data
+ 
+ #;  проверка и сбор данных по параметрам страницы 
+ d ..data( .args, .data ) 
+ 
+ #; извлекаем данные 
+ #define s(%name) s %name=$g(data("%name"))
+ 
+ $$$s(id) $$$s(sessionid) $$$s(serial) $$$s(garant) 
+ $$$s(canequal)  $$$s(equal) $$$s(creadate) $$$s(creatime)
+ $$$s(delivered) $$$s(saled) $$$s(contrid) $$$s(contragent) 
+ $$$s(good) $$$s(topicality) $$$s(closed) 
+ $$$s(utilization) $$$s(utilizname) $$$s(condition) $$$s(condname)
+ $$$s(candelete) $$$s(comment)
+ $$$s(repair1) $$$s(repair2) $$$s(repair3)
+ $$$s(repairname1) $$$s(repairname2) $$$s(repairname3)
+ $$$s(repairact1) $$$s(repairact2) $$$s(repairact3) $$$s(repairact4)
+ $$$s(repairactname1) $$$s(repairactname2) $$$s(repairactname3)  $$$s(repairactname4)
+ 
+ #; подготавливаем url
+ #; выбор контрагента
+ s urlContragent =..Link("Dictionary.csp",,1)
+ 
+ #; сохранение серийного
+ k arr s arr("classmethod")="Docs.Action.SaveStorageDoc"
+ s arr("documentclass")="Common.Dictionary2"
+ s arr("id")=id, arr("sessionid")=sessionid
+ s urlSave=..Link("xmlmethod.csp",.arr,1) k arr
+ #; s urlSave = "csp.Garant2.test.cls" ;отладка сохранения 
+   
+ #; удаление серийного
+ k arr s arr("oper")="del", arr("id")=id
+ s urlDelete=..Link("json.CommonDictionary2.cls",.arr,1)
+ 
+ #; линк на акт тенического состояния
+ k arr s arr("class")="Docs.Act"
+ s urlCondition = ..Link("print.csp",.arr,1)
+ 
+ k arr s arr("class")="Docs.Utiliz"
+ s urlUtilization = ..Link("print.csp",.arr,1)
+ 
+ s urlRepair = ..Link("screen/ChiefInstr.csp",,1) ;печать ремонта
+ 
+ s urlRepairAct = ..Link("screen/otchet2.csp",,1) ;
+ 
+ #; ссылка закачки файла на сервер
+ k arr s arr("oper")="add", arr("dictionary2")=id
+ s urlUploadFile = ..Link("json.CommonDictionary2File.cls",.arr,1)
+ 
+ #; ссылка получения списка файлов
+ s urlFiles=..Link("json.CommonDictionary2File.cls")
+ 
+ #; ссылка скачивания файлов
+ s urlFileDownload=..Link("csp.Garant2FileDownload.cls",,1)
+
+
+ #define true(%bool) $S(%bool=1:"true",1:"false")
+ #define link(%id,%name,%url,%arg) $S(%id="":"",1:",""%id"":{id:"""_%id_""",name:"""_%name_""",href:"""_%url_""",arg:"%arg"}")
+
+ 
+ #; динамическая часть в формате json
+ &html<<script type='text/javascript'>$(function(){
+     
+     window.page = { "id": '#(id)#'
+         
+        ,"url": {
+           "contragent": '#(urlContragent)#'
+           ,"save": '#(urlSave)#'
+           ,"delete": '#(urlDelete)#' 
+           ,"condition": '#(urlCondition)#' 
+           ,"utilization": '#(urlUtilization)#'
+           ,"uploadfile": '#(urlUploadFile)#'
+           ,"files": '#(urlFiles)#'
+           ,"filedownload": '#(urlFileDownload)#'
+        }
+        ,"values": { //initial values
+            "#serial-value": "#(serial)#"
+            ,"#garant-value": "#(garant)#"
+            ,"#created-value": "#(creadate)#"
+            ,"#delivered-value": "#(delivered)#"
+            ,"#saled-value": "#(saled)#"
+            ,"#good-value": "#(good)#"
+            ,"#comment-value": "#(comment)#"
+        }
+        , "text": { //text for span
+            "#created-time-value": "#(creatime)#"
+            ,"#contragent-value":"#(contragent)#"    
+            ,"#closed-value":"#(closed)#" 
+        } 
+        , "checked": { //checked
+            "#equal-value": #($$$true(equal))#
+        }
+        , "show": {
+            "#equal": #($$$true(canequal))#
+            ,"#bDelete": #($$$true(candelete))#
+        }
+        , "links": { 
+            "blank":{id:"",name:""} //для запятой
+            
+            #($$$link(utilization,utilizname,urlUtilization,"id"))#
+            #($$$link(condition,condname,urlCondition,"id"))#
+            #($$$link(repair1,repairname1,urlRepair,"docid"))#
+            #($$$link(repair2,repairname2,urlRepair,"docid"))#
+            #($$$link(repair3,repairname3,urlRepair,"docid"))#
+            #($$$link(repairact1,repairactname1,urlRepairAct,"id"))#
+            #($$$link(repairact2,repairactname2,urlRepairAct,"id"))#
+            #($$$link(repairact3,repairactname3,urlRepairAct,"id"))#
+            #($$$link(repairact4,repairactname4,urlRepairAct,"id"))#
+        
+        }
+        , "data": {
+            "id": "#(id)#"
+            ,"sessionid": "#(sessionid)#"
+            
+        }
+        , "select": {
+            "#topicality-value": 
+              #(..wTopicality(topicality))#
+        }
+     };
+     
+ })</script>>
+     
+ #; статическая клиентcкая логика    
+ d ..wJs() 
+    
+ &html<</body></html>>
+
+    Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="wHtml">
+<Description>
+Выводим статическую часть страницы
+то, что между тегами body</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ &html<<div class='form'>
+
+<div id='serial' class='property'>
+    <label class='label' for='serial-value'>#($$$Text("Серийный"))#</label>
+    <input type='text' class='value' id='serial-value'>
+</div>
+    
+<div id='garant' class='property clear'><label class='label' for='garant-value'>#($$$Text("Гарантийный"))#</label>
+    <input type='text' class='value' id='garant-value' maxlength='50'>
+</div>
+
+<div id='equal' class='property' style="display:none">
+    <input type="checkbox" id='equal-value' class='value' />
+    <label class='label' for='equal-value'>#($$$Text("номера идентичны"))#</label>
+</div>
+
+<!--[if IE 7]>
+<div id='ie7bugfix' style='height:0; line-height:0;'
+    href='http://www.sitepoint.com/fix-disappearing-absolute-position-element-ie/'
+></div>
+<![endif]-->
+    
+<div id='created' class='property'>
+    <label for='created-value' class='label'>#($$$Text("Создан"))#</label>
+    <input type='text' class='value datepicker' id='created-value'>
+    <span class='value' id='created-time-value'>&nbsp;</span>
+</div>       
+
+<div id='delivered' class='property'>
+    <label class='label' for='delivered-value'>#($$$Text("Дата выдачи"))#</label>   
+    <input type='text' class='value datepicker' id='delivered-value'>
+</div>
+
+<div id='saled' class='property'>
+    <label class='label' for='saled-value'>#($$$Text("Дата продажи"))#</label>    
+    <input type='text' class='value datepicker' id='saled-value' class='datepicker'>
+</div>
+
+<div id='contragent' class='property'>
+    <span class='label'>Контрагент</span>
+    <span class='value' id='contragent-value'>&nbsp;</span>
+</div>
+
+<div id='good' class='property'> 
+    <label class='label' for='good-value'>#($$$Text("Модель изд."))#</label>
+    <input type='text' class='value' id='good-value'>
+</div> 
+
+<div id='topicality' class='property clear'>
+    <label class='label' for='topicality-value'>#($$$Text("Актуальность"))#</label>
+    <select class='value' id='topicality-value'></select>
+</div>   
+
+<div id='utilization' class='property'>
+    <span class='label'>#($$$Text("Акт утилизац."))#</span>
+    <span class='value' id='utilization-value'><a title='#($$$Text("Печать"))#'></a></span>
+</div>
+ 
+ <div id='condition' class='property'>
+   <span class='label'>#($$$Text("Акт тех. сост."))#</span>
+   <span class='value' id='condition-value'><a title='#($$$Text("Печать"))#'></a></span>
+ </div>
+ 
+ <div id='repair1' class='property'>
+    <span class='label'>#($$$Text("1 заявка"))#</span>
+    <span class='value' id='repair1-value'><a title='#($$$Text("Печать"))#'></a></span>
+</div>
+
+<div id='repair1act' class='property'>
+    <span class='label'>#($$$Text("1 отчет"))#</span>
+    <span class='value' id='repair1act-value'><a title='#($$$Text("Печать"))#'></a></span>
+</div>
+
+<div id='repair2' class='property'>
+    <span class='label'>#($$$Text("2 заявка"))#</span>
+    <span class='value' id='repair2-value'><a title='#($$$Text("Печать"))#'></a></span>
+</div>
+
+<div id='repair2act' class='property'>
+    <span class='label'>#($$$Text("2 отчет"))#</span>
+    <span class='value' id='repair2act-value'><a title='#($$$Text("Печать"))#'></a></span>
+</div>
+
+<div id='repair3' class='property'>
+    <span class='label'>#($$$Text("3 заявка"))#</span>
+    <span class='value' id='repair3-value'><a title='#($$$Text("Печать"))#'></a></span>
+</div>
+
+<div id='repair3act' class='property'>
+    <span class='label'>#($$$Text("3 отчет"))#</span>
+    <span class='value' id='repair3act-value'><a title='#($$$Text("Печать"))#'></a></span>
+</div>
+
+<div id='repair4act' class='property'>
+    <span class='label'>#($$$Text("4 отчет"))#</span>
+    <span class='value' id='repair4act-value'><a title='#($$$Text("Печать"))#'></a></span>
+</div>
+     
+<div id='comment' class='property'>
+    <label class='label' for='comment-value'>#($$$Text("Примечание к гарантийному талону:"))#</label> 
+    <textarea class='value' id="comment-value"></textarea>
+</div>
+
+<table id='filesgrid'></table>
+<div id='filesbar'></div>
+
+<div id='closed' class='property clear' style='display:none;'>
+     <span class='label'>#($$$Text("Закрыт:"))#</span>
+     <span class='value' id='closed-value'>&nbsp;</span>
+</div>
+ 
+<!--[if IE 7]>
+<div id='ie7bugfix' style='height:0; line-height:0;'
+    href='http://www.sitepoint.com/fix-disappearing-absolute-position-element-ie/'
+></div>
+<![endif]--> 
+ 
+<div id='bar'>
+    <button type='button' id='bSave' title='#($$$Text("Сохранить в базе результаты редактирования"))#'>
+        #($$$Text("Сохранить"))#
+    </button>
+    <button type='button' id='bClose' title='#($$$Text("Отменить все изменения и закрыть окно"))#'>
+        #($$$Text("Отмена"))#
+    </button>
+    <button id='bDelete'
+        style="display:none" 
+        title='#($$$Text("Удалить этот серийный номер"))#'>
+        #($$$Text("Удалить"))#
+    </button>    
+</div>
+</div>>
+    
+ Q ""
+]]></Implementation>
+</Method>
+
+<Method name="data">
+<Description><![CDATA[
+Сбор данных для формирования страницы
+<var>args</var> - массив в формате %СSP.Request:Data
+<var>data</var> - очищенный массив в формате (ключ)=значение]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String="",*data:%String=""]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ ///извлечение из args 
+ #define g(%name) $g(args(%name,1))
+ 
+ s ( id, sessionid, serial, garant, canequal, equal
+    , creadate, creatime, delivered, saled, contrid, contragent
+    , good, topicality, repair, repairact, closed
+    , utilization, utilizname, condition, condname
+    , candelete, comment
+ ) = ""
+  
+ s id=$$$g("GarantId"), garant=$$$g("GarantName"), sessionid = $$$g("sessionid")
+ 
+ if (id="")&&(garant'="")  { ;неизвестен id, восстановим по гарантийному номеру
+     s id = ##class(Common.Dictionary2).DirectGetIdByGarant(garant)
+ }
+ 
+ s candelete=0,  cansave=1, canequal=0, equal=0, creadate=""
+ 
+ #; указан несуществующий ид
+ s:'##class(Common.Dictionary2).%ExistsId(id) id=""
+ 
+ #;НОВЫЙ гарантийный
+ s:id="" canequal=1, equal=1 ;делать гарант=серийному
+ 
+ #;СУЩЕСТВУЮЩИЙ
+ if ##class(Common.Dictionary2).%ExistsId(id) {
+        
+        s topicality = ##class(Common.Dictionary2).Property9194GetStored( id )
+         
+        if topicality=2  { ;2 - не актуальный гарантийный
+            s cansave=0 ;запрещаем изменения
+            s closed = ..closed( id ) ;строка с причиной закрытия 
+        }
+         
+        s garant=##class(Common.Dictionary2).NameGetStored(id)
+                
+        s contrid=##class(Common.Dictionary2).Property5330GetStored(id)
+        if ##class(Common.Kontragent).%ExistsId(contrid) {
+          s contragent=##class(Common.Kontragent).NameGetStored(contrid)
+        }
+                
+        s creadate=##class(Common.Dictionary2).DatGetStored(id)
+        s:creadate'="" creadate = $zd(creadate,4,,,,,,,"")
+        
+        s creatime = ##class(Common.Dictionary2).TimGetStored(id)
+        s:creatime'="" creatime = $zt(creatime) 
+        
+        s delivered=##class(Common.Dictionary2).Property8550GetStored(id)
+        s:delivered'="" delivered = $zd(delivered,4,,,,,,,"")
+        
+        s saled = ##class(Common.Dictionary2).SaleDateGetStored(id)
+        s:saled'="" saled=$zd(saled,4,,,,,,,"")
+         
+        s serial=##class(Common.Dictionary2).serialGetStored(id)
+        , good=##class(Common.Dictionary2).tovarGetStored(id)
+        s comment=##class(Common.Dictionary2).CommentGetStored(id)
+                
+        k repair, repairname s (repair,repairname)="" 
+        d ..repair(id, .repair,.repairname)
+        
+        k repairact, repairactname s (repairact,repairactname)="" 
+        d ..repairact(id, .repairact, .repairactname )
+        
+        //Включаем видимость кнопки УДАЛИТЬ, если нет ни заявок, ни отчётов
+        if $g(repair(1))="",($g(repairact(1))="") s candelete=1
+        
+        s condition=##class(Common.Dictionary2).ActGetStored(id)
+        if ##class(Docs.Act).%ExistsId(condition) {
+            s condname = ##class(Docs.Act).NameGetStored(condition)
+        }
+        
+        s utilization=##class(Common.Dictionary2).UtilizGetStored(id)
+        if ##class(Docs.Utiliz).%ExistsId(utilization) {
+            s utilizname = ##class(Docs.Utiliz).NameGetStored(utilization)
+        }
+
+}
+     s:creadate="" creadate=$zd($H,4)
+     #define s(%name) s data("%name")=%name
+     $$$s(id) $$$s(sessionid) $$$s(serial) $$$s(garant) $$$s(canequal) $$$s(equal) $$$s(creadate)
+     $$$s(creatime) $$$s(delivered) $$$s(saled)  $$$s(contrid) $$$s(contragent) $$$s(good) 
+     $$$s(topicality) $$$s(closed) $$$s(utilization) $$$s(utilizname)
+     $$$s(condition) $$$s(condname) $$$s(candelete) $$$s(comment)
+     
+     #; repair,repairact - массивы, раскрываем их
+     #define s(%name,%i) s data("%name%i")=$g(%name(%i))
+     $$$s(repair,1) $$$s(repair,2) $$$s(repair,3)
+     $$$s(repairname,1) $$$s(repairname,2) $$$s(repairname,3)
+     $$$s(repairact,1) $$$s(repairact,2) $$$s(repairact,3) $$$s(repairact,4)
+     $$$s(repairactname,1) $$$s(repairactname,2) $$$s(repairactname,3) $$$s(repairactname,4)
+ 
+ Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="wJs">
+<Description><![CDATA[
+<var>args</var> данные в формате (имя) = значение]]></Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ /// Отображение данных 
+ &html<<script type='text/javascript'>$(function(){ 
+    
+    var page = window.page || { 
+        values: {}, text: {}, show: {}, select: {}, data: {}, links: {} 
+    };
+    // показ значений
+    for ( var id in page.values){ var val = page.values[id]; $(id).val(val); }
+    // отображение разрешенных элементов
+    for ( var id in page.show){ var canshow = page.show[id]; if (canshow) $(id).show(); }
+    // вывод текста
+    for ( var id in page.text){ var str = page.text[id]; $(id).text(str); }
+    // формирование ссылок
+    for ( var id in page.links){ 
+        var link = page.links[id]; 
+        $('#'+id+"-value").find('a')
+         .attr('href', link.href+link.arg+"="+link.id )
+         .text(link.name)
+    }
+    // включение checkbox
+    for ( var id in page.checked){ 
+        $( id ).prop('checked',page.checked[id])
+    }
+        
+    // отрисовка опций
+    var options = page.select['#topicality-value'];
+    $(options).appendTo( $('#topicality-value') );
+    
+    // спец.обработка для closed
+    var closed = page.text['#closed-value']; if (closed!="") {
+        $('#closed').show();   
+    }
+    
+ })</script>>
+ 
+ /// Подключение датапикеров
+ &html<<script type='text/javascript'>$(function(){ 
+ 
+ $(".datepicker").datepicker({ dateFormat: "dd/mm/yy" });
+ 
+ })</script>>
+ 
+ /// Опция выставления одинакового номера гарантийного и серийного
+ &html<<script type='text/javascript'>$(function(){
+
+ var timeout = null
+     , serial = $("#serial-value")
+     , garant = $("#garant-value")
+     , equal = $('#equal-value')
+ ;
+     
+ var setEqual = function ( input ){
+     if (!equal.prop('checked')) return;
+        
+     if ( input.get(0)===serial.get(0) ){
+        garant.val( serial.val() );        
+     } else {
+        serial.val( garant.val() );   
+     }    
+ };
+    
+ $("#serial-value,#garant-value").on('keyup', function(){
+     if (timeout) clearTimeout(timeout);    
+     var input = $(this);
+     timeout = setTimeout(function(){
+        setEqual( input );    
+     },200);
+ });
+ 
+ })</script>>
+ 
+ /// Выбор контрагента   
+ &html<<script type='text/javascript'>$(function(){ 
+    
+    var contragentSelect = function () { // вызывается как обработчик
+        
+        var options = "center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;"
+         , url = window.page.url["contragent"]
+         , selected = window.showModalDialog(url,"Common.Kontragent", options)
+        ;
+        
+        if( !selected ) return false;
+        var data = selected.split( window.InnerSplitter ); //splitter определен в common.js
+        $(this).text( data[1] ).attr('Tag', data[0]);
+        
+    };
+    
+    $("#contragent-value")
+     .on('click', contragentSelect ) //выбор 
+     .on('contextmenu', function(){ //сброс
+        $(this).text('').attr('Tag',''); return false;
+    });
+    
+})</script>>
+
+ /// Сохранение
+ &html<<script type='text/javascript'>$(function(){            
+ 
+ var fn_save = function() {
+        
+        var xmlstr = ["<RootElement>"
+            ,"<AllHeaders>"
+                ,"<OneObject><serial><text/><type>%String</type></serial></OneObject>"
+                ,"<OneObject><Name><text/><type>%String</type></Name></OneObject>"
+                ,"<OneObject><Dat><text/><type>%Date</type></Dat></OneObject>"
+                ,"<OneObject><SaleDat><text/><type>%Date</type></SaleDat></OneObject>"
+                ,"<OneObject><Property8550><text/><type>%Date</type></Property8550></OneObject>"
+                ,"<OneObject><Property5330><text/><type>Common.Kontragent</type></Property5330></OneObject>"
+                ,"<OneObject><tovar><text/><type>%String</type></tovar></OneObject>"
+                ,"<OneObject><Property9194><text/><type>%String</type></Property9194></OneObject>"
+                ,"<OneObject><Comment><text/><type>%String</type></Comment></OneObject>"
+            ,"</AllHeaders>"
+         ,"</RootElement>"].join('')
+        , xmldoc = $.parseXML( xmlstr ) //try catch
+        , xml = $( xmldoc )
+        ;   
+        xml
+          .find('serial text').text( $('#serial-value').val() ).end()
+          .find('Name text').text( $('#garant-value').val() ).end()
+          .find('Dat text').text( $('#created-value').val() ).end()
+          .find('SaleDat text').text( $('#saled-value').val() ).end()
+          .find('Property8550 text').text( $('#delivered-value').val() ).end()
+          .find('Property5330 text').text( $('#contragent-value').attr('Tag') ).end()
+          .find('tovar text').text( $('#good-value').val() ).end()
+          .find('Property9194 text').text( $('#topicality-value').val() ).end()
+          .find('Comment text').text( $('#comment-value').val() ).end()
+        ;
+        
+        var url = window.page.url['save'];
+        
+        $.ajax({ 'url': url 
+            , data: xmldoc //в ie7 работает, при ie10 cache обнаруживает спецсимволы
+            , processData: false
+            , contentType: "text/xml"
+            , type:'POST'
+            , async: false 
+        }).done(function( data ){
+            
+            if ((isNaN(data))||(data=="")) {
+                if (data=="") var data="Ошибка при сохранении гарантийного талона. Но ошибка не указана."
+                alert(data);
+            } 
+            
+        });
+        
+        return;
+ }
+ 
+ $('#bSave').on('click', fn_save );
+ 
+ })</script>>
+ 
+ /// Удаление и Закрытие
+ &html<<script type='text/javascript'>$(function(){            
+    
+    var fn_delete = function() {
+        if ( !window.confirm( "Вы действительно ходите удалить этот серийный номер?"
+          ,"Удаление серийного номера"
+        )) return;
+        
+        var ok = 0, url = window.page.url['delete']; 
+        $.ajax({ 'url': url, async: false })
+        .done(function( data ){
+            
+            if(data=="1") {
+                alert("Запись успешно удалена."); window.close();
+            } else {
+                alert(data);
+            }
+               
+        })
+        .fail(function( e ){
+           alert( e )     
+        })
+        
+    };
+
+    $('#bDelete').on('click', fn_delete); 
+    
+     $('#bClose').on('click', function () {
+        if( window.confirm("Вы уверены?") ) window.close();
+    });
+   
+     
+})</script>> 
+
+ /// Грид с файлами 
+ &html<<script type='text/javascript'>$(function(){            
+var dictionary2= window.page.id;
+if (dictionary2 == "") return; //прикрепление файлов только для сохраненных серийных
+
+var url = window.page.url["files"]
+
+, grid = $('#filesgrid').jqGrid({ caption:'#($$$Text("Файлы"))#'
+    , 'url': url, editurl: url
+    , datatype: "json", jsonReader: { repeatitems:false }
+    , colModel: [
+        { name:'file', width:520, label:'#($$$Text("Наименование"))#', editable:true 
+            , edittype: 'file', editoptions: { width: 50 }
+        }
+    ]
+    , postData: { 'dictionary2': dictionary2 }
+    , pager: '#filesbar'
+    , height: 100
+    , hiddengrid: true
+    , scroll: 1
+    , viewrecords: true, rowNum: 100
+})
+
+url = window.page.url["uploadfile"];
+
+var beforeSubmit = function(data, form){
+     
+     $.ajaxFileUpload({
+            'url': url, fileElementId:'file'
+            , data: { "dictionary2": dictionary2 }
+            , secureuri: false
+            , success: function(data){ console.log(data) }
+            , error: function(obj,err,httpErr){ console.log(err) }
+            , complete: function(){
+                var dlg = $(form).closest('.ui-jqdialog')
+                $.jgrid.hideModal(dlg);
+                grid.trigger('reloadGrid');
+            }
+    });
+    
+    return [false, '#($$$Text("Подождите, файл отправляется"))#'];
+   
+};
+
+grid.jqGrid('navGrid','#filesbar',{refresh:true,edit:false,add:true,del:true,search:false}
+    ,{} 
+    ,{width:500, 'beforeSubmit': beforeSubmit} //add form
+)
+.jqGrid('navButtonAdd',"#filesbar",{
+   caption:'#($$$Text("Скачать"))#'
+   , buttonicon:"ui-icon-arrowstop-1-s"
+   , onClickButton: function(){ 
+     var id = grid.jqGrid('getGridParam','selrow'); 
+     if (!id) return;
+     window.open(window.page.url['filedownload']+"id="+id); 
+   }, 
+   position:"last"
+});
+
+
+ })</script>>
+]]></Implementation>
+</Method>
+
+<Method name="closed">
+<Description>
+Строка с объяснением, кто и когда закрыл гарантийный</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+    Q:'##class(Common.Dictionary2).%ExistsId(id) ""
+    s username="", user = ##class(Common.Dictionary2).CloseUserGetStored(id)
+    if ##class(Users.Dates).%ExistsId( user ){
+      s username = ##class(Users.Dates).NameGetStored(user)
+    }
+    s closedate = ##class(Common.Dictionary2).CloseDatGetStored(id)
+    , closedate = $zd(closedate,4,,,,,,,"")
+    s closetime = ##class(Common.Dictionary2).CloseTimeGetStored(id)
+    s:closetime'="" closetime=$zt(closetime)
+    s closed= username_" "_closedate_" "_closetime
+    Q $zstrip(closed,"<>W") ;непустая строка - используется как признак закрытого документа
+]]></Implementation>
+</Method>
+
+<Method name="wTopicality">
+<Description>
+Актуальность </Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>current:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+    s current=$g(current) s:current="" current=2 ;2 - гар талон недействительный
+    s options = ##class(Docs.Action2).GetDisplaylistOptions(current,"Common.Dictionary2||Property9194")
+    w """",$zcvt(options,"O","JS"),""""
+    Q ""
+]]></Implementation>
+</Method>
+
+<Method name="repair">
+<Description>
+собираем массив ремонтов в формате (номер)=значение</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>garantId:%String,*arr:%String="",*arrname:%String=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    
+    if '##class(Common.Dictionary2).%ExistsId(garantId) Q 1
+     
+    for i=1:1:3 {
+        s method="remont"_i_"GetStored"
+        
+        s remontId =$zobjclassmethod("Common.Dictionary2", method, garantId)
+        if '##class(Docs.Remont).%ExistsId(remontId) continue
+        
+        s id=##class(Docs.Remont).SourceGetStored(remontId) 
+        if '##class(Docs.Super).%ExistsId(id) continue
+        s name = ##class(Docs.Super).NameGetStored(id)
+        
+        s arr(i)=id, arrname(i)= name
+    }
+    
+    Q 1
+]]></Implementation>
+</Method>
+
+<Method name="repairact">
+<Description>
+собираем массив отчетов о ремонте в формате (номер)=значение</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>garantId:%String,*arr:%String,*arrname:%String=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    Q:'##class(Common.Dictionary2).%ExistsId(garantId) 1
+    for i=1:1:4 {
+        s method="remont"_i_"otchGetStored"
+        s id=$zobjclassmethod("Common.Dictionary2", method, garantId)
+        if id="" continue
+        if '##class(Doc.Otchet).%ExistsId(id) continue
+        s name=$zobjclassmethod("Doc.Otchet","NameGetStored",id)
+        s arr(i)=id, arrname(i)=name 
+    }
+    Q 1
+]]></Implementation>
+</Method>
+
+<Method name="garantByDoc">
+<Description>
+на вход страницы вместо GarantId поступает ид и класс документа
+пытаемся по ним определеить GarantId</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ 
+ if $d(%request.Data("doc")) && $d(%request.Data("cls"))  {
+   s cls=$g(%request.Data("cls",1)) //ожидаем Docs.Act
+   if cls="Docs.Act" {
+    s doc=$g(%request.Data("doc",1)) // id 
+    s serial = $zobjclassmethod(cls,"SerialGetStored",doc) ; возможна ошибка
+    s garantId = ##class(Common.Dictionary2).DirectGetIdBySerial( serial )
+    s %request.Data("GarantId",1) = garantId ;переход к стандартной обработке
+   }
+ }
+    
+ Q 1
+]]></Implementation>
+</Method>
+</Class>
+</Export>

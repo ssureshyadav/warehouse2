@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.Garant2FileDownload">
+<Description>
+для скачивания вложений к серийному
+На входе ид Common.Dictionary2File</Description>
+<Super>%CSP.StreamServer</Super>
+<TimeCreated>63216,76327.87521</TimeCreated>
+
+<Method name="OnPreHTTP">
+<Description><![CDATA[
+The <method>OnPostHTTP()</method> is called by the CSP dispatcher before the HTTP
+headers have been sent.  Here, we check that the incoming STREAMOID value is valid,
+then we set the appropriate content type and content length values into the %response
+object (see <class>%CSP.Request</class>), in preparation for sending the image data
+in the <method>OnPage()</method>.]]></Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+    #; запрещаем стандартные параметры
+    k %request.Data("FILE"), %request.Data("STREAMOID")
+    
+    #; заменяем стандартный параметр на свой
+    s id=$g(%request.Data("id",1)), streamoid=""
+    if ##class(Common.Dictionary2File).%ExistsId(id) {
+         s streamoid=##class(Common.Dictionary2File).fileGetStored(id)
+         s %request.Data("STREAMOID",1)=..Encrypt(streamoid)
+         
+         #; восстанавливаем имя файла
+         s name = ##class(Common.Dictionary2File).nameGetStored(id)
+         s:name'="" name=..EscapeURL($zcvt(name,"O","UTF8"))
+         d:name'="" %response.SetHeader("Content-Disposition","attachment; filename="_name)
+         
+         #; восстанавливаем тип содержимого файла
+         #; http://support.microsoft.com/kb/316431/ru
+         s mime = ##class(Common.Dictionary2File).mimeGetStored(id)
+         d:mime'="" %response.SetHeader("Content-Type", mime)
+         
+    }
+    
+    #; и запускаем стандартную обработку
+    Quit ##super()
+]]></Implementation>
+</Method>
+</Class>
+</Export>

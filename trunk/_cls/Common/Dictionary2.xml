@@ -81,6 +81,19 @@
 <Properties>Name</Properties>
 </Index>
 
+<Method name="DirectGetIdByGarant">
+<Description>
+Прямой доступ!
+Получение идентификатора по гарантийному номеру</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>garant:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+    s garant = " "_$zcvt( $g(garant),"U")
+    Q $O(^Common.Dictionary2I("garantInd",garant,""))
+]]></Implementation>
+</Method>
+
 <Property name="Property5330">
 <Description>
 Контрагент</Description>

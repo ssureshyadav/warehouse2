@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="json.CommonDictionary2File">
+<Description>
+json сервис для приаттаченных файлов 
+принимает команды на добавление, удаление, просмотр</Description>
+<Super>json.base</Super>
+<TimeCreated>63214,50082.718394</TimeCreated>
+
+<Parameter name="TABLENAME">
+<Description>
+Имя таблицы из которого берем данные
+!Но в таблице должны быть хоть один битмап индекс</Description>
+<Type>%String</Type>
+<Default>Common.Dictionary2File</Default>
+</Parameter>
+
+<Method name="OnPage">
+<Description>
+Вывод на страницу </Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+  m rq=%request.Data 
+  //d ..sessionFree(.rq)
+  s oper=$G(rq("oper",1)) 
+  Q:oper="add" ..Add(.rq)
+  Q:oper="del" ..Del(.rq)
+  
+  #;Q:oper="get" ..w1(.rq)
+  
+  Q ..w(.rq)
+]]></Implementation>
+</Method>
+
+<Method name="Add">
+<Description>
+Загрузка</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    s:$d(%request.MimeData("file")) stream= %request.MimeData("file",1)
+    s dictionary2= $g(args("dictionary2",1))
+ 
+    if $IsObject(stream) { ;сохраним файл на диск
+        s file=##class(Common.Dictionary2File).%New() 
+        d file.dictionary2SetObjectId(dictionary2) 
+        s file.mime = stream.ContentType
+        s file.name = stream.FileName
+        d file.file.CopyFrom(stream)
+        s sc = file.%Save()
+        #;w "[",+sc,"]"
+    }
+     
+    Q 1
+]]></Implementation>
+</Method>
+
+<Method name="Del">
+<Description>
+Удаление</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+    s id=$g(args("id",1)), sc=##class(Common.Dictionary2File).%DeleteId(id)
+    w "[",+sc,",""Ошибка удаления""]"
+    Q 1
+]]></Implementation>
+</Method>
+
+<Method name="w1">
+<Description>
+Любая логика вывода объекта в формат json</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ w "{""id"":""",id,""""
+    s name=##class(Common.Dictionary2File).nameGetStored(id)
+    w ",""file"":""",$zcvt(name,"O","JS"),""""
+ w "}"
+ Q 1
+]]></Implementation>
+</Method>
+
+<Method name="where">
+<Description><![CDATA[
+вернет where c учетом параметров запроса
+<var>rq</var> - %request.Data
+должен вернуть корректную часть where ]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&rq:%String="",*qp:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ 
+ #; показывать вложения для конкретного серийного
+ s dictionary2 = $g(rq("dictionary2",1)) //обязательный параметр
+ s where = " WHERE dictionary2=? ", qp($i(qp)) = dictionary2
+ 
+ if $g(rq("_search",1))'="true" Q where 
+ 
+ Q where
+]]></Implementation>
+</Method>
+
+<Method name="order">
+<Description>
+должен вернуть корректную часть order 
+Проверяем запрос на наличие параметров sidx и sord
+Проверяем чтобы sidx был указан в списке синонимов</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&rq:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+    /*
+    Q:'$d(rq("sidx",1)) "" ;сортировка не задана
+    s sidx=$g(rq("sidx",1))
+    s sord=$g(rq("sord",1),"desc") 
+    s:((sord'="asc") && (sord'="desc")) sord="desc"
+    Q " ORDER BY "_sidx_" "_sord
+   */
+    Q ""
+]]></Implementation>
+</Method>
+</Class>
+</Export>
