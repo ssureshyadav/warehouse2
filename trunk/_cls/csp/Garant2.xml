@@ -627,7 +627,7 @@ var url = window.page.url["files"]
     , postData: { 'dictionary2': dictionary2 }
     , pager: '#filesbar'
     , height: 100
-    , hiddengrid: true
+    //, hiddengrid: true
     , scroll: 1
     , viewrecords: true, rowNum: 100
 })
@@ -640,8 +640,12 @@ var beforeSubmit = function(data, form){
             'url': url, fileElementId:'file'
             , data: { "dictionary2": dictionary2 }
             , secureuri: false
-            , success: function(data){ console.log(data) }
-            , error: function(obj,err,httpErr){ console.log(err) }
+            , success: function(data){ //console.log(data) 
+            
+            }
+            , error: function(obj,err,httpErr){ //console.log(err) 
+            
+            }
             , complete: function(){
                 var dlg = $(form).closest('.ui-jqdialog')
                 $.jgrid.hideModal(dlg);
@@ -662,7 +666,7 @@ grid.jqGrid('navGrid','#filesbar',{refresh:true,edit:false,add:true,del:true,sea
    , buttonicon:"ui-icon-arrowstop-1-s"
    , onClickButton: function(){ 
      var id = grid.jqGrid('getGridParam','selrow'); 
-     if (!id) return;
+     if (!id) { alert('Выберите файл'); return; };
      window.open(window.page.url['filedownload']+"id="+id); 
    }, 
    position:"last"

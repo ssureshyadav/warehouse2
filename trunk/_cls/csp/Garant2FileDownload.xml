@@ -35,6 +35,7 @@ in the <method>OnPage()</method>.]]></Description>
          #; http://support.microsoft.com/kb/316431/ru
          s mime = ##class(Common.Dictionary2File).mimeGetStored(id)
          d:mime'="" %response.SetHeader("Content-Type", mime)
+         d %response.SetHeader("EXPIRES", "Thu, 01 Jan 1970 00:00:01 GMT")
          
     }
     
