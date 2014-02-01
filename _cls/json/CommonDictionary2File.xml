@@ -15,6 +15,28 @@ json сервис для приаттаченных файлов
 <Default>Common.Dictionary2File</Default>
 </Parameter>
 
+<Method name="OnPreHTTP">
+<Description><![CDATA[
+Event handler for <b>PreHTTP</b> event: this is invoked before
+the HTTP headers for a CSP page have been sent.  All changes to the
+<class>%CSP.Response</class> class, such as adding cookies, HTTP headers,
+setting the content type etc. must be made from within the OnPreHTTP() method.
+Also changes to the state of the CSP application such as changing
+%session.EndSession or %session.AppTimeout must be made within the OnPreHTTP() method.
+It is prefered that changes to %session.Preserve are also made in the OnPreHTTP() method
+as this is more efficient, although it is supported in any section of the page.
+Return <b>0</b> to prevent <method>OnPage</method> from being called.]]></Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Boolean</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+   s oper=$g(%request.Data("oper",1)) 
+   #; ie7 нервно реагирует на любой другой тип содержимого 
+   d:oper="add" %response.SetHeader("Content-Type", "text/html")     
+   Q 1
+]]></Implementation>
+</Method>
+
 <Method name="OnPage">
 <Description>
 Вывод на страницу </Description>
@@ -22,13 +44,11 @@ json сервис для приаттаченных файлов
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
   m rq=%request.Data 
-  //d ..sessionFree(.rq)
+  #; d ..sessionFree(.rq)
   s oper=$G(rq("oper",1)) 
   Q:oper="add" ..Add(.rq)
   Q:oper="del" ..Del(.rq)
-  
-  #;Q:oper="get" ..w1(.rq)
-  
+  #; Q:oper="get" ..w1(.rq)
   Q ..w(.rq)
 ]]></Implementation>
 </Method>
@@ -47,7 +67,7 @@ json сервис для приаттаченных файлов
         s file=##class(Common.Dictionary2File).%New() 
         d file.dictionary2SetObjectId(dictionary2) 
         s file.mime = stream.ContentType
-        s file.name = stream.FileName
+        s file.name = ##class(%File).GetFilename(stream.FileName)
         d file.file.CopyFrom(stream)
         s sc = file.%Save()
         #;w "[",+sc,"]"
