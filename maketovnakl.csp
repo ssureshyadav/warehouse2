@@ -40,7 +40,7 @@ var GruzootpravitelName="#($G(GruzootpravitelName))#";
 var PostavchikID="#($G(PostavchikID))#";
 var PostavchikName="#($G(PostavchikName))#";
 
-window.dialogHeight='420px';
+window.dialogHeight='440px';
 
 function startFun(){
 var k1=PropTable1.item("Kontr")
@@ -52,6 +52,7 @@ SetCookie("PostavchikID",k3);
 var nomnakl=document.myform.nomnakl.value;
 var DoverennNumber = document.myform.Doverenn.value;
 var DoverennDatValue = DoverennDat.innerText;
+var OpenWithValue = document.getElementById("OpenWith").value;
 if(k1==""){alert("Не заполнено поле Грузоотправитель");return}
 if(k2==""){alert("Не заполнено поле Грузополучатель");return}
 if(k3==""){alert("Не заполнено поле Поставщик");return}
@@ -60,7 +61,7 @@ if(nomnakl==""){alert("Не заполнен номер товарной накладной");return}
 window.open("print.csp?id="+docid+"&class="+clas+"&kontr="+k1+"&kontr2="+k2+"&kontr3="+k3+"&kontr4="+k4
 	+"&nomernakl="+nomnakl+"&DoverennNumber="+DoverennNumber+"&DoverennDatValue="+DoverennDatValue
 	+"&NDSinside="+document.all.NDSinside.checked+"&DocDate="+Dat.innerText
-	+"&sessionid="+sessionid);
+	+"&sessionid="+sessionid+"&OpenWith="+OpenWithValue);
 }
 
 function load(){
@@ -112,6 +113,9 @@ function LoadProp3Complite(){
 <tr><td>Плательщик</td><td><SKLAD2:table id="PropTable4" width=260 ClassName="Docs.Super" onLoadComplete="LoadProp24Complite()"/></td></tr>
 <tr>
 	<td>НДС включён в цену товара</td><td> <input type="checkbox" name="NDSinside" id="NDSinside" CHECKED ></td>
+</tr>
+<tr>
+	<td>Открыть с помощью</td><td> <select name="OpenWith" id="OpenWith"><option value="excel">Microsoft Excel</option><option value="word">Microsoft Word</option><option value="browser">В браузере</option></select> </td>
 </tr>
 <!-- <tr><td>Рассчитывать рублёвую сумму на дату документа</td><td> <input type="checkbox" name="KursFromDoc" id="KursFromDoc" CHECKED ></td></tr> -->
 </table>

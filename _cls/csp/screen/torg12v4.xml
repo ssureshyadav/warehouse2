@@ -94,7 +94,6 @@ id=83913&nomernakl=2013-11+868&DocDate=09%2F12%2F2013&kontr=4&kontr2=868&kontr3=
 <ClassMethod>1</ClassMethod>
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
-    
  #; Разбираем аргументы
  s mn(1)="января",mn(2)="февраля",mn(3)="марта",mn(4)="апреля",mn(5)="мая",mn(6)="июня",mn(7)="июля",mn(8)="августа",mn(9)="сентября",mn(10)="октября",mn(11)="ноября",mn(12)="декабря"
  
@@ -134,6 +133,10 @@ id=83913&nomernakl=2013-11+868&DocDate=09%2F12%2F2013&kontr=4&kontr2=868&kontr3=
  s nsp=+$G(other("nsp"))/100
  s antinds=1/(1+nds)
  s antinds=1
+ 
+ set:%request.Get("ShowBaseHidden")="checked" OsnovanieString = "Счёт № "_$G(nomnakl)
+ //s OsnovanieString = %request.Get("ShowBaseHidden")
+  
  &html<<html xmlns:o="urn:schemas-microsoft-com:office:office"
 xmlns:x="urn:schemas-microsoft-com:office:excel"
 xmlns="http://www.w3.org/TR/REC-html40">
@@ -288,7 +291,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
   <td height=16 class=xl24 style='height:12.6pt'></td>
   <td class=xl29></td>
   <td class=xl29>Основание</td>
-  <td colspan=31 class=xl126><!--Счет № *** от **.**.**** г.-->Счёт № #(nomnakl)#</td>
+  <td colspan=31 class=xl126><!--Счет № *** от **.**.**** г.--> #($G(OsnovanieString))#</td>
   <td class=xl24></td>
   <td colspan=2 class=xl24 style='mso-ignore:colspan'></td>
  </tr>
@@ -816,8 +819,10 @@ xmlns="http://www.w3.org/TR/REC-html40">
  
  s CountWords = 1
  s (CountWords(10),CountWords(5),CountWords(2),CountWords(1),CountWords(-1)) = ""
+
+ set ShowDoverennost = (%request.Get("ShowDVHidden")="checked")
+ if ShowDoverennost set DoverennostString = "(доверенность "_DoverennNumber_" от "_DoverennDatValue_")"
  
-   
      &html<<tr class=xl24 height=16 style='mso-height-source:userset;height:12.0pt'>
   <td height=16 colspan=4 class=xl24 style='height:12.0pt;mso-ignore:colspan'></td>
   <td class=xl24 colspan=4 style='mso-ignore:colspan'>Товарная накладная имеет
@@ -956,7 +961,7 @@ xmlns="http://www.w3.org/TR/REC-html40">
  </tr>
  <tr height=15 style='mso-height-source:userset;height:11.85pt'>
   <td height=15 style='height:11.85pt'></td>
-  <td colspan=18 class=xl112 width=575 style='width:434pt'>#(##class(Utils.Propis).Write(summary("vsegosummasnds")))#<!-- Пятьдесят один рубль 00 копеек --></td>
+  <td colspan=18 class=xl112 width=575 style='width:434pt'>#(##class(Utils.Propis).Write($G(summary("vsegosummasnds"))))#<!-- Пятьдесят один рубль 00 копеек --></td>
   <td colspan=5 style='mso-ignore:colspan'></td>
   <td colspan=2 class=xl80 align=center style='mso-ignore:colspan'>кем, кому (организация, должность, фамилия, и.о.)</td>
   <td colspan=14 style='mso-ignore:colspan'></td>
@@ -991,8 +996,12 @@ xmlns="http://www.w3.org/TR/REC-html40">
   <td rowspan=2 class=xl28>&nbsp;</td>
   <td rowspan=2 class=xl28>&nbsp;</td>
   <td rowspan=2 class=xl24></td>
-  <td rowspan=2 colspan=10 class=xl130 width=218 style='width:164pt'>#(permitter)# <font
-  class="font16">(доверенность #(DoverennNumber)# от #(DoverennDatValue)#)</font></td>
+  <td rowspan=2 colspan=10 class=xl130 width=218 style='width:164pt'>#(permitter)# 
+
+	  <font class="font16">
+	  	#($G(DoverennostString))#
+	  </font>
+  </td>
   
   <td colspan=5 class=xl24 style='mso-ignore:colspan'></td>
   <td colspan=16 class=xl28>&nbsp;</td>

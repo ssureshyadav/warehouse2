@@ -7,7 +7,7 @@
  s login=$G(%session.Data("user"))
  
  #; переключение на новую версию интерфейса, т.к. ссылки в 18 файлах
- s %response.ServerSideRedirect=..Link("csp.Garant2.cls")
+ #;s %response.ServerSideRedirect=..Link("csp.Garant2.cls")
  
  //i '+login s %response.ServerSideRedirect="norights.csp" 
 Quit 1

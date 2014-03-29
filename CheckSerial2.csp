@@ -71,7 +71,7 @@
 	 		if Property9194=2 s color="#DEDEDE"
 	 		s Model = ##class(Common.Dictionary2).GetPropertyValue(ID,"tovar",ListIndex("tovar"),.DataLocation)
 	 		s remont1 = ##class(Common.Dictionary2).GetPropertyValue(ID,"remont1",ListIndex("remont1"),.DataLocation)
-	 		if remont1'="" s HasRequest="есть"
+	 		if remont1'="" s HasRequest="<b>есть</b>"
 	 		else  s HasRequest="нет"
 		}
  	}

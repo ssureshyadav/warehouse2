@@ -68,7 +68,7 @@
  s onclick=##this.GetAttribute("onclick")
  s alt=##this.GetAttribute("alt")
 </script>
-<img src="images/##($G(name,"brace"))##.gif" onmouseover="##($G(id))##.src='images/On##($G(name,"brace"))##.gif'" onmouseout="##($G(id))##.src='images/##($G(name,"brace"))##.gif'"  id="##($G(id))##" name="##($G(id))##" title="##($G(alt))##" alt="##($G(alt))##" title="##($G(alt))##" onclick="##($G(onclick))##" style="##($G(style))##">
+<img src="images/##($G(name,"brace"))##.gif" onmouseover="##($G(id))##.src='images/On##($G(name,"brace"))##.gif'" onmouseout="##($G(id))##.src='images/##($G(name,"brace"))##.gif'"  id="##($G(id))##" name="##($G(id))##" title="##($G(alt))##" alt="##($G(alt))##" onclick="##($G(onclick))##" style="##($G(style))##">
 </csr:ACTION>
 </csr:Rule>
 <csr:Rule name="SkladImageList" match="sklad:ImageList" empty>

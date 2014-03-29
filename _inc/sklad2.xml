@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Routine name="sklad2" type="INC"><![CDATA[
+ /// Имя пользователя в системе склад
+ #define login $g(%session.Data("login"))
+ /// Код пользователя
+ #define user $g(%session.Data("user"))
+]]></Routine>
+</Export>

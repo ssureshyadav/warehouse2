@@ -29,7 +29,7 @@
  s:'+$$$TunesVariableGlobal("AutoSendMails") To=$$$TunesVariable("smtpfrom")
  //делаем word файл
  s exitfile=$$$TunesVariable("WordDestinationDir")_"\"_$TR($H,",","")_".doc"
- s ok=..MakeFile(DocID, DocClass, $$$TunesVariable("AutoTemplate"), .exitfile)
+ s ok=..MakeFile(DocID, DocClass, $$$TunesVariableGlobal("AutoTemplate"), .exitfile)
  i '+ok Goto LogResult
  //отправляем письмо с аттачем
  s ok=..SendMailNotification(To,exitfile)
@@ -406,7 +406,7 @@ FillVariableWithData(StrVariables,CurrentGoodsStr,RowNumber)
  
 AddMeetingResultErr
  $$$WriteError($ZE)
- q "Извините. Ошибка при записи."
+ q "Извините. Ошибка при записи. "_$ZCVT($ZE,"O","JS")
 ]]></Implementation>
 </Method>
 

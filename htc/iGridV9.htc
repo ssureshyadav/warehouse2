@@ -219,6 +219,12 @@ function setLayoutSort(val)
 {
 	iGridObj.LayoutSort = val;
 }
+
+function CellValue(x, y)
+{
+	var CellValue = iGrid.CellValue(y, x);
+	return CellValue;
+}
 </script>
 
 <script language="VBscript">

@@ -32,7 +32,7 @@ else{
 <center><h2>Ошибки</h2></center>
 <form name="forma">Дата <input type=text value=#($ZD(+$H,4))# name=data id=data onclick="DateClick()"> <input type=button onclick="subm()" value="ok" style="width:30"></form>
 <csp:ELSE>
-<a href="error.csp">выбрать дату</a><br>
+<a href="errors.csp">выбрать дату</a><br>
 ошибки на дату #(data)#
 <table border=1><tr><td>Дата, время<td>Содержание ошибки<td>Уточнение
 <script language="cache" runat="server">

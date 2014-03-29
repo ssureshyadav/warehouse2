@@ -37,11 +37,12 @@ text-decoration : none;
 }
 .ButtonDiv
 {
-background-color: rgb(233,243,255);
-border: solid 1 #004444;
-width:100px;
-padding:5px;
-margin:5px;
+	background-color: rgb(233,243,255);
+	border: solid 1 #004444;
+	width:100px;
+	padding:5px;
+	margin:5px;
+	cursor:hand;
 }
 
 .ButtonDivWait
@@ -55,11 +56,12 @@ margin:5px;
 
 .ButtonDivHover
 {
-background-color: rgb(203,213,225);
-border: solid 1 #004444;
-width:100px;
-padding:5px;
-margin:5px;
+	background-color: rgb(203,213,225);
+	border: solid 1 #004444;
+	width:100px;
+	padding:5px;
+	margin:5px;
+	cursor:hand;
 }
 
 .datar {width:70;border: solid 1 #004444;cursor:hand;}

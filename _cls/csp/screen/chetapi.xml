@@ -76,13 +76,14 @@
  
  #; всегда пересчитываем в рубли
  #; взял из screen/chet.csp
- s kurs=doc.kurs if '+kurs s kurs=doc.RubSumma/doc.Summa
+ s kurs=doc.kurs 
+ if '+kurs,+doc.Summa s kurs=doc.RubSumma/doc.Summa
  s waste=##class(Goods.GoodsAction).kurs(.other) 
  s:'+$G(kurs) kurs=waste
  
  s knds=+$G(other("nds"))/100 ;например, 0.18
  
- s totsum=0, totquant=0, count=0
+ s totsum=0, totquant=0, count=0, totnds=0
  s i="" for { s item=doc.Items.GetNext(.i) q:i=""  
  
     s goods="" s:$IsObject(item.Goods) goods=item.Goods.FullName
@@ -93,16 +94,17 @@
     k ctx 
     s ctx("price")=price, ctx("count")=quant, ctx("knds")=knds, ctx("incnds")=incnds
     , sum = ..getSum( .ctx ) ; сумма с единообразным округлением
-    , price = $g(ctx("price")) ;при вычислении суммы могли включить ндс в стоимость
+    //s price = $g(ctx("price")) ;при вычислении суммы могли включить ндс в стоимость
     
     s count = count + 1 ;порядковый номер строки
     , totsum = totsum + sum ;итоговая сумма
     , totquant = totquant + quant ;итоговое количество
+    , totnds = totnds + $G(ctx("ndsotsumma"))
     
     k row 
     s row("count")=count, row("goods")=goods
     , row("quant")=quant, row("price")=price
-    , row("sum")=sum
+    , row("sum")=sum, row("ndsotsumma")=$G(ctx("ndsotsumma"))
     
     d ..wRow(.row)
 
@@ -110,7 +112,7 @@
  s total("summa")=totsum
  s total("count")=count
  s total("amount")=totquant
-  
+ s total("totnds")=totnds
   Q ""
 ]]></Implementation>
 </Method>

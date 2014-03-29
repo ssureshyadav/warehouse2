@@ -125,7 +125,6 @@
 <Description>
 Тип оплаты</Description>
 <Type>Common.Dictionary7</Type>
-<Parameter name="CAPTION" value=",display=none"/>
 </Property>
 
 <Index name="RashOplatTypeInd">

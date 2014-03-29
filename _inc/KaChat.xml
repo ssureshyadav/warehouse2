@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Routine name="KaChat" type="INC"><![CDATA[
+  #; Макроопределения для страницы csp.KaChat
+  #; собираем все сообщения от Клиента и для Клиента
+  ///сообщения от Клиента
+  #define FromClient 2
+  ///сообщения для Клиента
+  #define ForClient 3
+]]></Routine>
+</Export>

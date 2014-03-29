@@ -66,9 +66,9 @@ body {margin:0px;padding:2px 1px;}
 .pageTitle tr {background: #e9f3ff;}
 .pageTitle tr td {border-bottom:1px #000066;}
 .actions a { display:inline-block; padding:10px; margin: 1px; 
-	border:1px solid #ccc; background:#eee; 
+	border:1px solid #ccc; background:#eee; cursor:cross;
 }
-.actions a:hover { text-decoration:none;background:#fcfcfc;}
+.actions a:hover { text-decoration:none;background:#fcfcfc;cursor:cross;}
 .actions a:visited {}
 label {color:#333;}
 
@@ -79,14 +79,23 @@ label {color:#333;}
         /* prevent horizontal scrollbar */
         overflow-x: hidden;
     }
-</style></head><body>
+</style></head><body style="margin:8px">
 <IE:DOWNLOAD id="downloader" STYLE="behavior:url(#default#download)" />
-<br><br><TABLE cellSpacing=0 width="100%" celpadding="0">
+<!-- <TABLE cellSpacing=0 width="100%" celpadding="0">
 <TR>
 <td width=10%><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
 <TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" ><strong>Товары</strong></TD>
 <td style="width:80px;text-align:right;font-size:11px;color: #6e6e6e;" title="Текущая версия справочника товаров">v #(GoodsGoodsVersion)#</td>
-</TABLE><br><br>
+</TABLE> -->
+
+<TABLE cellSpacing=0 width="100%" celpadding="0" >
+<TR>
+<td width=10%><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>
+<TD width=80% align=center style="BACKGROUND: rgb(233,243,255); FONT-size: 18px ; font-family: arial; COLOR: rgb(0,0,102); BORDER-BOTTOM: rgb(0,0,102) 1px solid" colspan=2><strong>Товары</strong></TD>
+<td style="width:80px;text-align:right;font-size:11px;color: #6e6e6e;" title="Текущая версия справочника товаров">v #(GoodsGoodsVersion)#</td>
+</TABLE>
+
+<br><br>
 <div class="actions">
 		<a href="PriceGroups.csp">Ценовые группы товаров</a>
 		<a href="Reserves2.csp">Резервы</a>
@@ -133,7 +142,8 @@ label {color:#333;}
  </td>
  <td valign=top width=50% valign="middle" align="center">
 <!-- диалог установки новой цены -->
-<div id="NewGoodsPriceDialog" title="Установка новой цены" style="display:none">
+<div id="NewGoodsPriceDialog" title="Установка новой цены" style="display:none;border:1 solid gray;margin:10px;margin-top:40px;padding:15px">
+	<p align="left"><b>Установка новой цены</b></p>
 	<Table>
 		<tr><td colspan=2 id="NewGoodsPriceName">
 		</tr>
@@ -228,7 +238,9 @@ LoadTree();
 function LoadTree()
 {
 	var CurrentCatalogueId = $("#Catalogues").val();
-	GroupsTree.DownLoad('Data.csp?class=Goods.Group&fields=Parent,Code,Name,ID&params="'+#(%session.Data("depot"))#+'","'+CurrentCatalogueId+'"');
+	var url = 'Data.csp?class=Goods.Group&fields=Parent,Code,Name,ID&params="'+#(%session.Data("depot"))#+'","'+CurrentCatalogueId+'"';
+	GroupsTree.DownLoad(url);
+	//window.open(url);
 	$( "#tags" ).autocomplete( "option", "source", "JQGoods.csp?Command=Groups&Cat="+CurrentCatalogueId );
 }
 
@@ -492,7 +504,7 @@ function EditGroupNameFn()
 	var NewName=window.prompt("Введите новое название группы",GroupsTree.NodeCaption);
 	if(!NewName)return;
 	if(NewName==""){alert("Пустные имена группа не допустимы.");return false;}
-	//var ok=#server(Goods.GroupAction.RenameGroup(GroupId,NewName))#
+	var ok=#server(Goods.GroupAction.RenameGroup(GroupId,NewName))#
 	if(isNaN(ok)){alert(ok)}
 	else{LoadTree();SelectedGroupCode=GroupCode;}
 }

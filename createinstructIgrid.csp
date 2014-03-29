@@ -13,7 +13,7 @@
 Quit 1
 </script>
 <html XMLNS:SKLADiGrid>
-<IMPORT NAMESPACE="SKLADiGrid" IMPLEMENTATION="htc/iGridV9.htc">
+<IMPORT NAMESPACE="SKLADiGrid" IMPLEMENTATION="htc/iGridV10.htc">
 <head>
 <link href="style.css" type=text/css rel=stylesheet>
 <style>
@@ -114,8 +114,26 @@ if(DocId!="")
 	}
 }
 
+//проверить количество товаров в заявке
+function CheckQuantity()
+{
+	var str = "";
+	for (var y = 1; y <= docstr.RowCount; y++)
+	{
+		var CellValue = docstr.CellValue(2,y);
+		if ( (CellValue == "0") || (CellValue=='')) str+="В строке "+y+" не указано количество товара \n";
+	}
+	return str;
+}
+
 // сохранить
 function startFun(){
+var CheckQuantityResult = CheckQuantity();
+if (CheckQuantityResult != '')
+{
+	alert(CheckQuantityResult);
+	return;
+}
 xmlDoc=docstr.GetXmlContentByRows();
 InsertXmlHeader(xmlDoc,"Summa",docstr.GetTableSumma(),"%String")
 InsertXmlHeader(xmlDoc,"Oper",Oper.value,"Operation.OperTemplate")
@@ -165,7 +183,7 @@ function AddGood()
 
 // удалить строку
 function RemoveRow(){
-docstr.RemoveSelectedRows();
+	docstr.RemoveSelectedRows();
 }
 
 // Очистить список

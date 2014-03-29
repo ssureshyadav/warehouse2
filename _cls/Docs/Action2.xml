@@ -1082,5 +1082,39 @@ isDocCreditOrDebetErr
  q "Извините, внутренняя ошибка при проверке документа (кредит или дебет)."
 ]]></Implementation>
 </Method>
+
+<Method name="MakeRashFromOthet">
+<Description>
+Сделать расходную накладную на основе отчёта</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>OtchetID:%String</FormalSpec>
+<ReturnType>Docs.Rash</ReturnType>
+<Implementation><![CDATA[
+	s docobj = ##class(Docs.Otchet).%OpenId(OtchetID)
+	if '$ISOBJECT(docobj) q ""
+	
+	s docrash = ##class(Docs.Rash).%New()
+	s docrash.Name = $P(docobj.Name,"\",2)_"-"_$P(docobj.Name,"\",1)_" "_docobj.Kontr.Code
+	s docrash.Kontr = docobj.Kontr
+	
+	s i=""
+	s ok=1
+ 	for  s i=docobj.Items.Next(i) q:(i="")!('+ok)  d
+ 	. s Item=docobj.Items.GetAt(i)
+ 	. q:'$ISOBJECT(Item)
+ 	. q:Item.StringType'=1	
+ 	. s newitem = ##class(Docs.RashItems).%New()
+ 	. s newitem.Goods = Item.Goods
+ 	. d newitem.DocTypeSetObjectId("Docs.Rash")
+ 	. s newitem.Doc = docrash
+ 	. s newitem.Quantity = Item.Quantity
+ 	. d docrash.Items.Insert(newitem)
+ 	
+ 	s ok = docrash.%Save()
+ 	if '+ok $$$WriteObjError(ok) q "Извините, ошибка при генерации накладной."
+ 	
+ 	q docrash.%Id()
+]]></Implementation>
+</Method>
 </Class>
 </Export>
