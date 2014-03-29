@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.ReqWar2">
+<Description><![CDATA[
+Request - Warranty Card
+Просмотр гарантийных талонов по заявке
+Заявка <class>Operation.Instructions</class>  с Type=10
+, содержит строки <class>Operation.InstructionsItems</class> 
+c полем <var>garant</var> в котором хранится номер гарантийного талона
+Задача - показывать связанные гарантийные талоны по ID заявки
+01.06.2012 - изменение требований
+гарантийные показывать вместе с товаром
+если гарантийный не найден - писать "не найден"]]></Description>
+<IncludeCode>xmlmacros</IncludeCode>
+<Super>json.service2</Super>
+<TimeCreated>62582,60240.213642</TimeCreated>
+
+<Parameter name="CLASSNAME">
+<Type>%String</Type>
+<Default>Operation.InstructionsItems</Default>
+</Parameter>
+
+<Parameter name="FIELDS">
+<Type>%String</Type>
+<Default><![CDATA[Goods->FullName as gd]]></Default>
+</Parameter>
+
+<Parameter name="FTYPES">
+<Type>%String</Type>
+<Default>%String</Default>
+</Parameter>
+
+<Method name="OnPage">
+<Description>
+Вывод на страницу </Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+  m rq=%request.Data  ;query arguments
+  s oper=$G(rq("oper",1)), json=$d(rq("json")) 
+  #; только просмотр
+  Q:json ..Out(.rq)  ;Просмотр записей
+  d ..wUI(.rq)
+  Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="Out">
+<Description><![CDATA[
+Вывод первой или указанной страницы
+<var>rq</var> %request.Data]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&rq:%String=""]]></FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ s classname=..#CLASSNAME
+ #; по коду Operation.Instruction отбираем Operation.InstructionItems
+ s doc=$g(rq("id",1)), iid="",allrows=0
+ 
+ s rq("where")=" Where Doc=? "
+ s rq("where","qp")=1, rq("where","qp",1)=doc
+ 
+ s allrows=..GetCount(.rq) ;количество строк с такими параметрами запроса
+ 
+ s rows=+$G(rq("rows",1),100) ;вывести строк на страницу, по умолчанию 100
+ s:rows<1 rows=100 ;контроль количества строк на страницу
+ 
+ s page=+$G(rq("page",1),1) ;номер запрашиваемой страницы, по умолчанию первой
+ s:page<1 page=1 ;контроль номера страницы 
+ 
+ s pages=0 ;всего страниц данных
+ s:allrows>0 pages=allrows\rows ; если есть строки 
+ s:allrows#rows>0 pages=pages+1 ;непоместившиеся строки на след страницу
+ s:page>pages page=pages ;нельзя вывести страницу больше чем есть
+
+ #;диапазон выводимых строк
+ s lastRow=rows*page ;последняя запись которую надо вывести с записи
+ s firstRow=lastRow-rows ; начиная с записи
+ 
+ s sql="SELECT ID FROM Operation.InstructionsItems "_$g(rq("where"))_..GetOrder(.rq) 
+ k qp s qp=0 m qp=rq("where","qp")
+ 
+ 
+ #; Переходим на универсальный интерфейс к динамическим запросам
+ s sc=1, rs=##class(json.xvrs).GetResultSet(sql,.qp,.sc)
+ if 'sc { w sc Q $$$OK  }
+ s first=1 
+ w "{"
+ #; w """userData"":",..QuoteJS(sql),","
+ w """page"":""",page,""""
+ w ",""total"":""",pages,""",""records"":""",allrows,""",""rows"":["
+ while rs.Next() {
+   s i=$i(i) ;счетчик выведенных строк
+   if i<=firstRow continue ;Не дошли до первой записи
+   if i>lastRow quit  ;прошли последнюю запись
+   w:'first "," s:first first=0 ;запятая перед каждым объектом кроме первого
+   i $i(CountLines)			
+   d ..wJson(rs.Get("ID"),.Serials,CountLines) ;вывод объекта 
+ }
+ d rs.Close() k rs
+ w "]}"
+ Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="wJson">
+<Description>
+вывод строк инструкции</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id:%String,Serials,Countlines</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ s $ZT="wJsonErr"
+ #define qt(%str) """"_$zconvert($tr(%str,"'"," "),"O","JS")_""""
+ 
+ w "{""id"":",$$$qt(id) ;код инструкции
+ 
+ s good=##class(Operation.InstructionsItems).GoodsGetStored(id) 
+ s gd=##class(Goods.Goods).GetFullName(good)
+	w ",""gd"":",$$$qt(gd)
+  
+ 
+ s gid=##class(Operation.InstructionsItems).snGetStored(id)
+
+ &sql(select ID into :gid from Common.Dictionary2 where serial=:gid)
+ if 'SQLCODE,##class(Common.Dictionary2).%ExistsId(gid) {
+	 		
+	 		 w ",""gid"":",$$$qt(gid)
+			 s sn=##class(Common.Dictionary2).NameGetStored(gid)
+			 w ",""sn"":",$$$qt(sn)
+			 if $$$qt(sn)="" s sn="0"
+			 
+			 
+			 s gn=##class(Common.Dictionary2).serialGetStored(gid)
+			 w ",""gn"":",$$$qt(gn)
+			 s cm=##class(Common.Dictionary2).CommentGetStored(gid) 
+			 w ",""cm"":",$$$qt(cm)
+			 s st=##class(Common.Dictionary2).Property9194GetStored(gid) 
+			 s stnm=##class(Common.Dictionary2).Property9194LogicalToDisplay(st) 
+			 w ",""st"":",$$$qt(stnm)
+			 s remont1=##class(Common.Dictionary2).remont1GetStored(gid)
+			 s hr=$S(remont1="":"нет",1:"есть")
+			 w ",""hr"":",$$$qt(hr)
+			 
+			 s tovar=##class(Common.Dictionary2).tovarGetStored(gid)
+			 w ",""t"":",$$$qt(tovar)
+			 w ",""co"":",$$$qt($G(Serials(sn)))
+			 
+			 if '$D(Serials(sn)) s Serials(sn)=Countlines
+	} else {
+			 w ",""sn"":""НЕ НАЙДЕН"""
+			 w ",""gn"":""НЕ НАЙДЕН"""
+			 w ",""cm"":"""""
+			 w ",""st"":"""""
+	}
+ 
+ w "}"
+ Q $$$OK
+wJsonErr
+ $$$WriteError($ZE)
+ q 0
+]]></Implementation>
+</Method>
+
+<Method name="wUI">
+<Description>
+Интерфейс для просмотра</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&rq:%String]]></FormalSpec>
+<Implementation><![CDATA[
+ s iid=$g(rq("id",1)),(inm,idt)=""
+ #SQLCompile Select=Display
+ &sql(Select Name,InstDate Into :inm,:idt From Operation.Instructions
+ 	Where ID=:iid
+ )
+ 
+ #define qt(%str) "'"_$zconvert(%str,"O","JS")_"'"
+ s inm=$$$qt(inm)
+ 
+ 
+ &html<<!DOCTYPE html>
+<html><head>
+<script type='text/javascript' src='js/jquery-1.6.4.min.js'></script>
+<script type='text/javascript' src='js/jquery-ui-1.8.16.custom.min.js'></script>
+<script type='text/javascript' src='js/i18n/grid.locale-ru_win1251.js'></script>
+<script type='text/javascript' src='js/jquery.jqGrid-4.1.2.min.js'></script>
+
+<script type="text/javascript">
+$(function(){
+	var GRID="#gg",BAR="#gb", id='#(iid)#';
+	
+	var fn_openTalon=function(id){
+		var row=$(GRID).jqGrid("getRowData",id), gid=row.gid; if (!gid) return;
+		window.showModalDialog("garant.csp?GarantId="+gid
+	   	,gid+";Common.Dictionary2","center:yes;status:no;dialogHeight:600px;dialogWidth:800px;resizable:yes;");	
+	};
+	
+	$( GRID ).jqGrid({ //Таблица с типами  документов
+	 url: ""+window.location
+	 ,mtype: "POST"
+	 ,datatype: "json", jsonReader : { repeatitems: false }
+	 ,caption: "Гарантийные талоны заявки #(inm)# #(idt)#"
+	 ,colModel: [
+	  {name:'id', hidden:true}
+	  , {name:'gid',label:'Код гарантийного', hidden: true, width:200}
+	  , {name:'gd',label:'Товар', width:200}
+      , {name:'t',label:'Модель', width:60}
+      , {name:'sn',label:'Серийный', width:150}
+      , {name:'gn',label:'Гарантийный', width:150}
+      , {name:'st',label:'Актуальность', width:130}
+      , {name:'hr',label:'Заявки', width:60}
+      , {name:'cm',label:'Комментарий', width:360}
+      , {name:'co',label:' ', width:20}
+  	 ]
+  	 , postData: {json:1, id: id}
+  	 , pager: BAR
+  	 , viewrecords:true
+  	 , height: 500
+  	 , width: 960 
+  	 , hidegrid: false
+     , gridview:true ,rownumbers:true,viewrecords:true,rowNum:100
+     , hoverrows:true ,scroll:1 
+     , ondblClickRow: fn_openTalon
+  	 
+	})
+	.jqGrid('navGrid',BAR, 
+       {add:false,edit:false,del: false	,view:false,search:false}
+    )
+    .jqGrid('navButtonAdd',BAR,{
+		caption:"Просмотр"
+		, title:"Просмотр выбранного талона ( двойной клик )"
+		, buttonicon:"ui-icon-document"
+		, onClickButton: function(){
+			var id=$( GRID ).jqGrid("getGridParam","selrow");
+			if (!id) {alert("Выберите талон"); return;} 
+			fn_openTalon(id);
+		}
+		, position: "first"
+	})
+    ;
+	
+	$( BAR +"_center").remove();
+	$( BAR +"_right").css("width","30%");
+	$( BAR +"_left").css("width","70%");
+
+});
+</script>
+<link rel='stylesheet' type='text/css' href='css/redmond/jquery-ui-1.8.16.custom.css'/>
+<link rel='stylesheet' type='text/css' href='css/ui.jqgrid.css'/>
+<style type='text/css'>
+	.ui-widget {font-size:.8em;}
+	.ui-state-default {font-weight:normal}
+	caption {text-align: left; }
+</style>
+</head><body><table id="gg"></table><div id="gb"></div></body></html>>
+]]></Implementation>
+</Method>
+</Class>
+</Export>

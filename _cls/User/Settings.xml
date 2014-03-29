@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="User.Settings">
+<Super>%Persistent</Super>
+<TimeCreated>63023,67452.862811</TimeCreated>
+
+<Property name="User1">
+<Type>Users.Dates</Type>
+</Property>
+
+<Property name="SettingName">
+</Property>
+
+<Property name="SettingValue">
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="3000"/>
+</Property>
+
+<Method name="GetSettingValue">
+<Description>
+Получить значение настройки для текущего пользователя</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>SettingName</FormalSpec>
+<Implementation><![CDATA[
+	s SessionUser = $S($ISOBJECT($G(%session)):$G(%session.Data("user")),1:"")
+	if SessionUser="" q ""
+	
+	&sql(select SettingValue
+		into :SettingValue
+		from Settings
+		where SettingName = :SettingName
+			and User1=:SessionUser)
+	if SQLCODE s SettingValue=""
+	
+	q SettingValue
+]]></Implementation>
+</Method>
+
+<Method name="SetSettingValue">
+<Description>
+Установить значение настройки для текущего пользователя</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>SettingName,SettingValue</FormalSpec>
+<Implementation><![CDATA[
+	s SessionUser = $S($ISOBJECT($G(%session)):$G(%session.Data("user")),1:77)
+	if SessionUser="" q ""
+	
+	&sql(select id into :id 
+		from Settings 
+		where SettingName = :SettingName
+			and User1=:SessionUser)
+			
+	if SQLCODE
+	{
+		&sql(insert into Settings 
+		(SettingName,SettingValue,User1)
+		VALUES
+		(:SettingName,:SettingValue,:SessionUser))
+	}
+	else
+	{
+		&sql(update Settings Set
+			SettingName = :SettingName,
+			SettingValue = :SettingValue,
+			User1 = :SessionUser
+			where id=:id)
+	}
+	
+	q
+]]></Implementation>
+</Method>
+
+<Index name="NewIndex1">
+<Data>SettingValue</Data>
+<Properties>User1,SettingName</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^User.SettingsD</DataLocation>
+<DefaultData>SettingsDefaultData</DefaultData>
+<IdLocation>^User.SettingsD</IdLocation>
+<IndexLocation>^User.SettingsI</IndexLocation>
+<StreamLocation>^User.SettingsS</StreamLocation>
+<Data name="SettingsDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>SettingName</Value>
+</Value>
+<Value name="3">
+<Value>SettingValue</Value>
+</Value>
+<Value name="4">
+<Value>User1</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.KaAuth">
+<Description>
+Страница входа в подсистему для контрагентов </Description>
+<IncludeCode>csp</IncludeCode>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62650,40877.487019</TimeCreated>
+
+<Parameter name="TITLE">
+<Type>%String</Type>
+<Default>Вход в систему</Default>
+</Parameter>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	k Args m Args=%request.Data
+	k %session.Data("Login") //если вышли на страницу - сбрасываем пользователя
+	&html<#($$$DOCTYPE)#<html lang="ru"><head>
+	#($$$icon("box.ico"))#
+	<link media="all" type="text/css" href="css/redmond/jquery-ui-1.8.16.custom.css" rel="stylesheet">
+	#($$$css("css/ui.jqgrid-4.2.0.css"))#
+	<title>#(..#TITLE)#</title>
+	#(..wCss(.Args))#
+	</head><body>	
+	#(..wBody(.Args))#	
+	#($$$js("js/jquery-1.7.2.min.js"))#
+	#($$$js("js/jquery-ui-1.8.22.custom.min.js"))#
+	#($$$js("js/md5.min.js"))#
+	#(..wJS(.Args))#
+	</body></html>>
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="wBody">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&Args:%String]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ &html<
+  	<table >
+	<tr>
+	<td><div class="ui-icon ui-icon-person">&nbsp;</div></td>
+	<td><input id="login" tabindex="1" title="Введите код" value="#($g(Args("login",1)))#" /></td>
+	<td rowspan="2"><button id="btnEnter" tabindex="3">Войти</button></td>
+	</tr>
+	<tr>
+	<td><div class="ui-icon ui-icon-key">&nbsp;</div></td>
+	<td><input id="passw" type="password" tabindex="2" title="Введите пароль" /></td>
+	</tr>
+	</table>
+<div id="dlg"></div>
+>
+ Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wCss">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&Args:%String]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ &html<<style type="text/css">
+	body {
+		background: url('http://www.securegion.com/images/vault.jpg') no-repeat;
+		background-position: 50% 45px;
+	}
+	table {position: absolute;
+		top: 150px;
+		left: 28%;
+		}
+	table input {width:8em; border:1px solid #999;}
+	</style>>
+ Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wJS">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&Args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ &html<<script type="text/javascript">
+
+$(function(){
+	
+	var fnLogin=function(res){
+		if (res==1) {
+		$("table").effect( "explode",{},1500,function(){
+			window.location='#(..Link("csp.Ka.cls"))#';
+		}); 
+		
+		return;
+	}
+	if (res==0) {
+		$("#dlg").dialog(
+			{ title:"В доступе отказано!",modal:true
+				,buttons: {
+					"OK":function() {
+						$(this).dialog("close");
+				}
+			 }
+			}
+		);
+		return;
+	}	
+	};
+	
+	$("#btnEnter").button({icons:{primary:'ui-icon-unlocked'}})
+	.click(function(){
+		var login=$("#login").val(), pass=$("#passw").val();
+		if (login=="") return;
+		
+		var hash=MD5('#($system.Encryption.Base64Encode(%session.Key))#'+pass);
+		$.ajax({ url:'#(..Link("csp.KaAuthCheck.cls"))#'
+			,data:{login:login, hash:hash}
+			,success: fnLogin
+		});
+	});
+	$("table").effect( "bounce", {}, 500);
+	$("#login").focus();
+});
+</script>>
+ q ""
+]]></Implementation>
+</Method>
+</Class>
+</Export>

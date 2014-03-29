@@ -1,0 +1,227 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ i %session.NewSession d
+ . s %session.EndSession=1
+ . s sessionid=%request.Get("sessionid",1)
+ . s %session=%session.GetSession(sessionid)
+ e  s sessionid=%session.SessionId
+ s login=$G(%session.Data("user"),0)
+ 
+Quit 1
+</script>
+<server>
+	s now=$zd(+$h,4)
+	s d1=$g(Args("d1",1),now), d2=$g(Args("d2",1),now)
+	s GoodsId = %request.Get("GoodsId")
+	if GoodsId &sql(select FullName into :FullName from Goods.Goods where id=:GoodsId)
+	s colspan = 2
+ if %request.Get("fromform")
+ {
+	 s kontr = %request.Get("kontr")
+	 if kontr=""  s colspan=3
+	 s d1= %request.Get("d1")
+	 s d2= %request.Get("d2")
+
+	 s d1Cache=+$H-30
+	 s d2Cache=+$H
+	 if d1?2N1"/"2N1"/"4N s d1Cache=$ZDH(d1,4)
+	 if d2?2N1"/"2N1"/"4N s d2Cache=$ZDH(d2,4)
+ }
+</server>
+<html>
+<head>
+
+<title>	Движение товара </title>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<link type="text/css" href="../css/redmond/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
+<script src="../js/jquery-1.6.4.min.js" type="text/javascript"></script>
+<script src="../js/jquery-ui-1.8.16.custom.min.js" type="text/javascript"></script>
+<script src="../js/i18n/jquery-ui.datepicker-ru.min.js" type="text/javascript"></script>
+<style>
+ BODY {margin: 20px;font-family:Arial}
+   	
+  	table.report {border:collapse;border:1px solid #6e6e6e;}
+  	table.report th {font-weight:normal}
+  	table.report td,table.report th {border:1px solid #6e6e6e;}
+</style>
+<script language="javascript" type="text/javascript">
+//разделитель строк
+var StringSplitter="#@#";
+//разделитель элементов внутри строки
+var InnerSplitter="~";
+
+    $(document).ready(function()
+    {
+       	$.datepicker.setDefaults( $.datepicker.regional[ "ru" ] );
+       	$(".datepicker").datepicker({ dateFormat: 'dd/mm/yy', duration: 0 });
+     });
+
+function ChooseGoods()
+{
+	WinResult=window.showModalDialog("../selectgoods2.csp","","center:yes;status:no;dialogHeight:700px;dialogWidth:800px;resizable:yes;")
+	if(WinResult==null)return
+	var TovarsString="";
+	var IDsString="";
+	var TovarsArray=WinResult.split(InnerSplitter);
+		var IDsString=TovarsArray[0];
+		var TovarsString=TovarsArray[10];
+	$("#GoodsName").text(TovarsString);
+	$("#GoodsId").val(IDsString);
+}
+</script>
+</head>
+
+<body>
+<h2>Движение товара</h2>
+	<fieldset><legend>Параметры отчета</legend>
+	<form method="post"><input type="hidden" value="1" name="fromform">
+	<server>
+	if '+GoodsId
+	{
+		w "<input type=""button"" value=""выбрать товар"" onclick=""ChooseGoods()"">"
+	}
+	</server>
+	<input type="hidden" name="GoodsId" id="GoodsId" value="#(GoodsId)#"><b id="GoodsName">#($G(FullName))#</b>
+	<table>
+	<tr><td>Период <label for="d1">с:</label></td>
+		<td><input type="text" id="d1" name="d1" maxlength="10" class='datepicker' title="Начало диапазона" value="#(d1)#" />
+			<label for="d2">по:</label>
+			<input type="text" id="d2" name="d2" maxlength="10" class='datepicker' title="Конец диапазона" value="#(d2)#" />
+		</td></tr>
+	<tr><td><label for="kontr">Контрагент:</label></td>
+		<td><select type="text" id="kontr" name="kontr" title="Контрагенты">
+<server>
+  d ..wKontrOptions($G(kontr))	
+</server>
+		</select></td></tr>
+	
+	</table>
+	<input type="submit" id="btnRun" value="Сформировать" title="Запустить формирование отчета" />
+	</form>
+	</fieldset>
+<server>
+  if %request.Get("fromform")=1
+ {
+	&html<
+	<br><br>
+	<Table id="maintable" class='report' cellpadding=7 cellspacing=0>
+		<tr>
+			<th>Документ
+			<th>Дата
+			#($S(kontr="":"<th>Контрагент",1:""))#
+			<th>Приход
+			<th>Расход
+		</tr>
+	
+	>	 
+	
+	&sql(declare docs cursor for 
+		select Doc,id,DocType,Doc->Dat,Quantity,Doc->Kontr,Doc->Name
+		into :doc,:id,:DocType,:DocDat,:prih,:DocKontr,:DocName
+		from Docs.DocItems
+		where Goods=:GoodsId and doc->dat>=:d1Cache and doc->dat<=:d2Cache
+			and DocType in ('Docs.StorageOut','Docs.Invent','Docs.StorageIn')
+			and (Doc->Kontr=:kontr or :kontr=null) 
+			and doc->stat=2
+		 )
+	&sql(open docs)
+	for  
+	{
+		&sql(fetch docs)
+		q:SQLCODE
+		
+		s rash=0
+		
+		if $D(DocNames(DocType))
+		{
+			s DocTypeName = $G(DocNames(DocType))
+		}
+		else
+		{
+			s DocTypeName = ##class(Docs.Action).GetDocNameFromClass(DocType)
+			s DocNames(DocType) = DocTypeName
+		}
+		s KontrName = ""
+		if kontr=""
+		{
+			if $D(KontrNames(+DocKontr))
+			{
+				s KontrName = $g(KontrNames(+DocKontr))
+			}
+			else
+			{
+				&sql(select Pseudonym into :KontrName 
+					from Common.Kontragent
+					where ID=:DocKontr)
+				s KontrNames(+DocKontr)=KontrName
+			}
+		}
+		
+		s quantplan=""
+		if DocType = "Docs.Invent"
+		{
+			&sql(select quantplan into :quantplan from Docs.InventItems where id=:id)
+			if quantplan=rash continue
+		}
+
+		if DocType = "Docs.StorageOut"
+		{
+			&sql(select quantreal into :quantreal from Docs.Docs.StorageOutItems where id=:id)
+			s rash = quantreal
+			s prih = 0
+		}		
+		
+		if DocType = "Docs.StorageIn"
+		{
+			&sql(select quantreal into :quantreal from Docs.Docs.StorageInItems where id=:id)
+			s rash = 0
+			s prih = quantreal
+		}		
+		
+		s rashItog = $G(rashItog) + rash
+		s prihItog = $G(prihItog) + prih
+		
+		//s Itog = $G(Itog) + Quantity
+		w "<tr id="""_id_""">"
+			w "<td>"
+			w "<a href=""../print.csp?class="_DocType_"&id="_doc_""" target=_blank>"
+			w DocTypeName_" "_DocName
+			w "</a>"
+			w "<td>"_$ZD(DocDat,4)
+			if kontr="" 
+			{
+				w "<td>"
+				w "<a href=""../Kontragent.csp?KontrId="_DocKontr_""" target=_blank>"
+				w KontrName
+				w "</a>"
+			}
+			w "<td>"_prih
+			w "<td>"_rash
+		w "</tr>"
+	}
+	w "<tr>"
+		w "<td colspan="_colspan_">Итого"
+		w "<td>"_$G(prihItog)
+		w "<td>"_$G(rashItog)
+	w "</tr>"
+	&sql(close docs)
+	w "</table>"
+ }
+</server>
+</body>
+</html>
+<script language="Cache" method="wKontrOptions" arguments="kontr:%String" returntype="%String">
+
+	w "<option value=''>&nbsp;&nbsp;Все контрагенты</option>"
+	&sql(Declare krs Cursor For
+		Select ID,Pseudonym Into :id,:Pseudonym
+		From Common.Kontragent
+		Order By Pseudonym
+	) &sql(Open krs)
+	for { &sql(FETCH krs) Q:SQLCODE'=0
+		if $TR(Pseudonym," ","")="" continue
+		w "<option value='",id,"' "
+		w:id=kontr "selected='selected' "
+		w ">",Pseudonym,"</option>"
+	} &sql(Close krs)
+	Q ""
+</script>

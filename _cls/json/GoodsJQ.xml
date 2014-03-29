@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="json.GoodsJQ">
+<Super>json.DynamicSql</Super>
+<TimeCreated>62527,62357.893094</TimeCreated>
+
+<Parameter name="CHARSET">
+<Description><![CDATA[
+Specifies the default character set for the page.  This can be overriden using the
+&lt;CSP:CONTENT CHARSET=&gt; tag, or by setting the <b>%response</b>.CharSet property
+in the <method>OnPreHTTP</method> method.  If this parameter is not specified, then
+for Unicode systems the default charset is utf-8 and for 8-bit systems it is the
+system default charset.]]></Description>
+<Default>utf-8</Default>
+</Parameter>
+
+<Parameter name="CLASSNAME">
+<Description>
+Имя Persistent класса для которого создается служба
+Соглашение: имя класса и имя таблицы совпадает
+Используйте Cache правильно!</Description>
+<Type>%String</Type>
+<Default>Goods.GoodsGroup</Default>
+</Parameter>
+
+<Parameter name="IDField">
+<Description>
+Имя поля, значение которого подставится в качестве ID строки на странице</Description>
+<Type>%String</Type>
+<Default>Goods</Default>
+</Parameter>
+
+<Parameter name="FIELDS">
+<Description><![CDATA[
+Список SQL полей, возможно с синонимами "Name As nm"
+ID можно не указывать, т.к. выбирается обязательно
+Внимание!, имена синонимов чувствительны к регистру (для javascript клиента)
+В отличие от имен полей (SQL на стороне сервера)
+Соглашение: синоним писать  через " as " - ",OBJ->name as oname "
+Раньше неправильно разбивал на поля ]]></Description>
+<Type>%String</Type>
+<Default><![CDATA[Goods as gd,Goods->FullName as nm,Goods->Property5300 as P5300,Goods->EnglishName as EN,%external(Goods->AllowToSend) as ats]]></Default>
+</Parameter>
+
+<Parameter name="PARENTFIELD">
+<Description><![CDATA[
+Поле (или синоним), связанное с родительским объектом
+Например, поле документ для строк накладной
+Используется при отборе записей чтобы не показывать строки из всех накладных
+Используется в методе <method>GetWhere</method>]]></Description>
+<Type>%String</Type>
+<Default>Groups</Default>
+</Parameter>
+
+<Parameter name="FTYPES">
+<Description>
+Типы полей, по умолчанию %String
+Используются при построении фильтра
+тип %String </Description>
+<Type>%String</Type>
+<Default>%String,%String,%String</Default>
+</Parameter>
+
+<Parameter name="OBJECTCONCURRENCY">
+<Description>
+Как открывать объект на редактирование</Description>
+</Parameter>
+</Class>
+</Export>

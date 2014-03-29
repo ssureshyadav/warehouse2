@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="js.jqgrid412min">
+<Description>
+Хранение javascript файла в глобали (для переноса между системами)</Description>
+<Super>csp.GlobalBinary</Super>
+<TimeCreated>62368,78235.368648</TimeCreated>
+
+<Parameter name="CONTENTTYPE">
+<Description><![CDATA[
+Specifies the default content type for the page.  This can be overriden using the
+&lt;CSP:CONTENT TYPE=&gt; tag, or by setting the <b>%response</b>.ContentType property
+in the <method>OnPreHTTP</method> method.  The default value if this parameter is
+not set is text/html.
+text/javascript
+text/css]]></Description>
+<Default>text/javascript</Default>
+</Parameter>
+</Class>
+</Export>

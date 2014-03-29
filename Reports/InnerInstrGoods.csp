@@ -1,0 +1,131 @@
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ i %session.NewSession d
+ . s %session.EndSession=1
+ . s sessionid=%request.Get("sessionid",1)
+ . s %session=%session.GetSession(sessionid)
+ e  s sessionid=%session.SessionId
+ s login=$G(%session.Data("user"),0)
+ 
+Quit 1
+</script>
+<server>
+	s now=$zd(+$h,4)
+	s d1=$g(Args("d1",1),now), d2=$g(Args("d2",1),now)
+
+ if %request.Get("fromform")
+ {
+	 s kontr = %request.Get("kontr")
+	 if kontr=""  s colspan=3
+	 s d1= %request.Get("d1")
+	 s d2= %request.Get("d2")
+	 
+	 s d1Cache=+$H-30
+	 s d2Cache=+$H
+	 if d1?2N1"/"2N1"/"4N s d1Cache=$ZDH(d1,4)
+	 if d2?2N1"/"2N1"/"4N s d2Cache=$ZDH(d2,4)
+ }
+</server>
+<html>
+<head>
+<title>	Отгрузка запчастей за период </title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+<link type="text/css" href="../css/redmond/jquery-ui-1.8.16.custom.css" rel="stylesheet" />
+<script src="../js/jquery-1.6.4.min.js" type="text/javascript"></script>
+<script src="../js/jquery-ui-1.8.16.custom.min.js" type="text/javascript"></script>
+<script src="../js/i18n/jquery-ui.datepicker-ru.min.js" type="text/javascript"></script>
+<style>
+ BODY {margin: 20px;font-family:Arial}
+   	
+  	table.report {border:collapse;border:1px solid #6e6e6e;}
+  	table.report th {font-weight:normal}
+  	table.report td,table.report th {border:1px solid #6e6e6e;}
+</style>
+<script language="javascript" type="text/javascript">
+    $(document).ready(function()
+    {
+       	$.datepicker.setDefaults( $.datepicker.regional[ "ru" ] );
+       	$(".datepicker").datepicker({ dateFormat: 'dd/mm/yy', duration: 0 });
+     });
+</script>
+</head>
+
+<body>
+<h2>Движение товара</h2>
+<fieldset><legend>Параметры отчета</legend>
+<form method="post"><input type="hidden" value="1" name="fromform">
+	<table>
+	<tr><td>Период <label for="d1">с:</label></td>
+		<td><input type="text" id="d1" name="d1" maxlength="10" class='datepicker' title="Начало диапазона" value="#(d1)#" />
+			<label for="d2">по:</label>
+			<input type="text" id="d2" name="d2" maxlength="10" class='datepicker' title="Конец диапазона" value="#(d2)#" />
+		</td></tr>
+	<!--
+	<tr><td><label for="kontr">Контрагент:</label></td>
+		<td><select type="text" id="kontr" name="kontr" title="Контрагенты">
+<server>
+  d ..wKontrOptions($G(kontr))	
+</server>
+		</select></td></tr>
+	-->
+	</table>
+	<input type="submit" id="btnRun" value="Сформировать" title="Запустить формирование отчета" />
+	</form>
+	</fieldset>
+<server>
+  if %request.Get("fromform")=1
+ {
+	&html<
+	<br><br>
+	<Table id="maintable" class='report' cellpadding=7 cellspacing=0>
+		<tr>
+			<th>Дата внутр. инструкции
+			<th>Внутрн. инструкция
+			<th>Заявка
+			<th>гарантия/платно
+			<th>Серийный номер
+			<th>Количество
+			<th>Товар
+			<th>Контрагент
+			<th>Состояние заявки
+		</tr>
+	>	
+
+	&sql(declare zz cursor for
+		SELECT Doc,id,%external(Doc->Dat),Doc->Kontr->Name,Doc->Name,Goods->FullName,serial,quantreal
+		INTO :doc,:id,:DocDat,:DocKontr,:DocName,:GoodsFullName,:serial,:quantreal
+		FROM Docs.StorageOutItems
+		WHERE doc->dat>=:d1Cache and doc->dat<=:d2Cache and doc->stat=2)
+	&sql(OPEN zz)
+	for
+	{
+		&sql(FETCH zz)
+		q:SQLCODE
+		
+		&sql(select Name,RashOplatType->Name,%external(State)
+			INTO :Name,:RashOplatType,:State 
+			FROM Operation.Instructions
+			WHERE innerinstr=:doc)
+		
+		&html<
+		 <tr>
+		 	<td>#(DocDat)#
+		 	<td><a href="../print.csp?class=Docs.StorageOut&id=#(doc)#" target=_blank>#(DocName)#</a>
+		 	<td>#(Name)#
+		 	<td>#(RashOplatType)#
+		 	<td>#(serial)#
+		 	<td>#(quantreal)#
+		 	<td>#(GoodsFullName)#
+		 	<td>#(DocKontr)#
+		 	<td>#(State)#
+		 </tr>
+		>
+	}
+	&sql(CLOSE zz)
+	
+	w "</table>"
+ }
+ </server>
+</body>
+</html>
+

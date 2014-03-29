@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.Sluzap">
+<Description>
+Служебная записка</Description>
+<Super>Docs.Super</Super>
+<TimeCreated>62633,42957.928644</TimeCreated>
+
+<Method name="IsKontrInDoc">
+<Description>
+отвечает на вопрос - есть ли этот контрагент в этом документе</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DocId:%String,KontrId:%String</FormalSpec>
+<ReturnType>%Boolean</ReturnType>
+<SqlProc>1</SqlProc>
+<Implementation><![CDATA[
+	&sql(Select ID from Docs.SluzapItems where Doc=:DocId and Kontr=:KontrId)
+	
+	if SQLCODE q 0
+	else  q 1
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+</Storage>
+</Class>
+</Export>

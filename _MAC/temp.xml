@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Routine name="temp" type="MAC" languagemode="0"><![CDATA[
+#include xmlmacros
+ 
+ q
+SetRates
+ s start=$ZDH("07/11/2009",4)
+ s end=$ZDH("20/11/2009",4)
+ f i=start:1:end d
+ . d UpdateRatesFromRBC^Currency(i)
+ . w $ZD(i,4),!
+ q
+temp(currentJob)
+ k ^temp(currentJob)
+ s ^temp(currentJob)=$ZDT($H,4)
+ for i=2:1:8
+ {
+	 if i=4
+	 {
+		 s ^temp(currentJob)=0
+		 	_$C(9)_"текст в окошке"
+		 	_$C(9)_"Да"_$C(8)_"ok"
+		 	_$C(9)_"Нет"_$C(8)_"no"
+		 	_$C(9)_"Отмена"_$C(8)_"cancel"
+		 while $G(^temp(currentJob,"answer"))=""
+		 {
+			 //тут действие зависящее от ответа
+			 h 1
+		 }
+	 }
+	 s ^temp(currentJob)=i_" "_$G(^temp(currentJob,"answer"))
+	 h 2
+ }
+ 
+ s ^temp(currentJob)=1_$C(9)
+ Quit
+DocFromInstr(InstrId,currentJob)
+ s $ZT="err"
+ s ^mtempArt("docfrominstr",2,"InstrId")=InstrId
+ s ^mtempArt("docfrominstr",2,"currentJob")=currentJob
+ 
+ k ^temp(currentJob)
+ s ^temp(currentJob)=$ZDT($H,4)
+ 
+ s ok = ##class(Docs.Action).DocFromInstr(InstrId,currentJob)
+  
+ s ^temp(currentJob)=1_$C(9)_$S(+ok:"Документ успешно создан",1:ok)
+ Quit
+err
+ $$$WriteError($ZE)
+ s ^temp(+$G(currentJob))=1_$C(9)_$ZE
+ q
+ 
+ // заново закрыть все служебные записки по отчётам
+ // d SetSluzapAgain^temp
+SetSluzapAgain
+ n CountOK,glob,doc,otchet,ok,CountFail
+ 
+ s glob = $NA(^mtempSetSluzapAgain($J))
+ k @glob
+ 
+ //все строки служебных записок по отчёту с 01/01/2013
+ &sql(DECLARE zz cursor for 
+ 	SELECT ID,doc,doc->name,otchet 
+ 	INTO :id,:doc,:docname,:otchet 
+ 	FROM Docs.SluzapItems 
+ 	WHERE doc->dat>=62822)
+ &sql(OPEN zz)
+ for  
+ {
+	 &sql(FETCH zz)
+	 q:SQLCODE
+	 
+	 //если мы эту записку ещё не обрабатывали
+	 if '$D(@glob@(doc))
+	 {
+		 s ok = ##class(Docs.Action).processSluZap(doc)
+		 if +ok 
+		 {
+			 s CountOK = $G(CountOK) + 1
+		 }
+		 else  
+		 {
+			 s CountFail = $G(CountFail) + 1
+			 w ok,!
+			 b	;FAIL
+		 }
+	 }
+ }
+ &sql(CLOSE zz)
+ 
+ w !
+ w "Всего служебных записок: "_($G(CountOK)+$G(CountFail)),!
+ w "Из них: ",!
+ w $C(9)_"Успешно изменили свои отчёты: "_+$G(CountOK),!
+ w $C(9)_"Не смогли изменить свои отчёты: "_+$G(CountFail),!
+ 
+ k @glob
+ q
+]]></Routine>
+</Export>

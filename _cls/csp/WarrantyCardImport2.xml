@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.WarrantyCardImport2">
+<Description>
+Загрузка файла импорта и обновление гарантийных талонов</Description>
+<Super>csp.Design</Super>
+<TimeCreated>62826,71445.661864</TimeCreated>
+
+<Method name="wTitle">
+<Description>
+write заголовок страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	w "Импорт гарантийных талонов"
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wCss">
+<Description>
+write заголовок страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	d ##super()
+	&html<<link rel='stylesheet' type='text/css' href='css/redmond/jquery-ui-1.8.16.custom.css'/>
+		<style type="text/css">
+			.box {height:250px;overflow:auto}
+			.box table {table-layout: fixed; border-collapse:collapse; }
+			.box table td { padding:1px 3px; border-bottom: 1px dotted #777;border-right: 1px dotted #777;}
+		</style>
+	>
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wPageHeader">
+<Description>
+write заголовок на странице</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wLoadForm">
+<Description>
+Вывод формы загрузки файла</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	&html<<form enctype="multipart/form-data" method="POST" class="ui-widget">
+			<table class="ui-widget-content"><caption class="ui-widget-header">
+				 Импортировать файл с гарантийными талонами<br/>
+				 ( несуществующие будут созданы, существующие обновлены )<br/>
+				 и выставить для них указанный статус
+				</caption>
+			<tr> 
+				<td class="ui-state-default">Файл: </td>
+				<td><input name="wci" id="wci" type="file" style="width:300px"/></td>
+			</tr>
+			<tr> 
+				<td class="ui-state-default">Cтатус: </td>
+				<td><select name="st" id="st">
+					<option value="1">действительный</option>
+					<option value="2">недействительный</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td class="ui-state-default">Опция: </td>
+				<td><Input type="checkbox" value="1" name="f" id="f" style="width:15px">
+										<label for="f" id="lblf">Принудительная смена статуса</label>
+				</td>
+			</tr>
+			<tr> 
+				<td colspan="2"><button style="width:98%;height:48px" type="submit">Импорт</button></td>
+			</tr>
+			<table>
+			В каждой строке файла <font face="courier">серийный номер, гарантийный номер, модель, комментарий</font> (разделитель - символ табуляции)
+		</form>
+		>
+		Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wBody">
+<Description>
+write содержимое страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	s import=$d(%request.MimeData("wci",1)) 
+	if 'import Q ..wLoadForm() ;выводим форму для загрузки и выходим
+	
+	#; получен файл
+	s stream=%request.MimeData("wci",1)
+	, status=$g(args("st",1)) ;выбранный статус
+	, force=+$g(args("f",1))	;принудительная смена статуса
+	
+	&html<
+	<div>Результат импорта данных из файла: 
+		<span class="ui-state-highlight">#(stream.FileName)#</span>
+	</div> 
+	<div>и установки статуса: 
+		<span class="ui-state-highlight">#($CASE(status,1:"Действительный",2:"Недействителен",:"Не установлен"))#</span>
+	</div>
+	<div>c опцией принудительной смены статуса: 
+		<span class="ui-state-highlight">#($CASE(force,1:"Да",:"Нет"))#</span>
+	</div>
+	<div>Получено: #(stream.Size)# байт</div>
+	<div class="box ui-widget" >
+	<table class="ui-widget-content">
+		<tr>
+			<td>&nbsp;
+			<td>Серийный номер
+			<td>Гарантийный номер
+			<td>Модель
+			<td>Комментарий
+			<td>&nbsp;
+		</tr>
+	>
+	s tab=$c(9) ;разделитель
+	for { Q:stream.AtEnd
+	;для каждой строки файла импорта
+		k str s len=32000, str=stream.ReadLine(.len) Q:len<1
+		s serial=$p(str,tab),garant=$p(str,tab,2),model=$p(str,tab,3),comment=$p(str,tab,4)
+		d ..wProcess(serial, garant ,model , comment,status,force)
+	} //for
+	&html<</table></div><button onclick="window.close()">Закрыть</button>>
+	
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wProcess">
+<Description>
+Обрабатываем прочитанную строку, и выставляем ей статус</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>serial:%String,garant:%String,model:%String,comment:%String,status:%Integer,force:%Boolean</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+		
+		k class s class="ui-icon" ;класс выводимой строки лога импорта
+		k error s error=""		
+		
+		#; ищем всё через глобалы
+		#; найдём ID нужного гарантийного талона
+		#; &sql(Select ID,comment Into :id,:txt From Common.Dictionary2 Where Name=:serial )
+		k match s match = " "_$ZCVT(serial,"U") ;индекс по текстовому полю, поэтому " "_value
+		s ID = $O(^Common.Dictionary2I("serialInd", match,"")) ;жесткая привязка к глобалам
+		
+		if ID'="" { ; нашли по серийному - обновляем данные
+				s class=class_" ui-icon-pencil"  
+				s error=..Upgrade(ID,garant,model,comment,status,force) ;обновляем статус и комментарий
+		} else {  ;ID по серийному не найден. Добавляем данные
+				s class=class_" ui-icon-plus" 
+			 s error=..Insert(serial,garant,model,comment,status) ;
+		}
+	
+			&html<<tr #($S(error'="":" class='ui-state-error'",1:""))# >		
+			<td><div class="#(class)#">&nbsp;</div></td>
+			<td>#(serial)#</td>
+			<td>#(garant)#</td>
+			<td>#(model)#</td>
+			<td>#(comment)#</td>
+			<td>#($S(error="":"Импорт прошёл успешно",1:error))#</td>
+			</tr>>
+]]></Implementation>
+</Method>
+
+<Method name="Upgrade">
+<Description>
+Обновление записи</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>ID,garant,model,comment,status,force</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+			
+			s oldComment = ##class(Common.Dictionary2).CommentGetStored(ID)
+			s dm="" s:(comment'="")||(oldComment'="") dm=" " ;delimeter
+			s comment=oldComment_dm_comment 
+			#; дописываем коммент в любом случае
+			&sql(UPDATE Common.Dictionary2  Set comment=:comment 	Where ID=:ID)
+			s error=$$ERR(SQLCODE) Q:error'="" error
+			
+			s oldStatus = ##class(Common.Dictionary2).Property9194GetStored(ID)
+			s oldStatusText = ##class(Common.Dictionary2).Property9194LogicalToDisplay(oldStatus)
+						
+			if ( oldStatus=status ) || ( force ) { ; текущее состояние= выбранному режиму или  
+				&sql(UPDATE Common.Dictionary2 
+						Set Property9194=:status,tovar=:model,serial=:serial,Name=:garant
+						Where ID=:ID
+				)
+				s error=$$ERR(SQLCODE)
+			} else {
+				s error="Такой номер уже есть в базе, статус до импорта "_oldStatusText_", статус не изменён."	
+			}
+		 
+	  Q error
+	  
+ERR(sqlcode)
+		  if (sqlcode=100) Q error="Система не смогла обновить талон. Нарушение индекса Common.Dictionary2:serialInd"
+		  if (sqlcode<0) Q error="Извините, "_$system.SQL.SQLCODE(SQLCODE)
+				Q ""
+]]></Implementation>
+</Method>
+
+<Method name="Insert">
+<Description>
+Добавление записи</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>serial,garant,model,comment,status</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+			s error=""
+			&sql(
+				INSERT INTO Common.Dictionary2 (Name,serial,tovar,Property9194,Comment)
+				VALUES (:garant,:serial,:model,:status,:comment)
+			)
+			if ( SQLCODE'=0 ) s error="Извините, "_$system.SQL.SQLCODE(SQLCODE)
+			Q error
+]]></Implementation>
+</Method>
+
+<Method name="wJs">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	d ##super()
+  	&html<
+  	<script type='text/javascript' src='js/jquery-1.6.4.min.js'></script>
+  	<script type="text/javascript" language="javascript">
+	$(	function(){
+			
+			$("#st").change(function(){
+				
+						var val=$(this).val() //выбранный для установки статус
+						
+						, str=["Устанавливать статус [ "
+								,$("#st option:selected").text()
+								," ] <br/> всем найденным записям,<br/> даже если они в статусе [ "
+								,(val==1)?"не":""
+								,"действительные ]"
+						].join("");
+						
+						$("#lblf").html(str);
+					
+			}).trigger("change");
+				
+	});
+</script>>
+	Q ""
+]]></Implementation>
+</Method>
+</Class>
+</Export>

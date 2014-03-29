@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.KaChat">
+<Description><![CDATA[
+Подстраница общения с контрагентом
+Часть страницы <class>csp.KaOrders</class>]]></Description>
+<IncludeCode>web,KaChat</IncludeCode>
+<Super>%CSP.Page,csp.KaProtected</Super>
+<TimeCreated>62675,68754.371151</TimeCreated>
+
+<Parameter name="DOMAIN">
+<Default>sklad2</Default>
+</Parameter>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	m args=%request.Data
+ if $d(args("msg")) Q ..AddMsg(.args)
+ 
+ &html<<style>
+#box {font:12px Verdana; height: 25em; overflow: auto;}
+#box p span {font: 90% Arial; font-weight: bold;}
+#box p div { padding:0 1em; white-space: pre;}
+</style>>
+
+ &html<
+ <div style="margin-bottom:2em">Отправка сообщения в офис Aska Elc.:
+	 <br/><textarea cols="60" rows="7" id="msg"></textarea>
+	 <br/><button id='bSend'>Отправить</button>
+ </div>
+ 
+ <div class='ui-widget'>
+  <div class='ui-widget-header' style='text-indent:3em;'>Сохраненные сообщения</div>
+  <div id='box' class='ui-widget-content'>
+  </div>
+ </div>>
+  
+ 
+ &html<<script type="text/javascript">
+ $(function(){
+	
+	 //Коробка куда добавляются сообщения
+		var $box=$("#box");
+		
+		 ///Функция, которая умеет рисовать сообщение на странице
+	 var fnWrite=function(obj){
+		 var $msg=$("<p></p>"); if (obj["in"]) $msg.addClass('ui-state-default'); 
+		 $("<span></span>").text(obj.dt+" "+obj.tm).appendTo($msg);
+		 $("<div></div>").html(obj.msg).appendTo($msg);
+		 $box.prepend($msg);
+		};
+	 
+	 $("#bSend").button({icons:{secondary:'ui-icon-mail-closed'}})
+			.click(function(){
+			 var msg=$("#msg").val(); if (msg=="") return;
+			 $.ajax({ url: '#(..Link("csp.KaChat.cls"))#'
+						,type: 'POST'
+						,data: {oper:'add',msg: msg }
+						,dataType: "text"
+						,success: function(data){
+						
+							try {
+								var arr=eval(data);
+							} catch (e){
+								alert(e.description);
+							}
+							
+							if (!arr[0]) {
+									alert(arr[1]);
+							} else {
+								 fnWrite(arr[2]); $("#msg").val("");
+							}
+								
+						} //success
+				}) //ajax
+			 
+			
+			});  
+	 
+	 // Сохраненные сообщения
+	 var msg=[
+	 	#(..wMessages())#
+	 ];
+	 // Выводим их
+	 for (var i=0,obj;obj=msg[i];i++){
+		 	fnWrite(obj);
+		}
+
+	 
+
+ })
+ </script>>
+ Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="wMessages">
+<Description>
+Выводим пришедшие сообщения </Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+  s kontr=+$$$client Q:'kontr ""
+  
+  &sql(DECLARE joke CURSOR FOR 
+   SELECT ID INTO :id
+ 		FROM Kontragent.Meeting 
+ 		WHERE MessageType IN ($$$FromClient,$$$ForClient) 
+ 			  AND Kontr=:kontr
+ 		ORDER BY Dat, Tim 
+ 
+  ) &sql(OPEN joke)
+  s first=1
+  for { &sql(FETCH joke) Q:SQLCODE  
+   w:'first "," s:first first=0
+			d ..wJson(id)   
+  } &sql(CLOSE joke)
+  Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wJson">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	&sql(Select Dat,Tim,Result,MessageType 
+								Into :dt,:tm,:msg,:tp
+							From Kontragent.Meeting
+							Where ID=:id
+	)
+	w "{dt:'", $tr($zd(dt,4),"/","."),"'"
+   	, ",tm:'",$zt(tm),"'"
+   	, ",msg:'",$zcvt(msg,"O","JS"),"'"
+   	, ",in:",$S(tp=$$$ForClient:"true",1:"false") 
+ ,"}"
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="AddMsg">
+<Description><![CDATA[
+Отправляем сообщение <var>Msg</var> котрагенту <var>Kontr</var>]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s Kontr=$$$client, msg=$g(args("msg",1))
+	
+	#; Запросы присылается javascript в кодировке utf
+	s msg=$zcvt(msg,"I","UTF8")
+	
+	#; если нет такого 
+	if '##class(Common.Kontragent).%ExistsId(Kontr) {
+		w "[false,'Ошибка: Указанный контрагент не существует."
+			, "Свяжитесь с сервисом по телефону или по электронной почте'"
+			, ",null]"
+		Q ""
+	}
+	
+	#define prop(%propName) %propName
+ #define Kontr(%propName) ##class(Common.Kontragent).$$$prop(%propName)GetStored(Kontr)
+	 
+ s KontrName=$$$Kontr(Name), KontrEmail=$$$Kontr(EMail)
+ s MailDestination=$$$Kontr(NotifyEmails)
+ s MailText = "Новое сообщение в системе Аска-Склад."
+		_$C(13,10)_"Клиент: "_KontrName
+		_$C(13,10)_"Дата: "_$ZDT($H,4)
+		_$C(13,10)_"Сообщение: "_msg
+  													
+  s MailSubject = "Сообщение от клиента "_KontrName
+  
+  s KMeet=##class(Kontragent.Meeting).%New()
+  s KMeet.MessageType=2
+  s KMeet.Result=msg
+  s KMeet.Dat=+$H
+  s KMeet.Tim=$P($H,",",2)
+  d KMeet.KontrSetObjectId(Kontr)
+  s ok=KMeet.%Save() 
+  
+  if '+ok {
+  		 w "[false,'Ошибка при сохранении сообщения',null]"
+  		 Q ""
+  } 
+   
+  s id=KMeet.%Id() k KMeet
+    
+  s SendMailResult = ##class(Kontragent.Action).SendMailNotification(MailDestination,"",MailText,MailSubject)
+  if 'SendMailResult {
+	      w "[false"
+	       	, ",'Сообщение сохранено, но возникла ошибка при отправке уведомления"
+	       	, "Пожалуйста, свяжитесь с офисом Aska Elc.'"
+	       	, "null"
+	      ,"]"
+	      Q
+   }
+   
+   w "[true,'',"
+   		,..wJson(id)
+   ,"]"
+  	Q $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

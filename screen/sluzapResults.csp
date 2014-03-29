@@ -1,0 +1,128 @@
+<script language="cache" runat="server">
+ s month=$listbuild("Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь")
+ 
+ s kontr=%request.Get("kontr")
+ s kontrId=%request.Get("kontrId")
+ s OtchetId = %request.Get("OtchetId")
+ s SchetNum =%request.Get("SchetNum")
+ s Save = %request.Get("Save")
+ s docsumm = %request.Get("docsumm")
+ s strs = %request.Get("strs")
+
+ //если потребовали сформировать строчку для таблицы
+ if (OtchetId '= "")
+ {
+	 &sql(select Name,Federal->Name,Currency
+	 	INTO :KontrName,:FederalName,:Currency 
+	 	FROM Common.Kontragent where id=:kontr)
+	 if SQLCODE s (KontrName,FederalName)="не найден"
+	 
+	 &sql(select Name,Summa,Sluzap->Stat,Sluzap->Name
+	 	INTO :DocName,:DocSumma,:SluzapStat,:SluzapName
+	 	FROM Docs.Otchet where id=:OtchetId)
+	 if SQLCODE s (DocName,DocSumma)="не найден"
+	 
+	 s ID="z"_$R(9999)
+	 
+	 if SluzapStat=2 
+	 {
+		 w "<tr ID="""_ID_""">"_
+	 	"<td>"_KontrName_"</td>"_
+	 	"<td>"_FederalName_"</td>"_
+	 	"<td colspan=5>Отчёт "_DocName_" в служебной записке "_SluzapName_"</td>"_
+	 	"<td class=""noborder""><input type=""button"" onclick=""delrow('"_ID_"')"" class=""notprint"" value=""Удалить"" title=""Удалить строку""></td>"_
+	 	"</tr>"
+	 }
+	 else  
+	 {
+	 w "<tr KontrId="""_kontr_""" OtchId="""_OtchetId_""" ID="""_ID_""">"_
+	 	"<td>"_KontrName_"</td>"_
+	 	"<td>"_FederalName_"</td>"_
+	 	"<td>"_DocName_"</td>"_
+	 	"<td>"_SchetNum_"</td>"_
+	 	"<td>"_DocSumma_"</td>"_
+	 	"<td>"_##class(Common.Kontragent).CurrencyLogicalToDisplay(Currency)_"</td>"_
+	 	"<td>"_$LG(month,+DocName)_"</td>"_
+	 	"<td class=""noborder""><input type=""button"" onclick=""delrow('"_ID_"')"" class=""notprint"" value=""Удалить"" title=""Удалить строку""></td>"_
+	 	"</tr>"
+	 }
+ }
+ 
+ //если потребовали вывести список 
+ if (+kontrId)
+ {
+	 &sql(declare zz cursor for
+	 	SELECT ID,Dat,Name 
+	 	INTO :ID,:Dat,:Name
+	 	FROM Docs.Otchet
+	 	WHERE Kontr=:kontrId
+	 	ORDER BY id DESC)
+	 &sql(open zz)
+	 f  &sql(fetch zz) q:SQLCODE  d
+	 . w "<option value="""_ID_""">"
+	 . w Name_" от "_$ZD(Dat,4)
+	 . w "</option>"
+	 &sql(close zz)
+ }
+ 
+ //если потребовали сохранить документ
+ if (+Save)
+ {
+	 s Summ=%request.Get("docsumm")
+	 s docid=%request.Get("docid")
+	 s DocKontrId=%request.Get("DocKontrId")
+	 
+	 s ^mtempArt("sluzap","Summ")=Summ
+	 s ^mtempArt("sluzap","docid")=docid
+	 s ^mtempArt("sluzap","DocKontrId")=DocKontrId
+	 
+	 if +docid 
+	 {
+		 s doc=##class(Docs.Sluzap).%OpenId(docid)
+		 if $ISOBJECT(doc) 
+		 {
+			 s number=doc.Name
+		 }
+		 else  
+		 {
+			 s number=""
+		 }
+		 &sql(delete from Docs.SluzapItems where Doc=:docid)
+	 }
+	 else
+	 {
+		 s doc=##class(Docs.Sluzap).%New(docid)
+		 s number = ##class(Docs.Action).getRashNumb("Docs.Sluzap")
+		 s doc.Name = $TR($J(number,5)," ","0")
+	 }
+	 
+	 s i=""
+	 d doc.KontrSetObjectId(DocKontrId)
+	 
+	 f  s i=$O(%request.Data("strs[]",i)) q:i=""  d
+	 . s strobj=##class(Docs.SluzapItems).%New()
+	 . s strdata = $G(%request.Data("strs[]",i))
+	 . s KontrId = $P(strdata,"&",1)
+	 . s OtchId = $P(strdata,"&",2)
+	 . s OtchetSumm = $P(strdata,"&",3)
+	 . s SchetNum = $P(strdata,"&",4)
+	 . d strobj.KontrSetObjectId(KontrId)
+	 . d strobj.OtchetSetObjectId(OtchId)
+	 . s strobj.Total = OtchetSumm
+	 . s strobj.SchetNum = SchetNum
+	 . d strobj.DocTypeSetObjectId("Docs.Sluzap")
+	 . d strobj.GoodsSetObjectId(0)
+	 . s ok = doc.Items.Insert(strobj)
+	 
+	 s ok=doc.%Save()
+	 if ok 
+	 {
+		 w doc.%Id()_"||"_number
+	 }
+	 else  
+	 {
+		 w "Извините. Документ не удалось сохранить."
+	 }
+ }
+ 
+</script>

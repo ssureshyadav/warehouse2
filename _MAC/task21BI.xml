@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Routine name="task21BI" type="MAC" languagemode="0"><![CDATA[
+ w !, "Common.Dictionary2.BuildIndices()="
+ 	, ##class(Common.Dictionary2).%BuildIndices("",1)
+]]></Routine>
+</Export>

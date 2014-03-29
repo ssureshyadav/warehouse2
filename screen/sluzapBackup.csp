@@ -1,0 +1,271 @@
+<script language="cache" runat="server">
+ s month=$listbuild("Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь")
+ s class=%request.Get("class")
+ if class'="" s catalogue=""
+ else  s catalogue=""
+ 
+ s docid = %request.Get("docid")
+ if +docid
+ {
+	 s docobj = ##class(Docs.Sluzap).%OpenId(docid)
+	 if $ISOBJECT(docobj)
+	 {
+		 s docnumber = docobj.Name
+	 }
+ }
+</script><!doctype html><html lang="ru">
+<!--xmlns:v="urn:schemas-microsoft-com:vml"
+xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns:m="http://schemas.microsoft.com/office/2004/12/omml"
+xmlns="http://www.w3.org/TR/REC-html40"-->
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1251">
+<title>Служебная записка</title>
+
+<link rel='stylesheet' type='text/css' href='../css/redmond/jquery-ui-1.8.16.custom.css'/>
+<link rel='stylesheet' type='text/css' href='../css/ui.jqgrid.css'/>
+
+
+<link rel="stylesheet" href="../jquery/themes/base/jquery.ui.all.css">
+<script src="../jquery/jquery-1.7.2.js"></script>
+<!-- Это все есть в посленднем файле script src="../jquery/external/jquery.bgiframe-2.1.2.js"></script>
+<script src="../jquery/ui/jquery.ui.core.js"></script>
+<script src="../jquery/ui/jquery.ui.widget.js"></script>
+<script src="../jquery/ui/jquery.ui.mouse.js"></script>
+<script src="../jquery/ui/jquery.ui.button.js"></script>
+<script src="../jquery/ui/jquery.ui.draggable.js"></script>
+<script src="../jquery/ui/jquery.ui.position.js"></script>
+<script src="../jquery/ui/jquery.ui.resizable.js"></script>
+<script src="../jquery/ui/jquery.ui.dialog.js"></script>
+<script src="../jquery/ui/jquery.effects.core.js"></script
+--><script type='text/javascript' src='../js/jquery-ui-1.8.16.custom.min.js'></script>
+
+<script type='text/javascript' src='../js/i18n/grid.locale-ru.js'></script>
+<script type='text/javascript' src='../js/jquery.jqGrid-4.1.2.min.js'></script>
+
+<style>
+body { font-size: 62.5%; }
+input.text { margin-bottom:12px; width:95%; padding: .4em; }
+fieldset { padding:0; border:0; margin-top:25px; }
+h1 { font-size: 1.2em; margin: .6em 0; }
+div#users-contain { width: 350px; margin: 20px 0; }
+div#users-contain table { margin: 1em 0; border-collapse: collapse; width: 100%; }
+div#users-contain table td, div#users-contain table th { border: 1px solid #eee; padding: .6em 10px; text-align: left; }
+.ui-dialog .ui-state-error { padding: .3em; }
+.validateTips { border: 1px solid transparent; padding: 0.3em; }
+.noborder{ border-right: none; border-top: none; border-bottom: none; }
+
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:Tahoma;
+	panose-1:2 11 6 4 3 5 4 4 2 4;
+	mso-font-charset:204;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:-520081665 -1073717157 41 0 66047 0;}
+@font-face
+	{font-family:"Arial CYR";
+	panose-1:2 11 6 4 2 2 2 2 2 4;
+	mso-font-charset:204;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:-536859905 -1073711037 9 0 511 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-parent:"";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman","serif";
+	mso-fareast-font-family:"Times New Roman";}
+span.SpellE
+	{mso-style-name:"";
+	mso-spl-e:yes;}
+span.GramE
+	{mso-style-name:"";
+	mso-gram-e:yes;}
+@page WordSection1
+	{size:595.3pt 841.9pt;
+	margin:2.0cm 42.5pt 2.0cm 3.0cm;
+	mso-header-margin:35.4pt;
+	mso-footer-margin:35.4pt;
+	mso-paper-source:0;}
+div.WordSection1
+	{page:WordSection1;}
+-->
+@media print
+{
+	.notprint { display: none }
+}
+ TD,TH {border:1px solid black; font-family: Arial}
+</style>
+<script language="javascript" type="text/javascript" src="../js/pages/sluzap1.js"></script>
+<script language="javascript" type="text/javascript" src="js/pages/sluzap.js"></script>
+</head>
+
+<body lang=RU style='tab-interval:35.4pt'>
+<div class=WordSection1>
+
+<p class=MsoNormal align=right style='text-align:right'><span style='font-family:
+"Tahoma","sans-serif"'>Исполнительному директору</span></p>
+
+<p class=MsoNormal align=right style='text-align:right'><span style='font-family:
+"Tahoma","sans-serif"'>Арутюнян А.А.</span></p>
+
+<p class=MsoNormal><span style='font-family:"Tahoma","sans-serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal><span style='font-family:"Tahoma","sans-serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal align=center style='text-align:center'><span
+style='font-family:"Tahoma","sans-serif"'>Служебная записка № <span id="docnumber">#($G(docnumber))#</span></span></p>
+
+<p class=MsoNormal align=center style='text-align:center'><span
+style='font-family:"Tahoma","sans-serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal><span style='font-family:"Tahoma","sans-serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-indent:35.4pt'><span style='font-family:"Tahoma","sans-serif"'>Александр Альбертович, прошу оплатить за сервисное обслуживание, проданной техники, в авторизованные сервисные центры от ИП Носач А.В.</span></p>
+
+<p class=MsoNormal style='text-indent:35.4pt'><span style='font-family:"Tahoma","sans-serif"'>&nbsp;</span></p>
+
+<table id="MainTable" class=MsoNormalTable border=0 cellspacing=0 cellpadding=6 width=625 style='width:468.75pt;margin-left:4.65pt;border-collapse:collapse;mso-padding-alt: 0cm 5.4pt 0cm 5.4pt'>
+<thead>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes;height:13.5pt;mso-row-margin-right:2.3pt'>
+  <th width=169>
+	Получатель
+  </th>
+  <th width=100>
+  	Округ
+  </th>
+  <th width=61>
+  	Номер отчёта
+  </th>
+  <th width=60 >
+  	Счёт №
+  </th>
+  <th width=57>
+  	Сумма, руб
+  </th>
+  <th width=92 valign=top>
+  	Примечание
+  </th>
+  <!--
+  <th width=84 valign=top>
+  	Бренд
+  </th>
+  -->
+ </tr>
+</thead>
+<tbody>
+<script language="cache" runat="server">
+ if +docid
+ {
+	 &sql(declare zz cursor for
+	 	SELECT ID,Kontr,Kontr->Name,Otchet,Otchet->Name,SchetNum,Total,Kontr->Federal->Name
+	 	INTO :ID,:Kontr,:KontrName,:Otchet,:OtchetName,:SchetNum,:Total,:FederalName
+	 	FROM Docs.SluzapItems WHERE Doc=:docid)
+	 &sql(open zz)
+	 f  &sql(fetch zz) q:SQLCODE  d
+	 . w "<tr id="""_ID_""" KontrId="""_Kontr_""" OtchId="""_Otchet_""">"
+	 . w "<td>"_KontrName_"</td>"
+	 . w "<td>"_FederalName_"</td>"
+	 . w "<td>"_OtchetName_"</td>"
+	 . w "<td>"_SchetNum_"</td>"
+	 . w "<td>"_Total_"</td>"
+	 . w "<td>"_$LG(month,+SchetNum)_"</td>"
+	 . w "<td class=""noborder""><input type=""button"" onclick=""delrow('"_ID_"')"" class=""noprint"" value=""Удалить"" title=""Удалить строку""></td>"
+	 . w "</tr>"
+	 &sql(close zz)
+ }
+</script>
+</tbody>
+<tfoot>
+ <tr>
+  <td colspan=4 > ИТОГО:</td>
+  <td id="ItogTD"></td>
+  <td >&nbsp;</td>
+ </tr>
+</tfoot>
+</table>
+
+<p class=MsoNormal><span style='font-family:"Tahoma","sans-serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal><span style='font-family:"Tahoma","sans-serif"'>27.12.2011
+г.</span></p>
+
+<p class=MsoNormal><span style='font-family:"Tahoma","sans-serif"'>&nbsp;</span></p>
+
+<p class=MsoNormal><span style='font-family:"Tahoma","sans-serif"'>Директор
+сервисной службы<span style='mso-tab-count:4'>                                 </span>В.Ф.Ульянов</span></p>
+</div><br><br>
+<span class="noprint">
+	<input type="button" value="Добавить получателя" onclick="Add()">&nbsp;
+	<input type="button" value="Сохранить" onclick="Save()">
+</span>
+<!-- окно выбора контрагента, отчёта -->
+<div id="dialog" title="Выбор контрагента и отчёта" style="display:none">
+	<table>
+	<tr>
+	<td valign="top">
+		<table>
+			<tr>
+			<td>
+				<table id="kontrGrid"><tr><td></td></tr></table><div id="kontrBar"></div>
+			</td>
+			<td>
+				<table id="kontrReportsGrid"><tr><td></td></tr></table><div id="kontrBar"></div>
+			</td>
+			</tr>
+		</table>
+	</td>
+	<td valign="top">
+		<font size="3">Отчёты контрагента</font><br>
+		<select id="otchetSel" multiple style="font-size:22px;font-family:Arial;width:250px" size="13"></select>
+	</td>
+	</tr>
+	<tr>
+		<td colspan=2><nobr>Номер счёта <input type="text" id="SchetNumb" style="font-size:22px;font-family:Arial"></nobr></td>
+	</tr>
+	</table>
+</div>
+<script language="javascript" type="text/javascript">
+var docid = "";
+$("#kontrGrid").jqGrid({
+	colModel: [
+		{name:"id",hidden: true}
+		,{name:"name",label:"Наименование",width:250}
+		,{name:"nick",label:"Псевдоним",width:200}
+		,{name:"city",label:"Город",width:100}
+	]
+	,url: "../json.Kontragent.cls"
+	,datatype: "json"
+	,jsonReader : { repeatitems: false }
+	,pager: "#kontrBar"	
+	,idPrefix:"kt"
+ ,viewrecords:true
+ ,height:300
+ ,hidegrid: false
+ ,gridview:true ,rownumbers:true,viewrecords:true,rowNum:100
+ ,pager:"#kontrBar" ,/*scrollrows:true,*/hoverrows:true ,scroll:1
+ ,onSelectRow: function(id)
+ 	{ 
+ 		$.get( "sluzapResults.csp?kontrId="+id, function(data){ $("#otchetSel").html(data);} ); 
+	 }
+ }).jqGrid('navGrid',"#kontrBar", 
+       {add:false,edit:false,del:false,view:false,search:false}
+       ,{} //Параметры редактирования
+       ,{} //Параметры добавления
+       ,{}
+ ).jqGrid('filterToolbar',{searchOnEnter:false})
+ .jqGrid('gridResize',{})
+ ;
+$("#kontrGrid").trigger("reloadGrid"); //глючит прокрутка
+Itog();
+</script>
+</body>
+</html>

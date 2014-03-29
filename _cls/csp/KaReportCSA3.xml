@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.KaReportCSA3">
+<Description><![CDATA[
+[rep]ort [C]ontract [S]ervices [A]ttachment
+Печатная форма - 
+Приложение №3 к договору на проведение сервисного обслуживания
+Исходный класс - <class>csp.screen.otchet2</class>]]></Description>
+<IncludeCode>web</IncludeCode>
+<Super>%CSP.Page,csp.KaProtected</Super>
+<TimeCreated>62671,69659.423136</TimeCreated>
+
+<Parameter name="PRIVATE">
+<Default>1</Default>
+</Parameter>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Boolean</ReturnType>
+<Implementation><![CDATA[
+	
+ if $d(%request.Data("word")) {
+	 s %response.ContentType = "application/msword"
+	 do %response.SetHeader("Content-Disposition","attachment;word.doc")
+	 s %response.Expires = "Thu, 01 Apr 2003 00:00:00 GMT"
+	}
+	
+ Q 1
+]]></Implementation>
+</Method>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	 
+	 s AllColumns = %request.Get("AllColumns")
+	 s WordFormat=0 s:$d(%request.Data("word")) WordFormat=1
+	 
+	 s mn(1)="Январь",mn(2)="Февраль",mn(3)="Март",mn(4)="Апрель",mn(5)="Май",mn(6)="Июнь",mn(7)="Июль",mn(8)="Август",mn(9)="Сентябрь",mn(10)="Октябрь",mn(11)="Ноябрь",mn(12)="Декабрь"
+	 s id=%request.Get("id")
+	 s obj=##class(Docs.Otchet).%OpenId(id)
+	 d:$ISOBJECT(obj)
+	 . s OtchetMonth=$G(mn(+obj.Name))
+	 . s OtchetYear=$P(obj.Name,"\",2)
+	 . d:$ISOBJECT(obj.Kontr)
+	 . . s KontragentName=obj.Kontr.Name
+	 . . s Address=obj.Kontr.Address
+	 . . s City=obj.Kontr.City
+	 . . s Phones=obj.Kontr.Phones
+	 . . s EMail=obj.Kontr.EMail
+	 . . s chief=obj.Kontr.chief
+	 . . s CurrencyName = ##class(Common.Kontragent).CurrencyLogicalToDisplay(obj.Kontr.Currency)
+	 . s summa = $J(obj.Summa,".",2)
+	 . s DocKurs = obj.Kurs
+	 . s SluzapObj=obj.Sluzap	//документ "служебная записка"
+	 . if $ISOBJECT(SluzapObj) d
+	 . . s SluzapName=SluzapObj.Name
+	 . . s SluzapId=SluzapObj.%Id()
+	 . . s args("docid",1)=SluzapId, args("class",1)="Docs.Sluzap"
+	 . . s SluzapPrintUrl=..Link("screen/sluzap.csp")_"?docid="_SluzapId_"&class=Docs.Sluzap"
+
+	&html<<!doctype html><html><head><meta charset="windows-1251"/>
+		<title>№ </title>
+		<style type="text/css">
+			body { }
+			#t1 {border-collapse:collapse;}
+			#t1 th,#t1 td {border: solid 1px #555;font-family: Arial;font-size:12px;padding:2px 3px;}
+			#t1 th {font-family: Verdana; font-weight:normal; font-size:11px; color: #333;}
+			.tac {text-align:center;}
+			p {color: #333;}
+			p span {font-weight:bold; color:#000;}
+		</style>
+	</head><body>
+		<h3>ПРИЛОЖЕНИЕ 3.</h3>
+		<div>К ДОГОВОРУ НА ПРОВЕДЕНИЕ	СЕРВИСНОГО ОБСЛУЖИВАНИЯ №_____   от ______________20__ г.      
+			<br/>
+			<p class="tac">Технический отчет за <span>#($G(OtchetMonth))# #($G(OtchetYear))# г.</span></p>
+			<p>Наименование сервисного	центра: <span>#($G(KontragentName))#</span>;<br/>
+			Адрес: <span>#($G(City))# #($G(Address))#</span>; 
+			<br/>Телефон: <span>#($G(Phones))#</span>; Факс: <span>#($G(fax))#;</span>	 
+			<br/>E-mail: <span>#($G(EMail))#;</span>
+			<br/>Ф.И.О. директора: <span>#($G(chief))#</span>
+			<br/>Служебная записка: <a href="#($G(SluzapPrintUrl))#" target=_blank><span>#($G(SluzapName))#</span></a>
+			</p>
+			<br/>
+		</div>
+		<p>(Форма и образец заполнения)</p>
+		<table id="t1">
+<!--
+	<COL width=21>
+	<COL width=101>
+	<COL width=58>
+	<COL width=106>
+	<COL width=70>
+	<COL width=46>
+	<COL width=118>
+	<COL width=82>
+	<COL width=34>
+	<COL width=70>
+	<COL width=58>
+	-->
+	<thead>
+	<tr valign="top">
+		<th width="21">№<br/>п/п</th>
+		<th width="101">Наименование<br/>изделия</th>
+		<th width="58">Модель</th>
+		<th width=106>Заводской №</th>
+		<th width=70>Гарант.<br/>талон №</th>
+		<th width=46>Отр.<br/>талон (A/B/C)</th>
+		<th width=118>Наименование<br/>детали</th>
+		<th width=82>Марка<br/>детали</th>
+		<th width=34>Кол-во</th>
+		<th width=70>Цена<br/>детали</th>
+		<th width=58>Цена<br/>ремонта</th>>
+	
+		if AllColumns,WordFormat {
+			w "<th>Примечание</th>"
+			w "<th>Дата</th>"
+			w "<th>Тип<br/> ремонта</th>"
+		}
+ w "</tr></thead>",!
+ 
+ #include xmlmacros
+
+ #;соберём в одну глобаль все модели и запчасти
+ k glob,i,count,item,z
+
+ #;список аббревиатур мастермакс через запятую
+ #;списки которые через запятую перегоним в массивы, и вырежем пробелы
+ f brandname="MM","VC","TL" d
+ . s @brandname=$$$TunesVariableGlobal(brandname)
+ . f i=1:1:$L(@brandname,",") d
+ . . //обрезаем пробелы
+ . . s abbr=$TR($P(@brandname,",",i)," ","")
+ . . q:abbr=""
+ . . s @brandname@(abbr)=""
+
+ s glob=$NA(^mtempOthcet($J)) k @glob
+ 
+ d:$ISOBJECT(obj.Items)
+ . s i="" f  s i=obj.Items.Next(i) Q:i=""  d
+ . . s item=obj.Items.GetAt(i)
+ . . s groups=+item.Groups 
+ . . Q:'$IsObject(item.Goods)
+ . . s GoodsId = item.Goods.%Id()
+ . . &sql(select Groups->Catalogue->Name into :CatalogueName from Goods.GoodsGroup where Goods=:GoodsId)
+ . . else  s CatalogueName="Каталог не найден"
+ . . if SQLCODE s CatalogueName="Каталог не найден"
+ . . s Summa=item.CalculatedStringRubSumma()
+ . . s SumsArray(CatalogueName)=$G(SumsArray(CatalogueName))+Summa
+ . . if $ISOBJECT(item.RemTovar) d
+ . . . //это модель
+ . . . s @glob@(groups,"ModelName")=item.RemTovar.Name
+ . . . s @glob@(groups,"AbbrNumber")=item.RemTovar.ModelNumber
+ . . . s Abbr=item.RemTovar.abbr
+ . . . s @glob@(groups,"Serial")=item.serial
+ . . . s @glob@(groups,"Garant")=item.garant
+ . . . s @glob@(groups,"Talon")=item.talonLogicalToDisplay(item.talon)
+ . . . s @glob@(groups,"Quantity")=item.Quantity
+ . . . s @glob@(groups,"RemontCost")=item.remcost
+ . . . s @glob@(groups,"RemType")=item.RemType
+ . . . s @glob@(groups,"ActNumber")=item.ActNumber
+ . . . s:AllColumns&WordFormat @glob@(groups,"Comment")=item.Comment
+ . . . s:AllColumns&WordFormat @glob@(groups,"Dat")=$S(+item.Dat:$ZD(item.Dat,4),1:"")
+ . . . //s:AllColumns&WordFormat @glob@(groups,"goodssource")= ##class(Docs.OtchetItems).goodssourceLogicalToDisplay(item.goodssource)
+ . . . s:AllColumns&WordFormat @glob@(groups,"RemType")=##class(Docs.OtchetItems).RemTypeLogicalToDisplay(item.RemType)
+ . . . //s @glob@(groups,"Total")=item.Total
+ . . . s @glob@(groups,"Summa")=Summa
+ . . else  d
+ . . . //это запчасть
+ . . . i $I(DetailCount)
+ . . . s @glob@(groups,DetailCount,"DetailName")=item.Goods.Name
+ . . . s @glob@(groups,DetailCount,"DetailBrand")=item.Goods.abbr_"-"_item.Goods.Property3609
+ . . . s Abbr=item.Goods.abbr
+ . . . s @glob@(groups,DetailCount,"Quantity")=item.Quantity
+ . . . s @glob@(groups,DetailCount,"DetailPrice")=item.Price
+ . . . s:WordFormat @glob@(groups,DetailCount,"Comment")=item.Comment
+ . . . s @glob@(groups,DetailCount,"Dat")=$S(+item.Dat:$ZD(item.Dat,4),1:"")
+ . . . s @glob@(groups,DetailCount,"goodssource")= ##class(Docs.OtchetItems).goodssourceLogicalToDisplay(item.goodssource)
+ . . . s @glob@(groups,DetailCount,"RemType")=##class(Docs.OtchetItems).RemTypeLogicalToDisplay(item.RemType)
+ . . . s @glob@(groups,DetailCount,"Summa")=Summa
+ . . . //s @glob@(groups,DetailCount,"Total")=item.Total
+ . . s var=$S($D(MM(Abbr)):"MM",$D(VC(Abbr)):"VC",$D(TL(Abbr)):"TL",1:"untitled")
+ . . s @var=+$G(@var)+Summa
+ . . k item
+ 
+ s i="" f  s i=$O(@glob@(i)) q:i=""  d
+ . s ModelName=$G(@glob@(i,"ModelName"))
+ . s AbbrNumber=$G(@glob@(i,"AbbrNumber"))
+ . s Serial=$G(@glob@(i,"Serial"))
+ . s GarantId = $G(@glob@(i,"Garant"))
+ . s Garant= GarantId
+ . //s:GarantId'="" Garant=Garant_"/"_##class(Common.Dictionary2).GetPropertyValue(GarantId,"Property9194")
+ . s Talon=$G(@glob@(i,"Talon"))
+ . s Quantity=$G(@glob@(i,"Quantity"))
+ . s RemontCost=$G(@glob@(i,"RemontCost"))
+ . s Comment=$G(@glob@(i,"Comment"))
+ . s Dat=$G(@glob@(i,"Dat"))
+ . s goodssource=$G(@glob@(i,"goodssource"))
+ . s RemType=$G(@glob@(i,"RemType"))
+ . s ActNumber=$G(@glob@(i,"ActNumber"))
+ . s ActNumberName=$S(ActNumber="":"",1:" Акт "_ActNumber)
+ . s RemTypeName = ##class(Docs.OtchetItems).RemTypeLogicalToDisplay(RemType)
+ . //s Total=$G(@glob@(i,"Total"))
+ . s (DetailPrice,DetailName)="&nbsp;"
+ . i $I(count)
+ . w "<tr VALIGN=TOP>"
+ . w "<td width=21 title="""_Comment_""">",$G(count),"</td>"
+ . w "<td width=101 style=""word-break:break-all"">",$G(ModelName),"</td>"
+ . w "<td width=58>",$G(AbbrNumber),"</td>"
+ . w "<td width=106>",$G(Serial),"</td>"
+ . w "<td width=70>",$G(Garant),"</td>"
+ . w "<td width=46>",$G(Talon)," (",RemTypeName,ActNumberName,")","</td>"
+ . w "<td width=118>",$G(DetailName),"</td>"
+ . w "<td width=82></td>"
+ . w "<td width=34>",$G(Quantity),"</td>"
+ . w "<td width=70>-</td>"
+ . w "<td width=58>",$G(RemontCost),"</td>"
+ . if WordFormat&AllColumns w "<td>",$G(Comment)	//примечание
+ . if WordFormat&AllColumns w "<td>",$G(Dat)	//дата
+ . if WordFormat&AllColumns w "<td>",$G(goodssource)	//источник товара
+ . if WordFormat&AllColumns w "<td>",$G(RemType)	//тип ремонта
+ . //if WordFormat w "<td>"_$G(Total)	//сумма
+ . w "</tr>",!
+ . s z="" f  s z=$O(@glob@(i,z)) q:z=""  d
+ . . q:'+z
+ . . i $I(count)
+ . . s DetailName=@glob@(i,z,"DetailName")
+ . . s DetailBrand=@glob@(i,z,"DetailBrand")
+ . . s Quantity=@glob@(i,z,"Quantity")
+ . . s DetailPrice=@glob@(i,z,"DetailPrice")
+ . . s Comment=$G(@glob@(i,"Comment"))
+ . . s Dat=$G(@glob@(i,"Dat"))
+ . . s goodssource=$G(@glob@(i,"goodssource"))
+ . . s RemType=$G(@glob@(i,"RemType"))
+ . . s ActNumber=$G(@glob@(i,"ActNumber"))
+ . . //s Total=$G(@glob@(i,"Total"))
+ . . s (ModelName,AbbrNumber,Serial,Garant,Talon,RemontCost)="&nbsp;"
+ . . if Quantity="" s Quantity="&nbsp;"
+ . . if DetailPrice="" s DetailPrice="&nbsp;"
+ . . if DetailName="" s DetailName="&nbsp;"
+ . . s Summa = $G(@glob@(i,z,"Summa"))
+ . . w "<TR VALIGN=TOP>"
+ . . w "<td width=21>",$G(count),"</td>"
+ . . w "<td width=101 style=""word-break:break-all"">",$G(ModelName),"</td>"
+ . . w "<td width=58>",$G(AbbrNumber),"</td>"
+ . . w "<td width=106>",$G(Serial),"</td>"
+ . . w "<td width=70>",$G(Garant),"</td>"
+ . . w "<td width=46>",$G(Talon),"</td>"
+ . . w "<td width=118>",$G(DetailName),"</td>"
+ . . w "<td width=82>",$G(DetailBrand),"</td>"
+ . . w "<td width=34>",$G(Quantity),"</td>"
+ . . w "<td width=70>",$G(Summa),"</td>"
+ . . w "<td width=58>",$G(RemontCost),"</td>"
+ . . if WordFormat&AllColumns w "<td>",$G(Comment)	//примечание
+ . . if WordFormat&AllColumns w "<td>",$G(Dat)	//дата
+ . . if WordFormat&AllColumns w "<td>",$G(goodssource)	//источник товара
+ . . if WordFormat&AllColumns w "<td>",$G(RemType)	//тип ремонта
+ . . //if WordFormat w "<td>"_$G(Total)	//сумма
+ . . w "</TR>"
+ k @glob
+	&html<</table><p>Сумма отчёта<span> #($G(summa))#>
+	
+ #; в итоге сумма должна сопровождаться названием валюты 
+ #; (название забить прям в коде страницы), 
+ #; некоторые клиенты работают в долларах, некоторые в рублях, 
+ #; различать их можно по полю в Common.Kontragent (не помню название - там в комментах видно)	
+ if $IsObject(obj)&&$IsObject(obj.Kontr) w obj.Kontr.CurrencyLogicalToDisplay(obj.Kontr.Currency)	
+ #;if +$G(DocKurs) w "Курс "_$G(DocKurs)
+ &html<</span></p>>
+ 
+ #;для клиентов НЕ должно быть видно блока под таблицей, 
+ #;для пользователей системы СкладСервис этот блок должен быть виден
+ if $$$client="" {
+	 w "<br><br>Сумма сгруппированная по классификаторам<table>"
+	 f i="" f  s i=$O(SumsArray(i)) q:i=""  d
+	 . w "<tr><td>",i,"<td>",$J($G(SumsArray(i)),"",2)
+	 w "</table>"
+ 
+	 w "<br>Сумма сгруппированная по брендам<table>"
+	 w "<tr><td>Mastermax<td>"_$J($G(MM),"",2)
+	 w "<tr><td>Viconte<td>"_$J($G(VC),"",2)
+	 w "<tr><td>Tull<td>"_$J($G(TL),"",2)
+	 w:+$G(untitled) "<tr><td>Товары с неизвестным брендом<td>"_$J($G(untitled),"",2)
+	 w "</table><br>" 
+	 w "Валюта расчётов с клиентом: "_$G(CurrencyName)
+ }
+	&html<
+	<div>
+		<p>Директор сервисного
+		центра					/______________/</p>
+		
+		<p>&laquo;___&raquo;________________201 г.</p>												М.П.
+	</div></body></html>>
+	Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

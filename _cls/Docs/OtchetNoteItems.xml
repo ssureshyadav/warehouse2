@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.OtchetNoteItems">
+<Super>Docs.DocItems</Super>
+<TimeCreated>62304,37.027896</TimeCreated>
+
+<Property name="Brand">
+<Description>
+Бренд</Description>
+<Type>Common.Dictionary19</Type>
+</Property>
+
+<Property name="Period">
+<Description>
+Период</Description>
+<Type>%String</Type>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>OtchetNoteItemsDefaultData</DefaultData>
+<Data name="OtchetNoteItemsDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"OtchetNoteItems"</Subscript>
+<Value name="1">
+<Value>Brand</Value>
+</Value>
+<Value name="2">
+<Value>Period</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

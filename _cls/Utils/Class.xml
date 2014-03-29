@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Utils.Class">
+<Description>
+Вкусняшки для работы с описаниями класса</Description>
+<Super>%RegisteredObject</Super>
+<TimeCreated>62670,44534.629015</TimeCreated>
+
+<Method name="wVDList">
+<Description><![CDATA[
+Выводит Value/Display список значений 
+для свойства <var>prop</var> класса <var>class</var> 
+в формате <example>значение:отображение; значение:отображение;</example>
+Используется в интерфейсных классах с jqgrid компонентом
+для инициализации списка возможных значений в поле
+и построения элемента select]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>class:%String="",prop:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s property=$g(class)_"||"_$g(prop) ;id свойства 
+	s params="" &sql(Select parameters Into :params From %Dictionary.CompiledProperty Where ID1=:property)
+ s list=$LFS(params,","),key=0,param=""
+ /*
+ * EXAMPLE: ,CALCSELECTIVITY=1,CAPTION=,COLLATION=,CONTENT=STRING,DISPLAYLIST=,Создана,Утверждена,Принята,Укомплектовано,Отправлено в офис,Отправлено c товаром,Отправлено из офиса,Отправлено экпресс-почтой,Нет в наличии,Отклонена,Самовывоз,Отправлено транспортной компанией,Завершена,EXTERNALSQLNAME=,JAVATYPE=,MAXLEN=50,MINLEN=,PATTERN=,SELECTIVITY=,TRUNCATE=0,VALUELIST=,1,2,3,4,5,6,7,8,8.5,8.6,8.7,8.9,9,XSDTYPE=string 
+ */
+ k dlist, vlist
+ while $LISTNEXT(list,key,param) { //цикл по всем параметрам
+			
+			if param="DISPLAYLIST=" { ;начиная с этого момента вычленяем элементы
+				s dkey=key,dparam=""
+				while $LISTNEXT(list,dkey,dparam){ Q:dparam["="
+				 #;собираем список ОТОБРАЖЕНИЯ
+					s dlist($i(dlist))=dparam
+				}
+				s key=dkey, param=dparam ;восстановили контекст основного поиска
+			}
+			
+			if param="VALUELIST=" { ;начиная с этого момента вычленяем элементы
+				s vkey=key,vparam=""
+				while $LISTNEXT(list,vkey,vparam){ Q:vparam["="
+				 #;собираем список ЗНАЧЕНИЙ
+					s vlist($i(vlist))=vparam
+				}
+				s key=vkey, param=vparam ;восстановили контекст основного поиска
+			}
+			
+	}
+	#; выводим в формате значение:отображение; значение:отображение;
+ w "':;" ;первое пустое значение
+ s i="" for { s i=$o(vlist(i)) Q:i=""
+	 s value=$g(vlist(i)), display=$g(dlist(i)) s:display="" display=value
+	 w value,":",display s next=$o(vlist(i)) w $S(next'="":";",1:"")
+	}
+ w "'"
+ Q ""
+]]></Implementation>
+</Method>
+</Class>
+</Export>

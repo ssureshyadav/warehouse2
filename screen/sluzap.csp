@@ -1,0 +1,244 @@
+<csp:class super="%CSP.Page" encoded=0
+ includes="xmlmacros">
+
+
+<server>
+ s month=$lb("Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь")
+ s class=%request.Get("class")
+ , catalogue="" // if class'="" s catalogue=""
+ , docid=$g(%request.Data("docid",1))
+ , docnumber="" 
+ 
+ if ##class(Docs.Sluzap).%ExistsId(docid) 
+ {
+	 s docnumber=##class(Docs.Sluzap).NameGetStored(docid)
+ }
+</server><!doctype html><html lang="ru">
+<head><meta charset="windows-1251">
+<title>Служебная записка</title>
+<link rel='stylesheet' type='text/css' href='../css/redmond/jquery-ui-1.8.16.custom.css'/>
+<link rel='stylesheet' type='text/css' href='../css/ui.jqgrid.css'/>
+<style type="text/css" media="all">
+.ui-widget {font-size:.8em;}
+.vat {vertical-align: top;}
+.tar {text-align: right;}
+.tac {text-align: center;}
+p {font-family: 'Tahoma','Sans-serif';}
+.sluzap-table {border-collapse:collapse; font-size:80%;}
+.sluzap-table th,.sluzap-table td {padding:1.2mm;border:1px solid;font-family:'Arial';}
+.sluzap-table th {font-weight: normal;}
+.noborder { border-right: none; border-top: none; border-bottom: none; }
+@page WordSection1
+	{size:595.3pt 841.9pt;
+	margin:2.0cm 42.5pt 2.0cm 3.0cm;
+	mso-header-margin:35.4pt;
+	mso-footer-margin:35.4pt;
+	mso-paper-source:0;}
+div.WordSection1 {page:WordSection1;}
+
+/* не работает 
+@media print {
+ .notprint { display: none }
+}*/
+</style><style type="text/css" media="print">
+
+.notprint { display: none; }
+
+</style>
+
+
+<script src="../js/jquery-1.7.2.min.js"></script>
+<script type='text/javascript' src='../js/jquery-ui-1.8.16.custom.min.js'></script>
+<script type='text/javascript' src='../js/i18n/grid.locale-ru_win1251.js'></script>
+<script type='text/javascript' src='../js/jquery.jqGrid-4.1.2.min.js'></script>
+<script type="text/javascript" src="../js/pages/sluzap.js"></script>
+
+</head><body>
+<server>
+ s CreateDate=+$H
+ if +docid 
+ {
+	 &sql(SELECT Stat,Dat,Kontr,Kontr->Name
+		INTO :Stat,:CreateDate,:KontrId,:KontrName
+		FROM Docs.Sluzap 
+		WHERE id=:docid)
+		
+	if $G(KontrId)="" 
+	{
+		s KontrName="_________________"
+		s KontrId=""
+	}
+	s CurrencyName = ##class(Kontragent.Action).KontragentCurrencyName(KontrId)
+ }
+ else
+ {
+	s KontrId = 695
+	s KontrName = "ИП Носач А.В."
+ }
+</server>
+<p class='tar'>Исполнительному директору <br/> Арутюнян А.А.</p>
+<p class='tac' style="margin:1cm 0cm;">Служебная записка № <span id="docnumber">#($G(docnumber))#</span></p>
+<p style='text-indent:35.4pt'>Александр Альбертович, прошу оплатить за сервисное обслуживание проданной техники, в авторизованные сервисные центры от 
+	<span onclick="ChooseKonragent(this)" id="KontrHref" Tag="#(KontrId)#" onmouseover="this.style.background='gray'" onmouseout="this.style.background='transparent'">#(KontrName)#</span></p>
+<table id="MainTable" class='sluzap-table'>
+<thead><tr>
+ <th width=169>Получатель</th>
+ <th width=100>Округ</th>
+ <th width=61>Номер отчёта</th>
+ <th width=60 >Счёт №</th>
+ <th width=57 colspan=2>Сумма</th>
+ <th width=92 valign=top>Примечание</th>
+ <!--th width=84>Бренд</th-->
+ </tr></thead>
+<tbody>
+<server>
+	if +docid {
+	 &sql(declare zz cursor for
+	 	SELECT ID,Kontr,Kontr->Name,Otchet,Otchet->Name,SchetNum,Total,Kontr->Federal->Name,Kontr->Currency
+	 	INTO :ID,:Kontr,:KontrName,:Otchet,:OtchetName,:SchetNum,:Total,:FederalName,:KontrCurrency
+	 	FROM Docs.SluzapItems WHERE Doc=:docid)
+	 &sql(open zz)
+	 f  &sql(fetch zz) q:SQLCODE  d
+	 . w "<tr id=""",ID,""" KontrId=""",Kontr,""" OtchId=""",Otchet,""">"
+	 . w "<td>",KontrName,"</td>"
+	 . w "<td>",FederalName,"</td>"
+	 . w "<td>",OtchetName,"</td>"
+	 . w "<td>",SchetNum,"</td>"
+	 . w "<td>",Total,"</td>"
+	 . w "<td>",##class(Common.Kontragent).CurrencyLogicalToDisplay(KontrCurrency),"</td>"
+	 . w "<td>",$LG(month,+SchetNum),"</td>"
+	 . w:Stat=1 "<td class=""noborder""><button class='bDelRow notprint' type=""button"" title=""Удалить строку"">Удалить</button></td>"
+	 . w "</tr>"
+	 &sql(close zz)
+ }
+ 
+ s buttons="<button type=""button"" id=""bAdd"" class=""notprint"">Добавить получателя</button><button type=""button"" id=""bSave"" class=""notprint"">Сохранить</button>"
+ if $G(Stat)=2 s buttons=""
+ 
+&html<
+</tbody><tfoot><tr>
+  <td colspan=4 > Итого:</td>
+  <td id="ItogTD"></td>
+  <td >&nbsp;</td>
+ </tr></tfoot>
+</table>
+
+<p>#($ZD(CreateDate,4))# г.</p>
+<p>Директор сервисной службы <span style="padding: 0 0 0 5cm">#($$$TunesVariableGlobal("director"))#</span></p>
+</div>
+
+<div class="noprint">
+	#(buttons)#
+</div>
+>
+</server>
+<!-- окно выбора контрагента, отчёта -->
+<div id="dialog" style="display:none">
+	<table><tr class='vat'>
+		<td id="leftPane">
+			<table id="kontrGrid"></table><div id="kontrBar"></div>
+		</td><td id="rightPane">
+			<label for="otchetSel" class='ui-state-default'>Отчёты контрагента</label><br/>	
+			<select id="otchetSel" multiple size="13" style="width:160px"></select>
+			<!--table id="kontrReportsGrid"></table><div id="kontrReportsBar"></div-->
+		</td>
+	</tr></table>
+	<div>
+		<label for="SchetNumb">Номер счёта<label>
+		<input type="text" id="SchetNumb"/>
+	</div>
+</div>
+<script type="text/javascript">
+var docid = "#(docid)#";
+$(function(){ //функция будет выполнена после загрузки страницы
+	$(".bDelRow")
+		.button({label:'Удалить', icons:{primary:'ui-icon-trash'}, title:'Удалить строку'})
+		.click(function(){
+			delrow( 
+				$(this) //button->
+				.parent() //td ->
+				.parent() //tr 
+				.attr("id")
+			);
+		})
+	;
+	//Инициализация диалога выбора
+	$("#dialog").dialog({
+			title: "Выбор контрагента и отчета" 
+			,autoOpen: false
+			,buttons: [
+				{ text: "Выбрать", click: function(){ 
+		        		var KontrId = $("#kontrGrid").jqGrid("getGridParam","selrow")
+		        		, OtchetId= $("#otchetSel option:selected").val()
+		        		, SchetNum= $("#SchetNumb").val()
+		        		;
+		        		$.get( "sluzapResults.csp?kontr="+KontrId+"&OtchetId="+OtchetId+"&SchetNum="+SchetNum
+		        			,function(data) { 
+								$("#MainTable > tbody:last").append(data); 
+								Itog();
+							}
+						); 
+		        		$(this).dialog("close");
+		        }}
+		    	,{ text: "Отмена", click: function(){ 
+		        	$(this).dialog("close"); 
+		        }}
+			]
+			,width: 900
+			
+	});
+ //Инициализация грида с контрагентами в диалоге
+ $("#kontrGrid").jqGrid({
+	url: "../json.Kontragent.cls"
+	,datatype: "json",jsonReader : { repeatitems: false }
+	,idPrefix:"kt"
+	,colModel: [
+		{name:"id",hidden: true}
+		,{name:"name",label:"Наименование",width:250}
+		,{name:"nick",label:"Псевдоним",width:200}
+		,{name:"city",label:"Город",width:100}
+	]
+	,pager: "#kontrBar"	
+	,rowNum:100
+	,viewrecords:true
+ 	,gridview:true ,rownumbers:true,viewrecords:true
+ 	,hidegrid: false,hoverrows:true ,scroll:1
+ 	,pager:"#kontrBar" 
+ 	,height:300
+ 	,onSelectRow: function(id){ 
+ 		$.get( "sluzapResults.csp?kontrId="+id
+ 			, function(data){ $("#otchetSel").html(data);}
+ 		); 
+  	}
+ }).jqGrid('navGrid',"#kontrBar", 
+       {add:false,edit:false,del:false,view:false,search:false}
+       ,{} //Параметры редактирования
+       ,{} //Параметры добавления
+       ,{}
+ ).jqGrid('filterToolbar',{searchOnEnter:false})
+ .jqGrid('gridResize',{})
+ ;
+  //рассчитываем итог
+  Itog(); 
+  //Кнопки
+  	$("#bAdd").button({
+		icons: {primary: "ui-icon-plus"}	
+	}).click(function(){
+		$("#kontrGrid").trigger("reloadGrid"); //глючит прокрутка 	
+ 		$("#dialog").dialog("open");
+	});
+	
+	$("#bSave").button({
+		icons: {primary: "ui-icon-disk"}	
+	}).click(Save);
+});
+	//функция выбора контрагента (подставит выбранного в innerText переданного объекта
+function ChooseKonragent(Obj)
+{
+	newItem=window.showModalDialog("../Dictionary.csp","Common.Kontragent","center:yes;status:no;dialogHeight:400px;dialogWidth:650px;resizable:yes;");
+	if(newItem==null){return false;}
+	var newArr=newItem.split('~');
+	$(Obj).text(newArr[1]);
+	Obj.Tag=newArr[0];
+}
+</script></body></html>

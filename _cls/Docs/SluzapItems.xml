@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.SluzapItems">
+<Description>
+Строки служебной записки</Description>
+<Super>Docs.DocItems</Super>
+<TimeCreated>62633,43094.971403</TimeCreated>
+
+<Property name="Otchet">
+<Description>
+Отчёт</Description>
+<Type>Docs.Otchet</Type>
+</Property>
+
+<Index name="OtchetInd">
+<Properties>Otchet</Properties>
+</Index>
+
+<Property name="SchetNum">
+<Description>
+Счёт</Description>
+<Type>%String</Type>
+</Property>
+
+<Index name="SchetNumInd">
+<Properties>SchetNum</Properties>
+</Index>
+
+<Property name="Kontr">
+<Description>
+Контрагент</Description>
+<Type>Common.Kontragent</Type>
+</Property>
+
+<Index name="KontrInd">
+<Properties>Kontr</Properties>
+</Index>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>SluzapItemsDefaultData</DefaultData>
+<Data name="SluzapItemsDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"SluzapItems"</Subscript>
+<Value name="1">
+<Value>Kontr</Value>
+</Value>
+<Value name="2">
+<Value>Otchet</Value>
+</Value>
+<Value name="3">
+<Value>SchetNum</Value>
+</Value>
+<Value name="4">
+<Value>Summ</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

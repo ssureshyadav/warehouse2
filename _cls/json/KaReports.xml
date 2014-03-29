@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="json.KaReports">
+<Description>
+Служба для (только!!!) просмотра отчетов
+для подсистемы web-доступа контрагентов</Description>
+<Super>csp.KaProtected,json.service2</Super>
+<TimeCreated>62568,43526.814506</TimeCreated>
+
+<Parameter name="CLASSNAME">
+<Type>%String</Type>
+<Default>Docs.Otchet</Default>
+</Parameter>
+
+<Parameter name="FIELDS">
+<Type>%String</Type>
+<Default><![CDATA[NameSorted as nms,Name as nm,Dat as dt,Summa as sum,Stat as st,ErrorDescription as erd,GotPaperProve as gpp,CloseDate as cldt,CloseTime as cltm,CloseUser->Name as clusnm,Comment as cm,DatePaperProve as dtpp,Kontr->Name as ktnm,Kurs as cr,Rem->Name as rnm,Source->Name as srcnm,SummaCurrency as sumc,Tim as tm,User1->Name as usnm,UserPaperProve->Name as usnmpp]]></Default>
+</Parameter>
+
+<Parameter name="FTYPES">
+<Type>%String</Type>
+<Default>%String,%String,%String</Default>
+</Parameter>
+
+<Method name="OnPage">
+<Description>
+Вывод на страницу </Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+  m qa=%request.Data 
+  
+  #; обязательный параметр
+  s qa("where")=" where Kontr->Code=? "
+  s qa("where","params")=1
+  s qa("where","params",1)=$$$client
+  
+  #; только просмотр
+  Q ..Out(.qa)
+  Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csr.csp.SkladFlexGrid">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Rule</Super>
+<TimeCreated>62900,11392.099464</TimeCreated>
+
+<Method name="CompilerMethod1">
+<CodeMode>code</CodeMode>
+<Language>cache</Language>
+<ReturnType/>
+<Implementation><![CDATA[
+	 s id=##this.GetAttribute("id")
+	 s style=##this.GetAttribute("style")
+]]></Implementation>
+</Method>
+
+<Method name="RenderStartTag">
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	New element Set element=##this
+	Set %statuscode=$$$OK Do ..CompilerMethod1()
+	Quit:$$$ISERR(%statuscode) %statuscode
+	Do ..WriteCSPText("",1)
+	Do ..WriteCSPText("<OBJECT ID=""##($G(id,""FlexGrid""))##""   style='##($G(style))##' CLASSID=""CLSID:6262D3A0-531B-11CF-91F6-C2863C385E30"">",1)
+	Do ..WriteCSPText("<PARAM NAME=""Appearance"" VALUE=""0""> ",1)
+	Do ..WriteCSPText("<PARAM NAME=""AllowUserResizing"" VALUE=""3""> ",1)
+	Do ..WriteCSPText("<PARAM NAME=""BorderStyle"" VALUE=""1"">",1)
+	Do ..WriteCSPText("<PARAM NAME=""ScrollBars"" VALUE=""3"">",1)
+	Do ..WriteCSPText("<PARAM NAME=""BackColorBkg"" VALUE=""16777215"">",1)
+	Do ..WriteCSPText("<PARAM NAME=""FixedCols"" VALUE=""1"">",1)
+	Do ..WriteCSPText("<PARAM NAME=""GridLinesUnpopulated"" VALUE=""1"">",1)
+	Do ..WriteCSPText("</OBJECT>",0)
+	Quit $$$SKIPCHILDREN
+]]></Implementation>
+</Method>
+
+<Parameter name="CSRURL">
+<Default>/csp/sklad2/skladRules.csr</Default>
+</Parameter>
+</Class>
+</Export>

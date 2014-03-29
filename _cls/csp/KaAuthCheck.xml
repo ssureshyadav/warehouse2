@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.KaAuthCheck">
+<Description>
+Закрытая страница-сервис, проверяющая имя и хеш пароля</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62650,41454.786708</TimeCreated>
+
+<Parameter name="PRIVATE">
+<Default>1</Default>
+</Parameter>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	m args=%request.Data
+	s login=$g(args("login",1)), ClienthashHex=$zcvt($g(args("hash",1)),"U")
+	s ssid=$system.Encryption.Base64Encode(%session.Key)
+	s passw="" &sql(Select Password Into :passw From Common.Kontragent Where Code=:login)
+
+	s hash=$system.Encryption.MD5Encode(ssid_passw)
+	s serverHex=..EncodeHash(hash)
+	s hashHexUpperCase = $ZCVT(ClienthashHex,"U")
+	
+	if hashHexUpperCase=serverHex {
+		s %session.Data("Login")=login 
+		s %session.AppTimeout=10800 ;3 часа * 60 мин * 60 сек
+		w 1
+	} else {
+		k %session.Data("Login") w 0
+	}	
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="EncodeHash">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>hash:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s serverHex="",len=$l(hash)
+	f i=1:1:len 
+	{
+		s byteHex=$zh($a($e(hash,i))) 
+		s:$l(byteHex)=1 serverHex=serverHex_"0"
+		s serverHex=serverHex_byteHex
+	}
+	q serverHex
+]]></Implementation>
+</Method>
+</Class>
+</Export>
