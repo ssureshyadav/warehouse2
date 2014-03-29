@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.jqgrid412src">
+<Super>%CSP.Page</Super>
+<TimeCreated>62370,53039.819303</TimeCreated>
+
+<Parameter name="CONTENTTYPE">
+<Description><![CDATA[
+Specifies the default content type for the page.  This can be overriden using the
+&lt;CSP:CONTENT TYPE=&gt; tag, or by setting the <b>%response</b>.ContentType property
+in the <method>OnPreHTTP</method> method.  The default value if this parameter is
+not set is text/html.]]></Description>
+<Default>text/javascript</Default>
+</Parameter>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ &js<
+ 
+ >
+ Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

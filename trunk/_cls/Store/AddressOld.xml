@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Store.AddressOld">
+<Description>
+Структура адреса</Description>
+<Super>%Persistent</Super>
+<TimeCreated>62301,60132.204748</TimeCreated>
+
+<Property name="Depot">
+<Description>
+Склад</Description>
+<Type>Depot</Type>
+<Required>1</Required>
+<Parameter name="CAPTION" value="Склад"/>
+</Property>
+
+<Index name="DepotIndex">
+<Properties>Depot</Properties>
+</Index>
+
+<Property name="Code">
+<Description>
+Элемент адреса</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Элемент адреса"/>
+</Property>
+
+<Index name="NewIndex1">
+<Properties>Code</Properties>
+</Index>
+
+<Property name="Name">
+<Description>
+Наименование</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Наименование"/>
+</Property>
+
+<Property name="Comment">
+<Description>
+Справочная информация</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Справочная информация"/>
+</Property>
+
+<Property name="Parent">
+<Description>
+Родитель</Description>
+<Type>%String</Type>
+<SqlComputeCode> Set {*} = $Piece({Code},"*",1,$Length({Code},"*")-1)</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+<Parameter name="CAPTION" value="Родитель"/>
+</Property>
+
+<Index name="ParentIndex">
+<Properties>Parent</Properties>
+</Index>
+
+<Property name="tempstore">
+<Description>
+Временное хранение</Description>
+<Type>%String</Type>
+<Parameter name="CAPTION" value="Временное хранение"/>
+</Property>
+
+<Property name="Size1">
+<Description>
+Максимальный объём ячейки</Description>
+<Type>%Numeric</Type>
+<Parameter name="SCALE" value="3"/>
+</Property>
+
+<Property name="Currentsize">
+<Description>
+Текущий объём ячейки</Description>
+<Type>%Numeric</Type>
+<Parameter name="SCALE" value="3"/>
+</Property>
+
+<Property name="Weight">
+<Description>
+Максимальная нагрузка на ячейку</Description>
+<Type>%Numeric</Type>
+<Parameter name="SCALE" value="3"/>
+</Property>
+
+<Property name="Currentweight">
+<Description>
+Текущая нагрузка на ячейку</Description>
+<Type>%Numeric</Type>
+<Parameter name="SCALE" value="3"/>
+</Property>
+
+<Property name="oldnumb">
+<Description>
+Старый номер</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="speed">
+<Description>
+Скорость доступа</Description>
+<Type>%Numeric</Type>
+</Property>
+
+<Index name="speedind">
+<Properties>speed</Properties>
+</Index>
+
+<Property name="block">
+<Description>
+Состояние</Description>
+<Type>%String</Type>
+<InitialExpression>1</InitialExpression>
+<Parameter name="DISPLAYLIST" value=",Используется,Заблокировано"/>
+<Parameter name="VALUELIST" value=",1,0"/>
+</Property>
+
+<Property name="AddressName">
+<Description>
+Адрес ячейки</Description>
+<Type>%String</Type>
+<Calculated>1</Calculated>
+<SqlComputeCode>Set {AddressName}=##class(Store.Action).AddressPath({ID})</SqlComputeCode>
+<SqlComputed>1</SqlComputed>
+<Parameter name="CAPTION" value=",display=none"/>
+</Property>
+
+<Query name="Common">
+<Type>%SQLQuery</Type>
+<FormalSpec>Depot</FormalSpec>
+<SqlQuery>SELECT Parent,Code,Name,ID FROM "Address"
+where Depot=:Depot
+ ORDER BY Code</SqlQuery>
+</Query>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Store.AddressOldD</DataLocation>
+<DefaultData>AddressOldDefaultData</DefaultData>
+<IdLocation>^Store.AddressOldD</IdLocation>
+<IndexLocation>^Store.AddressOldI</IndexLocation>
+<StreamLocation>^Store.AddressOldS</StreamLocation>
+<Data name="AddressOldDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>block</Value>
+</Value>
+<Value name="3">
+<Value>Code</Value>
+</Value>
+<Value name="4">
+<Value>Comment</Value>
+</Value>
+<Value name="5">
+<Value>Currentsize</Value>
+</Value>
+<Value name="6">
+<Value>Currentweight</Value>
+</Value>
+<Value name="7">
+<Value>Depot</Value>
+</Value>
+<Value name="8">
+<Value>Name</Value>
+</Value>
+<Value name="9">
+<Value>oldnumb</Value>
+</Value>
+<Value name="10">
+<Value>Parent</Value>
+</Value>
+<Value name="11">
+<Value>Size1</Value>
+</Value>
+<Value name="12">
+<Value>speed</Value>
+</Value>
+<Value name="13">
+<Value>tempstore</Value>
+</Value>
+<Value name="14">
+<Value>Weight</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

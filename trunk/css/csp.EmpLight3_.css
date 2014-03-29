@@ -1,0 +1,59 @@
+body {padding:0px 5px;margin:0px;}
+.pageLegend { /*Шапка страницы*/
+	height:29px;
+	margin:0px;padding:0px;
+	font: bold 18px "Arial" ;
+	text-align:center; vertical-align:center;
+	background-color: #e9f3ff;
+	color: rgb(0,0,102);
+	border-bottom: rgb(0,0,102) 1px solid;
+}
+.button { 
+	border:1px solid #333;
+	background-color:#e9f3ff;
+	padding:3px 10px;
+	text-align:center; 
+}
+label {color:#339;padding:3px;}
+/*Размер колонок таблицы*/
+.c1 {width:200px;}
+.c2 {width:75px;}
+.c3 {width:150px;}
+.c4 {width:130px;}
+.c5 {width:150px;}
+.c6 {width:160px;}
+.c7 {width:140px;}
+/*филдсет со списком инструкций*/
+#fsInstr {display:block;min-width:1050px; margin-right:auto;}
+/*Шапка и таблица с инструкциями*/
+#TIH,#TIB { 
+	border-collapse:collapse;
+	border:solid 1px silver;
+	table-layout:fixed;
+	color:#000;
+	font-size: 12px;
+}
+#TIH td, #TIH th, #TIB td {
+	border-collapse:collapse;
+	border:solid 1px #ccf;
+	padding: 2px;
+}
+/*Название колонок в шапке таблицы*/
+th a {font: 12px normal ! important; color: #339 ! important;  }
+/*Область прокрутки с таблицей инструкций*/
+#TIBbox {height:350px;overflow:auto;}
+#TIB tr {height:20px;}
+/*Подсветка строки*/
+.hover {background-color:#bbddff;}
+/*Кнопки действий над документами*/
+#TIB button {padding:0px;border:0px none; display:inline-block;width:24px;height:24px;
+	background-color:transparent;
+	background-position:0px 0px;
+	background-repeat: no-repeat;
+}
+.state, .stateDoc {background-image:url('../images/ok.gif');}
+.print, .printDoc {background-image:url('../images/print.gif');}
+.post {background-image:url('../images/post.gif');}
+.new {background-image:url('../images/new.gif');}
+.edit {background-image:url('../images/edit.gif');}
+.out {background-image:url('../images/Disabledok.gif');}

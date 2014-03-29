@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csr.csp.SkladLittleButton">
+<ClassType/>
+<Hidden>1</Hidden>
+<Import>User</Import>
+<Language>cache</Language>
+<ProcedureBlock>0</ProcedureBlock>
+<Super>%CSP.Rule</Super>
+<TimeCreated>62900,11392.297584</TimeCreated>
+
+<Method name="CompilerMethod1">
+<CodeMode>code</CodeMode>
+<Language>cache</Language>
+<ReturnType/>
+<Implementation><![CDATA[
+	 s id=##this.GetAttribute("id")
+	 s style=##this.GetAttribute("style")
+	 s name=##this.GetAttribute("name")
+	 s onclick=##this.GetAttribute("onclick")
+	 s alt=##this.GetAttribute("alt")
+]]></Implementation>
+</Method>
+
+<Method name="RenderStartTag">
+<CodeMode>code</CodeMode>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	New element Set element=##this
+	Set %statuscode=$$$OK Do ..CompilerMethod1()
+	Quit:$$$ISERR(%statuscode) %statuscode
+	Do ..WriteCSPText("",1)
+	Do ..WriteCSPText("<img src=""images/##($G(name,""brace""))##.gif"" onmouseover=""##($G(id))##.src='images/On##($G(name,""brace""))##.gif'"" onmouseout=""##($G(id))##.src='images/##($G(name,""brace""))##.gif'""  id=""##($G(id))##"" name=""##($G(id))##"" title=""##($G(alt))##"" alt=""##($G(alt))##"" onclick=""##($G(onclick))##"" style=""##($G(style))##"">",0)
+	Quit $$$SKIPCHILDREN
+]]></Implementation>
+</Method>
+
+<Parameter name="CSRURL">
+<Default>/csp/sklad2/skladRules.csr</Default>
+</Parameter>
+</Class>
+</Export>

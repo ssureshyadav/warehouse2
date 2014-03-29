@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.RashPlatej">
+<Description>
+Связь платёжки и расходной</Description>
+<Super>%Persistent</Super>
+<TimeCreated>62303,45162.091378</TimeCreated>
+
+<Property name="Rash">
+<Description>
+Расходная накладная</Description>
+<Type>Docs.Rash</Type>
+<Required>1</Required>
+</Property>
+
+<Index name="Rash">
+<Properties>Rash</Properties>
+</Index>
+
+<Property name="Platej">
+<Description>
+Платёжка</Description>
+<Type>Docs.Platejka</Type>
+<Required>1</Required>
+</Property>
+
+<Index name="Platej">
+<Properties>Platej</Properties>
+</Index>
+
+<Property name="Summa">
+<Description>
+Сумма</Description>
+</Property>
+
+<Property name="NewProperty1">
+<Type>%String</Type>
+<Required>1</Required>
+</Property>
+
+<Index name="NewIndex1">
+<IdKey>1</IdKey>
+<PrimaryKey>1</PrimaryKey>
+<Properties>NewProperty1</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Method name="%OnBeforeSave">
+<Description><![CDATA[
+This callback method is invoked by the <METHOD>%Save</METHOD> method to 
+provide notification that the object is being saved. It is called before 
+any data is written to disk.
+
+<P><VAR>insert</VAR> will be set to 1 if this object is being saved for the first time.
+
+<P>If this method returns an error then the call to <METHOD>%Save</METHOD> will fail.]]></Description>
+<FormalSpec>insert:%Boolean</FormalSpec>
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	s:$ISOBJECT(##this.Rash) RashId = ##this.Rash.%Id()
+	s:$ISOBJECT(##this.Platej) PlatejId = ##this.Platej.%Id()
+	
+	s ##this.NewProperty1 = RashId_"||"_PlatejId
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Docs.RashPlatejD</DataLocation>
+<DefaultData>RashPlatejDefaultData</DefaultData>
+<IdLocation>^Docs.RashPlatejD</IdLocation>
+<IndexLocation>^Docs.RashPlatejI</IndexLocation>
+<StreamLocation>^Docs.RashPlatejS</StreamLocation>
+<Data name="RashPlatejDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Platej</Value>
+</Value>
+<Value name="3">
+<Value>Rash</Value>
+</Value>
+<Value name="4">
+<Value>Summa</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

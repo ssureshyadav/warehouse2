@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.KaOrders">
+<Description>
+Список заявок - часть страницы csp.Ka</Description>
+<IncludeCode>csp,web</IncludeCode>
+<Super>%CSP.Page,csp.KaProtected</Super>
+<TimeCreated>62482,83020.332849</TimeCreated>
+
+<Parameter name="DOMAIN">
+<Default>sklad2</Default>
+</Parameter>
+
+<Method name="OnPage">
+<Description>
+write содержимое страницы</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	 &html<<table id="KaOrdersg"></table><div id="KaOrdersb"></div>
+		<script type="text/javascript">
+		$(function(){
+			
+		 var openDoc=function(id){
+			 if (!id) id="";
+			 window.location='#(..Link("csp.Instruction.cls"))#?id='+id;
+		 };
+		
+		 var GRID="#KaOrdersg", $GRID=$(GRID), BAR="#KaOrdersb"
+		 , URL='#(..Link("json.KaOrders.cls"))#';
+		 
+		 //функция определения выделенной строки
+		 var gid=function(){
+				return $GRID.jqGrid("getGridParam","selrow");
+		 };
+		 
+		 //настройки грида
+		 var GOPTS={ 
+				url: URL, editurl: URL
+				,datatype: "json"
+				,jsonReader : { repeatitems: false }
+				,sortname: "d", sortorder: "desc"
+				,colModel: [
+					{name:"id",hidden: true}
+					,{name:"d",label:'#($$$Text("Дата"))#',width:120
+					, search: true
+					, stype: 'text'
+					, searchoptions:{
+								dataInit: function(elem){
+									/*$(elem).datepicker(
+										{dateFormat:'yy-mm-dd'
+											,changeMonth: true
+											,changeYear: true
+											,yearRange: "2006:+1"
+										}
+									);*/	
+								}	
+							}
+						
+						}
+						,{name:"nm",label:'#($$$Text("Наименование документа"))#'
+							,width:450
+							, search:true
+						
+						}
+						,{name:"ste",index:"st", label:'#($$$Text("Статус"))#'
+							,width:150
+							, search:true
+							, stype: 'select'
+							, searchoptions: {value:
+								#(..wInstrStateSelOpts())#
+							}
+						}
+					]
+				 ,pager: BAR 
+				 ,viewrecords: true
+				 ,height: 300
+				 ,hidegrid: false
+				 ,gridview: true ,rownumbers: true,viewrecords: true,rowNum:100
+				 ,hoverrows: true ,scroll: 1
+				 ,ondblClickRow: function(id){openDoc(id);}
+ 	};
+		
+	//восстанавливаем пользовательские настройки
+  	var userSettings=$GRID.jqGrid("userSettings", GOPTS);
+ 
+	$GRID.jqGrid( userSettings )
+	.jqGrid('navGrid',BAR, {
+	       	add: false
+       		, edit:false
+       		, del:false 
+       		, view:false
+       		, search:false
+    }).jqGrid('navButtonAdd',BAR,{ 
+   			caption:'#($$$Text("Печать"))#', buttonicon:"ui-icon-print"
+   			, title:'#($$$Text("Распечатать документ"))#' 
+   			, position: 'first'
+   			, onClickButton: function(){
+	   			var id=gid();
+	   			window.open('#(..Link("screen/ChiefInstr.csp"))#?docid='+id);
+	   		}
+   })
+   .jqGrid('filterToolbar',{searchOnEnter:false})
+   .jqGrid('gridResize',{});
+ 	
+ 	//добавляем необходимые обработчики
+	//добавляем контекстное меню
+	//перетаскивание колонок, изменение размеров	
+	$(GRID).jqGrid("improve",{contextmenu: false});	 
+ 	
+});
+</script>>
+  Q $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="wInstrStateSelOpts">
+<Description>
+Выводит Display/Value списки значений в определенном формате</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	d ##class(Utils.Class).wVDList("Operation.Instructions","State")
+ Q ""
+]]></Implementation>
+</Method>
+</Class>
+</Export>

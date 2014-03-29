@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.Ka">
+<Description>
+Главная страница для подсистемы web-доступа контрагентов</Description>
+<IncludeCode>csp,web</IncludeCode>
+<Super>csp.Design,csp.KaProtected</Super>
+<TimeCreated>62676,56341.860712</TimeCreated>
+
+<Parameter name="CHARSET">
+<Default>utf-8</Default>
+</Parameter>
+
+<Method name="wTitle">
+<Description>
+write заголовок страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	d ##super()
+	w $$$Text("Aska Elc")
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wCss">
+<Description>
+write заголовок страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ 
+ &html<
+ #($$$icon("box.ico"))#
+ <link rel='stylesheet' type='text/css' 
+ 	href='css/redmond/jquery-ui-1.8.22.custom.css'
+ 	class='ui-theme'
+ />
+ <link rel='stylesheet' type='text/css' href='css/ui.jqgrid-4.4.0.css'/>
+ <style type="text/css">
+ 	.ui-widget {font-size: .8em}
+ </style>
+ >
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="wBody">
+<Description>
+write содержимое страницы</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	 &html<<table width=100%>
+	 	<tr><td align="left" 
+	 		style="font-family:Arial;color:#555;font-size:12px">
+	 			#($$$Text("Cервисный центр"))#: <b>#($$$client)#</b> #($$$clientName)#
+	 	</td>
+	 	<td align="right">
+	 		<button id='bExit' type="button">#($$$Text("Выход"))#</button>
+	 	</td>
+	 	</tr></table>
+	 	
+	 	<div id="instabs">
+			<ul>
+				<li><a href='#(..Link("csp.KaChat.cls"))#'>#($$$Text("Обратная связь"))#</a></li>
+				<li><a href='#(..Link("csp.KaReports.cls"))#'>#($$$Text("Отчёты"))#</a></li>
+			>
+				#;<li><a href='#(..Link("csp.KaOrders.cls"))#'>#($$$Text("Заявки"))#</a></li>
+				&html<
+			</ul>
+			
+		</div>>
+	Q ""
+]]></Implementation>
+</Method>
+
+<UDLText name="T">
+<Content><![CDATA[
+//Скрипты
+
+]]></Content>
+</UDLText>
+
+<Method name="wJs">
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	&html<
+		<script type='text/javascript' src='js/jquery-1.7.2.min.js'></script>
+		<script type='text/javascript' src='js/jquery-ui-1.8.22.custom.min.js'></script>
+		<script type='text/javascript' src='js/i18n/grid.locale-ru.js'></script>
+		<script type='text/javascript' src='js/jquery.jqGrid-4.4.0.min.js'></script>
+		<script type='text/javascript' src='js/grid.setcolumns.min.js'></script>
+		<script type='text/javascript' src='js/grid.usersettings.min.js'></script>
+		<script type='text/javascript' src='js/jquery.cookie.min.js'></script>
+		<script type='text/javascript' src='js/jquery.themeloader.min.js'></script>
+		<script type='text/javascript' src='js/jquery.obj2json.js'></script>
+		<script type='text/javascript' src='js/jquery.contextmenu.min.js'></script>
+		<script type="text/javascript">
+		$(function(){
+			
+		 $("#bExit").button({icons:{secondary: 'ui-icon-circle-close'}}).click(function(){
+			window.location='#(..Link("csp.KaAuth.cls"))#';
+		 });
+		
+		 $("#instabs").tabs({ cookie: { expires: 30 } });
+		 
+ 	
+});
+</script>>
+  Q ""
+]]></Implementation>
+</Method>
+</Class>
+</Export>

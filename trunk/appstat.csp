@@ -1,0 +1,21 @@
+<html><head></head><body onload='info();'><form id='data' name='data'>
+<input type='hidden' id='nav' name='nav' />
+</form>
+<script type='text/javascript'>
+function info(){
+   // версия ie по глобальным объектам   
+   var elem = document.getElementById('nav'); if (!elem) return;
+   if (document.compatMode)  elem.value="6+"; 
+   if (window.XMLHttpRequest) elem.value+="7+";     
+   if (document.querySelector) elem.value+="8+";
+   if (document.addEventListener) elem.value+="9+";
+   if (window.atob) elem.value += "10+"; 
+   
+    #($S( $g(%request.Data("nav",1))="":"data.submit()",1:"" ))#
+}
+</script></body></html>
+<script runat='server' language='cache' method='OnPreHTTP' returnType='%Boolean'>
+   s nav = $g(%request.Data("nav",1)) 
+   s:nav'="" ^appstat.navD($i(^appstat.navD))=nav
+   Q 1
+</script>

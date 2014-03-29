@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.KaReports">
+<Description><![CDATA[
+Список отчетов по заявкам
+Часть страницы <class>csp.KaOrders</class>
+Самостоятельно в качестве страницы не выступает]]></Description>
+<Super>%CSP.Page,csp.KaProtected</Super>
+<TimeCreated>62651,41274.753077</TimeCreated>
+
+<Parameter name="DOMAIN">
+<Description>
+Точка локализации</Description>
+<Default>sklad2</Default>
+</Parameter>
+
+<Method name="OnPage">
+<Description>
+Только часть страницы</Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+  &html<<table id="KaReportsg"></table><div id="KaReportsb"></div>
+	<script type="text/javascript">
+	$(function(){
+				
+	var GRID="#KaReportsg", $GRID=$(GRID)
+	BAR="#KaReportsb",URL='#(..Link("json.KaReports.cls"))#';
+	var printDoc=function(id){
+		if (!id) id=""; 
+		if (id=="")
+		{
+			alert("Укажите, пожалуйста, отчёт.");
+			return;
+		}
+		var href='#(..Link("screen/otchet2.csp"))#';
+		var ch=(href.indexOf("?")>-1)?"&":"?";
+		window.open(href+ch+"id="+id);
+	};
+	 
+	var GOPTS={
+			url: URL, editurl: URL
+			,datatype: "json"
+			,jsonReader : { repeatitems: false }
+			,colModel: [
+				{name:"id",hidden: true}
+				,{name:"dt",label:'#($$$Text("Дата"))#',width:120
+					, search:true
+					, stype: 'text'
+					, searchoptions:{
+						dataInit: function(elem){
+							/*$(elem).datepicker(
+								{dateFormat:'yy-mm-dd'
+									,changeMonth: true
+									,changeYear: true
+									,yearRange: "2006:+1"
+								}
+							);*/	
+						}	
+					}
+				
+				}
+				,{name:"nm",label:'#($$$Text("Наименование документа"))#',width:450
+					, search:true
+				}
+			]
+		,sortname: "dt", sortorder: "desc"
+		,pager:BAR 
+		,viewrecords:true
+		,height:300
+		,hidegrid: false
+		,gridview:true ,rownumbers:true,viewrecords:true,rowNum:100
+		,hoverrows:true ,scroll:1
+		,ondblClickRow: function(id){openDoc(id);}
+	}; 
+	
+ var userSettings=$GRID.jqGrid("userSettings", GOPTS); 
+	 
+ $GRID.jqGrid( userSettings )
+	 	.jqGrid('navGrid',BAR, {
+       	add: false
+   		, edit:false
+   		, del:false 
+   		, view:false
+   		, search:false
+	}).jqGrid('navButtonAdd',BAR,{ 
+		caption:'#($$$Text("Печать"))#', buttonicon:"ui-icon-print"
+		,position: 'first'
+		, title:'#($$$Text("Распечатать документ"))#' 
+		, onClickButton: function(id){
+			var id=$(GRID).jqGrid("getGridParam","selrow");
+			printDoc(id);
+		}
+   })
+   .jqGrid('filterToolbar',{searchOnEnter:false})
+   .jqGrid('gridResize',{});
+   $GRID.jqGrid("improve");	  
+}); </script>>
+  Q $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

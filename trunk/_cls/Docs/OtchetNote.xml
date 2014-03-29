@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Docs.OtchetNote">
+<Description>
+Служебная записка о гарантийном ремонте</Description>
+<Super>Docs.Super</Super>
+<TimeCreated>62303,85794.764203</TimeCreated>
+
+<Property name="Manager">
+<Description>
+Менеджер</Description>
+<Type>%String</Type>
+</Property>
+
+<Property name="Otchet">
+<Description>
+Отчёт</Description>
+<Type>Docs.Otchet</Type>
+</Property>
+
+<Property name="OurCompany">
+<Description>
+Наше юр лицо</Description>
+<Type>Common.Kontragent</Type>
+</Property>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DefaultData>OtchetNoteDefaultData</DefaultData>
+<Data name="OtchetNoteDefaultData">
+<Structure>listnode</Structure>
+<Subscript>"OtchetNote"</Subscript>
+<Value name="1">
+<Value>Manager</Value>
+</Value>
+<Value name="2">
+<Value>Otchet</Value>
+</Value>
+<Value name="3">
+<Value>OurCompany</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>

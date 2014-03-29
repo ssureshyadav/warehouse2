@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.ShowLicense">
+<Super>%CSP.Page</Super>
+<TimeCreated>62352,74679.127192</TimeCreated>
+
+<Method name="OnPage">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ &html<<html>
+ <head>
+ </head>
+ <body><div style="white-space:pre">>
+ ;To do...
+ d ^ShowLicense
+ 
+ w $system.Version.GetVersion()
+ &html<</div></body>
+ </html>>
+ Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

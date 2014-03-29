@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="json.KaOrders">
+<Description>
+служба только для просмотра заявок
+в подсистеме web доступа контрагентов</Description>
+<Super>csp.KaProtected,json.service2</Super>
+<TimeCreated>62482,82508.423363</TimeCreated>
+
+<Parameter name="CHARSET">
+<Description><![CDATA[
+Specifies the default character set for the page.  This can be overriden using the
+&lt;CSP:CONTENT CHARSET=&gt; tag, or by setting the <b>%response</b>.CharSet property
+in the <method>OnPreHTTP</method> method.  If this parameter is not specified, then
+for Unicode systems the default charset is utf-8 and for 8-bit systems it is the
+system default charset.]]></Description>
+<Default>utf-8</Default>
+</Parameter>
+
+<Parameter name="CLASSNAME">
+<Description>
+Имя Persistent класса для которого создается служба
+Соглашение: имя класса и имя таблицы совпадает
+Используйте Cache правильно!</Description>
+<Type>%String</Type>
+<Default>Operation.Instructions</Default>
+</Parameter>
+
+<Parameter name="FIELDS">
+<Description>
+Список SQL полей, возможно с синонимами "Name As nm"
+ID можно не указывать, т.к. выбирается обязательно
+Внимание!, имена синонимов чувствительны к регистру (для javascript клиента)
+В отличие от имен полей (SQL на стороне сервера)
+Соглашение: синоним писать  через " as " </Description>
+<Type>%String</Type>
+<Default>Name as nm,json.service2_DATESTR3(Dat) as d,%external(State) as ste,State as st</Default>
+</Parameter>
+
+<Parameter name="FTYPES">
+<Description>
+Типы полей, по умолчанию %String
+Используются при построении фильтра
+тип %String </Description>
+<Type>%String</Type>
+<Default>%String,%String,%String,%Integer</Default>
+</Parameter>
+
+<Parameter name="OBJECTCONCURRENCY">
+<Description>
+Как открывать объект на редактирование</Description>
+</Parameter>
+
+<Parameter name="PARENTFIELD">
+<Description><![CDATA[
+Поле, связанное с родительским объектом
+Например, поле документ для строк накладной
+Используется при отборе записей чтобы не показывать строки из всех накладных
+Используется в методе <method>GetWhere</method>]]></Description>
+<Type>%String</Type>
+<Default>oper</Default>
+</Parameter>
+
+<Method name="OnPage">
+<Description>
+Вывод на страницу </Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+  m qa=%request.Data 
+ 
+  #;Так получилось что в этой службе у целевого класса 
+  #;тоже есть поле oper, и по нему надо фильтровать записи
+  s qa("oper",1)=10
+  
+  #; обязательный параметр
+  s qa("where")=" and Kontr->Code=?"
+  s qa("where","params")=1, qa("where","params",1)=$$$client
+  
+  Q ..Out(.qa)
+  Quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

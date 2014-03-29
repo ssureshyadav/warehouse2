@@ -1,0 +1,46 @@
+<html>
+<head>
+<title>	Проверка дубликатов серийных номеров в отчёте контрагента </title>
+<style>
+BODY { font-family: Arial;margin: 30px }
+</style>
+</head>
+
+<body>
+<server>
+ s docObj = ##class(Docs.Otchet).%OpenId(%request.Get("id"))
+ 
+ if $ISOBJECT(docObj),$ISOBJECT(docObj.Items)
+ {
+	 w "<h2>Отчёт "_docObj.Name_" от "_$ZD(docObj.Dat,1)_"</h2>"
+	 w "<br><br>"
+	 W "<table cellpadding=7 cellspacing=0 border=1>"
+	 w "<tR>"
+	 	w "<th>№ п/п"
+	 	w "<th>Товар"
+	 	w "<th>Серийный номер"
+	 	w "<th>Копия"
+	 w "</tr>"
+	  s i=""
+	  for  
+	  {
+		    s i=docObj.Items.Next(i) 
+		    q:i=""
+		    i $i(CountLines)
+		    w "<tr>"
+		    s item=docObj.Items.GetAt(i)
+		    w "<td>"_CountLines
+		    w "<td>"_item.Goods.FullName_" "
+		    w "<td>"_item.serial_" "
+		    w "<td> "
+		    if ($D(Serials(item.serial_" "))) w $G(Serials(item.serial_" "))
+		    w "</tr>"
+		    
+		    if '$D(Serials(item.serial_" ")) s Serials(item.serial_" ")=CountLines
+	  }
+	 w "</table>"
+ }
+
+</server>
+</body>
+</html>

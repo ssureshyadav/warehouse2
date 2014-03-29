@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="csp.Logon">
+<Description>
+Устарела - оставлена для совместимости
+Страница входа в подсистему web доступа для контрагентов</Description>
+<ProcedureBlock>1</ProcedureBlock>
+<Super>%CSP.Page</Super>
+<TimeCreated>62650,40877.487019</TimeCreated>
+
+<Method name="OnPreHTTP">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Boolean</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	s %response.Redirect=..Link("csp.KaAuth.cls")
+	Q 1
+]]></Implementation>
+</Method>
+</Class>
+</Export>

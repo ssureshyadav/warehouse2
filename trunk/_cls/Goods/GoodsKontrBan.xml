@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="Goods.GoodsKontrBan">
+<Description>
+Запрет использования товара контрагентом</Description>
+<Super>%Persistent</Super>
+<TimeCreated>62768,43373.94115</TimeCreated>
+
+<Property name="Goods">
+<Type>Goods.Goods</Type>
+</Property>
+
+<Property name="Kontr">
+<Type>Common.Kontragent</Type>
+</Property>
+
+<Index name="GoodsKontr">
+<Properties>Goods,Kontr</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Index name="KontrGoods">
+<Properties>Kontr,Goods</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Method name="Convert">
+<Description>
+перетащить баны из старой системы в новую</Description>
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+	k Array,Array2
+	
+	&sql(declare zz cursor for 
+		select ID,kban into :GoodsId,:kban
+		from Goods.Goods)
+	&sql(open zz)
+	f  &sql(fetch zz) q:SQLCODE  d
+	. s Array(GoodsId)=kban
+	&sql(close zz)
+	
+	/*
+	&sql(declare zz2 cursor for 
+		select ID into :KontrId 
+		from Common.Kontragent)
+	&sql(open zz)
+	f  &sql(fetch zz) q:SQLCODE  d
+	. m Array2(KontrId)=Array
+	&sql(close zz)
+	*/
+	
+	//&sql(delete from Goods.GoodsKontrBan)
+	s goods = "" f  s goods=$O(Array(goods),1,data) q:goods=""  d
+	. //w "goods="_goods,!
+	. for i=1:1:$L(data,",") do
+	. . s kontr=$P(data,",",i)
+	. . q:kontr=""
+	. . s ^GoodsKontrBan("Goods",goods,kontr)=""
+	. . s ^GoodsKontrBan("Kontr",kontr,goods)=""
+	. . //&sql(insert into Goods.GoodsKontrBan (Goods,Kontr) VALUES (:goods,:kontr) )
+	q
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^Goods.GoodsKontrBanD</DataLocation>
+<DefaultData>GoodsKontrBanDefaultData</DefaultData>
+<IdLocation>^Goods.GoodsKontrBanD</IdLocation>
+<IndexLocation>^Goods.GoodsKontrBanI</IndexLocation>
+<StreamLocation>^Goods.GoodsKontrBanS</StreamLocation>
+<Data name="GoodsKontrBanDefaultData">
+<Structure>listnode</Structure>
+<Subscript/>
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>Goods</Value>
+</Value>
+<Value name="3">
+<Value>Kontr</Value>
+</Value>
+</Data>
+</Storage>
+</Class>
+</Export>
