@@ -69,6 +69,15 @@
 <Parameter name="VALUELIST" value=",0,1"/>
 </Property>
 
+<Property name="GotPaperRash">
+<Description>
+Накладная получена</Description>
+<Type>%String</Type>
+<InitialExpression>0</InitialExpression>
+<Parameter name="DISPLAYLIST" value=",Нет,Да"/>
+<Parameter name="VALUELIST" value=",0,1"/>
+</Property>
+
 <Property name="DatePaperProve">
 <Description>
 Дата проверки бумажного отчёта</Description>
@@ -212,6 +221,24 @@ CreatePaperOthetErr
 ]]></Implementation>
 </Method>
 
+<Method name="SetGotTorg12">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>DocId:%String=""</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ 	s obj=..%OpenId(DocId)
+ 	q:'$ISOBJECT(obj) "Невозможно открыть документ отчёта "_DocId
+ 	s obj.GotPaperRash = 1
+ 	s ok = obj.%Save()
+ 	if $$$ISOK(ok) q 1
+ 	
+	q "Извините, ошибка при попытке сохранить документ отчёта."
+SetGotTorg12Err
+ 	$$$WriteError($ZE)
+ 	q "Извините. Ошибка."
+]]></Implementation>
+</Method>
+
 <Storage name="Default">
 <Type>%Library.CacheStorage</Type>
 <DefaultData>OtchetDefaultData</DefaultData>
@@ -250,6 +277,9 @@ CreatePaperOthetErr
 </Value>
 <Value name="11">
 <Value>MOVersion</Value>
+</Value>
+<Value name="12">
+<Value>GotPaperRash</Value>
 </Value>
 </Data>
 </Storage>

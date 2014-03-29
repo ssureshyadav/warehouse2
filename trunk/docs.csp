@@ -565,9 +565,9 @@ function GotTorg12()
   <Table width=100%><tr><td width=100%>
 <sklad:LittleButton name="new" id="newbut" onclick="CreateDocument('')" alt="Создать документ">
 <sklad:LittleButton name="edit" id="editbut" onclick="CreateDocument(docums.ItemID)" alt="Редактировать документ">
-<!--
-sklad:LittleButton name="ok" id="okbut2" onclick="processdoc()" alt="Обработать документ"
--->
+
+<sklad:LittleButton name="ok" id="okbut2" onclick="processdoc()" alt="Обработать документ">
+
 <sklad:LittleButton name="print" id="okbwut2" onclick="prnt(docums.ItemID,docums.ClassName,'')" alt="Печать документа">
 <sklad:LittleButton name="printword" id="PrntButWord" onclick="prnt(docums.ItemID,docums.ClassName,'word')" alt="Печать документа Word">
 <!--

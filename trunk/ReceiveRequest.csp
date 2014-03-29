@@ -39,12 +39,12 @@
  f i=2:1:$L(Data,$C(13,10)) d  q:error'=""
  . s CurrentFileString=$P(Data,$C(13,10),i)
  . Do fileobj.WriteLine(CurrentFileString)
+ . q:CurrentFileString=""
  . s garant = $P(CurrentFileString,$C(9),3)
  . s serial = $P(CurrentFileString,$C(9),4)
  . s quantity = +$TR($P(CurrentFileString,$C(9),2)," ","")
  . if (quantity<1) s error=error_" в строке (серийный н. "_serial_", гарантийный н. "_garant_") количество меньше 1 штуки, что недопустимо."_$C(13,10)
  . if (RashOplatType=1)&&(quantity>1) s error=error_" в строке (серийный н. "_serial_", гарантийный н. "_garant_") указано более 1 штуки, что недопустимо для заявок по гарантии."_$C(13,10)
- . q:CurrentFileString=""
  . //проверка на соответствие серийного номера
  . for zz=1:1:$L(serial) d
  . . if AllowedSymbols'[$E(serial,zz) s error=error_" в серийном номере "_serial_" есть недопустимый символ "_"'"_$E(serial,zz)_"'"_$C(10,13)

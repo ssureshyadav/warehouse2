@@ -38,6 +38,7 @@
 <Description>
 № и дата выписки Справки</Description>
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="1000"/>
 </Property>
 
 <Property name="Client">
@@ -86,6 +87,7 @@
 <Description>
 Организация продавшая товар</Description>
 <Type>%String</Type>
+<Parameter name="MAXLEN" value="1000"/>
 </Property>
 
 <Property name="opispolomki">

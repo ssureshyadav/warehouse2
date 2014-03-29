@@ -24,11 +24,11 @@
 <style type="text/css">
  .caption {background-color:#e9f9ff;height:24px;text-align:center;vertical-align:center;margin-bottom:5px;}
  #forma {margin-top:10%;width:400px;border:1px solid #aaa;}
+ .btn { border: 1px solid #676767;}
 </style>
 <script language="jscript" src="common.js"></script>
 </head>
 <body onload="onload()" onkeypress="ManageWindow(this)" >
-#($G(%session.Data("user")))#
 <table width="100%"><tr><td align="center">
 
 <form name="forma" id="forma"><input type="hidden" id="SystemDrive" name="SystemDrive">
@@ -41,7 +41,8 @@
 </td></tr>
 <tr><td>Пользователь:</td><td width=50%><input type="text" name="user" value=#($G(%session.Data("login")))#></td></tr>
 <tr><td>Пароль:</td><td><input type="password" name="password" value=#($G(%session.Data("passworders")))#></td></tr>
-<tr><td colspan=2 align=center><sklad:Button onclick="startFun()" value="Войти"></td></tr>
+<tr><td colspan=2 align=center>
+<button type='button' onclick="startFun()" class='btn'>Войти</button></td></tr>
 </table>
 </form>
 
@@ -49,6 +50,9 @@
 </td></tr></table>
 
 </TABLE>
+
+<!--Собираем статистику по браузерам пользователя-->
+<iframe src='#(..Link("appstat.csp"))#' frameborder='no'></iframe>
 
 <span id="MustExist" name="MustExist" style="display:none">
 <script language="cache" runat="server">
@@ -58,33 +62,34 @@
 </script>
 </span>
 <CSP:IF CONDITION="login=7">
-	<!--input type="text" id="edtText" style="width:300px">
+    <!--input type="text" id="edtText" style="width:300px">
 <input type="button" value="test" onclick="alert(eval(edtText.value));"-->
 </CSP:IF>
 <script language="jscript">
 // #(login)#
 
  function startFun() { forma.submit(); }
-		 
+         
 function onload(){
 #(result)#
 }
 
 function hui() {
-	frameElement.document.all.MainFrameSet.rows="35px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,*,20px";
-	frameElement.document.all.statusFR.src='csp.StatusBar.cls';
-	frameElement.document.all.topFR.src='toolbar.csp';
-	frameElement.document.all.goods.src="#(Goods)#";
-	frameElement.document.all.docs.src="#(DocsPage)#";
-	frameElement.document.all.dicts.src="dicts.csp";
-	frameElement.document.all.store.src="store.csp";
-	frameElement.document.all.tuneup.src="tuneup.csp";
-	frameElement.document.all.chief.src="chief.csp";
-	frameElement.document.all.emplight.src="csp.EmpLight3.cls";
-	frameElement.document.all.analyzis.src="analyzis.csp";
-	frameElement.document.all.kontr.src="kontr.csp";
-	frameElement.document.all.finance.src="finance.csp";
-	frameElement.document.all.director.src="director.csp";
+    frameElement.document.all.MainFrameSet.rows="35px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,0px,*,20px";
+    frameElement.document.all.statusFR.src='csp.StatusBar.cls';
+    frameElement.document.all.topFR.src='toolbar.csp';
+    frameElement.document.all.goods.src="#(Goods)#";
+    frameElement.document.all.docs.src="#(DocsPage)#";
+    frameElement.document.all.dicts.src="dicts.csp";
+    frameElement.document.all.store.src="store.csp";
+    frameElement.document.all.tuneup.src="tuneup.csp";
+    frameElement.document.all.chief.src="chief.csp";
+    frameElement.document.all.emplight.src="csp.EmpLight3.cls";
+    frameElement.document.all.analyzis.src="analyzis.csp";
+    frameElement.document.all.kontr.src="kontr.csp";
+    frameElement.document.all.finance.src="finance.csp";
+    frameElement.document.all.director.src="director.csp";
+    
 }
 
 </script>

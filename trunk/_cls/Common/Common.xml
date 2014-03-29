@@ -26,6 +26,9 @@
 	s ^mtempArt("CheckSerialUnique",$I(^mtempArt("CheckSerialUnique")),"serial")=serial
 	s ^mtempArt("CheckSerialUnique",$I(^mtempArt("CheckSerialUnique")),"GarantID")=GarantID
 	
+	s serialSearch = $ZCVT(serial,"U")
+	
+	//если такого серийного нет в индексе, значит всё хорошо
 	q:'$D(^Common.Dictionary2I("serialInd"," "_serial)) 1
 	s GarantID = $O(^Common.Dictionary2I("serialInd"," "_serial,""))
 	if GarantID="" q "Удивительная ошибка. Серийный номер "_serial_" есть в индексе, но нет записи о гарантийном номере."
@@ -1148,6 +1151,8 @@ SetGarantDisabledErr
 <FormalSpec>KontrId="",GoodsString="",quant=0</FormalSpec>
 <Implementation><![CDATA[
 	s $ZT="AddGoodsToKontrErr"
+		s ^mtempArt("AddGoodsToKontr",KontrId,GoodsString)=quant
+	
 	if '+KontrId q "Невозможно зачислить запчасти на баланс, так как не указан контрагент."
 	if '+GoodsString q "Невозможно зачислить запчасти на баланс, так как они не указаны."
 	s user = $S($ISOBJECT($G(%session)):$G(%session.Data("user")),1:"")

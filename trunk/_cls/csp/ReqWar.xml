@@ -3,7 +3,7 @@
 <Class name="csp.ReqWar">
 <Description><![CDATA[
 Request - Warranty Card
-Просмотр гарантиных талонов по заявке
+Просмотр гарантийных талонов по заявке
 Заявка <class>Operation.Instructions</class>  с Type=10
 , содержит строки <class>Operation.InstructionsItems</class> 
 c полем <var>garant</var> в котором хранится номер гарантийного талона

@@ -453,6 +453,9 @@ function showReport15()
 
 <br><hr width=80%>16 <br>
 <a href="reports/InOut.csp?sessionid=#(%session.SessionId)#" target="_blank">Движение товара</a><br>
+
+<br><hr width=80%>17 <br>
+<a href="reports/InnerInstrGoods.csp?sessionid=#(%session.SessionId)#" target="_blank">Отчёт по отправленным запчастям</a><br>
 <!--
 <a href="rrr.csp">расход по брендам</a>
 -->

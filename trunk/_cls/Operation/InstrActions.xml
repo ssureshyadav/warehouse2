@@ -34,7 +34,7 @@
  
  s oldstat=instr.State
  i newstat=2 d
- . i (oldstat'=1)&(oldstat'=9) s err="Инструкция уже утверждена" q
+ . i (oldstat'=1)&(oldstat'=9)&(oldstat'=8.6) s err="Инструкция уже утверждена" q
  . i '$ISOBJECT(instr.Kontr) s err="В инструкции не указан контрагент" q
  if $G(err)'="" q err
  i newstat=9 s instr.Stat=2	//если "завершена" то закрываем документ (для записи времени и оператора)

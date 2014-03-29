@@ -322,7 +322,10 @@ Sub VBLoad(textString,TreeIsClosed)
 Dim node,I,SingleNodeString,strings,InnerSplitter,NodeText,NodeTag,key,NodeParent,Captions(2000),Values(2000),SingleNodeArray5,Blocked
 strings = Split(textString, StringSplitter)
 InnerSplitter="~"
+ThereWereMistakes = 0
 For I = 0 To (UBound(strings)-1)
+ //внутренний одноразовый FOR дл€ того чтобы из него можно было выйти во внешний (в VBscript нет CONTINUE)
+ FOR TrickyLoop = 1 TO 1
 	SingleNodeString = strings(I)
 	SingleNodeArray = Split(SingleNodeString, InnerSplitter)
 	NodeParent=SingleNodeArray(0)
@@ -339,7 +342,15 @@ For I = 0 To (UBound(strings)-1)
 	IF NodeParent="" Then
 		Set node = TreeViewID.Nodes.Add(,,key, NodeText)
 	ELSE
-		Set node = TreeViewID.Nodes.Add(NodeParent,4,key, NodeText)
+		//set kott = TreeViewID.Nodes(NodeParent)
+		//msgbox "»щем "&NodeParent&" "&kott
+		//IF ( TreeViewID.Nodes(NodeParent) Is Nothing ) THEN
+			//msgbox "Ќе нашли"&NodeParent
+			//ThereWereMistakes = 1
+			//EXIT FOR
+		//ELSE
+			Set node = TreeViewID.Nodes.Add(NodeParent,4,key, NodeText)
+		//End IF
 	End IF
 	node.Tag=NodeTag
 	node.sorted=true
@@ -359,6 +370,7 @@ For I = 0 To (UBound(strings)-1)
 		SingleNodeArray5=""
 	End If
 	Values(I+1)=SingleNodeArray5
+ NEXT
 Next
 	//string = Split(strings(I),InnerSplitter);
 	//NodeParent=string(0);
@@ -371,7 +383,7 @@ Next
 	//
 	//node.expanded=true
 	//Set node = TreeViewID.Nodes.Add(ParentKey, 4, Key2, Text)
-
+	//msgbox "ThereWereMistakes="&ThereWereMistakes
 End Sub
 
 Function getCaptionVB()

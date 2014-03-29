@@ -199,13 +199,6 @@ function TestFastGoods()
 </script>
 </head>
 <body onload="load()" >
-
-<CSP:IF CONDITION="login=7">
-	<input type="text" id="EdtTest" style="width:300px"><input type="button" id="testBtn" value="Тест быстрого окошка с товарами" onclick="TestFastGoods();"><br><br>
-	<input type="text" id="edtText" style="width:300px">
-<input type="button" value="test" onclick="alert(eval(edtText.value));">
-</CSP:IF>
-
 <TABLE cellSpacing=0 width="100%" celpadding="0" >
 <TR>
 <td width=10%><img alt="Обновить раздел" src="images/refresh.gif" onclick="window.location.reload()"></td>

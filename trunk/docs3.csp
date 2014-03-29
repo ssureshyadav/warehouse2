@@ -41,6 +41,7 @@
  <span id="ActAddFields" style="display:none;border:solid black 1">
     Неоплаченные <input type="checkbox" style="border:none;width:15px" id="ShowUnpaid" title="Выводить только неоплаченные акты">
  </span>
+
 <sklad:LittleButton name="ok" id="okbut" onclick="okfunc()" alt="Показать документы"><br>
 <SKLADList:listview width=100% height=150 id="docums" onAddColumns="showdocums()" zClick="showitems()" zonDblClick="CreateDocument(docums.ItemID)" />
   <Table width=100%><tr><td width=100%>
@@ -81,7 +82,7 @@ d ..wCheckSerialButton( "bCheckSerialOtchet"
     , $$$Text("Перейти на страницу проверки серийных номеров")
 )
 </server>
- 
+    <sklad:LittleButton name="card" id="btnGotTorg12" onclick="GotTorg12()" alt="Накладная получена">
 </span>
 
 <!-- кнопки инструкции руководителя -->
@@ -110,11 +111,11 @@ d ..wCheckSerialButton( "bCheckSerialAct"
 #; Кнопка ПРОСМОТРА серийного номера
 
 s urlargs("sessionid")=%session.SessionId ;дополнительно нуждается в ид сессии
-
+/*
 &html<<button id='bOpenSerialAct' class='btn bOpenSerial' title='#($$$Text("Просмотр серийного номера"))#'
     data-url='#(..Link("garant.csp",.urlargs,1))#'
 >#($$$Text("Открыть серийный"))#</button>>
-
+*/
 </server>
 
 </span>
@@ -569,6 +570,14 @@ function SetBrakAnswer()
     ok = #server(..SetBrakAnswer(DocId,Answer))#
     if (isNaN(ok)){alert(ok);}
     else{alert('Ответ на негативный отзыв сохранён');}
+}
+
+function GotTorg12()
+{
+    if(!window.confirm("Указать, что накладная получена ?"))return;
+    var ok = #server(Docs.Otchet.SetGotTorg12(docums.ItemID))#
+    if(isNaN(ok)){alert(ok)}
+    else{okfunc()}	
 }
 </script>
 

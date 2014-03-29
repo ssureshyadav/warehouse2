@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Routine name="xmlmacros" type="INC"><![CDATA[
+ #define WriteElement(%element,%text) s sc=xmlstr.Element(%element) d xmlstr.WriteChars(%text) s sc=xmlstr.EndElement()
+ #define WriteError(%error) JOB saveerror^saveerror(%error,$ZNAME)
+ #define WriteObjError(%error) JOB saveobjerror^saveerror(%error,$ZNAME)
+ #define StartXML  s xmlstr=##class(%XML.Writer).%New() s xmlstr.Charset="windows-1251" d xmlstr.OutputToDevice() s sc=xmlstr.RootElement("root")
+ #define EndXML s sc=xmlstr.EndRootElement()
+ #define WriteElementTwice(%element,%text) s sc=xmlstr.Element(%element) s sc=xmlstr.Element("text") d xmlstr.WriteChars(%text) s sc=xmlstr.EndElement() s sc=xmlstr.EndElement()
+ #define WriteHeader(%field,%descr,%width) s sc=xmlstr.Element("OneObject") s sc=xmlstr.Element("key") d xmlstr.Write(%field) s sc=xmlstr.EndElement() s sc=xmlstr.Element("text") d xmlstr.Write(%descr) s sc=xmlstr.EndElement() s sc=xmlstr.Element("Width") d xmlstr.Write(%width) s sc=xmlstr.EndElement() s sc=xmlstr.EndElement()
+ #define save(%name,%val) s ^mtempArt("variables",%name)=%val
+ #define WriteComment(%text)  s sc=xmlstr.Element("comment") d xmlstr.WriteChars(%text) s sc=xmlstr.EndElement()
+ #define RashOpl 2
+ ;номер поля Оплата в расходной накладной
+ #define ObjectName(%obj) $S($ISOBJECT(%obj):%obj.Name,1:"")
+ #define TunesVariable(%var) $S($ISOBJECT($G(%session)):$G(%session.Data(%var)),1:$G(^Tunes(^Tunes(0,%var),%var,"Value")))
+ #define TunesVariableGlobal(%var) $G(^Tunes(^Tunes(0,%var),%var,"Value"))
+ #define SetTunesVariableGlobal(%var,%value) s ^Tunes(^Tunes(0,%var),%var,"Value")=%value
+ #define SessionData(%var) $S($ISOBJECT($G(%session)):$G(%session.Data(%var)),1:"")
+ 
+]]></Routine>
+</Export>

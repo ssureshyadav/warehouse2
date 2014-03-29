@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Routine name="web" type="INC"><![CDATA[
+/// Код клиента
+#define client $g(%session.Data("Login"))
+/// Наименование клиента
+#define clientName $s(##class(Common.Kontragent).%ExistsId($$$client):##class(Common.Kontragent).NameGetStored($$$client),1:"")
+ 
+]]></Routine>
+</Export>

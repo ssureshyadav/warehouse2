@@ -676,6 +676,8 @@ SaveStorageDocErr
   }
  } While (key '= "") q:'+ok ok
  q:'+ok ok
+ 
+ 
  // Если заявка на ремонт запишем товары
  if class="Docs.Remont" {
  //s ok=..MarkGarant(docobj)
@@ -814,7 +816,7 @@ LookGarantDateErr
 	s ^mtempArt("garant")=garant
 	
 	//ID талона найденный по имени
-	s garantID = ##class(Common.Common).GetGarantIdByName(garant)
+	s garantID = ##class(Common.Common).GetGarantIdByName($ZCVT(garant,"U"))
 	//ID талона найденные по серийному
 	s GarantIDFoundBySerial = ""
 	
@@ -883,6 +885,7 @@ setSerialGarantErr
 <Implementation><![CDATA[
  i $ISOBJECT(kontr) s kontr=kontr.%Id()
  i $ISOBJECT(goods) s goods=goods.%Id()
+	s ^mtempArt("addTovarOnKontr",kontr,goods)=val
  s ^t(kontr,goods)=$G(^t(kontr,goods))+val
  q
 ]]></Implementation>
@@ -1038,6 +1041,7 @@ processdocErr
 <FormalSpec>doc</FormalSpec>
 <Implementation><![CDATA[
 	s $ZT="processSluZapErr"
+	//s ^mtempArt("processSluZap")=""
 	
 	if $ISOBJECT(doc) s docobj = doc
 	else  s docobj = ##class(Docs.Sluzap).%OpenId(doc)
@@ -1045,6 +1049,9 @@ processdocErr
 	if '$ISOBJECT(docobj) q "Извините. Не удалось получить доступ к документу "_doc
 	s docid = docobj.%Id()
 	
+	//s ^mtempArt("processSluZap",1,"docid")=docid
+	
+	//цикл по строкам служебной записки
 	&sql(declare sluzap cursor for
 		SELECT Otchet
 		INTO :Otchet
@@ -1056,12 +1063,15 @@ processdocErr
 	. s otch(Otchet)=""
 	&sql(close sluzap)
 	
+	//m ^mtempArt("processSluZap",2,"otch")=otch
 	//теперь всем отчётам пропишем эту служебную записку
 	TSTART
 	s OtchetId = ""
  	f  s OtchetId = $O(otch(OtchetId)) q:OtchetId=""  d
  	. &sql(update Docs.Otchet set Sluzap = :docid where ID=:OtchetId)
+ 	. //s ^mtempArt("processSluZap",3,OtchetId)=SQLCODE
  	. if SQLCODE q
+ 	
  	if SQLCODE 
  	{
 	 	TROLLBACK
@@ -1072,8 +1082,8 @@ processdocErr
 		TCOMMIT
  	}
 	
+	//s ^mtempArt("processSluZap",4)="OK"
 	
-	//соберём в массив все отчёты упоминающиеся в этой записке
 	q 1
 processSluZapErr
  $$$WriteError($ZE)
@@ -1561,6 +1571,8 @@ DocFromInstrErr
 </Method>
 
 <Method name="MarkGarant">
+<Description>
+Всем гарантийным талонам этого документа проставить что они использованы здесь </Description>
 <ClassMethod>1</ClassMethod>
 <FormalSpec>docobj</FormalSpec>
 <Implementation><![CDATA[
@@ -1570,6 +1582,8 @@ DocFromInstrErr
  i '$ISOBJECT(docobj) s docobjID=docobj,docobj=##class(Docs.Remont).%OpenId(docobj)
  e  s docobjID=docobj.%Id()
  i '$ISOBJECT(docobj) $$$WriteError("MarkGarant не открылся объект ("_docobjID_") класса Docs.Remont") q err
+ 
+ //цикл по строкам документа, пишем все гарантийные в массив
  Set key = ""
  Do {
   Set itemobj = docobj.Items.GetNext(.key)
@@ -1578,15 +1592,19 @@ DocFromInstrErr
      s garants(garant)=1
   }
  } While (key '= "")
+ 
+ //пошли по массиву гарантийных, пытаемся открыть каждый
  s garant="" f  s garant=$O(garants(garant)) q:(garant="")||('+ok)  d
- . s garantobj=##class(Common.Dictionary2).%OpenId(garant)
+ . s garantID = ##class(Common.Common).GetGarantIdByName($ZCVT(garant,"U"))
+ . s garantobj=##class(Common.Dictionary2).%OpenId(garantID)
  . i $ISOBJECT(garantobj)  //гарантийный талон есть в базе
  .. i garantobj.Property9194=2 s ok="Гарантийный талон №"_garantobj.Name_" недействителен" q
  .. //вставить проверку дат
  .. q:'+ok
- .. i remont'="fukk" d
- .. . d $ZOBJMETHOD(garantobj,remont,docobj.%Id())
- .. s:remont="remont3SetObjectId" garantobj.Property9194=2 //Ставя третий ремонт одновременно ставим что талон недействителен
+ .. //чейта???
+ .. //i remont'="fukk" d
+ .. //. d $ZOBJMETHOD(garantobj,remont,docobj.%Id())
+ .. //s:remont="remont3SetObjectId" garantobj.Property9194=2 //Ставя третий ремонт одновременно ставим что талон недействителен
  .e  d   //гарантийного талона нет (или ошибка)
  .. s garantobj=##class(Common.Dictionary2).%New()
  .. s garantobj.Name=garant
@@ -1779,7 +1797,7 @@ GetSummByPriceErr
  i '$ISOBJECT(doc) $$$WriteError("CloneDoc не опознан как объект "_doc) q err
  TSTART
  s newObj=doc.%ConstructClone()  	//делаем клона передаваемого объекта
- s newObj.Name="Копия "_doc.Name 	//переименовываем новый объект
+ s newObj.Name=doc.Name_" копия" 	//переименовываем новый объект
  s newObj.Stat=1
  s newObj.Dat=+$H
  s newObj.Tim=$P($H,",",2)
@@ -1787,10 +1805,16 @@ GetSummByPriceErr
  s newObj.CloseDate=""
  s newObj.CloseTime=""
  s newObj.CloseUser=""
+
  if $ISOBJECT(newObj.DocumentClass),newObj.DocumentClass.%Id()="Operation.Instructions" d
  . s newObj.State=1
  . s newObj.InstDate=+$H
  . s newObj.innerinstr=""
+ . s newObj.HasBeenSent=""
+ . s newObj.postnumber=""
+ . s newObj.postdata=""
+ . s newObj.dostavka=""
+ . d newObj.ChangesChain.Clear()
  s ok=newObj.%Save()
  i '+ok $$$WriteObjError(ok) q err
  TCOMMIT
