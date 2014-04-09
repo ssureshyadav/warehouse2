@@ -176,7 +176,7 @@ html,body {margin:0,padding:0}
 <script type='text/javascript' src='js/i18n/jquery-ui.datepicker-ru.min.js'></script>
 <script type='text/javascript' src='js/i18n/grid.locale-ru_win1251.js'></script>
 <script type='text/javascript' src='js/jquery.jqGrid-4.4.0.min.js'></script>
-<script type='text/javascript' src="js/pages/MakeTovNaklV2_1.js"></script>
+<script type='text/javascript' src="js/pages/MakeTovNaklV2_2.js"></script>
 </body>
 </html>> 
  Quit $$$OK
