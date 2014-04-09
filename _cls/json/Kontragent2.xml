@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="json.Kontragent2">
+<Description>
+Тестирование быстродействия</Description>
+<Super>json.base</Super>
+<TimeCreated>63286,76233.475245</TimeCreated>
+
+<Parameter name="ROWS">
+<Description>
+Размер порции данных по умолчанию</Description>
+<Default>50</Default>
+</Parameter>
+
+<Parameter name="TABLENAME">
+<Description>
+Имя таблицы из которого берем данные
+!Но в таблице должны быть хоть один битмап индекс</Description>
+<Type>%String</Type>
+<Default>Common.Kontragent</Default>
+</Parameter>
+
+<Method name="OnPage">
+<Description>
+Вывод на страницу </Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+  m rq=%request.Data 
+  d ..sessionFree(.rq)
+  s oper=$G(rq("oper",1)) 
+  Q:oper="get" ..w1(.rq)
+  Q ..w(.rq)
+]]></Implementation>
+</Method>
+
+<Method name="order">
+<Description>
+должен вернуть корректную часть order 
+Проверяем запрос на наличие параметров sidx и sord
+Проверяем чтобы sidx был указан в списке синонимов</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&rq:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+    
+    Q:'$d(rq("sidx")) "" ;сортировка не задана
+    s sidx=$g(rq("sidx",1)) ;по какому полю
+    if sidx'="city" && (sidx'="name") Q ""  ;неизвестные поля сортировки
+    
+    s sord=$g(rq("sord",1)) ;в какой очередности
+    if sord'="asc" && (sord'="desc") s sord="desc"
+    
+    Q " ORDER BY "_sidx_" "_sord
+]]></Implementation>
+</Method>
+
+<Method name="w1">
+<Description>
+Любая логика вывода объекта в формат json</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id:%String</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+ w "{""id"":""",id,""""
+ 
+ s name=##class(Common.Kontragent).NameGetStored(id)
+ s city=##class(Common.Kontragent).CityGetStored(id)
+ 
+ #define json(%str) $zcvt(%str,"O","JS")
+
+ w ",""name"":""",$$$json(name),""""
+ w ",""city"":""",city,""""
+
+ w "}"
+ Q 1
+]]></Implementation>
+</Method>
+
+<Method name="where">
+<Description><![CDATA[
+вернет where c учетом параметров запроса
+<var>rq</var> - %request.Data
+должен вернуть корректную часть where ]]></Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&rq:%String="",*qp:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+ 
+ if $g(rq("_search",1))'="true" Q "" 
+ s where=" WHERE 1=1 " k qp
+ s name=$g(rq("name",1)) 
+ if name'="" { ;задан фильтр по наименованию 
+	s where = where _ " AND name Like ? ", qp($i(qp))="%"_name_"%" 
+ }
+ s city=$g(rq("city",1))
+ if city'="" { ;задан фильтр по городу
+	s where = where _ " AND city Like ? ", qp($i(qp))="%"_city_"%" 
+ }
+ 
+ Q where
+]]></Implementation>
+</Method>
+</Class>
+</Export>

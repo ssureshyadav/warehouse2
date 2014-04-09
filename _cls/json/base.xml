@@ -13,10 +13,16 @@
 <Default>application/json</Default>
 </Parameter>
 
+<Parameter name="CHARSET">
+<Description>
+текущая система на windows-1251, а данные принимаются js (utf-8)</Description>
+<Default>utf-8</Default>
+</Parameter>
+
 <Parameter name="TABLENAME">
 <Description>
 Имя таблицы из которого берем данные
-!Но в таблице должны быть хоть один битмап индекс</Description>
+!Но в таблице должен быть хоть один битмап индекс - чтобы быстро считать Count(*)</Description>
 <Type>%String</Type>
 <Default>your.tablename</Default>
 </Parameter>
@@ -34,7 +40,7 @@
 <ReturnType>%Status</ReturnType>
 <Implementation><![CDATA[
   m rq=%request.Data 
-  //d ..sessionFree(.rq)
+  d ..sessionFree(.rq)
   s oper=$G(rq("oper",1)) 
   Q:oper="get" ..w1(.rq)
   Q ..w(.rq)
@@ -156,12 +162,15 @@
 </Method>
 
 <Method name="sessionFree">
-<Description>
-Освобождаем блокировку сессии</Description>
+<Description><![CDATA[
+Освобождаем блокировку сессии
+в версиях Cache старше 5.2
+$$SaveSession^%SYS.cspServer2(%session) && %session.Unlock()
+$$SaveSession^%SYS.cspServer2(%session) - обновляет таймаут сессии]]></Description>
 <ClassMethod>1</ClassMethod>
 <CodeMode>expression</CodeMode>
 <FormalSpec><![CDATA[&rq:%String=""]]></FormalSpec>
-<Implementation><![CDATA[$$SaveSession^%SYS.cspServer2(%session) && %session.Unlock()
+<Implementation><![CDATA[%session.Unlock()
 ]]></Implementation>
 </Method>
 </Class>
