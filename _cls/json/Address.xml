@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="20">
+<Class name="json.Address">
+<Description><![CDATA[
+Предоставляет json данные для построения ДЕРЕВА мест хранения
+через последовательные вызовы
+<example>
+http://213.128.198.234/csp/sklad2/json.Address.cls?depot=1 ;вернет список верхних узлов
+http://213.128.198.234/csp/sklad2/json.Address.cls?depot=1&parent=162 ;спрашиваем дочерние конкретного узла 
+</example>]]></Description>
+<Super>%CSP.Page</Super>
+<TimeCreated>63307,86062.557193</TimeCreated>
+
+<Parameter name="CONTENTTYPE">
+<Description><![CDATA[
+Specifies the default content type for the page.  This can be overriden using the
+&lt;CSP:CONTENT TYPE=&gt; tag, or by setting the <b>%response</b>.ContentType property
+in the <method>OnPreHTTP</method> method.  The default value if this parameter is
+not set is text/html.
+;]]></Description>
+<Default>application/json</Default>
+</Parameter>
+
+<Parameter name="CHARSET">
+<Description><![CDATA[
+Specifies the default character set for the page.  This can be overriden using the
+&lt;CSP:CONTENT CHARSET=&gt; tag, or by setting the <b>%response</b>.CharSet property
+in the <method>OnPreHTTP</method> method.  If this parameter is not specified, then
+for Unicode systems the default charset is utf-8 and for 8-bit systems it is the
+system default charset.]]></Description>
+<Default>utf-8</Default>
+</Parameter>
+
+<Parameter name="TABLENAME">
+<Description>
+
+Название таблицы ( класса ) - просто декларация</Description>
+<Default>Store.Address</Default>
+</Parameter>
+
+<Parameter name="FIELDS">
+<Description>
+Выбираемые поля - просто декларация</Description>
+<Default>ParentID,Code,Name,ID</Default>
+</Parameter>
+
+<Method name="OnPage">
+<Description><![CDATA[
+Event handler for <b>PAGE</b> event: this is invoked in order to  
+generate the content of a csp page.]]></Description>
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	d %session.Unlock() ;сессия не нужна - освобождаем
+	m args=%request.Data
+	#;d ..UpdateIndices()
+	d ..w(.args)
+	Quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="w">
+<Description>
+Вывод узлов от текущего</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	s sql="Select ID from "_..#TABLENAME, qp=""
+	s where = ..where(.args,.qp) s:where'="" sql=sql_" Where "_where ;фильтрация
+	s order = ..order(.args) s:order'="" sql=sql_" Order By "_order ;сортировка
+	
+	#;w sql
+	#;zw qp
+	
+	s %rs=##class(%ResultSet).%New(), sc=%rs.Prepare(sql)
+	#; в этой версии Cache нет воможности передать в .Execute(qp...) 
+	#; разбираем
+	s cmd="s sc=%rs.Execute("
+	for i=1:1:qp {
+		s:i>1 cmd=cmd_"," 
+		s arg=$g(qp(i)) s:+arg'=arg arg=""""_arg_""""
+		s cmd=cmd_arg
+	}
+	s cmd=cmd_")"
+	
+	x cmd
+	
+	w "["
+	s first=1 for { Q:'%rs.Next()
+		w:'first "," s:first first=0
+		s id =$g(%rs.Data("ID"))
+		d ..w1(id)
+	}
+	w "]"
+	d %rs.Close() k %rs
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="w1">
+<Description>
+Вывод одного узла по id в js</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>id:%String</FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	
+	w "{""id"":",id
+	
+	s parentid = ##class(Store.Address).ParentIDGetStored(id)
+	s:parentid="" parentid="#" ;особенность jstree
+	w ",""parent"":""",parentid,""""
+	
+	s name = ##class(Store.Address).NameGetStored(id)
+	w:name'="" ",""text"":""",name,""""
+	
+	s code = ##class(Store.Address).CodeGetStored(id)
+	w:code'="" ",""code"":""",code,""""
+	
+	#;наличие дочерних узлов
+	s children = +##class(Store.Address).HasChild(id)
+	if children '=0 w ",""children"":true"
+	
+	
+	w "}"
+	
+	Q ""
+]]></Implementation>
+</Method>
+
+<Method name="where">
+<Description>
+Режим отбора для SQL запроса
+всегда отбираем один уровень от родителя
+когда родитель не указан, то только верхний уровень</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String="",&qp:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[
+	s depot=$g(args("depot",1)) s where = "depot = ?", qp($i(qp))=depot
+	s parent=$g(args("parent",1)) 
+	if parent'="" {
+		s where=where_" AND ParentID=?", qp($i(qp))=parent
+	} else {
+		s where=where_" AND ParentID is NULL "
+	}
+	Q where
+]]></Implementation>
+</Method>
+
+<Method name="order">
+<Description>
+Режим сортировки для SQL запроса</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec><![CDATA[&args:%String=""]]></FormalSpec>
+<ReturnType>%String</ReturnType>
+<Implementation><![CDATA[	Q " Code "
+]]></Implementation>
+</Method>
+
+<Method name="UpdateIndices">
+<Description>
+Индекс на рассчетные поля - могут быть проблемы</Description>
+<ClassMethod>1</ClassMethod>
+<Implementation><![CDATA[
+ 
+	If $SortBegin(^Store.AddressI("ParentIDX"))
+	Set id="" for { Set id=$order(^Store.AddressD(id)) Q:id="" 
+		Set list=^Store.AddressD(id)
+		s code = $listget(list,8), depot = $listget(list,2)
+		Set parent=##class(Store.Address).ParentIDCompute(id,code,depot)
+		Set parent=$s(parent'="":parent,1:-1E14)
+		Set ^Store.AddressI("ParentIDX",parent,id)=""
+		w !,id,"[",code,",",depot,"]=",parent
+		
+	}
+	If $SortEnd(^Store.AddressI("ParentIDX"))
+	QUIT 1
+]]></Implementation>
+</Method>
+</Class>
+</Export>
