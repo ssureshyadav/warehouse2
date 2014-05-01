@@ -100,10 +100,9 @@
 <Description>
 Свойство для использования через SQL</Description>
 <Type>Store.Address</Type>
-<Calculated>1</Calculated>
 <SqlComputeCode> Set {*}= ##class(Store.Address).GetParentID({Depot},{Code}) </SqlComputeCode>
 <SqlComputed>1</SqlComputed>
-<SqlComputeOnChange>Code</SqlComputeOnChange>
+<SqlComputeOnChange>Depot,Code</SqlComputeOnChange>
 </Property>
 
 <Method name="GetParentID">
@@ -120,7 +119,8 @@
 
 <Index name="ParentIDX">
 <Description>
-Могут быть проблемы с его перестройкой</Description>
+Индекс по вычисляемому свойству
+Проблемы с его перестройкой</Description>
 <Properties>ParentID</Properties>
 </Index>
 
@@ -128,9 +128,9 @@
 <Description>
 Процент заполнения места хранения</Description>
 <Type>%Integer</Type>
-<Calculated>1</Calculated>
-<SqlComputeCode> Set {*}=##class(Store.Address).CalcPercent({CurrentSize},{Size1}) </SqlComputeCode>
+<SqlComputeCode> Set {*}=##class(Store.Address).CalcPercent({Currentsize},{Size1}) </SqlComputeCode>
 <SqlComputed>1</SqlComputed>
+<SqlComputeOnChange>Currentsize,Size1</SqlComputeOnChange>
 </Property>
 
 <Method name="CalcPercent">
@@ -157,7 +157,7 @@
 <SqlProc>1</SqlProc>
 <Implementation><![CDATA[
  Q:'..%ExistsId(id) 0
- s child="" &sql(Select TOP 1 ID Into :child From Store.Address Where ParentID = :id)
+ s child=0 &sql(Select TOP 1 ID Into :child From Store.Address Where ParentID = :id)
  Q child
 ]]></Implementation>
 </Method>
@@ -263,8 +263,6 @@ where Depot=:Depot
 <IndexLocation>^Store.AddressI</IndexLocation>
 <StreamLocation>^Store.AddressS</StreamLocation>
 <Data name="AddressDefaultData">
-<Structure>listnode</Structure>
-<Subscript/>
 <Value name="1">
 <Value>%%CLASSNAME</Value>
 </Value>
@@ -348,6 +346,9 @@ where Depot=:Depot
 </Value>
 <Value name="28">
 <Value>Percent</Value>
+</Value>
+<Value name="29">
+<Value>ParentID</Value>
 </Value>
 </Data>
 </Storage>

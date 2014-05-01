@@ -1,0 +1,319 @@
+<html XMLNS:SKLADz XMLNS:SKLAD2 XMLNS:SKLADList>
+<IMPORT NAMESPACE="SKLADList" IMPLEMENTATION="htc/listview2.htc">
+<IMPORT NAMESPACE="SKLADz" IMPLEMENTATION="htc/treeview.htc">
+<IMPORT NAMESPACE="SKLAD2" IMPLEMENTATION="htc/table.htc">
+<head>
+<link href="style.css" type='text/css' rel='stylesheet'>
+<link href="js/jstree-3.0.0/themes/default/style.min.css" type='text/css' rel='stylesheet' />
+<script type="text/javascript" src='js/jquery-1.11.0.min.js'></script>
+<script type="text/javascript" src='js/jstree-3.0.0/jstree.min.js'></script>
+</head>
+
+<body>
+
+<!--TreeView на js-->
+		<div id='jsTree'></div>
+
+<script type='text/javascript'>
+	$(function(){
+	
+	//$.jstree.defaults.core.theme.variant = "large";	
+	$('#jsTree').jstree({ 
+		'core' : {
+			'data' : function( obj, callback ){
+				var tree=this, id=(obj.id=='#')?'':obj.id;
+				
+				$.ajax({ url:'#(..Link("json.Address.cls"))#'
+					,data:{ depot:1, parent: id }
+				}).done(function(data){
+					
+					callback.call(tree,data);
+						
+				});
+			}
+		} 
+    });
+    	
+    	
+		
+	})
+</script>
+<!--scr ipt type='text/javascript' src="common.js"></script>
+<scr ipt type='text/javascript'>
+
+//onload="load();" onmoveend ="fnHandleMove();" 
+var ids=[],percent=[],code=[],name=[],comment=[],tempstore=[],parents=[];
+
+#(..wJsData())#
+		
+var Trick=0;
+sessionid="#(%session.SessionId)#";
+
+var ItemsPercents = new Array();
+var depot='#($g(%session.Data("depot"),1))#';
+
+#(..wJsAppSettings())#
+
+var CurrentElement="";
+
+function load(){
+	LoadAddress();
+	AddressTree.onClick="TreeClick()";
+	TreeClick();
+}
+
+function TreeClick( NodeCode ){
+	
+	Trick = (NodeCode=="")?1:0; 
+	CreateAddressLine();
+	Clear();
+	
+	if( NodeCode==null ) NodeCode=AddressTree.NodeCode;
+	
+	StoreID.innerText=AddressTree.NodeID;
+	
+	var childs="";
+	if(NodeCode==""){
+	  childs=sparents ;
+	} else { 
+	  childs=ReturnSpace(parents[NodeCode]);
+	}
+	
+	if(childs!=""){
+	
+		tablefield.style.display="none";
+		var strings = childs.split(InnerSplitter);
+		
+	if (strings.length!=1){
+		for (var i = 0; i < strings.length-1; i++){
+			var id1=strings[i]
+			ElemId=id1
+			ElemCode=code[id1]
+			ElemName=name[id1]
+			ElemComment=comment[id1]
+			elemtempstore=tempstore[id1]
+			elempercent=percent[id1]
+			ElementStr="<div ondblclick='HandleClick(this)' onmouseover=\"Comment.innerText='"+ElemComment+"'\" onmouseout=\"Comment.innerText=''\" style='margin:6;height:"+BlockHeight+";width:"+BlockWidth+";border:1 solid;display:inline' id='"+ElemId+"'></div>";
+			aElement=document.createElement(ElementStr);
+			if(elemtempstore=="1"){aElement.style.backgroundColor="#efefef"}
+			var littlecols=CreateChQuant(ReturnSpace(parents[ElemCode]))
+			aElement.innerHTML="<center>"+ElemName+"<font color=gray> ("+elempercent+"%) </font>"+littlecols+"</center>";
+			aElement.tag=ElemCode;
+			MoveField.appendChild(aElement);
+		}
+	} else{
+		alert(ok);
+	}
+	} else {
+		var currentid=AddressTree.NodeID;
+		var currentpercent=ItemsPercents[currentid];
+		tablefield.style.display="block";
+		PropTable.ClearRows();
+		PropTable.DownLoadPairs("",currentid,"Depot,Code,Parent");
+		goods.loadfrommethod("Goods.GoodsAction.goodsfromstore",currentid,2,3)
+		}
+}
+
+function CreateChQuant(str){
+	var res="", string=str.split(InnerSplitter);
+	if(string.length > 1) res="<br>";
+	for(z=0;z<string.length-1;z++){
+		var curid=string[z];
+		var procent=percent[curid]
+		var heightz=(ColumnHeight-Math.ceil(ColumnHeight*(procent/100)))-2
+		var res=res+"<div style='margin:1;padding:0;border:1 solid;background-color:#898989;height:"+ColumnHeight+";display:inline' ><img src='images/WhitePixel.gif' width=4 height="+heightz+" style='cursor:auto' ></div>"
+	}
+	return res;
+}
+
+function Create(){
+	number=MoveField.childNodes.length;
+	ElementStr="<button oncontrolselect='HandleClick(this.id)' style='position:absolute;height:28;width:40' id='but"+number+"'></button>";
+	aElement=document.createElement(ElementStr);
+	MoveField.appendChild(aElement);
+}
+
+function Save(){
+	res="";
+	for (i = 0; i <MoveField.childNodes.length; i++){
+	res=res+MoveField.childNodes(i).id+InnerSplitter;
+	res=res+MoveField.childNodes(i).offsetLeft+InnerSplitter;
+	res=res+MoveField.childNodes(i).offsetTop+InnerSplitter;
+	res=res+MoveField.childNodes(i).style.pixelWidth+InnerSplitter;
+	res=res+MoveField.childNodes(i).style.pixelHeight+InnerSplitter;
+	val=ReturnSpace(MoveField.childNodes(i).value);
+	if(val==""){alert("Элементы без подписи недопустимы");return false;}
+	res=res+val;
+	res=res+StringSplitter;
+	}
+	ok=#server(Store.Action.SaveButs(AddressTree.NodeCode,res))#
+	if(ok!=1){alert(ok)}
+	else{alert("Сохранено")}
+}
+
+function HandleClick(Obj){
+	AddressLine(Obj.tag)
+}
+
+function CreateSub(sublevel){
+	code=ReturnSpace(AddressTree.NodeCode);
+	if((sublevel==1)&(code=="")){return false;}
+	ok=window.showModalDialog("addZone.csp",code+";"+sublevel,"center:yes;status:no;dialogHeight:250px;dialogWidth:600px;resizable:yes")
+	if(ok==null)return false;
+	if(ok==1){
+		//load()
+		window.location.reload();
+		}
+	else{alert(ok)}
+}
+
+function DelSub(){
+	if(!window.confirm("Вы уверены?"))return false;
+	ok=#server(Store.Action.deletecell(AddressTree.NodeID))#
+	if(isNaN(ok)){alert(ok)}
+	else{window.location.reload();}
+}
+
+function LoadAddress(){
+	AddressTree.DownLoad("Data.csp?class=Store.Address&fields=Parent,Code,Name,ID,block&where=depot="+depot+"&order=Code");
+}
+
+function Clear(){
+	MoveField.innerHTML="";
+}
+function AddressLine(code){
+	AddressTree.SelectedItem=code;
+	TreeClick();
+}
+
+function CreateAddressLine(){
+	if (Trick==1){addresspath.innerHTML="";return false;}
+	ParentNames=AddressTree.ParentNames;
+	ParentCodes=AddressTree.ParentCodes;
+	if(ParentNames=="")return false
+	addresspath.innerHTML="";
+	NamesArr=ParentNames.split("~");
+	CodesArr=ParentCodes.split("~");
+	for(i=0;i<NamesArr.length;i++){
+		aElement=CreateLink(NamesArr[i],CodesArr[i]);
+		addresspath.appendChild(aElement);
+		addresspath.innerHTML=addresspath.innerHTML+" > ";
+	}
+}
+
+function CreateLink(name,hrefz){
+	ElementStr="<a></a>";
+	aElement=document.createElement(ElementStr);
+	hrefz="javascript:AddressLine('"+hrefz+"')";
+	aElement.href=hrefz;
+	//javascript:TreeClick('"+hrefz+"')
+	aElement.innerText=name;
+	return aElement;
+}
+
+function startFun(){
+	var CurrentCellCode=AddressTree.SelectedItem;
+	xmldoc=PropTable.GetXmlContent();
+	ok=SplitSendXml(AddressTree.NodeID,PropTable.ClassName,xmldoc,"","#(%session.SessionId)#")
+	if(isNaN(ok)){alert(ok)}
+	else{TreeClick(CurrentCellCode)}
+}
+
+//Открыть карточку товара
+function OpenCard(){
+	var gid=goods.ItemID
+	if(gid=="")return
+	var gname=goods.item("tov")
+	ok=window.showModalDialog("GoodsCard.csp?GoodsId="+gid+"&groupspath=",gid+InnerSplitter+gname,"center:yes;status:no;dialogHeight:600px;dialogWidth:650px;resizable:yes")
+	if(ok==1){ShowTovars()}
+}
+
+function multiedit(){
+	ok=window.showModalDialog("multichange.csp?skip=Code,Parent,Currentsize,Currentweight,Depot,Name,oldnumb&addrpath="+addresspath.innerText,AddressTree.NodeID+";Store.Address","center:yes;status:no;dialogHeight:380px;dialogWidth:400px;resizable:yes;")
+}
+
+function editname(){
+	var Name=window.prompt("Новое наименование",AddressTree.NodeCaption)
+	if(Name==null)return false;
+	#server(Store.Action.changename(AddressTree.NodeID,Name))#
+	window.location.reload()
+}
+
+function clearcell(){
+	var cellid=AddressTree.NodeID
+	, cellcode=AddressTree.NodeCode
+	;
+	if(cellid=="")return false;
+	if(!window.confirm("Очистить "+AddressTree.NodeCaption+"?"))return false;
+	ok=#server(Store.Action.ClearCell(cellid,cellcode,depot))#
+	if(isNaN(ok)){alert(ok);}
+	else{TreeClick(cellcode)}
+}
+</script-->
+
+</body>
+</html>
+
+<script language="Cache" method="OnPreHTTP" arguments="" returntype="%Boolean">
+ 
+ s login=1 //$G(%session.Data("user"))
+ //i '+login s %response.ServerSideRedirect="norights.csp" 
+ q 1
+</script><script runat="server" language="cache" method="wJsAppSettings" returntype="%String" >
+ #; настройки в js 
+ s gln=$na(^Tunes(2))
+ s i="" f { s i=$O(@gln@(i)) q:i=""  
+  w !,"var ",i,"=""",$G(@gln@(i,"Value"),"undefined"),""";"
+ }
+ Q ""
+ 
+</script><script runat="server" language="cache" method="wJsData" returntype="%String">
+
+ s depot=%session.Data("depot") ;склад
+ s sql="Select ID, Code, Name, Comment, tempstore, Currentsize, Size1, Parent "
+ 	  _"From Store.Address "
+ 	  _"Where depot = ? order by Name"
+ 	  
+ s rs=##class(%ResultSet).%New()
+ s rs.RuntimeMode=2 ;ODBC?
+ s ok = rs.Prepare(sql)
+ s ok = rs.Execute(depot)
+ s res=""
+ 
+ for { Q:'rs.Next() 
+ 
+  s id=rs.Get("ID"), code=rs.Get("Code"), name=rs.Get("Name")
+  s comment=rs.Get("Comment"), tempstore=rs.Get("tempstore")
+  s Currentsize=+rs.Get("Currentsize"), Maxsize=+rs.Get("Size1")
+  
+  s parent=rs.Get("Parent")
+  if parent'="" { 
+  	s str(parent)=$G(str(parent))_id_"~" ;список дочерних
+  } else {
+	s str=$G(str)_id_"~" ;список узлов верхнего уровня
+  }
+  
+  s percent=0 ;процент заполненности места хранения 
+  i Maxsize>0 s percent=$J((Currentsize/Maxsize)*100,".",0)
+  
+  s str2(code)=id ;соответствие код = id
+  
+  #; все данные в js массивы
+  w "ids[""",code,"""]=",id,";" ;это же соответствие и для клиента
+  w "percent[",id,"]=""",percent,""";"
+  w "code[",id,"]=""",code,""";"
+  w "name[",id,"]=""",name,""";"
+  w "comment[",id,"]=""",comment,""";"
+  w "tempstore[",id,"]=""",tempstore,""";"
+  
+ }
+  
+  w "",! 
+  #; иерархию в js
+  s i="" f { s i=$O(str(i)) q:i=""  
+   q:str2(i)=""
+   w "parents[""",i,"""]=""",$G(str(i)),""";"
+  }
+  w "sparents=""",$G(str),""";" ;верхние узлы
+  Q ""
+</script>
