@@ -1,21 +1,21 @@
 <public:component tagname='listview'>
 <PUBLIC:DEFAULTS viewLinkContent />
 <public:ATTACH EVENT="ondocumentready" HANDLER="init"/>
-<PUBLIC:PROPERTY NAME="width" />
-<PUBLIC:PROPERTY NAME="height" />
-<PUBLIC:PROPERTY NAME="ItemID" VALUE="" get="GetItemID" />
-<PUBLIC:PROPERTY NAME="ItemName" VALUE="" get="getItemName" put="setItemName" />
-<PUBLIC:PROPERTY NAME="ClassName" VALUE="" />
-<PUBLIC:PROPERTY NAME="AddOnClear" VALUE="true" PUT="setAddOnClear" />
-<PUBLIC:PROPERTY NAME="Skip" VALUE="" />
-<PUBLIC:PROPERTY NAME="ColName" VALUE="" />
-<PUBLIC:PROPERTY NAME="ColCode" VALUE="" />
-<PUBLIC:PROPERTY NAME="ColType" VALUE="" />
-<PUBLIC:PROPERTY NAME="AddHeaders" VALUE="false" />
-<PUBLIC:PROPERTY NAME="Count" VALUE="" />
-<PUBLIC:PROPERTY NAME="doitogo" VALUE="" />
-<PUBLIC:PROPERTY NAME="login" VALUE="" />
-<PUBLIC:PROPERTY NAME="SaveSort" VALUE="true" />
+<public:property name="width" />
+<public:property name="height" />
+<public:property name="ItemID" VALUE="" get="GetItemID" />
+<public:property name="ItemName" VALUE="" get="getItemName" put="setItemName" />
+<public:property name="ClassName" VALUE="" />
+<public:property name="AddOnClear" VALUE="true" PUT="setAddOnClear" />
+<public:property name="Skip" VALUE="" />
+<public:property name="ColName" VALUE="" />
+<public:property name="ColCode" VALUE="" />
+<public:property name="ColType" VALUE="" />
+<public:property name="AddHeaders" VALUE="false" />
+<public:property name="Count" VALUE="" />
+<public:property name="doitogo" VALUE="" />
+<public:property name="login" VALUE="" />
+<public:property name="SaveSort" VALUE="true" />
 <public:method name = "LoadHeaders" />
 <public:method name = "DownLoad" />
 <public:method name = "GoodsFromGroup" />
@@ -89,6 +89,7 @@ function checkColChange() {
 var currentpage=1;
 var allpages=1;
 var customrows="";
+
 function init(){
 strrr.innerText=currentpage;
 vsegostrok.innerText=allpages;
@@ -212,19 +213,25 @@ ListViewID.startDownload("Data.csp?class="+ClassName+"&fields=ID,"+fields+"&wher
 //window.open("Data.csp?class="+ClassName+"&fields=ID,"+fields+"&where="+where+"&kolbasaddr="+kolbasaddr+"&stroknastr="+stroknastr.value+"&currentpage="+currentpage+"&order="+order);
 }
 
-function ListViewAddItems(textString){
-//alert("Проверка.\n textString \n" + textString);
-ListViewID.Sorted =false;
-if (textString=="") return false;
-if(AddOnClear=="true"){ListViewID.ListItems.Clear();}
-var strings = textString.split(StringSplitter);
-strcount=strings[0];  //здесь количество переданных строк
-//alert("Проверка.\n strcount = " + strcount + "\n strings" + strings);
-//проверим указано ли количество строк
-if(!isNaN(strcount)){
-	PagesControl.style.display="inline";
-}
-else{PagesControl.style.display="none";}
+/* Публичный метод*/
+/* Добавление элементов в таблицу */
+function ListViewAddItems( textString ){
+	//alert("Проверка.\n textString \n" + textString);
+	ListViewID.Sorted =false;
+	if (textString=="") return false;
+	if(AddOnClear=="true"){ListViewID.ListItems.Clear();}
+	var strings = textString.split(StringSplitter);
+	strcount=strings[0];  //здесь количество переданных строк
+	totalRowsCount( strcount );
+	//alert( strcount );
+	
+	//проверим указано ли количество строк
+	if ( !isNaN( strcount ) ) {
+		PagesControl.style.display="inline";
+	} else { 
+		PagesControl.style.display="none";
+	}
+	//strings.length - количество строк
 	for (i = 1; i < strings.length-1; i++){
 	string = strings[i].split(InnerSplitter);
 	//alert("Проверка.\n" + string);
@@ -235,6 +242,8 @@ else{PagesControl.style.display="none";}
 	ListViewID.ListItems.Add();
 	count=ListViewID.ListItems.Count;
 	ListViewID.ListItems.Item(count).Tag=string[0];
+	//ListViewID.ListItems.Item(count).ForeColor = 0*65536+100*256+0;
+	//ListViewID.ListItems.Item(count).Bold = true;
 	//alert(string+"\n"+HiddenFields[string[0]])
 	ListViewID.ListItems.Item(count).Key="key"+string[0];
 	ListViewID.ListItems.Item(count).Text=string[1];
@@ -243,6 +252,8 @@ else{PagesControl.style.display="none";}
 	  for (z = 2; z < string.length; z++){
 	   ListViewID.ListItems.Item(count).ListSubItems.Add();
 	   ListViewID.ListItems.Item(count).ListSubItems.Item(z-1).Text=string[z];
+	   //ListViewID.ListItems.Item(count).ListSubItems.Item(z-1).ForeColor = 0*65536+100*256+0;
+	   //ListViewID.ListItems.Item(count).ListSubItems.Item(z-1).Bold = true;
 	   }
 	  }
 	}
@@ -395,6 +406,10 @@ for (var i=0; i<oNodeList.length; i++) {
 }
 oNodeList = xmlobj.selectNodes("//AllObjects/*"); //Здесь строки
 countheaders=ListViewID.ColumnHeaders.Count  //количество колонок у ListView
+//oNodeList.length - количество строк
+// обновим отображение
+totalRowsCount( oNodeList.length );
+
 for (var i=0; i<oNodeList.length; i++){ 
  if(i>2000){alert("Превышено масимально допустимое количество строк в таблице 500 шт. Вывод строк прекращается.");break;}
  OneObject = oNodeList.item(i);
@@ -638,16 +653,53 @@ function itogo(cols, itigicol) {
 	}
 }
 
+/* Приватная функция для отображения общего количества найденных сервером строк */
+function totalRowsCount( total ) {
+
+	total = total - 0; if ( isNaN( total ) ) return;
+	var label = totalLabel, span = totalCount;
+	span.innerText = total;
+	label.style.display='inline';
+
+}
 </script>
 </head>
 
 <body>
 <table CELLPADDING=0 CELLSPACING=0 border=0><tr><td rowspan=2>
-	<img src="images/excel.gif" onmouseover="this.src='images/Onexcel.gif'" onmouseout="this.src='images/excel.gif'" onclick="copyclip()" style="cursor:hand" alt="Открыть в Excel">
-	<img src="images/mail.gif" onmouseover="this.src='images/Onmail.gif'" onmouseout="this.src='images/mail.gif'" onclick="saveColunmsSettings()" style="cursor:hand" alt="Сохранить положение и размер колонок">
-	<span id="PagesControl" style="display:none"><input type="button" value="<<" style="width:20px" disabled onclick="fullleft();" id="fullleftbut"><input id="leftbut" type="button" value="<" onclick="moveleft();" style="width:20px" disabled> стр. <span id="strrr"></span> из <span id="vsegostrok"></span> <input type="button" value=">" style="width:20px" onclick="moveright()" id="rightbut" disabled><input type="button" id="fullrightbut" value=">>" style="width:20px" disabled onclick="fullright()"> строк на странице 
-	<input type=text style="width:40" id="stroknastr" value="100"></span> <span id="tempForNothing"></span>
-	&nbsp;&nbsp;&nbsp;&nbsp;
+	<img src="images/excel.gif" 
+		onmouseover="this.src='images/Onexcel.gif'" 
+		onmouseout="this.src='images/excel.gif'" 
+		onclick="copyclip()" 
+		style="cursor:hand" 
+		alt="Открыть в Excel"
+	>
+
+	<img src="images/mail.gif" 
+		onmouseover="this.src='images/Onmail.gif'" 
+		onmouseout="this.src='images/mail.gif'" 
+		onclick="saveColunmsSettings()" 
+		style="cursor:hand" 
+		alt="Сохранить положение и размер колонок"
+	>
+	<span id="PagesControl" style="display:none">
+
+		<input id="fullleftbut" type="button" value="<<" style="width:20px" disabled  onclick="fullleft();" >
+		<input id="leftbut" type="button" value="<" onclick="moveleft();" style="width:20px" disabled>
+		&nbsp;
+		<label> стр. <b><span id="strrr"></span></b></label>
+		&nbsp;
+		<label> из <b><span id="vsegostrok"></span></b></label>
+		&nbsp;
+		<input id="rightbut" type="button" value=">" style="width:20px" onclick="moveright()" disabled>
+		<input id="fullrightbut" type="button"  value=">>" style="width:20px" disabled onclick="fullright()"> строк на странице 
+		<input id="stroknastr" type=text style="width:40" value="100"></span>
+		<span id="tempForNothing"></span>
+		&nbsp;&nbsp;
+		<!-- Найдено на сервере и передано на клиент -->
+		<label id='totalLabel' style='display:none;'> Всего:  <b><span id='totalCount'></span></b></label>
+		&nbsp;&nbsp;
+	
 </td><td>
 	<img src="images/UpSmall.gif" style="cursor:hand" onmouseover="this.src='images/onUpSmall.gif'" onmouseout="this.src='images/UpSmall.gif'" onclick="ListViewID.style.posHeight=ListViewID.style.posHeight+20" alt="Увеличить размер таблицы">
 </td></tr>
